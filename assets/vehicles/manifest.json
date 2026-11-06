@@ -1,0 +1,40 @@
+{
+  "version": "1.0-rc2",
+  "reviewStatus": "awaiting_visual_approval",
+  "librarySwitcherEnabled": false,
+  "defaultAssembly": {
+    "chassis": "C01",
+    "body": "B01",
+    "upperPreview": "U01"
+  },
+  "components": [
+    {
+      "id": "C01",
+      "class": "S",
+      "lods": [
+        "C01/C01-lod0.glb",
+        "C01/C01-lod1.glb",
+        "C01/C01-lod2.glb"
+      ],
+      "lodDistanceMetres": [
+        0,
+        18,
+        36
+      ]
+    },
+    {
+      "id": "B01",
+      "class": "S",
+      "lods": [
+        "B01/B01-lod0.glb",
+        "B01/B01-lod1.glb",
+        "B01/B01-lod2.glb"
+      ],
+      "lodDistanceMetres": [
+        0,
+        18,
+        36
+      ]
+    }
+  ]
+}

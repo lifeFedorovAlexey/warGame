@@ -1,0 +1,555 @@
+{
+  "schema_version": 1,
+  "id": "C02",
+  "name": "Марш",
+  "size": "M",
+  "category": "running-gear",
+  "folder": "C02-marsh",
+  "units": "mm",
+  "axes": {
+    "right": "+X",
+    "forward": "+Y",
+    "up": "+Z"
+  },
+  "bounds_mm": {
+    "min": [
+      -1750.0,
+      -3700.0,
+      0
+    ],
+    "max": [
+      1750.0,
+      3700.0,
+      1350
+    ]
+  },
+  "purpose": "Средние универсальные машины, быстрые переброски по дорогам; уступает специализированным базам в сложной местности.",
+  "visual": "Колёсная база 8×8: четыре оси, длиннее и устойчивее C01.",
+  "anchors": [
+    {
+      "name": "body_mount",
+      "position_mm": [
+        0,
+        0,
+        1350
+      ],
+      "role": "центр контактной плоскости палубы"
+    },
+    {
+      "name": "pad_FL",
+      "position_mm": [
+        -950,
+        2250,
+        1350
+      ],
+      "role": "центр площадки 240 × 240 мм"
+    },
+    {
+      "name": "pad_FR",
+      "position_mm": [
+        950,
+        2250,
+        1350
+      ],
+      "role": "центр площадки 240 × 240 мм"
+    },
+    {
+      "name": "pad_RL",
+      "position_mm": [
+        -950,
+        -2250,
+        1350
+      ],
+      "role": "центр площадки 240 × 240 мм"
+    },
+    {
+      "name": "pad_RR",
+      "position_mm": [
+        950,
+        -2250,
+        1350
+      ],
+      "role": "центр площадки 240 × 240 мм"
+    }
+  ],
+  "moving_parts": [
+    {
+      "name": "axle_1_L_suspension",
+      "parent": null,
+      "pivot_mm": [
+        -1500,
+        2700,
+        550
+      ],
+      "axis": "Z",
+      "kind": "translation",
+      "min": -80,
+      "max": 80,
+      "speed": 250,
+      "rest": 0,
+      "motion": "translation по Z. Ход подвески относительно исходного центра.",
+      "limits": "-80…80 мм; исходное 0; 250 мм/с"
+    },
+    {
+      "name": "axle_1_L_steer",
+      "parent": "axle_1_L_suspension",
+      "pivot_mm": [
+        -1500,
+        2700,
+        550
+      ],
+      "axis": "Z",
+      "kind": "rotation",
+      "min": -35,
+      "max": 35,
+      "speed": 60,
+      "rest": 0,
+      "motion": "rotation по Z. Только управляемая ось.",
+      "limits": "-35…35 градусов; исходное 0; 60 град/с"
+    },
+    {
+      "name": "axle_1_L_wheel",
+      "parent": "axle_1_L_steer",
+      "pivot_mm": [
+        -1500,
+        2700,
+        550
+      ],
+      "axis": "X",
+      "kind": "rotation",
+      "min": null,
+      "max": null,
+      "speed": null,
+      "rest": 0,
+      "motion": "rotation по X. Угол = -пройденный путь / 550 радиан; одинаковая ось +X у левого и правого колеса.",
+      "limits": "непрерывное вращение"
+    },
+    {
+      "name": "axle_1_R_suspension",
+      "parent": null,
+      "pivot_mm": [
+        1500,
+        2700,
+        550
+      ],
+      "axis": "Z",
+      "kind": "translation",
+      "min": -80,
+      "max": 80,
+      "speed": 250,
+      "rest": 0,
+      "motion": "translation по Z. Ход подвески относительно исходного центра.",
+      "limits": "-80…80 мм; исходное 0; 250 мм/с"
+    },
+    {
+      "name": "axle_1_R_steer",
+      "parent": "axle_1_R_suspension",
+      "pivot_mm": [
+        1500,
+        2700,
+        550
+      ],
+      "axis": "Z",
+      "kind": "rotation",
+      "min": -35,
+      "max": 35,
+      "speed": 60,
+      "rest": 0,
+      "motion": "rotation по Z. Только управляемая ось.",
+      "limits": "-35…35 градусов; исходное 0; 60 град/с"
+    },
+    {
+      "name": "axle_1_R_wheel",
+      "parent": "axle_1_R_steer",
+      "pivot_mm": [
+        1500,
+        2700,
+        550
+      ],
+      "axis": "X",
+      "kind": "rotation",
+      "min": null,
+      "max": null,
+      "speed": null,
+      "rest": 0,
+      "motion": "rotation по X. Угол = -пройденный путь / 550 радиан; одинаковая ось +X у левого и правого колеса.",
+      "limits": "непрерывное вращение"
+    },
+    {
+      "name": "axle_2_L_suspension",
+      "parent": null,
+      "pivot_mm": [
+        -1500,
+        900,
+        550
+      ],
+      "axis": "Z",
+      "kind": "translation",
+      "min": -80,
+      "max": 80,
+      "speed": 250,
+      "rest": 0,
+      "motion": "translation по Z. Ход подвески относительно исходного центра.",
+      "limits": "-80…80 мм; исходное 0; 250 мм/с"
+    },
+    {
+      "name": "axle_2_L_steer",
+      "parent": "axle_2_L_suspension",
+      "pivot_mm": [
+        -1500,
+        900,
+        550
+      ],
+      "axis": "Z",
+      "kind": "rotation",
+      "min": -35,
+      "max": 35,
+      "speed": 60,
+      "rest": 0,
+      "motion": "rotation по Z. Только управляемая ось.",
+      "limits": "-35…35 градусов; исходное 0; 60 град/с"
+    },
+    {
+      "name": "axle_2_L_wheel",
+      "parent": "axle_2_L_steer",
+      "pivot_mm": [
+        -1500,
+        900,
+        550
+      ],
+      "axis": "X",
+      "kind": "rotation",
+      "min": null,
+      "max": null,
+      "speed": null,
+      "rest": 0,
+      "motion": "rotation по X. Угол = -пройденный путь / 550 радиан; одинаковая ось +X у левого и правого колеса.",
+      "limits": "непрерывное вращение"
+    },
+    {
+      "name": "axle_2_R_suspension",
+      "parent": null,
+      "pivot_mm": [
+        1500,
+        900,
+        550
+      ],
+      "axis": "Z",
+      "kind": "translation",
+      "min": -80,
+      "max": 80,
+      "speed": 250,
+      "rest": 0,
+      "motion": "translation по Z. Ход подвески относительно исходного центра.",
+      "limits": "-80…80 мм; исходное 0; 250 мм/с"
+    },
+    {
+      "name": "axle_2_R_steer",
+      "parent": "axle_2_R_suspension",
+      "pivot_mm": [
+        1500,
+        900,
+        550
+      ],
+      "axis": "Z",
+      "kind": "rotation",
+      "min": -35,
+      "max": 35,
+      "speed": 60,
+      "rest": 0,
+      "motion": "rotation по Z. Только управляемая ось.",
+      "limits": "-35…35 градусов; исходное 0; 60 град/с"
+    },
+    {
+      "name": "axle_2_R_wheel",
+      "parent": "axle_2_R_steer",
+      "pivot_mm": [
+        1500,
+        900,
+        550
+      ],
+      "axis": "X",
+      "kind": "rotation",
+      "min": null,
+      "max": null,
+      "speed": null,
+      "rest": 0,
+      "motion": "rotation по X. Угол = -пройденный путь / 550 радиан; одинаковая ось +X у левого и правого колеса.",
+      "limits": "непрерывное вращение"
+    },
+    {
+      "name": "axle_3_L_suspension",
+      "parent": null,
+      "pivot_mm": [
+        -1500,
+        -900,
+        550
+      ],
+      "axis": "Z",
+      "kind": "translation",
+      "min": -80,
+      "max": 80,
+      "speed": 250,
+      "rest": 0,
+      "motion": "translation по Z. Ход подвески относительно исходного центра.",
+      "limits": "-80…80 мм; исходное 0; 250 мм/с"
+    },
+    {
+      "name": "axle_3_L_wheel",
+      "parent": "axle_3_L_suspension",
+      "pivot_mm": [
+        -1500,
+        -900,
+        550
+      ],
+      "axis": "X",
+      "kind": "rotation",
+      "min": null,
+      "max": null,
+      "speed": null,
+      "rest": 0,
+      "motion": "rotation по X. Угол = -пройденный путь / 550 радиан; одинаковая ось +X у левого и правого колеса.",
+      "limits": "непрерывное вращение"
+    },
+    {
+      "name": "axle_3_R_suspension",
+      "parent": null,
+      "pivot_mm": [
+        1500,
+        -900,
+        550
+      ],
+      "axis": "Z",
+      "kind": "translation",
+      "min": -80,
+      "max": 80,
+      "speed": 250,
+      "rest": 0,
+      "motion": "translation по Z. Ход подвески относительно исходного центра.",
+      "limits": "-80…80 мм; исходное 0; 250 мм/с"
+    },
+    {
+      "name": "axle_3_R_wheel",
+      "parent": "axle_3_R_suspension",
+      "pivot_mm": [
+        1500,
+        -900,
+        550
+      ],
+      "axis": "X",
+      "kind": "rotation",
+      "min": null,
+      "max": null,
+      "speed": null,
+      "rest": 0,
+      "motion": "rotation по X. Угол = -пройденный путь / 550 радиан; одинаковая ось +X у левого и правого колеса.",
+      "limits": "непрерывное вращение"
+    },
+    {
+      "name": "axle_4_L_suspension",
+      "parent": null,
+      "pivot_mm": [
+        -1500,
+        -2700,
+        550
+      ],
+      "axis": "Z",
+      "kind": "translation",
+      "min": -80,
+      "max": 80,
+      "speed": 250,
+      "rest": 0,
+      "motion": "translation по Z. Ход подвески относительно исходного центра.",
+      "limits": "-80…80 мм; исходное 0; 250 мм/с"
+    },
+    {
+      "name": "axle_4_L_wheel",
+      "parent": "axle_4_L_suspension",
+      "pivot_mm": [
+        -1500,
+        -2700,
+        550
+      ],
+      "axis": "X",
+      "kind": "rotation",
+      "min": null,
+      "max": null,
+      "speed": null,
+      "rest": 0,
+      "motion": "rotation по X. Угол = -пройденный путь / 550 радиан; одинаковая ось +X у левого и правого колеса.",
+      "limits": "непрерывное вращение"
+    },
+    {
+      "name": "axle_4_R_suspension",
+      "parent": null,
+      "pivot_mm": [
+        1500,
+        -2700,
+        550
+      ],
+      "axis": "Z",
+      "kind": "translation",
+      "min": -80,
+      "max": 80,
+      "speed": 250,
+      "rest": 0,
+      "motion": "translation по Z. Ход подвески относительно исходного центра.",
+      "limits": "-80…80 мм; исходное 0; 250 мм/с"
+    },
+    {
+      "name": "axle_4_R_wheel",
+      "parent": "axle_4_R_suspension",
+      "pivot_mm": [
+        1500,
+        -2700,
+        550
+      ],
+      "axis": "X",
+      "kind": "rotation",
+      "min": null,
+      "max": null,
+      "speed": null,
+      "rest": 0,
+      "motion": "rotation по X. Угол = -пройденный путь / 550 радиан; одинаковая ось +X у левого и правого колеса.",
+      "limits": "непрерывное вращение"
+    }
+  ],
+  "lights": [],
+  "states": [
+    {
+      "name": "Стоянка",
+      "description": "Рулевые узлы 0, ход подвески 0. Вращение колёс остановлено."
+    },
+    {
+      "name": "Езда",
+      "description": "Вращение колёс определяется фактическим пройденным путём, не произвольной частотой. Подвеска следует грунту в своих пределах."
+    },
+    {
+      "name": "Поворот",
+      "description": "Управляемые колёса поворачиваются вокруг Z, остальные остаются по направлению корпуса. У второй управляемой оси угол 70% первой. Для внутреннего и внешнего колеса применяется разница углов без выхода за пределы."
+    },
+    {
+      "name": "Торможение",
+      "description": "Частота вращения уменьшается вместе со скоростью движения; не останавливать колёса до остановки машины."
+    }
+  ],
+  "constraints": [
+    "Центральная палуба: 6200 мм вдоль Y × 2700 мм вдоль X на Z=1350 мм.",
+    "Весь этот центральный прямоугольник выше монтажной плоскости свободен от собственной геометрии ходовой.",
+    "Колёса, гусеницы и ноги не входят в объём установленного корпуса. Минимальный зазор до движущихся частей 150 мм.",
+    "Оранжевые метки крепления — краска без Emission. Фары находятся на корпусе, не дублировать их на палубе."
+  ],
+  "payloads": [],
+  "origin_description": "Центр машины на земле: Z=0 — опорная поверхность в исходной позе.",
+  "wheel_data": [
+    {
+      "name": "axle_1_L_wheel",
+      "center_mm": [
+        -1500,
+        2700,
+        550
+      ],
+      "radius_mm": 550,
+      "tire_width_mm": 400,
+      "steering": true
+    },
+    {
+      "name": "axle_1_R_wheel",
+      "center_mm": [
+        1500,
+        2700,
+        550
+      ],
+      "radius_mm": 550,
+      "tire_width_mm": 400,
+      "steering": true
+    },
+    {
+      "name": "axle_2_L_wheel",
+      "center_mm": [
+        -1500,
+        900,
+        550
+      ],
+      "radius_mm": 550,
+      "tire_width_mm": 400,
+      "steering": true
+    },
+    {
+      "name": "axle_2_R_wheel",
+      "center_mm": [
+        1500,
+        900,
+        550
+      ],
+      "radius_mm": 550,
+      "tire_width_mm": 400,
+      "steering": true
+    },
+    {
+      "name": "axle_3_L_wheel",
+      "center_mm": [
+        -1500,
+        -900,
+        550
+      ],
+      "radius_mm": 550,
+      "tire_width_mm": 400,
+      "steering": false
+    },
+    {
+      "name": "axle_3_R_wheel",
+      "center_mm": [
+        1500,
+        -900,
+        550
+      ],
+      "radius_mm": 550,
+      "tire_width_mm": 400,
+      "steering": false
+    },
+    {
+      "name": "axle_4_L_wheel",
+      "center_mm": [
+        -1500,
+        -2700,
+        550
+      ],
+      "radius_mm": 550,
+      "tire_width_mm": 400,
+      "steering": false
+    },
+    {
+      "name": "axle_4_R_wheel",
+      "center_mm": [
+        1500,
+        -2700,
+        550
+      ],
+      "radius_mm": 550,
+      "tire_width_mm": 400,
+      "steering": false
+    }
+  ],
+  "reference_crop": {
+    "source": "../../overviews/running-gear.png",
+    "rectangle": [
+      345,
+      115,
+      345,
+      337
+    ]
+  },
+  "working_bounds_mm": {
+    "min": [
+      -2100.0,
+      -3700.0,
+      -80
+    ],
+    "max": [
+      2100.0,
+      3700.0,
+      1350
+    ]
+  }
+}

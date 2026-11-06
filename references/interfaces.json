@@ -1,0 +1,40 @@
+{
+  "units": "mm",
+  "axes": {
+    "right": "+X",
+    "forward": "+Y",
+    "up": "+Z"
+  },
+  "classes": {
+    "S": {
+      "deck_length": 4400,
+      "deck_width": 2000,
+      "pad_x": 650,
+      "pad_y": 1450,
+      "pad_size": 180,
+      "ring_diameter": 900,
+      "flange_height": 80
+    },
+    "M": {
+      "deck_length": 6200,
+      "deck_width": 2700,
+      "pad_x": 950,
+      "pad_y": 2250,
+      "pad_size": 240,
+      "ring_diameter": 1500,
+      "flange_height": 100
+    },
+    "L": {
+      "deck_length": 8600,
+      "deck_width": 3400,
+      "pad_x": 1200,
+      "pad_y": 3200,
+      "pad_size": 300,
+      "ring_diameter": 2100,
+      "flange_height": 120
+    }
+  },
+  "body_pad_clearance_mm": 150,
+  "body_roof_clearance_mm": 150,
+  "moving_parts_clearance_mm": 30
+}

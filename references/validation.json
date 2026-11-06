@@ -1,0 +1,6 @@
+{
+  "modules": 46,
+  "chassis_body_pairs": 37,
+  "class_compatible_assemblies": 334,
+  "scope": "socket coordinates, bounds, payload storage, hierarchy, GLB binary and units; not production mesh collision or animation clearance"
+}

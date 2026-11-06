@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1200" viewBox="0 0 1800 1200">
+<defs><marker id="arrow" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto-start-reverse"><path d="M7 0 L0 3.5 L7 7" fill="none" stroke="#263c48"/></marker></defs>
+<rect width="1800" height="1200" fill="#f2f0e9"/>
+<style>text{font-family:Segoe UI,Arial,sans-serif;fill:#263c48} .title{font-size:38px;font-weight:700}.small{font-size:20px}.label{font-size:24px}.dim{stroke:#263c48;stroke-width:1.5;fill:none;marker-start:url(#arrow);marker-end:url(#arrow)}.guide{stroke:#8f9ba0;stroke-dasharray:6 6;fill:none}</style>
+<text x="60" y="65" class="title">U17 Заслон · L</text>
+<text x="60" y="105" class="small">Проектные размеры в мм · габаритные схемы, не ортографические виды готовой модели</text>
+<text x="80" y="160" class="label">Вид сверху · X Y</text>
+<rect x="286.25" y="207.50" width="247.50" height="285.00" fill="#b0b99b" fill-opacity=".55" stroke="#4f6143" stroke-width="2"/>
+<path d="M398.00 380.00h24 M410.00 368.00v24" stroke="#bc4038" stroke-width="2"/>
+<text x="424.00" y="398.00" class="small">O</text>
+<path d="M286.25 530.50H533.75" class="dim"/>
+<text x="410.00" y="559.50" text-anchor="middle" class="small">3300 мм</text>
+<path d="M248.25 207.50V492.50" class="dim"/>
+<text x="234.25" y="350.00" text-anchor="middle" transform="rotate(-90 234.25 350.00)" class="small">3800 мм</text>
+<circle cx="410.00" cy="380.00" r="6" fill="#d38922" stroke="#6d470f"/>
+<text x="422.00" y="368.00" class="small">mount</text>
+<circle cx="410.00" cy="380.00" r="78.75" fill="none" stroke="#d38922" stroke-width="3"/>
+<text x="940" y="160" class="label">Вид сбоку · Y Z</text>
+<rect x="1127.50" y="248.75" width="285.00" height="202.50" fill="#b0b99b" fill-opacity=".55" stroke="#4f6143" stroke-width="2"/>
+<path d="M1228.00 451.25h24 M1240.00 439.25v24" stroke="#bc4038" stroke-width="2"/>
+<text x="1254.00" y="469.25" class="small">O</text>
+<path d="M1127.50 489.25H1412.50" class="dim"/>
+<text x="1270.00" y="518.25" text-anchor="middle" class="small">3800 мм</text>
+<path d="M1089.50 248.75V451.25" class="dim"/>
+<text x="1075.50" y="350.00" text-anchor="middle" transform="rotate(-90 1075.50 350.00)" class="small">2700 мм</text>
+<circle cx="1240.00" cy="451.25" r="6" fill="#d38922" stroke="#6d470f"/>
+<text x="1252.00" y="439.25" class="small">mount</text>
+<text x="80" y="660" class="label">Вид спереди · X Z</text>
+<rect x="286.25" y="748.75" width="247.50" height="202.50" fill="#b0b99b" fill-opacity=".55" stroke="#4f6143" stroke-width="2"/>
+<path d="M398.00 951.25h24 M410.00 939.25v24" stroke="#bc4038" stroke-width="2"/>
+<text x="424.00" y="969.25" class="small">O</text>
+<path d="M286.25 989.25H533.75" class="dim"/>
+<text x="410.00" y="1018.25" text-anchor="middle" class="small">3300 мм</text>
+<path d="M248.25 748.75V951.25" class="dim"/>
+<text x="234.25" y="850.00" text-anchor="middle" transform="rotate(-90 234.25 850.00)" class="small">2700 мм</text>
+<circle cx="410.00" cy="951.25" r="6" fill="#d38922" stroke="#6d470f"/>
+<text x="422.00" y="939.25" class="small">mount</text>
+<text x="940" y="690" class="small">Длина Y: 3800 мм</text>
+<text x="940" y="721" class="small">Ширина X: 3300 мм</text>
+<text x="940" y="752" class="small">Высота Z: 2700 мм</text>
+<text x="940" y="783" class="small">Min: (-1650, -1500, 0)</text>
+<text x="940" y="814" class="small">Max: (1650, 2300, 2700)</text>
+<text x="940" y="845" class="small">Начало координат: красный крест O</text>
+<text x="940" y="876" class="small">Оранжевый: точки крепления</text>
+<text x="940" y="907" class="small">+Y — вперёд, +X — вправо, +Z — вверх</text>
+<text x="940" y="938" class="small">Габарит показан в исходном положении.</text>
+<text x="940" y="969" class="small">mount: (0, 0, 0)</text>
+<text x="940" y="1000" class="small">fx_muzzle_1: (-825, 2300, 1485)</text>
+<text x="940" y="1031" class="small">fx_muzzle_2: (825, 2300, 1485)</text>
+<text x="60" y="1160" class="small">Размеры, оси и ограничения движений: module.json. Импортируемый размерный шаблон: blockout.glb.</text>
+</svg>

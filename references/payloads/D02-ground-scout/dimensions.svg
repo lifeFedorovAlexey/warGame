@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1200" viewBox="0 0 1800 1200">
+<defs><marker id="arrow" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto-start-reverse"><path d="M7 0 L0 3.5 L7 7" fill="none" stroke="#263c48"/></marker></defs>
+<rect width="1800" height="1200" fill="#f2f0e9"/>
+<style>text{font-family:Segoe UI,Arial,sans-serif;fill:#263c48} .title{font-size:38px;font-weight:700}.small{font-size:20px}.label{font-size:24px}.dim{stroke:#263c48;stroke-width:1.5;fill:none;marker-start:url(#arrow);marker-end:url(#arrow)}.guide{stroke:#8f9ba0;stroke-dasharray:6 6;fill:none}</style>
+<text x="60" y="65" class="title">D02 Наземный разведывательный робот · payload</text>
+<text x="60" y="105" class="small">Проектные размеры в мм · габаритные схемы, не ортографические виды готовой модели</text>
+<text x="80" y="160" class="label">Вид сверху · X Y</text>
+<rect x="299.89" y="207.50" width="220.23" height="285.00" fill="#b0b99b" fill-opacity=".55" stroke="#4f6143" stroke-width="2"/>
+<path d="M398.00 350.00h24 M410.00 338.00v24" stroke="#bc4038" stroke-width="2"/>
+<text x="424.00" y="368.00" class="small">O</text>
+<path d="M299.89 530.50H520.11" class="dim"/>
+<text x="410.00" y="559.50" text-anchor="middle" class="small">850 мм</text>
+<path d="M261.89 207.50V492.50" class="dim"/>
+<text x="247.89" y="350.00" text-anchor="middle" transform="rotate(-90 247.89 350.00)" class="small">1100 мм</text>
+<text x="940" y="160" class="label">Вид сбоку · Y Z</text>
+<rect x="1127.50" y="265.80" width="285.00" height="168.41" fill="#b0b99b" fill-opacity=".55" stroke="#4f6143" stroke-width="2"/>
+<path d="M1258.00 434.20h24 M1270.00 422.20v24" stroke="#bc4038" stroke-width="2"/>
+<text x="1284.00" y="452.20" class="small">O</text>
+<path d="M1127.50 472.20H1412.50" class="dim"/>
+<text x="1270.00" y="501.20" text-anchor="middle" class="small">1100 мм</text>
+<path d="M1089.50 265.80V434.20" class="dim"/>
+<text x="1075.50" y="350.00" text-anchor="middle" transform="rotate(-90 1075.50 350.00)" class="small">650 мм</text>
+<text x="80" y="660" class="label">Вид спереди · X Z</text>
+<rect x="299.89" y="765.80" width="220.23" height="168.41" fill="#b0b99b" fill-opacity=".55" stroke="#4f6143" stroke-width="2"/>
+<path d="M398.00 934.20h24 M410.00 922.20v24" stroke="#bc4038" stroke-width="2"/>
+<text x="424.00" y="952.20" class="small">O</text>
+<path d="M299.89 972.20H520.11" class="dim"/>
+<text x="410.00" y="1001.20" text-anchor="middle" class="small">850 мм</text>
+<path d="M261.89 765.80V934.20" class="dim"/>
+<text x="247.89" y="850.00" text-anchor="middle" transform="rotate(-90 247.89 850.00)" class="small">650 мм</text>
+<text x="940" y="690" class="small">Длина Y: 1100 мм</text>
+<text x="940" y="721" class="small">Ширина X: 850 мм</text>
+<text x="940" y="752" class="small">Высота Z: 650 мм</text>
+<text x="940" y="783" class="small">Min: (-425, -550, 0)</text>
+<text x="940" y="814" class="small">Max: (425, 550, 650)</text>
+<text x="940" y="845" class="small">Начало координат: красный крест O</text>
+<text x="940" y="876" class="small">Оранжевый: точки крепления</text>
+<text x="940" y="907" class="small">+Y — вперёд, +X — вправо, +Z — вверх</text>
+<text x="940" y="938" class="small">Габарит показан в исходном положении.</text>
+<text x="940" y="969" class="small">dock: (0, 0, 0)</text>
+<text x="940" y="1000" class="small">camera_view: (0, 180, 520)</text>
+<text x="60" y="1160" class="small">Размеры, оси и ограничения движений: module.json. Импортируемый размерный шаблон: blockout.glb.</text>
+</svg>

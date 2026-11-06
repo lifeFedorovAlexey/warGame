@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1200" viewBox="0 0 1800 1200">
+<defs><marker id="arrow" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto-start-reverse"><path d="M7 0 L0 3.5 L7 7" fill="none" stroke="#263c48"/></marker></defs>
+<rect width="1800" height="1200" fill="#f2f0e9"/>
+<style>text{font-family:Segoe UI,Arial,sans-serif;fill:#263c48} .title{font-size:38px;font-weight:700}.small{font-size:20px}.label{font-size:24px}.dim{stroke:#263c48;stroke-width:1.5;fill:none;marker-start:url(#arrow);marker-end:url(#arrow)}.guide{stroke:#8f9ba0;stroke-dasharray:6 6;fill:none}</style>
+<text x="60" y="65" class="title">C09 Вихрь · M</text>
+<text x="60" y="105" class="small">Проектные размеры в мм · габаритные схемы, не ортографические виды готовой модели</text>
+<text x="80" y="160" class="label">Вид сверху · X Y</text>
+<rect x="295.21" y="207.50" width="229.58" height="285.00" fill="#b0b99b" fill-opacity=".55" stroke="#4f6143" stroke-width="2"/>
+<path d="M398.00 350.00h24 M410.00 338.00v24" stroke="#bc4038" stroke-width="2"/>
+<text x="424.00" y="368.00" class="small">O</text>
+<path d="M295.21 530.50H524.79" class="dim"/>
+<text x="410.00" y="559.50" text-anchor="middle" class="small">5800 мм</text>
+<path d="M257.21 207.50V492.50" class="dim"/>
+<text x="243.21" y="350.00" text-anchor="middle" transform="rotate(-90 243.21 350.00)" class="small">7200 мм</text>
+<circle cx="410.00" cy="350.00" r="6" fill="#d38922" stroke="#6d470f"/>
+<text x="422.00" y="338.00" class="small">body_mount</text>
+<rect x="368.40" y="256.94" width="8" height="8" fill="#d38922"/>
+<rect x="443.60" y="256.94" width="8" height="8" fill="#d38922"/>
+<rect x="368.40" y="435.06" width="8" height="8" fill="#d38922"/>
+<rect x="443.60" y="435.06" width="8" height="8" fill="#d38922"/>
+<rect x="356.56" y="227.29" width="106.88" height="245.42" class="guide"/>
+<text x="940" y="160" class="label">Вид сбоку · Y Z</text>
+<rect x="1127.50" y="320.31" width="285.00" height="59.38" fill="#b0b99b" fill-opacity=".55" stroke="#4f6143" stroke-width="2"/>
+<path d="M1258.00 379.69h24 M1270.00 367.69v24" stroke="#bc4038" stroke-width="2"/>
+<text x="1284.00" y="397.69" class="small">O</text>
+<path d="M1127.50 417.69H1412.50" class="dim"/>
+<text x="1270.00" y="446.69" text-anchor="middle" class="small">7200 мм</text>
+<path d="M1089.50 320.31V379.69" class="dim"/>
+<text x="1075.50" y="350.00" text-anchor="middle" transform="rotate(-90 1075.50 350.00)" class="small">1500 мм</text>
+<circle cx="1270.00" cy="326.25" r="6" fill="#d38922" stroke="#6d470f"/>
+<text x="1282.00" y="314.25" class="small">body_mount</text>
+<rect x="1355.06" y="322.25" width="8" height="8" fill="#d38922"/>
+<rect x="1355.06" y="322.25" width="8" height="8" fill="#d38922"/>
+<rect x="1176.94" y="322.25" width="8" height="8" fill="#d38922"/>
+<rect x="1176.94" y="322.25" width="8" height="8" fill="#d38922"/>
+<path d="M980 326.25H1590" class="guide"/>
+<text x="80" y="660" class="label">Вид спереди · X Z</text>
+<rect x="295.21" y="820.31" width="229.58" height="59.38" fill="#b0b99b" fill-opacity=".55" stroke="#4f6143" stroke-width="2"/>
+<path d="M398.00 879.69h24 M410.00 867.69v24" stroke="#bc4038" stroke-width="2"/>
+<text x="424.00" y="897.69" class="small">O</text>
+<path d="M295.21 917.69H524.79" class="dim"/>
+<text x="410.00" y="946.69" text-anchor="middle" class="small">5800 мм</text>
+<path d="M257.21 820.31V879.69" class="dim"/>
+<text x="243.21" y="850.00" text-anchor="middle" transform="rotate(-90 243.21 850.00)" class="small">1500 мм</text>
+<circle cx="410.00" cy="826.25" r="6" fill="#d38922" stroke="#6d470f"/>
+<text x="422.00" y="814.25" class="small">body_mount</text>
+<rect x="368.40" y="822.25" width="8" height="8" fill="#d38922"/>
+<rect x="443.60" y="822.25" width="8" height="8" fill="#d38922"/>
+<rect x="368.40" y="822.25" width="8" height="8" fill="#d38922"/>
+<rect x="443.60" y="822.25" width="8" height="8" fill="#d38922"/>
+<path d="M120 826.25H730" class="guide"/>
+<text x="940" y="690" class="small">Длина Y: 7200 мм</text>
+<text x="940" y="721" class="small">Ширина X: 5800 мм</text>
+<text x="940" y="752" class="small">Высота Z: 1500 мм</text>
+<text x="940" y="783" class="small">Min: (-2900, -3600, 0)</text>
+<text x="940" y="814" class="small">Max: (2900, 3600, 1500)</text>
+<text x="940" y="845" class="small">Начало координат: красный крест O</text>
+<text x="940" y="876" class="small">Оранжевый: точки крепления</text>
+<text x="940" y="907" class="small">+Y — вперёд, +X — вправо, +Z — вверх</text>
+<text x="940" y="938" class="small">Габарит показан в исходном положении.</text>
+<text x="940" y="969" class="small">body_mount: (0, 0, 1350)</text>
+<text x="60" y="1160" class="small">Размеры, оси и ограничения движений: module.json. Импортируемый размерный шаблон: blockout.glb.</text>
+</svg>

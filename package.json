@@ -1,0 +1,22 @@
+{
+  "name": "wargame",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Modular vehicle game assets and local review arena",
+  "scripts": {
+    "check:assets": "python tools/reference_pack.py --check",
+    "check:demo": "node tools/demo-smoke.cjs",
+    "export:models": "node tools/export-production.cjs",
+    "check:models": "node tools/validate-production.cjs",
+    "check:terrain": "node tools/terrain-smoke.cjs",
+    "check:driving": "node tools/drive-smoke.cjs",
+    "check:map": "node tools/check-alpha-map.cjs",
+    "build:map": "python tools/build-alpha-map.py",
+    "build:map-textures": "node tools/build-alpha-texture.cjs",
+    "build:roads": "node tools/build-roads.cjs"
+  },
+  "devDependencies": {
+    "gltf-validator": "^2.0.0-dev.3.10"
+  },
+  "type": "module"
+}

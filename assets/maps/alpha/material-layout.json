@@ -1,0 +1,62 @@
+[
+  {
+    "name": "dune-sand",
+    "coveragePercent": 21.648648824422406,
+    "dominantPercent": 20.807838439941406
+  },
+  {
+    "name": "bleached-sand",
+    "coveragePercent": 3.1389620101436533,
+    "dominantPercent": 3.0958175659179688
+  },
+  {
+    "name": "rust-clay",
+    "coveragePercent": 6.212138451546907,
+    "dominantPercent": 7.1895599365234375
+  },
+  {
+    "name": "desert-gravel",
+    "coveragePercent": 10.82662332750451,
+    "dominantPercent": 10.574150085449219
+  },
+  {
+    "name": "scorched-rock",
+    "coveragePercent": 0.011693438020065103,
+    "dominantPercent": 0
+  },
+  {
+    "name": "ash-earth",
+    "coveragePercent": 1.6574209321878142,
+    "dominantPercent": 1.63421630859375
+  },
+  {
+    "name": "ruined-asphalt",
+    "coveragePercent": 1.6670151535647462,
+    "dominantPercent": 1.8472671508789062
+  },
+  {
+    "name": "weathered-concrete",
+    "coveragePercent": 0.04856434118634249,
+    "dominantPercent": 0.01125335693359375
+  },
+  {
+    "name": "transition-sand",
+    "coveragePercent": 1.4968208214576808,
+    "dominantPercent": 0
+  },
+  {
+    "name": "dusty-sandstone",
+    "coveragePercent": 18.585698516174627,
+    "dominantPercent": 19.353294372558594
+  },
+  {
+    "name": "sandy-talus",
+    "coveragePercent": 20.034801234111242,
+    "dominantPercent": 20.711326599121094
+  },
+  {
+    "name": "weathered-limestone",
+    "coveragePercent": 14.67161294968018,
+    "dominantPercent": 14.775276184082031
+  }
+]

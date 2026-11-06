@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1200" viewBox="0 0 1800 1200">
+<defs><marker id="arrow" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto-start-reverse"><path d="M7 0 L0 3.5 L7 7" fill="none" stroke="#263c48"/></marker></defs>
+<rect width="1800" height="1200" fill="#f2f0e9"/>
+<style>text{font-family:Segoe UI,Arial,sans-serif;fill:#263c48} .title{font-size:38px;font-weight:700}.small{font-size:20px}.label{font-size:24px}.dim{stroke:#263c48;stroke-width:1.5;fill:none;marker-start:url(#arrow);marker-end:url(#arrow)}.guide{stroke:#8f9ba0;stroke-dasharray:6 6;fill:none}</style>
+<text x="60" y="65" class="title">U04 Резак · S</text>
+<text x="60" y="105" class="small">Проектные размеры в мм · габаритные схемы, не ортографические виды готовой модели</text>
+<text x="80" y="160" class="label">Вид сверху · X Y</text>
+<rect x="351.47" y="207.50" width="117.05" height="285.00" fill="#b0b99b" fill-opacity=".55" stroke="#4f6143" stroke-width="2"/>
+<path d="M398.00 421.25h24 M410.00 409.25v24" stroke="#bc4038" stroke-width="2"/>
+<text x="424.00" y="439.25" class="small">O</text>
+<path d="M351.47 530.50H468.53" class="dim"/>
+<text x="410.00" y="559.50" text-anchor="middle" class="small">1150 мм</text>
+<path d="M313.47 207.50V492.50" class="dim"/>
+<text x="299.47" y="350.00" text-anchor="middle" transform="rotate(-90 299.47 350.00)" class="small">2800 мм</text>
+<circle cx="410.00" cy="421.25" r="6" fill="#d38922" stroke="#6d470f"/>
+<text x="422.00" y="409.25" class="small">mount</text>
+<circle cx="410.00" cy="421.25" r="45.80" fill="none" stroke="#d38922" stroke-width="3"/>
+<text x="940" y="160" class="label">Вид сбоку · Y Z</text>
+<rect x="1127.50" y="301.65" width="285.00" height="96.70" fill="#b0b99b" fill-opacity=".55" stroke="#4f6143" stroke-width="2"/>
+<path d="M1186.75 398.35h24 M1198.75 386.35v24" stroke="#bc4038" stroke-width="2"/>
+<text x="1212.75" y="416.35" class="small">O</text>
+<path d="M1127.50 436.35H1412.50" class="dim"/>
+<text x="1270.00" y="465.35" text-anchor="middle" class="small">2800 мм</text>
+<path d="M1089.50 301.65V398.35" class="dim"/>
+<text x="1075.50" y="350.00" text-anchor="middle" transform="rotate(-90 1075.50 350.00)" class="small">950 мм</text>
+<circle cx="1198.75" cy="398.35" r="6" fill="#d38922" stroke="#6d470f"/>
+<text x="1210.75" y="386.35" class="small">mount</text>
+<text x="80" y="660" class="label">Вид спереди · X Z</text>
+<rect x="351.47" y="801.65" width="117.05" height="96.70" fill="#b0b99b" fill-opacity=".55" stroke="#4f6143" stroke-width="2"/>
+<path d="M398.00 898.35h24 M410.00 886.35v24" stroke="#bc4038" stroke-width="2"/>
+<text x="424.00" y="916.35" class="small">O</text>
+<path d="M351.47 936.35H468.53" class="dim"/>
+<text x="410.00" y="965.35" text-anchor="middle" class="small">1150 мм</text>
+<path d="M313.47 801.65V898.35" class="dim"/>
+<text x="299.47" y="850.00" text-anchor="middle" transform="rotate(-90 299.47 850.00)" class="small">950 мм</text>
+<circle cx="410.00" cy="898.35" r="6" fill="#d38922" stroke="#6d470f"/>
+<text x="422.00" y="886.35" class="small">mount</text>
+<text x="940" y="690" class="small">Длина Y: 2800 мм</text>
+<text x="940" y="721" class="small">Ширина X: 1150 мм</text>
+<text x="940" y="752" class="small">Высота Z: 950 мм</text>
+<text x="940" y="783" class="small">Min: (-575, -700, 0)</text>
+<text x="940" y="814" class="small">Max: (575, 2100, 950)</text>
+<text x="940" y="845" class="small">Начало координат: красный крест O</text>
+<text x="940" y="876" class="small">Оранжевый: точки крепления</text>
+<text x="940" y="907" class="small">+Y — вперёд, +X — вправо, +Z — вверх</text>
+<text x="940" y="938" class="small">Габарит показан в исходном положении.</text>
+<text x="940" y="969" class="small">mount: (0, 0, 0)</text>
+<text x="940" y="1000" class="small">fx_muzzle_1: (0, 2100, 522)</text>
+<text x="60" y="1160" class="small">Размеры, оси и ограничения движений: module.json. Импортируемый размерный шаблон: blockout.glb.</text>
+</svg>

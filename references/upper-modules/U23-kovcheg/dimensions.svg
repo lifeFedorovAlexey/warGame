@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1200" viewBox="0 0 1800 1200">
+<defs><marker id="arrow" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto-start-reverse"><path d="M7 0 L0 3.5 L7 7" fill="none" stroke="#263c48"/></marker></defs>
+<rect width="1800" height="1200" fill="#f2f0e9"/>
+<style>text{font-family:Segoe UI,Arial,sans-serif;fill:#263c48} .title{font-size:38px;font-weight:700}.small{font-size:20px}.label{font-size:24px}.dim{stroke:#263c48;stroke-width:1.5;fill:none;marker-start:url(#arrow);marker-end:url(#arrow)}.guide{stroke:#8f9ba0;stroke-dasharray:6 6;fill:none}</style>
+<text x="60" y="65" class="title">U23 Ковчег · L</text>
+<text x="60" y="105" class="small">Проектные размеры в мм · габаритные схемы, не ортографические виды готовой модели</text>
+<text x="80" y="160" class="label">Вид сверху · X Y</text>
+<rect x="308.21" y="207.50" width="203.57" height="285.00" fill="#b0b99b" fill-opacity=".55" stroke="#4f6143" stroke-width="2"/>
+<path d="M398.00 329.64h24 M410.00 317.64v24" stroke="#bc4038" stroke-width="2"/>
+<text x="424.00" y="347.64" class="small">O</text>
+<path d="M308.21 530.50H511.79" class="dim"/>
+<text x="410.00" y="559.50" text-anchor="middle" class="small">3000 мм</text>
+<path d="M270.21 207.50V492.50" class="dim"/>
+<text x="256.21" y="350.00" text-anchor="middle" transform="rotate(-90 256.21 350.00)" class="small">4200 мм</text>
+<circle cx="410.00" cy="329.64" r="6" fill="#d38922" stroke="#6d470f"/>
+<text x="422.00" y="317.64" class="small">mount</text>
+<circle cx="410.00" cy="329.64" r="71.25" fill="none" stroke="#d38922" stroke-width="3"/>
+<text x="940" y="160" class="label">Вид сбоку · Y Z</text>
+<rect x="1127.50" y="285.54" width="285.00" height="128.93" fill="#b0b99b" fill-opacity=".55" stroke="#4f6143" stroke-width="2"/>
+<path d="M1278.36 414.46h24 M1290.36 402.46v24" stroke="#bc4038" stroke-width="2"/>
+<text x="1304.36" y="432.46" class="small">O</text>
+<path d="M1127.50 452.46H1412.50" class="dim"/>
+<text x="1270.00" y="481.46" text-anchor="middle" class="small">4200 мм</text>
+<path d="M1089.50 285.54V414.46" class="dim"/>
+<text x="1075.50" y="350.00" text-anchor="middle" transform="rotate(-90 1075.50 350.00)" class="small">1900 мм</text>
+<circle cx="1290.36" cy="414.46" r="6" fill="#d38922" stroke="#6d470f"/>
+<text x="1302.36" y="402.46" class="small">mount</text>
+<text x="80" y="660" class="label">Вид спереди · X Z</text>
+<rect x="308.21" y="785.54" width="203.57" height="128.93" fill="#b0b99b" fill-opacity=".55" stroke="#4f6143" stroke-width="2"/>
+<path d="M398.00 914.46h24 M410.00 902.46v24" stroke="#bc4038" stroke-width="2"/>
+<text x="424.00" y="932.46" class="small">O</text>
+<path d="M308.21 952.46H511.79" class="dim"/>
+<text x="410.00" y="981.46" text-anchor="middle" class="small">3000 мм</text>
+<path d="M270.21 785.54V914.46" class="dim"/>
+<text x="256.21" y="850.00" text-anchor="middle" transform="rotate(-90 256.21 850.00)" class="small">1900 мм</text>
+<circle cx="410.00" cy="914.46" r="6" fill="#d38922" stroke="#6d470f"/>
+<text x="422.00" y="902.46" class="small">mount</text>
+<text x="940" y="690" class="small">Длина Y: 4200 мм</text>
+<text x="940" y="721" class="small">Ширина X: 3000 мм</text>
+<text x="940" y="752" class="small">Высота Z: 1900 мм</text>
+<text x="940" y="783" class="small">Min: (-1500, -2400, 0)</text>
+<text x="940" y="814" class="small">Max: (1500, 1800, 1900)</text>
+<text x="940" y="845" class="small">Начало координат: красный крест O</text>
+<text x="940" y="876" class="small">Оранжевый: точки крепления</text>
+<text x="940" y="907" class="small">+Y — вперёд, +X — вправо, +Z — вверх</text>
+<text x="940" y="938" class="small">Габарит показан в исходном положении.</text>
+<text x="940" y="969" class="small">mount: (0, 0, 0)</text>
+<text x="940" y="1000" class="small">robot_slot_L: (-650, -200, 400)</text>
+<text x="940" y="1031" class="small">robot_slot_R: (650, -200, 400)</text>
+<text x="60" y="1160" class="small">Размеры, оси и ограничения движений: module.json. Импортируемый размерный шаблон: blockout.glb.</text>
+</svg>

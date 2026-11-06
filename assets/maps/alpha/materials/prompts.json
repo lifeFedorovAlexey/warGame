@@ -1,0 +1,54 @@
+[
+  {
+    "key": "ash-earth",
+    "prompt": "Use case: photorealistic-natural. Asset type: seamless tileable game terrain albedo texture. Generate a single full-frame square orthographic overhead scan of compacted scorched earth and windblown nuclear fallout ash, post-apocalyptic wasteland decades after a nuclear war. Physically plausible small gravel, dusty dark grey-brown soil, fine pale ash deposits in tiny cracks, sparse angular stones 1–5 cm, subtly varied rough dusty surface across an approximately 4 by 4 metre patch. Contemporary realistic AAA strategy game material, photographic microdetail, muted warm charcoal, taupe and ash grey palette. Flat neutral diffuse illumination, no baked directional lighting or cast shadows, seamless repeat on all four edges. No objects, buildings, vegetation, roads, lane markings, dramatic glowing radiation, labels, frames, letters or watermark. This is a usable uniform ground texture, NOT a landscape scene or a material preview sphere."
+  },
+  {
+    "key": "scorched-rock",
+    "prompt": "Use case: photorealistic-natural. Asset type: seamless tileable game terrain rock albedo texture. One full-frame square, straight-on orthographic scan of dark weathered fractured bedrock exposed in a post-nuclear wasteland. Realistic stratified grey-taupe rock, sharp small fissures, burnt charcoal seams, restrained rusty iron oxidation and pale ash caught in crevices. Approximately 4 by 4 metre surface patch, contemporary high fidelity game material, fine natural granular microdetail, no huge boulders or recognizable repeated centrepiece. Neutral diffuse lighting with no directional cast shadows or vignette. Seamless repeat across all four edges. No vegetation, structures, neon radiation, text, borders or watermark. Entire image is the same rock surface, NOT a landscape or material sphere."
+  },
+  {
+    "key": "ruined-asphalt",
+    "prompt": "Use case: photorealistic-natural. Asset type: seamless tileable game road albedo texture. Single full-frame square orthographic overhead scan of ruined charcoal asphalt decades after a nuclear war, approximately 6 by 6 metre road surface patch. Photorealistic fine aggregate, weathered tar, irregular branching cracks, small broken asphalt chips, dusty pale ash and a few degraded concrete grains. Flat usable contemporary game texture with balanced medium detail, realistic desaturated dark grey and brown-grey palette. Flat neutral diffuse illumination, no baked directional lighting, no shadows, no vignette. Tileable seamlessly on all four edges. Absolutely no lane markings, road edges, curbs, vehicles, plants, debris objects, letters, frame or watermark. This is only road material, NOT a complete road scene."
+  },
+  {
+    "key": "dune-sand",
+    "prompt": "Use case: photorealistic-natural. Asset type: seamlessly tileable terrain albedo for a contemporary desert strategy game. Single full-frame square overhead orthographic scan of golden ochre dune sand with fine wind ripples and subtle swept grains. A 6 by 6 metre patch, fine granular texture, warm amber gold and tan, cinematic desert atmosphere like an immense arid science-fiction world, but this image is ONLY the flat material. Neutral diffuse illumination, no directional lighting or cast shadows, no vignette. Seamless repeat all four edges. No landscape, objects, stones larger than a few centimetres, grass, sky, text, frame, watermark or material sphere."
+  },
+  {
+    "key": "bleached-sand",
+    "prompt": "Use case: photorealistic-natural. Asset type: seamless game terrain albedo tile. Full frame square orthographic overhead material scan of pale sun-bleached ivory and cream desert sand, very fine powdery grains, subtle wind-smoothed deposits with a few faint delicate erosion traces. Material is clearly much lighter and smoother than golden rippled dune sand or grey earth. Contemporary photorealistic game detail. A 6 by 6 metre surface patch. Neutral diffuse shadow-free lighting, no vignette. Seamlessly repeats on all four edges. No rocks, vegetation, roads, sky, perspective scene, lettering, border, watermark or preview sphere."
+  },
+  {
+    "key": "rust-clay",
+    "prompt": "Use case: photorealistic-natural. Asset type: seamless game terrain albedo. Square full-frame orthographic overhead scan of dry iron-rich desert clay, rich muted terracotta, burnt sienna and rusty red-brown, irregular small desiccation cracks and fine dusty grit. Rougher and darker than soft sand, contemporary realistic material quality, a 6 by 6 metre patch. Flat neutral diffuse lighting, no directional shadows, no vignette. Seamless tile on every edge. Only the material surface, no grass, large objects, sky, landscape perspective, labels, border, watermark or sphere."
+  },
+  {
+    "key": "desert-gravel",
+    "prompt": "Use case: photorealistic-natural. Asset type: seamless game terrain albedo tile. Full square image is an orthographic overhead scan of a coarse arid desert plateau surface: compacted warm taupe and tan sand mixed with numerous angular pale limestone chips, weathered small dark pebbles and dusty gravel. Noticeably coarse texture, distinct from soft dune sand. Tiny particles up to 8 cm, a 6 by 6 metre patch. Modern photorealistic game quality, flat diffuse shadow-free lighting, seamless all edges. No plants, objects larger than small gravel, road markings, sky, landscape, vignette, labels, border, watermark or sphere."
+  },
+  {
+    "key": "desert-sky",
+    "prompt": "Use case: photorealistic-natural. Asset type: 360-degree equirectangular HDR-style sky background panorama for a 3D desert game, image aspect ratio 2:1. Atmospheric immense desert sky after a long era of war: warm dusty amber haze at the horizon, pale desaturated blue-grey upper atmosphere, beautiful layered high clouds and sweeping thin windblown dust, soft bright sunlight diffused through haze toward one side. Cinematic epic science-fiction desert mood, realistic light, not an orange monochrome filter. Horizon is flat and low, no ground terrain, mountains, buildings, trees, objects, sun drawn as a huge fantasy disk, extra planets, text or border. Full image only sky and atmospheric haze. Left and right edges should join naturally for a panoramic sky dome."
+  },
+  {
+    "key": "weathered-concrete",
+    "prompt": "Use case: photorealistic-natural. Asset type: seamless tileable albedo game material for abandoned post-nuclear industrial hardstand. Entire square image is an orthographic overhead scan of aged pale warm-grey concrete, larger irregular cracked concrete slabs with worn seams, weathered porous surface, sparse iron-rust stains and darker soot pockets in cracks, chipped edges and a little sandy ash. Material is clearly much lighter than dark soil or asphalt. Approximately 6 by 6 metres. Contemporary realistic game material microdetail, flat diffuse neutral illumination, no directional cast shadows. Tileable all four edges. No buildings, vehicles, vegetation, scene perspective, labels, yellow hazard signs, logos, borders or watermarks. NOT a sphere or landscape; full frame usable concrete texture."
+  },
+  {
+    "key": "transition-sand",
+    "prompt": "Use case: photorealistic-natural. Asset type: seamless albedo texture tile for a modern desert strategy game. Full frame square orthographic scan of softly compacted desert dust and fine sand in a calm desaturated warm taupe and light beige palette. Gently wind-smoothed fine grains, a few tiny pale mineral flecks. A natural intermediate material between golden dune sand and sandstone, pleasant low contrast, no vivid yellow or orange. Six by six metre patch. Flat neutral diffuse lighting with no baked shadows or vignette; tileable all edges. No objects, plants, text, border, sky or scene perspective."
+  },
+  {
+    "key": "dusty-sandstone",
+    "prompt": "Use case: photorealistic-natural. Asset type: seamless albedo material for mesa cliffs. Full square straight-on orthographic scan of weathered warm beige sandstone with fine subtle horizontal sedimentary strata, rounded wind-eroded texture, soft dusty crevices filled with tan sand. Calm pale ochre and grey-beige natural palette, realistic fine rock grain, medium-low contrast and no black dramatic fissures. A six by six metre wall patch. Flat neutral diffuse lighting with no directional shadows or vignette. Seamless on all four edges. Only rock material, no landscape, objects, lettering, frame or preview sphere."
+  },
+  {
+    "key": "sandy-talus",
+    "prompt": "Use case: photorealistic-natural. Asset type: seamless game terrain albedo tile. Full frame square orthographic overhead scan of sandy talus at the foot of a desert mesa, fine muted beige sand interspersed with softly dust-coated angular sandstone fragments 5 to 25 centimetres. Surface is half smooth sand, half sparse eroded chips, visually intermediate between dune sand and rocky cliff. Restrained warm beige, muted brown, pale limestone tones, pleasant low contrast, contemporary realistic material detail. Six by six metre area, shadow-free diffuse neutral lighting, seamless edges. No large boulders, vegetation, objects, text, border, vignette or landscape."
+  },
+  {
+    "key": "weathered-limestone",
+    "prompt": "Use case: photorealistic-natural. Asset type: seamless albedo texture for flat desert plateau tops. Square full-frame overhead orthographic scan of flat weathered sandy limestone bedrock, broad smooth rock surface with thin irregular erosion fissures, fine wind-polished grains, faint sand deposits. Pale creamy grey-beige and soft buff tones, NOT pure white, natural muted low contrast. A six by six metre patch, realistic modern game quality. Flat neutral diffuse illumination, no directional shadows or vignette. All four edges tile seamlessly. No objects, plants, sky, text, border, sphere or landscape perspective."
+  }
+]

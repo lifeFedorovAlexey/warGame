@@ -1,0 +1,140 @@
+[
+  {
+    "id": "C01",
+    "lod": 0,
+    "triangles": 7912,
+    "vertices": 9124,
+    "primitives": 16,
+    "materials": 5,
+    "removedDegenerate": 0,
+    "inputTriangles": 7912,
+    "bytes": 356652,
+    "boundsMm": {
+      "min": [
+        -1077,
+        -2410,
+        0
+      ],
+      "max": [
+        1077,
+        2394,
+        1492
+      ]
+    }
+  },
+  {
+    "id": "B01",
+    "lod": 0,
+    "triangles": 12334,
+    "vertices": 15685,
+    "primitives": 11,
+    "materials": 11,
+    "removedDegenerate": 0,
+    "inputTriangles": 12334,
+    "bytes": 590364,
+    "boundsMm": {
+      "min": [
+        -1161,
+        -2125,
+        0
+      ],
+      "max": [
+        1161,
+        2189,
+        1650
+      ]
+    }
+  },
+  {
+    "id": "C01",
+    "lod": 1,
+    "triangles": 4568,
+    "vertices": 5614,
+    "primitives": 16,
+    "materials": 5,
+    "removedDegenerate": 0,
+    "inputTriangles": 4568,
+    "bytes": 224232,
+    "boundsMm": {
+      "min": [
+        -1077,
+        -2410,
+        0
+      ],
+      "max": [
+        1077,
+        2394,
+        1484
+      ]
+    }
+  },
+  {
+    "id": "B01",
+    "lod": 1,
+    "triangles": 5936,
+    "vertices": 7250,
+    "primitives": 11,
+    "materials": 11,
+    "removedDegenerate": 0,
+    "inputTriangles": 5936,
+    "bytes": 282016,
+    "boundsMm": {
+      "min": [
+        -1161,
+        -2125,
+        0
+      ],
+      "max": [
+        1161,
+        2191,
+        1650
+      ]
+    }
+  },
+  {
+    "id": "C01",
+    "lod": 2,
+    "triangles": 2792,
+    "vertices": 3504,
+    "primitives": 16,
+    "materials": 5,
+    "removedDegenerate": 0,
+    "inputTriangles": 2792,
+    "bytes": 146004,
+    "boundsMm": {
+      "min": [
+        -1063,
+        -2410,
+        0
+      ],
+      "max": [
+        1063,
+        2394,
+        1492
+      ]
+    }
+  },
+  {
+    "id": "B01",
+    "lod": 2,
+    "triangles": 2598,
+    "vertices": 2859,
+    "primitives": 9,
+    "materials": 9,
+    "removedDegenerate": 0,
+    "inputTriangles": 2598,
+    "bytes": 119032,
+    "boundsMm": {
+      "min": [
+        -1156,
+        -2122,
+        0
+      ],
+      "max": [
+        1156,
+        2189,
+        1650
+      ]
+    }
+  }
+]

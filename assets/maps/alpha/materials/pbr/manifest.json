@@ -1,0 +1,103 @@
+{
+  "license": "CC0-1.0",
+  "licenseUrl": "https://polyhaven.com/license",
+  "resolution": 1024,
+  "assets": [
+    {
+      "id": "gravelly_sand",
+      "source": "https://polyhaven.com/a/gravelly_sand",
+      "files": {
+        "albedo": {
+          "path": "gravelly_sand/albedo.jpg",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/gravelly_sand/gravelly_sand_diff_1k.jpg",
+          "sha256": "bc1624594ce807f04eaa023f6f9df93ffefd20904570cd46ca302b954ef80eec",
+          "bytes": 1062525
+        },
+        "normal": {
+          "path": "gravelly_sand/normal.jpg",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/gravelly_sand/gravelly_sand_nor_gl_1k.jpg",
+          "sha256": "7ccb08525d46520a6d00262f4f73483b3569cc6cbc2908da069f033290d1c2f8",
+          "bytes": 1387739
+        },
+        "orm": {
+          "path": "gravelly_sand/orm.jpg",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/gravelly_sand/gravelly_sand_arm_1k.jpg",
+          "sha256": "24ae423af3a5ca6ba78fc02fc5257d0270888fb1e60996c761ee110994c6ed6b",
+          "bytes": 826170
+        }
+      }
+    },
+    {
+      "id": "sandy_gravel",
+      "source": "https://polyhaven.com/a/sandy_gravel",
+      "files": {
+        "albedo": {
+          "path": "sandy_gravel/albedo.jpg",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/sandy_gravel/sandy_gravel_diff_1k.jpg",
+          "sha256": "38829e669dc246e86b7ce94c4141485709988450b13f82cfc4bc6067dd69ed48",
+          "bytes": 795227
+        },
+        "normal": {
+          "path": "sandy_gravel/normal.jpg",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/sandy_gravel/sandy_gravel_nor_gl_1k.jpg",
+          "sha256": "f2a4c48f31cd5ad5e2b0488e89c94d284c5a2acd4367bec49a5f48f832b7e3da",
+          "bytes": 1159620
+        },
+        "orm": {
+          "path": "sandy_gravel/orm.jpg",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/sandy_gravel/sandy_gravel_arm_1k.jpg",
+          "sha256": "ae13c0de981ab78abc39e3bec6147a06448e0865f4162cd57d54ada411df0de7",
+          "bytes": 765219
+        }
+      }
+    },
+    {
+      "id": "asphalt_03",
+      "source": "https://polyhaven.com/a/asphalt_03",
+      "files": {
+        "albedo": {
+          "path": "asphalt_03/albedo.jpg",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/asphalt_03/asphalt_03_diff_1k.jpg",
+          "sha256": "95ad02e2631c41cf9fdd6a37596cf75adb4fb8a8b6880567cc78ed1c41dc5681",
+          "bytes": 788840
+        },
+        "normal": {
+          "path": "asphalt_03/normal.jpg",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/asphalt_03/asphalt_03_nor_gl_1k.jpg",
+          "sha256": "978de8349ce2e9989325099a6fd1f5ea6b2826528e1264606a5c51296b1e2888",
+          "bytes": 974676
+        },
+        "orm": {
+          "path": "asphalt_03/orm.jpg",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/asphalt_03/asphalt_03_arm_1k.jpg",
+          "sha256": "36e898a43fd828e71f5bc08fa0f86dc2c7338194c87eb6a2b30d7216318b9f31",
+          "bytes": 1053867
+        }
+      }
+    },
+    {
+      "id": "quarry_wall_02",
+      "source": "https://polyhaven.com/a/quarry_wall_02",
+      "files": {
+        "albedo": {
+          "path": "quarry_wall_02/albedo.jpg",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/quarry_wall_02/quarry_wall_02_diff_1k.jpg",
+          "sha256": "7dcaf9d3cb2246106c74e7388a8e4c21b9a44927634f1ad1708ba139af3fa906",
+          "bytes": 917402
+        },
+        "normal": {
+          "path": "quarry_wall_02/normal.jpg",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/quarry_wall_02/quarry_wall_02_nor_gl_1k.jpg",
+          "sha256": "3bb933ac8ee37b8ace4256f43332c517113fb648edf470a7d47ea340d2241cba",
+          "bytes": 1165166
+        },
+        "orm": {
+          "path": "quarry_wall_02/orm.jpg",
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/quarry_wall_02/quarry_wall_02_arm_1k.jpg",
+          "sha256": "e1a44fade696b99977002a97ad8f0a2c753db89a0055c4cc5a2c6086e29130f2",
+          "bytes": 569916
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1200" viewBox="0 0 1800 1200">
+<defs><marker id="arrow" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto-start-reverse"><path d="M7 0 L0 3.5 L7 7" fill="none" stroke="#263c48"/></marker></defs>
+<rect width="1800" height="1200" fill="#f2f0e9"/>
+<style>text{font-family:Segoe UI,Arial,sans-serif;fill:#263c48} .title{font-size:38px;font-weight:700}.small{font-size:20px}.label{font-size:24px}.dim{stroke:#263c48;stroke-width:1.5;fill:none;marker-start:url(#arrow);marker-end:url(#arrow)}.guide{stroke:#8f9ba0;stroke-dasharray:6 6;fill:none}</style>
+<text x="60" y="65" class="title">B08 Тень · S</text>
+<text x="60" y="105" class="small">Проектные размеры в мм · габаритные схемы, не ортографические виды готовой модели</text>
+<text x="80" y="160" class="label">Вид сверху · X Y</text>
+<rect x="345.23" y="207.50" width="129.55" height="285.00" fill="#b0b99b" fill-opacity=".55" stroke="#4f6143" stroke-width="2"/>
+<path d="M398.00 350.00h24 M410.00 338.00v24" stroke="#bc4038" stroke-width="2"/>
+<text x="424.00" y="368.00" class="small">O</text>
+<path d="M345.23 530.50H474.77" class="dim"/>
+<text x="410.00" y="559.50" text-anchor="middle" class="small">2000 мм</text>
+<path d="M307.23 207.50V492.50" class="dim"/>
+<text x="293.23" y="350.00" text-anchor="middle" transform="rotate(-90 293.23 350.00)" class="small">4400 мм</text>
+<circle cx="410.00" cy="350.00" r="6" fill="#d38922" stroke="#6d470f"/>
+<text x="422.00" y="338.00" class="small">mount</text>
+<circle cx="410.00" cy="375.91" r="6" fill="#d38922" stroke="#6d470f"/>
+<text x="422.00" y="363.91" class="small">upper_mount</text>
+<rect x="363.90" y="252.08" width="8" height="8" fill="#d38922"/>
+<rect x="448.10" y="252.08" width="8" height="8" fill="#d38922"/>
+<rect x="363.90" y="439.92" width="8" height="8" fill="#d38922"/>
+<rect x="448.10" y="439.92" width="8" height="8" fill="#d38922"/>
+<circle cx="410.00" cy="375.91" r="29.15" fill="none" stroke="#d38922" stroke-width="3"/>
+<text x="940" y="160" class="label">Вид сбоку · Y Z</text>
+<rect x="1127.50" y="325.71" width="285.00" height="48.58" fill="#b0b99b" fill-opacity=".55" stroke="#4f6143" stroke-width="2"/>
+<path d="M1258.00 374.29h24 M1270.00 362.29v24" stroke="#bc4038" stroke-width="2"/>
+<text x="1284.00" y="392.29" class="small">O</text>
+<path d="M1127.50 412.29H1412.50" class="dim"/>
+<text x="1270.00" y="441.29" text-anchor="middle" class="small">4400 мм</text>
+<path d="M1089.50 325.71V374.29" class="dim"/>
+<text x="1075.50" y="350.00" text-anchor="middle" transform="rotate(-90 1075.50 350.00)" class="small">750 мм</text>
+<circle cx="1270.00" cy="374.29" r="6" fill="#d38922" stroke="#6d470f"/>
+<text x="1282.00" y="362.29" class="small">mount</text>
+<circle cx="1244.09" cy="325.71" r="6" fill="#d38922" stroke="#6d470f"/>
+<text x="1256.09" y="313.71" class="small">upper_mount</text>
+<rect x="1359.92" y="370.29" width="8" height="8" fill="#d38922"/>
+<rect x="1359.92" y="370.29" width="8" height="8" fill="#d38922"/>
+<rect x="1172.08" y="370.29" width="8" height="8" fill="#d38922"/>
+<rect x="1172.08" y="370.29" width="8" height="8" fill="#d38922"/>
+<text x="80" y="660" class="label">Вид спереди · X Z</text>
+<rect x="345.23" y="825.71" width="129.55" height="48.58" fill="#b0b99b" fill-opacity=".55" stroke="#4f6143" stroke-width="2"/>
+<path d="M398.00 874.29h24 M410.00 862.29v24" stroke="#bc4038" stroke-width="2"/>
+<text x="424.00" y="892.29" class="small">O</text>
+<path d="M345.23 912.29H474.77" class="dim"/>
+<text x="410.00" y="941.29" text-anchor="middle" class="small">2000 мм</text>
+<path d="M307.23 825.71V874.29" class="dim"/>
+<text x="293.23" y="850.00" text-anchor="middle" transform="rotate(-90 293.23 850.00)" class="small">750 мм</text>
+<circle cx="410.00" cy="874.29" r="6" fill="#d38922" stroke="#6d470f"/>
+<text x="422.00" y="862.29" class="small">mount</text>
+<circle cx="410.00" cy="825.71" r="6" fill="#d38922" stroke="#6d470f"/>
+<text x="422.00" y="813.71" class="small">upper_mount</text>
+<rect x="363.90" y="870.29" width="8" height="8" fill="#d38922"/>
+<rect x="448.10" y="870.29" width="8" height="8" fill="#d38922"/>
+<rect x="363.90" y="870.29" width="8" height="8" fill="#d38922"/>
+<rect x="448.10" y="870.29" width="8" height="8" fill="#d38922"/>
+<text x="940" y="690" class="small">Длина Y: 4400 мм</text>
+<text x="940" y="721" class="small">Ширина X: 2000 мм</text>
+<text x="940" y="752" class="small">Высота Z: 750 мм</text>
+<text x="940" y="783" class="small">Min: (-1000, -2200, 0)</text>
+<text x="940" y="814" class="small">Max: (1000, 2200, 750)</text>
+<text x="940" y="845" class="small">Начало координат: красный крест O</text>
+<text x="940" y="876" class="small">Оранжевый: точки крепления</text>
+<text x="940" y="907" class="small">+Y — вперёд, +X — вправо, +Z — вверх</text>
+<text x="940" y="938" class="small">Габарит показан в исходном положении.</text>
+<text x="940" y="969" class="small">mount: (0, 0, 0)</text>
+<text x="940" y="1000" class="small">upper_mount: (0, -400, 750)</text>
+<text x="60" y="1160" class="small">Размеры, оси и ограничения движений: module.json. Импортируемый размерный шаблон: blockout.glb.</text>
+</svg>
