@@ -74,15 +74,18 @@ for(const sign of [-1,1])box(chassis,[.008,4.02,.004],[sign*.941,0,1.049],dark);
 box(chassis,[1.88,.11,.12],[0,2.01,.55],dark);box(chassis,[1.88,.11,.12],[0,-2.01,.55],dark);
 // Heavy guards are part of C01, structurally carried by the chassis rails.
 function guardTube(points,r=.055){const curve=new T.CatmullRomCurve3(points.map(p=>new T.Vector3(...p)));return mesh(chassis,new T.TubeGeometry(curve,[20,12,6][lod],r,[8,6,4][lod],false),dark);}
+let rearGuardTop=0;
 for(const end of [-1,1]){
- const y=end*2.32;const top=end===1?1.38:1.18;
+ const firstGuardPart=chassis.children.length;
+ const y=end*2.32;const top=end===1?1.38:.90,wing=end===1?1.10:.88;
  box(chassis,[2.02,.22,.17],[0,end*2.25,.56],dark);
  for(const x of [-.46,.46]){box(chassis,[.13,.62,.12],[x,end*1.99,.65],steel);rod(chassis,[x,end*1.72,.83],[x,end*2.32,.94],.055,dark);}
  guardTube([[-.60,y,.60],[-.60,y,top-.12],[-.49,y,top],[.49,y,top],[.60,y,top-.12],[.60,y,.60]],.060);
- for(const sign of [-1,1])guardTube([[sign*.60,y,.70],[sign*.98,y,1.03],[sign*1.02,end*2.19,1.10],[sign*1.02,end*1.83,1.10]],.052);
- rod(chassis,[-.60,y,1.02],[.60,y,1.02],.052,dark);rod(chassis,[-.60,y,.76],[.60,y,.76],.049,dark);
+ for(const sign of [-1,1])guardTube([[sign*.60,y,.70],[sign*.98,y,wing-.07],[sign*1.02,end*2.19,wing],[sign*1.02,end*1.83,wing]],.052);
+ const upperCross=end===1?1.02:.84,lowerCross=end===1?.76:.68;rod(chassis,[-.60,y,upperCross],[.60,y,upperCross],.052,dark);rod(chassis,[-.60,y,lowerCross],[.60,y,lowerCross],.049,dark);
  const shield=box(chassis,[1.32,.055,.40],[0,end*2.12,.78],steel);shield.rotation.x=end*.12;
  for(const x of [-.52,.52])for(const z of [.65,.90])cylinder(chassis,.026,.07,[x,end*2.16,z],dark,'Y');
+ if(end<0){chassis.updateWorldMatrix(true,true);const bounds=new T.Box3();for(const part of chassis.children.slice(firstGuardPart))bounds.expandByObject(part);rearGuardTop=bounds.max.z;}
 }
 box(chassis,[1.44,.30,.085],[0,-2.26,.58],dark);
 group(chassis,[0,0,1.05],'body_mount');for(const [name,x,y] of [['FL',-.65,1.45],['FR',.65,1.45],['RL',-.65,-1.45],['RR',.65,-1.45]])group(chassis,[x,y,1.05],'pad_'+name);
@@ -90,7 +93,8 @@ const body=group(chassis,[0,0,1.05],'B01_BUKHANKA');
 group(body,[0,0,0],'mount');group(body,[0,-.65,1.65],'upper_mount');for(const [name,x,y] of [['FL',-.65,1.45],['FR',.65,1.45],['RL',-.65,-1.45],['RR',.65,-1.45]])group(body,[x,y,0],'pad_'+name);for(const [name,x,y,z] of [['headlamp_L',-.62,2.18,.56],['headlamp_R',.62,2.18,.56],['rear_marker_L',-.77,-2.11,.35],['rear_marker_R',.77,-2.11,.35]])group(body,[x,y,z],name);
 const indicator=new T.MeshStandardMaterial({color:'#d48e29',emissive:'#ff9c2a',emissiveIntensity:.25,metalness:.15,roughness:.35});
 buildBukhanka(T,body,{olive,edge,dark,rubber,steel,glass,lampMat,redMat,indicator},{box,mesh,rod,cylinder,line,rounded,lod});
-cylinder(body,.45,.08,[0,-.65,1.61],dark);cylinder(body,.47,.025,[0,-.65,1.6375],steel);
+cylinder(body,.45,.176,[0,-.65,1.558],dark,'Z','upper_mount_solid_collar');cylinder(body,.47,.025,[0,-.65,1.6375],steel);
+state.modelClearances={rearDoorGuardMm:(body.position.z+body.userData.rearDoorLowerZ-rearGuardTop)*1000,glassOffsetMm:body.userData.glassOffsetMm,sealOffsetMm:body.userData.sealOffsetMm,roofSupportBottom:1.47,roofSupportTop:1.646};
 const upper=group(body,[0,-.65,1.65],'U01_KORD');cylinder(upper,.45,.08,[0,0,.04],olive);
 const yaw=group(upper,[0,0,.08],'turret_yaw');yaw.rotation.z=-Math.PI/2;cylinder(yaw,.27,.12,[0,0,.08],steel);box(yaw,[.28,.42,.48],[0,0,.38],edge);box(yaw,[.30,.5,.35],[.34,-.10,.43],olive);box(yaw,[.13,.22,.28],[-.25,-.10,.6],steel);
 // Bearing cheeks, optical spine and ammunition bracket visibly carry every upper component.
@@ -196,5 +200,7 @@ window.demoActions.driveSegments=()=>{
 window.demoActions.roadView=(index=0)=>{navigation.setCamera('overview');const road=terrain.roadPaths[index%terrain.roadPaths.length],point=road.points[Math.floor(road.points.length*.5)],h=terrain.heightAt(point.x,point.y);controls.target.set(point.x,point.y,h+1);camera.position.set(point.x+58,point.y-83,h+58);controls.update();};
 window.demoActions.follow=()=>{state.followFront=false;navigation.setCamera('follow');};
 window.demoActions.followFront=()=>{state.followFront=true;navigation.setCamera('follow');};
+window.demoActions.inspectTerrain=(gridX,gridY,offset=[60,-90,65])=>{navigation.setCamera('overview');const p=terrain.field.gridToWorld([gridX,gridY]),height=terrain.heightAt(p.x,p.y);controls.target.set(p.x,p.y,height+1);camera.position.set(p.x+offset[0],p.y+offset[1],height+offset[2]);controls.update();};
+window.demoActions.setQuality=(quality='auto')=>{state.forceQuality=quality==='full';state.lowCost=quality==='low';renderer.shadowMap.enabled=!state.lowCost;renderer.setPixelRatio(state.lowCost?.8:Math.min(devicePixelRatio,1.15));for(const material of [olive,edge]){material.bumpMap=state.lowCost?null:paintBump;material.needsUpdate=true;}resize();};
 const reviewView=new URLSearchParams(location.search).get('view');
 if(reviewView==='front')window.demoActions.followFront();else if(reviewView==='follow')window.demoActions.follow();

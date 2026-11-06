@@ -13,12 +13,12 @@ const fs=require('node:fs'),path=require('node:path');
   if(contacts.maxContactErrorMm>3||contacts.bodyErrorMm>.1||contacts.upperErrorMm>.1)throw new Error('Route contact or assembly failed: '+JSON.stringify(contacts));
   fs.mkdirSync(path.resolve('demo/previews'),{recursive:true});await page.screenshot({path:path.resolve('demo/previews/alpha-overview.png')});
   await page.evaluate(()=>window.demoActions.roadView(2));await page.waitForTimeout(450);await page.screenshot({path:path.resolve('demo/previews/road-review.png')});
-  await page.evaluate(()=>{window.demoState.forceQuality=true;window.demoState.lowCost=false;});await page.getByRole('button',{name:'За машиной',exact:true}).click();
+  await page.evaluate(()=>window.demoActions.setQuality('full'));await page.getByRole('button',{name:'За машиной',exact:true}).click();
   await page.selectOption('#checkpoint-select','5');await page.waitForTimeout(1800);
   if(await page.evaluate(()=>window.demoState.groundHeight)<45)throw new Error('Upper plateau jump failed');
   await page.screenshot({path:path.resolve('demo/previews/alpha-follow.png')});
   await page.evaluate(()=>{window.demoActions.followFront();window.demoActions.setCheckpoint(0);});await page.waitForTimeout(1200);await page.screenshot({path:path.resolve('demo/previews/environment-review.png')});
-  await page.evaluate(()=>{window.demoState.forceQuality=false;});
+  await page.evaluate(()=>window.demoActions.setQuality('auto'));
   await page.locator('#terrain').click();await page.locator('#terrain').click();
   for(const [distance,lod] of [[110,1],[200,2],[45,0]]){await page.evaluate(d=>window.demoActions.setDistance(d),distance);await page.waitForFunction(n=>window.demoState.renderLod===n,lod);}
   await page.getByRole('button',{name:'Вся карта',exact:true}).click();await page.setViewportSize({width:390,height:844});await page.waitForTimeout(400);await page.screenshot({path:path.resolve('demo/previews/alpha-mobile.png')});

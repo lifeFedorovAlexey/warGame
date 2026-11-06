@@ -10,6 +10,7 @@ const path = require('node:path');
  await page.evaluate(()=>{window.demoActions.setCheckpoint(0);window.demoActions.follow();});await page.waitForTimeout(6500);
  const state=await page.evaluate(()=>({...window.demoState}));
  const audit=await page.evaluate(()=>window.demoActions.audit());
+ if(state.modelClearances.rearDoorGuardMm<70||state.modelClearances.glassOffsetMm>6.1)throw new Error('Body surface seating or rear door clearance failed: '+JSON.stringify(state.modelClearances));
  if(audit.source!=='game-glb'||audit.bodyErrorMm>.1||audit.upperErrorMm>.1||audit.wheels!==4)throw new Error('Game asset assembly failed: '+JSON.stringify(audit));
  if(!state.shots||!state.angle)throw new Error('Driving or firing is inactive: '+JSON.stringify(state));
  await page.screenshot({path:path.resolve('demo/previews/arena.png')});

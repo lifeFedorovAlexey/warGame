@@ -8,7 +8,7 @@
     "materials": 5,
     "removedDegenerate": 0,
     "inputTriangles": 7912,
-    "bytes": 356652,
+    "bytes": 356708,
     "boundsMm": {
       "min": [
         -1077,
@@ -25,17 +25,17 @@
   {
     "id": "B01",
     "lod": 0,
-    "triangles": 12334,
-    "vertices": 15685,
+    "triangles": 13494,
+    "vertices": 17184,
     "primitives": 11,
     "materials": 11,
     "removedDegenerate": 0,
-    "inputTriangles": 12334,
-    "bytes": 590364,
+    "inputTriangles": 13494,
+    "bytes": 645356,
     "boundsMm": {
       "min": [
         -1161,
-        -2125,
+        -2070,
         0
       ],
       "max": [
@@ -54,7 +54,7 @@
     "materials": 5,
     "removedDegenerate": 0,
     "inputTriangles": 4568,
-    "bytes": 224232,
+    "bytes": 224288,
     "boundsMm": {
       "min": [
         -1077,
@@ -71,17 +71,17 @@
   {
     "id": "B01",
     "lod": 1,
-    "triangles": 5936,
-    "vertices": 7250,
+    "triangles": 6856,
+    "vertices": 8710,
     "primitives": 11,
     "materials": 11,
     "removedDegenerate": 0,
-    "inputTriangles": 5936,
-    "bytes": 282016,
+    "inputTriangles": 6856,
+    "bytes": 334324,
     "boundsMm": {
       "min": [
         -1161,
-        -2125,
+        -2070,
         0
       ],
       "max": [
@@ -100,15 +100,15 @@
     "materials": 5,
     "removedDegenerate": 0,
     "inputTriangles": 2792,
-    "bytes": 146004,
+    "bytes": 146060,
     "boundsMm": {
       "min": [
-        -1063,
+        -1065,
         -2410,
         0
       ],
       "max": [
-        1063,
+        1065,
         2394,
         1492
       ]
@@ -117,17 +117,17 @@
   {
     "id": "B01",
     "lod": 2,
-    "triangles": 2598,
-    "vertices": 2859,
+    "triangles": 3422,
+    "vertices": 4219,
     "primitives": 9,
     "materials": 9,
     "removedDegenerate": 0,
-    "inputTriangles": 2598,
-    "bytes": 119032,
+    "inputTriangles": 3422,
+    "bytes": 167584,
     "boundsMm": {
       "min": [
         -1156,
-        -2122,
+        -2070,
         0
       ],
       "max": [
