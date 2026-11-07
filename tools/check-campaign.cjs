@@ -37,6 +37,15 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   assert.equal(await page.evaluate(()=>window.campaign.storyAudio.playing),false);
   await page.locator('#home').click();
   await page.locator('#pause').click();
+  const idleShadows=await page.evaluate(()=>{
+   const {mission,world,advance}=window.campaign;
+   const render=()=>world.update(mission,new Set(),1/60);
+   advance(.25);render();
+   const before=world.statistics.shadowUpdates;
+   for(let i=0;i<4;i++){advance(.125);render();}
+   return world.statistics.shadowUpdates-before;
+  });
+  assert.equal(idleShadows,0,'Simulation ticks with identical casters reuse the shadow map');
   await page.getByRole('button',{name:'Строитель 2',exact:true}).click({modifiers:['Shift']});
   await page.locator('#build-toggle').click();
   try{await page.waitForFunction(()=>[...document.querySelectorAll('#build-cards img')].length===5&&[...document.querySelectorAll('#build-cards img')].every(img=>img.naturalWidth===192),{},{timeout:10000});}
@@ -150,7 +159,7 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   await page.locator('#move-order').click();
   await page.mouse.click(destination.x,destination.y);
   assert.equal(await page.evaluate(()=>{const c=window.campaign;return c.mission.entity(c.selected[0])?.task?.type;}),'move','Click in the scene must issue a move order');
-  const workStart=await page.evaluate(()=>{const c=window.campaign,u=c.mission.entity(c.selected[0]);return{x:u.x,y:u.y};});
+  const workStart=await page.evaluate(()=>{const c=window.campaign,u=c.mission.entity(c.selected[0]);return{x:u.x,y:u.y,shadowUpdates:c.world.statistics.shadowUpdates};});
   for(let i=0;i<52;i++){
    const arrived=await page.evaluate(()=>{
     const c=window.campaign,u=c.mission.entity(c.selected[0]);
@@ -163,7 +172,7 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   await page.waitForFunction(()=>window.campaign.world.statistics.tireMarks>0);
   const drive=await page.evaluate(p=>{
    const c=window.campaign,u=c.mission.entity(c.selected[0]);
-   return {distance:Math.hypot(u.x-p.x,u.y-p.y),unit:u,nearby:c.mission.state.units.filter(other=>other!==u&&Math.hypot(u.x-other.x,u.y-other.y)<55).map(({id,x,y,heading})=>({id,x,y,heading}))};
+   return {distance:Math.hypot(u.x-p.x,u.y-p.y),shadowUpdates:c.world.statistics.shadowUpdates-p.shadowUpdates,unit:u,nearby:c.mission.state.units.filter(other=>other!==u&&Math.hypot(u.x-other.x,u.y-other.y)<55).map(({id,x,y,heading})=>({id,x,y,heading}))};
   },workStart);
   const driven=drive.distance;
   if(driven<=12||drive.unit.task){
@@ -171,6 +180,7 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
    fs.writeFileSync('campaign/reports/field-move-failure.json',await page.evaluate(()=>window.campaign.mission.save()));
   }
   assert(driven>12&&!drive.unit.task,JSON.stringify(drive));
+  assert(drive.shadowUpdates>0,'Moving vehicles still refresh their shadows');
   await page.screenshot({path:'campaign/previews/field-headlights-tracks.png'});
   const models=await page.evaluate(async ()=>{
    const c=window.campaign,m=c.mission;
