@@ -969,6 +969,8 @@ export class Mission{
    plan.blocked+=dt;
    if(plan.blocked<1)return false;
    if(plan.passageExit&&egress){
+    // Resume from the current pose using only the untraversed part of the arc.
+    egress.legs=plan.legs.map(leg=>({...leg}));
     egress.phase='waiting';egress.retryAt=this.state.time+.8;
     delete unit.detour;
     return false;
