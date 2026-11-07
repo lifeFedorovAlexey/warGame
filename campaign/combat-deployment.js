@@ -1,5 +1,5 @@
 import {automaticCombatTarget,combatPolicy} from './combat-policy.js';
-import {assignFormation} from './formation-assignment.js';
+import {assignFormation,assignFormationSteps} from './formation-assignment.js';
 import {checkManeuver} from './vehicle-motion.js';
 import {navigationDecision} from './navigation-state.js';
 
@@ -20,14 +20,18 @@ function firingSlots(spec,scale,angle,anchor){
   }
   return slots;
 }
-function reserveSlot(mission,unit,deployment){
+function* reserveSlot(mission,unit,deployment){
   const slots=firingSlots(mission.unitSpec(unit),mission.config.worldScale,deployment.angle,deployment.anchor);
   const reserved=mission.state.units.filter(other=>other!==unit&&other.hp>0&&other.combatDeployment?.group===deployment.group)
     .map(other=>other.combatDeployment.goal??other.combatDeployment.slot).filter(Boolean);
   const target=mission.entity(deployment.targetId);
-  const eligible=slots.map((slot,index)=>({slot,index,cost:slotCost(unit,slot,mission.config.worldScale)}))
-    .filter(({slot})=>target&&validPosition(mission,unit,target,slot,reserved))
-    .sort((a,b)=>a.cost-b.cost||a.index-b.index);
+  const eligible=[];
+  for(let index=0;index<slots.length;index++){
+    if(index%8===0)yield;
+    const slot=slots[index];if(target&&validPosition(mission,unit,target,slot,reserved))eligible.push({slot,index,cost:slotCost(unit,slot,mission.config.worldScale)});
+  }
+  if(unit.combatDeployment!==deployment||unit.pendingOrder)return false;
+  eligible.sort((a,b)=>a.cost-b.cost||a.index-b.index);
   const rejected=deployment.rejectedSlots??=[];
   const available=eligible.filter(({index})=>!rejected.includes(index));
   // Failed approaches remain rejected until the actual obstacles or reserved
@@ -58,7 +62,7 @@ function slotCost(unit,point,scale){
 
 // One contact turns a marching group into reserved firing positions. The state
 // is serializable; searches yield through the existing simulation budget.
-function beginDeployment(mission,unit,target){
+function* beginDeployment(mission,unit,target){
   const members=mission.state.units.filter(other=>other.owner===unit.owner&&other.hp>0
     &&other.combatGroup===unit.combatGroup&&combatTask(other.task)&&!other.pendingOrder&&!other.combatRetreat&&!other.combatDeployment
     &&(other.task.type==='attack'||combatPolicy(other).response!=='ignore')
@@ -87,11 +91,16 @@ function beginDeployment(mission,unit,target){
   const moving=members.filter(member=>member.combatDeployment.status!=='arrived'),scale=mission.config.worldScale;
   const held=[...existing,...members].map(member=>member.combatDeployment.goal??member.combatDeployment.slot).filter(Boolean);
   const options=moving.map(member=>firingSlots(mission.unitSpec(member),scale,angle,target)),count=Math.max(0,...options.map(slots=>slots.length));
-  const costs=moving.map((member,row)=>Array.from({length:count+moving.length},(_,index)=>{
-    const point=options[row][index];
-    return point&&validPosition(mission,member,target,point,held)?slotCost(member,point,scale):1e8+index;
-  }));
-  for(const [row,index] of assignFormation(costs).entries())if(index<count&&costs[row][index]<1e8){
+  const deployments=moving.map(member=>member.combatDeployment),costs=[];
+  for(const [row,member] of moving.entries()){
+    const values=[];costs.push(values);
+    for(let index=0;index<count+moving.length;index++){
+      if(index%8===0)yield;
+      const point=options[row][index];values.push(point&&validPosition(mission,member,target,point,held)?slotCost(member,point,scale):1e8+index);
+    }
+  }
+  const assignments=yield* assignFormationSteps(costs);
+  for(const [row,index] of assignments.entries())if(index<count&&costs[row][index]<1e8&&moving[row].combatDeployment===deployments[row]&&!moving[row].pendingOrder){
     const member=moving[row],deployment=member.combatDeployment;
     deployment.index=index;deployment.slot=options[row][index];deployment.status='planning';
     member.task={type:'combat-position',...deployment.slot};
@@ -157,8 +166,9 @@ export function* updateCombatDeployment(mission,unit,spec,dt){
     unit.combatContactAt=mission.state.time+.25;
     const target=unit.task.type==='attack'?mission.entity(unit.task.targetId)
       :automaticCombatTarget(mission,unit,{...spec,range:spec.vision});
-    if(!target||!mission.visibleAt(target.x,target.y)||distance(unit,target)>spec.vision||!beginDeployment(mission,unit,target))return false;
+    if(!target||!mission.visibleAt(target.x,target.y)||distance(unit,target)>spec.vision||!(yield* beginDeployment(mission,unit,target)))return false;
     deployment=unit.combatDeployment;
+    if(!deployment||unit.pendingOrder)return false;
   }
   const target=mission.entity(deployment.targetId);
   if(!target||target.hp<=0||!mission.visibleAt(target.x,target.y)
@@ -198,7 +208,7 @@ export function* updateCombatDeployment(mission,unit,spec,dt){
     if(deployment.conditions!==conditions){deployment.conditions=conditions;deployment.rejectedSlots=[];delete deployment.exhausted;}
     navigationDecision(unit,'WAITING_RESERVATION','no-free-firing-position',null,'retry-on-position-change');
     if(deployment.exhausted)return true;
-    if(!reserveSlot(mission,unit,deployment)){deployment.exhausted=true;return true;}
+    if(!(yield* reserveSlot(mission,unit,deployment))){if(unit.combatDeployment===deployment&&!unit.pendingOrder)deployment.exhausted=true;return true;}
     deployment.retryAt=0;
   }
   if(deployment.status==='arrived'&&distance(unit,target)<=spec.range&&mission.lineOfSight(unit,target)){
