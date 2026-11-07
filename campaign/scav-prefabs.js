@@ -11,7 +11,7 @@ export function createScavPrefab(T, kind, site) {
   const stronghold = site === 'west-south';
   const mats = {
     rust: new T.MeshStandardMaterial({color:stronghold ? '#51443b' : depot ? '#685a4e' : '#795145', roughness:.87, metalness:.25}),
-    tin: new T.MeshStandardMaterial({color:waterTower ? '#8aaca9' : depot ? '#939c98' : stronghold ? '#77796a' : '#8b8476', roughness:.74, metalness:.46}),
+    tin: new T.MeshStandardMaterial({color:waterTower ? '#8aaca9' : site === 'nw-east' ? '#778985' : depot ? '#939c98' : stronghold ? '#77796a' : '#8b8476', roughness:.74, metalness:.46}),
     dark: new T.MeshStandardMaterial({color:stronghold ? '#282c29' : '#3a3630', roughness:.91, metalness:.24}),
     wood: new T.MeshStandardMaterial({color:stronghold ? '#716c58' : '#79634d', roughness:1}),
     tarp: new T.MeshStandardMaterial({color:stronghold ? '#5c6153' : '#796447', roughness:1}),
@@ -41,6 +41,15 @@ export function createScavPrefab(T, kind, site) {
     g.applyQuaternion(new T.Quaternion().setFromUnitVectors(new T.Vector3(0,0,1), d.normalize()));
     shape(g, mat, a.add(b).multiplyScalar(.5).toArray());
   }
+  function pipe(points, radius, material) {
+    for (let i=1;i<points.length;i++) {
+      const a=new T.Vector3(...points[i-1]),b=new T.Vector3(...points[i]),axis=b.clone().sub(a);
+      const geometry=new T.CylinderGeometry(radius,radius,axis.length(),8);
+      geometry.applyQuaternion(new T.Quaternion().setFromUnitVectors(new T.Vector3(0,1,0),axis.normalize()));
+      shape(geometry,material,a.lerp(b,.5).toArray());
+      if(i<points.length-1)shape(new T.SphereGeometry(radius,8,4),material,points[i]);
+    }
+  }
   function shed(x, y, width, depth, height, mat, loadingBay = false) {
     box([width, depth, height], [x,y,height/2], mat);
     const door = loadingBay ? x : x-width*.19;
@@ -59,6 +68,7 @@ export function createScavPrefab(T, kind, site) {
       beam([x,y,0], [x*.63,y*.63,9.15], .23, mats.rust);
       beam([x,y,1.25], [-x*.72,y*.73,7.9], .14, mats.dark);
       if (stronghold) box([.76,.76,.28], [x,y,-.08], mats.wood);
+      if (waterTower) box([.71,.71,.60], [x,y,-.19], mats.dark);
     }
     box([3.75,3.75,.24],[0,0,9.15],mats.wood);
     const yaw = new T.Group();
@@ -71,8 +81,9 @@ export function createScavPrefab(T, kind, site) {
       drum(1.59,2.14,[0,.39,10.53],mats.tin,12);
       for(const z of [9.62,11.38])drum(1.63,.12,[0,.39,z],mats.rust,12);
       drum(1.64,.54,[0,.39,11.9],mats.tin,12,.34);
-      drum(.105,8.95,[1.48,-.81,4.72],mats.dark,8);
-      beam([1.1,-.49,9.57],[1.48,-.81,9.21],.2,mats.dark);
+      pipe([[1.10,-.49,9.57],[1.48,-.81,9.57],[1.48,-.81,.40],[1.95,-.29,.40],[1.95,-.29,-.22]],.12,mats.dark);
+      box([.74,.72,.45],[1.95,-.29,-.13],mats.dark);
+      drum(.20,.095,[1.95,-.29,.135],mats.rust,8);
       for(const z of [2.4,5.5,8.2])box([.34,.15,.13],[1.48,-.81,z],mats.tin);
       for(const x of [-.44,.44])box([.38,.15,.61],[x,-1.56,10.62],mats.dark);
       drum(.80,.19,[0,0,12.19],mats.rust,12);
@@ -138,9 +149,42 @@ export function createScavPrefab(T, kind, site) {
       }
     }
   } else if (site === 'nw-east') {
-    shed(1.25,.8,6,4.4,2.65,mats.tin);
-    for (const x of [-4.8,-3.65]) drum(.5,1.6,[x,1.45,.8],mats.rust);
-    beam([-4.15,1.45,1.65],[.2,1.45,1.65],.19,mats.dark);
+    box([5.85,4.25,.52],[1.31,.27,-.10],mats.dark);
+    box([5.65,.15,2.3],[1.31,2.32,1.27],mats.rust);
+    box([.15,4.1,2.33],[4.13,.27,1.29],mats.tin);
+    box([.15,4.1,2.33],[-1.52,.27,1.29],mats.tarp);
+    box([2.64,.16,2.35],[2.80,-1.82,1.3],mats.rust);
+    box([2.48,.08,.79],[2.81,-1.92,1.74],mats.tin);
+    for (const x of [-1.49,1.47,4.11]) box([.17,.19,2.78],[x,-1.85,1.49],mats.dark);
+    box([5.82,.18,.19],[1.30,-1.87,2.72],mats.dark);
+    box([2.74,.09,.35],[-.01,-1.95,2.47],mats.tin);
+    for (const x of [1.68,2.18,2.68,3.18,3.68,4.04]) box([.058,.045,2.25],[x,-1.93,1.28],mats.dark);
+    beam([4.22,-1.75,.28],[4.22,2.17,2.24],.10,mats.dark);
+
+    const roofSlope=-.13;
+    for (const [side,x,width,z,material] of [['front',-.43,2.71,2.66,mats.tin],['back',2.46,3.14,2.61,mats.rust]]) {
+      box([width,4.72,.12],[x,.24,z],material,[roofSlope,0,0]);
+      for(let rib=x-width/2+.20;rib<x+width/2-.1;rib+=.54)box([.066,4.70,.047],[rib,.24,z+.075],material,[roofSlope,0,0]);
+      if(side==='back')box([1.25,1.44,.04],[2.55,-.70,2.82],mats.tarp,[roofSlope,0,-.05]);
+    }
+
+    // The open bay exposes the motor and the pipe that feeds the salvaged tank.
+    box([2.35,1.26,.17],[-.17,-.91,.25],mats.rust);
+    pipe([[-1.08,-.99,.68],[.82,-.99,.68]],.39,mats.dark);
+    for(const x of [-.80,-.49,-.18])pipe([[x,-.99,.68],[x+.085,-.99,.68]],.43,mats.tin);
+    pipe([[.53,-.99,.81],[.53,-.99,1.49],[.53,.07,1.49],[-2.18,.07,1.49],[-2.18,-.57,1.49],[-3.72,-.57,1.49]],.13,mats.dark);
+    box([.32,.23,.44],[.74,-1.58,.67],mats.tin);
+    for(const y of [-.28,1.03])box([1.27,.28,.60],[-3.74,y,.045],mats.dark);
+    pipe([[-3.74,-.94,.87],[-3.74,1.66,.87]],.65,mats.tin);
+    for(const y of [-.28,1.03])pipe([[-3.74,y,.87],[-3.74,y+.12,.87]],.68,mats.rust);
+    pipe([[-3.74,-.57,1.46],[-3.74,-.57,1.68]],.26,mats.rust);
+    pipe([[-3.74,-.91,.76],[-3.74,-1.7,.76],[-5.13,-2.57,.76],[-5.13,-2.57,-.39]],.18,mats.rust);
+    box([.74,.72,.54],[-5.13,-2.57,-.25],mats.dark);
+    drum(.26,.09,[-5.13,-2.57,.07],mats.rust,8);
+    box([.58,.41,.55],[-4.43,-2.13,-.12],mats.dark);
+    beam([-4.43,-2.13,.13],[-4.43,-2.13,.73],.15,mats.dark);
+    drum(.34,.91,[3.53,-2.77,.24],mats.rust);
+    drum(.355,.07,[3.53,-2.77,.35],mats.dark);
   } else {
     box([11.1,7.2,.60],[0,0,.12],mats.wood);
     box([3.32,4.75,2.91],[-3.64,.85,1.66],mats.rust);
@@ -157,7 +201,7 @@ export function createScavPrefab(T, kind, site) {
       box([.84,.19,1.65],[x+side*1.2,-1.68,1.12],mats.tin,[.13,0,0]);
     }
   }
-  if (kind !== 'mg-tower') {
+  if (kind !== 'mg-tower' && site !== 'nw-east') {
     for (const [x,y] of [[-4.45,-2.6],[-3.5,-3.2],[3.85,-2.7],[4.65,-2.55]]) {
       drum(.37,.96,[x,y,.48],mats.rust);
       for (const z of [.26,.7]) drum(.382,.055,[x,y,z],mats.dark);
