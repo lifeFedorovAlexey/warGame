@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
 import {Mission} from '../campaign/mission.js';
-import {raidApproachSignal, southernApproachSignal, waterTower, waterTowerSignal} from '../campaign/threat-guidance.js';
+import {raidApproachSignal, southernApproachSignal, warehouseAdvanceHint, waterTower, waterTowerSignal} from '../campaign/threat-guidance.js';
 import {vehicleClearance} from '../campaign/vehicle-motion.js';
 import {createHeightfield} from '../demo/map-route.js';
 import {shapeMesaRims} from '../demo/mesa-shaping.js';
@@ -23,8 +23,14 @@ reveal(tower);
 scout.updateMission();
 assert(scout.state.pendingCinematics.includes('camp3-sighted'));
 assert.deepEqual([waterTowerSignal(scout).x,waterTowerSignal(scout).y],[tower.x,tower.y]);
+assert.equal(warehouseAdvanceHint(scout),'');
+scout.state.camps[0].cleared=true;
+assert.match(warehouseAdvanceHint(scout),/Башня держит дорогу/);
 tower.hp=0;
 assert.equal(waterTowerSignal(scout),null,'A destroyed tower leaves no threat marker');
+assert.match(warehouseAdvanceHint(scout),/К складу по северной дороге/);
+scout.state.camps[1].cleared=true;
+assert.equal(warehouseAdvanceHint(scout),'');
 assert.equal(raidApproachSignal(scout),null,'The approach is quiet before first contact');
 scout.state.flags.contact=true;
 const approach=field.gridToWorld(config.raidApproachGrid);
@@ -139,7 +145,8 @@ function testMovingRepair(worker){
  // Isolated save clone: array order must not permit healing before target movement.
  const m=new Mission(config,field);m.load(mission.save());for(const id of [...m.state.pendingCinematics])m.finishCinematic(id);
  const target=m.entity(worker.task.targetId);m.state.units.sort((a,b)=>(a.id===target.id?1:0)-(b.id===target.id?1:0));assert(orderNearby(m,target),'Moving repair fixture needs an accessible destination');
- let moved=false;for(let i=0;i<20&&!moved;i++){const before=target.hp;m.advance(.1);moved=Math.hypot(target.x-target.previousX,target.y-target.previousY)>.05;if(moved){assert(target.hp<=before,'Moving target healed');assert(m.state.units.filter(u=>u.task?.type==='repair'&&u.task.targetId===target.id).every(u=>!u.builderWorking),'Moving target still welds');}}
+ // Parked neighbours may need a short manoeuvre to let the target leave.
+ let moved=false;for(let i=0;i<60&&!moved;i++){const before=target.hp;m.advance(.1);moved=Math.hypot(target.x-target.previousX,target.y-target.previousY)>.05;if(moved){assert(target.hp<=before,'Moving target healed');assert(m.state.units.filter(u=>u.task?.type==='repair'&&u.task.targetId===target.id).every(u=>!u.builderWorking),'Moving target still welds');}}
  assert(moved,'Repair target did not move');mechanics.movingRepair=true;
 }
 function testInterruptProjection(){
@@ -255,6 +262,11 @@ if(process.argv.includes('--full')){
  until(()=>mission.state.flags.raidWon,300,'Repel first raid');
  for(const camp of mission.state.camps){
   const ids=()=>army().map(u=>u.id);let iterations=0;
+  if(camp.index===1&&!camp.cleared){
+   // The northern road passes the eastern tower before it reaches the warehouse.
+   reportOrder(mission.order(ids(),'attack-move',camp.gate),'Advance through the northern road with combat');
+   until(()=>camp.cleared||!army().length,235,'Clear the warehouse with one attack-move order');
+  }
   const rally=camp.index===3?field.gridToWorld(config.camps[3].approachGrid):null;
   if(camp.index===3){
    const mustered=()=>army().filter(u=>Math.hypot(u.x-rally.x,u.y-rally.y)<100);

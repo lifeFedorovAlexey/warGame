@@ -1,7 +1,7 @@
 import {createCampaignWorld} from './world.js';
 import {Mission} from './mission.js';
 import {FieldRadio, missionSignal} from './field-radio.js';
-import {raidApproachSignal, visibleRaidContact, waterTowerSignal} from './threat-guidance.js';
+import {raidApproachSignal, visibleRaidContact, warehouseAdvanceHint, waterTowerSignal} from './threat-guidance.js';
 import {FieldSound} from './field-sound.js';
 import {buildLayerHeight} from './builder-optics.js';
 import {VehicleDesigner} from './designer.js';
@@ -30,7 +30,7 @@ function firstPowerSites(){
 function knownArtifact(mission){
   return mission.state.artifacts.find(item=>!item.collected&&mission.exploredAt(item.x,item.y));
 }
-function nextObjectiveHint(state,{plant,well},tasks,artifact,contact,southernApproach){
+function nextObjectiveHint(state,{plant,well},tasks,artifact,contact,southernApproach,warehouseHint){
   if(state.status!=='running')return '';
   if(state.flags.contact&&!state.flags.raidWon)return contact ? 'Отразите рейд на базу.' : 'Прикройте въезд к базе.';
   if(artifact)return 'Подберите артефакт.';
@@ -54,6 +54,7 @@ function nextObjectiveHint(state,{plant,well},tasks,artifact,contact,southernApp
   if(!tasks.find(task=>task.id==='research').done){
     const hasSample=state.artifactKeys.some(key=>!state.research[key]&&!owned.some(b=>b.research?.key===key));
     if(hasSample)return 'Изучите артефакты в НИИ.';
+    if(warehouseHint)return warehouseHint;
     if(!state.flags.lastRevealed&&!owned.some(b=>b.research))return 'Ищите артефакты в лагерях.';
   }
   const headquarters=state.camps[3];
@@ -658,7 +659,7 @@ function updateUi() {
   world.storySignals.setThreat(threat);
   const sites=firstPowerSites(),artifact=knownArtifact(mission),southernApproach=missionSignal('last-camp',mission);
   const marker=tacticalFocus(contact,{...sites,threat,artifact,southernApproach});
-  const objectiveHint = $('objective-hint'), hint = nextObjectiveHint(s,sites,tasks,artifact,contact,southernApproach);
+  const objectiveHint = $('objective-hint'), hint = nextObjectiveHint(s,sites,tasks,artifact,contact,southernApproach,warehouseAdvanceHint(mission));
   if(objectiveHint.textContent!==hint)objectiveHint.textContent=hint;
   objectiveHint.hidden=!hint;
   const signal=world.storySignals.current;

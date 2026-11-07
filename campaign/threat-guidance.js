@@ -25,6 +25,14 @@ export function waterTowerSignal(mission) {
     ? threat(tower, 'К башне', 440) : null;
 }
 
+export function warehouseAdvanceHint(mission) {
+  const [first,warehouse]=mission.state.camps;
+  if(!first?.cleared||!warehouse||warehouse.cleared)return '';
+  return waterTowerSignal(mission)
+    ? 'Башня держит дорогу к складу. Ведите колонну с боем.'
+    : 'К складу по северной дороге. Ведите колонну с боем.';
+}
+
 export function southernApproachSignal(mission) {
   const {state,config,field}=mission;
   if(!state.flags.lastRevealed||state.camps[3]?.cleared)return null;

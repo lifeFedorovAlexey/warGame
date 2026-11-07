@@ -424,6 +424,10 @@ export class Mission{
     const row=units.slice(index,index+3).sort((a,b)=>(a.x-b.x)*right.x+(a.y-b.y)*right.y);
     units.splice(index,row.length,...row);
    }
+  }else if(this.commandJob&&action==='attack'){
+   // Units with a clear shot need no route and can engage before the flankers plan.
+   const ready=new Set(units.filter(unit=>distance(unit,target)<=this.unitSpec(unit).range&&this.lineOfSight(unit,target)));
+   units.sort((a,b)=>Number(ready.has(b))-Number(ready.has(a))||distance(a,target)-distance(b,target));
   }
   for(let index=0;index<units.length;index++){const unit=units[index],workOffset=(index-(units.length-1)/2)*18,goal=action==='build'||action==='repair'?this.workPoint(target,workOffset):target,columns=Math.min(3,units.length);
    if(repeat.has(unit.id)){assigned.add(unit.id);if(unit.passage)preceding=unit.id;continue;}
