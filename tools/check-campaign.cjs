@@ -54,7 +54,13 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   assert.equal(await page.evaluate(()=>window.campaign.storyAudio.playing),false);
   assert.equal(await page.evaluate(()=>window.campaign.radio.queue.length),0,'Skipping radio also drops queued transmissions');
   assert.deepEqual(await page.locator('#minimap').boundingBox(),minimapWithRadio,'Dismissing the radio does not move the minimap');
+  if(!await page.locator('#home').isVisible())await page.locator('.settings > summary').click();
+  assert(await page.locator('#control-hints').isHidden());
+  await page.locator('#controls-help').click();
+  assert(await page.locator('#control-hints').isVisible());
+  await page.locator('#controls-help').click();
   await page.locator('#home').click();
+  assert.equal(await page.locator('.settings').getAttribute('open'),null);
   await page.locator('#pause').click();
   const idleShadows=await page.evaluate(()=>{
    const {mission,world,advance}=window.campaign;
@@ -75,15 +81,17 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   await page.setViewportSize({width:800,height:600});
   const buildLayout=await page.evaluate(()=>{
    const tray=document.querySelector('#build-palette');
-   const commands=document.querySelector('#commands').getBoundingClientRect();
+   const map=document.querySelector('#world canvas').getBoundingClientRect();
+   const squad=document.querySelector('.squad').getBoundingClientRect();
    const orders=document.querySelector('.order-bar').getBoundingClientRect();
-   const x=(commands.right+orders.right)/2,y=(orders.top+orders.bottom)/2;
+   const x=(squad.right+orders.left)/2,y=(orders.top+orders.bottom)/2;
    const rows=new Set([...tray.querySelectorAll('#build-cards button')].map(card=>card.getBoundingClientRect().top));
    return {rows:rows.size,scroll:tray.scrollHeight>tray.clientHeight,
-    mapClick:x>orders.right&&document.elementFromPoint(x,y)===document.querySelector('#world canvas')};
+    fullMap:map.top===0&&map.bottom===innerHeight,
+    mapClick:x>squad.right&&document.elementFromPoint(x,y)===document.querySelector('#world canvas')};
   });
-  assert.deepEqual(buildLayout,{rows:1,scroll:false,mapClick:true},
-   'The compact build tray leaves the empty part of the dock clickable on the map');
+  assert.deepEqual(buildLayout,{rows:1,scroll:false,fullMap:true,mapClick:true},
+   'The compact controls fit without reserving an opaque strip below the map');
   await page.setViewportSize(viewport);
   await page.getByRole('button',{name:/^АЭС/}).click();
   await page.locator('#suggest-site').click();

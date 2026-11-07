@@ -294,6 +294,7 @@ function suggestSite() {
 }
 function installInput() {
   const canvas = world.renderer.domElement;
+  const settings = document.querySelector('.settings');
   canvas.addEventListener('contextmenu', event => event.preventDefault());
   canvas.addEventListener('pointerdown', event => {
     if (!active || mission.state.status !== 'running') return;
@@ -367,7 +368,11 @@ function installInput() {
     if (!active || designer.visible || event.target.matches('input, select, textarea') || event.ctrlKey || event.metaKey || event.altKey) return;
     const {code} = event;
     if (code === 'Escape') {
-      if (buildKind || buildOpen || orderMode) cancelMode();
+      if (settings.open) {
+        settings.open = false;
+        settings.querySelector('summary').focus();
+      }
+      else if (buildKind || buildOpen || orderMode) cancelMode();
       else radio.dismiss();
     } else if (code === 'Space' && !event.target.closest('button, summary')) {
       event.preventDefault();
@@ -427,7 +432,9 @@ function updatePalette() {
 }
 function updateRoster() {
   const units=vehicles(),roster=$('roster');
-  const columns=Math.max(4,Math.min(9,Math.floor(Math.min(innerWidth*.56,336)/37)));
+  const tileWidth=roster.firstElementChild?.offsetWidth||40;
+  const gap=parseFloat(getComputedStyle(roster).columnGap)||0;
+  const columns=Math.max(1,Math.min(6,Math.floor((roster.clientWidth+gap)/(tileWidth+gap))));
   const groups=new Map();
   const stack=units.length>columns;
   const counts={};
@@ -779,6 +786,11 @@ try {
   $('begin').onclick = () => start();
   $('resume-save').onclick = $('load').onclick = () => start(true);
   $('save').onclick = () => saveGame();
+  $('controls-help').onclick = () => {
+    const hints = $('control-hints');
+    hints.hidden = !hints.hidden;
+    $('controls-help').setAttribute('aria-expanded', String(!hints.hidden));
+  };
   $('pause').onclick = () => { paused = !paused; world.keys.clear(); updateUi(); };
   $('tempo').onclick = () => { speed = speed === 1 ? 2 : speed === 2 ? 4 : 1; updateUi(); };
   $('design-toggle').onclick = toggleDesigner;
@@ -787,7 +799,10 @@ try {
   $('suggest-site').onclick = suggestSite;
   $('move-order').onclick = () => beginOrder('move');
   $('attack-order').onclick = () => beginOrder('attack');
-  $('home').onclick = () => world.centre(world.field.gridToWorld(config.startGrid), 360);
+  $('home').onclick = () => {
+    document.querySelector('.settings').open = false;
+    world.centre(world.field.gridToWorld(config.startGrid), 360);
+  };
   $('objective-focus').onclick = () => {
     const signal=tacticalFocus(visibleRaidContact(mission));
     if(!signal)return;

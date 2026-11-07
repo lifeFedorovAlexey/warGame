@@ -32,26 +32,47 @@
         <button id="objective-focus" class="quiet" hidden></button>
       </div>
       <button id="pause" title="Пауза · Пробел">Пауза</button>
-      <button id="tempo" title="Скорость симуляции">×1</button>
       <button id="design-toggle" aria-controls="designer" aria-expanded="false">Конструктор</button>
       <details class="settings">
         <summary aria-label="Меню операции">Меню</summary>
-        <div class="panel">
-          <button id="save">Сохранить</button>
-          <button id="load">Загрузить</button>
-          <button id="radio-toggle"></button>
-          <button id="sound-toggle">Звук: вкл.</button>
-          <button id="story-voice-toggle">Голос радио: вкл.</button>
-          <p>ЛКМ — выбор, ПКМ — приказ.<br>Колесо — масштаб, средняя кнопка — поворот.<br>WASD — камера, B — стройка, M — движение, T — атака.</p>
+        <div class="operation-menu">
+          <header class="operation-heading">
+            <div><small>ОПЕРАЦИЯ «РАЙ» · АЛЬФА</small><h2>Освоение целины</h2></div>
+          </header>
+          <section class="settings-group" aria-labelledby="operation-controls">
+            <h3 id="operation-controls">Операция</h3>
+            <div class="settings-actions">
+              <button id="save">Сохранить</button>
+              <button id="load">Загрузить</button>
+              <button id="tempo" title="Скорость симуляции">×1</button>
+              <button id="home" title="К начальной базе · Home">К базе</button>
+            </div>
+          </section>
+          <section class="settings-group" aria-labelledby="communication-controls">
+            <h3 id="communication-controls">Связь</h3>
+            <div class="settings-actions">
+              <button id="radio-toggle"></button>
+              <button id="sound-toggle">Звук: вкл.</button>
+              <button id="story-voice-toggle">Голос радио: вкл.</button>
+            </div>
+          </section>
+          <section class="mission-tasks">
+            <h2>Задачи <span id="objective-count"></span></h2>
+            <ol id="objectives"></ol>
+            <p id="hint"></p>
+          </section>
+          <div class="settings-help">
+            <button id="controls-help" class="icon-button" type="button" title="Управление" aria-label="Управление" aria-expanded="false" aria-controls="control-hints">
+              <svg class="game-icon" viewBox="0 0 32 24" aria-hidden="true">
+                <rect x="2" y="4" width="28" height="16" rx="2" fill="none" stroke="#d9c69b" stroke-width="2"/>
+                <path d="M7 9h2m3 0h2m3 0h2m3 0h3M7 13h2m3 0h2m3 0h2m3 0h3M11 17h10" stroke="#f3ae54" stroke-width="1.4"/>
+              </svg>
+            </button>
+            <p id="control-hints" hidden>ЛКМ — выбор, ПКМ — приказ.<br>Колесо — масштаб, средняя кнопка — поворот.<br>WASD — камера, B — стройка, M — движение, T — атака.</p>
+          </div>
         </div>
       </details>
     </header>
-
-    <aside class="mission-tasks">
-      <h2>Задачи <span id="objective-count"></span></h2>
-      <ol id="objectives"></ol>
-      <p id="hint"></p>
-    </aside>
 
     <aside id="radio" aria-label="Полевое радио" aria-live="polite" hidden>
       <div class="radio-copy">
@@ -64,9 +85,13 @@
       </div>
     </aside>
 
+    <div class="command-deck">
+    <div class="squad">
+      <div class="selection-title"><strong id="selection">Техника</strong><small id="details"></small></div>
+      <div id="roster" aria-label="Своя техника"></div>
+    </div>
     <aside id="minimap-panel" class="panel">
       <canvas id="minimap" width="224" height="224" aria-label="Миникарта. Нажмите для перемещения камеры"></canvas>
-      <button id="home" title="К начальной базе · Home">К базе</button>
     </aside>
 
     <section id="commands" aria-label="Приказы">
@@ -85,10 +110,6 @@
         <span aria-live="polite"></span><button id="select-blocked" class="quiet" hidden>Выбрать</button>
       </div>
       <div class="tactical-dock">
-        <div class="squad">
-          <div class="selection-title"><strong id="selection">Техника</strong><small id="details"></small></div>
-          <div id="roster" aria-label="Своя техника"></div>
-        </div>
         <div class="order-bar" aria-label="Действия">
           <button id="build-toggle" title="Строительство · B" aria-expanded="false"><svg aria-hidden="true"><use href="hud-icons.svg#build"/></svg><span>Строить</span><kbd>B</kbd></button>
           <button id="move-order" title="Движение · M"><svg aria-hidden="true"><use href="hud-icons.svg#move"/></svg><span>Маршрут</span><kbd>M</kbd></button>
@@ -97,6 +118,7 @@
         </div>
       </div>
     </section>
+    </div>
   </div>
 
   <dialog id="designer" aria-labelledby="designer-title">
