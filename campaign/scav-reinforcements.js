@@ -83,6 +83,7 @@ function planSquad(mission,camp,types) {
 
 export function updateScavReinforcements(mission) {
   const {state}=mission;
+  if(!state.flags.raidWon)return;
   for(const {id,wave} of mission.config.camps){
     if(!wave?.units.length)continue;
     const camp=state.camps.find(item=>item.id===id);
@@ -90,12 +91,14 @@ export function updateScavReinforcements(mission) {
     const core=state.buildings.find(item=>item.campId===id&&item.kind==='camp-core'&&item.hp>0);
     if(!core)continue;
     if(camp.nextWaveAt===undefined){
-      if(mission.exploredAt(camp.x,camp.y)||mission.exploredAt(camp.gate.x,camp.gate.y))camp.nextWaveAt=state.time+wave.seconds;
+      camp.nextWaveAt=state.time+wave.seconds;
       continue;
     }
     if(state.time<camp.nextWaveAt)continue;
+    const discovered=mission.exploredAt(camp.x,camp.y)||mission.exploredAt(camp.gate.x,camp.gate.y);
+    const limit=discovered?waveLimit:wave.units.length;
     const active=state.units.filter(unit=>unit.campId===id&&unit.reinforcement&&unit.hp>0).length;
-    const squad=active+wave.units.length<=waveLimit&&planSquad(mission,camp,wave.units);
+    const squad=active+wave.units.length<=limit&&planSquad(mission,camp,wave.units);
     camp.nextWaveAt=state.time+(squad?wave.seconds:retrySeconds);
     if(!squad)continue;
     for(const {kind,x,y,heading,path,rally} of squad){

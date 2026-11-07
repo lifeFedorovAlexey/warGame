@@ -15,10 +15,6 @@ shapeMesaRims(original);
 const field=refineRoadHeightfield(original);
 applyRoadGrades(field,json('assets/maps/alpha/roads.json'));
 const mission=new Mission(config,field);
-const reveal=point=>{
-  const [col,row]=field.worldToGrid(point.x,point.y).map(Math.round);
-  mission.explored[row*128+col]=255;
-};
 const members=(m,id)=>m.state.units.filter(unit=>unit.campId===id&&unit.reinforcement&&unit.hp>0);
 const force=(m,camp)=>{
   m.state.time=camp.nextWaveAt+.01;
@@ -28,27 +24,39 @@ const force=(m,camp)=>{
 for(const camp of mission.state.camps){
   const guards=mission.state.units.filter(unit=>unit.campId===camp.id);
   assert.equal(guards.length,camp.units+camp.extraGuards.length,camp.id+' garrison');
-  reveal(camp.gate);
+  assert(!mission.exploredAt(camp.x,camp.y)&&!mission.exploredAt(camp.gate.x,camp.gate.y),camp.id+' starts unexplored');
 }
 updateScavReinforcements(mission);
-assert.equal(mission.state.camps.at(-1).nextWaveAt,undefined,'Locked sector cannot call up reinforcements');
+assert(mission.state.camps.every(camp=>camp.nextWaveAt===undefined),'The opening raid comes first');
+mission.state.flags.raidWon=true;
+updateScavReinforcements(mission);
+const locked=mission.state.camps.at(-1);
+assert.equal(locked.nextWaveAt,undefined,'Locked sector cannot call up reinforcements');
+for(const camp of mission.state.camps.slice(0,-1)){
+  assert.equal(camp.nextWaveAt,mission.state.time+camp.wave.seconds,camp.id+' starts its timer before exploration');
+}
+mission.state.time+=10;
 mission.state.flags.lastRevealed=true;
 mission.state.bounds=config.finalMapBounds.slice();
 mission.rebuildNavigation();
 updateScavReinforcements(mission);
+assert.equal(locked.nextWaveAt,mission.state.time+locked.wave.seconds,'New sector gets its own first interval');
 
 const waveCounts={};
-for(const camp of [...mission.state.camps].sort((a,b)=>a.nextWaveAt-b.nextWaveAt)){
-  const deadline=camp.nextWaveAt;
+const deadlines=[...new Set(mission.state.camps.map(camp=>camp.nextWaveAt))].sort((a,b)=>a-b);
+for(const deadline of deadlines){
+  const due=mission.state.camps.filter(camp=>camp.nextWaveAt===deadline);
   mission.state.time=deadline-.01;
   updateScavReinforcements(mission);
-  assert.equal(members(mission,camp.id).length,0,camp.id+' interval');
-  force(mission,camp);
-  const squad=members(mission,camp.id);
-  assert.equal(squad.length,2,camp.id+' squad');
-  assert(squad.every(unit=>unit.path.length&&!mission.visibleAt(unit.x,unit.y)));
-  assert(vehicleClearance(squad[0],squad[1],config.worldScale,field)>0);
-  waveCounts[camp.id]=squad.length;
+  for(const camp of due)assert.equal(members(mission,camp.id).length,0,camp.id+' interval');
+  force(mission,due[0]);
+  for(const camp of due){
+    const squad=members(mission,camp.id);
+    assert.equal(squad.length,2,camp.id+' squad');
+    assert(squad.every(unit=>unit.path.length&&!mission.visibleAt(unit.x,unit.y)));
+    assert(vehicleClearance(squad[0],squad[1],config.worldScale,field)>0);
+    waveCounts[camp.id]=squad.length;
+  }
 }
 
 const restored=new Mission(config,field);
@@ -56,6 +64,10 @@ restored.load(mission.save());
 const camp=restored.state.camps[0],savedCamp=mission.state.camps[0];
 assert.equal(camp.nextWaveAt,savedCamp.nextWaveAt);
 assert.deepEqual(members(restored,camp.id).map(unit=>unit.id),members(mission,camp.id).map(unit=>unit.id));
+force(restored,camp);
+assert.equal(members(restored,camp.id).length,2,'An unscouted camp keeps one pair in the field');
+const [gateCol,gateRow]=field.worldToGrid(camp.gate.x,camp.gate.y).map(Math.round);
+restored.explored[gateRow*128+gateCol]=255;
 force(restored,camp);
 assert.equal(members(restored,camp.id).length,4);
 force(restored,camp);
@@ -73,4 +85,4 @@ core.hp=0;
 for(const unit of members(restored,camp.id).slice(0,2))unit.hp=0;
 force(restored,camp);
 assert.equal(members(restored,camp.id).length,2,'Destroying the core stops sorties while its guards still survive');
-console.log(JSON.stringify({waveCounts,saveLoad:true,cap:4,visibleExitBlocked:true,destroyedCoreStops:true}));
+console.log(JSON.stringify({waveCounts,beforeExploration:true,saveLoad:true,cap:4,visibleExitBlocked:true,destroyedCoreStops:true}));
