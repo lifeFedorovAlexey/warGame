@@ -1,0 +1,50 @@
+{
+  "status": "engineering-prototypes",
+  "units": "metres",
+  "axes": "X right, Y forward, Z up",
+  "source": "assets/campaign/alpha/mission01/gameplay.json",
+  "buildings": [
+    {
+      "id": "generator",
+      "path": "generator/prototype.glb",
+      "spec": "generator/module.json",
+      "triangles": 420,
+      "bytes": 27120
+    },
+    {
+      "id": "derrick",
+      "path": "derrick/prototype.glb",
+      "spec": "derrick/module.json",
+      "triangles": 756,
+      "bytes": 35684
+    },
+    {
+      "id": "factory",
+      "path": "factory/prototype.glb",
+      "spec": "factory/module.json",
+      "triangles": 240,
+      "bytes": 22892
+    },
+    {
+      "id": "lab",
+      "path": "lab/prototype.glb",
+      "spec": "lab/module.json",
+      "triangles": 180,
+      "bytes": 15948
+    },
+    {
+      "id": "bunker",
+      "path": "bunker/prototype.glb",
+      "spec": "bunker/module.json",
+      "triangles": 80,
+      "bytes": 8412
+    },
+    {
+      "id": "mg-tower",
+      "path": "mg-tower/prototype.glb",
+      "spec": "mg-tower/module.json",
+      "triangles": 336,
+      "bytes": 20308
+    }
+  ]
+}

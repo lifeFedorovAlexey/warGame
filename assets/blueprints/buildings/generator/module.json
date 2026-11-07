@@ -1,0 +1,68 @@
+{
+  "id": "generator",
+  "name": "Генератор",
+  "status": "engineering-prototype-awaiting-art-reference",
+  "units": "metres",
+  "axes": "X right,Y forward,Z up",
+  "nominalEnvelope": [
+    12,
+    10,
+    5
+  ],
+  "reservedFootprint": [
+    14,
+    12
+  ],
+  "measuredBounds": {
+    "min": [
+      -6,
+      -5,
+      2.9802322831784522e-9
+    ],
+    "max": [
+      6,
+      5,
+      5
+    ]
+  },
+  "anchors": {
+    "work_anchor": [
+      0,
+      -8,
+      0
+    ]
+  },
+  "collision": {
+    "type": "box",
+    "width": 14,
+    "depth": 12,
+    "height": 5
+  },
+  "validation": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "geometry": {
+    "id": "generator",
+    "lod": 0,
+    "triangles": 420,
+    "vertices": 620,
+    "primitives": 4,
+    "materials": 4,
+    "removedDegenerate": 0,
+    "inputTriangles": 420,
+    "bytes": 27120,
+    "boundsMm": {
+      "min": [
+        -6000,
+        -5000,
+        0
+      ],
+      "max": [
+        6000,
+        5000,
+        5000
+      ]
+    }
+  }
+}

@@ -31,11 +31,12 @@ def download(url, path, expected=None):
 def main():
     RUNTIME.mkdir(parents=True, exist_ok=True)
     LICENSES.mkdir(parents=True, exist_ok=True)
-    api = json.loads(read('https://huggingface.co/api/models/rhasspy/piper-voices'))
-    revision = api['sha']
+    lockfile = LICENSES / 'speech-sources.json'
+    locked = json.loads(lockfile.read_text(encoding='utf-8')) if lockfile.exists() else {}
+    revision = locked.get('revision') or json.loads(read('https://huggingface.co/api/models/rhasspy/piper-voices'))['sha']
     manifest = {'tool': 'Piper 2023.11.14-2 (offline build tool)', 'voiceRepository': 'rhasspy/piper-voices', 'revision': revision, 'voices': []}
     archive = RUNTIME / 'piper_windows_amd64.zip'
-    manifest['runtime'] = download('https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_windows_amd64.zip', archive)
+    manifest['runtime'] = download('https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_windows_amd64.zip', archive, locked.get('runtime', {}).get('sha256'))
     if not (RUNTIME / 'piper/piper.exe').exists():
         with zipfile.ZipFile(archive) as package:
             for entry in package.infolist():

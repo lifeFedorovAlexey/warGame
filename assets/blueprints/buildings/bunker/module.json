@@ -1,0 +1,68 @@
+{
+  "id": "bunker",
+  "name": "Пулемётное укрытие",
+  "status": "engineering-prototype-awaiting-art-reference",
+  "units": "metres",
+  "axes": "X right,Y forward,Z up",
+  "nominalEnvelope": [
+    6,
+    5,
+    3
+  ],
+  "reservedFootprint": [
+    8,
+    7
+  ],
+  "measuredBounds": {
+    "min": [
+      -3,
+      -3.5,
+      2.9802322831784522e-9
+    ],
+    "max": [
+      3,
+      2.5,
+      2.609999895095825
+    ]
+  },
+  "anchors": {
+    "work_anchor": [
+      0,
+      -5,
+      0
+    ]
+  },
+  "collision": {
+    "type": "box",
+    "width": 8,
+    "depth": 7,
+    "height": 3
+  },
+  "validation": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "geometry": {
+    "id": "bunker",
+    "lod": 0,
+    "triangles": 80,
+    "vertices": 132,
+    "primitives": 3,
+    "materials": 3,
+    "removedDegenerate": 0,
+    "inputTriangles": 80,
+    "bytes": 8412,
+    "boundsMm": {
+      "min": [
+        -3000,
+        -3500,
+        0
+      ],
+      "max": [
+        3000,
+        2500,
+        2610
+      ]
+    }
+  }
+}

@@ -1,9 +1,9 @@
 // Story timing comes from the delivered Russian recordings, not estimated text length.
 export function buildTimeline(story,audio,sceneIds){
  const cues=new Map(story.dialogue.map(c=>[c.id,c])),segments=[];let time=0;
- for(const entry of sceneIds){const id=typeof entry==='string'?entry:entry.scene,scene=story.scenes.find(s=>s.id===id);if(!scene)throw new Error('Unknown scene '+id);const start=time,lines=[];time+=1;
-  for(const key of typeof entry==='string'?scene.cues:entry.cues){const cue=cues.get(key),clip=audio.clips[key];if(!clip||!(clip.duration>0))throw new Error('Missing recording '+key);lines.push({...cue,start:time,end:time+clip.duration,clip});time+=clip.duration+cue.pauseAfter;}
-  time+=1.3;segments.push({scene,start,end:time,lines});
+ for(const entry of sceneIds){const id=typeof entry==='string'?entry:entry.scene,scene=story.scenes.find(s=>s.id===id);if(!scene)throw new Error('Unknown scene '+id);const start=time,lines=[],keys=typeof entry==='string'?scene.cues:entry.cues;time+=1;
+  for(const key of keys){const cue=cues.get(key),clip=audio.clips[key];if(!clip||!(clip.duration>0))throw new Error('Missing recording '+key);lines.push({...cue,start:time,end:time+clip.duration,clip});time+=clip.duration+cue.pauseAfter;}
+  time+=1.3;const card=keys.at(-1)===scene.cues.at(-1)?scene.endCard:null,cardStart=time;if(card)time+=card.seconds;segments.push({scene,start,end:time,lines,card,cardStart});
  }
  return {segments,duration:time};
 }
@@ -65,9 +65,10 @@ export class CinematicPlayer{
  }
  draw(time){
   const ctx=this.context,w=this.canvas.width,h=this.canvas.height,segment=this.segmentAt(time);ctx.fillStyle='#080b0c';ctx.fillRect(0,0,w,h);if(!segment?.image)return;
+  if(segment.card&&time>=segment.cardStart){const card=segment.card;ctx.save();ctx.globalAlpha=Math.max(0,Math.min(1,(time-segment.cardStart)/.5,(segment.end-time)/.5));ctx.textAlign='center';ctx.fillStyle='#d6dfb9';ctx.font='600 '+Math.round(w/42)+'px "Segoe UI",Arial,sans-serif';ctx.fillText(card.title,w/2,h*.30,w*.9);ctx.fillStyle='#aebc8b';ctx.font='500 '+Math.round(w/62)+'px "Segoe UI",Arial,sans-serif';ctx.fillText(card.subtitle,w/2,h*.42);ctx.fillStyle='#e3e3d3';ctx.font='400 '+Math.round(w/63)+'px "Segoe UI",Arial,sans-serif';card.lines.forEach((line,index)=>ctx.fillText(line,w/2,h*.53+index*h*.055,w*.88));ctx.restore();return;}
   const phase=Math.max(0,Math.min(1,(time-segment.start)/(segment.end-segment.start))),motion=segment.scene.motion,zoom=this.motion?motion.from[2]+(motion.to[2]-motion.from[2])*phase:1.035,panX=this.motion?(motion.from[0]+(motion.to[0]-motion.from[0])*phase)*w:0,panY=this.motion?(motion.from[1]+(motion.to[1]-motion.from[1])*phase)*h:0;
   const image=segment.image,scale=Math.max(w/image.width,h/image.height)*zoom,iw=image.width*scale,ih=image.height*scale;ctx.drawImage(image,(w-iw)/2+panX,(h-ih)/2+panY,iw,ih);
-  const fade=Math.min(1,(time-segment.start)/.75,(segment.end-time)/.75);if(fade<1){ctx.fillStyle='rgba(0,0,0,'+(1-Math.max(0,fade))+')';ctx.fillRect(0,0,w,h);}
+  const fade=Math.min(1,(time-segment.start)/.75,((segment.card?segment.cardStart:segment.end)-time)/.75);if(fade<1){ctx.fillStyle='rgba(0,0,0,'+(1-Math.max(0,fade))+')';ctx.fillRect(0,0,w,h);}
   const gradient=ctx.createLinearGradient(0,h*.62,0,h);gradient.addColorStop(0,'transparent');gradient.addColorStop(1,'rgba(0,0,0,.82)');ctx.fillStyle=gradient;ctx.fillRect(0,h*.62,w,h*.38);
   const cue=this.cueAt(time);if(cue){const size=Math.round(w/48),max=w*.84;ctx.font='500 '+size+'px "Segoe UI",Arial,sans-serif';const words=cue.text.split(' '),lines=[];let line='';for(const word of words){const next=line?line+' '+word:word;if(ctx.measureText(next).width>max&&line){lines.push(line);line=word;}else line=next;}if(line)lines.push(line);const bottom=h*.91,start=bottom-(lines.length-1)*size*1.4;ctx.textAlign='left';ctx.fillStyle='#c7d1a6';ctx.font='600 '+Math.round(size*.66)+'px "Segoe UI",Arial,sans-serif';ctx.fillText(this.story.speakers[cue.speaker].name.toUpperCase(),w*.08,start-size*1.25);ctx.fillStyle='#f1eee4';ctx.font='500 '+size+'px "Segoe UI",Arial,sans-serif';lines.forEach((text,i)=>ctx.fillText(text,w*.08,start+i*size*1.4));}
   if(time-segment.start<4&&!cue){ctx.font='600 '+Math.round(w/70)+'px "Segoe UI",Arial,sans-serif';ctx.textAlign='left';ctx.fillStyle='#e8e5d7';ctx.fillText(segment.scene.title.toUpperCase(),w*.08,h*.84);}

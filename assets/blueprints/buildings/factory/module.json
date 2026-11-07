@@ -1,0 +1,73 @@
+{
+  "id": "factory",
+  "name": "Завод",
+  "status": "engineering-prototype-awaiting-art-reference",
+  "units": "metres",
+  "axes": "X right,Y forward,Z up",
+  "nominalEnvelope": [
+    26,
+    20,
+    9
+  ],
+  "reservedFootprint": [
+    28,
+    24
+  ],
+  "measuredBounds": {
+    "min": [
+      -13,
+      -10,
+      2.9802322831784522e-9
+    ],
+    "max": [
+      13,
+      10,
+      8.819999694824219
+    ]
+  },
+  "anchors": {
+    "work_anchor": [
+      0,
+      -14,
+      0
+    ],
+    "exit_anchor": [
+      0,
+      -18,
+      0
+    ]
+  },
+  "collision": {
+    "type": "box",
+    "width": 28,
+    "depth": 24,
+    "height": 9
+  },
+  "validation": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "geometry": {
+    "id": "factory",
+    "lod": 0,
+    "triangles": 240,
+    "vertices": 480,
+    "primitives": 5,
+    "materials": 5,
+    "removedDegenerate": 0,
+    "inputTriangles": 240,
+    "bytes": 22892,
+    "boundsMm": {
+      "min": [
+        -13000,
+        -10000,
+        0
+      ],
+      "max": [
+        13000,
+        10000,
+        8820
+      ]
+    }
+  }
+}

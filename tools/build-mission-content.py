@@ -93,9 +93,11 @@ def main():
         if extra and line.startswith('|') and not line.startswith(('| Событие','|---')):
             cells=[x.strip() for x in line.strip('|').split('|')]
             if len(cells)==2:
-                barks.append({'id':f'm01-b{len(barks)+1:03}', 'event':cells[0], 'speaker':'commander' if 'УАЗ' in cells[0] else 'builder' if any(x in cells[0] for x in ['Стро','Ремонт']) else 'scientist' if 'Исслед' in cells[0] else 'scout', 'text':cells[1].strip('«»'), 'sourceLine':line_number})
+                barks.append({'id':f'm01-b{len(barks)+1:03}', 'event':cells[0], 'speaker':'commander' if 'УАЗ' in cells[0] else 'builder' if any(x in cells[0] for x in ['Стро','Ремонт']) else 'scientist' if 'Исслед' in cells[0] else 'scout', 'text':re.sub('[«»]', '', cells[1]), 'sourceText':cells[1], 'sourceLine':line_number})
     assert len(scenes)==14 and all(s['cues'] for s in scenes)
     assert all(c['speaker'] in PROFILES for c in dialogue+barks)
+    scenes[4]['endCard']={'seconds':7,'title':'МИССИЯ 1 — «ОСВОЕНИЕ ЦЕЛИНЫ»','subtitle':'ОСНОВНЫЕ ЗАДАЧИ','lines':['Развернуть передовую базу.','Обеспечить энергоснабжение.','Наладить производство техники.','Организовать научные исследования.','Обеспечить безопасность района.']}
+    scenes[13]['endCard']={'seconds':7,'title':'ОПЕРАЦИЯ «РАЙ»','subtitle':'МИССИЯ 1 ЗАВЕРШЕНА','lines':['СЛЕДУЮЩАЯ МИССИЯ:','ЭНЕРГЕТИЧЕСКИЙ ВСПЛЕСК']}
     OUT.mkdir(parents=True, exist_ok=True)
     def part(number,phase=None):
         scene_id=f'm01-s{number:02}'

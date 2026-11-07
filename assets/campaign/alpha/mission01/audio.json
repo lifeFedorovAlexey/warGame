@@ -1109,17 +1109,17 @@
     },
     "m01-b014": {
       "file": "audio/m01-b014.ogg",
-      "duration": 2.2832083333333335,
+      "duration": 2.1782083333333335,
       "speaker": "scientist",
-      "sha256": "5d96e300bae3ed63d7a2fcedc96d913504a8cf06df9e45fd8ab34532bbbedd54",
-      "bytes": 11165
+      "sha256": "9a061d1db4cb3e27acf18fa07074d7a4f771044dd07326ea465a62a9c1a3adb0",
+      "bytes": 10639
     },
     "m01-b015": {
       "file": "audio/m01-b015.ogg",
-      "duration": 2.861291666666667,
+      "duration": 2.8844583333333333,
       "speaker": "scientist",
-      "sha256": "ee711e3ecf54d2943f687eaade039370a00db72858e8d1dbfbac6fa94396327d",
-      "bytes": 13662
+      "sha256": "2c7be4f90f9cd7ea3952031a05a02ceae1b08393152c09367f8d000fa7bcc32e",
+      "bytes": 13630
     },
     "m01-s07-l001": {
       "file": "audio/m01-s07-l001.ogg",
@@ -1242,10 +1242,10 @@
     },
     "m01-b007": {
       "file": "audio/m01-b007.ogg",
-      "duration": 2.3847916666666666,
+      "duration": 2.420125,
       "speaker": "scout",
-      "sha256": "4b1cdcb312ad8c7c684e142586bb49c532ea76114c0a73c35d9a63d1556df71f",
-      "bytes": 11309
+      "sha256": "afe3300d07371046afd3176db83d1f2e9c608084496c23b231b3acc82f727a09",
+      "bytes": 11559
     },
     "m01-b008": {
       "file": "audio/m01-b008.ogg",
@@ -1256,38 +1256,38 @@
     },
     "m01-b009": {
       "file": "audio/m01-b009.ogg",
-      "duration": 2.977375,
+      "duration": 3.0116666666666667,
       "speaker": "scout",
-      "sha256": "57f5880f9668e74be3ce1cea200e94f889f03e671a183990d32c36c1f60be483",
-      "bytes": 14412
+      "sha256": "0065809baef38c60c3875b24b18e6bda58980b1988c2f67496fe0c58134d127c",
+      "bytes": 14548
     },
     "m01-b010": {
       "file": "audio/m01-b010.ogg",
-      "duration": 2.96525,
+      "duration": 3.034875,
       "speaker": "scout",
-      "sha256": "10b8532b4598741f7d08a8cf7f0bf0474d20b4fbccbdea68aec7bec0bbbb3b55",
-      "bytes": 14127
+      "sha256": "6d9168b6e1ff1119fb0e57af0dfa7517e684416897bf76694436f51202985102",
+      "bytes": 14641
     },
     "m01-b013": {
       "file": "audio/m01-b013.ogg",
-      "duration": 1.563375,
+      "duration": 1.55125,
       "speaker": "scout",
-      "sha256": "c065c4b9717dc593e0cefff0f2eeb21ef7b9cd69467f78114c594203587e0cc8",
-      "bytes": 7574
+      "sha256": "2181cbd65db6a8c5bb79e3fc7b89e5845c00cc2e818e58359cc79806b0dd05be",
+      "bytes": 7495
     },
     "m01-b016": {
       "file": "audio/m01-b016.ogg",
-      "duration": 1.9581666666666666,
+      "duration": 1.9227916666666667,
       "speaker": "scout",
-      "sha256": "3a915d961f8f26dc6a52db186516e411b6b4b609dfd337afc1f03b81564a2283",
-      "bytes": 9481
+      "sha256": "32aa581b3f6df7dcd0d957b1eefdc3b220e3b555708d2ec46810ddecdcb59155",
+      "bytes": 9308
     },
     "m01-b017": {
       "file": "audio/m01-b017.ogg",
-      "duration": 2.3150833333333334,
+      "duration": 2.3847916666666666,
       "speaker": "scout",
-      "sha256": "c4e0584323d5bb424884803a630e3ab4afcea1af8310729291da10efb6f41266",
-      "bytes": 10879
+      "sha256": "f416e25cc6ed0a9dea25b9548f1a99452b73c9cdabb9c21fe8227a2e8ab1dfc9",
+      "bytes": 11224
     },
     "m01-b019": {
       "file": "audio/m01-b019.ogg",
@@ -1298,10 +1298,10 @@
     },
     "m01-b020": {
       "file": "audio/m01-b020.ogg",
-      "duration": 2.1782083333333335,
+      "duration": 2.1439166666666667,
       "speaker": "scout",
-      "sha256": "8e326711a2ac0568db969c443590575f60d65b1243769951d815cb31581228a7",
-      "bytes": 10821
+      "sha256": "37b9b014f2cac768d1f3859c51af704b2fab225fd61b84a692b76c4bcde5a6d7",
+      "bytes": 10687
     },
     "m01-s07-l006": {
       "file": "audio/m01-s07-l006.ogg",
@@ -1445,17 +1445,17 @@
     },
     "m01-b011": {
       "file": "audio/m01-b011.ogg",
-      "duration": 2.2019166666666665,
+      "duration": 2.306125,
       "speaker": "builder",
-      "sha256": "2feb2cda0efd51f3809970e5750eb81489774d78e78e9c2876715e6d9b3ba530",
-      "bytes": 10472
+      "sha256": "e9b9e6bc88cd459137bb8c564bac1676e3f23bcdc57301c0cbf14b83bb021c00",
+      "bytes": 10977
     },
     "m01-b012": {
       "file": "audio/m01-b012.ogg",
-      "duration": 3.0378333333333334,
+      "duration": 3.049166666666667,
       "speaker": "builder",
-      "sha256": "77121a1ce6e8f13a1f4eb4f09eedce1196d46ea983d4be9a951bfd1399139caa",
-      "bytes": 14704
+      "sha256": "c5575bce80641131fd395e427dbcc279af42929a9a36c88f079efdaa22ebb3fb",
+      "bytes": 14776
     }
   },
   "ambience": {
@@ -1463,49 +1463,49 @@
       "file": "sfx/wind.ogg",
       "duration": 12,
       "source": "Procedural synthesis in build-campaign-audio.py",
-      "sha256": "770f09d021291bd6bdf7d774b1ab8bff0290bb33f282bd31ff93ca3622376c47"
+      "sha256": "14480fe01ed182b49387f7b90a449b1cf8b5319acbc2ac8f5382db36a35e2139"
     },
     "siren": {
       "file": "sfx/siren.ogg",
       "duration": 12,
       "source": "Procedural synthesis in build-campaign-audio.py",
-      "sha256": "cf2218cf6a1e0d34a41d2299806e4da714591662dd61f741f20c678f1a9b6803"
+      "sha256": "93a36598081b9b337f0622d005ee5c28451c129948888baff07ad15ed1b49ba9"
     },
     "barracks": {
       "file": "sfx/barracks.ogg",
       "duration": 12,
       "source": "Procedural synthesis in build-campaign-audio.py",
-      "sha256": "9d2987d22fee03578a2c3d49504f32fe8119126cbfe65844d628f4de4ee7ecd6"
+      "sha256": "57921445ebe9cca72ed37bd08a26e652b177c872c7a79131ef5f2860a7626341"
     },
     "base": {
       "file": "sfx/base.ogg",
       "duration": 12,
       "source": "Procedural synthesis in build-campaign-audio.py",
-      "sha256": "147309a16816463ec3e6274d216bfd27e5e41b263e34e5d938f3279b5fe623c7"
+      "sha256": "9c697d9613f6758862a3dab960e9cd7ff73f015e7f2b75501ff82d1bd37800df"
     },
     "projector": {
       "file": "sfx/projector.ogg",
       "duration": 12,
       "source": "Procedural synthesis in build-campaign-audio.py",
-      "sha256": "54ad3a366690b2cd94bc01907ae84f67c286b8beba2e3dd723cf5f6281db7fc9"
+      "sha256": "87aa0b10a1b628ae9c71bf5d5c5e716869f10c33f373840382133217ea00f5ad"
     },
     "convoy": {
       "file": "sfx/convoy.ogg",
       "duration": 12,
       "source": "Procedural synthesis in build-campaign-audio.py",
-      "sha256": "ca7f3d8291451ac593b3bd9928e128bb49b99d8bc724d4884fda3f68c665d4d2"
+      "sha256": "5ce7e6abce8d49cab1ee10e9b1970b074fb9c661f2e1e738b5d50d0f0c7e2b4a"
     },
     "radio": {
       "file": "sfx/radio.ogg",
       "duration": 12,
       "source": "Procedural synthesis in build-campaign-audio.py",
-      "sha256": "1424fd1d03e01084ff0c68c80a2022575db3d8beb9aed76bc79c08697bb21e6f"
+      "sha256": "afa20ad71ac4c81a62f2efb6766bb430f855b560d09003481380e828682eb622"
     },
     "workshop": {
       "file": "sfx/workshop.ogg",
       "duration": 12,
       "source": "Procedural synthesis in build-campaign-audio.py",
-      "sha256": "ab06919f38a9183785216e23278434959d129720bed15e443d0917e08063070b"
+      "sha256": "a3f9e8dea224c26c7d3fd48477942384b39913430bdc13bd14f62816e7fd8d0c"
     }
   }
 }

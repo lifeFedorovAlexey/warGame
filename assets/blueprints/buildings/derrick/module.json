@@ -1,0 +1,68 @@
+{
+  "id": "derrick",
+  "name": "Нефтяная вышка",
+  "status": "engineering-prototype-awaiting-art-reference",
+  "units": "metres",
+  "axes": "X right,Y forward,Z up",
+  "nominalEnvelope": [
+    8,
+    8,
+    14
+  ],
+  "reservedFootprint": [
+    10,
+    10
+  ],
+  "measuredBounds": {
+    "min": [
+      -4,
+      -4,
+      2.9802322831784522e-9
+    ],
+    "max": [
+      4,
+      4,
+      13.359999656677246
+    ]
+  },
+  "anchors": {
+    "work_anchor": [
+      0,
+      -6,
+      0
+    ]
+  },
+  "collision": {
+    "type": "box",
+    "width": 10,
+    "depth": 10,
+    "height": 14
+  },
+  "validation": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "geometry": {
+    "id": "derrick",
+    "lod": 0,
+    "triangles": 756,
+    "vertices": 856,
+    "primitives": 3,
+    "materials": 3,
+    "removedDegenerate": 0,
+    "inputTriangles": 756,
+    "bytes": 35684,
+    "boundsMm": {
+      "min": [
+        -4000,
+        -4000,
+        0
+      ],
+      "max": [
+        4000,
+        4000,
+        13360
+      ]
+    }
+  }
+}
