@@ -37,6 +37,7 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
    mission.cinematic('artifact-mg-ammo-1');c.advance(0);
    const before=radio.entry.chapter;
    mission.cinematic('first-contact');c.advance(0);
+   radio.until=Infinity;
    mission.state.seenCinematics=seen;
    return {before,chapter:radio.entry.chapter,interrupted:performance.now()<until,
     queued:radio.queue.map(entry=>entry.chapter),signal:c.world.storySignals.current?.kind};
@@ -46,11 +47,13 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
    const audio=window.campaign.storyAudio;
    return audio.playing&&audio.chapter==='first-contact'&&audio.urgent;
   });
+  const minimapWithRadio=await page.locator('#minimap').boundingBox();
   await page.locator('[data-skip-all]').click();
   assert.equal(await page.evaluate(()=>localStorage.getItem('warGame.fieldRadio')),'off');
   assert.equal(await page.evaluate(()=>window.campaign.world.storySignals.current),null);
   assert.equal(await page.evaluate(()=>window.campaign.storyAudio.playing),false);
   assert.equal(await page.evaluate(()=>window.campaign.radio.queue.length),0,'Skipping radio also drops queued transmissions');
+  assert.deepEqual(await page.locator('#minimap').boundingBox(),minimapWithRadio,'Dismissing the radio does not move the minimap');
   await page.locator('#home').click();
   await page.locator('#pause').click();
   const idleShadows=await page.evaluate(()=>{
@@ -88,6 +91,8 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   await page.mouse.click(position.x,position.y);
   await page.waitForFunction(()=>window.campaign.mission.state.buildings.some(b=>b.owner==='rai'&&b.kind==='generator'));
   await page.getByRole('button',{name:'К нефти',exact:true}).click();
+  assert.equal(await page.locator('.settings').getAttribute('open'),null,'Oil focus is available with the operation menu closed');
+
   const oil=await page.evaluate(()=>{
    const {world,storyAudio}=window.campaign,p=world.storySignals.current;
    return {position:world.screen(p,2),target:{x:world.controls.target.x,y:world.controls.target.y},signal:p,playing:storyAudio.playing};
@@ -95,6 +100,8 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   assert.deepEqual(oil.target,{x:briefing.signal.x,y:briefing.signal.y},'The objective opens the same playable oil point with radio off');
   assert.equal(oil.signal.kind,'guidance');
   assert.equal(oil.playing,false);
+  await page.mouse.move(oil.position.x,oil.position.y);
+  assert.equal(await page.locator('#world canvas').getAttribute('title'),'Построить вышку');
   await page.mouse.click(oil.position.x,oil.position.y);
   await page.waitForFunction(()=>window.campaign.mission.state.buildings.some(b=>b.owner==='rai'&&b.kind==='derrick'));
   assert.equal(await page.locator('#objective-focus').isVisible(),false);

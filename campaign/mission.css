@@ -73,14 +73,15 @@ button.active { border-color: #e5db9d; box-shadow: inset 0 -2px #e5db9d; }
 #objectives li.done::before { content: '✓'; color: #b8d88c; }
 #objectives small { font-size: 11px; color: #d6c994; font-variant-numeric: tabular-nums; }
 #hint { margin: 6px 0 0 15px; color: #d7d0a9; font-size: 11px; }
-#objective-focus { min-height: 26px; margin-left: 8px; padding: 4px 7px; pointer-events: auto; color: #f3e8ba; font-size: 11px; text-shadow: 0 1px 3px #171511; }
+.resources #objective-focus { --button-size: 32px; --icon-size: 26px; min-height: 26px; margin: 0; padding: 2px; pointer-events: auto; color: #f3e8ba; text-shadow: 0 1px 3px #171511; }
 #objective-focus.threat { color: #ffd0af; }
 #minimap-panel { position: fixed; z-index: 3; right: var(--edge); bottom: var(--edge); overflow: hidden; }
 #minimap { display: block; width: var(--map-size); height: var(--map-size); cursor: crosshair; }
 #minimap-panel button { width: 100%; border: 0; border-radius: 0; font-size: 11px; padding: 3px; }
+#mission-hud > .command-deck { grid-template-columns: minmax(0, 1fr) var(--map-size); }
 #commands { position: fixed; z-index: 4; left: var(--edge); bottom: var(--edge); width: max-content; max-width: calc(100vw - var(--map-size) - 3 * var(--edge)); pointer-events: none; }
 #commands :is(button, .panel, #queue) { pointer-events: auto; }
-.order-bar, #placement, .tray-heading, .radio-head { display: flex; align-items: center; gap: 5px; }
+.order-bar, #placement, .tray-heading { display: flex; align-items: center; gap: 5px; }
 .tactical-dock { display: flex; gap: 10px; align-items: end; text-shadow: 0 1px 4px #151912; }
 .squad { min-width: 0; }
 .selection-title { display: flex; align-items: baseline; gap: 8px; padding-bottom: 4px; white-space: nowrap; }
@@ -102,7 +103,7 @@ button.active { border-color: #e5db9d; box-shadow: inset 0 -2px #e5db9d; }
 #build-toggle { background: #5b6241; color: #f5edbb; }
 #build-palette { margin-bottom: 5px; width: min(612px, calc(100vw - var(--map-size) - 3 * var(--edge))); padding: 6px; max-height: 44vh; overflow: auto; }
 .tray-heading { justify-content: space-between; padding-bottom: 4px; }
-.tray-heading button, .radio-head button { padding: 0 6px; }
+.tray-heading button { padding: 0 6px; }
 #build-cards { display: grid; grid-template-columns: repeat(var(--build-columns,5), minmax(0, 1fr)); gap: 4px; }
 #build-cards button { display: flex; flex-direction: column; align-items: stretch; gap: 2px; text-align: left; padding: 3px; font-size: 11px; line-height: 1.2; overflow-wrap:anywhere; border-color: transparent; }
 #build-cards img { width: 100%; height: clamp(32px, 6.8vh, 60px); object-fit: contain; background: #3d4236; border-radius: 2px; }
@@ -119,10 +120,24 @@ button.active { border-color: #e5db9d; box-shadow: inset 0 -2px #e5db9d; }
 #queue progress { width: 88px; margin-left: 7px; vertical-align: middle; accent-color: var(--accent); }
 #order-feedback { display: flex; flex-wrap: wrap; gap: 3px 9px; align-items: baseline; padding: 0 3px 4px; color: #ffd3a7; font-size: 11px; text-shadow: 0 1px 3px #17150c; }
 #select-blocked { color: inherit; }
-#radio { position: fixed; z-index: 5; top: 53px; right: var(--edge); width: min(288px, 43vw); padding: 6px 9px; border-left: 2px solid #d6da9f; }
-.radio-head { justify-content: space-between; color: var(--accent); }
-#radio p { margin: 2px 0; font-size: 12px; }
-.radio-actions { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; }
+#mission-hud > #radio {
+  position: fixed; z-index: 5; top: calc(var(--hud-top, 44px) + 8px); right: var(--edge);
+  width: max-content; max-width: min(390px, 56vw); pointer-events: none;
+  display: flex; align-items: flex-start; gap: 8px; text-shadow: 0 1px 3px #111a10, 0 2px 8px #111a10;
+}
+#mission-hud:has(> .command-deck) > #radio {
+  right: auto; left: max(12px, var(--edge)); max-width: min(390px, calc(100vw - 24px));
+}
+.radio-copy { min-width: 0; }
+.radio-copy strong { color: var(--accent); font-size: 11px; }
+#radio p { margin: 2px 0 0; color: #f0eee2; font-size: 13px; line-height: 1.4; }
+.radio-actions { display: flex; align-items: center; flex: 0 0 auto; gap: 2px; }
+#radio button { pointer-events: auto; }
+#radio [data-dismiss]:not(.icon-button) { width: 30px; height: 30px; padding: 0; border: 0; background: none; color: var(--accent); font-size: 22px; }
+.radio-actions button.icon-button { --button-size: 30px; --icon-size: 23px; padding: 2px; }
+@media (max-width: 700px) {
+  #mission-hud:has(.settings[open]) > #radio { visibility: hidden; }
+}
 button.quiet { padding: 2px 0; border: 0; background: transparent; color: var(--muted); font-size: 10px; text-decoration: underline; }
 button.radio-focus { color: var(--accent); }
 #toast { position: fixed; z-index: 8; top: 52px; left: 50%; transform: translateX(-50%); max-width: min(52vw, 420px); background: #26302cf5; border: 1px solid var(--line); border-radius: 4px; padding: 6px 9px; pointer-events: none; }

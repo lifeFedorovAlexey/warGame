@@ -29,6 +29,7 @@
           <meter id="fleet-meter" aria-label="Лимит техники" min="0" max="48" value="5"></meter>
         </div>
         <span id="power" title="Питание от АЭС"></span>
+        <button id="objective-focus" class="quiet" hidden></button>
       </div>
       <button id="pause" title="Пауза · Пробел">Пауза</button>
       <button id="tempo" title="Скорость симуляции">×1</button>
@@ -50,15 +51,16 @@
       <h2>Задачи <span id="objective-count"></span></h2>
       <ol id="objectives"></ol>
       <p id="hint"></p>
-      <button id="objective-focus" class="quiet" hidden></button>
     </aside>
 
-    <aside id="radio" class="panel" aria-live="polite" hidden>
-      <div class="radio-head"><strong></strong><button data-dismiss title="Пропустить реплику · Esc" aria-label="Пропустить реплику">×</button></div>
-      <p></p>
-      <div class="radio-actions">
-        <button class="quiet radio-focus" data-focus hidden></button>
+    <aside id="radio" aria-label="Полевое радио" aria-live="polite" hidden>
+      <div class="radio-copy">
+        <strong></strong><p></p>
         <button class="quiet" data-skip-all>Пропустить все реплики</button>
+      </div>
+      <div class="radio-actions">
+        <button class="quiet radio-focus" data-focus hidden data-icon="focus" aria-label=""></button>
+        <button data-dismiss title="Пропустить реплику · Esc" data-icon="close" aria-label="Пропустить реплику">×</button>
       </div>
     </aside>
 

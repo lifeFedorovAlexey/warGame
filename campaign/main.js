@@ -310,11 +310,13 @@ function installInput() {
   canvas.addEventListener('pointermove', event => {
     pointer = {x: event.clientX, y: event.clientY};
     site = null;
+    const oil = !buildKind && !orderMode && oilAt(pointer.x,pointer.y);
+    canvas.title = oil ? 'Построить вышку' : '';
     if (buildKind) {
       updatePlacement();
       return;
     }
-    canvas.style.cursor = orderMode ? 'crosshair' : oilAt(pointer.x,pointer.y) ? 'pointer' : '';
+    canvas.style.cursor = orderMode ? 'crosshair' : oil ? 'pointer' : '';
     if (!drag || orderMode) return;
     const box = $('drag-box');
     box.hidden = Math.hypot(pointer.x - drag.x, pointer.y - drag.y) < 6;
@@ -597,6 +599,7 @@ function updateUi() {
   focus.hidden=!marker;
   if(marker){
     focus.textContent=marker.label;
+    focus.title=marker.kind==='guidance'?'ЛКМ по нефтяной точке — поставить вышку':marker.label;
     focus.classList.toggle('threat',marker.kind==='threat');
   }
   const raidHint=contact?'Рейдеры в зоне обзора.':s.flags.raidStarted?'Рейдеры в пути. Прикройте въезд.':'Готовится рейд. Прикройте въезд.';
