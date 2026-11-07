@@ -1,6 +1,7 @@
 import {driveStep,checkManeuver} from './vehicle-motion.js';
 import {vehicleEnvelope} from './vehicle-collision.js';
 import {vehicleDynamics} from './vehicle-dynamics.js';
+import {maneuverAdmissionRadius} from './maneuver-admission.js';
 
 // Prove a shortcut using the actual steering, acceleration and full-body
 // sweep. A straight grid ray alone cannot prove that a van can make a turn.
@@ -8,6 +9,7 @@ import {vehicleDynamics} from './vehicle-dynamics.js';
 const failures=new WeakMap();
 const recoveryFailures=new WeakMap();
 const progressTurnFailures=new WeakMap();
+const blockedDetourFailures=new WeakMap();
 export function recoveryConditions(mission,unit,radius=mission.config.worldScale*22){
  const neighbours=mission.nearbyUnits(unit,radius).filter(other=>other.hp>0);
  const admission=mission.trafficCoordinator.passageDecisions.get(unit.id);
@@ -19,6 +21,33 @@ export function recoveryConditions(mission,unit,radius=mission.config.worldScale
 }
 export function unchangedRecoveryFailure(unit,conditions){return recoveryFailures.get(unit)===conditions;}
 export function rememberRecoveryFailure(unit,conditions){recoveryFailures.set(unit,conditions);}
+// A previously valid local manoeuvre can become blocked by a newly parked
+// body. Try the bounded alternatives on that geometry change, rather than
+// waiting for the old plan's one-second timeout. Special cooperative/arrival
+// plans have their own contracts and are never replaced here.
+export function* checkedDetourAlternative(mission,unit,plan,goal,allowed,dt=.1){
+ if(plan.parking||plan.idleYield||plan.yieldReturning||plan.departure||plan.passageExit
+  ||plan.progressRecovery||plan.pickup||plan.arrival||plan.rough||unit.pendingOrder)return null;
+ const scale=mission.config.worldScale,state=mission.state,revision=unit.commandRevision;
+ const condition=()=>{
+  // A fast neighbour beyond the old fixed local radius can still brake
+  // through any of the nine 1.2-scale legs or their 2.5-scale continuation.
+  const radius=Math.max(scale*22,scale*(9*1.2+2.5)+maneuverAdmissionRadius(mission,unit,dt));
+  return radius+'|'+recoveryConditions(mission,unit,radius)+'|'+goal.x+','+goal.y+'|'
+   +mission.nearbyUnits(unit,radius).filter(other=>other.hp>0&&(other.driveSpeed??0)>0)
+    .map(other=>[other.id,other.driveSpeed,other.steering,other.reversing].join(',')).join(';');
+ };
+ const signature=condition();
+ if(blockedDetourFailures.get(plan)===signature)return null;
+ const legs=yield* mission.planManeuverSteps(unit,goal,{scale,allowed,attempts:2,maximumLegs:9,
+  reverseBudget:Math.max(0,scale*4-(unit.reverseDebt??0))});
+ // A sliced search may outlive a replacement command or a changed obstacle.
+ // Do not publish its old proof into that new state.
+ if(mission.state!==state||mission.entity(unit.id)!==unit||unit.hp<=0||unit.detour!==plan
+  ||unit.pendingOrder||unit.commandRevision!==revision||condition()!==signature)return null;
+ if(!legs)blockedDetourFailures.set(plan,signature);
+ return legs;
+}
 export function* checkedProgressTurn(mission,unit,waypoint,destination,allowed){
  const scale=mission.config.worldScale,depth=vehicleEnvelope(unit,scale,mission.field).depth,
   distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),initial=distance(unit,destination),toWaypoint=distance(unit,waypoint);

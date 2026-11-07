@@ -43,6 +43,7 @@ function disableBattle(m){
  m.enemyOf=()=>false;m.attack=()=>{};m.updateRaid=()=>{};
  m.config={...m.config,camps:m.config.camps.map(c=>({...c,wave:null}))};
 }
+export {setup as createMapSampleMission,disableBattle as disableMapSampleBattle};
 function solidGap(unit,solid,m){const s=vehicleEnvelope(unit,m.config.worldScale,m.field);let gap=-Infinity;
  for(const [x,y] of [[1,0],[0,1],[s.c,s.s],[-s.s,s.c]])gap=Math.max(gap,
   Math.abs((s.x-solid.x)*x+(s.y-solid.y)*y)-footprintSupport(s,x,y)-solid.halfWidth*Math.abs(x)-solid.halfDepth*Math.abs(y));return gap;}

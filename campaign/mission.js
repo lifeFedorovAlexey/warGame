@@ -19,7 +19,7 @@ import {vehicleContact,impactPower,fallbackVehicleImpact} from './vehicle-impact
 import {kickContactRock} from './vehicle-contact-rock.js';
 import {TrafficCoordinator} from './traffic-coordinator.js';
 import {prepareTrafficDeparture,departureSlotOrder,rememberYieldHome,recordYieldStep,resumeYieldHome,borrowedHomeClear} from './traffic-start.js';
-import {checkedRouteShortcut,checkedProgressTurn,recoveryConditions,unchangedRecoveryFailure,rememberRecoveryFailure} from './traffic-shortcut.js';
+import {checkedRouteShortcut,checkedProgressTurn,checkedDetourAlternative,recoveryConditions,unchangedRecoveryFailure,rememberRecoveryFailure} from './traffic-shortcut.js';
 import {maneuverAdmissionBlocker} from './maneuver-admission.js';
 import {recoverWaitCycle,resumeCycleRoute} from './traffic-cycle.js';
 import {vehicleDynamics} from './vehicle-dynamics.js';
@@ -1576,6 +1576,9 @@ export class Mission{
     return yield* this.moveSteps(unit,dt);
    }
    if(plan.passageExit&&[...blockers].some(advancingThroughExit))return false;
+   const alternative=yield* checkedDetourAlternative(this,unit,plan,point,admitted,dt);
+   if(unit.detour!==plan||unit.pendingOrder||unit.hp<=0)return false;
+   if(alternative){unit.detour={legs:alternative,parking:false,blocked:0};return false;}
    plan.blocked+=dt;
    if(plan.blocked<1)return false;
    if(plan.passageExit&&egress){
