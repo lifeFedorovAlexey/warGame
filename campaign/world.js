@@ -253,7 +253,7 @@ export async function createCampaignWorld(host,config,sound){
   });
   const buildingIds=new Set(mission.state.buildings.map(b=>b.id));for(const [id,object] of buildings)if(!buildingIds.has(id)){construction.release(object);buildingRoot.remove(object);buildings.delete(id);}
   for(const b of mission.state.buildings){let object=buildings.get(b.id);if(object&&(object.userData.kind!==b.kind||object.userData.owner!==b.owner)){construction.release(object);buildingRoot.remove(object);buildings.delete(b.id);object=null;}if(!object){object=getPrefab(b.kind,b.owner,b.campId).clone(true);object.userData.entity=b.id;buildingRoot.add(object);buildings.set(b.id,object);}object.visible=b.hp>0&&(b.owner==='rai'||mission.exploredAt(b.x,b.y));if(!object.visible)continue;object.position.set(b.x,b.y,b.groundHeight??field.heightAt(b.x,b.y));object.rotation.z=b.rotation;object.scale.setScalar(config.worldScale);
-   if(b.campId==='west-south'&&b.kind==='mg-tower')aimTowerWeapon(object,b,field,config.worldScale,b.aimTarget,now-(shotTimes.get(b.id)??-Infinity));
+   if(b.owner==='scavs'&&b.kind==='mg-tower')aimTowerWeapon(object,b,field,config.worldScale,b.aimTarget,now-(shotTimes.get(b.id)??-Infinity));
    if(b.owner==='rai')construction.building(object,b,config.buildings[b.kind]);
    if(b.kind==='derrick'&&b.completed){
     const phase=(b.pumpTime??0)+(b.powered&&mission.state.status==='running'?Math.max(0,mission.accumulator):0);

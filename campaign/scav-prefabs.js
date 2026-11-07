@@ -61,22 +61,28 @@ export function createScavPrefab(T, kind, site) {
       if (stronghold) box([.76,.76,.28], [x,y,-.08], mats.wood);
     }
     box([3.75,3.75,.24],[0,0,9.15],mats.wood);
+    const yaw = new T.Group();
+    yaw.name = 'tower_yaw';
+    structure.add(yaw);
+    const mountBatches = new Map();
+    surfaces.push([yaw,mountBatches]);
     if (waterTower) {
       drum(1.46,.21,[0,.39,9.38],mats.dark,12);
       drum(1.59,2.14,[0,.39,10.53],mats.tin,12);
       for(const z of [9.62,11.38])drum(1.63,.12,[0,.39,z],mats.rust,12);
       drum(1.64,.54,[0,.39,11.9],mats.tin,12,.34);
-      drum(.23,.16,[0,.39,12.24],mats.rust,9);
       drum(.105,8.95,[1.48,-.81,4.72],mats.dark,8);
       beam([1.1,-.49,9.57],[1.48,-.81,9.21],.2,mats.dark);
       for(const z of [2.4,5.5,8.2])box([.34,.15,.13],[1.48,-.81,z],mats.tin);
       for(const x of [-.44,.44])box([.38,.15,.61],[x,-1.56,10.62],mats.dark);
+      drum(.80,.19,[0,0,12.19],mats.rust,12);
+      activeBatches = mountBatches;
+      drum(.40,.20,[0,0,12.38],mats.dark,12);
+      box([.54,1.88,.19],[0,-.71,12.52],mats.rust);
+      drum(.29,.33,[0,-1.52,12.72],mats.dark,10);
+      for (const x of [-.28,.28]) box([.12,.42,.48],[x,-1.52,12.98],mats.dark);
     } else {
-      const yaw = new T.Group();
-      yaw.name = 'tower_yaw';
-      structure.add(yaw);
-      activeBatches = new Map();
-      surfaces.push([yaw,activeBatches]);
+      activeBatches = mountBatches;
       box([3.28,.20,1.02],[0,-1.55,9.82],mats.rust);
       box([3.28,3.1,.12],[0,.08,11.03],mats.tarp,[.08,0,0]);
       for (const x of [-1.48,1.48]) beam([x,1.38,9.22],[x,1.38,11.02],.16,mats.wood);
@@ -86,27 +92,20 @@ export function createScavPrefab(T, kind, site) {
           box([.21,2.25,.79],[side*1.57,-.18,9.96],mats.rust);
         }
       }
-      const pitch = new T.Group(), recoil = new T.Group(), muzzle = new T.Object3D();
-      pitch.name = 'tower_pitch';
-      pitch.position.set(0,-1.41,10.80);
-      recoil.name = 'tower_recoil';
-      muzzle.name = 'muzzle';
-      muzzle.position.y = -1.49;
-      yaw.add(pitch);pitch.add(recoil);recoil.add(muzzle);
-      activeBatches = new Map();
-      surfaces.push([recoil,activeBatches]);
-      box([.42,.66,.34],[0,0,-.02],mats.dark);
-      beam([0,-.14,0],[0,-1.49,0],.095,mats.dark);
-      activeBatches = batches;
     }
-    if (waterTower) {
-      box([.42,.66,.34],[0,-1.41,10.78],mats.dark);
-      beam([0,-1.55,10.80],[0,-2.9,10.80],.095,mats.dark);
-      const muzzle = new T.Object3D();
-      muzzle.name = 'muzzle';
-      muzzle.position.set(0,-2.9,10.80);
-      root.add(muzzle);
-    }
+    const pitch = new T.Group(), recoil = new T.Group(), muzzle = new T.Object3D();
+    pitch.name = 'tower_pitch';
+    pitch.position.set(0,waterTower?-1.52:-1.41,waterTower?13.16:10.80);
+    recoil.name = 'tower_recoil';
+    muzzle.name = 'muzzle';
+    const barrelLength=waterTower?1.25:1.49;
+    muzzle.position.y = -barrelLength;
+    yaw.add(pitch);pitch.add(recoil);recoil.add(muzzle);
+    activeBatches = new Map();
+    surfaces.push([recoil,activeBatches]);
+    box([.42,.66,.34],[0,0,-.02],mats.dark);
+    beam([0,-.14,0],[0,-barrelLength,0],.095,mats.dark);
+    activeBatches = batches;
   } else if (site === 'nw-pocket') {
     shed(-2.6,.40,4.2,4.3,2.65,mats.rust);
     shed(3.25,1.55,3.1,2.45,1.95,mats.wood);
