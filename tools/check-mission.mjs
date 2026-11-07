@@ -108,6 +108,30 @@ const southernRoad=field.roadNetwork.paths.find(path=>path.to==='west-south');
 const bend=southernRoad.points.reduce((south,point)=>point.y<south.y?point:south);
 assert(loaded.inBounds(bend.x,bend.y-bend.width/2),'Expanded sector includes the outside of the western bend in old saves');
 assert(loaded.nav.findPath(southernRoad.points[0],bend)&&loaded.nav.findPath(bend,southernRoad.points.at(-1)),'Both sides of the western bend are reachable');
+const stronghold=mission.state.camps.find(camp=>camp.id===southernRoad.to);
+const defenses=mission.state.buildings.filter(building=>building.campId===stronghold.id);
+const towers=defenses.filter(building=>building.kind==='mg-tower');
+assert.equal(towers.length,2);
+assert(towers.every(tower=>Math.hypot(tower.x-stronghold.gate.x,tower.y-stronghold.gate.y)<config.buildings['mg-tower'].range&&mission.lineOfSight(tower,stronghold.gate)),'Both towers can cover the gate');
+assert(defenses.every((a,i)=>defenses.slice(i+1).every(b=>Math.abs(a.x-b.x)>=a.halfWidth+b.halfWidth||Math.abs(a.y-b.y)>=a.halfDepth+b.halfDepth)),
+ 'Stronghold collision footprints stay separate');
+assert(defenses.every(b=>southernRoad.points.every(p=>
+ Math.abs(p.x-b.x)>=b.halfWidth+mission.nav.clearance||Math.abs(p.y-b.y)>=b.halfDepth+mission.nav.clearance)),
+ 'Stronghold defenses leave the entire approach centerline clear for vehicles');
+const oldLayout=JSON.parse(save);
+const oldCamp=oldLayout.state.camps.find(camp=>camp.id===stronghold.id);
+delete oldCamp.towerGrids;
+delete oldCamp.coreRotationDegrees;
+const oldGrid=[12,72],oldCenter=field.gridToWorld(oldGrid);
+Object.assign(oldCamp,oldCenter,{grid:oldGrid});
+const oldDefenses=oldLayout.state.buildings.filter(building=>building.campId===stronghold.id);
+Object.assign(oldDefenses[0],oldCenter,{rotation:0});
+oldDefenses.slice(1).forEach((tower,i)=>Object.assign(tower,{x:oldCenter.x+(i?48:-48),y:oldCenter.y-30}));
+loaded.load(structuredClone(oldLayout));
+assert.deepEqual(loaded.state.buildings.filter(building=>building.campId===stronghold.id),defenses,'A hidden stronghold moves without changing structure identity');
+oldLayout.state.flags.lastRevealed=true;
+loaded.load(structuredClone(oldLayout));
+assert.deepEqual(loaded.state.buildings.filter(building=>building.campId===stronghold.id),oldDefenses,'A revealed stronghold stays in place when an old battle is resumed');
 const result={realTerrain:true,baseBuildings:mission.state.buildings.filter(b=>b.owner==='rai'&&b.completed).map(b=>b.kind),oilLinked:mission.state.oilLinked,produced:mission.state.statistics.produced,seconds:mission.state.time,cancelRefund:true,saveRoundTrip:true,legacySectorExpanded:true,builderHandoff:mechanics.builderHandoff,cinematics:seen,events:events.map(e=>e.type),status:mission.state.status};
 fs.mkdirSync('campaign/reports',{recursive:true});fs.writeFileSync('campaign/reports/mission-base.json',JSON.stringify(result,null,2));console.log(JSON.stringify(result));
 

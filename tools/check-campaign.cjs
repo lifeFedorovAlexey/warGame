@@ -184,6 +184,21 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
    return {parts,collectedRemoved:!c.world.scene.getObjectByName('salvage_flamethrower')};
   });
   assert(models.parts.every(count=>count>4)&&models.collectedRemoved);
+  const approach=await page.evaluate(()=>{
+   const {mission,world}=window.campaign,{field}=world;
+   return mission.state.buildings.filter(b=>b.campId==='west-south').map(b=>{
+    const tower=b.kind==='mg-tower',scale=mission.config.worldScale;
+    const w=(tower?2.58:5.55)*scale,d=(tower?2.58:3.6)*scale;
+    const foundation=field.heightAt(b.x,b.y),depth=(tower ? .22 : .18)*scale;
+    let asphalt=0,airGap=0;
+    for(const x of [-w,0,w])for(const y of [-d,0,d]){
+     asphalt=Math.max(asphalt,field.roadBlendAt(b.x+x,b.y+y));
+     if(!tower||(x&&y))airGap=Math.max(airGap,foundation-depth-field.heightAt(b.x+x,b.y+y));
+    }
+    return {kind:b.kind,asphalt,airGap};
+   });
+  });
+  assert(approach.length===3&&approach.every(b=>b.asphalt<.2&&b.airGap<.1),JSON.stringify(approach));
   const finalView=await page.evaluate(()=>{
    // Present the debrief from an isolated UI fixture after the real base/drive checks.
    const c=window.campaign,m=c.mission,{target}=c.world.controls;
@@ -205,7 +220,7 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   assert.equal(signal.time,finalView.time);
   assert.equal(signal.explored,finalView.explored);
   await page.screenshot({path:'campaign/previews/field-southern-signal.png'});
-  const report={base,light,driven,pausedBetweenCommands:true,layeredConstruction:construction,oilDirectClick:true,radioSkipPersisted:true,optionalRadioFocus:true,oilFocusWithoutRadio:true,signal,artifactModels:models,animatedPump:true,oilPowerLoss:powered.stopped,resumedPump:powered.resumed,errors};
+  const report={base,light,driven,pausedBetweenCommands:true,layeredConstruction:construction,oilDirectClick:true,radioSkipPersisted:true,optionalRadioFocus:true,oilFocusWithoutRadio:true,approach,signal,artifactModels:models,animatedPump:true,oilPowerLoss:powered.stopped,resumedPump:powered.resumed,errors};
   assert.deepEqual(errors,[]);
   fs.mkdirSync('campaign/reports',{recursive:true});
   fs.writeFileSync('campaign/reports/campaign-browser.json',JSON.stringify(report,null,2));

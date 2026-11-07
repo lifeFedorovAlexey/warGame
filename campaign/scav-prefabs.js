@@ -57,6 +57,7 @@ export function createScavPrefab(T, kind, site) {
     for (const x of [-2.2,2.2]) for (const y of [-2.2,2.2]) {
       beam([x,y,0], [x*.63,y*.63,9.15], .23, mats.rust);
       beam([x,y,1.25], [-x*.72,y*.73,7.9], .14, mats.dark);
+      if (stronghold) box([.76,.76,.28], [x,y,-.08], mats.wood);
     }
     box([3.75,3.75,.24],[0,0,9.15],mats.wood);
     if (waterTower) {
@@ -122,7 +123,7 @@ export function createScavPrefab(T, kind, site) {
     for (const x of [-4.8,-3.65]) drum(.5,1.6,[x,1.45,.8],mats.rust);
     beam([-4.15,1.45,1.65],[.2,1.45,1.65],.19,mats.dark);
   } else {
-    box([11.1,7.2,.42],[0,0,.21],mats.wood);
+    box([11.1,7.2,.60],[0,0,.12],mats.wood);
     box([3.32,4.75,2.91],[-3.64,.85,1.66],mats.rust);
     box([4.44,4.75,2.91],[2.85,.85,1.66],mats.rust);
     box([2.63,2.95,2.91],[-.66,1.73,1.66],mats.rust);

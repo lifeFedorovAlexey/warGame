@@ -24,7 +24,17 @@ export class Mission{
   this.visible=new Uint8Array(128*128);this.explored=new Uint8Array(128*128);this.visionSources=[];this.fogTimer=1;this.fogRevision=0;
   const start=field.gridToWorld(config.startGrid);
   config.initialUnits.forEach((kind,index)=>this.addUnit(kind,'rai',{x:start.x+(index%3-1)*28,y:start.y-45-Math.floor(index/3)*30}));
-  config.camps.forEach((data,index)=>{const point=field.gridToWorld(data.grid),gate=field.gridToWorld(data.gateGrid),camp={...data,index,x:point.x,y:point.y,gate,cleared:false,artifactSpawned:false};this.state.camps.push(camp);this.addStructure('camp-core','scavs',point,{campId:data.id,hp:750*data.strength,halfWidth:28,halfDepth:22});if(index>=2)for(let j=0;j<(index===3?2:1);j++)this.addStructure('mg-tower','scavs',{x:point.x+(j?48:-48),y:point.y-30},{campId:data.id,hp:850*data.strength});for(let i=0;i<data.units;i++)this.addUnit('raider','scavs',{x:gate.x+(i%3-1)*24,y:gate.y+30+Math.floor(i/3)*24},{campId:data.id,guard:{...gate}});});
+  config.camps.forEach((data,index)=>{
+   const point=field.gridToWorld(data.grid),gate=field.gridToWorld(data.gateGrid);
+   const camp={...data,index,...point,gate,cleared:false,artifactSpawned:false};
+   this.state.camps.push(camp);
+   const rotation=(data.coreRotationDegrees??0)*Math.PI/180;
+   this.addStructure('camp-core','scavs',point,{campId:data.id,hp:750*data.strength,halfWidth:28,halfDepth:22,rotation});
+   for(const grid of data.towerGrids??[]){
+    this.addStructure('mg-tower','scavs',field.gridToWorld(grid),{campId:data.id,hp:850*data.strength});
+   }
+   for(let i=0;i<data.units;i++)this.addUnit('raider','scavs',{x:gate.x+(i%3-1)*24,y:gate.y+30+Math.floor(i/3)*24},{campId:data.id,guard:{...gate}});
+  });
   this.rebuildNavigation();this.updateFog();this.reserveRaid();
  }
  id(prefix){return prefix+this.serial++;}
@@ -1287,7 +1297,26 @@ export class Mission{
  advance(seconds){this.accumulator+=Math.max(0,seconds);let ticks=0;while(this.accumulator+1e-8>=this.config.simulationStep){this.accumulator-=this.config.simulationStep;this.tick(this.config.simulationStep);ticks++;}return ticks;}
  objectives(){const s=this.state,has=kind=>s.buildings.some(b=>b.owner==='rai'&&b.hp>0&&b.completed&&b.kind===kind);return [{id:'base',name:'Развернуть передовую базу',done:has('generator')&&has('factory')&&has('lab')&&(has('bunker')||has('mg-tower'))},{id:'power',name:'Обеспечить энергоснабжение',done:s.powered},{id:'production',name:'Наладить производство техники',done:s.statistics.produced>0},{id:'research',name:'Организовать научные исследования',done:Object.keys(this.config.research).every(key=>s.research[key]),progress:Object.keys(s.research).length+'/3'},{id:'security',name:s.flags.contact?'Уничтожить четыре лагеря':'Обеспечить безопасность района',done:s.camps.every(c=>c.cleared)&&s.flags.raidWon,progress:s.camps.filter(c=>c.cleared).length+'/4'}];}
  save(){this.updateFog();return JSON.stringify({version:1,mission:this.config.id,serial:this.serial,randomState:this.randomState,accumulator:this.accumulator,fogTimer:this.fogTimer,state:this.state,explored:Array.from(this.explored)});}
+ updateUnrevealedCampLayout(){
+  // Revealed camps keep their saved positions so ongoing battles can resume.
+  if(this.state.flags.lastRevealed)return;
+  for(const data of this.config.camps){
+   if(!data.requiresCamps||!data.towerGrids)continue;
+   const camp=this.state.camps.find(item=>item.id===data.id);
+   if(!camp||camp.towerGrids)continue;
+   const buildings=this.state.buildings.filter(b=>b.campId===data.id);
+   const core=buildings.find(b=>b.kind==='camp-core');
+   const point=this.field.gridToWorld(data.grid);
+   Object.assign(camp,{...point,grid:data.grid,towerGrids:data.towerGrids,coreRotationDegrees:data.coreRotationDegrees});
+   if(core)Object.assign(core,point,{rotation:(data.coreRotationDegrees??0)*Math.PI/180});
+   buildings.filter(b=>b.kind==='mg-tower').forEach((tower,index)=>{
+    const grid=data.towerGrids[index];
+    if(grid)Object.assign(tower,this.field.gridToWorld(grid));
+   });
+  }
+ }
  load(json){const data=typeof json==='string'?JSON.parse(json):json;if(data.version!==1||data.mission!==this.config.id||!Array.isArray(data.state?.units)||data.explored?.length!==16384)throw new Error('Несовместимое сохранение');this.state=data.state;
+  this.updateUnrevealedCampLayout();
   const bunker=this.config.buildings.bunker;
   if(bunker)for(const building of this.state.buildings){
    if(building.kind!=='bunker'||building.owner!=='rai')continue;
