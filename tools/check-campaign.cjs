@@ -210,7 +210,8 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
     tower.aimTarget=to;
     mission.effects.push({type:'shot',from:tower.id,to,weapon:'mg'});
     world.update(mission,new Set(),0);
-    const muzzle=world.buildingObjects.get(tower.id).getObjectByName('muzzle');
+    const model=world.buildingObjects.get(tower.id),muzzle=model.getObjectByName('muzzle');
+    const recoil=model.getObjectByName('tower_recoil').position.y;
     const tip=muzzle.getWorldPosition(new T.Vector3()),forward=new T.Vector3(0,-1,0).transformDirection(muzzle.matrixWorld);
     const alignment=forward.dot(new T.Vector3(to.x,to.y,to.z).sub(tip).normalize());
     const flash=world.scene.getObjectByName('field_muzzle_flash'),matrix=new T.Matrix4();
@@ -226,11 +227,11 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
      const direction=new T.Vector3(-1,0,0).transformDirection(muzzle.matrixWorld);
      part=world.damage.trace(tower,origin.toArray(),direction.toArray())?.partId??null;
     }
-    result.push({alignment,flashDistance,part});
+    result.push({alignment,flashDistance,recoil,part});
    }
    return result;
   });
-  assert(towerShots.every(shot=>shot.alignment>.9999&&shot.flashDistance<.005&&[undefined,9].includes(shot.part)),JSON.stringify(towerShots));
+  assert(towerShots.every(shot=>shot.alignment>.9999&&shot.flashDistance<.005&&shot.recoil>.09&&[undefined,9].includes(shot.part)),JSON.stringify(towerShots));
   const finalView=await page.evaluate(()=>{
    // Present the debrief from an isolated UI fixture after the real base/drive checks.
    const c=window.campaign,m=c.mission,{target}=c.world.controls;
