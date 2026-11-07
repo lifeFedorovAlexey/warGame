@@ -102,7 +102,7 @@ button.active { border-color: #e5db9d; box-shadow: inset 0 -2px #e5db9d; }
 .tray-heading { justify-content: space-between; padding-bottom: 4px; }
 .tray-heading button, .radio-head button { padding: 0 6px; }
 #build-cards { display: grid; grid-template-columns: repeat(var(--build-columns,5), minmax(0, 1fr)); gap: 4px; }
-#build-cards button { display: flex; flex-direction: column; align-items: stretch; gap: 2px; text-align: left; padding: 3px; font-size: 11px; line-height: 1.2; overflow-wrap:anywhere; }
+#build-cards button { display: flex; flex-direction: column; align-items: stretch; gap: 2px; text-align: left; padding: 3px; font-size: 11px; line-height: 1.2; overflow-wrap:anywhere; border-color: transparent; }
 #build-cards img { width: 100%; aspect-ratio: 1.65; object-fit: cover; background: #3d4236; border-radius: 2px; }
 #build-cards small, #actions small { color: var(--muted); font-size: 10px; }
 #placement { padding: 6px; margin-bottom: 4px; }

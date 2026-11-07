@@ -2,7 +2,6 @@ import {RoadTraffic, asphaltBonus, gradeSpeed, surfaceTravelCost} from './road-t
 import {sweepAvoidsFootprint, vehicleSweep} from './vehicle-collision.js';
 
 const climbableGrade = .52;
-const gridEdgeGrade = Math.max(.60,climbableGrade*1.32);
 
 // A* on a cached terrain grid. Dynamic building footprints are rasterized once
 // per structural change; movement never falls back to teleporting.
@@ -126,10 +125,7 @@ export class TerrainNavigator{
   // A vehicle can have wheel support even when its centre is on a steep cell.
   // Let it reach the nearby grid using the same grade limits as vehicle motion.
   if(escapeSteepStart&&!starts.length&&!this.walkable[startId]&&!this.occupied[startId]){
-   const gradient=this.field.gradientAt(from.x,from.y);
-   if(Math.hypot(gradient.x,gradient.y)>=gridEdgeGrade){
-    starts=entries.filter(point=>this.lineClear(from,point,false,true,climbableGrade,true,true));
-   }
+   starts=entries.filter(point=>this.lineClear(from,point,false,true,climbableGrade,true,true));
   }
   if(!starts.length)return direct;
   const n=this.size,endIds=new Set(),maxEndDistance=Math.min(maxGoalDistance,Math.hypot(end.x-to.x,end.y-to.y)+this.cell*1.5);for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){const col=end.col+dx,row=end.row+dy,p=this.position(col,row);if(this.allowed(col,row)&&Math.hypot(p.x-to.x,p.y-to.y)<=maxEndDistance)endIds.add(row*n+col);}if(!endIds.size)return direct;

@@ -23,7 +23,7 @@
     "max": [
       6,
       5,
-      4.78000020980835
+      4.809999942779541
     ]
   },
   "anchors": {
@@ -57,13 +57,13 @@
   "geometry": {
     "id": "generator",
     "lod": 0,
-    "triangles": 3808,
-    "vertices": 3974,
+    "triangles": 7080,
+    "vertices": 7874,
     "primitives": 11,
     "materials": 11,
     "removedDegenerate": 0,
-    "inputTriangles": 3808,
-    "bytes": 162684,
+    "inputTriangles": 7080,
+    "bytes": 307112,
     "boundsMm": {
       "min": [
         -6000,
@@ -73,7 +73,7 @@
       "max": [
         6000,
         5000,
-        4780
+        4810
       ]
     }
   }

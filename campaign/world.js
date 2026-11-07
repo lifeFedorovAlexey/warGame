@@ -135,9 +135,9 @@ export async function createCampaignWorld(host,config,sound){
  }
  function buildingCards(){
   const stage = new T.Scene(), camera = new T.OrthographicCamera(-1,1,1,-1,.1,80);
-  stage.background = new T.Color('#464a3f');
-  stage.add(new T.HemisphereLight('#e7edf2','#938c71',2.3));
-  const key = new T.DirectionalLight('#ffdfb4',3);
+  stage.background = new T.Color('#41433c');
+  stage.add(new T.HemisphereLight('#e7edf2','#938c71',1.95));
+  const key = new T.DirectionalLight('#ffdfb4',2.85);
   key.position.set(-5,-8,12);
   stage.add(key);
   camera.up.set(0,0,1);
@@ -147,12 +147,20 @@ export async function createCampaignWorld(host,config,sound){
    renderer.shadowMap.enabled = false;
    renderer.setPixelRatio(1);
    renderer.setSize(192,116,false);
-   for (const [kind,spec] of Object.entries(config.buildings)) {
-    const mesh = getPrefab(kind).clone(true), centre = new T.Vector3(0,0,spec.realSizeMetres[2]*.43);
-    const radius = Math.hypot(...spec.realSizeMetres)*.42;
-    camera.left=-radius*192/116;camera.right=-camera.left;camera.top=radius;camera.bottom=-radius;
-    camera.position.copy(centre).add(new T.Vector3(-22,-29,20));
+   const aspect=192/116, corner=new T.Vector3();
+   for (const kind of Object.keys(config.buildings)) {
+    const mesh = getPrefab(kind).clone(true), bounds = new T.Box3().setFromObject(mesh);
+    const centre = bounds.getCenter(new T.Vector3());
+    camera.position.copy(centre).add(new T.Vector3(kind==='factory'||kind==='generator'?22:-22,-29,20));
     camera.lookAt(centre);
+    camera.updateMatrixWorld(true);
+    let radius=0;
+    for(const x of [bounds.min.x,bounds.max.x])for(const y of [bounds.min.y,bounds.max.y])for(const z of [bounds.min.z,bounds.max.z]){
+     corner.set(x,y,z).applyMatrix4(camera.matrixWorldInverse);
+     radius=Math.max(radius,Math.abs(corner.x)/aspect,Math.abs(corner.y));
+    }
+    radius*=kind==='bunker'?1.48:1.13;
+    camera.left=-radius*aspect;camera.right=-camera.left;camera.top=radius;camera.bottom=-radius;
     camera.updateProjectionMatrix();
     stage.add(mesh);
     renderer.render(stage,camera);

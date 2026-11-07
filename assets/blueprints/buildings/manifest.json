@@ -8,8 +8,8 @@
       "id": "generator",
       "path": "generator/prototype.glb",
       "spec": "generator/module.json",
-      "triangles": 3808,
-      "bytes": 162684
+      "triangles": 7080,
+      "bytes": 307112
     },
     {
       "id": "derrick",
@@ -22,22 +22,22 @@
       "id": "factory",
       "path": "factory/prototype.glb",
       "spec": "factory/module.json",
-      "triangles": 3488,
-      "bytes": 188076
+      "triangles": 4156,
+      "bytes": 224220
     },
     {
       "id": "lab",
       "path": "lab/prototype.glb",
       "spec": "lab/module.json",
-      "triangles": 3488,
-      "bytes": 179664
+      "triangles": 4564,
+      "bytes": 246568
     },
     {
       "id": "bunker",
       "path": "bunker/prototype.glb",
       "spec": "bunker/module.json",
-      "triangles": 92,
-      "bytes": 11272
+      "triangles": 412,
+      "bytes": 35156
     },
     {
       "id": "mg-tower",

@@ -75,7 +75,14 @@ const save=mission.save(),loaded=new Mission(config,field);loaded.load(save);ass
 const legacy=JSON.parse(save);
 legacy.state.flags.lastRevealed=true;
 legacy.state.bounds=[0,0,53,80];
+const legacyBunker=legacy.state.buildings.find(building=>building.id===bunker.id);
+legacyBunker.rotation=Math.PI/2;
+legacyBunker.halfWidth=7*config.worldScale/2;
+legacyBunker.halfDepth=8*config.worldScale/2;
 loaded.load(legacy);
+assert.deepEqual([legacyBunker.halfWidth,legacyBunker.halfDepth],
+ [...config.buildings.bunker.footprintMetres].reverse().map(length=>length*config.worldScale/2),
+ 'Old rotated bunkers use the new collision footprint');
 const southernRoad=field.roadNetwork.paths.find(path=>path.to==='west-south');
 const bend=southernRoad.points.reduce((south,point)=>point.y<south.y?point:south);
 assert(loaded.inBounds(bend.x,bend.y-bend.width/2),'Expanded sector includes the outside of the western bend in old saves');

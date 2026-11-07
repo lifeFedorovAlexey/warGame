@@ -21,7 +21,7 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
         root.updateMatrixWorld(true);
         const bounds=new T.Box3().setFromObject(root);
         const exported=await createProductionExporter({[kind]:root},0)();
-        const anchors=Object.fromEntries(root.children.filter(c=>c.name.endsWith('_anchor')||c.name==='work_contact').map(c=>[c.name,c.position.toArray()]));
+        const anchors=Object.fromEntries(root.children.filter(c=>c.name.endsWith('_anchor')||['work_contact','muzzle'].includes(c.name)).map(c=>[c.name,c.position.toArray()]));
         result.push({kind,bounds:{min:bounds.min.toArray(),max:bounds.max.toArray()},anchors,exported,art:root.userData.artStatus});
       }
       return result;
@@ -59,6 +59,7 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
         'Основание остаётся на месте. Излучатель открывает геометрию корпуса горизонтальными слоями по 0,24 м. work_anchor задаёт зону строителя. work_contact сохраняет положение стальной планки для стенда обслуживания.',
         spec.exitAnchor?'Зона выезда и точка сбора связаны с exit_anchor.':'',
         model.kind==='derrick'?'Балансир, кривошип, шатун и шток анимирует campaign/oil-pump.js.':'',
+        model.kind==='bunker'?'Низкий бетонный каземат с утопленной амбразурой. Трассер и вспышка начинаются в точке muzzle.':'',
       ].filter(Boolean);
       fs.writeFileSync(path.join(directory,'README.md'),notes.join('\n\n')+'\n');
       manifest.buildings.push({id:model.kind,path:model.kind+'/prototype.glb',spec:model.kind+'/module.json',triangles:data.geometry.triangles,bytes:bytes.length});

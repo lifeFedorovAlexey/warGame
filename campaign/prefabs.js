@@ -12,15 +12,50 @@ export function createBuildingPrefab(T,kind,spec){
  const box=(size,pos,mat=paint,rotation)=>mesh(new T.BoxGeometry(...size),mat,pos,rotation);
  function rod(a,b,r=.1,mat=steel){const start=new T.Vector3(...a),end=new T.Vector3(...b),geo=new T.CylinderGeometry(r,r,start.distanceTo(end),8);geo.applyQuaternion(new T.Quaternion().setFromUnitVectors(new T.Vector3(0,1,0),end.clone().sub(start).normalize()));mesh(geo,mat,start.add(end).multiplyScalar(.5).toArray());}
  const cylinder=(r,height,pos,mat=steel)=>{const geo=new T.CylinderGeometry(r,r,height,12);geo.rotateX(Math.PI/2);mesh(geo,mat,pos);};
- box([w,d,.35],[0,0,.175],concrete);
+ const foundationHeight=kind==='bunker'?.20:.35;
+ box([w,d,foundationHeight],[0,0,foundationHeight/2],concrete);
  const rail=buildingWorkRail(spec);box([rail.width,rail.depth,rail.height],rail.position,steel);
+ if(kind==='bunker')for(const x of [-w*.24,0,w*.24])box([.17,.22,.21],[x,-d*.487,.30],steel);
  groups=structureGroups;
  if(['generator','factory','lab'].includes(kind)){
   buildIndustrialStructure(T,kind,[w,d,h],{box,cylinder,rod,mesh});
  }else if(kind==='derrick'){
   oilPump=createOilPump(T,w,d,h);
  }else if(kind==='bunker'){
-  box([w*.92,d*.9,h*.68],[0,0,h*.4],concrete);box([w,d,.42],[0,0,h*.8],steel);box([w*.65,.11,h*.13],[0,-d*.455,h*.48],dark);rod([0,-d*.42,h*.48],[0,-d*.7,h*.48],.08);
+  const cast=new T.MeshStandardMaterial({color:'#a29883',roughness:.96});
+  const joint=new T.MeshStandardMaterial({color:'#655f51',roughness:.95});
+  const edge=-d*.427, slitZ=h*.53, sill=h*.40, crown=h*.80;
+  function slab(width,depth,corner,z,height,bevel,material,pitch=0){
+   const x=width/2,y=depth/2;
+   const section=new T.Shape().moveTo(-x+corner,-y).lineTo(x-corner,-y)
+    .lineTo(x,-y+corner).lineTo(x,y-corner).lineTo(x-corner,y).lineTo(-x+corner,y)
+    .lineTo(-x,y-corner).lineTo(-x,-y+corner).closePath();
+   const geometry=new T.ExtrudeGeometry(section,{depth:height,bevelEnabled:true,bevelThickness:bevel,bevelSize:bevel,bevelSegments:1});
+   if(pitch)geometry.applyMatrix4(new T.Matrix4().makeShear(0,0,0,pitch,0,0));
+   mesh(geometry,material,[0,0,z]);
+  }
+  slab(w*.87,d*.83,.40,.28,sill-.28,.07,concrete);
+  slab(w*.80,d*.77,.48,crown,.16,.083,cast,.082);
+  const cheekWidth=w*.29, cheekZ=(sill+crown)/2;
+  for(const side of [-1,1]){
+   box([cheekWidth,.49,crown-sill],[side*w*.30,edge+.26,cheekZ],cast,[0,0,side*.12]);
+   box([.34,d*.69,crown-sill],[side*w*.38,.12,cheekZ],concrete);
+   box([w*.31,.20,.085],[side*w*.23,edge-.02,sill+.055],joint);
+  }
+  box([w*.72,d*.57,crown-sill],[0,d*.12,cheekZ],cast);
+  box([w*.46,.12,.36],[0,edge+.38,slitZ],dark);
+  box([w*.45,.37,.23],[0,edge+.16,crown-.18],cast);
+  box([w*.43,.10,.085],[0,edge+.05,slitZ-.21],steel);
+  box([.27,.22,.22],[0,edge+.32,slitZ],steel);
+  rod([0,-d*.28,slitZ],[0,-d*.495,slitZ],.052,dark);
+  rod([0,-d*.456,slitZ],[0,-d*.50,slitZ],.069,steel);
+  box([.75,.12,1.08],[w*.145,d*.395,.86],steel);
+  box([.86,.12,.13],[w*.145,d*.401,1.44],joint);
+  box([.18,.11,.09],[w*.19,d*.422,.89],joint);
+  const muzzle=new T.Object3D();
+  muzzle.name='muzzle';
+  muzzle.position.set(0,-d*.504,slitZ);
+  root.add(muzzle);
  }else if(kind==='mg-tower'){
   for(const x of [-1,1])for(const y of [-1,1]){rod([x*w*.4,y*d*.4,.3],[x*w*.3,y*d*.3,h*.8],.18);rod([x*w*.4,y*d*.4,.5],[x*w*.3,-y*d*.3,h*.77],.09);}
   box([w*.8,d*.8,.32],[0,0,h*.8],steel);box([w*.68,d*.65,h*.15],[0,0,h*.89]);box([w*.3,d*.24,h*.12],[0,0,h*.94],dark);rod([0,-d*.1,h*.94],[0,-d*.62,h*.94],.1);

@@ -2,15 +2,15 @@
 export function buildIndustrialStructure(T, kind, [w,d,h], kit) {
   const {box,cylinder,rod,mesh}=kit;
   const material=(color,metalness,roughness)=>new T.MeshStandardMaterial({color,metalness,roughness});
-  const concrete=material('#b5a78e',.08,.87), trim=material('#82796a',.15,.77);
-  const stripe=material('#955238',.24,.74), roof=material('#55534b',.38,.84);
+  const concrete=material('#b4a690',.03,.93), trim=material('#81796d',.12,.85);
+  const stripe=material('#a35c3e',.22,.78), roof=material('#666158',.30,.85);
   const steel=material('#494b43',.68,.60), pipe=material('#9a9584',.68,.59);
-  const glass=material('#37474b',.33,.28), dark=material('#262b28',.32,.88);
+  const glass=material('#46565b',.32,.31), dark=material('#262b28',.32,.88);
   const caution=material('#c89b46',.45,.68), porcelain=material('#c6b69b',.11,.47);
 
-  function windows(x,y,z,width,panes,height=.48){
+  function windows(x,y,z,width,panes,height=.48,facing=-1){
     box([width+.13,.09,height+.13],[x,y,z],steel);
-    for(let i=0;i<panes;i++)box([width/panes-.047,.046,height],[x-width/2+(i+.5)*width/panes,y-.055,z],glass);
+    for(let i=0;i<panes;i++)box([width/panes-.047,.046,height],[x-width/2+(i+.5)*width/panes,y+facing*.055,z],glass);
   }
   function sideWindows(x,y,z,depth,panes,side,height=.47){
     box([.09,depth+.12,height+.10],[x,y,z],steel);
@@ -32,17 +32,22 @@ export function buildIndustrialStructure(T, kind, [w,d,h], kit) {
   function stack(x,y,bottom,top,radius){
     cylinder(radius*1.12,.29,[x,y,bottom+.145],steel);
     const sections=6,len=(top-bottom-.29)/sections;
-    for(let i=0;i<sections;i++)cylinder(radius*(1-i*.035),len,[x,y,bottom+.29+(i+.5)*len],i%2?stripe:concrete);
-    const rim=new T.TorusGeometry(radius*.825,.055,7,16);
+    for(let i=0;i<sections;i++){
+      const z=bottom+.29+i*len,r=radius*(1-i*.035);
+      const shell=new T.LatheGeometry([new T.Vector2(r,z),new T.Vector2(r-radius*.035,z+len)],16);
+      shell.rotateX(Math.PI/2);
+      mesh(shell,i%2===0||i===sections-1?concrete:stripe,[x,y,0]);
+    }
+    const rim=new T.TorusGeometry(radius*.79,.055,7,16);
     mesh(rim,pipe,[x,y,top-.03]);
-    cylinder(radius*.81,.075,[x,y,top-.065],dark);
+    cylinder(radius*.76,.075,[x,y,top-.22],dark);
   }
 
   if(kind==='factory'){
     const width=w*.63,depth=d*.79,x=-w*.117,front=-depth/2,back=depth/2;
     const wall=h*.59,top=.35+wall;
     box([width,depth,wall],[x,0,.35+wall/2],concrete);
-    box([width+.18,depth+.16,.22],[x,0,top+.07],steel);
+    box([width+.18,depth+.16,.22],[x,0,top+.07],roof);
     box([width+.10,.105,1.19],[x,front-.06,1.7],stripe);
     windows(x,front-.09,top-.81,width*.82,11,.55);
     for(const side of [-1,1]){
@@ -57,12 +62,23 @@ export function buildIndustrialStructure(T, kind, [w,d,h], kit) {
     box([doorW+.65,.52,.40],[doorX,front-.24,.35+doorH+.17],trim);
     for(let j=0;j<7;j++)box([doorW-.20,.035,.032],[doorX,front-.225,.64+j*.37],steel);
     for(let j=0;j<9;j++)box([.18,.12,.09],[doorX-doorW*.42+j*.55,front-.37,.39],j%2?dark:caution);
+    // Roof monitors have sloped glazing, a ridge and sheet-metal backs.
+    const profile=new T.Shape().moveTo(-1.44,0).lineTo(1.40,0).lineTo(.83,.84).lineTo(-.50,.84).closePath();
+    const monitorWidth=width*.81, slope=Math.atan2(.84,.94), panePitch=monitorWidth/8;
+    const monitor=new T.ExtrudeGeometry(profile,{depth:monitorWidth,bevelEnabled:false});
+    monitor.applyMatrix4(new T.Matrix4().makeBasis(new T.Vector3(0,1,0),new T.Vector3(0,0,1),new T.Vector3(1,0,0)));
     for(const y of [-depth*.32,0,depth*.32]){
-      const z=top+.44;
-      box([width*.80,2.56,.16],[x,y,z],steel,[.26,0,0]);
-      for(let i=0;i<7;i++)box([width*.105,2.17,.11],[x-width*.345+i*width*.115,y-.02,z+.11],glass,[.26,0,0]);
-      for(const side of [-1,1])box([width*.82,.09,.12],[x,y+side*1.19,z+side*.31+.08],caution,[.26,0,0]);
+      const z=top+.18;
+      mesh(monitor.clone(),steel,[x-monitorWidth/2,y,z]);
+      box([monitorWidth+.15,1.43,.12],[x,y+.17,z+.87],roof);
+      for(let i=0;i<8;i++){
+        const paneX=x-monitorWidth/2+(i+.5)*panePitch;
+        box([panePitch-.17,1.08,.08],[paneX,y-1.01,z+.46],glass,[slope,0,0]);
+      }
+      box([monitorWidth+.12,.08,.095],[x,y-.54,z+.86],caution);
+      box([monitorWidth+.12,.12,.12],[x,y-1.44,z+.06],trim);
     }
+    monitor.dispose();
     guard([x-width*.44,back-.55],[x+width*.44,back-.55],top+.17);
     const sx=w*.371;
     stack(w*.287,d*.303,.39,h-.08,.69);
@@ -73,15 +89,32 @@ export function buildIndustrialStructure(T, kind, [w,d,h], kit) {
       cylinder(1.09,.13,[sx,y,4.99],steel);
       cylinder(.52,.32,[sx,y,5.14],trim);
       cylinder(1.08,.105,[sx,y,3.01],steel);
+      for(const side of [-1,1]){
+        rod([sx+side*.87,y-.87,.49],[sx+side*.87,y+.87,2.06],.061,steel);
+        rod([sx-.87,y+side*.87,.49],[sx+.87,y+side*.87,2.06],.061,steel);
+      }
     }
-    const pipeZ=1.76;
-    rod([width*.20,back*.73,pipeZ],[sx,back*.73,pipeZ],.18,pipe);
-    rod([sx,back*.73,pipeZ],[sx,front*.82,pipeZ],.18,pipe);
+    const wallX=x+width/2, canopyX=wallX+1.22, pipeX=wallX+2.52, pipeZ=2.99;
+    box([2.74,3.85,.24],[canopyX,-1.70,3.17],trim);
+    for(const y of [-3.41,-.02]){
+      box([.29,.29,2.70],[wallX+2.35,y,1.70],concrete);
+      box([.39,.39,.20],[wallX+2.35,y,.45],steel);
+    }
     for(const y of [front*.78,0,back*.71]){
-      rod([sx-1.09,y,.37],[sx-1.09,y,pipeZ],.10,steel);
-      rod([sx+1.09,y,.37],[sx+1.09,y,pipeZ],.10,steel);
-      rod([sx-1.2,y,pipeZ-.20],[sx+1.2,y,pipeZ-.20],.095,steel);
+      box([.24,.24,2.48],[pipeX,y,1.59],steel);
+      box([.32,.43,.19],[pipeX,y,2.71],steel);
     }
+    const pipeStart=front*.82,pipeEnd=back*.73;
+    for(const z of [2.58,2.80])rod([pipeX,pipeStart,z],[pipeX,pipeEnd,z],.07,steel);
+    const braceStep=(pipeEnd-pipeStart)/8;
+    for(let i=0;i<8;i++){
+      const y=pipeStart+i*braceStep;
+      rod([pipeX,y,i%2?2.80:2.58],[pipeX,y+braceStep,i%2?2.58:2.80],.054,steel);
+    }
+    rod([pipeX,pipeStart,pipeZ],[pipeX,pipeEnd,pipeZ],.18,pipe);
+    rod([wallX,pipeEnd,pipeZ],[pipeX,pipeEnd,pipeZ],.18,pipe);
+    for(const y of [-d*.255,-d*.073,d*.106])rod([pipeX,y,pipeZ],[sx-.96,y,pipeZ],.14,pipe);
+    for(const y of [-4.9,-2.6,1.5,4.1])box([.4,.085,.4],[pipeX,y,pipeZ],steel);
     return;
   }
 
@@ -92,62 +125,110 @@ export function buildIndustrialStructure(T, kind, [w,d,h], kit) {
       box([wing,depth,wall],[x,.21,.35+wall/2],concrete);
       box([wing+.16,depth+.16,.22],[x,.21,top+.07],trim);
       box([wing-.20,depth-.19,.06],[x,.21,top+.20],roof);
+      box([wing+.16,.19,.22],[x,.21+depth/2,top+.23],trim);
+      box([.19,depth,.22],[x+side*wing/2,.21,top+.23],trim);
       for(const z of [1.44,2.67,3.83]){
         windows(x,fy-.055,z,wing*.86,5,.55);
+        windows(x,fy+depth+.055,z,wing*.86,5,.55,1);
         sideWindows(x+side*(wing/2+.055),.21,z,depth*.82,8,side,.52);
       }
+      for(const y of [fy+.16,fy+depth-.16])box([.27,.31,wall],[x+side*wing/2,y,.35+wall/2],trim);
       box([wing*.66,.11,.48],[x,fy-.07,.68],stripe);
       guard([x-wing*.44,fy+.26],[x+wing*.44,fy+.26],top+.22);
-      vent(x+side*.50,2.5,top+.24,1.25);
+      guard([x+side*wing*.43,fy+.27],[x+side*wing*.43,1.5],top+.22);
+      vent(x+side*.83,2.60,top+.24,1.25);
+      vent(x-side*.82,2.33,top+.24,.86);
     }
-    const midH=h*.781,midW=w*.238,midFront=-d*.374;
-    box([midW,d*.755,midH],[0,.05,.35+midH/2],trim);
-    box([midW*.70,.13,midH*.70],[0,midFront-.11,.35+midH*.61],stripe);
-    box([midW*.71,.20,1.77],[0,midFront-.13,1.23],dark);
-    box([midW*1.16,1.61,.22],[0,midFront-.76,2.30],concrete);
-    for(const x of [-midW*.49,midW*.49])box([.15,.15,1.92],[x,midFront-1.34,1.31],trim);
+    const midH=h*.789,midW=w*.238,midFront=-d*.396,midDepth=d*.79,base=.35+midH;
+    box([midW,midDepth,midH],[0,midFront+midDepth/2,.35+midH/2],trim);
+    box([midW+.15,midDepth+.12,.23],[0,midFront+midDepth/2,base-.04],concrete);
+    box([midW-.35,midDepth-.35,.065],[0,midFront+midDepth/2,base+.07],roof);
+    box([midW*.68,.13,midH*.65],[0,midFront-.11,.35+midH*.61],stripe);
+    for(const side of [-1,1]){
+      box([.33,.23,midH-.20],[side*midW*.45,midFront-.06,.35+(midH-.20)/2],concrete);
+      box([midW*.30,.20,1.56],[side*midW*.16,midFront-.13,1.13],dark);
+    }
+    box([midW*1.19,1.48,.25],[0,midFront-.68,2.20],concrete);
+    for(const x of [-midW*.49,midW*.49])box([.22,.21,1.84],[x,midFront-1.24,1.27],trim);
+    for(let i=0;i<3;i++)box([midW*.91,.20,.12],[0,midFront-1.43+i*.21,.42+i*.08],concrete);
     for(const a of [0,Math.PI/3,Math.PI*2/3]){
-      const torus=new T.TorusGeometry(.58,.032,6,18);
+      const torus=new T.TorusGeometry(.70,.043,6,18);
       torus.scale(1,.53,1);torus.rotateZ(a);torus.rotateX(Math.PI/2);
-      mesh(torus,porcelain,[0,midFront-.21,h*.665]);
+      mesh(torus,porcelain,[0,midFront-.21,h*.68]);
     }
-    const base=.35+midH;
-    stack(-.83,1.23,base,h-.09,.085);
-    const dishProfile=[[0,0],[.24,.046],[.46,.13],[.65,.25],[.76,.36],[.76,.42],[.62,.30],[.43,.18],[.20,.085],[0,.059]];
+    for(const x of [-.58,.28])for(const y of [1.34,2.09])rod([x,y,base+.10],[-.15,1.70,base+.60],.044,steel);
+    rod([-.15,1.70,base+.49],[-.15,1.70,h-.07],.044,stripe);
+    rod([-.39,1.70,h-.28],[.09,1.70,h-.28],.031,porcelain);
+    const dishProfile=[[0,0],[.41,.055],[.72,.16],[.99,.31],[1.15,.45],[1.15,.51],[.98,.36],[.69,.22],[.39,.116],[0,.064]];
     const dish=new T.LatheGeometry(dishProfile.map(([r,z])=>new T.Vector2(r,z)),22);
     dish.rotateX(Math.PI/2);
-    cylinder(.29,.42,[sideX,.84,top+.43],steel);
-    mesh(dish,porcelain,[sideX,.84,top+.69],[.66,-.29,.18]);
-    rod([sideX,.77,top+.69],[sideX+.17,.51,top+1.45],.052,steel);
+    const mount=[sideX,.77,top+.78], tilt=[.93,-.30,.12];
+    cylinder(.39,.48,[sideX,.77,top+.46],steel);
+    box([.60,.49,.31],[sideX,.77,top+.67],steel);
+    mesh(dish,porcelain,mount,tilt);
+    const lip=new T.TorusGeometry(1.145,.033,6,22);
+    lip.translate(0,0,.487);
+    mesh(lip,pipe,mount,tilt);
+    const rotation=new T.Euler(...tilt);
+    const dishPoint=(x,y,z)=>new T.Vector3(x,y,z).applyEuler(rotation).add(new T.Vector3(...mount)).toArray();
+    for(const x of [-.61,.61])rod(dishPoint(x,.62,.27),dishPoint(0,0,.86),.032,steel);
+    rod(dishPoint(0,-.13,.31),dishPoint(0,0,.95),.064,steel);
     return;
   }
 
   const x=-w*.223,width=w*.46,depth=d*.59,fy=-depth/2+.68,top=h*.671;
   box([width,depth,top-.35],[x,.68,(top+.35)/2],concrete);
   box([width+.15,depth+.15,.17],[x,.68,top+.055],roof);
-  box([width,.10,.49],[x,fy-.045,1.27],stripe);
+  box([width,.10,.49],[x,fy-.045,1.81],stripe);
   windows(x,fy-.08,2.44,width*.87,6,.45);
   sideWindows(x-width/2-.055,.68,2.38,depth*.82,5,-1,.42);
-  for(const y of [-.47,1.76])vent(x-.64,y,top+.16,.83);
+  for(const dx of [-1.20,.88]){
+    for(const y of [-.74,1.84])vent(x+dx,y,top+.16,.82);
+    box([.89,.12,1.12],[x+dx,fy-.06,.93],steel);
+    box([1.05,.10,.13],[x+dx,fy-.10,1.57],trim);
+  }
+  for(const y of [fy+.17,fy+depth-.17])box([.28,.33,top-.35],[x-width/2,y,(top+.35)/2],trim);
   const sx=w*.289;
   for(const sy of [-d*.245,d*.245]){
-    const rings=[[1.54,.82],[1.39,1.08],[1.22,1.57],[1.03,2.42],[.94,3.24],[.99,4.08],[1.09,4.78],[1.03,4.78],[.92,4.08],[.87,3.24],[.96,2.42],[1.16,1.57],[1.31,1.08],[1.46,.82],[1.54,.82]];
-    const g=new T.LatheGeometry(rings.map(([r,z])=>new T.Vector2(r,z)),22);
+    const lift=sy>0?1:.9;
+    const rings=[[1.60,.96],[1.44,1.24],[1.23,1.74],[1.04,2.61],[.96,3.41],[1.01,4.13],[1.14,4.81],[1.055,4.81],[.93,4.13],[.87,3.41],[.95,2.61],[1.14,1.74],[1.35,1.24],[1.50,.96],[1.60,.96]]
+      .map(([radius,z])=>new T.Vector2(radius,.96+(z-.96)*lift));
+    const g=new T.LatheGeometry(rings,24);
     g.rotateX(Math.PI/2);mesh(g,concrete,[sx,sy,0]);
-    const band=new T.LatheGeometry([new T.Vector2(1.021,4.23),new T.Vector2(1.057,4.49)],22);
+    const band=new T.LatheGeometry([new T.Vector2(1.048,.96+3.30*lift),new T.Vector2(1.109,.96+3.59*lift)],24);
     band.rotateX(Math.PI/2);mesh(band,stripe,[sx,sy,0]);
-    for(let i=0;i<12;i++){
-      const a=i*Math.PI/6,b=a+.26;
-      rod([sx+1.49*Math.cos(a),sy+1.49*Math.sin(a),.34],[sx+1.52*Math.cos(b),sy+1.52*Math.sin(b),.89],.061,steel);
+    cylinder(1.43,.10,[sx,sy,1.01],dark);
+    for(let i=0;i<10;i++){
+      const a=i*Math.PI/5,b=a+Math.PI/5,at=(r,angle,z)=>[sx+r*Math.cos(angle),sy+r*Math.sin(angle),z];
+      const bottom=at(1.52,a,.38),upper=at(1.57,a,.96),next=at(1.57,b,.96);
+      rod(bottom,upper,.075,steel);
+      rod(bottom,next,.067,steel);
+      rod(upper,next,.065,steel);
     }
-    rod([x+width*.47,sy,1.18],[sx-1.43,sy,1.18],.15,stripe);
+    rod([x+width*.47,sy,1.22],[sx-1.45,sy,1.22],.15,stripe);
+    rod([sx-1.48,sy,1.18],[sx-1.48,sy,.68],.15,stripe);
+    for(const dx of [-1.49,-2.42])box([.19,.38,.38],[sx+dx,sy,1.22],steel);
   }
-  for(const tx of [x-1.36,x+.94]){
-    box([1.52,1.23,.86],[tx,-d*.392,.78],steel);
-    for(let i=0;i<5;i++)box([.11,.10,.71],[tx-.56+i*.28,-d*.392-.64,.81],pipe);
-    for(const dx of [-.49,0,.49]){
-      cylinder(.065,.62,[tx+dx,-d*.392,1.51],stripe);
-      for(const z of [1.33,1.49,1.66])cylinder(.114,.065,[tx+dx,-d*.392,z],porcelain);
+  const yardY=-d*.390;
+  box([4.89,1.43,.09],[x+.01,yardY,.395],trim);
+  for(const tx of [x-1.65,x,x+1.65]){
+    box([1.34,1.02,.74],[tx,yardY,.79],steel);
+    box([1.41,1.12,.13],[tx,yardY,1.19],roof);
+    for(let i=0;i<5;i++)box([.11,.12,.64],[tx-.48+i*.24,yardY-.54,.81],pipe);
+    for(const dx of [-.42,0,.42]){
+      cylinder(.063,.61,[tx+dx,yardY,1.54],stripe);
+      for(const z of [1.36,1.50,1.64,1.78])cylinder(.119,.059,[tx+dx,yardY,z],porcelain);
     }
   }
+  const mastX=-w*.453,mastY=-d*.30;
+  for(const side of [-1,1]){
+    rod([mastX+side*.44,mastY,.35],[mastX+side*.07,mastY,4.20],.072,steel);
+    rod([mastX,mastY+side*.39,.35],[mastX,mastY+side*.06,4.20],.064,steel);
+    rod([mastX+side*.34,mastY,.85],[mastX-side*.22,mastY,2.08],.052,pipe);
+    rod([mastX+side*.22,mastY,2.08],[mastX-side*.11,mastY,3.20],.048,pipe);
+  }
+  rod([mastX-.49,mastY,3.28],[mastX+.50,mastY,3.28],.063,steel);
+  rod([mastX-.36,mastY,3.78],[mastX+.36,mastY,3.78],.055,steel);
+  for(const dx of [-.34,.34])cylinder(.09,.24,[mastX+dx,mastY,3.91],porcelain);
+  rod([mastX,mastY,4.02],[mastX,mastY,4.41],.055,steel);
 }

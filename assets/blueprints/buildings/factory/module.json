@@ -62,13 +62,13 @@
   "geometry": {
     "id": "factory",
     "lod": 0,
-    "triangles": 3488,
-    "vertices": 4860,
-    "primitives": 10,
-    "materials": 10,
+    "triangles": 4156,
+    "vertices": 5829,
+    "primitives": 11,
+    "materials": 11,
     "removedDegenerate": 0,
-    "inputTriangles": 3488,
-    "bytes": 188076,
+    "inputTriangles": 4156,
+    "bytes": 224220,
     "boundsMm": {
       "min": [
         -13000,

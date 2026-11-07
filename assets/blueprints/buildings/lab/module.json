@@ -23,7 +23,7 @@
     "max": [
       8,
       7,
-      6.933620929718018
+      6.929999828338623
     ]
   },
   "anchors": {
@@ -57,13 +57,13 @@
   "geometry": {
     "id": "lab",
     "lod": 0,
-    "triangles": 3488,
-    "vertices": 4531,
+    "triangles": 4564,
+    "vertices": 6420,
     "primitives": 12,
     "materials": 12,
     "removedDegenerate": 44,
-    "inputTriangles": 3532,
-    "bytes": 179664,
+    "inputTriangles": 4608,
+    "bytes": 246568,
     "boundsMm": {
       "min": [
         -8000,
@@ -73,7 +73,7 @@
       "max": [
         8000,
         7000,
-        6934
+        6930
       ]
     }
   }

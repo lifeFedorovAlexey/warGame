@@ -5,30 +5,35 @@
   "units": "metres",
   "axes": "X right,Y forward,Z up",
   "nominalEnvelope": [
-    6,
-    5,
-    3
+    4.6,
+    3.8,
+    2
   ],
   "reservedFootprint": [
-    8,
-    7
+    6.4,
+    5.6
   ],
   "measuredBounds": {
     "min": [
-      -3,
-      -3.5,
-      2.9802322831784522e-9
+      -2.299999952316284,
+      -1.9900000095367432,
+      -1.4901161415892261e-9
     ],
     "max": [
-      3,
-      2.5,
-      2.609999895095825
+      2.299999952316284,
+      1.899999976158142,
+      1.962965965270996
     ]
   },
   "anchors": {
+    "muzzle": [
+      0,
+      -1.9152,
+      1.06
+    ],
     "work_contact": [
       0,
-      -2.59,
+      -1.99,
       0.4
     ],
     "work_anchor": [
@@ -45,9 +50,9 @@
   },
   "collision": {
     "type": "box",
-    "width": 8,
-    "depth": 7,
-    "height": 3
+    "width": 6.4,
+    "depth": 5.6,
+    "height": 2
   },
   "validation": {
     "errors": 0,
@@ -56,23 +61,23 @@
   "geometry": {
     "id": "bunker",
     "lod": 0,
-    "triangles": 92,
-    "vertices": 156,
-    "primitives": 5,
-    "materials": 3,
+    "triangles": 412,
+    "vertices": 764,
+    "primitives": 7,
+    "materials": 5,
     "removedDegenerate": 0,
-    "inputTriangles": 92,
-    "bytes": 11272,
+    "inputTriangles": 412,
+    "bytes": 35156,
     "boundsMm": {
       "min": [
-        -3000,
-        -3500,
+        -2300,
+        -1990,
         0
       ],
       "max": [
-        3000,
-        2500,
-        2610
+        2300,
+        1900,
+        1963
       ]
     }
   }
