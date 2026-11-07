@@ -284,6 +284,11 @@ if(process.argv.includes('--full')){
     reportOrder(mission.order(builders(),'repair',damaged),'Repair at the rally point');
     until(()=>damaged.hp===damaged.maxHp,250,'Repair '+damaged.id);
    }
+   const westTower=towers.reduce((west,tower)=>tower.x<west.x?tower:west);
+   // Use the road beyond the bend to engage the western tower on its own.
+   reportOrder(mission.order(ids(),'attack-move',field.gridToWorld([9,75.1875])),'Advance to the western firing line');
+   until(()=>westTower.hp<=0||!army().length,90,'Disable the western tower first');
+   assert(westTower.hp<=0,'The column must disable the western tower before advancing');
   }
   while(!camp.cleared&&iterations++<160){
    const visible=[...mission.state.units,...mission.state.buildings].filter(e=>e.hp>0&&e.campId===camp.id&&mission.visibleAt(e.x,e.y)),centre=army().reduce((p,u)=>({x:p.x+u.x/army().length,y:p.y+u.y/army().length}),{x:0,y:0});visible.sort((a,b)=>Math.hypot(a.x-centre.x,a.y-centre.y)-Math.hypot(b.x-centre.x,b.y-centre.y));

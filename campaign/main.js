@@ -61,7 +61,7 @@ function nextObjectiveHint(state,{plant,well},tasks,artifact,contact,southernApp
   if(state.flags.lastRevealed&&!headquarters.cleared){
     if(southernApproach?.kind!=='intel')return 'Разведайте южное шоссе до западного изгиба.';
     if(state.buildings.some(b=>b.campId===headquarters.id&&b.kind==='mg-tower'&&b.hp>0))
-      return 'Соберите группу перед изгибом. Бейте башни по одной.';
+      return 'Соберите группу перед изгибом. Атакуйте башни с запада.';
     return 'Зачистите штаб Петровича.';
   }
   return state.camps.some(camp=>!camp.cleared) ? 'Зачистите лагеря Отбросов.' : 'Завершите исследования в НИИ.';
