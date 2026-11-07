@@ -1,6 +1,6 @@
-import {checkManeuver,clearOfVehicles} from './vehicle-motion.js';
+import {checkManeuver} from './vehicle-motion.js';
 import {vehicleDynamics} from './vehicle-dynamics.js';
-import {vehicleSweep,vehicleRadiusBound} from './vehicle-collision.js';
+import {vehicleSweep,vehicleRadiusBound,vehicleEnvelope,sweepClearsVehicle} from './vehicle-collision.js';
 
 // A neighbour's unavoidable stopping path is identical for every point of
 // our candidate arc until its physical state changes. Retain only one lazy
@@ -39,7 +39,7 @@ function stoppingPath(mission,other,dt,scale){
 // unavoidable braking path. Admit it only when that physical path is clear;
 // this is recomputed from actual velocities, not a timed parking lease.
 export function maneuverAdmissionBlocker(mission,unit,from,to,dt){
- const scale=mission.config.worldScale;let obstacles;
+ const scale=mission.config.worldScale;let obstacle;
  const ownRadius=vehicleRadiusBound(unit.kind,scale),skin=scale*.055+.02;
  // The query surrounds the FUTURE tested body. Its initial position may be
  // far behind it on a turn. The spatial aggregate includes actual speeds,
@@ -51,7 +51,8 @@ export function maneuverAdmissionBlocker(mission,unit,from,to,dt){
   const speed=other.driveSpeed;
   const distance=Math.hypot(other.x-to.x,other.y-to.y);
   if(distance>speed*speed/(2*braking)+speed*dt+ownRadius+vehicleRadiusBound(other.kind,scale)+skin)continue;
-  const path=stoppingPath(mission,other,dt,scale);obstacles??=[{...to,kind:unit.kind,hp:1}];
+  const path=stoppingPath(mission,other,dt,scale);
+  obstacle??=vehicleEnvelope(to.kind===unit.kind?to:{...to,kind:unit.kind},scale,mission.field);
   // Include one reaction step before maximum normal deceleration.
   for(let step=0;step<64;step++){
    let segment=path.segments[step];
@@ -65,7 +66,7 @@ export function maneuverAdmissionBlocker(mission,unit,from,to,dt){
     segment={from:path.pose,to:next,sweep:vehicleSweep(path.pose,next,scale,mission.field)};
     path.segments.push(segment);path.pose=next;
    }
-   if(!clearOfVehicles(other,segment.to,obstacles,scale,false,segment.from,mission.field,undefined,segment.sweep))return other;
+   if(!sweepClearsVehicle(segment.sweep,obstacle,scale*.055))return other;
   }
  }
  return null;

@@ -17,4 +17,14 @@ for(const unit of units.slice(0,20)){
  assert.deepEqual(index.query(unit,radius,unit.owner),expected,'Hostile broad phase has no friendly-only false negative');
 }
 for(const unit of units){unit.owner='rai';index.update(unit);}assert.deepEqual(index.query(units[0],10000,'rai'),[]);
-console.log(JSON.stringify({spatialQueries:300,collisionComparisons:300,units:500,passed:true}));
+// Exercise packed-key sign changes, its exact 52-bit upper edge, and the
+// string fallback on both sides; neighbour query entries must never alias.
+const edgeUnits=[];
+for(const x of [-4097,-4096,-1,0,4094,4095,4096])for(const y of [-4097,-4096,-1,0,4094,4095,4096])
+ edgeUnits.push({id:'edge'+edgeUnits.length,kind:'bukhanka',x:(x+.5)*64,y:(y+.5)*64,hp:1});
+index.rebuild(edgeUnits);let edgeQueries=0;
+for(let pass=0;pass<2;pass++)for(const unit of edgeUnits)for(const radius of [1,33,96]){
+ const expected=edgeUnits.filter(u=>Math.abs(u.x-unit.x)<=radius&&Math.abs(u.y-unit.y)<=radius);
+ assert.deepEqual(index.query(unit,radius),expected,'Packed and fallback rectangles preserve exact membership');edgeQueries++;
+}
+console.log(JSON.stringify({spatialQueries:300,edgeQueries,collisionComparisons:300,units:500,passed:true}));

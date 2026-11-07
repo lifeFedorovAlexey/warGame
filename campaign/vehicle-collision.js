@@ -58,12 +58,13 @@ export function footprintSupport(shape, x, y) {
     shape.depth * Math.abs(shape.c * y - shape.s * x);
 }
 
-function poseGap(a, b) {
+function poseGap(a, b, separation = Infinity) {
   const dx = b.x - a.x, dy = b.y - a.y;
   let gap = -Infinity;
   for(let axis=0;axis<4;axis++){
     const shape=axis<2?a:b,x=axis%2?-shape.s:shape.c,y=axis%2?shape.c:shape.s;
     gap = Math.max(gap, Math.abs(dx * x + dy * y) - footprintSupport(a, x, y) - footprintSupport(b, x, y));
+    if(gap>=separation)return gap;
   }
   return gap;
 }
@@ -86,7 +87,7 @@ export function vehicleSweep(from, to, scale, field) {
   return {start, middle, end, padding: .012 + radius * turn * turn / 24};
 }
 
-function sweepGap(sweep, obstacle) {
+function sweepGap(sweep, obstacle, separation = Infinity) {
   const {start, middle, end, padding} = sweep;
   let gap = -Infinity;
   for(let axis=0;axis<8;axis++){
@@ -97,6 +98,9 @@ function sweepGap(sweep, obstacle) {
     const b = (end.x - obstacle.x) * x + (end.y - obstacle.y) * y;
     const min = Math.min(a - sa, m - sm, b - sb), max = Math.max(a + sa, m + sm, b + sb);
     gap = Math.max(gap, Math.max(min, -max) - footprintSupport(obstacle, x, y) - padding);
+    // One separating axis already proves the sweep clear. Full maximum gaps
+    // are still computed for penetration recovery and reported clearances.
+    if(gap>=separation)return gap;
   }
   return gap;
 }
@@ -105,12 +109,25 @@ export function sweepAvoidsFootprint(sweep, obstacle, minimum = .1) {
   const box = {
     x: obstacle.x, y: obstacle.y, width: obstacle.halfWidth, depth: obstacle.halfDepth, c: 1, s: 0
   };
-  if (sweepGap(sweep, box) >= minimum) return true;
+  if (sweepGap(sweep, box, minimum) >= minimum) return true;
   // Saves made with the former capsule can start in penetration. Permit only
   // movement which releases that penetration and never deepens it.
   const start = poseGap(sweep.start, box);
   return start < minimum + sweep.padding && poseGap(sweep.middle, box) >= start - .001
     && poseGap(sweep.end, box) > start + .002;
+}
+
+// Used when the caller already owns a prepared sweep and one exact envelope.
+// Keep penetration recovery identical to the general multi-vehicle query.
+export function sweepClearsVehicle(sweep,obstacle,minimum){
+  if(sweepGap(sweep,obstacle,minimum)>=minimum)return true;
+  const initial=poseGap(sweep.start,obstacle),middle=poseGap(sweep.middle,obstacle),final=poseGap(sweep.end,obstacle);
+  if(initial<minimum+sweep.padding&&middle>=initial-.000001&&final>initial+.000001)return true;
+  // Legacy parallel interpenetration may retain its side gap until the ends
+  // clear. Ground-following pitch and roll slightly vary the projected gap.
+  const tolerance=initial<0?.0005:.000001;
+  return initial<minimum+sweep.padding&&middle>=initial-tolerance&&final>=initial-tolerance
+    &&Math.abs(sweep.start.c*sweep.end.s-sweep.start.s*sweep.end.c)<.000001;
 }
 
 export function clearOfVehicles(unit, next, units, scale, strict = false, previous = unit, field, blockers, prepared) {
@@ -131,21 +148,10 @@ export function clearOfVehicles(unit, next, units, scale, strict = false, previo
     const obstacle = vehicleEnvelope(other, scale, field);
     end ??= sweep?.end ?? vehicleEnvelope(current, scale, field);
     if (strict || !before || before === current) {
-      if (poseGap(end, obstacle) >= minimum) continue;
+      if (poseGap(end, obstacle, minimum) >= minimum) continue;
     } else {
       sweep ??= vehicleSweep(before, current, scale, field);
-      if (sweepGap(sweep, obstacle) >= minimum) continue;
-      const initial = poseGap(sweep.start, obstacle);
-      const middle = poseGap(sweep.middle, obstacle), final = poseGap(end, obstacle);
-      if (initial < minimum + sweep.padding && middle >= initial - .000001
-          && final > initial + .000001) continue;
-      // A legacy save may contain two parallel, interpenetrating vans. A
-      // straight exit can keep their side gap constant before the ends clear.
-      // Ground-following pitch and roll can vary the projected gap slightly.
-      const straightTolerance = initial < 0 ? .0005 : .000001;
-      if (initial < minimum + sweep.padding && middle >= initial - straightTolerance
-          && final >= initial - straightTolerance
-          && Math.abs(sweep.start.c * end.s - sweep.start.s * end.c) < .000001) continue;
+      if(sweepClearsVehicle(sweep,obstacle,minimum))continue;
     }
     clear = false;
     if (!blockers) return false;
