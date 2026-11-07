@@ -9,6 +9,18 @@ const fieldCar = [[1.03, -.075, 2.18, .43, .47], [.96, -.06, 2.10, 1.48, .78]];
 const cached = new WeakMap();
 const skin = .055;
 export const vehicleLocalBoxes = kind => SCAV_PROFILES[kind]?.boxes ?? (kind === 'command' || kind === 'raider' ? fieldCar : modular);
+const radiusBounds=new WeakMap();
+export function vehicleRadiusBound(kind,scale){
+  const boxes=vehicleLocalBoxes(kind);let radius=radiusBounds.get(boxes);
+  if(radius===undefined){
+    // Projection can combine extrema from different authored boxes. sqrt(2)
+    // also encloses the corners of that projected bounding rectangle, for
+    // any ground pitch, roll and heading, including long buses/trucks.
+    radius=Math.SQRT2*Math.max(...boxes.map(([hx,y,hy,z,hz])=>Math.hypot(hx,Math.abs(y)+hy,Math.abs(z)+hz)));
+    radiusBounds.set(boxes,radius);
+  }
+  return radius*scale;
+}
 // Death releases the driving space immediately. A retained visual wreck and
 // collectible parts have their own lifetimes, but are never traffic obstacles.
 export const vehicleObstacle = unit => unit.hp > 0;
@@ -105,11 +117,17 @@ export function clearOfVehicles(unit, next, units, scale, strict = false, previo
   const minimum = skin * scale;
   const current = next.kind || !unit?.kind ? next : {...next, kind: unit.kind};
   const before = previous?.kind || !unit?.kind ? previous : {...previous, kind: unit.kind};
+  const broadFrom=!strict&&before?before:current;
+  const ownRadius=Math.max(vehicleRadiusBound(current.kind,scale),vehicleRadiusBound(broadFrom.kind,scale));
+  const angle=(current.heading??0)-(broadFrom.heading??0),turn=Math.atan2(Math.sin(angle),Math.cos(angle));
+  const padding=minimum+(prepared?.padding??(.012+Math.SQRT2*ownRadius*turn*turn/24));
+  const xmin=Math.min(broadFrom.x,current.x),xmax=Math.max(broadFrom.x,current.x),ymin=Math.min(broadFrom.y,current.y),ymax=Math.max(broadFrom.y,current.y);
   let sweep = prepared, end;
   let clear = true;
   for (const other of units) {
-    if (other === unit || !vehicleObstacle(other) || Math.abs(next.x - other.x) > 7 * scale
-        || Math.abs(next.y - other.y) > 7 * scale) continue;
+    if (other === unit || !vehicleObstacle(other))continue;
+    const range=ownRadius+vehicleRadiusBound(other.kind,scale)+padding;
+    if(other.x<xmin-range||other.x>xmax+range||other.y<ymin-range||other.y>ymax+range)continue;
     const obstacle = vehicleEnvelope(other, scale, field);
     end ??= sweep?.end ?? vehicleEnvelope(current, scale, field);
     if (strict || !before || before === current) {

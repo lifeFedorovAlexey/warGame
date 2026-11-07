@@ -4,15 +4,14 @@ import {maneuverAdmissionBlocker} from '../campaign/maneuver-admission.js';
 import {checkManeuver,clearOfVehicles} from '../campaign/vehicle-motion.js';
 import {vehicleDynamics} from '../campaign/vehicle-dynamics.js';
 
-// Frozen pre-cache algorithm. Compare which actual body blocks the manoeuvre,
-// including its order, rather than merely comparing cache implementation data.
+// Uncached original stopping integrator with NO distance pruning. Compare
+// the first blocking body, independently of production range selection.
 function reference(mission,unit,from,to,dt){
  const scale=mission.config.worldScale;
  for(const other of mission.nearbyUnits(unit,scale*24)){
   if(other===unit||other.hp<=0||(other.driveSpeed??0)<.01)continue;
   const braking=vehicleDynamics(other).braking,direction=other.reversing?-1:1,curve=Math.tan(other.steering??0)*direction;
   let pose=other,speed=other.driveSpeed;
-  if(Math.hypot(other.x-unit.x,other.y-unit.y)>speed*speed/(2*braking)+speed*dt+scale*7)continue;
   for(let step=0;step<64&&speed>.001;step++){
    const interval=step?.1:dt;if(step)speed=Math.max(0,speed-braking*interval);
    const length=speed*interval;if(!length)break;
@@ -75,5 +74,5 @@ const measure=fn=>{heightCalls=0;const start=performance.now();let hits=0;for(le
 measure(reference);measure(maneuverAdmissionBlocker);
 const before=measure(reference),after=measure(maneuverAdmissionBlocker);
 assert.equal(after.hits,before.hits);assert(after.heightCalls<before.heightCalls*.5,'Repeated neighbour forecasts must actually be reused');
-const report={passed:true,comparisons,blocked,before,after,note:'Equivalence to pre-cache swept braking queries and isolated Node microbenchmark, not game FPS.'};
+const report={passed:true,comparisons,blocked,before,after,note:'Equivalence to uncached swept braking queries without distance pruning; isolated Node microbenchmark, not game FPS.'};
 fs.mkdirSync('campaign/reports',{recursive:true});fs.writeFileSync('campaign/reports/stopping-path-cache.json',JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));

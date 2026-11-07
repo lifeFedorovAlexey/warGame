@@ -33,7 +33,7 @@ function projectedSweep(mission,unit,projected){
   // The same full-body neighbourhood as vehicleMotionClear, replacing only
   // the one/two explicitly proved future poses. Avoid scanning 500 bodies
   // at every arc sample of a suspended continuation proof.
-  const obstacles=mission.nearbyUnits(to,mission.config.worldScale*7).filter(body=>!projected.has(body));
+  const obstacles=mission.vehicleMotionNeighbours(unit,from,to).filter(body=>!projected.has(body));
   obstacles.push(...projected.values());
   return mission.vehicleMotionClear(unit,from,to,.52,undefined,obstacles);
  };

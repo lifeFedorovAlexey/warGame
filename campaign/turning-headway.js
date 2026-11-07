@@ -1,7 +1,7 @@
 import {checkManeuver} from './vehicle-motion.js';
-import {vehicleSweep} from './vehicle-collision.js';
+import {vehicleSweep,vehicleRadiusBound} from './vehicle-collision.js';
 import {vehicleDynamics} from './vehicle-dynamics.js';
-import {maneuverAdmissionBlocker} from './maneuver-admission.js';
+import {maneuverAdmissionBlocker,maneuverAdmissionRadius} from './maneuver-admission.js';
 
 // A turning rear corner can hit a neighbour which is behind the centre's
 // forward corridor. Probe only the current Ackermann arc up to the braking
@@ -16,8 +16,10 @@ export function turningHeadway(mission,unit,point,dt,scale,blockers,grade=.52,ac
  // opposite turns their front corners meet while the centres remain farther
  // apart than four scale units. A sharp turn also probes approaching traffic.
  const curve=actualCurve??Math.tan(Math.max(-dynamics.steeringLimit,Math.min(dynamics.steeringLimit,angle*1.55)));
- const turning=Math.abs(curve)>1e-4,radius=horizon+scale*7;
- if(!mission.nearbyUnits(unit,turning?Math.max(radius,scale*24):radius).some(other=>other!==unit&&other.hp>0)
+ const turning=Math.abs(curve)>1e-4,radius=horizon+vehicleRadiusBound(unit.kind,scale);
+ const neighbours=turning?mission.nearbyUnits(unit,horizon+maneuverAdmissionRadius(mission,unit,dt))
+  :mission.vehicleMotionNeighbours(unit,unit,{...unit,x:unit.x-Math.sin(unit.heading)*horizon,y:unit.y+Math.cos(unit.heading)*horizon});
+ if(!neighbours.some(other=>other!==unit&&other.hp>0)
   &&!mission.nav.nearbySolids(unit,radius).length)return Infinity;
  // A straight route intent does not describe a body still following a
  // curved approach. The selected physical arc cannot enter a neighbour's

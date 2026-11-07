@@ -2,7 +2,7 @@ import {TerrainNavigator} from './navigation.js';
 import {waterTower} from './threat-guidance.js';
 import {constructionUnlocked,researchUnlocked,defenseReady} from './story-construction.js';
 import {driveStep,clearOfVehicles,vehicleClearance,planManeuver,planManeuverSteps,maneuverStep,checkManeuver} from './vehicle-motion.js';
-import {footprintSupport,vehicleEnvelope,vehicleSweep,vehicleGroundSafe,vehicleObstacle} from './vehicle-collision.js';
+import {footprintSupport,vehicleEnvelope,vehicleSweep,vehicleGroundSafe,vehicleObstacle,vehicleRadiusBound} from './vehicle-collision.js';
 import {passageStillOpen,preparePassageEgress} from './passage-egress.js';
 import {vehicleRecipes,starterProjects,matchingRecipe,projectDesignation,designNameKey,projectAssemblyKey,latestVehicleProjects} from './vehicle-designs.js';
 import {angleDelta} from './builder-kinematics.js';
@@ -998,10 +998,17 @@ export class Mission{
   }
   return null;
  }
+ vehicleMotionNeighbours(unit,from,to){
+  if(!this.unitIndexActive)return this.state.units;
+  const scale=this.config.worldScale,radius=Math.max(vehicleRadiusBound(from.kind??unit.kind,scale),vehicleRadiusBound(to.kind??unit.kind,scale));
+  const angle=(to.heading??0)-(from.heading??0),turn=Math.atan2(Math.sin(angle),Math.cos(angle));
+  const padding=scale*.055+.012+Math.SQRT2*radius*turn*turn/24;
+  return this.unitIndex.query(to,distance(from,to)+radius+this.unitIndex.maxBodyRadius*scale+padding);
+ }
  vehicleMotionClear(unit,from,to,grade=.52,blockers,obstacles=this.state.units){
   const field=this.field,scale=this.config.worldScale;
   if(!passageWaitClear(this,unit,from,to))return false;
-  if(obstacles===this.state.units)obstacles=this.nearbyUnits(to,7*scale);
+  if(obstacles===this.state.units)obstacles=this.vehicleMotionNeighbours(unit,from,to);
   const terrainEscape=unit.owner==='rai'?this.terrainEscapeFor(unit):null;
   if(!this.nav.lineClear(from,to,false,true,grade,true,false,terrainEscape))return false;
   const envelope=vehicleEnvelope(to,scale,field);

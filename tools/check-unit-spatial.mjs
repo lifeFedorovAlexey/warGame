@@ -1,13 +1,15 @@
 import assert from 'node:assert/strict';
 import {UnitSpatialIndex} from '../campaign/unit-spatial-index.js';
-import {clearOfVehicles} from '../campaign/vehicle-collision.js';
-const units=Array.from({length:500},(_,i)=>({id:'u'+i,kind:i%3?'bukhanka':'raider',x:Math.sin(i*1.791)*600,y:Math.cos(i*.733)*600,heading:i*.31,hp:100})),index=new UnitSpatialIndex();index.rebuild(units);
+import {clearOfVehicles,vehicleRadiusBound} from '../campaign/vehicle-collision.js';
+const kinds=['bukhanka','raider','scav-bus','scav-firetruck'];
+const units=Array.from({length:500},(_,i)=>({id:'u'+i,kind:kinds[i%kinds.length],x:Math.sin(i*1.791)*600,y:Math.cos(i*.733)*600,heading:i*.31,hp:100})),index=new UnitSpatialIndex();index.rebuild(units);
 for(let i=0;i<300;i++){
   const unit=units[i%units.length];unit.x+=Math.sin(i)*70;unit.y+=Math.cos(i)*50;index.update(unit);
   const radius=10+(i%13)*17,near=index.query(unit,radius),brute=units.filter(u=>Math.abs(u.x-unit.x)<=radius&&Math.abs(u.y-unit.y)<=radius);
   assert.deepEqual(near.map(u=>u.id),brute.map(u=>u.id),'Broad phase preserves membership and sequential order');
   const next={...unit,x:unit.x+2,y:unit.y-1};
-  assert.equal(clearOfVehicles(unit,next,index.query(next,7*4.5),4.5),clearOfVehicles(unit,next,units,4.5),'Exact collision result is unchanged');
+  const sweepRadius=vehicleRadiusBound(unit.kind,4.5)+index.maxBodyRadius*4.5+Math.hypot(2,1)+.3;
+  assert.equal(clearOfVehicles(unit,next,index.query(next,sweepRadius),4.5),clearOfVehicles(unit,next,units,4.5),'Exact collision result is unchanged');
 }
 for(let i=0;i<units.length;i++)units[i].owner=i%3?'rai':'scavs';index.rebuild(units);
 for(const unit of units.slice(0,20)){
