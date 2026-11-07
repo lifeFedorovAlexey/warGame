@@ -569,30 +569,39 @@ export class Mission{
  enemyOf(item,other){return other.hp>0&&item.owner!==other.owner&&(!other.campId||this.inBounds(other.x,other.y));}
  nearestEnemy(item,range,canTarget=null){let nearest=null,best=range;for(const target of [...this.state.units,...this.state.buildings]){if(!this.enemyOf(item,target))continue;const d=distance(item,target);if(d<best&&(item.owner!=='rai'||this.visibleAt(target.x,target.y))&&(!canTarget||canTarget(target))){best=d;nearest=target;}}return nearest;}
  requestPassage(unit,blockers){
-  if(unit.task?.type==='clear-site')return;
+  if(unit.task?.type==='clear-site'||unit.detour||unit.traffic||unit.trafficHold)return false;
   const scale=this.config.worldScale;
   for(const other of blockers){
-   if(other.owner!==unit.owner||other.path.length||other.task||other.detour||this.unitSpec(other).role==='builder'
+   if(other.hp<=0||other.owner!==unit.owner||other.path.length||other.task||other.detour||this.unitSpec(other).role==='builder'
     ||other.trafficRest>this.state.time||distance(unit,other)>scale*6)continue;
    if(!other.routeOrder&&(!['move','attack-move'].includes(unit.task?.type)||this.unitSpec(unit).role==='builder'))continue;
    other.trafficRest=this.state.time+5;
    const park=this.parkingManeuver(other,unit,(from,to)=>this.vehicleMotionClear(other,from,to));
    if(!park)continue;
    other.detour={legs:park.legs,parking:true,idleYield:true,blocked:0};
-   return;
+   unit.trafficHold=other.id;
+   return true;
   }
   const course=vehicle=>Math.atan2(vehicle.path[0].y-vehicle.y,vehicle.path[0].x-vehicle.x);
   const direction=course(unit);
-  const candidates=[...blockers].filter(other=>other.owner===unit.owner&&other.path.length
+  const candidates=[...blockers].filter(other=>other.hp>0&&other.owner===unit.owner&&other.path.length
+   &&!other.traffic&&!other.detour&&!other.trafficHold&&!other.passage
+   &&(other.driveSpeed??0)<scale*.18
    &&other.task?.type!=='clear-site'&&distance(unit,other)<this.config.worldScale*6
    &&Math.cos(direction-course(other))<.55);
-  if(!candidates.length)return;
+  if(!candidates.length)return false;
   const serial=vehicle=>Number(vehicle.id.slice(1));
   candidates.sort((a,b)=>distance(unit,a)-distance(unit,b)||serial(a)-serial(b));
   const other=candidates[0],higher=serial(unit)<serial(other);
   const leader=higher?unit:other, follower=higher?other:unit;
-  if(follower.traffic||follower.trafficRest>this.state.time)return;
-  follower.traffic={leader:leader.id,since:this.state.time,phase:'seek'};
+  if(follower.trafficRest>this.state.time)return false;
+  const park=this.parkingManeuver(follower,leader,(from,to)=>this.vehicleMotionClear(follower,from,to));
+  if(!park){follower.trafficRest=this.state.time+1.2;return false;}
+  // Reserve both sides after the sweep is checked, so neither starts a second manoeuvre.
+  follower.detour={legs:park.legs,parking:true,blocked:0};
+  follower.traffic={leader:leader.id,since:this.state.time,phase:'move',forward:park.forward};
+  leader.trafficHold=follower.id;
+  return true;
  }
  vehicleMotionClear(unit,from,to,grade=.52,blockers,obstacles=this.state.units){
   const field=this.field,scale=this.config.worldScale;
@@ -636,7 +645,7 @@ export class Mission{
   unit.passingLane=lane;
   return goal;
  }
- trafficSpeed(unit,course,lane,scale){
+ trafficSpeed(unit,course,lane,scale,stoppedObstacles){
   const field=this.field,shape=vehicleEnvelope(unit,scale,field);
   const front=footprintSupport(shape,course.x,course.y);
   const width=footprintSupport(shape,course.y,-course.x);
@@ -652,7 +661,19 @@ export class Mission{
   for(const other of this.state.units){
    if(other===unit||other.hp<=0||other.owner!==unit.owner||distance(unit,other)>scale*13)continue;
    const point=other.path[0];
-   if(!point)continue;
+   if(!point){
+    if(!['move','attack-move'].includes(unit.task?.type))continue;
+    // Stop clears the leader's route immediately. Its solid hull still needs
+    // a braking interval; normal stalled-path recovery can then plan a pass.
+    const obstacle=vehicleEnvelope(other,scale,field),dx=obstacle.x-shape.x,dy=obstacle.y-shape.y;
+    const along=dx*course.x+dy*course.y,across=Math.abs(dx*course.y-dy*course.x);
+    if(along>0&&across<width+footprintSupport(obstacle,course.y,-course.x)+scale*.15){
+     const gap=along-front-footprintSupport(obstacle,course.x,course.y)-scale*.72;
+     if(gap<scale*.18&&(other.driveSpeed??0)<scale*.18&&!other.detour)stoppedObstacles?.add(other);
+     limit=Math.min(limit,Math.sqrt(44*Math.max(0,gap)));
+    }
+    continue;
+   }
    const goalDistance=distance(other,point);
    if(!goalDistance)continue;
    const otherCourse={x:(point.x-other.x)/goalDistance,y:(point.y-other.y)/goalDistance};
@@ -730,7 +751,7 @@ export class Mission{
   for(const sign of [side,-side]){
    const goal={x:unit.x+right.x*scale*5*sign,y:unit.y+right.y*scale*5*sign};
    const path=planManeuver(unit,goal,{scale,allowed,attempts:2,
-    accept:pose=>lateral(pose)*sign>scale*3.4&&distance(pose,unit)>scale*2.6&&clearLane(pose)});
+    accept:pose=>lateral(pose)*sign>scale*1.3&&distance(pose,unit)>scale*.6&&clearLane(pose)});
    if(path)return {legs:path,forward};
   }
   return null;
@@ -920,7 +941,8 @@ export class Mission{
   }
   if(unit.detour){
    const plan=unit.detour,leg=plan.legs[0];
-   const throughSpeed=plan.passageExit&&plan.legs[1]?.direction===leg.direction?16:0;
+   const throughSpeed=plan.legs[1]?.direction===leg.direction
+    ?plan.passageExit?16:plan.parking&&!plan.rough?8:0:0;
    const step=maneuverStep(unit,leg,dt,{scale,allowed:plan.rough?roughAllowed:allowed,crawl:!!plan.rough,
     throughSpeed,forwardSpeed:plan.passageExit?18:13});
    if(step){
@@ -982,7 +1004,9 @@ export class Mission{
   const slopeBlockers=Math.hypot(slope.x,slope.y)>=.42?blockers:undefined;
   const grade=(slope.x*(waypoint.x-unit.x)+slope.y*(waypoint.y-unit.y))/Math.max(1,remaining);
   const aligned=-Math.sin(unit.heading)*course.x+Math.cos(unit.heading)*course.y>.72;
-  const trafficLimit=cruising&&aligned?this.trafficSpeed(unit,course,roadLane,scale):Infinity;
+  // Braking for a parked van can stop us before a movement sweep ever hits it.
+  const stoppedObstacles=new Set();
+  const trafficLimit=cruising&&aligned?this.trafficSpeed(unit,course,roadLane,scale,stoppedObstacles):Infinity;
   const speed=this.unitSpec(unit).speed*this.nav.roads.factor(unit.x,unit.y);
   let pose=driveStep(unit,waypoint,dt,{speed,grade,scale,tolerance,trafficLimit,
    reverseLimit:unit.task?.type==='clear-site'?scale*4:precise?scale*1.5:0,allowed});
@@ -1004,11 +1028,13 @@ export class Mission{
   const stoppedPair=()=>!pose&&!gate&&!unit.traffic&&slopeBlockers?.size===1&&[...slopeBlockers].some(other=>other.owner===unit.owner
    &&other.path.length&&!other.traffic&&!other.passage&&(other.driveSpeed??0)<scale*.18
    &&vehicleClearance(unit,other,scale,this.field)>=scale*.52);
-  const blockDelay=stoppedPair() ? .55 : .85;
+  const nearbyStall=!pose&&!gate&&!unit.traffic&&(stoppedObstacles.size||[...blockers].some(other=>
+   other.hp>0&&other.owner===unit.owner&&(other.driveSpeed??0)<scale*.18));
+  const blockDelay=stoppedPair() ? .55 : nearbyStall&&this.state.units.length<128 ? .35 : .85;
   if(watch.elapsed<2.1&&watch.blocked<blockDelay)return !!pose;
   const waiting=trafficLimit<speed*.3&&!blockers.size&&(!pose||pose.driveSpeed<speed*.14);
   unit.queueSince=waiting?unit.queueSince??this.state.time:undefined;
-  const queued=waiting&&this.state.time-unit.queueSince<2.4;
+  const queued=waiting&&!stoppedObstacles.size&&this.state.time-unit.queueSince<2.4;
   const jammed=!queued&&(watch.distance-d<2.2||watch.blocked>=blockDelay);
   watch.distance=d;watch.elapsed=0;watch.blocked=0;
   if(!jammed){watch.attempts=0;delete watch.stalledAt;return !!pose;}
@@ -1022,11 +1048,11 @@ export class Mission{
    if(local)unit.detour={legs:local,parking:false,blocked:0};
    return !!pose;
   }
-  this.requestPassage(unit,blockers);
-
   const target=unit.task?.targetId?this.entity(unit.task.targetId):null;
   const travel=['move','attack-move'].includes(unit.task?.type);
   if(travel&&stoppedPair()&&this.recoverTrafficCluster(unit,false,slopeBlockers))return !!pose;
+  for(const other of stoppedObstacles)blockers.add(other);
+  if(this.requestPassage(unit,blockers))return !!pose;
   const destination=travel||unit.task?.type==='clear-site'?unit.task:unit.path.at(-1);
   const stalledNearParked=travel&&[...blockers].some(other=>!other.path.length);
   const routeStale=stalledNearParked&&unit.trafficReplan&&distance(unit,unit.trafficReplan)<scale*.7
