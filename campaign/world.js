@@ -22,11 +22,11 @@ import {buildLayerHeight} from './builder-optics.js';
 export async function createCampaignWorld(host,config,sound){
  const renderer=new T.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
  const gl=renderer.getContext(),debug=gl.getExtension('WEBGL_debug_renderer_info');
- const software=debug&&/swiftshader|llvmpipe|software/i.test(gl.getParameter(debug.UNMASKED_RENDERER_WEBGL));
+ const software=!!debug&&/swiftshader|llvmpipe|softpipe|software|basic render/i.test(gl.getParameter(debug.UNMASKED_RENDERER_WEBGL));
  renderer.setPixelRatio(Math.min(devicePixelRatio,software?.77:1.15));renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;renderer.shadowMap.enabled=true;renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.localClippingEnabled=true;host.append(renderer.domElement);
  const scene=new T.Scene();scene.background=new T.Color('#8a826d');scene.fog=new T.Fog('#9c8d70',3500,11000);const camera=new T.PerspectiveCamera(43,1,1,22000);camera.up.set(0,0,1);
  scene.add(new T.HemisphereLight('#c4d8e0','#79664d',2.3));const sun=new T.DirectionalLight('#ffdfb7',2.5);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-400,right:400,top:400,bottom:-400,near:1,far:1600});sun.shadow.bias=-.0001;sun.shadow.normalBias=.08;scene.add(sun,sun.target);const fill=new T.DirectionalLight('#a5b6c3',1);fill.position.set(100,-200,800);scene.add(fill);
- const [terrain,sky]=await Promise.all([createAlphaMap(T),createDesertSky(T,renderer,scene)]);scene.add(terrain.root);terrain.baseOutline.visible=false;terrain.path.visible=false;terrain.setViewMode('close');const field=terrain.field,start=field.gridToWorld(config.startGrid);
+ const [terrain,sky]=await Promise.all([createAlphaMap(T,{lightweightOverview:software}),createDesertSky(T,renderer,scene)]);scene.add(terrain.root);terrain.baseOutline.visible=false;terrain.path.visible=false;terrain.setViewMode('close');const field=terrain.field,start=field.gridToWorld(config.startGrid);
  const normalCameraLimit=Math.PI*.42;
  const controls=new OrbitControls(camera,renderer.domElement);controls.target.set(start.x,start.y,field.heightAt(start.x,start.y));camera.position.set(start.x+100,start.y-360,controls.target.z+360);controls.enableDamping=true;controls.minDistance=110;controls.maxDistance=5300;controls.minPolarAngle=.06;controls.maxPolarAngle=normalCameraLimit;controls.mouseButtons={LEFT:-1,MIDDLE:T.MOUSE.ROTATE,RIGHT:-1};controls.enablePan=false;
  controls.addEventListener('start',()=>{controls.maxPolarAngle=normalCameraLimit;});
@@ -214,7 +214,7 @@ export async function createCampaignWorld(host,config,sound){
   controls.target.x=T.MathUtils.clamp(controls.target.x,-field.half,field.half);controls.target.y=T.MathUtils.clamp(controls.target.y,-field.half,field.half);controls.update();camera.position.z=Math.max(camera.position.z,field.heightAt(camera.position.x,camera.position.y)+40);
   sky.update(camera,false);
   storySignals.update(mission,camera,now);
-  const threshold=software?240:800;
+  const threshold=software?145:800;
   const mode=distance>(terrainMode==='close'?threshold+22:threshold-22)?'overview':'close';
   if(mode!==terrainMode){terrain.setViewMode(mode);terrainMode=mode;}
   vehicles.update(mission,distance,shotTimes,now);
