@@ -62,8 +62,13 @@ export class RoadTraffic {
         const {a, b, path, ux, uy, length} = segment;
         const along = clamp((point.x - a.x) * ux + (point.y - a.y) * uy, 0, length);
         const px = a.x + ux * along, py = a.y + uy * along;
-        const distance = Math.hypot(point.x - px, point.y - py);
         const width = (a.width ?? path.width) + ((b.width ?? path.width) - (a.width ?? path.width)) * along / length;
+        const dx = point.x - px, dy = point.y - py, limit = Math.min(shortest, width / 2 + radius);
+        // Exact broad phase: a point outside either axis interval is also
+        // outside the circle. Keep hypot and the original strict tie rule for
+        // every surviving candidate; no approximate distance enters routing.
+        if (Math.abs(dx) > limit || Math.abs(dy) > limit) continue;
+        const distance = Math.hypot(dx, dy);
         if (distance >= shortest || distance > width / 2 + radius) continue;
         shortest = distance;
         nearest = {segment, along, x: px, y: py, distance, width};
