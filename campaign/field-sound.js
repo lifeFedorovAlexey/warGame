@@ -237,6 +237,8 @@ export class FieldSound {
     if (!chapter || !this.enabled || !this.storyEnabled || !this.context) return;
     const request = {chapter, urgent, cue, keepCaptionUntil, time:performance.now()};
     this.pendingStory = request;
+    const scene=this.storyScenes?.get(cue?.storyScene),index=scene?.cues.indexOf(cue.id)??-1;
+    if(index>=0)for(const id of scene.cues.slice(index+1,index+3))this.storyClip(chapter,this.storyLines.get(id));
     if (cue) {
       keepCaptionUntil(Infinity);
       request.releaseCaption = () => keepCaptionUntil(performance.now() + Math.max(2200, cue.text.length * 60));
@@ -270,7 +272,9 @@ export class FieldSound {
     source.buffer = request.buffer;
     gain.gain.value = 0;
     source.connect(gain).connect(this.output);
-    const playback = this.storyPlayback = {source, gain, chapter:request.chapter, cueId:request.cue?.id, urgent:request.urgent};
+    const playback = this.storyPlayback = {source, gain, chapter:request.chapter, cueId:request.cue?.id, urgent:request.urgent,
+      releaseCaption:request.releaseCaption};
+    const gap=Math.max(0,(request.cue?.pauseAfter??.18)-(request.cue?.clip?.trailingSilence??0));
     this.updateDialogueMix();
     source.onended = () => {
       source.disconnect();
@@ -278,11 +282,12 @@ export class FieldSound {
       if (this.storyPlayback !== playback) return;
       this.storyPlayback = null;
       this.updateDialogueMix();
+      request.keepCaptionUntil(performance.now()+gap*1000);
     };
     source.start(now);
-    // A recorded actor's pause already occupies the gap; preserve the MP3 itself.
-    const gap=Math.max(0,(request.cue?.pauseAfter??.18)-(request.cue?.clip?.trailingSilence??0));
-    request.keepCaptionUntil(performance.now() + (request.buffer.duration + gap) * 1000);
+    // Advance on AudioBuffer completion: a wall-clock deadline can cut the tail
+    // when the audio context starts late or is suspended by the browser.
+    request.keepCaptionUntil(request.cue?Infinity:performance.now()+(request.buffer.duration+gap)*1000);
   }
 
   updateDialogueMix() {
@@ -301,6 +306,7 @@ export class FieldSound {
     const playback = this.storyPlayback;
     if (!playback) return;
     this.storyPlayback = null;
+    playback.releaseCaption?.();
     const now = this.context.currentTime;
     playback.gain.gain.setTargetAtTime(0, now, .012);
     playback.source.stop(now + .065);
@@ -357,6 +363,8 @@ export class FieldSound {
 
   configureStoryVoices(script,mission,isBusy) {
     this.storyVoices=new Map(script.barks.map(cue=>[cue.event,cue]));
+    this.storyScenes=new Map(script.scenes.map(scene=>[scene.id,scene]));
+    this.storyLines=new Map(script.dialogue.map(cue=>[cue.id,cue]));
     this.storyMission=mission;this.storyBusy=isBusy;this.barkTimes=new Map();
     this.seenHostiles=new Set();this.lastOrderAt=performance.now();
   }

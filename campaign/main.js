@@ -21,7 +21,6 @@ const selected = new Set();
 const miniBackground = new Image();
 let world, mission, config, radio, sound, designer, combatMenu;
 let active = false, paused = false, speed = 1, resultShown = false;
-let prologuePlaying = false;
 let pausedBeforeDesigner = false;
 let buildOpen = false, buildKind = null, rotation = 0, orderMode = null;
 let pointer = null, drag = null, site = null, placing = null;
@@ -216,14 +215,7 @@ function saveGame(notify = true) {
     if (notify) toast('Сохранение недоступно');
   }
 }
-function stopPrologue() {
-  if(!prologuePlaying)return;
-  radio.reset();radio.director.stopPrologue();prologuePlaying=false;
-  document.body.classList.remove('prologue-playing');$('mission-hud').hidden=!active;
-  setButtonIcon($('prologue'),'radio','Прослушать пролог');
-}
 function start(restore = false) {
-  stopPrologue();
   if (restore) {
     try {
       const data = localStorage.getItem(saveKey);
@@ -240,6 +232,7 @@ function start(restore = false) {
   paused = false;
   resultShown = false;
   radio.reset();
+  if(!restore)radio.director.beginStory(mission,{enabled:radio.enabled});
   world.storySignals.show(null);
   blockedOrders.clear();
   $('order-feedback').hidden=true;
@@ -930,7 +923,6 @@ function frame(now) {
     events();
     radio.consume(mission, now);
   }
-  if(prologuePlaying){radio.consume(mission,now);if(radio.director.prologueDone)stopPrologue();}
   world.update(mission, selected, dt, active && !paused && mission.state.status==='running');
   navigationDebug?.update();
   if (active) {
@@ -990,7 +982,7 @@ try {
     },
     onFocus:focusSignal,
   });
-  sound.configureStoryVoices(story,mission,()=>!!radio.entry||prologuePlaying);
+  sound.configureStoryVoices(story,mission,()=>!!radio.entry);
   new ResizeObserver(positionFieldTasks).observe($('radio'));
   window.campaign = {
     ready: true, mission, world, select, radio,
@@ -1010,13 +1002,6 @@ try {
   installInput();
   $('loading-status').textContent = 'Карта готова. Первый приказ — развернуть базу.';
   $('begin').disabled = false;
-  $('prologue').disabled = false;
-  $('prologue').onclick = () => {
-    if(prologuePlaying)return stopPrologue();
-    radio.reset();radio.setEnabled(true);radio.director.startPrologue();
-    prologuePlaying=true;document.body.classList.add('prologue-playing');$('mission-hud').hidden=false;
-    setButtonIcon($('prologue'),'close','Закончить пролог');sound.unlock();radio.consume(mission,performance.now());
-  };
   try { $('resume-save').hidden = !localStorage.getItem(saveKey); } catch {}
   $('begin').onclick = () => start();
   $('resume-save').onclick = $('load').onclick = () => start(true);

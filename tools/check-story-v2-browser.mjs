@@ -4,7 +4,7 @@ import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url);
 const {chromium}=require('C:/Users/Алексей/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
 const base='assets/campaign/alpha/mission01/',story=JSON.parse(fs.readFileSync(base+'story-v2.json'));
-const folder='campaign/previews/radio-v3';fs.mkdirSync(folder,{recursive:true});
+const folder='campaign/previews/radio-flow-review';fs.mkdirSync(folder,{recursive:true});
 const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true,args:['--enable-unsafe-swiftshader','--use-angle=swiftshader']});
 try{
  const page=await browser.newPage({viewport:{width:1440,height:900}}),errors=[],pending=new Set();
@@ -17,7 +17,14 @@ try{
  const initial=await page.evaluate(()=>campaign.mission.save());
  // Screenshots may outlast a short line on a busy renderer. Hold only the test's
  // current caption; the real AudioBuffer still starts and finishes normally.
- await page.evaluate(()=>{const r=campaign.radio,signal=r.onSignal;r.onSignal=(s,c,keep,urgent,cue)=>signal(s,c,keep?until=>keep(r.testHeldCue===cue?.id?Infinity:until):keep,urgent,cue);});
+ await page.evaluate(()=>{
+  const r=campaign.radio,signal=r.onSignal;r.testTransmissions=[];
+  r.onSignal=(s,c,keep,urgent,cue)=>{
+   const entry=cue?{id:cue.id,presented:performance.now(),duration:cue.clip.duration}:null;
+   if(entry)r.testTransmissions.push(entry);
+   return signal(s,c,keep?until=>{if(entry&&Number.isFinite(until))entry.finished=performance.now();keep(r.testHeldCue===cue?.id?Infinity:until);}:keep,urgent,cue);
+  };
+ });
  const waitCue=async id=>{
   try{await page.waitForFunction(id=>campaign.storyAudio.cueId===id,id,{timeout:15000});}
   catch(error){throw new Error(JSON.stringify({expected:id,...await page.evaluate(()=>({audio:campaign.storyAudio,entry:campaign.radio.entry,until:campaign.radio.until,now:performance.now(),state:campaign.state,radio:campaign.mission.state.radioStory}))}),{cause:error});}
@@ -49,15 +56,28 @@ try{
   mission.updateEconomy(0);mission.updateFog();campaign.advance(0);return e.id;
  },{kind,dx,dy});
  const unlocked=kind=>page.evaluate(k=>campaign.mission.constructionUnlocked(k),kind);
- await page.locator('#prologue').click();await waitCue('m01-s01-l003');
- assert.equal(await page.evaluate(()=>campaign.mission.state.time),0);
- await playScene('p01');await playScene('p02',{snap:'prologue-warrant'});await playScene('p03');await playScene('p04');
- await page.locator('#begin').click();await waitCue('m01-v3-general-coffee');
+ assert.equal(await page.locator('#prologue').count(),0);
+ await screenshot('start-desktop');await screenshot('start-narrow',true);await page.setViewportSize({width:1440,height:900});
+ await page.locator('#begin').click();await waitCue('m01-s01-l003');
+ assert.equal(await page.locator('#welcome').isHidden(),true);
+ assert.equal(await page.evaluate(()=>campaign.state.active&&!campaign.state.paused),true);
+ // No second button, forced completion, pause or fixture injection through the opening.
+ await playScene('p01',{natural:true});
+ await playScene('p02',{natural:true,check:async i=>{
+  if(i===0){await screenshot('opening-commander-desktop');await screenshot('opening-commander-narrow',true);}
+ }});
+ await playScene('p03',{natural:true});await playScene('p04',{natural:true});
+ await waitCue('m01-v3-general-coffee');
  assert.equal(await page.evaluate(()=>campaign.state.paused),false);
- await playScene('r01',{check:async i=>{
+ await playScene('r01',{natural:true,check:async i=>{
   if(i===1){await screenshot('original-commander-desktop');await screenshot('original-commander-narrow',true);}
   if(i===2)assert.equal(await page.locator('#field-tasks').isHidden(),false);
  }});
+ const opening=await page.evaluate(()=>({lines:campaign.radio.testTransmissions,time:campaign.mission.state.time,opening:campaign.mission.state.radioStory.includeOpening}));
+ assert.equal(opening.lines.length,14);assert(opening.time>20);assert(opening.opening);
+ for(const line of opening.lines)assert(line.finished-line.presented>=(line.duration-.12)*1000,JSON.stringify(line));
+ for(let i=1;i<opening.lines.length;i++)assert(opening.lines[i].presented-opening.lines[i-1].finished<700,'Broken exchange: '+JSON.stringify(opening.lines.slice(i-1,i+1)));
+ fs.writeFileSync(folder+'/opening-timeline.json',JSON.stringify(opening,null,2));
  await page.waitForFunction(()=>document.querySelector('#field-objectives').textContent.includes('Построить электростанцию'));
  await screenshot('power-task-narrow',true);await screenshot('power-task-desktop');
  await page.locator('#pause').click();await page.locator('#build-toggle').click();

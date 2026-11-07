@@ -22,6 +22,12 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   const introUrl=new URL('../'+fieldRadioDir+intro.file,page.url()).href;
   const introResponse=page.waitForResponse(response=>response.url()===introUrl&&response.ok());
   await page.locator('#begin').click();
+  // The main button includes the opening. This general control smoke skips it
+  // through the UI; the story browser suite listens to every line naturally.
+  for(const scene of ['p01','p02','p03','p04']){
+   await page.waitForFunction(id=>campaign.radio.entry?.storyScene===id,scene);
+   await page.locator('#radio [data-dismiss]').click();
+  }
   await introResponse;
   // This general gameplay smoke exercises free construction; the story suite
   // separately verifies every progressive unlock and its dialogue.

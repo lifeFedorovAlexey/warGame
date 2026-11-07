@@ -30,13 +30,13 @@ for(const clip of Object.values(original.clips).filter(c=>c.origin==='user-recor
 assert.equal(source.scenes.find(s=>s.id==='r50').cues.length,10);
 assert.equal(source.scenes.find(s=>s.id==='r06').cues.length,6);
 
-function fixture(){
+function fixture(startImmediately=true){
  const camps=['flamethrower','mg-ammo-1','mg-tower',null].map((artifact,i)=>({id:'camp'+i,artifact,cleared:false}));
  const mission={state:{status:'running',buildings:[],units:[],projectiles:[],flags:{},research:{},artifactKeys:[],artifacts:[],statistics:{produced:0},camps,storyConstruction:{enabled:true,unlocked:['generator'],requiredBunkers:2,research:false}},effects:[],config:{startGrid:[0,0],oilFields:[],camps},field:{worldToGrid:(x,y)=>[x,y],gridToWorld:([x,y])=>({x,y})},visibleAt:()=>true,exploredAt:()=>true};
  mission.entity=id=>[...mission.state.units,...mission.state.buildings].find(e=>e.id===id&&e.hp>0);
  const director=new StoryDirector(script);let now=0;
  const tick=(seconds=0,enabled=true)=>{let cue;do{const step=Math.min(1,seconds);now+=step*1000;seconds-=step;cue=director.update(mission,now,{enabled});}while(seconds>0);return cue;};
- tick();
+ if(startImmediately)tick();
  const heard=(...ids)=>{for(const id of ids)director.data.scenes[id]={status:'done',cursor:0,endedAt:director.data.clock};};
  const finish=()=>{const id=director.data.active;assert(id);while(director.data.active===id)director.completeLine();return id;};
  const building=(kind,completed=true,owner='rai',campId)=>{const e={id:kind+'-'+mission.state.buildings.length,kind,completed,owner,campId,hp:100,x:0,y:0};mission.state.buildings.push(e);return e;};
@@ -71,7 +71,7 @@ function fixture(){
  assert(storyObjectives(f.mission).some(t=>t.id==='security'&&t.progress==='0/4'));
 }
 for(const completed of [false,true]){
- const f=fixture();f.building('generator',completed);
+ const f=fixture(false);f.building('generator',completed);
  assert.equal(f.tick().storyScene,completed?'r01b':'r01a');f.finish();
  assert.notEqual(f.tick()?.storyScene,'r01');
 }
@@ -88,7 +88,8 @@ for(const keys of [['mg-tower','flamethrower','mg-ammo-1'],['mg-ammo-1','mg-towe
  assert.equal(f.tick().storyScene,'r26');f.finish();assert.equal(f.tick().storyScene,'r27');f.finish();
  f.mission.state.research.flamethrower=true;assert.equal(f.tick().storyScene,'r29');f.finish();assert.equal(f.tick(),null);
  const fast=fixture();fast.finish();fast.mission.state.artifactKeys.push('flamethrower');fast.tick();fast.director.completeLine();
- fast.mission.state.research.flamethrower=true;assert.equal(fast.tick().storyScene,'r30-alt');assert.equal(fast.director.record('r26').status,'cancelled');
+ fast.mission.state.research.flamethrower=true;assert.equal(fast.tick().storyScene,'r26');fast.finish();
+ assert.equal(fast.tick().storyScene,'r30-alt');assert.equal(fast.director.record('r26').status,'done');
 }
 // Discoveries identify the actual camp, without false ordinals on another route.
 {
@@ -140,7 +141,24 @@ for(const enabled of [false,true]){
  assert(!f.director.data.scenes.u01);assert(!f.director.data.scenes.u02);assert(!f.director.data.scenes.u04);
 }
 {
- const f=fixture();f.director.startPrologue();for(const id of ['p01','p02','p03','p04']){assert.equal(f.tick().storyScene,id);f.finish();}
- assert(f.director.prologueDone);f.director.stopPrologue();assert.equal(f.tick().storyScene,'r01');
+ const f=fixture(false);f.director.beginStory(f.mission);
+ for(const id of ['p01','p02','p03','p04']){assert.equal(f.tick().storyScene,id);f.finish();}
+ assert.equal(f.tick().storyScene,'r01');
 }
-console.log('PASS: radio v3, 39 original recordings, independent progression, alternate camp orders, complete exchanges, interruptions, saves, prologue and finale');
+// Saving the opening keeps it in the same mission, including the current reply.
+{
+ const f=fixture(false);f.director.beginStory(f.mission);f.tick();f.finish();f.tick();f.director.completeLine();
+ assert.equal(f.tick().id,'m01-s02-l004');f.mission.state=JSON.parse(JSON.stringify(f.mission.state));
+ assert.equal(f.tick().id,'m01-s02-l004');assert(f.director.heard('p01'));
+ f.finish();assert.equal(f.tick().storyScene,'p03');
+ const muted=fixture(false);muted.director.beginStory(muted.mission,{enabled:false});assert.equal(muted.tick().storyScene,'r01');
+}
+// Progress in the world cannot cut off a question, its reply or an unfinished voice.
+{
+ const f=fixture();f.director.completeLine();const cue=f.tick();f.building('generator',false);
+ assert.equal(f.tick().id,cue.id);f.finish();assert.equal(f.tick(),null);
+ f.mission.state.buildings[0].completed=true;assert.equal(f.tick().storyScene,'r02');f.director.completeLine();
+ f.mission.state.powered=true;assert.equal(f.tick().id,'m01-v3-r02-l002');f.finish();
+ assert.equal(f.tick().storyScene,'r04');
+}
+console.log('PASS: integrated opening, complete exchanges through construction/research, 39 original recordings, alternate routes, interruptions, native and old saves, finale');

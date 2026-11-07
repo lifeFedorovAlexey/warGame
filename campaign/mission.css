@@ -151,9 +151,6 @@ button.active { border-color: #e5db9d; box-shadow: inset 0 -2px #e5db9d; }
 #field-objectives li::before { content: '•'; color: #dfd396; }
 #field-objectives small { color: #d6c994; font-variant-numeric: tabular-nums; }
 #mission-hud:has(.settings[open]) > #field-tasks { visibility: hidden; }
-.prologue-playing #mission-hud > .top,
-.prologue-playing #mission-hud > #field-tasks,
-.prologue-playing #mission-hud > .command-deck { visibility: hidden; }
 .radio-portrait { width: 84px; height: auto; aspect-ratio: 276 / 290; flex: 0 0 84px; border: 0; border-radius: 0; box-shadow: none; pointer-events: none; }
 .radio-portrait[hidden] { display: none; }
 .radio-copy strong { color: var(--accent); font-size: 11px; }

@@ -12,25 +12,23 @@ export class StoryDirector {
     this.script=script;
     this.scenes=new Map(script.scenes.map(scene=>[scene.id,scene]));
     this.lines=new Map(script.dialogue.map(cue=>[cue.id,cue]));
-    this.mode='mission';
   }
   bind(mission) {
-    const state=this.mode==='prologue' ? this.prologue : (mission.state.radioStory ??= {
+    const state=mission.state.radioStory ??= {
       version:2,clock:0,scenes:{},facts:{},journal:[],lastEnd:-30000,lastCombat:-30000,
-    });
+    };
     if(this.data!==state){
       this.data=state;this.lastNow=null;
       parkRadioStory(state);
-      if(this.mode==='mission')migrateStoryOpening(mission,state);
+      migrateStoryOpening(mission,state);
     }
     this.mission=mission;
     return state;
   }
-  startPrologue() {
-    this.mode='prologue';this.prologue={version:2,clock:0,scenes:{},facts:{},journal:[],lastEnd:-30000,lastCombat:-30000};
+  beginStory(mission,{enabled=true}={}) {
+    // New games include the opening; a loaded game keeps its saved place.
+    this.bind(mission).includeOpening=enabled;
   }
-  stopPrologue() {this.mode='mission';this.data=null;}
-  get prologueDone(){return this.mode==='prologue'&&prologueScenes.every(id=>this.finished(id));}
   record(id){return this.data.scenes[id]??={status:'pending',cursor:0};}
   finished(id){return terminal(this.data.scenes[id]?.status);}
   heard(id){return this.data.scenes[id]?.status==='done';}
@@ -72,24 +70,24 @@ export class StoryDirector {
   skip(){this.end('skipped');}
   update(mission,now,{enabled=true}={}) {
     const d=this.bind(mission);
-    if(this.mode==='mission')updateStoryConstruction(mission,{radioEnabled:enabled});
+    updateStoryConstruction(mission,{radioEnabled:enabled});
     if(this.lastNow!==null)d.clock+=Math.max(0,Math.min(2000,now-this.lastNow));
     this.lastNow=now;
-    if(this.mode==='prologue'){
-      if(!enabled){this.suspend();return null;}
-      if(!d.active){const id=prologueScenes.find(id=>!this.finished(id));if(id){d.active=id;this.record(id).status='playing';}}
-      return this.cue();
-    }
     const f=this.facts(mission),rules=this.rules(f);
+    const opening=d.includeOpening&&prologueScenes.find(id=>!this.finished(id));
+    if(opening)rules[opening]={priority:1,trigger:true,valid:true};
     if(!enabled||mission.state.status==='defeat'){this.suspend();return null;}
     if(d.active){
       const rule=rules[d.active];
-      if(!rule?.valid||f.victory&&!finalScene(d.active))this.end('cancelled');
+      // Ordinary progress changes the next exchange, not a sentence already on air.
+      // Death, diplomacy overtaken by battle and the mission ending are different.
+      if(!rule||rule.continueValid===false||f.victory&&!finalScene(d.active))this.end('cancelled');
       else if(rule.priority>0&&f.battle)this.interrupt();
     }
     const eligible=[];
     for(const [id,rule] of Object.entries(rules)){
       if(!this.scenes.has(id)||this.finished(id)||id===d.active)continue;
+      if(opening&&id!==opening&&rule.priority>0&&!f.victory)continue;
       if(!rule.valid){
         if(this.data.scenes[id]){const record=this.record(id);record.status='cancelled';record.endedAt=d.clock;}
         continue;
