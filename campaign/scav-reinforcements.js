@@ -51,11 +51,20 @@ export function placeExtraCampGuards(mission) {
 
 function planSquad(mission,camp,types) {
   const axis=campAxes(camp),squad=[];
+  const exitHeading=Math.atan2(-axis.x,axis.y);
   for(const [index,type] of types.entries()){
     const kind=mission.config.units[type]?type:'raider';
     const flank=index%2?1:-1;
-    const target=offset(camp.gate,axis,12,flank*26);
-    const rally=mission.nav.nearest(target.x,target.y,2);
+    const rallySpots=squad.map(member=>member.rally);
+    let rally;
+    for(const [along,across] of [[12,26],[28,26],[12,44],[28,44],[44,36]]){
+      const target=offset(camp.gate,axis,along,flank*across);
+      const point=mission.nav.nearest(target.x,target.y,2);
+      if(point&&freePose(mission,kind,point,exitHeading,rallySpots)){
+        rally=point;
+        break;
+      }
+    }
     if(!rally)return null;
     let member;
     for(const behind of [72,104,136]){

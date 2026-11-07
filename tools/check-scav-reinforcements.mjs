@@ -41,6 +41,7 @@ mission.state.bounds=config.finalMapBounds.slice();
 mission.rebuildNavigation();
 updateScavReinforcements(mission);
 assert.equal(locked.nextWaveAt,mission.state.time+locked.wave.seconds,'New sector gets its own first interval');
+const beforeWaves=mission.save();
 
 const waveCounts={};
 const deadlines=[...new Set(mission.state.camps.map(camp=>camp.nextWaveAt))].sort((a,b)=>a-b);
@@ -60,6 +61,15 @@ for(const deadline of deadlines){
 }
 
 const restored=new Mission(config,field);
+restored.load(beforeWaves);
+const blockedCamp=restored.state.camps[0];
+const blockedRally=members(mission,blockedCamp.id)[0].task;
+restored.addUnit('scav-bus','scavs',blockedRally);
+force(restored,blockedCamp);
+const rerouted=members(restored,blockedCamp.id);
+assert.equal(rerouted.length,2,'A bus at the first rally point does not block the sortie');
+assert(rerouted.every(unit=>unit.task.x!==blockedRally.x||unit.task.y!==blockedRally.y),'The squad avoids the occupied rally point');
+
 restored.load(mission.save());
 const camp=restored.state.camps[0],savedCamp=mission.state.camps[0];
 assert.equal(camp.nextWaveAt,savedCamp.nextWaveAt);
