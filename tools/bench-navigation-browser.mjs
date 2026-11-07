@@ -13,7 +13,7 @@ for(const name of fs.readdirSync('campaign').filter(n=>/^(mission|main|navigatio
  report.sources[name]=createHash('sha256').update(fs.readFileSync('campaign/'+name)).digest('hex');
 try{
  const page=await browser.newPage({viewport:{width:1920,height:1080}}),sourceJobs=[];report.loadedSources={};
- page.on('response',response=>{if(/\/campaign\/[^/]+\.js(?:\?|$)/.test(response.url()))sourceJobs.push(response.body().then(bytes=>{report.loadedSources[new URL(response.url()).pathname]=createHash('sha256').update(bytes).digest('hex');}));});
+ page.on('response',response=>{if(/\/(?:campaign|demo)\/[^/]+\.js(?:\?|$)/.test(response.url()))sourceJobs.push(response.body().then(bytes=>{report.loadedSources[new URL(response.url()).pathname]=createHash('sha256').update(bytes).digest('hex');}));});
  page.on('pageerror',e=>{report.errors.push(e.message);console.log(JSON.stringify({pageError:e.message}));});
  await page.goto((process.env.WARGAME_URL??'http://127.0.0.1:8893')+'/campaign/');await page.waitForFunction(()=>window.campaign?.ready,null,{timeout:90000});
  await page.evaluate(()=>campaign.radio.setEnabled(false));await page.locator('#begin').click();await page.locator('#pause').click();await Promise.allSettled(sourceJobs);
@@ -82,15 +82,15 @@ try{
    const result=await page.evaluate(async({phase,seconds})=>{
     const c=campaign,m=c.mission,w=c.world,b=c.navigationBench,gl=w.renderer.getContext(),ext=gl.getExtension('EXT_disjoint_timer_query_webgl2');
     let order=null,submitMs=null,orderedAt=null;if(phase==='move-order'){orderedAt=performance.now();order=m.submitOrder(b.ids,'move',b.goal);submitMs=performance.now()-orderedAt;}
-    const queries=[],gpu=[],frames=[],cpu=[],simulation=[],navigation=[],planner=[],draw=[],visible=[],moving=[],pending=[];
+    const queries=[],gpu=[],frames=[],cpu=[],simulation=[],navigation=[],coordination=[],planner=[],draw=[],visible=[],moving=[],pending=[];
     const firstResponse=b.ids.map(()=>null),firstHalfWorld=b.ids.map(()=>null),firstReady=b.ids.map(()=>null);
     let start=null,last=null,disjoint=false,maxBacklog=0,firstMotion=null;const simulationStart=m.state.time,contactsBefore=b.contacts,terrainBefore=b.terrainStops,contactLogStart=b.contactLog.length;
     const advance=m.advance,update=w.update;let lastSimulationCpu=0;
     m.advance=function(...args){
-     const began=performance.now(),oldNav=b.navigationCpu+b.coordinatorCpu,oldPlan=m.commandPlanner?.stats.cpuMs??0;
+     const began=performance.now(),oldNav=b.navigationCpu+b.coordinatorCpu,oldCoord=b.coordinatorCpu,oldPlan=m.commandPlanner?.stats.cpuMs??0;
      try{return advance.apply(this,args);}finally{
       lastSimulationCpu=performance.now()-began;simulation.push(lastSimulationCpu);
-      const plan=(m.commandPlanner?.stats.cpuMs??0)-oldPlan;planner.push(plan);navigation.push(b.navigationCpu+b.coordinatorCpu-oldNav+plan);
+      const plan=(m.commandPlanner?.stats.cpuMs??0)-oldPlan;planner.push(plan);navigation.push(b.navigationCpu+b.coordinatorCpu-oldNav+plan);coordination.push(b.coordinatorCpu-oldCoord);
      }
     };
     w.update=function(...args){
@@ -131,22 +131,38 @@ try{
     for(const q of queries)gl.deleteQuery(q);
     const stats=a=>{const sorted=a.slice().sort((a,b)=>a-b),at=p=>sorted[Math.min(sorted.length-1,Math.floor(sorted.length*p))]??null;return {p50:at(.5),p95:at(.95),p99:at(.99),max:sorted.at(-1)??null,mean:a.reduce((s,x)=>s+x,0)/Math.max(1,a.length)};};
     const units=m.state.units,physical=w.damage.statistics;
+    // Capture the actual failed scheduling state, without save()/tick flush.
+    // Re-running only the original spawn can produce a different incremental
+    // admission order and fail to reproduce this particular wait chain.
+    const unrespondedIds=orderedAt===null?[]:b.ids.filter((id,i)=>firstResponse[i]===null);
+    const waitingSnapshot=unrespondedIds.length?structuredClone({state:m.state,serial:m.serial,randomState:m.randomState,
+     accumulator:m.accumulator,unrespondedIds,pendingTick:m.pendingTick?{cursor:m.pendingTick.cursor,hasIterator:!!m.pendingTick.iterator}:null,
+     decisions:[...m.trafficCoordinator.decisions],intents:[...m.trafficCoordinator.intents]}):null;
     const responseDistribution=times=>({thresholdWorld:times===firstResponse ? .01 : .5,responded:times.filter(Boolean).length,
      wallSeconds:stats(times.filter(Boolean).map(t=>t.wallSeconds)),simSeconds:stats(times.filter(Boolean).map(t=>t.simSeconds)),
      overHalfSecondIds:b.ids.filter((id,i)=>times[i]?.wallSeconds>.5),unrespondedIds:b.ids.filter((id,i)=>times[i]===null),
      units:b.ids.map((id,i)=>({id,...(times[i]??{wallSeconds:null,simSeconds:null}),readyWallSeconds:firstReady[i]?.wallSeconds??null,
       responseAfterReadySeconds:times[i]&&firstReady[i]?times[i].wallSeconds-firstReady[i].wallSeconds:null,
       lastNavigationReason:units[i].navigation?.reason??null,pendingStatus:units[i].pendingOrder?.status??null}))});
-    return {phase,order,submitMs,firstMotion,frames:frames.length,fps:1000/stats(frames).mean,frameMs:stats(frames),cpuFrameMs:stats(cpu),simulationCpuMs:stats(simulation),
+    return {phase,order,submitMs,firstMotion,waitingSnapshot,frames:frames.length,fps:1000/stats(frames).mean,frameMs:stats(frames),cpuFrameMs:stats(cpu),simulationCpuMs:stats(simulation),
      ...(orderedAt!==null?{firstResponse:responseDistribution(firstResponse),firstHalfWorld:responseDistribution(firstHalfWorld)}:{}),
-     navigationCpuMs:stats(navigation),navigationScope:'Command planner + TrafficCoordinator + actual moveSteps generator slices; excludes combat logic and renderer.',plannerCpuMs:stats(planner),
+     navigationCpuMs:stats(navigation),navigationScope:'Command planner + TrafficCoordinator + actual moveSteps generator slices; excludes combat logic and renderer.',plannerCpuMs:stats(planner),coordinatorCpuMs:stats(coordination),
      gpuFrameMs:ext&&!disjoint&&gpu.length?stats(gpu):null,gpuReason:!ext?'EXT_disjoint_timer_query_webgl2 unavailable':disjoint?'disjoint timer':gpu.length?null:'no completed queries',
      drawCalls:stats(draw),visibleMin:Math.min(...visible),movingMax:Math.max(...moving),pendingMax:Math.max(...pending),pendingEnd:units.filter(u=>u.pendingOrder?.status==='planning').length,
-     blockedEnd:units.filter(u=>u.pendingOrder?.status==='blocked').length,started:units.filter((u,i)=>Math.hypot(u.x-b.starts[i].x,u.y-b.starts[i].y)>.5).length,
+     blockedEnd:units.filter(u=>u.pendingOrder?.status==='blocked').length,
+     continuationsEnd:units.filter(u=>u.routeContinuation).length,continuationFailures:units.filter(u=>u.routeContinuation?.failure).length,
+     assignedDestinations:units.filter(u=>u.routeOrder&&!u.pendingOrder&&!u.routeContinuation).length,
+     prefixReleased:order?m.state.commandOrders.find(r=>r.revision===order.revision)?.prefixReleased??0:0,
+     started:units.filter((u,i)=>Math.hypot(u.x-b.starts[i].x,u.y-b.starts[i].y)>.5).length,
      contacts:b.contacts-contactsBefore,contactLog:b.contactLog.slice(contactLogStart),terrainStops:b.terrainStops-terrainBefore,damage:units.reduce((sum,u,i)=>sum+Math.max(0,b.starts[i].hp-u.hp),0),simulatedSeconds:m.state.time-simulationStart,maxBacklog,
      jsHeap:performance.memory?{used:performance.memory.usedJSHeapSize,total:performance.memory.totalJSHeapSize}:null,
      geometryUpdates:physical.geometryUpdates,activePhysics:physical.activePhysics,geometries:w.renderer.info.memory.geometries,textures:w.renderer.info.memory.textures};
    },{phase,seconds});
+   if(result.waitingSnapshot){
+    result.waitingSnapshotFile=`campaign/reports/navigation-wait-${count}-${Date.now()}.json`;
+    fs.writeFileSync(result.waitingSnapshotFile,JSON.stringify(result.waitingSnapshot));
+   }
+   delete result.waitingSnapshot;
    if(profiler&&phase==='move-order'){
     const {profile}=await profiler.send('Profiler.stop');fs.mkdirSync('campaign/reports',{recursive:true});
     result.cpuProfile=`campaign/reports/navigation-${count}-${Date.now()}.cpuprofile`;fs.writeFileSync(result.cpuProfile,JSON.stringify(profile));

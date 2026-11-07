@@ -19,12 +19,14 @@ try{
   m.rebuildNavigation();m.updateFog();m.explored.fill(1);c.select(units.map(u=>u.id));
   if(!units.every(u=>m.lineOfSight(u,target)))throw Error('Initial real campaign cars cannot see this target');
   if(!m.nav.terrainAllowed(goal.x,goal.y))throw Error('Requested relocation endpoint is forbidden');
-  const t=c.interruptCheck={units,goal,origins:units.map(u=>({x:u.x,y:u.y})),orders:[],samples:[],contacts:[],targetId:target.id,shots:[]};
+  const t=c.interruptCheck={units,goal,origins:units.map(u=>({x:u.x,y:u.y})),orders:[],samples:[],contacts:[],targetId:target.id,shots:[],acceptedGoals:{}};
   const submit=m.submitOrder.bind(m),advance=m.advance.bind(m),collision=m.vehicleCollision.bind(m),attack=m.attack.bind(m);
   m.submitOrder=(ids,action,target)=>{const time=m.state.time,wall=performance.now(),result=submit(ids,action,target);t.orders.push({ids:[...ids],action,target:{x:target.x,y:target.y,id:target.id},time,wall,result});return result;};
   m.vehicleCollision=(u,s,b)=>{if(b.size&&units.includes(u))t.contacts.push({time:m.state.time,id:u.id,speed:s,blockers:[...b].map(v=>v.id)});return collision(u,s,b);};
   m.attack=(u,v,s)=>{const result=attack(u,v,s);if(result&&units.includes(u))t.shots.push({time:m.state.time,id:u.id,targetId:v.id});return result;};
-  m.advance=(...args)=>{const result=advance(...args);if(t.samples.at(-1)?.time!==m.state.time)t.samples.push({time:m.state.time,wall:performance.now(),units:units.map(u=>({id:u.id,x:u.x,y:u.y,hp:u.hp,pending:!!u.pendingOrder,task:u.task?.type,deploy:u.combatDeployment?.targetId,nav:u.navigation?{...u.navigation}:null}))});return result;};
+  m.advance=(...args)=>{const result=advance(...args);
+   for(const u of units)if(!u.pendingOrder&&u.routeOrder?.destination)t.acceptedGoals[u.commandRevision+'|'+u.id]??={...u.routeOrder.destination};
+   if(t.samples.at(-1)?.time!==m.state.time)t.samples.push({time:m.state.time,wall:performance.now(),units:units.map(u=>({id:u.id,x:u.x,y:u.y,hp:u.hp,pending:!!u.pendingOrder,task:u.task?.type,deploy:u.combatDeployment?.targetId,nav:u.navigation?{...u.navigation}:null}))});return result;};
   w.controls.enableDamping=false;w.centre({x:centre.x,y:centre.y-35},640);c.advance(0);
   const chunks=[],stream=w.renderer.domElement.captureStream(20),recorder=new MediaRecorder(stream,{mimeType:'video/webm;codecs=vp8',videoBitsPerSecond:2200000});recorder.ondataavailable=e=>{if(e.data.size)chunks.push(e.data);};recorder.start(1000);c.interruptVideo={chunks,stream,recorder};
   return {targetId:target.id,goal,units:units.map(u=>({id:u.id,x:u.x,y:u.y,heading:u.heading}))};
@@ -43,7 +45,7 @@ try{
   const c=campaign,m=c.mission,t=c.interruptCheck,order=t.orders.at(-1);
   return {orders:t.orders,seconds:m.state.time-order.time,contacts:t.contacts,samples:t.samples,shots:t.shots,
    firstMotion:t.units.map((u,i)=>{const sample=t.samples.find(s=>s.wall>=order.wall&&Math.hypot(s.units[i].x-t.origins[i].x,s.units[i].y-t.origins[i].y)>.01);return sample?{id:u.id,simulation:sample.time-order.time,wall:(sample.wall-order.wall)/1000}:null;}),
-   units:t.units.map(u=>({id:u.id,x:u.x,y:u.y,hp:u.hp,maxHp:u.maxHp,task:u.task,pending:u.pendingOrder,goal:u.routeOrder?.destination,arrived:!u.task&&!u.pendingOrder&&!u.path.length&&!u.detour&&Math.hypot(u.x-u.routeOrder.destination.x,u.y-u.routeOrder.destination.y)<2}))};
+   units:t.units.map(u=>{const acceptedGoal=t.acceptedGoals[order.result.revision+'|'+u.id];return{id:u.id,x:u.x,y:u.y,hp:u.hp,maxHp:u.maxHp,task:u.task,pending:u.pendingOrder,acceptedGoal,goal:u.routeOrder?.destination,arrived:!!acceptedGoal&&!u.task&&!u.pendingOrder&&!u.path.length&&!u.detour&&Math.hypot(u.x-acceptedGoal.x,u.y-acceptedGoal.y)<2};})};
  })};
  await page.setViewportSize({width:800,height:900});await page.waitForTimeout(200);await page.screenshot({path:folder+'/narrow.png'});
  report.passed=report.units.every(u=>u.arrived&&u.hp===u.maxHp)&&report.firstMotion.every(t=>t&&t.simulation<=.50001&&t.wall<=.5)&&!report.contacts.length&&!errors.length;

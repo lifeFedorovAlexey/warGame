@@ -409,7 +409,9 @@ function installInput() {
   canvas.addEventListener('contextmenu', event => event.preventDefault());
   canvas.addEventListener('pointerdown', event => {
     if (!active || mission.state.status !== 'running') return;
+    if(document.elementFromPoint(event.clientX,event.clientY)!==canvas)return;
     if (event.button === 2) {
+      cancelMapGesture();
       lastSelectionClick=null;
       event.preventDefault();
       if (buildKind) return cancelMode();

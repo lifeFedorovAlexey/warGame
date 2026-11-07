@@ -18,20 +18,21 @@ function setup(count){
 }
 for(const [count,action] of [[1,'attack-move'],[3,'attack-move'],[6,'attack-move'],[3,'move']]){
  const {m,units,target}=setup(count),origins=units.map(u=>({x:u.x,y:u.y})),first=units.map(()=>null),ids=units.map(u=>u.id);
- const contacts=[],oldDeployments=[],initialTime=m.state.time,collision=m.vehicleCollision.bind(m);let gap=Infinity;
+ const contacts=[],oldDeployments=[],acceptedGoals=units.map(()=>null),initialTime=m.state.time,collision=m.vehicleCollision.bind(m);let gap=Infinity;
  m.vehicleCollision=(u,s,b)=>{if(b.size)contacts.push({time:m.state.time,id:u.id,speed:s,blockers:[...b].map(x=>x.id)});return collision(u,s,b);};
  const response=m.submitOrder(ids,action,{x:0,y:-180});assert(response.ok);
  for(let frame=0;frame<4800;frame++){
   m.advance(1/80,{budgetMs:6});
   for(const [i,u] of units.entries()){
+   if(!u.pendingOrder&&u.routeOrder&&!acceptedGoals[i])acceptedGoals[i]={...u.routeOrder.destination};
    if(first[i]===null&&dist(u,origins[i])>.01)first[i]=m.state.time-initialTime;
    if(!u.pendingOrder&&u.combatDeployment?.targetId===target.id)oldDeployments.push(u.id);
    for(let j=0;j<i;j++)gap=Math.min(gap,vehicleClearance(u,units[j],m.config.worldScale,m.field));
   }
   if(units.every(u=>!u.task&&!u.path.length&&!u.pendingOrder&&!u.detour))break;
  }
- const arrived=units.every(u=>!u.task&&!u.pendingOrder&&dist(u,u.routeOrder.destination)<2),passed=arrived&&first.every(t=>t!==null&&t<=.50001)&&!contacts.length&&!oldDeployments.length&&gap>=0&&units.every(u=>u.hp===u.maxHp);
- results.push({case:`${count} shooting vehicles accept ${action}`,passed,firstMotionSeconds:first,seconds:m.state.time-initialTime,arrived,contacts,oldDeployments,minimumGap:Number.isFinite(gap)?gap:null,units:units.map(u=>({id:u.id,x:u.x,y:u.y,task:u.task,goal:u.routeOrder?.destination,hp:u.hp}))});
+ const arrived=units.every((u,i)=>!u.task&&!u.pendingOrder&&acceptedGoals[i]&&dist(u,acceptedGoals[i])<2),passed=arrived&&first.every(t=>t!==null&&t<=.50001)&&!contacts.length&&!oldDeployments.length&&gap>=0&&units.every(u=>u.hp===u.maxHp);
+ results.push({case:`${count} shooting vehicles accept ${action}`,passed,firstMotionSeconds:first,seconds:m.state.time-initialTime,arrived,contacts,oldDeployments,minimumGap:Number.isFinite(gap)?gap:null,units:units.map((u,i)=>({id:u.id,x:u.x,y:u.y,task:u.task,acceptedGoal:acceptedGoals[i],goal:u.routeOrder?.destination,hp:u.hp}))});
 }
 {
  const {m,units}=setup(3),ids=units.map(u=>u.id),second=m.addStructure('camp-core','scavs',{x:220,y:-70},{completed:true,hp:100000,maxHp:100000});

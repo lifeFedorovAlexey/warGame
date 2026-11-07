@@ -48,6 +48,10 @@ try{
   await page.mouse.move(box.x+box.width/2,box.y-80);await page.mouse.down();
   await page.mouse.move(box.x+box.width/2,box.y+box.height/2,{steps:5});await page.mouse.up();
  });
+ await run('right button over HUD while canvas holds left pointer',async()=>{
+  await page.mouse.move(900,500);await page.mouse.down();await page.mouse.move(box.x+box.width/2,box.y+box.height/2);
+  await page.mouse.down({button:'right'});await page.mouse.up({button:'right'});await page.mouse.up();
+ });
  await run('changing mode while map pointer held cancels old gesture',async()=>{
   await page.mouse.move(900,500);await page.mouse.down();await page.keyboard.press('KeyF');await page.mouse.up();
  });
