@@ -1,4 +1,4 @@
-"""Compile the user's v2 screenplay and fill missing recordings with local Piper voices."""
+"""Compile the current v4 screenplay using compatible v2 IDs and local Piper placeholders."""
 from pathlib import Path
 import argparse
 import hashlib
@@ -9,7 +9,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 BASE = ROOT / 'assets/campaign/alpha/mission01'
-SOURCE = ROOT / 'docs/campaign/alpha/mission01-script-v3.md'
+SOURCE = ROOT / 'docs/campaign/alpha/mission01-script-v4.md'
 REPORT = ROOT / 'docs/campaign/alpha/voice/mission01-v2-status.txt'
 RUNTIME = ROOT / 'tools/.runtime-media'
 sys.path.insert(0, str(RUNTIME / 'python'))
@@ -22,8 +22,9 @@ ROLES = {
     'Солдат':'soldier', 'Офицер':'officer', 'Голос из прошлого':'past',
     'Водитель':'driver',
 }
-EXPECTED_SCENES = {'p01','p02','p03','01a','01b','10-alt','16-alt',
-    *[f'{number:02}' for number in range(1,30)], *[f'd{number:02}' for number in range(1,5)]}
+EXPECTED_SCENES = {'p01','p02','p03','16-alt',
+    *[f'o{number:02}' for number in range(1,13)],
+    *[f'{number:02}' for number in range(14,30)], *[f'd{number:02}' for number in range(1,5)]}
 
 
 def read(path):
@@ -65,9 +66,9 @@ def compile_story():
 
     for number, raw in enumerate(SOURCE.read_text(encoding='utf-8-sig').splitlines(), 1):
         line = raw.strip()
-        heading = re.match(r'^#{2,3}\s+([ПД]?\d{2}[АБ]?)\.\s*(.+)$', line)
+        heading = re.match(r'^#{2,3}\s+([ПДН]?\d{2})\.\s*(.+)$', line)
         if heading:
-            scene_id = heading[1].translate(str.maketrans({'П':'p','Д':'d','А':'a','Б':'b'}))
+            scene_id = heading[1].translate(str.maketrans({'П':'p','Д':'d','Н':'o'}))
             scene = new_scene(scene_id, heading[2], number)
             speaker = None
         if line.startswith('# КОРОТКИЕ РЕПЛИКИ ЮНИТОВ'):
@@ -81,16 +82,6 @@ def compile_story():
                 barks.append({'id':f'm01v2-b{len(barks)+1:03}', 'event':cells[0],
                     'speaker':ROLES[cells[1]], 'text':cells[2], 'sourceLine':number})
             continue
-        if scene and scene['id'] == '10' and line.startswith('**Условие:**'):
-            quoted = re.search('«([^»]+)»', line)
-            if not quoted:
-                raise ValueError('No alternative direction line at ' + str(number))
-            alternative = new_scene('10-alt', scene['title'] + ' — другое направление', number)
-            add_line(alternative, 'scout', quoted[1], number)
-            # The source explicitly replaces only the first line of the same exchange.
-            originals = [cue for cue in dialogue if cue['id'] in scene['cues'][1:]]
-            for cue in originals:
-                add_line(alternative, cue['speaker'], cue['text'], cue['sourceLine'])
         if scene and scene['id'] == '16' and line.startswith('Если предыдущие разговоры были пропущены'):
             scene = new_scene('16-alt', 'Огнемёт исследован — самостоятельный доклад', number)
             speaker = None
@@ -106,14 +97,14 @@ def compile_story():
         pause = re.match(r'^\*Пауза (\d+(?:,\d+)?) секунд', line)
         if pause and scene and scene['cues']:
             dialogue[-1]['pauseAfter'] = float(pause[1].replace(',', '.'))
-    if {scene['id'] for scene in scenes} != EXPECTED_SCENES or len(scenes) != 40:
-        raise ValueError('Unexpected v2 scenes: ' + str([scene['id'] for scene in scenes]))
+    if {scene['id'] for scene in scenes} != EXPECTED_SCENES or len(scenes) != 36:
+        raise ValueError('Unexpected v4 scenes: ' + str([scene['id'] for scene in scenes]))
     if len(barks) != 18 or any(not scene['cues'] for scene in scenes):
-        raise ValueError('Missing v2 lines or unit barks')
+        raise ValueError('Missing v4 lines or unit barks')
     ids = [cue['id'] for cue in dialogue + barks]
     if len(ids) != len(set(ids)):
         raise ValueError('Duplicate cue IDs')
-    return {'schemaVersion':2, 'source':{'path':SOURCE.relative_to(ROOT).as_posix(),
+    return {'schemaVersion':2, 'revision':4, 'source':{'path':SOURCE.relative_to(ROOT).as_posix(),
         'sha256':hashlib.sha256(SOURCE.read_bytes()).hexdigest()},
         'speakers':profiles, 'scenes':scenes, 'dialogue':dialogue, 'barks':barks}
 
@@ -194,7 +185,7 @@ def build(story, compile_only=False):
     raw, out = BASE/'audio-source-v2', BASE/'audio-v2'
     raw.mkdir(exist_ok=True)
     out.mkdir(exist_ok=True)
-    manifest = {'schemaVersion':2, 'language':'ru-RU', 'source':story['source'],
+    manifest = {'schemaVersion':2, 'revision':story['revision'], 'language':'ru-RU', 'source':story['source'],
         'voices':story['speakers'], 'clips':{}}
     durations = {}
     for actor, profile in story['speakers'].items():
@@ -243,7 +234,7 @@ def build(story, compile_only=False):
         raise ValueError('Audio coverage mismatch')
     write_json(BASE/'audio-v2.json', manifest)
     summary = [
-        'ОПЕРАЦИЯ «РАЙ» — МИССИЯ 1, СЦЕНАРИЙ V3',
+        f'ОПЕРАЦИЯ «РАЙ» — МИССИЯ 1, СЦЕНАРИЙ V{story["revision"]}',
         'Источник: '+story['source']['path'], 'SHA-256: '+story['source']['sha256'],
         f'Сцен: {len(story["scenes"])}. Реплик диалогов: {len(story["dialogue"])}. Реплик юнитов: {len(story["barks"])}.',
         f'Твоя запись: {reused_user}. Временная существующая: {reused_temporary}. Новая временная: {len(cues)-reused_user-reused_temporary}.',

@@ -16,13 +16,16 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   assert(await page.evaluate(()=>window.campaign?.ready),errors.join('\n')||await page.locator('#loading-status').textContent());
   const fieldRadioDir='assets/campaign/alpha/mission01/';
   const story=JSON.parse(fs.readFileSync(fieldRadioDir+'story-v2.json'));
-  const line=story.dialogue.find(cue=>cue.id==='m01v2-01-l001');
+  const line=story.dialogue.find(cue=>cue.id==='m01v2-o01-l001');
   const intro={...JSON.parse(fs.readFileSync(fieldRadioDir+'audio-v2.json')).clips[line.id],text:line.text};
   assert.equal(createHash('sha256').update(fs.readFileSync(fieldRadioDir+intro.file)).digest('hex'),intro.sha256);
   const introUrl=new URL('../'+fieldRadioDir+intro.file,page.url()).href;
   const introResponse=page.waitForResponse(response=>response.url()===introUrl&&response.ok());
   await page.locator('#begin').click();
   await introResponse;
+  // This general gameplay smoke exercises free construction; the story suite
+  // separately verifies every progressive unlock and its dialogue.
+  await page.evaluate(()=>{delete campaign.mission.state.storyConstruction;const r=campaign.radio;r.present(r.entry,campaign.mission,performance.now());});
   await page.waitForFunction(()=>window.campaign.drivingAudio.running&&window.campaign.drivingAudio.recordings);
   await page.waitForFunction(()=>window.campaign.mission.state.time>.2&&!document.querySelector('#radio').hidden);
   await page.waitForFunction(()=>window.campaign.storyAudio.playing&&window.campaign.storyAudio.chapter==='intro');
@@ -49,6 +52,7 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
    const point=mission.field.gridToWorld(mission.config.startGrid);
    const enemy=mission.addUnit('raider','scavs',{x:point.x+20,y:point.y-40});
    mission.state.flags.contact=true;mission.state.flags.raidStarted=true;mission.state.flags.raidIds=[enemy.id];
+   mission.effects.push({type:'shot',from:enemy.id,to:{x:enemy.x+10,y:enemy.y,z:mission.field.heightAt(enemy.x,enemy.y)+1},weapon:'mg'});
    mission.updateFog();c.advance(0);
    radio.until=Infinity;
    mission.state.seenCinematics=seen;
@@ -65,7 +69,7 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
    const {mission,radio}=campaign;
    for(const id of mission.state.flags.raidIds)mission.entity(id).hp=0;
    mission.state.flags.contact=false;mission.state.flags.raidStarted=false;mission.state.artifactKeys=[];
-   radio.director.data.scenes['01']={status:'done',cursor:0,endedAt:0};campaign.advance(0);
+   radio.director.data.scenes.o01={status:'done',cursor:0,endedAt:0};campaign.advance(0);
   });
   await page.locator('.settings summary').click();
   assert(await page.locator('#objectives').isVisible());
@@ -253,7 +257,7 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   assert(destination);
   await page.locator('#move-order').click();
   await page.mouse.click(destination.x,destination.y);
-  assert.equal(await page.evaluate(()=>{const c=window.campaign;return c.mission.entity(c.selected[0])?.task?.type;}),'move','Click in the scene must issue a move order');
+  assert.equal(await page.evaluate(()=>{const c=window.campaign,u=c.mission.entity(c.selected[0]);return u?.pendingOrder?.type??u?.task?.type;}),'move','Click in the scene must issue a move order');
   const workStart=await page.evaluate(()=>{const c=window.campaign,u=c.mission.entity(c.selected[0]);return{x:u.x,y:u.y,shadowUpdates:c.world.statistics.shadowUpdates};});
   for(let i=0;i<52;i++){
    const arrived=await page.evaluate(()=>{

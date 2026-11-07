@@ -6,9 +6,9 @@ const require = createRequire(import.meta.url);
 const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
 const actor = process.argv[2] ?? 'commander';
 const scenes = {
-  commander:{trigger:'12',chapter:'raid-won',portrait:'radio'},
-  warrant:{trigger:'06',chapter:'story-06',portrait:'neutral'},
-  scout:{trigger:'10-alt',chapter:'first-contact',portrait:'radio'},
+  commander:{trigger:'o01',chapter:'intro',portrait:'radio',line:1},
+  warrant:{trigger:'o03',chapter:'story-o03',portrait:'neutral',line:1},
+  scout:{trigger:'o08',chapter:'first-contact',portrait:'radio',line:0},
 };
 assert(actor in scenes);
 const scene = scenes[actor];
@@ -32,32 +32,27 @@ try {
   await page.waitForFunction(() => window.campaign?.ready, null, {timeout:90000});
   await page.locator('#begin').click();
   await page.locator('#pause').click();
-  const before = await page.evaluate(({actor,trigger}) => {
+  const before = await page.evaluate(({actor,trigger,line}) => {
     const {mission,radio,world,advance} = window.campaign;
     radio.reset(); radio.setEnabled(true); mission.state.pendingCinematics = [];
     const target = {x:world.controls.target.x,y:world.controls.target.y};
     const d=radio.director;d.bind(mission);d.data.clock=30000;d.data.lastEnd=0;
     for(const scene of d.script.scenes)if(scene.id!==trigger)d.data.scenes[scene.id]={status:'skipped',cursor:0,endedAt:0};
-    if(actor==='commander')mission.state.flags.raidWon=true;
-    if(actor==='warrant')d.data.facts.firstVan=true;
+    if(actor==='warrant'){const p=mission.field.gridToWorld(mission.config.startGrid);mission.addStructure('generator','rai',{x:p.x+140,y:p.y+100},{completed:true});}
     if(actor==='scout'){
-      delete d.data.scenes['10'];
       const point=mission.field.gridToWorld(mission.config.startGrid);
-      mission.addUnit('raider','scavs',{x:point.x-20,y:point.y-40});mission.updateFog();
+      const enemy=mission.addUnit('raider','scavs',{x:point.x-20,y:point.y-40});mission.state.flags.raidIds=[enemy.id];mission.effects.push({type:'shot',from:enemy.id,to:{x:enemy.x+10,y:enemy.y,z:mission.field.heightAt(enemy.x,enemy.y)+1},weapon:'mg'});mission.updateFog();
     }
     advance(0);
+    for(let i=0;i<line;i++){radio.until=0;advance(0);}
     radio.until = Infinity;
     return target;
-  }, {actor,trigger:scene.trigger});
+  }, {actor,trigger:scene.trigger,line:scene.line});
   await page.waitForFunction(() => !document.querySelector('.radio-portrait').hidden);
   await page.waitForFunction(chapter => campaign.storyAudio.playing && campaign.storyAudio.chapter === chapter, scene.chapter);
-  if (actor === 'commander') {
-    assert(audioRequests.some(url => url.endsWith('/raid-won.mp3')));
-    assert(!audioRequests.some(url => url.endsWith('/raid-won.ogg')));
-    const recording = JSON.parse(fs.readFileSync('assets/campaign/alpha/mission01/field-radio/manifest.json'))['raid-won'];
-    assert.equal(await page.locator('#radio p').textContent(), recording.text);
-    assert.equal(createHash('sha256').update(fs.readFileSync('assets/campaign/alpha/mission01/field-radio/' + recording.file)).digest('hex'), recording.sha256);
-  }
+  const script=JSON.parse(fs.readFileSync('assets/campaign/alpha/mission01/story-v2.json'));
+  const cue=script.dialogue.find(c=>c.id===script.scenes.find(s=>s.id===scene.trigger).cues[scene.line]);
+  assert.equal(await page.locator('#radio p').textContent(),cue.text);
   const layout = await page.locator('#radio').evaluate(panel => {
     const canvas = panel.querySelector('canvas'), style = getComputedStyle(canvas), box = canvas.getBoundingClientRect();
     return {state:canvas.dataset.state, speaker:canvas.dataset.speaker, width:box.width, border:style.borderWidth, radius:style.borderRadius, shadow:style.boxShadow,

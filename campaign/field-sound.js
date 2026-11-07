@@ -399,7 +399,7 @@ export class FieldSound {
   storyEvent(event) {
     if(!this.storyVoices)return;
     const mission=this.storyMission;
-    if(event.type==='construction-complete'&&!['generator','factory'].includes(event.kind))this.bark(4);
+    if(event.type==='construction-complete'&&!['generator','factory','lab','bunker','derrick'].includes(event.kind))this.bark(4);
     if(event.type==='research-start')this.bark(11);
     if(event.type==='research-complete'&&!['flamethrower','mg-ammo-1','mg-tower'].includes(event.key))this.bark(12);
     if(event.type==='unit-damaged'&&mission.entity(event.target)?.kind!=='builder')this.bark(13,{cooldown:45000});
@@ -416,7 +416,7 @@ export class FieldSound {
     const mission=this.storyMission,visible=mission.state.units.filter(e=>e.owner==='scavs'&&e.hp>0&&mission.visibleAt(e.x,e.y));
     const discovered=visible.some(e=>!this.seenHostiles.has(e.id));
     for(const e of visible)this.seenHostiles.add(e.id);
-    if(discovered&&['10','10-alt'].some(id=>mission.state.radioStory?.scenes[id]?.status==='done'))this.bark(17,{cooldown:45000});
+    if(discovered&&mission.state.radioStory?.scenes.o08?.status==='done')this.bark(17,{cooldown:45000});
     if(now-this.lastOrderAt>45000&&this.idleIds?.some(id=>{const unit=mission.entity(id);return unit?.hp>0&&unit.kind!=='builder'&&!unit.task&&!unit.path?.length;}))this.bark(14,{cooldown:90000});
   }
 

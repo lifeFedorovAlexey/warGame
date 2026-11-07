@@ -232,7 +232,7 @@ function start(restore = false) {
       return toast('Сохранение не открывается. ' + error.message);
     }
   }
-  if(!restore)mission.state.storyConstruction={enabled:true,unlocked:['generator']};
+  if(!restore)mission.state.storyConstruction={enabled:true,unlocked:['generator'],research:false,requiredBunkers:2};
   designer.close(false);
   active = true;
   paused = false;
@@ -663,7 +663,7 @@ function updateContext(first) {
   const projects = factory ? mission.factoryProjects() : [];
   const designs = factory ? s.designs.map(project => project.id + ':' + project.name).join(',') : '';
   const activeResearch = s.buildings.filter(b=>b.hp>0&&b.research).map(b=>b.research.key);
-  const key = [first?.id, first?.completed, first?.clearing, first?.research?.key, activeResearch.join(), s.artifactKeys.join(), Object.keys(s.research).join(), thresholds, designs, builders().length].join('|');
+  const key = [first?.id, first?.completed, first?.clearing, first?.research?.key, activeResearch.join(), s.artifactKeys.join(), Object.keys(s.research).join(), thresholds, designs, builders().length,mission.researchUnlocked()].join('|');
   if (key !== actionKey) {
     actionKey = key;
     const items = [];
@@ -690,7 +690,7 @@ function updateContext(first) {
         const count=document.createElement('span');count.className='production-count';count.hidden=true;count.setAttribute('aria-hidden','true');control.append(count);
       }
     }
-    if (first?.owner === 'rai' && first.completed && first.kind === 'lab') {
+    if (first?.owner === 'rai' && first.completed && first.kind === 'lab'&&mission.researchUnlocked()) {
       for (const [id,spec] of Object.entries(config.research)) {
         const done = s.research[id], known = s.artifactKeys.includes(id);
         if(done||!known||first.research||activeResearch.includes(id)||!mission.canSpend(spec.cost))continue;

@@ -3,145 +3,116 @@ import fs from 'node:fs';
 import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url);
 const {chromium}=require('C:/Users/Алексей/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
-const folder='campaign/previews/story-v2';fs.mkdirSync(folder,{recursive:true});
+const base='assets/campaign/alpha/mission01/',story=JSON.parse(fs.readFileSync(base+'story-v2.json'));
+const folder='campaign/previews/story-v4';fs.mkdirSync(folder,{recursive:true});
 const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true,args:['--enable-unsafe-swiftshader','--use-angle=swiftshader']});
 try{
  const page=await browser.newPage({viewport:{width:1440,height:900}}),errors=[],pending=new Set();
+ page.on('pageerror',e=>errors.push(e.stack??e.message));page.on('response',r=>{if(r.status()>=400)errors.push(r.status()+' '+r.url());});
  page.on('request',r=>pending.add(r.url()));page.on('requestfinished',r=>pending.delete(r.url()));page.on('requestfailed',r=>pending.delete(r.url()));
- page.on('pageerror',e=>errors.push(e.message));
- page.on('response',r=>{if(r.status()>=400)errors.push(r.status()+' '+r.url());});
  await page.goto((process.env.WARGAME_URL??'http://127.0.0.1:8884')+'/campaign/');
  try{await page.waitForFunction(()=>window.campaign?.ready||document.querySelector('#loading-status').textContent.startsWith('Ошибка'),null,{timeout:90000});}
  catch(error){throw new Error(JSON.stringify({status:await page.locator('#loading-status').textContent(),errors,pending:[...pending]}),{cause:error});}
- assert(await page.evaluate(()=>!!window.campaign?.ready),await page.locator('#loading-status').textContent());
+ assert(await page.evaluate(()=>!!window.campaign?.ready),JSON.stringify({status:await page.locator('#loading-status').textContent(),errors,pending:[...pending]}));
  const initial=await page.evaluate(()=>campaign.mission.save());
- await page.locator('#prologue').click();
- await page.waitForFunction(()=>campaign.storyAudio.cueId==='m01v2-p01-l001');
- assert.equal(await page.evaluate(()=>campaign.mission.state.time),0);
- await page.locator('#begin').click();
- await page.waitForFunction(()=>campaign.storyAudio.cueId==='m01v2-01-l001'&&document.querySelector('.radio-portrait').dataset.speaker==='general');
- assert.equal(await page.evaluate(()=>campaign.state.paused),false);
- assert.equal(await page.locator('#radio p').textContent(),'А кофе почему нет?');
- assert.equal(await page.locator('#field-tasks').isHidden(),true,'No assignment before the order');
- assert.equal(await page.evaluate(()=>campaign.radio.director.mode),'mission');
- await page.screenshot({path:folder+'/coffee-desktop.png'});
- await page.setViewportSize({width:390,height:844});
- await page.screenshot({path:folder+'/coffee-narrow.png'});
- await page.waitForFunction(()=>campaign.storyAudio.cueId==='m01v2-01-l002');
- assert.equal(await page.locator('#radio p').textContent(),'Потому что электричества нет.');
- assert.equal(await page.evaluate(()=>campaign.unitVoice.playing),false);
- await page.waitForFunction(()=>campaign.storyAudio.cueId==='m01v2-01-l003');
- await page.screenshot({path:folder+'/order-narrow.png'});
- await page.waitForFunction(()=>campaign.mission.state.radioStory.scenes['01'].status==='done');
- await page.waitForFunction(()=>document.querySelector('#field-objectives').textContent.includes('Построить электростанцию'));
- await page.screenshot({path:folder+'/tasks-narrow.png'});
- await page.setViewportSize({width:1440,height:900});
- await page.screenshot({path:folder+'/tasks-desktop.png'});
- await page.locator('#pause').click();
- // Only the power station is initially buildable. The factory is gated by all four lines.
- await page.locator('#build-toggle').click();
- assert.equal(await page.locator('#build-cards button').count(),1);
- assert.match(await page.locator('#build-cards button').getAttribute('aria-label'),/АЭС/);
- assert.equal(await page.locator('#production-toggle').isHidden(),true);
- assert.equal(await page.evaluate(()=>campaign.mission.placement('factory',0,0).reason),'Строительство ещё не открыто');
- await page.screenshot({path:folder+'/first-construction-desktop.png'});
- await page.evaluate(()=>{
-  const {mission}=campaign,point=mission.field.gridToWorld(mission.config.startGrid);
-  mission.addStructure('generator','rai',{x:point.x+140,y:point.y+100},{completed:true,progress:1});campaign.advance(0);
- });
- const factoryExchange=['Электростанция готова?','Так точно!','А почему завод без электричества?','Так мы его ещё не построили, товарищ командир.'];
- for(let i=0;i<4;i++){
-  await page.waitForFunction(id=>campaign.storyAudio.cueId===id,'m01v2-03-l00'+(i+1));
-  assert.equal(await page.locator('#radio p').textContent(),factoryExchange[i]);
-  assert.equal(await page.evaluate(()=>campaign.mission.constructionUnlocked('factory')),false);
-  if(i===3)await page.screenshot({path:folder+'/factory-dialogue-desktop.png'});
- }
- await page.waitForFunction(()=>campaign.mission.constructionUnlocked('factory')&&document.querySelector('#field-objectives').textContent.includes('Построить завод'));
- assert.equal(await page.locator('#build-cards button').count(),2);
- assert.equal(await page.evaluate(()=>campaign.mission.constructionUnlocked('derrick')),false);
- await page.screenshot({path:folder+'/factory-quest-desktop.png'});
- await page.setViewportSize({width:390,height:844});await page.screenshot({path:folder+'/factory-quest-narrow.png'});
- await page.setViewportSize({width:1440,height:900});await page.locator('#build-toggle').click();
- const loaded=await page.evaluate(async()=>{
-  const {loadMissionStory}=await import('./story-director.js');const story=await loadMissionStory(),context=new AudioContext();
-  const result=[];
-  for(const cue of [...story.dialogue,...story.barks]){
-   const response=await fetch('../assets/campaign/alpha/mission01/'+cue.clip.file);
-   const buffer=await context.decodeAudioData(await response.arrayBuffer());
-   result.push({id:cue.id,duration:buffer.duration,expected:cue.clip.duration});
+ // Screenshots may outlast a short line on a busy renderer. Hold only the test's
+ // current caption; the real AudioBuffer still starts and finishes normally.
+ await page.evaluate(()=>{const r=campaign.radio,signal=r.onSignal;r.onSignal=(s,c,keep,urgent,cue)=>signal(s,c,keep?until=>keep(r.testHeldCue===cue?.id?Infinity:until):keep,urgent,cue);});
+ const waitCue=async id=>{
+  try{await page.waitForFunction(id=>campaign.storyAudio.cueId===id,id,{timeout:15000});}
+  catch(error){throw new Error(JSON.stringify({expected:id,...await page.evaluate(()=>({audio:campaign.storyAudio,entry:campaign.radio.entry,until:campaign.radio.until,now:performance.now(),state:campaign.state,radio:campaign.mission.state.radioStory}))}),{cause:error});}
+ };
+ const finishLine=()=>page.evaluate(()=>{campaign.radio.testHeldCue=null;campaign.radio.until=0;campaign.advance(0);});
+ const screenshot=async(name,narrow=false)=>{
+  await page.setViewportSize(narrow?{width:390,height:844}:{width:1440,height:900});
+  await page.waitForFunction(()=>{const r=document.querySelector('#radio'),q=document.querySelector('#field-tasks');return r.hidden||q.hidden||q.getBoundingClientRect().top>=r.getBoundingClientRect().bottom+8;});
+  await page.screenshot({path:folder+'/'+name+'.png'});
+ };
+ const playScene=async(id,{natural=false,check,snap}={})=>{
+  console.log('Scene',id);
+  const scene=story.scenes.find(s=>s.id===id);assert(scene,id);
+  for(let i=0;i<scene.cues.length;i++){
+   const cueId=scene.cues[i],cue=story.dialogue.find(c=>c.id===cueId);
+   await waitCue(cueId);assert.equal(await page.locator('#radio p').textContent(),cue.text);
+   if(!natural)await page.evaluate(id=>{campaign.radio.testHeldCue=id;campaign.radio.until=Infinity;},cueId);
+   if(cue.speaker!=='past')await page.waitForFunction(s=>document.querySelector('.radio-portrait').dataset.speaker===s,cue.speaker);
+   assert.equal(await page.evaluate(()=>campaign.unitVoice.playing),false);
+   if(check)await check(i);
+   if(snap&&i===scene.cues.length-1)await screenshot(snap);
+   if(natural)await page.waitForFunction(id=>campaign.radio.entry?.id!==id,cueId);
+   else await finishLine();
   }
-  await context.close();return result;
- });
- assert.equal(loaded.length,127);for(const clip of loaded)assert(Math.abs(clip.duration-clip.expected)<.14,JSON.stringify(clip));
- // Selecting and ordering repeatedly cannot overlap or queue a backlog of unit voices.
- const bark=await page.evaluate(()=>{
-  const ids=campaign.mission.state.units.filter(e=>e.owner==='rai'&&e.kind==='bukhanka').map(e=>e.id);
-  campaign.select(ids);return ids;
- });
- await page.waitForFunction(()=>campaign.unitVoice.playing);
- const voice=await page.evaluate(()=>campaign.unitVoice.cueId);
- await page.evaluate(ids=>{for(let n=0;n<15;n++)campaign.select(ids);},bark);
- assert.equal(await page.evaluate(()=>campaign.unitVoice.cueId),voice);
- // Real research completion grants the technology immediately and cancels stale discovery speech.
- await page.evaluate(()=>{
-  const {mission,radio}=campaign,point=mission.field.gridToWorld(mission.config.startGrid);
-  const lab=mission.addStructure('lab','rai',{x:point.x+70,y:point.y+150},{completed:true,progress:1});
-  mission.state.artifactKeys.push('flamethrower');campaign.advance(0);
-  window.storyTestLab=lab.id;
- });
- await page.waitForFunction(()=>campaign.storyAudio.cueId==='m01v2-14-l001');
- assert.equal(await page.evaluate(()=>campaign.unitVoice.playing),false,'Main dialogue preempts a bark');
- const researched=await page.evaluate(()=>{
-  const {mission}=campaign;mission.state.energy=10000;
-  const point=mission.field.gridToWorld(mission.config.startGrid);
-  if(!mission.state.buildings.some(e=>e.kind==='generator'))mission.addStructure('generator','rai',{x:point.x+140,y:point.y+100},{completed:true,progress:1});
-  mission.addStructure('derrick','rai',mission.field.gridToWorld(mission.config.oilFields[0]),{completed:true,progress:1});
-  const result=mission.research(window.storyTestLab,'flamethrower');
-  mission.entity(window.storyTestLab).research.progress=.9999;
-  campaign.advance(.5);
-  return {ok:result.ok,unlocked:mission.state.research.flamethrower};
- });
- assert.deepEqual(researched,{ok:true,unlocked:true});
- await page.waitForFunction(()=>campaign.storyAudio.cueId==='m01v2-16-alt-l001'&&document.querySelector('.radio-portrait').dataset.speaker==='scientist');
- await page.waitForFunction(()=>document.querySelector('#field-tasks').getBoundingClientRect().top>=document.querySelector('#radio').getBoundingClientRect().bottom+8);
- await page.screenshot({path:folder+'/research-desktop.png'});
- // Save/load retains the current line and completed scenes.
+ };
+ const addBuilding=async(kind,dx,dy)=>page.evaluate(({kind,dx,dy})=>{
+  const {mission}=campaign,p=kind==='derrick'?mission.field.gridToWorld(mission.config.oilFields[0]):mission.field.gridToWorld(mission.config.startGrid);
+  const e=mission.addStructure(kind,'rai',{x:p.x+dx,y:p.y+dy},{completed:true,progress:1});
+  mission.updateEconomy(0);mission.updateFog();campaign.advance(0);return e.id;
+ },{kind,dx,dy});
+ const unlocked=kind=>page.evaluate(k=>campaign.mission.constructionUnlocked(k),kind);
+ await page.locator('#prologue').click();await waitCue('m01v2-p01-l001');assert.equal(await page.evaluate(()=>campaign.mission.state.time),0);
+ await page.locator('#begin').click();await waitCue('m01v2-o01-l001');
+ assert.equal(await page.evaluate(()=>campaign.state.paused),false);assert.equal(await page.locator('#field-tasks').isHidden(),true);
+ await playScene('o01',{check:async i=>{if(i===0){await screenshot('coffee-desktop');await screenshot('coffee-narrow',true);}}});
+ await page.waitForFunction(()=>document.querySelector('#field-objectives').textContent.includes('Построить электростанцию'));
+ await screenshot('power-task-narrow',true);await screenshot('power-task-desktop');
+ await page.locator('#pause').click();await page.locator('#build-toggle').click();
+ assert.equal(await page.locator('#build-cards button').count(),1);assert.match(await page.locator('#build-cards button').getAttribute('aria-label'),/АЭС/);
+ assert.equal(await page.locator('#production-toggle').isHidden(),true);assert.equal(await unlocked('derrick'),false);
+ assert.equal(await page.evaluate(()=>campaign.mission.placement('factory',0,0).reason),'Строительство ещё не открыто');
+ await screenshot('first-construction-desktop');await page.locator('#build-toggle').click();
+ await addBuilding('generator',140,100);
+ await playScene('o02',{natural:true,check:async()=>assert.equal(await unlocked('factory'),false),snap:'power-complete-desktop'});
+ await playScene('o03',{check:async()=>assert.equal(await unlocked('derrick'),false),snap:'oil-order-desktop'});
+ assert.equal(await unlocked('derrick'),true);assert.equal(await unlocked('factory'),false);
+ await page.waitForFunction(()=>document.querySelector('#field-objectives').textContent.includes('нефтяную вышку'));
+ await screenshot('oil-task-desktop');await screenshot('oil-task-narrow',true);await page.setViewportSize({width:1440,height:900});
+ // Unit responses in a free channel are rate limited and yield to the next story line.
+ const selected=await page.evaluate(()=>{const ids=campaign.mission.state.units.filter(e=>e.owner==='rai'&&e.kind==='bukhanka').map(e=>e.id);campaign.select(ids);return ids;});
+ await page.waitForFunction(()=>campaign.unitVoice.playing);const bark=await page.evaluate(()=>campaign.unitVoice.cueId);
+ await page.evaluate(ids=>{for(let n=0;n<15;n++)campaign.select(ids);},selected);assert.equal(await page.evaluate(()=>campaign.unitVoice.cueId),bark);
+ await addBuilding('derrick',0,0);await playScene('o04');
+ await playScene('o05',{check:async()=>assert.equal(await unlocked('factory'),false),snap:'factory-order-desktop'});
+ assert.equal(await unlocked('factory'),true);assert.equal(await unlocked('lab'),false);
+ await page.waitForFunction(()=>document.querySelector('#field-objectives').textContent.includes('Построить завод'));
+ await screenshot('factory-task-desktop');
+ await addBuilding('factory',-170,120);
+ await playScene('o06',{check:async()=>assert.equal(await unlocked('lab'),false)});assert.equal(await unlocked('lab'),true);
+ const lab=await addBuilding('lab',40,160);
+ const beforeResearch=await page.evaluate(id=>{campaign.mission.state.artifactKeys.push('flamethrower');return campaign.mission.research(id,'flamethrower');},lab);
+ assert.equal(beforeResearch.ok,false);assert.match(beforeResearch.reason,/не принят/);
+ await playScene('o07',{check:async()=>assert.equal(await page.evaluate(()=>campaign.mission.researchUnlocked()),false),snap:'lab-report-desktop'});
+ assert.equal(await page.evaluate(()=>campaign.mission.researchUnlocked()),true);
+ // Actual economy/research code grants a technology before its result speech finishes.
+ const result=await page.evaluate(id=>{const m=campaign.mission;m.state.energy=2400;const result=m.research(id,'flamethrower');m.entity(id).research.progress=.99999;m.updateEconomy(.2);campaign.advance(0);return{ok:result.ok,unlocked:m.state.research.flamethrower};},lab);
+ assert.deepEqual(result,{ok:true,unlocked:true});await playScene('16-alt',{snap:'research-desktop'});
+ // A visible raid is not falsely described as firing until a hostile shot is observed.
+ const enemy=await page.evaluate(()=>{const m=campaign.mission,p=m.field.gridToWorld(m.config.startGrid),enemy=m.addUnit('raider','scavs',{x:p.x+25,y:p.y-40});m.state.flags.raidStarted=true;m.state.flags.raidIds=[enemy.id];m.updateFog();campaign.advance(0);return enemy.id;});
+ assert.notEqual(await page.evaluate(()=>campaign.radio.entry?.storyScene),'o08');
+ await page.evaluate(id=>{const m=campaign.mission,target=m.state.units.find(e=>e.owner==='rai'&&e.hp>0);m.effects.push({type:'shot',from:id,targetId:target.id,to:{x:target.x,y:target.y,z:m.field.heightAt(target.x,target.y)+1},weapon:'mg'});campaign.advance(0);},enemy);
+ await playScene('o08',{snap:'attack-desktop'});
+ await page.evaluate(id=>{const m=campaign.mission;m.damage(m.entity(id),99999);m.state.flags.raidWon=true;m.effects=[];campaign.radio.director.data.lastCombat=-30000;campaign.advance(0);},enemy);
+ await playScene('o09');await playScene('o10',{check:async()=>assert.equal(await unlocked('bunker'),false),snap:'defense-order-desktop'});
+ assert.equal(await unlocked('bunker'),true);
+ await addBuilding('bunker',-100,-150);await playScene('o11');assert.notEqual(await page.evaluate(()=>campaign.radio.entry?.storyScene),'o12');
+ await addBuilding('bunker',120,-150);await playScene('o12',{snap:'offensive-desktop'});
+ await page.waitForFunction(()=>document.querySelector('#field-objectives').textContent.includes('четыре лагеря'));
+ await screenshot('offensive-tasks-desktop');await screenshot('offensive-tasks-narrow',true);
  const saved=await page.evaluate(()=>campaign.mission.save());
  await page.evaluate(saved=>{campaign.radio.reset();campaign.mission.load(saved);campaign.advance(0);},saved);
- await page.waitForFunction(()=>campaign.storyAudio.cueId==='m01v2-16-alt-l001');
- assert.equal(await page.evaluate(()=>campaign.mission.state.radioStory.scenes['01'].status),'done');
- // A close enemy interrupts inside one frame; a destroyed chief cannot finish his threat.
- await page.evaluate(initial=>{
-  campaign.radio.reset();campaign.mission.load(initial);
-  const {mission,radio}=campaign;radio.director.bind(mission);radio.director.data.scenes['01']={status:'done',endedAt:0,cursor:0};
-  const point=mission.field.gridToWorld(mission.config.startGrid);
-  mission.addStructure('generator','rai',{x:point.x+100,y:point.y+100},{completed:false});
-  radio.director.data.scenes['04']={status:'done',endedAt:0,cursor:0};
-  radio.director.data.clock=20000;campaign.advance(0);radio.until=0;campaign.advance(0);
-  const enemy=mission.addUnit('raider','scavs',{x:point.x+25,y:point.y-45});
-  window.storyTestEnemy=enemy.id;mission.updateFog();campaign.advance(0);
- },initial);
- await page.waitForFunction(()=>campaign.storyAudio.chapter==='first-contact'&&campaign.storyAudio.urgent);
- assert.equal(await page.evaluate(()=>campaign.radio.director.record('02').cursor),0);
- await page.screenshot({path:folder+'/contact-desktop.png'});
- // All supplied and temporary portraits decode and render, without adding UI borders.
- const portraits=await page.evaluate(async()=>{
-  const {portraitCatalog,setCharacterPortrait}=await import('./character-portraits.js');const catalog=await portraitCatalog(),canvas=document.createElement('canvas'),result=[];
-  for(const id of Object.keys(catalog.characters))result.push([id,await setCharacterPortrait(canvas,id,'radio')]);
-  return result;
+ assert.equal(await page.evaluate(()=>campaign.mission.state.radioStory.scenes.o12.status),'done');assert.equal(await unlocked('bunker'),true);
+ // Decode every record and render every portrait, including optional later scenes.
+ const verification=await page.evaluate(async()=>{
+  const {loadMissionStory}=await import('./story-director.js'),script=await loadMissionStory(),context=new AudioContext(),clips=[];
+  for(const cue of [...script.dialogue,...script.barks]){const r=await fetch('../assets/campaign/alpha/mission01/'+cue.clip.file),b=await context.decodeAudioData(await r.arrayBuffer());clips.push({id:cue.id,duration:b.duration,expected:cue.clip.duration});}
+  await context.close();const {portraitCatalog,setCharacterPortrait}=await import('./character-portraits.js'),catalog=await portraitCatalog(),canvas=document.createElement('canvas'),portraits=[];
+  for(const id of Object.keys(catalog.characters))portraits.push([id,await setCharacterPortrait(canvas,id,'radio')]);
+  const panel=document.querySelector('#field-tasks'),style=getComputedStyle(panel),box=panel.getBoundingClientRect();
+  return{clips,portraits,layout:{left:box.left,right:box.right,width:innerWidth,border:style.borderTopWidth,background:style.backgroundColor}};
  });
- assert(portraits.every(([,ok])=>ok));assert.equal(portraits.length,12);
- const layout=await page.evaluate(()=>{
-  const panel=document.querySelector('#radio'),p=panel.getBoundingClientRect(),css=getComputedStyle(panel);
-  return {left:p.left,right:p.right,width:innerWidth,border:css.borderTopWidth,background:css.backgroundColor};
- });
- assert(layout.left>=0&&layout.right<=layout.width);assert.equal(layout.border,'0px');assert.equal(layout.background,'rgba(0, 0, 0, 0)');
- await page.evaluate(()=>{
-  const d=campaign.radio.director;d.data.journal=[{id:'outcasts',title:'Отбросы',text:'Местные вооружённые формирования.'}];campaign.advance(0);
- });
- await page.locator('.settings summary').click();await page.locator('[aria-controls="operation-journal"]').click();
- assert.match(await page.locator('#journal-entries').textContent(),/Отбросы/);
- assert.deepEqual(errors,[]);
- fs.writeFileSync(folder+'/verification.json',JSON.stringify({audio:loaded,portraits,layout,errors},null,2));
- console.log('PASS: prologue, coffee, 4-line factory exchange, construction gates, narrow/desktop screenshots, 127 decoded clips, research, saves, interruption, voice arbitration, 12 portraits and journal');
+ assert.equal(verification.clips.length,story.dialogue.length+story.barks.length);
+ for(const clip of verification.clips)assert(Math.abs(clip.duration-clip.expected)<.14,JSON.stringify(clip));
+ assert(verification.portraits.every(([,ok])=>ok));assert.equal(verification.portraits.length,12);
+ assert(verification.layout.left>=0&&verification.layout.right<=verification.layout.width);assert.equal(verification.layout.border,'0px');assert.equal(verification.layout.background,'rgba(0, 0, 0, 0)');
+ assert.deepEqual(errors,[]);fs.writeFileSync(folder+'/verification.json',JSON.stringify({...verification,errors},null,2));
+ console.log('PASS: all 12 opening scenes, exact subtitles/audio, progressive construction, research gate and rewards, raid, two bunkers, offensive quest, saves, portraits and desktop/narrow layouts');
 }finally{await browser.close();}
