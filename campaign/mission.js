@@ -700,22 +700,33 @@ export class Mission{
   }
   return null;
  }
- recoverTrafficCluster(unit){
+ recoverTrafficCluster(unit,includeParked=false){
   const scale=this.config.worldScale;
-  const moving=this.state.units.filter(other=>other.owner===unit.owner&&other.hp>0
-   &&other.path.length&&other.task?.type!=='clear-site');
+  const idle=other=>!other.path.length&&!other.task&&!other.builderWorking&&!other.tool&&!other.foldTime;
+  const neighbours=this.state.units.filter(other=>other.owner===unit.owner&&other.hp>0
+   &&(other.path.length&&other.task?.type!=='clear-site'||includeParked&&idle(other)&&distance(unit,other)<scale*12));
   const cluster=[unit];
   for(let index=0;index<cluster.length;index++){
    const current=cluster[index];
-   for(const other of moving){
+   for(const other of neighbours){
     if(cluster.includes(other)||distance(current,other)>scale*6.5)continue;
     if(vehicleClearance(current,other,scale,this.field)<scale*.52)cluster.push(other);
    }
   }
   if(cluster.length<2||cluster.some(other=>other.detour||other.trafficHold))return false;
+  const yieldSpace=(vehicle,legs,rough=true)=>{
+   vehicle.detour={legs,parking:true,rough,idleYield:true,blocked:0};
+   vehicle.trafficRest=this.state.time+6;
+   for(const other of cluster)if(other.path.length)other.trafficHold=vehicle.id;
+   return true;
+  };
+  if(includeParked&&cluster.length>=4
+   &&cluster.every(other=>other===unit||vehicleClearance(unit,other,scale,this.field)>=0)
+   &&this.clearParkedAisle(unit,neighbours.filter(idle),yieldSpace))return true;
   const centre=cluster.reduce((sum,other)=>({x:sum.x+other.x/cluster.length,y:sum.y+other.y/cluster.length}),{x:0,y:0});
   const outer=cluster.slice().sort((a,b)=>distance(b,centre)-distance(a,centre)||Number(b.id.slice(1))-Number(a.id.slice(1)));
   for(const vehicle of outer){
+   if(includeParked&&!idle(vehicle))continue;
    if(vehicle.traffic||vehicle.trafficRest>this.state.time)continue;
    const offset={x:vehicle.x-centre.x,y:vehicle.y-centre.y};
    const radius=Math.max(1,distance(vehicle,centre));
@@ -725,12 +736,55 @@ export class Mission{
    const legs=planManeuver(vehicle,goal,{scale,allowed,attempts:2,maximumLegs:6,
     accept:pose=>distance(vehicle,pose)>scale*2.5&&distance(pose,centre)>radius+scale*1.3
      &&others.every(other=>vehicleClearance(pose,other,scale,this.field)>scale*.4)});
-   if(!legs)continue;
+   if(!legs){
+    if(includeParked)vehicle.trafficRest=this.state.time+4;
+    continue;
+   }
+   if(includeParked)return yieldSpace(vehicle,legs);
    const leader=others.slice().sort((a,b)=>Number(a.id.slice(1))-Number(b.id.slice(1)))[0];
    vehicle.detour={legs,parking:true,rough:true,blocked:0};
    vehicle.traffic={leader:leader.id,since:this.state.time,phase:'move'};
    for(const other of others)other.trafficHold=vehicle.id;
    return true;
+  }
+  return false;
+ }
+ clearParkedAisle(unit,parked,yieldSpace){
+  // A boxed vehicle must drive along its row before it has room to turn.
+  const scale=this.config.worldScale,fx=-Math.sin(unit.heading),fy=Math.cos(unit.heading);
+  const along=other=>(other.x-unit.x)*fx+(other.y-unit.y)*fy;
+  const lateral=other=>(other.x-unit.x)*fy-(other.y-unit.y)*fx;
+  const allowed=(from,to)=>this.vehicleMotionClear(unit,from,to);
+  const reverse=Math.max(0,scale*4-(unit.reverseDebt??0));
+  const ignoreUnits=new Set([unit]);
+  for(const [direction,lengths] of [[1,[10*scale,8*scale,6*scale]],[-1,[reverse]]]){
+   for(const length of lengths){
+    if(length<scale*3)continue;
+    const legs=[{direction,curve:0,remaining:length}];
+    const exit=checkManeuver(unit,legs,scale,allowed);
+    if(!exit)continue;
+    const path=this.vehiclePath(exit,unit.task,{ignoreUnits,maxGoalDistance:8,fallback:false});
+    if(!path?.length)continue;
+    const onward=planManeuver(exit,path[0],{scale,allowed,attempts:2,reverseBudget:0,maximumLegs:7});
+    if(!onward)continue;
+    unit.path=path;
+    unit.detour={legs:[...legs,...onward],parking:false,blocked:0};
+    return true;
+   }
+  }
+  const row=parked.filter(other=>!other.detour&&!other.traffic&&Math.abs(lateral(other))<scale*1.2)
+   .sort((a,b)=>along(b)-along(a));
+  for(const other of row){
+   const alignment=-Math.sin(other.heading)*fx+Math.cos(other.heading)*fy;
+   if(Math.abs(alignment)<.72)continue;
+   const advance=along(other),direction=Math.sign(alignment*advance);
+   if(!direction)continue;
+   const clearance=Math.max(scale*9,scale*20-Math.abs(advance));
+   const canMove=(from,to)=>this.vehicleMotionClear(other,from,to);
+   for(const remaining of [clearance,scale*10]){
+    const legs=[{direction,curve:0,remaining}];
+    if(checkManeuver(other,legs,scale,canMove))return yieldSpace(other,legs,false);
+   }
   }
   return false;
  }
@@ -935,7 +989,9 @@ export class Mission{
   const legs=planManeuver(unit,point,{...maneuverOptions,reverseBudget:0})
    ??(reverseBudget>=scale*.6?planManeuver(unit,point,{...maneuverOptions,reverseBudget}):null);
   if(legs){unit.detour={legs,parking:false,blocked:0};return !!pose;}
-  if(blockers.size&&watch.attempts>=2&&unit.task?.type!=='clear-site'&&this.recoverTrafficCluster(unit))return !!pose;
+  if(blockers.size&&watch.attempts>=2&&unit.task?.type!=='clear-site'){
+   if(this.recoverTrafficCluster(unit)||travel&&unit.owner==='rai'&&this.recoverTrafficCluster(unit,true))return !!pose;
+  }
   if(!blockers.size&&watch.attempts>=2){
    const rough=planManeuver(unit,point,{...maneuverOptions,allowed:roughAllowed,
     failedArcs:[],maximumLegs:5,reverseBudget});
