@@ -1,5 +1,5 @@
 import {setCharacterPortrait} from './character-portraits.js';
-import {raidApproachSignal, waterTowerSignal} from './threat-guidance.js';
+import {raidApproachSignal, visibleRaidContact, waterTowerSignal} from './threat-guidance.js';
 
 const messages = {
   intro: { station: 'Командир', speaker:'commander', portrait:'radio', text: 'Вас понял. На месте.' },
@@ -40,7 +40,7 @@ export function missionSignal(chapter, mission) {
     return mark(well, 'К нефти', 'guidance', 320);
   }
   if (chapter === 'first-contact') {
-    const contact = state.units.find(unit => unit.owner === 'scavs' && unit.hp > 0 && mission.visibleAt(unit.x, unit.y));
+    const contact = visibleRaidContact(mission);
     return raidApproachSignal(mission) ?? (contact ? mark(contact, 'К контакту', 'threat', 400) :
       mark(field.gridToWorld(config.startGrid), 'К базе', 'threat', 380));
   }

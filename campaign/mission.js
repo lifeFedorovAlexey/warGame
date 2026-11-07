@@ -42,22 +42,28 @@ export class Mission{
  id(prefix){return prefix+this.serial++;}
  reserveRaid(unseen=false){
   const camp=this.state.camps[0],positions=[],target=this.field.gridToWorld(this.config.startGrid);
+  const staging=this.config.raidStagingGrid&&this.field.gridToWorld(this.config.raidStagingGrid);
   this.state.raidReserve=[];
-  const candidates=[];
-  for(let row=-6;row<=6;row++)for(let col=-6;col<=6;col++){
-   const x=camp.gate.x+col*20,y=camp.gate.y+row*20;
-   if(Math.hypot(x-camp.x,y-camp.y)<54)continue;
-   const point=this.nav.nearest(x,y,1);
-   if(point&&(!unseen||!this.visibleAt(point.x,point.y)))candidates.push(point);
-  }
-  candidates.sort((a,b)=>distance(a,camp.gate)-distance(b,camp.gate));
-  for(const point of candidates){
+  for(const anchor of staging?[staging,camp.gate]:[camp.gate]){
    if(positions.length===4)break;
-   if(this.state.units.some(unit=>unit.hp>0&&distance(unit,point)<25))continue;
-   if(!this.nav.findPath(point,target))continue;
-   positions.push(point);
-   const unit=this.addUnit('raider','scavs',point,{raidReserve:true,guard:{x:point.x,y:point.y}});
-   this.state.raidReserve.push(unit.id);
+   const candidates=[];
+   for(let row=-6;row<=6;row++)for(let col=-6;col<=6;col++){
+    const x=anchor.x+col*20,y=anchor.y+row*20;
+    if(Math.hypot(x-camp.x,y-camp.y)<54)continue;
+    const point=this.nav.nearest(x,y,1);
+    if(point&&(!(unseen||staging)||!this.visibleAt(point.x,point.y)))candidates.push(point);
+   }
+   candidates.sort((a,b)=>distance(a,anchor)-distance(b,anchor));
+   for(const point of candidates){
+    if(positions.length===4)break;
+    if(this.state.units.some(unit=>unit.hp>0&&distance(unit,point)<25))continue;
+    const path=this.nav.findPath(point,target);
+    if(!path?.length)continue;
+    positions.push(point);
+    const heading=staging?Math.atan2(point.x-path[0].x,path[0].y-point.y):0;
+    const unit=this.addUnit('raider','scavs',point,{heading,raidReserve:true,guard:{x:point.x,y:point.y}});
+    this.state.raidReserve.push(unit.id);
+   }
   }
  }
  launchRaid(){
@@ -75,6 +81,24 @@ export class Mission{
    unit.task={type:'move',x:goal.x,y:goal.y};
   }
   this.emit('raid-start');
+ }
+ updateRaid(activate){
+  const {flags,time}=this.state;
+  if(flags.raidWon)return;
+  if(!flags.raidStarted){
+   // Older saves may already have played the warning and scheduled the sortie.
+   if(Number.isFinite(flags.raidAt)?time<flags.raidAt:!activate)return;
+   this.launchRaid();
+  }
+  const raiders=flags.raidIds.map(id=>this.entity(id)).filter(Boolean);
+  if(!raiders.length){flags.raidWon=true;this.cinematic('raid-won');return;}
+  if(flags.contact)return;
+  const approach=this.field.gridToWorld(this.config.raidApproachGrid??this.config.startGrid);
+  const warningRange=10*(this.field.cellMetres??32);
+  if(raiders.some(unit=>this.visibleAt(unit.x,unit.y)||distance(unit,approach)<=warningRange)){
+   flags.contact=true;
+   this.cinematic('first-contact');
+  }
  }
  random(){this.randomState=(Math.imul(this.randomState,1664525)+1013904223)>>>0;return this.randomState/4294967296;}
  emit(type,data={}){this.events.push({id:this.id('e'),type,time:this.state.time,...data});}
@@ -1403,9 +1427,7 @@ export class Mission{
   for(const camp of s.camps){if(camp.cleared)continue;const hostile=[...s.units,...s.buildings].some(e=>e.campId===camp.id&&e.hp>0);if(!hostile){camp.cleared=true;this.emit('camp-cleared',{camp:camp.id});if(camp.artifact&&!camp.artifactSpawned){const point=this.nav.nearest(camp.x+35,camp.y,8)??camp;s.artifacts.push({id:this.id('a'),key:camp.artifact,x:point.x,y:point.y,collected:false});camp.artifactSpawned=true;}}}
   for(const artifact of s.artifacts)if(!artifact.collected&&s.units.some(u=>u.owner==='rai'&&u.hp>0&&distance(u,artifact)<24)){artifact.collected=true;if(!s.artifactKeys.includes(artifact.key))s.artifactKeys.push(artifact.key);this.emit('artifact-collected',{key:artifact.key});if(artifact.key!=='mg-tower')this.cinematic('artifact-'+artifact.key);}
   const enemyVisible=s.units.some(u=>u.owner==='scavs'&&u.hp>0&&this.visibleAt(u.x,u.y));const has=kind=>s.buildings.some(b=>b.owner==='rai'&&b.hp>0&&b.completed&&b.kind===kind);
-  if(!s.flags.contact&&(enemyVisible||(has('factory')&&has('lab')&&s.statistics.produced>0))){s.flags.contact=true;this.cinematic('first-contact');s.flags.raidAt=s.time+12;}
-  if(s.flags.contact&&!s.flags.raidStarted&&s.time>=s.flags.raidAt)this.launchRaid();
-  if(s.flags.raidStarted&&!s.flags.raidWon&&s.flags.raidIds.every(id=>!this.entity(id))){s.flags.raidWon=true;this.cinematic('raid-won');}
+  this.updateRaid(enemyVisible||(has('factory')&&has('lab')&&s.statistics.produced>0));
   if(!s.flags.thirdSighted){
    const tower=waterTower(this);
    if(tower&&this.visibleAt(tower.x,tower.y)){s.flags.thirdSighted=true;this.cinematic('camp3-sighted');}

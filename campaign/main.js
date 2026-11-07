@@ -30,9 +30,9 @@ function firstPowerSites(){
 function knownArtifact(mission){
   return mission.state.artifacts.find(item=>!item.collected&&mission.exploredAt(item.x,item.y));
 }
-function nextObjectiveHint(state,{plant,well},tasks,artifact){
+function nextObjectiveHint(state,{plant,well},tasks,artifact,contact){
   if(state.status!=='running')return '';
-  if(state.flags.contact&&!state.flags.raidWon)return state.flags.raidStarted ? 'Отразите рейд на базу.' : 'Прикройте въезд к базе.';
+  if(state.flags.contact&&!state.flags.raidWon)return contact ? 'Отразите рейд на базу.' : 'Прикройте въезд к базе.';
   if(artifact)return 'Подберите артефакт.';
   if(!state.powered){
     if(!plant&&!well)return 'Постройте АЭС и вышку.';
@@ -650,7 +650,7 @@ function updateUi() {
   const contact=visibleRaidContact(mission),threat=staticThreat(contact);
   world.storySignals.setThreat(threat);
   const sites=firstPowerSites(),artifact=knownArtifact(mission),marker=tacticalFocus(contact,{...sites,threat,artifact});
-  const objectiveHint = $('objective-hint'), hint = nextObjectiveHint(s,sites,tasks,artifact);
+  const objectiveHint = $('objective-hint'), hint = nextObjectiveHint(s,sites,tasks,artifact,contact);
   if(objectiveHint.textContent!==hint)objectiveHint.textContent=hint;
   objectiveHint.hidden=!hint;
   const signal=world.storySignals.current;

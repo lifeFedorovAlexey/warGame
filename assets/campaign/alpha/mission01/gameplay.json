@@ -7,6 +7,7 @@
   "energyCapacity": 2400,
   "startGrid": [14.5, 53.5],
   "raidApproachGrid": [21, 52.25],
+  "raidStagingGrid": [29.5, 52.125],
   "initialUnits": ["bukhanka", "bukhanka", "bukhanka", "builder", "builder"],
   "initialMapBounds": [0, 0, 53, 66],
   "finalMapBounds": [0, 0, 53, 83],
