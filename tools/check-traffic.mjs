@@ -100,6 +100,18 @@ const onApproach=Array.from({length:5},(_,i)=>shoulderGroup.addUnit('bukhanka','
 assert.equal(shoulderGroup.order(onApproach.map(u=>u.id),'move',{x:160,y:roadY}).assigned,onApproach.length);
 assert(onApproach.every(u=>shoulderGroup.nav.roads.coverage(u.path.at(-1).x,u.path.at(-1).y)>=.58));
 assert.equal(sample(shoulderGroup,onApproach,60).complete,onApproach.length);
+const turningTraffic=session({...field,roadNetwork:null,roadBlendAt:null});
+const turningVan=turningTraffic.addUnit('bukhanka','rai',{x:0,y:0},{heading:-Math.PI/2,driveSpeed:13});
+const parkedVan=turningTraffic.addUnit('bukhanka','rai',{x:25,y:0},{heading:-Math.PI/2});
+turningVan.path=[{x:90,y:100}];turningVan.task={type:'move',...turningVan.path[0]};
+turningTraffic.move(turningVan,.1);
+assert(turningVan.driveSpeed<11.1,'A turning vehicle brakes for the van in its current direction');
+assert(vehicleClearance(turningVan,parkedVan,scale,turningTraffic.field)>0);
+const apronGroup=session();
+const apronUnits=[-140,-174,-208].map(x=>apronGroup.addUnit('bukhanka','rai',{x,y:0},{heading:0}));
+assert.equal(apronGroup.order(apronUnits.map(u=>u.id),'move',{x:160,y:roadY}).assigned,apronUnits.length);
+assert(apronUnits.every(u=>apronGroup.nav.roads.coverage(u.path.at(-1).x,u.path.at(-1).y)>=.58),
+ 'Units approaching the same road from the apron receive paved slots');
 function shoulder(separation){
  const curved={...field,roadBlendAt:null,roadNetwork:{paths:[{id:'curve',width:28,points:[
   {x:-450,y:38},{x:-180,y:38},{x:-135,y:45},{x:-95,y:61},{x:-45,y:65},{x:450,y:65}]}]}};

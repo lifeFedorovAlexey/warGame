@@ -1008,10 +1008,16 @@ export class Mission{
   const slope=this.field.gradientAt(unit.x,unit.y);
   const slopeBlockers=Math.hypot(slope.x,slope.y)>=.42?blockers:undefined;
   const grade=(slope.x*(waypoint.x-unit.x)+slope.y*(waypoint.y-unit.y))/Math.max(1,remaining);
-  const aligned=-Math.sin(unit.heading)*course.x+Math.cos(unit.heading)*course.y>.72;
+  const motionCourse=remaining>0?{x:(waypoint.x-unit.x)/remaining,y:(waypoint.y-unit.y)/remaining}:course;
+  const forward={x:-Math.sin(unit.heading),y:Math.cos(unit.heading)};
+  const aligned=forward.x*motionCourse.x+forward.y*motionCourse.y>.72;
   // Braking for a parked van can stop us before a movement sweep ever hits it.
   const stoppedObstacles=new Set();
-  const trafficLimit=cruising&&aligned?this.trafficSpeed(unit,course,roadLane,scale,stoppedObstacles):Infinity;
+  // On a sharp turn, brake for the current heading and let the sweep handle
+  // the final low-speed manoeuvre.
+  const checkingTurn=cruising&&!aligned&&(unit.driveSpeed??0)>scale*2.5;
+  const trafficLimit=cruising&&aligned?this.trafficSpeed(unit,motionCourse,roadLane,scale,stoppedObstacles)
+   :checkingTurn?Math.max(scale,this.trafficSpeed(unit,forward,null,scale,stoppedObstacles)):Infinity;
   const speed=this.unitSpec(unit).speed*this.nav.roads.factor(unit.x,unit.y);
   let pose=driveStep(unit,waypoint,dt,{speed,grade,scale,tolerance,trafficLimit,
    reverseLimit:unit.task?.type==='clear-site'?scale*4:precise?scale*1.5:0,allowed});
@@ -1057,6 +1063,14 @@ export class Mission{
   const travel=['move','attack-move'].includes(unit.task?.type);
   if(travel&&stoppedPair()&&this.recoverTrafficCluster(unit,false,slopeBlockers))return !!pose;
   for(const other of stoppedObstacles)blockers.add(other);
+  // A parked yielder and the vehicle waiting for it form a temporary queue.
+  // Give that queue time to clear before planning a detour around both hulls.
+  const clearingTraffic=travel&&[...blockers].some(other=>other.owner===unit.owner&&other.hp>0
+   &&(other.detour?.parking||other.traffic?.phase==='parked'||this.entity(other.trafficHold)?.detour?.parking));
+  if(clearingTraffic){
+   watch.trafficWaitAt??=this.state.time;
+   if(this.state.time-watch.trafficWaitAt<4)return !!pose;
+  }else delete watch.trafficWaitAt;
   if(this.requestPassage(unit,blockers))return !!pose;
   const destination=travel||unit.task?.type==='clear-site'?unit.task:unit.path.at(-1);
   const stalledNearParked=travel&&[...blockers].some(other=>!other.path.length);

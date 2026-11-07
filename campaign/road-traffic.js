@@ -162,11 +162,12 @@ export class RoadTraffic {
   }
 
   formationProgress(unit, layout, scale) {
-    const road = this.nearest(unit,scale*7);
-    if (!road || road.distance > road.width) return null;
+    const road = this.nearest(unit,scale*14);
+    if (!road) return null;
+    const nearLane = road.distance <= Math.min(scale * 7, road.width);
     const {segment} = road, progress = (segment.progress + road.along) * layout.direction;
     if (segment.pathId !== layout.path) {
-      if (this.coverage(unit.x, unit.y) < .4) return null;
+      if (!nearLane || this.coverage(unit.x, unit.y) < .4) return null;
       const {progress, length} = this.roadPosition(road);
       const remaining = Math.min(
         (layout.distances.get(segment.path.from) ?? Infinity) + progress,
@@ -175,9 +176,10 @@ export class RoadTraffic {
       const direct = Math.hypot(unit.x - layout.goal.x, unit.y - layout.goal.y);
       return remaining <= direct * 3 + 60 ? layout.targetProgress - remaining : null;
     }
-    if (this.coverage(unit.x,unit.y) >= .4) return progress;
-    const aligned = (-Math.sin(unit.heading) * segment.ux + Math.cos(unit.heading) * segment.uy) * layout.direction;
-    return aligned >= .62 && progress <= layout.targetProgress ? progress : null;
+    if (nearLane && this.coverage(unit.x,unit.y) >= .4) return progress;
+    // A group entering from an apron can use the same lane slots as vehicles
+    // already on the road. The navigation search still validates each approach.
+    return progress <= layout.targetProgress ? progress : null;
   }
 
   rightLane(unit, goal, scale) {
