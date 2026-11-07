@@ -85,6 +85,8 @@ export class FieldSound {
     this.output.connect(limiter).connect(ctx.destination);
     this.effectsOutput = ctx.createGain();
     this.effectsOutput.connect(this.output);
+    this.commandOutput = ctx.createGain();
+    this.commandOutput.connect(this.output);
     this.noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
     const samples = this.noise.getChannelData(0);
     let low = 0;
@@ -95,7 +97,7 @@ export class FieldSound {
     }
     this.loadRecordings();
     this.loadVoices();
-    if (this.storyEnabled) this.storyClip('intro');
+    if (this.storyEnabled) for (const chapter of ['intro', 'first-contact', 'camp3-sighted']) this.storyClip(chapter);
     this.loadProjector();
     for (const [kind, file] of Object.entries(combatFiles)) {
       this.loadClip(combatBase, file)
@@ -183,10 +185,10 @@ export class FieldSound {
     return this.storyClips.get(chapter);
   }
 
-  playStory(chapter, keepCaptionUntil) {
+  playStory(chapter, keepCaptionUntil, urgent = false) {
     this.stopStory();
     if (!chapter || !this.enabled || !this.storyEnabled || !this.context) return;
-    const request = {keepCaptionUntil, time:performance.now()};
+    const request = {chapter, urgent, keepCaptionUntil, time:performance.now()};
     this.pendingStory = request;
     this.storyClip(chapter).then(buffer => {
       if (this.pendingStory !== request) return;
@@ -208,22 +210,24 @@ export class FieldSound {
     source.buffer = request.buffer;
     gain.gain.value = 0;
     source.connect(gain).connect(this.output);
-    const playback = this.storyPlayback = {source, gain};
-    this.updateStoryGain();
-    this.effectsOutput.gain.setTargetAtTime(.67, now, .045);
+    const playback = this.storyPlayback = {source, gain, chapter:request.chapter, urgent:request.urgent};
+    this.updateDialogueMix();
     source.onended = () => {
       source.disconnect();
       gain.disconnect();
       if (this.storyPlayback !== playback) return;
       this.storyPlayback = null;
-      this.effectsOutput.gain.setTargetAtTime(1, ctx.currentTime, .16);
+      this.updateDialogueMix();
     };
     source.start(now);
     request.keepCaptionUntil(performance.now() + (request.buffer.duration + .18) * 1000);
   }
 
-  updateStoryGain() {
-    this.storyPlayback?.gain.gain.setTargetAtTime(this.voiceSource ? .51 : .88, this.context.currentTime, .035);
+  updateDialogueMix() {
+    const now = this.context.currentTime, story = this.storyPlayback, urgent = story?.urgent;
+    this.effectsOutput.gain.setTargetAtTime(urgent ? .46 : story ? .67 : 1, now, story ? .045 : .16);
+    this.commandOutput.gain.setTargetAtTime(urgent ? .54 : 1, now, urgent ? .035 : .12);
+    story?.gain.gain.setTargetAtTime(urgent ? .94 : this.voiceSource ? .51 : .88, now, .035);
   }
 
   stopStory() {
@@ -234,7 +238,7 @@ export class FieldSound {
     const now = this.context.currentTime;
     playback.gain.gain.setTargetAtTime(0, now, .012);
     playback.source.stop(now + .065);
-    this.effectsOutput.gain.setTargetAtTime(1, now, .16);
+    this.updateDialogueMix();
   }
 
   acknowledge(kind, ids) {
@@ -258,15 +262,15 @@ export class FieldSound {
     for (const [played, at] of this.lastVoice) if (now - at >= voiceCooldown) this.lastVoice.delete(played);
     const source = this.context.createBufferSource();
     this.voiceSource = source;
-    this.updateStoryGain();
+    this.updateDialogueMix();
     source.buffer = this.voices[kind];
-    source.connect(this.output);
+    source.connect(this.commandOutput);
     source.onended = () => {
       source.disconnect();
       if (this.voiceSource !== source) return;
       this.voiceSource = null;
       this.playPendingVoice();
-      this.updateStoryGain();
+      this.updateDialogueMix();
     };
     source.start();
     this.lastVoice.set(key, now);

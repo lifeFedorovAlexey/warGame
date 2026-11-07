@@ -751,9 +751,9 @@ try {
     },
   });
   radio = new FieldRadio($('radio'), $('radio-toggle'), {
-    onSignal(signal,chapter,keepCaptionUntil) {
+    onSignal(signal,chapter,keepCaptionUntil,urgent) {
       if(chapter&&signal?.kind!=='anomaly')sound.signal('radio');
-      sound.playStory(chapter,keepCaptionUntil);
+      sound.playStory(chapter,keepCaptionUntil,urgent);
       presentSignal(signal);
     },
     onFocus:focusSignal,
@@ -761,7 +761,7 @@ try {
   window.campaign = {
     ready: true, mission, world, select, radio,
     get drivingAudio() { return {running:sound.ready(), recordings:!!sound.recordings}; },
-    get storyAudio() { return {playing:!!sound.storyPlayback, enabled:sound.storyEnabled}; },
+    get storyAudio() { return {playing:!!sound.storyPlayback, enabled:sound.storyEnabled, chapter:sound.storyPlayback?.chapter, urgent:!!sound.storyPlayback?.urgent}; },
     get selected() { return [...selected]; },
     get state() { return {active, paused, speed, buildKind, orderMode}; },
     advance(seconds) { mission.advance(seconds); events(); radio.consume(mission, performance.now()); updateUi(); return mission.state; },

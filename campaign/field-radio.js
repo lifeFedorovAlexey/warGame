@@ -13,6 +13,20 @@ const messages = {
   outro: { station: 'Штаб', text: 'К югу от ваших позиций зафиксирован энергетический всплеск. Следующая задача — разведка.' },
 };
 
+const tacticalPriority = 2, endingPriority = 4;
+const priorities = { 'last-camp':1, 'camp3-sighted':tacticalPriority, 'first-contact':3, victory:endingPriority, outro:endingPriority };
+const routineLifetime = 10000;
+
+function relevant(entry, state, now) {
+  const {chapter, priority, queuedAt} = entry;
+  if (state.status !== 'running') return state.status === 'victory' && priority === endingPriority;
+  if (chapter === 'first-contact') return !state.flags.raidWon;
+  if (chapter === 'camp3-sighted') return !state.camps[2].cleared;
+  if (chapter === 'last-camp') return !state.camps[3].cleared;
+  if (chapter.startsWith('artifact-') && state.research[chapter.slice(9)]) return false;
+  return priority > 0 || now - queuedAt < routineLifetime;
+}
+
 export function missionSignal(chapter, mission) {
   const {config, field, state} = mission;
   const mark = (point, label, kind, distance) => point && {x:point.x,y:point.y,label,kind,distance};
@@ -86,14 +100,27 @@ export class FieldRadio {
   }
 
   consume(mission, now) {
+    let queued = false;
     for (const chapter of [...mission.state.pendingCinematics]) {
       mission.finishCinematic(chapter);
-      if (this.enabled && messages[chapter]) this.queue.push({chapter, ...messages[chapter]});
+      if (!this.enabled || !messages[chapter]) continue;
+      const priority = priorities[chapter] ?? 0;
+      this.queue.push({chapter, ...messages[chapter], priority, queuedAt:now});
+      queued = true;
     }
-    if (now >= this.until) this.dismiss();
-    if (!this.enabled || !this.panel.hidden || !this.queue.length) return;
-    const entry = this.entry = this.queue.shift();
-    const { chapter, station, text } = entry;
+    if (!this.enabled) return;
+    if (queued) this.queue.sort((a,b) => b.priority - a.priority);
+    while (this.queue.length && !relevant(this.queue[0], mission.state, now)) this.queue.shift();
+    if (this.entry && (now >= this.until || mission.state.status === 'defeat')) this.dismiss();
+    const next = this.queue[0];
+    if (!next || (this.entry && next.priority <= this.entry.priority)) return;
+    this.queue.shift();
+    this.present(next, mission, now);
+  }
+
+  present(entry, mission, now) {
+    this.entry = entry;
+    const { chapter, station, text, priority } = entry;
     this.current = missionSignal(chapter, mission);
     this.focus.hidden = !this.current;
     if (this.current) this.focus.textContent = this.current.label;
@@ -103,6 +130,6 @@ export class FieldRadio {
     this.until = now + Math.min(6700, 3000 + text.length * 28);
     this.onSignal(this.current, chapter, until => {
       if (this.entry === entry) this.until = Math.max(this.until, until);
-    });
+    }, priority >= tacticalPriority && priority < endingPriority);
   }
 }

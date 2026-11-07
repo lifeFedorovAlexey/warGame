@@ -31,10 +31,26 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
    const {target}=window.campaign.world.controls;
    return Math.hypot(target.x-p.x,target.y-p.y)<.01;
   },briefing.signal),'Optional radio focus goes to the marked oil point');
+  const warning=await page.evaluate(()=>{
+   const c=window.campaign,{mission,radio}=c;
+   const seen=mission.state.seenCinematics.slice(),until=radio.until;
+   mission.cinematic('artifact-mg-ammo-1');c.advance(0);
+   const before=radio.entry.chapter;
+   mission.cinematic('first-contact');c.advance(0);
+   mission.state.seenCinematics=seen;
+   return {before,chapter:radio.entry.chapter,interrupted:performance.now()<until,
+    queued:radio.queue.map(entry=>entry.chapter),signal:c.world.storySignals.current?.kind};
+  });
+  assert.deepEqual(warning,{before:'intro',chapter:'first-contact',interrupted:true,queued:['artifact-mg-ammo-1'],signal:'threat'});
+  await page.waitForFunction(()=>{
+   const audio=window.campaign.storyAudio;
+   return audio.playing&&audio.chapter==='first-contact'&&audio.urgent;
+  });
   await page.locator('[data-skip-all]').click();
   assert.equal(await page.evaluate(()=>localStorage.getItem('warGame.fieldRadio')),'off');
   assert.equal(await page.evaluate(()=>window.campaign.world.storySignals.current),null);
   assert.equal(await page.evaluate(()=>window.campaign.storyAudio.playing),false);
+  assert.equal(await page.evaluate(()=>window.campaign.radio.queue.length),0,'Skipping radio also drops queued transmissions');
   await page.locator('#home').click();
   await page.locator('#pause').click();
   const idleShadows=await page.evaluate(()=>{
