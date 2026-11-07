@@ -6,7 +6,7 @@ import {maneuverAdmissionBlocker} from './maneuver-admission.js';
 // A turning rear corner can hit a neighbour which is behind the centre's
 // forward corridor. Probe only the current Ackermann arc up to the braking
 // distance; this is a bounded collision query, not a path/recovery search.
-export function turningHeadway(mission,unit,point,dt,scale,blockers,grade=.52){
+export function turningHeadway(mission,unit,point,dt,scale,blockers,grade=.52,actualCurve){
  const angle=Math.atan2(Math.sin(Math.atan2(unit.x-point.x,point.y-unit.y)-unit.heading),
   Math.cos(Math.atan2(unit.x-point.x,point.y-unit.y)-unit.heading));
  const dynamics=vehicleDynamics(unit),speed=(unit.reversing?0:unit.driveSpeed??0)+dynamics.acceleration*dt;
@@ -15,12 +15,13 @@ export function turningHeadway(mission,unit,point,dt,scale,blockers,grade=.52){
  // Include both full bodies, not just the centre's own half-length. During
  // opposite turns their front corners meet while the centres remain farther
  // apart than four scale units. A sharp turn also probes approaching traffic.
- const turningOutsideRoute=Math.cos(angle)<.65,radius=horizon+scale*7;
- if(!mission.nearbyUnits(unit,turningOutsideRoute?Math.max(radius,scale*24):radius).some(other=>other!==unit&&other.hp>0)
+ const curve=actualCurve??Math.tan(Math.max(-dynamics.steeringLimit,Math.min(dynamics.steeringLimit,angle*1.55)));
+ const turning=Math.abs(curve)>1e-4,radius=horizon+scale*7;
+ if(!mission.nearbyUnits(unit,turning?Math.max(radius,scale*24):radius).some(other=>other!==unit&&other.hp>0)
   &&!mission.nav.nearbySolids(unit,radius).length)return Infinity;
- const curve=Math.tan(Math.max(-dynamics.steeringLimit,Math.min(dynamics.steeringLimit,angle*1.55)));
- // The shared straight-route coordinator deliberately excludes this turn.
- // Its body arc still cannot enter a neighbour's unavoidable braking path.
+ // A straight route intent does not describe a body still following a
+ // curved approach. The selected physical arc cannot enter a neighbour's
+ // unavoidable braking path, even after the nose faces its waypoint.
  let clearDistance=0,terrainOnly=false;
  const safe=checkManeuver(unit,[{direction:1,curve,remaining:horizon}],scale,(from,to)=>{
   const hit=new Set();
@@ -32,7 +33,7 @@ export function turningHeadway(mission,unit,point,dt,scale,blockers,grade=.52){
    // arc meets terrain. A zero speed here would prevent it trying that arc.
    terrainOnly=!hit.size&&!solid;return false;
   }
-  if(turningOutsideRoute){
+  if(turning){
    const approaching=maneuverAdmissionBlocker(mission,unit,from,to,dt);
    if(approaching){blockers?.add(approaching);return false;}
   }

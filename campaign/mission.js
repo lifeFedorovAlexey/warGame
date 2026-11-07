@@ -1628,11 +1628,13 @@ export class Mission{
   const aligned=forward.x*motionCourse.x+forward.y*motionCourse.y>.72;
   // Braking for a parked van can stop us before a movement sweep ever hits it.
   const stoppedObstacles=new Set();
-  const coordinatorLimit=cruising?this.trafficCoordinator.limit(unit):Infinity;
-  // On a sharp turn, brake for the current heading and let the sweep handle
-  // the final low-speed manoeuvre. A shared yield still has priority.
+  const coordinatorLimit=this.trafficCoordinator.limit(unit);
+  const curving=Math.abs(angleDelta(Math.atan2(unit.x-waypoint.x,waypoint.y-unit.y),unit.heading))>1e-4/1.55;
+  // A curve has its own swept braking corridor below. Requiring the straight
+  // projected corridor as well can freeze two safe turning arcs forever.
+  // Shared intersection/passing priority still constrains every candidate.
   const checkingTurn=cruising&&!aligned;
-  let trafficLimit=cruising&&aligned?this.trafficSpeed(unit,motionCourse,roadLane,scale,stoppedObstacles)
+  let trafficLimit=curving?coordinatorLimit:cruising&&aligned?this.trafficSpeed(unit,motionCourse,roadLane,scale,stoppedObstacles)
    :checkingTurn?Math.min(coordinatorLimit,this.trafficSpeed(unit,forward,null,scale,stoppedObstacles)):coordinatorLimit;
   const speed=this.unitSpec(unit).speed*this.nav.roads.factor(unit.x,unit.y)*damageMobility(unit.damage);
   if(unit.navigation)unit.navigation.desiredSpeed=speed;
@@ -1641,12 +1643,17 @@ export class Mission{
    &&Math.abs(angleDelta(Math.atan2(unit.x-waypoint.x,waypoint.y-unit.y),unit.heading))>(unit.reversing?Math.PI*.47:Math.PI*.61);
   // A work approach still has the same physical body and braking distance.
   // Precision changes endpoint tolerance, not whether it brakes for a car.
-  if(!cruising&&!reverseApproach)trafficLimit=Math.min(trafficLimit,this.trafficSpeed(unit,forward,null,scale,stoppedObstacles));
-  if(!reverseApproach)trafficLimit=Math.min(trafficLimit,turningHeadway(this,unit,waypoint,dt,scale,stoppedObstacles));
+  if(!curving&&!cruising&&!reverseApproach)trafficLimit=Math.min(trafficLimit,this.trafficSpeed(unit,forward,null,scale,stoppedObstacles));
+  const steeringLimit=vehicleDynamics(unit).steeringLimit;
+  const requestedCurve=Math.tan(clamp(angleDelta(Math.atan2(unit.x-waypoint.x,waypoint.y-unit.y),unit.heading)*1.55,-steeringLimit,steeringLimit));
+  const requestedLimit=reverseApproach?Infinity:turningHeadway(this,unit,waypoint,dt,scale,stoppedObstacles,.52,requestedCurve);
+  if(!reverseApproach)trafficLimit=Math.min(trafficLimit,requestedLimit);
   let contactSpeed;
   const onBlockedContact=speed=>{contactSpeed=speed;};
   let pose=driveStep(unit,waypoint,dt,{speed,grade,scale,tolerance,trafficLimit,
-   reverseLimit,allowed,onBlockedContact});
+   reverseLimit,allowed,onBlockedContact,
+   curveLimit:reverseApproach?undefined:curve=>curve===requestedCurve?requestedLimit
+    :turningHeadway(this,unit,waypoint,dt,scale,stoppedObstacles,.52,curve)});
   if(!pose&&aligned&&cruising&&trafficLimit>speed*.25&&[...blockers].some(other=>
    other.owner===unit.owner&&Math.cos(unit.heading-other.heading)>.85)){
    const forward={x:unit.x-Math.sin(unit.heading)*scale*6,y:unit.y+Math.cos(unit.heading)*scale*6};

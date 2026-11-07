@@ -39,28 +39,50 @@ function vehiclePose(unit, pose, direction, curve, length, dt) {
   };
 }
 
-export function driveStep(unit, point, dt, {speed, grade, scale, tolerance, reverseLimit = 0, trafficLimit = Infinity, allowed, onBlockedContact}) {
+export function driveStep(unit, point, dt, {speed, grade, scale, tolerance, reverseLimit = 0, trafficLimit = Infinity, allowed, onBlockedContact, curveLimit}) {
   const dynamics=vehicleDynamics(unit),steeringLimit=dynamics.steeringLimit,maximumCurve=Math.tan(steeringLimit);
   const distance = lengthBetween(unit, point);
   const direct = wrap(headingTo(unit, point) - unit.heading);
   const reverse = distance < reverseLimit && Math.abs(direct) > (unit.reversing ? Math.PI * .47 : Math.PI * .61);
   const direction = reverse ? -1 : 1;
   const angle = wrap(direct + (reverse ? Math.PI : 0));
+  const curve = Math.tan(clamp(angle * 1.55, -steeringLimit, steeringLimit));
+  const mainLimit = direction > 0 ? curveLimit?.(curve) ?? Infinity : Infinity;
   const targetSpeed = Math.min(speed * gradeSpeed(grade) * (reverse ? .59 : 1),
     Math.sqrt(2*dynamics.braking * Math.max(.05, distance - tolerance * .6)), speed / (1 + dynamics.turnPenalty * Math.abs(angle)),
-    reverse ? Infinity : trafficLimit);
+    reverse ? Infinity : Math.min(trafficLimit,mainLimit));
   const lastSpeed = unit.reversing === reverse ? unit.driveSpeed ?? 0 : 0;
   const nextSpeed = lastSpeed + clamp(targetSpeed - lastSpeed, -dynamics.braking * dt, dynamics.acceleration * dt);
   const travel = Math.min(distance, Math.max(0, nextSpeed * dt));
   if (travel < .001) return null;
-  const curve = Math.tan(clamp(angle * 1.55, -steeringLimit, steeringLimit));
+  // A new waypoint can request a tight turn while the body is still moving
+  // too fast to enter its stopping corridor. Brake along the current arc
+  // first, preserving inertia; changing steering before slowing can make a
+  // later collision unavoidable even though every immediate sweep is clear.
+  if(direction>0&&nextSpeed>mainLimit+1e-6){
+    const previousCurve=Math.tan(unit.steering??0);
+    const brakingSpeed=Math.max(0,lastSpeed-dynamics.braking*dt);
+    if(Math.abs(previousCurve-curve)>1e-6&&brakingSpeed>0
+      &&brakingSpeed<=(curveLimit?.(previousCurve)??Infinity)+1e-6){
+      const brakingTravel=brakingSpeed*dt;
+      const brakingPose=traceArc(unit,direction,previousCurve,brakingTravel,scale,allowed);
+      if(brakingPose)return vehiclePose(unit,brakingPose,direction,previousCurve,brakingTravel,dt);
+    }
+  }
   // A gentle physical contact also triggers suspension feedback. Combat
   // damage keeps its separate, much higher kinetic-energy threshold.
   const blocked=lastSpeed>.18*scale?{}:null;
-  const pose = traceArc(unit, direction, curve, travel, scale, allowed,blocked);
+  const pose = nextSpeed<=mainLimit+1e-6?traceArc(unit, direction, curve, travel, scale, allowed,blocked):null;
   if (pose) return vehiclePose(unit, pose, direction, curve, travel, dt);
-  const fallbackTravel = travel * .70;
   for (const alternative of [maximumCurve, -maximumCurve, 0]) {
+    // A different arc has a different stopping corridor. Passing the main
+    // arc's forecast does not permit an alternative to cut across a nearby
+    // vehicle's unavoidable braking path. Check the executed fallback speed
+    // against that arc's own cap; retain the existing slow fallback handling.
+    const limit = direction > 0 ? curveLimit?.(alternative) ?? Infinity : Infinity;
+    const alternativeSpeed = lastSpeed + clamp(Math.min(targetSpeed,limit) - lastSpeed, -dynamics.braking * dt, dynamics.acceleration * dt);
+    const fallbackTravel = Math.min(distance, Math.max(0,alternativeSpeed * dt)) * .70;
+    if(fallbackTravel<.001||fallbackTravel/dt>limit+1e-6)continue;
     const next = traceArc(unit, direction, alternative, fallbackTravel, scale, allowed);
     if (next && lengthBetween(point, next) < distance - fallbackTravel * .15) {
       return vehiclePose(unit, next, direction, alternative, fallbackTravel, dt);
