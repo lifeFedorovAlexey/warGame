@@ -614,6 +614,12 @@ function updateUi() {
   const contact=visibleRaidContact(mission),threat=staticThreat(contact);
   world.storySignals.setThreat(threat);
   const sites=firstPowerSites(),marker=tacticalFocus(contact,sites,threat);
+  const powerHint = $('power-objective-hint');
+  powerHint.hidden = s.powered || s.status !== 'running' || !!(sites.plant && sites.well);
+  if (!powerHint.hidden) {
+    powerHint.textContent = sites.plant ? 'Поставьте вышку на нефти.' :
+      sites.well ? 'Постройте АЭС.' : 'Постройте АЭС и вышку.';
+  }
   const signal=world.storySignals.current;
   if(signal?.kind==='guidance'&&sites.well?.x===signal.x&&sites.well.y===signal.y)presentSignal(null);
   const focus=$('objective-focus');
@@ -715,6 +721,7 @@ function presentSignal(signal) {
   if(signal?.kind==='anomaly')sound.anomaly?.();
 }
 function focusSignal(signal) {
+  if (signal?.kind === 'guidance' && (buildOpen || buildKind || orderMode)) cancelMode();
   world.focusStorySignal(signal,mission.state.camps[3]);
 }
 function frame(now) {

@@ -191,6 +191,7 @@ button.radio-focus { color: var(--accent); }
 .top .operation-menu .mission-tasks { position: static; width: 100%; padding: 0; pointer-events: none; }
 .operation-menu #objectives li { padding-block: 1px; }
 .operation-menu #objective-count { color: #e6dca6; }
+.operation-menu #power-objective-hint { margin: 6px 0 0; color: #e6dca6; }
 .key-guide { display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; margin: 0; font-size: 11px; }
 .key-guide dt { color: #e6dca6; }
 .key-guide dd { margin: 0; }

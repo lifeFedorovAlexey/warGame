@@ -10,6 +10,7 @@ import {combatContact} from './combat-contact.js';
 
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 const routeOrderRevision=1;
+const workArrivalTolerance=.08;
 function halfFootprint(footprint,scale,rotation){
  const [w,d]=footprint.map(length=>length*scale/2);
  return Math.abs(Math.round(rotation/(Math.PI/2)))%2?[d,w]:[w,d];
@@ -292,7 +293,9 @@ export class Mission{
    const key=y*this.nav.size+x;
    if(seen.has(key)||!this.nav.allowed(x,y))return;
    seen.add(key);
-   const p=this.nav.position(x,y),parked={...p,heading:Math.atan2(unit.x-p.x,p.y-unit.y)};
+   const p=this.nav.position(x,y);
+   if(distance(unit,p)<workArrivalTolerance)return;
+   const parked={...p,heading:Math.atan2(unit.x-p.x,p.y-unit.y)};
    if(!clearOfVehicles(unit,parked,this.state.units,scale,true)||!clearOfVehicles(unit,parked,reservations,scale,true))return;
    const at={...unit,...parked};
    const aim=this.projectorAim(at,target);
@@ -989,7 +992,9 @@ export class Mission{
    stop();
    return true;
   }
-  if(atWork||d<tolerance||canRoundCorner){
+  // A position within the normal driving tolerance can still be outside the
+  // projector's reach at the top layer. Keep driving to the checked work spot.
+  if(atWork||d<(precise?workArrivalTolerance:tolerance)||canRoundCorner){
    unit.path.shift();
    if(!unit.path.length)stop();
    return true;

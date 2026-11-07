@@ -34,6 +34,13 @@ reveal(approach);
 assert.deepEqual([raidApproachSignal(scout).x,raidApproachSignal(scout).y],[approach.x,approach.y]);
 scout.state.flags.raidWon=true;
 assert.equal(raidApproachSignal(scout),null,'Clear the warning once the raid is over');
+const oilFirst=new Mission(config,field);
+oilFirst.advance(2.7);
+const oilPoint=field.gridToWorld(config.oilFields[0]);
+const oilOrder=oilFirst.build(['u4'],'derrick',oilPoint.x,oilPoint.y);
+assert(oilOrder.ok,oilOrder.reason);
+oilFirst.advance(65);
+assert(oilFirst.entity(oilOrder.id).completed,'The first builder can park within reach and finish the first derrick alone');
 const traffic=new Mission(config,field);
 const stalledPair=[
  {x:-1391.9818,y:783.6999,heading:1.33193,waypoint:{x:-1392,y:800},goal:{x:-794.54,y:1077.31}},
