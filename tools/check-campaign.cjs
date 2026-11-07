@@ -56,7 +56,7 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   assert.deepEqual(await page.locator('#minimap').boundingBox(),minimapWithRadio,'Dismissing the radio does not move the minimap');
   await page.locator('.settings > summary').click();
   assert(await page.locator('#objectives').isVisible());
-  assert.equal(await page.locator('#power-objective-hint').textContent(),'Постройте АЭС и вышку.');
+  assert.equal(await page.locator('#objective-hint').textContent(),'Постройте АЭС и вышку.');
   assert(await page.locator('#radio-toggle').isHidden());
   assert(await page.locator('#control-hints').isHidden());
   await page.locator('#controls-help').click();
@@ -101,24 +101,22 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   await page.getByRole('button',{name:/^АЭС/}).click();
   assert(await page.locator('#placement').isVisible());
   await page.getByRole('button',{name:'К нефти',exact:true}).click();
-  assert(await page.locator('#placement').isHidden(),'Oil focus clears the unplaced AЭС');
+  assert(await page.locator('#placement').isVisible(),'Oil focus preserves the placement mode');
+  assert.equal(await page.evaluate(()=>window.campaign.state.buildKind),'generator');
   const oilDuringPlacement=await page.evaluate(()=>{
    const w=window.campaign.world;
    return w.screen(w.storySignals.current,2);
   });
   await page.mouse.move(oilDuringPlacement.x,oilDuringPlacement.y);
-  assert.equal(await page.locator('#world canvas').getAttribute('title'),'Построить вышку');
+  assert.equal(await page.locator('#world canvas').getAttribute('title'),'');
   await page.keyboard.press('Home');
-  await page.locator('#build-toggle').click();
-  await page.getByRole('button',{name:/^АЭС/}).click();
   await page.locator('#suggest-site').click();
   const position=await page.evaluate(()=>{const w=window.campaign.world;return w.screen(w.controls.target,0);});
   await page.mouse.click(position.x,position.y);
   await page.waitForFunction(()=>window.campaign.mission.state.buildings.some(b=>b.owner==='rai'&&b.kind==='generator'));
-  assert.equal(await page.locator('#power-objective-hint').textContent(),'Поставьте вышку на нефти.');
+  assert.equal(await page.locator('#objective-hint').textContent(),'Поставьте вышку на нефти.');
   await page.getByRole('button',{name:'К нефти',exact:true}).click();
   assert.equal(await page.locator('.settings').getAttribute('open'),null,'Oil focus is available with the operation menu closed');
-
   const oil=await page.evaluate(()=>{
    const {world,storyAudio}=window.campaign,p=world.storySignals.current;
    return {position:world.screen(p,2),target:{x:world.controls.target.x,y:world.controls.target.y},signal:p,playing:storyAudio.playing};
@@ -130,7 +128,7 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   assert.equal(await page.locator('#world canvas').getAttribute('title'),'Построить вышку');
   await page.mouse.click(oil.position.x,oil.position.y);
   await page.waitForFunction(()=>window.campaign.mission.state.buildings.some(b=>b.owner==='rai'&&b.kind==='derrick'));
-  assert(await page.locator('#power-objective-hint').evaluate(el=>el.hidden));
+  assert.match(await page.locator('#objective-hint').textContent(),/^Достройте /);
   assert.equal(await page.locator('#objective-focus').isVisible(),false);
   assert.equal(await page.evaluate(()=>window.campaign.world.storySignals.current),null);
   assert.equal(await page.evaluate(()=>window.campaign.mission.state.energy),530);
@@ -188,6 +186,7 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
    return{power:m.state.powered,complete:b.completed,progress:m.state.buildings.filter(b=>b.owner==='rai').map(b=>b.progress)};
   });
   assert.deepEqual(base,{power:true,complete:true,progress:[1,1]});
+  assert.equal(await page.locator('#objective-hint').textContent(),'Постройте завод и НИИ.');
   await page.waitForFunction(()=>{const c=window.campaign,b=c.mission.state.buildings.find(b=>b.kind==='derrick');return !!c.world.buildingObjects.get(b.id)?.getObjectByName('oil_beam');});
   const getBeam=()=>page.evaluate(()=>{const c=window.campaign,b=c.mission.state.buildings.find(b=>b.kind==='derrick');return c.world.buildingObjects.get(b.id).getObjectByName('oil_beam').rotation.y;});
   const angles=[await getBeam()];

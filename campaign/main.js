@@ -27,6 +27,32 @@ function firstPowerSites(){
   const owned=mission.state.buildings.filter(b=>b.owner==='rai'&&b.hp>0);
   return {plant:owned.find(b=>b.kind==='generator'),well:owned.find(b=>b.kind==='derrick')};
 }
+function nextObjectiveHint(state,{plant,well},tasks){
+  if(state.status!=='running')return '';
+  if(state.flags.contact&&!state.flags.raidWon)return state.flags.raidStarted ? 'Отразите рейд на базу.' : 'Прикройте въезд к базе.';
+  if(!state.powered){
+    if(!plant&&!well)return 'Постройте АЭС и вышку.';
+    if(!well)return 'Поставьте вышку на нефти.';
+    if(!plant)return 'Постройте АЭС.';
+    if(!plant.completed&&!well.completed)return 'Достройте АЭС и вышку.';
+    return plant.completed ? 'Достройте вышку.' : 'Достройте АЭС.';
+  }
+  const owned=state.buildings.filter(b=>b.owner==='rai'&&b.hp>0);
+  const ready=kind=>owned.some(b=>b.kind===kind&&b.completed);
+  const facilities=[['factory','завод'],['lab','НИИ']];
+  const missing=facilities.filter(([kind])=>!owned.some(b=>b.kind===kind));
+  if(missing.length)return 'Постройте '+missing.map(([,name])=>name).join(' и ')+'.';
+  if(ready('factory')&&!state.statistics.produced)return 'Выпустите машину на заводе.';
+  const unfinished=facilities.filter(([kind])=>!ready(kind));
+  if(unfinished.length)return 'Достройте '+unfinished.map(([,name])=>name).join(' и ')+'.';
+  if(!ready('bunker')&&!ready('mg-tower'))return owned.some(b=>b.kind==='bunker'||b.kind==='mg-tower') ? 'Достройте укрепление.' : 'Постройте ДОТ.';
+  if(!tasks.find(task=>task.id==='research').done){
+    const hasSample=state.artifactKeys.some(key=>!state.research[key]&&!owned.some(b=>b.research?.key===key));
+    if(hasSample)return 'Изучите артефакты в НИИ.';
+    if(!owned.some(b=>b.research))return 'Ищите артефакты в лагерях.';
+  }
+  return state.camps.some(camp=>!camp.cleared) ? 'Зачистите лагеря Отбросов.' : 'Завершите исследования в НИИ.';
+}
 function tacticalFocus(contact,{well}=firstPowerSites(),threat=staticThreat(contact)){
   if(mission.state.status!=='running')return null;
   if(contact)return {x:contact.x,y:contact.y,kind:'threat',label:'К контакту',distance:420};
@@ -614,12 +640,9 @@ function updateUi() {
   const contact=visibleRaidContact(mission),threat=staticThreat(contact);
   world.storySignals.setThreat(threat);
   const sites=firstPowerSites(),marker=tacticalFocus(contact,sites,threat);
-  const powerHint = $('power-objective-hint');
-  powerHint.hidden = s.powered || s.status !== 'running' || !!(sites.plant && sites.well);
-  if (!powerHint.hidden) {
-    powerHint.textContent = sites.plant ? 'Поставьте вышку на нефти.' :
-      sites.well ? 'Постройте АЭС.' : 'Постройте АЭС и вышку.';
-  }
+  const objectiveHint = $('objective-hint'), hint = nextObjectiveHint(s,sites,tasks);
+  if(objectiveHint.textContent!==hint)objectiveHint.textContent=hint;
+  objectiveHint.hidden=!hint;
   const signal=world.storySignals.current;
   if(signal?.kind==='guidance'&&sites.well?.x===signal.x&&sites.well.y===signal.y)presentSignal(null);
   const focus=$('objective-focus');
@@ -721,8 +744,11 @@ function presentSignal(signal) {
   if(signal?.kind==='anomaly')sound.anomaly?.();
 }
 function focusSignal(signal) {
-  if (signal?.kind === 'guidance' && (buildOpen || buildKind || orderMode)) cancelMode();
   world.focusStorySignal(signal,mission.state.camps[3]);
+  if (buildKind) {
+    site = pointer = null;
+    updatePlacement();
+  }
 }
 function frame(now) {
   requestAnimationFrame(frame);
