@@ -102,7 +102,7 @@ export class CommandPlanner{
   records.push(record);
   // Keep active records plus a bounded history of reusable completed results.
   while(records.length>64){const old=records.findIndex(r=>!['queued','planning'].includes(r.status));if(old<0)break;records.splice(old,1);}
-  for(const unit of units){unit.commandRevision=revision;unit.pendingOrder={revision,type:action,target:{...record.target},queuedAt:m.state.time,status:'planning'};}
+  for(const unit of units){unit.commandRevision=revision;unit.retreatSuppressed=true;unit.pendingOrder={revision,type:action,target:{...record.target},queuedAt:m.state.time,status:'planning'};}
   return {ok:true,assigned:units.length,pending:units.length,revision};
  }
  start(record){

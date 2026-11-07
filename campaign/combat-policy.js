@@ -181,6 +181,17 @@ function* homePath(mission,unit,retreat,known){
   }
   return null;
 }
+// Searches and local movement can span frames. A newer player command must
+// invalidate them at the next yield, before they can publish an old route.
+function* currentRetreatSteps(iterator,current){
+ try{
+  while(current()){
+   const step=iterator.next();if(step.done)return step.value;
+   yield step.value;
+  }
+  return null;
+ }finally{iterator.return();}
+}
 // Uses the existing yielding path search and swept vehicle movement. A retreat
 // never jumps the vehicle to a point or disables collision checks.
 export function* updateCombatRetreat(mission, unit, spec, dt) {
@@ -192,6 +203,7 @@ export function* updateCombatRetreat(mission, unit, spec, dt) {
     clearMotion(unit);
     retreat=unit.combatRetreat={status:'planning',threat:threat?{...threat}:null,started:mission.state.time};
   }
+  const current=()=>unit.hp>0&&unit.combatRetreat===retreat&&!unit.pendingOrder;
   // Upgrade old saves whose retreat stopped at an arbitrary escape point.
   const existingBase=retreat.home?.id&&mission.entity(retreat.home.id);
   if(!retreat.home||retreat.home.id&&(!existingBase||existingBase.hp<=0||!existingBase.completed)){
@@ -207,7 +219,8 @@ export function* updateCombatRetreat(mission, unit, spec, dt) {
     if(unit.detour||unit.yieldReturn||unit.task?.yieldHome){
       // A home position can be borrowed for a real passing vehicle. Arrival
       // must not freeze the already checked parking/return manoeuvre.
-      retreat.status='yielding';yield* mission.moveSteps(unit,dt);
+      retreat.status='yielding';yield* currentRetreatSteps(mission.moveSteps(unit,dt),current);
+      if(!current())return true;
       if(unit.detour||unit.yieldReturn||unit.path.length||unit.task)return true;
     }
     if(retreat.destination&&distance(unit,retreat.destination)<2){
@@ -221,6 +234,8 @@ export function* updateCombatRetreat(mission, unit, spec, dt) {
   }
   const conditions=!unit.path.length?retreatConditions(mission,unit,retreat):null;
   if(!unit.path.length&&retreat.failedSignature!==conditions) {
+    const topology=mission.nav.topologyRevision,x=unit.x,y=unit.y,heading=unit.heading;
+    const planningCurrent=()=>current()&&mission.nav.topologyRevision===topology&&unit.x===x&&unit.y===y&&unit.heading===heading;
     const threat=retreat.threat,scale=mission.config.worldScale;
     const live=threat&&mission.entity(threat.id);
     // Only update a contact with visible information. A hidden attacker is not tracked.
@@ -234,9 +249,10 @@ export function* updateCombatRetreat(mission, unit, spec, dt) {
       if(weapon.damage)known.push({x:enemy.x,y:enemy.y,range:weapon.range??0});
     }
     const returningHome=retreat.phase==='home'&&retreat.destination;
-    const home=returningHome
-      ?yield* mission.vehiclePathSteps(unit,retreat.destination,{fallback:false,maxGoalDistance:.01})
-      :yield* homePath(mission,unit,retreat,known);
+    const home=yield* currentRetreatSteps(returningHome
+      ?mission.vehiclePathSteps(unit,retreat.destination,{fallback:false,maxGoalDistance:.01})
+      :homePath(mission,unit,retreat,known),planningCurrent);
+    if(!planningCurrent())return true;
     if(home){
       unit.path=home;unit.task={type:'move',...home.at(-1)};
       if(!returningHome)retreat.destination={...home.at(-1)};
@@ -248,9 +264,11 @@ export function* updateCombatRetreat(mission, unit, spec, dt) {
     for(const turn of threat?[0,.4,-.4,.8,-.8,1.2,-1.2]:[]) {
       if(home)break;
       yield;
+      if(!planningCurrent())return true;
       const goal={x:unit.x+Math.cos(angle+turn)*travel,y:unit.y+Math.sin(angle+turn)*travel};
       if(!mission.inBounds(goal.x,goal.y)||!mission.exploredAt(goal.x,goal.y)||!safe(goal))continue;
-      const path=yield* mission.vehiclePathSteps(unit,goal,{fallback:false,maxGoalDistance:8});
+      const path=yield* currentRetreatSteps(mission.vehiclePathSteps(unit,goal,{fallback:false,maxGoalDistance:8}),planningCurrent);
+      if(!planningCurrent())return true;
       if(!path?.length||!safe(path.at(-1)))continue;
       // Reject routes looping towards the known attacker to reach a distant endpoint.
       if(path.some(p=>distance(p,threat)<distance(unit,threat)-scale*2))continue;
@@ -262,7 +280,8 @@ export function* updateCombatRetreat(mission, unit, spec, dt) {
     if(!unit.path.length){retreat.failedSignature=conditions;retreat.status='blocked';unit.driveSpeed=0;}
     else delete retreat.failedSignature;
   }
-  if(unit.path.length||unit.detour||unit.yieldReturn)yield* mission.moveSteps(unit,dt);
+  if(unit.path.length||unit.detour||unit.yieldReturn)yield* currentRetreatSteps(mission.moveSteps(unit,dt),current);
+  if(!current())return true;
   if(retreat.destination&&!unit.path.length&&!unit.detour&&!unit.yieldReturn&&distance(unit,retreat.destination)<2){
     retreat.status=retreat.phase==='home'?'arrived':'planning';delete retreat.failedSignature;unit.task=null;unit.driveSpeed=0;
   }
