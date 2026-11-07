@@ -119,7 +119,7 @@ export class Mission{
   const contains=point=>point.x>left&&point.x<right&&point.y>bottom&&point.y<top;
   return this.state.units.filter(unit=>unit.hp>0&&(contains(unit)||contains(this.nav.position(...this.nav.grid(unit.x,unit.y)))));
  }
- vehiclePath(unit,goal,{avoidMoving=false,avoidPoint=null,fallback=true,ignoreUnits=null,...options}={}){
+ vehiclePath(unit,goal,{avoidMoving=false,avoidPoint=null,fallback=true,ignoreUnits=null,escapeSteepStart=unit.owner==='rai',...options}={}){
   const occupied=this.nav.occupied,changed=[],radius=this.config.worldScale*(avoidMoving?3.1:2.18);
   for(const other of this.state.units){
    if(other===unit||ignoreUnits?.has(other)||other.hp<=0||other.owner!==unit.owner&&!this.visibleAt(other.x,other.y))continue;
@@ -138,13 +138,12 @@ export class Mission{
    }
   }
   let path;
-  try{path=this.nav.findPath(unit,goal,options);}
+  try{path=this.nav.findPath(unit,goal,{...options,escapeSteepStart});}
   finally{for(const i of changed)occupied[i]=0;}
-  return path??(fallback&&changed.length?this.nav.findPath(unit,goal,options):null);
+  return path??(fallback&&changed.length?this.nav.findPath(unit,goal,{...options,escapeSteepStart}):null);
  }
  movePath(unit,goal,reserved=[],parkingRadius=0,roadOnly=false,parkingAllowed=()=>true){
   const spacing=this.config.worldScale*4.55;
-  const escapeSteepStart=unit.owner==='rai'&&unit.path?.length===0;
   const occupied=point=>reserved.some(other=>distance(point,other)<spacing)
    ||this.state.units.some(other=>other!==unit&&other.hp>0&&!other.path.length
     &&(other.owner===unit.owner||this.visibleAt(other.x,other.y))&&distance(point,other)<spacing);
@@ -159,7 +158,7 @@ export class Mission{
   }
   for(const candidate of candidates){
    if(!parkingAllowed(candidate)||occupied(candidate)||roadOnly&&this.nav.roads.coverage(candidate.x,candidate.y)<.58)continue;
-   const path=this.vehiclePath(unit,candidate,{maxGoalDistance:16,escapeSteepStart});
+   const path=this.vehiclePath(unit,candidate,{maxGoalDistance:16});
    const end=path?.at(-1);
    if(end&&parkingAllowed(end)&&!occupied(end)&&(!roadOnly||this.nav.roads.coverage(end.x,end.y)>=.58))return path;
   }
@@ -1025,11 +1024,14 @@ export class Mission{
     ||travel&&unit.owner==='rai'&&this.recoverTrafficCluster(unit,true,slopeBlockers))return !!pose;
   }
   if(!blockers.size&&watch.attempts>=2){
-   if(resuming&&travel&&next&&watch.attempts%4===2){
+   const [col,row]=this.nav.grid(unit.x,unit.y),steepStart=!this.nav.walkable[row*this.nav.size+col];
+   if((resuming&&travel&&next||steepStart&&!precise&&unit.owner==='rai')&&watch.attempts%4===2){
     // The cheapest grid waypoint can be behind a vehicle facing up a slope.
     // Find a reachable start pose and validate the turn onto its new route.
-    for(const remaining of [scale*7,scale*5,scale*3]){
-     const first={direction:1,curve:0,remaining};
+    const lengths=[scale*7,scale*5,scale*3];
+    if(steepStart&&reverseBudget>=scale)lengths.unshift(-Math.min(reverseBudget,scale*2));
+    for(const length of lengths){
+     const first={direction:Math.sign(length),curve:0,remaining:Math.abs(length)};
      const exit=checkManeuver(unit,[first],scale,roughAllowed);
      if(!exit)continue;
      const path=this.vehiclePath(exit,destination,{ignoreUnits:new Set([unit]),avoidMoving:true,fallback:false,maxGoalDistance:8});

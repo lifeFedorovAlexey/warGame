@@ -47,7 +47,9 @@ export function missionSignal(chapter, mission) {
     return waterTowerSignal(mission);
   }
   if (chapter === 'last-camp') {
-    return mark(state.camps[3].gate, 'К въезду', 'intel', 530);
+    const approach = config.camps[3].approachGrid;
+    return approach ? mark(field.gridToWorld(approach), 'К подходу', 'intel', 530) :
+      mark(state.camps[3].gate, 'К въезду', 'intel', 530);
   }
   if (chapter === 'outro') {
     const [x] = config.startGrid;

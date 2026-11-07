@@ -18,7 +18,7 @@
     {"id": "nw-pocket", "name": "Первый лагерь", "grid": [31.5, 42.7], "gateGrid": [35.5, 42.5], "artifact": "flamethrower", "chapter": "first-artifact", "units": 3, "strength": 1},
     {"id": "nw-west", "name": "Склад", "grid": [15.9, 30.5], "gateGrid": [18.5, 33.5], "artifact": "mg-ammo-1", "chapter": "second-artifact", "units": 4, "strength": 1.2},
     {"id": "nw-east", "name": "Водонапорная башня", "grid": [39.6, 25.9], "gateGrid": [38.5, 29.5], "towerGrids": [[38.1, 26.8375]], "artifact": "mg-tower", "chapter": "third-artifact", "units": 4, "strength": 1.4},
-    {"id": "west-south", "name": "Штаб Петровича", "grid": [13.5, 71.75], "gateGrid": [14.5, 67.5], "coreRotationDegrees": 180, "towerGrids": [[9.625, 71.625], [15.25, 70.8125]], "requiresCamps": 3, "chapter": "last-camp", "units": 6, "strength": 1.7}
+    {"id": "west-south", "name": "Штаб Петровича", "grid": [13.5, 71.75], "gateGrid": [14.5, 67.5], "approachGrid": [14.28125, 62.84375], "coreRotationDegrees": 180, "towerGrids": [[9.625, 71.625], [15.25, 70.8125]], "requiresCamps": 3, "chapter": "last-camp", "units": 6, "strength": 1.7}
   ],
   "units": {
     "bukhanka": {"name": "Пулемёт", "components": ["C01", "B01", "U01"], "cost": 130, "seconds": 18, "hp": 320, "speed": 30, "range": 145, "damage": 9, "cooldown": 0.55, "vision": 210, "role": "combat"},

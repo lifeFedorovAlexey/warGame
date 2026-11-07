@@ -53,6 +53,19 @@ for(const [index,van] of vans.entries()){
  assert(firstMotion[index]!==null&&firstMotion[index]<=7,`Van ${van.id} waited ${firstMotion[index]} seconds before moving`);
  assert(Math.hypot(van.x-origin.x,van.y-origin.y)>12,`Van ${van.id} must leave the mutual deadlock`);
 }
+const slopeStart={x:-815.9248,y:453.4290,heading:-.81455};
+const firstPoint={x:-832,y:448};
+const climbingVan=traffic.addUnit('bukhanka','rai',slopeStart,{
+ heading:slopeStart.heading,path:[firstPoint],task:{type:'move',...firstPoint},
+});
+assert(!traffic.nav.allowed(...traffic.nav.grid(slopeStart.x,slopeStart.y)));
+const newGoal=traffic.state.camps[3].gate;
+traffic.state.bounds=config.finalMapBounds.slice();
+traffic.rebuildNavigation();
+assert(traffic.order([climbingVan.id],'move',newGoal).ok,'A van on a steep cell accepts a replacement order');
+for(let step=0;step<120;step++)traffic.advance(.1);
+assert(Math.hypot(climbingVan.x-slopeStart.x,climbingVan.y-slopeStart.y)>60
+ &&traffic.nav.allowed(...traffic.nav.grid(climbingVan.x,climbingVan.y)),'The van must drive off the slope onto its new route');
 function dismiss(){for(const key of [...mission.state.pendingCinematics]){seen.push({key,time:mission.state.time});mission.finishCinematic(key);}}
 const mechanics={workSteps:0,constructionGated:true,repairGated:true,interruptProjection:false,movingRepair:false,builderHandoff:false};
 function step(){
@@ -191,10 +204,31 @@ if(process.argv.includes('--full')){
  until(()=>mission.state.flags.raidWon,300,'Repel first raid');
  for(const camp of mission.state.camps){
   const ids=()=>army().map(u=>u.id);let iterations=0;
-  if(camp.index===3)for(const unit of army().filter(u=>u.hp<u.maxHp)){mission.stop([unit.id]);reportOrder(mission.order(builders(),'repair',unit),'Field repair');until(()=>unit.hp===unit.maxHp,250,'Repair '+unit.id);}
+  const rally=camp.index===3?field.gridToWorld(config.camps[3].approachGrid):null;
+  if(camp.index===3){
+   const mustered=()=>army().filter(u=>Math.hypot(u.x-rally.x,u.y-rally.y)<100);
+   assert(mission.setRally(factory.id,rally).ok);
+   reportOrder(mission.order(ids(),'move',rally),'Muster outside tower range');
+   const reinforcements=Math.max(0,12-army().length);
+   for(let i=0;i<reinforcements;i++){
+    until(()=>mission.canSpend(config.units.bukhanka.cost),100,'Reinforcement resources');
+    assert(mission.produce(factory.id,'bukhanka').ok);
+   }
+   until(()=>mustered().length>=8,360,'Gather eight vans on the western approach');
+   const damaged=mustered().find(u=>u.hp<u.maxHp);
+   if(damaged){
+    mission.stop([damaged.id]);
+    reportOrder(mission.order(builders(),'repair',damaged),'Repair at the rally point');
+    until(()=>damaged.hp===damaged.maxHp,250,'Repair '+damaged.id);
+   }
+  }
   while(!camp.cleared&&iterations++<160){
    const visible=[...mission.state.units,...mission.state.buildings].filter(e=>e.hp>0&&e.campId===camp.id&&mission.visibleAt(e.x,e.y)),centre=army().reduce((p,u)=>({x:p.x+u.x/army().length,y:p.y+u.y/army().length}),{x:0,y:0});visible.sort((a,b)=>Math.hypot(a.x-centre.x,a.y-centre.y)-Math.hypot(b.x-centre.x,b.y-centre.y));
-   if(visible[0])reportOrder(mission.order(ids(),'attack',visible[0]),camp.id);else reportOrder(mission.order(ids(),'move',camp.gate),camp.id);
+   const tower=camp.index===3&&visible.filter(e=>e.kind==='mg-tower')
+    .sort((a,b)=>Math.hypot(a.x-rally.x,a.y-rally.y)-Math.hypot(b.x-rally.x,b.y-rally.y))[0];
+   const target=tower??visible[0];
+   if(target)reportOrder(mission.order(ids(),'attack',target),camp.id);
+   else reportOrder(mission.order(ids(),camp.index===3?'attack-move':'move',camp.gate),camp.id);
    for(let i=0;i<50;i++)step();if(!army().length)throw new Error('Combat force lost at '+camp.id);
   }
   if(!camp.cleared)fs.writeFileSync('campaign/reports/mission-failure.json',mission.save());assert(camp.cleared,'Camp did not clear: '+camp.id);console.log('cleared',camp.id,mission.state.time.toFixed(1),'survivors',army().length);
