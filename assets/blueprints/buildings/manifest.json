@@ -8,8 +8,8 @@
       "id": "generator",
       "path": "generator/prototype.glb",
       "spec": "generator/module.json",
-      "triangles": 7080,
-      "bytes": 307112
+      "triangles": 7560,
+      "bytes": 345284
     },
     {
       "id": "derrick",

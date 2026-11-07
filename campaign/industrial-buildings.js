@@ -180,21 +180,44 @@ export function buildIndustrialStructure(T, kind, size, kit) {
   }
 
   const {hall,towers}=generatorLayout(size);
-  const {x,y,width,depth,bottom,top}=hall,fy=-depth/2+y;
+  const {x,y,width,depth,bottom,top}=hall,fy=y-depth/2,by=y+depth/2;
   box([width,depth,top-bottom],[x,y,(top+bottom)/2],concrete);
   box([width+.15,depth+.15,.17],[x,y,top+.055],roof);
+  for(const side of [-1,1]){
+    const sx=x+side*width/2, edgeY=y+side*depth/2;
+    box([width+.18,.18,.20],[x,edgeY,top+.16],trim);
+    box([.18,depth-.18,.20],[sx,y,top+.16],trim);
+    for(const end of [fy,by])box([.26,.30,top-bottom],[sx,end,(top+bottom)/2],trim);
+  }
   box([width,.10,.49],[x,fy-.045,1.81],stripe);
   windows(x,fy-.08,2.44,width*.87,6,.45);
-  sideWindows(x-width/2-.055,.68,2.38,depth*.82,5,-1,.42);
+  for(const side of [-1,1]){
+    const sx=x+side*(width/2+.055);
+    sideWindows(sx,y,2.38,depth*.76,5,side,.42);
+    box([.10,depth*.89,.28],[sx,y,1.84],stripe);
+  }
   for(const dx of [-1.20,.88]){
     for(const y of [-.74,1.84])vent(x+dx,y,top+.16,.82);
     box([.89,.12,1.12],[x+dx,fy-.06,.93],steel);
-    box([1.05,.10,.13],[x+dx,fy-.10,1.57],trim);
+    box([1.05,.30,.13],[x+dx,fy-.16,1.57],trim);
   }
-  for(const y of [fy+.17,fy+depth-.17])box([.28,.33,top-.35],[x-width/2,y,(top+.35)/2],trim);
-  for(const {x:sx,y:sy,lift,rings} of towers){
-    const g=new T.LatheGeometry(rings.map(([radius,z])=>new T.Vector2(radius,z)),24);
-    g.rotateX(Math.PI/2);mesh(g,concrete,[sx,sy,0]);
+  // Rear service entrance and louvres stay readable when the camera orbits the plant.
+  windows(x,by+.065,2.44,width*.86,6,.45,1);
+  box([width,.10,.33],[x,by+.045,1.83],stripe);
+  box([1.62,.20,1.41],[x,by+.09,1.11],trim);
+  box([1.37,.11,1.22],[x,by+.19,1.10],dark);
+  for(const dx of [-.32,.32])box([.58,.055,1.14],[x+dx,by+.25,1.10],steel);
+  box([1.69,.35,.13],[x,by+.20,1.83],trim);
+  box([1.84,.58,.16],[x,by+.29,bottom+.08],trim);
+  for(const dx of [-1.63,1.63]){
+    box([.89,.13,.76],[x+dx,by+.074,1.16],dark);
+    for(let i=0;i<5;i++)box([.80,.105,.049],[x+dx,by+.16,.88+i*.135],pipe,[.34,0,0]);
+  }
+  for(const {x:sx,y:sy,lift,outer,rings} of towers){
+    for(const [profile,material] of [[rings.slice(0,outer.length+1),concrete],[rings.slice(outer.length),roof]]){
+      const shell=new T.LatheGeometry(profile.map(([radius,z])=>new T.Vector2(radius,z)),24);
+      shell.rotateX(Math.PI/2);mesh(shell,material,[sx,sy,0]);
+    }
     const band=new T.LatheGeometry([new T.Vector2(1.048,.96+3.30*lift),new T.Vector2(1.109,.96+3.59*lift)],24);
     band.rotateX(Math.PI/2);mesh(band,stripe,[sx,sy,0]);
     cylinder(1.43,.10,[sx,sy,1.01],dark);
