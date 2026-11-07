@@ -31,10 +31,16 @@ for (const range of [35, 90, 170]) {
     const ray = new T.Raycaster(position(receiver), trajectory, 0, target.distanceTo(position(receiver)));
     assert.equal(ray.intersectObjects(tank).length, 0, 'The gun must clear its own tank');
 
+    for (const age of [.12, .24]) {
+      aimTowerWeapon(model, building, field, scale, target, age);
+      assert(position(muzzle).distanceTo(shot) < 1e-6, 'Every round starts with a fresh recoil');
+    }
     aimTowerWeapon(model, building, field, scale, target, .22);
     const recoil = position(muzzle).sub(shot);
     assert(Math.abs(recoil.length() - .12 * scale) < 1e-6, 'The muzzle must move with recoil and return to rest');
     assert(recoil.normalize().dot(trajectory) > 1 - 1e-9, 'Recoil travels along the barrel');
+    aimTowerWeapon(model, building, field, scale, target, .34);
+    assert(Math.abs(position(muzzle).distanceTo(shot) - .12 * scale) < 1e-6, 'The gun settles after the burst');
   }
 }
 console.log('Water tower gun: 24 clear firing angles, muzzle alignment and recoil');

@@ -2,6 +2,7 @@ import {GLTFLoader} from '../demo/vendor/loaders/GLTFLoader.js';
 import {createConstructionProjector} from './construction-projector.js';
 import {vehiclePose,worldToVehicle} from './builder-kinematics.js';
 import {buildKord} from '../demo/kord.js';
+import {mgRecoil} from './mg-burst.js';
 import {vehicleKit,batchRigidMeshes,createFieldVehicle} from './field-vehicles.js';
 
 // One instance stream per GLB primitive. More units do not add draw calls.
@@ -141,7 +142,7 @@ export async function createVehicleLayer(T,scene,field,config) {
    const aim=aimPoint?worldToVehicle([aimPoint.x,aimPoint.y,aimPoint.z??field.heightAt(aimPoint.x,aimPoint.y)+1.5*scale],pose):null;
    const yawTo=(px,py)=>aim?Math.atan2(px-aim[0],aim[1]-py):0;
    const pitchTo=(px,py,pz,low,high)=>aim?T.MathUtils.clamp(Math.atan2(aim[2]-pz,Math.hypot(aim[0]-px,aim[1]-py)),low,high):0;
-   const age=now-(shotTimes.get(unit.id)??-Infinity),recoil=age<.065 ? -.025*Math.sin(age/.065*Math.PI) : 0;
+   const age=now-(shotTimes.get(unit.id)??-Infinity),recoil=-.105*mgRecoil(age);
    color.set('#ffffff');
    if(unit.kind==='builder'){
     builder.aim(unit.projector?.yaw??0,unit.projector?.pitch??0,false);

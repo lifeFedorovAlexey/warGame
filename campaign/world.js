@@ -6,6 +6,7 @@ import {createVehicleLayer} from './vehicle-layer.js';
 import {createBuildingPrefab} from './prefabs.js';
 import {createScavPrefab} from './scav-prefabs.js';
 import {aimTowerWeapon} from './tower-weapon.js';
+import {mgRecoil} from './mg-burst.js';
 import {createShadowCasters} from './shadow-casters.js';
 import {createGroundEffects} from './ground-effects.js';
 import {updateOilPump} from './oil-pump.js';
@@ -235,7 +236,8 @@ export async function createCampaignWorld(host,config,sound){
    const transform=vehicles.transforms.get(unit.id);
    if(!transform)continue;
    const {position,heading}=transform,aim=unit.aimTarget;
-   const recoil=now-(shotTimes.get(unit.id)??-Infinity)<.065?now:0;
+   const shotAge=now-(shotTimes.get(unit.id)??-Infinity);
+   const recoil=unit.kind==='bukhanka'||unit.kind==='raider'?mgRecoil(shotAge):shotAge<.065?now:0;
    shadowCasters.watch(unit.id,unit.kind,unit.damage?.wreck,position.x,position.y,position.z,heading,
     blend(unit.previousSteering,unit.steering),blend(unit.previousWheelDistance,unit.wheelDistance),
     unit.projector?.yaw,unit.projector?.pitch,aim?.x,aim?.y,aim?.z,recoil);
@@ -259,7 +261,7 @@ export async function createCampaignWorld(host,config,sound){
     const phase=(b.pumpTime??0)+(b.powered&&mission.state.status==='running'?Math.max(0,mission.accumulator):0);
     if(object.userData.pumpPhase!==phase){updateOilPump(object,phase);object.userData.pumpPhase=phase;}
    }
-   const aim=b.aimTarget,recoil=now-(shotTimes.get(b.id)??-Infinity)<.22?now:0;
+   const aim=b.aimTarget,recoil=mgRecoil(now-(shotTimes.get(b.id)??-Infinity));
    shadowCasters.watch(b.id,b.kind,b.owner,b.campId,b.x,b.y,object.position.z,b.rotation,b.progress,b.completed,b.clearing,
     object.userData.pumpPhase,aim?.x,aim?.y,aim?.z,recoil);
   }
@@ -278,11 +280,16 @@ export async function createCampaignWorld(host,config,sound){
    combat.spawn(start,end,event.weapon,now,camera,event);
    if(aimed&&from.aimTarget!==event.to)aimTowerWeapon(building,from,field,config.worldScale);
   }
-  combat.update(now,camera,renderer.domElement.height,shot=>{
+  combat.update(now,camera,renderer.domElement.height,(shot,start=shot.start)=>{
    const target=mission.entity(shot.targetId);
    if(!target||target.owner!=='rai'&&!mission.visibleAt(target.x,target.y))return null;
-   const p=combatContact(shot.start,target,config,field);
+   const p=combatContact(start,target,config,field);
    return new T.Vector3(p.x,p.y,p.z);
+  },id=>{
+   if(visibleIds.has(id))return vehicles.muzzles.get(id);
+   const attacker=mission.state.buildings.find(building=>building.id===id&&building.hp>0);
+   if(!attacker||attacker.owner!=='rai'&&!mission.visibleAt(attacker.x,attacker.y))return null;
+   return buildings.get(id)?.getObjectByName('muzzle')?.getWorldPosition(new T.Vector3());
   });
   for(const oil of oilMarkers)oil.root.visible=mission.exploredAt(oil.x,oil.y)&&!mission.state.buildings.some(b=>b.kind==='derrick'&&b.hp>0&&Math.hypot(b.x-oil.x,b.y-oil.y)<5);
   const knownArtifacts=mission.state.artifacts.filter(a=>!a.collected&&mission.exploredAt(a.x,a.y));
