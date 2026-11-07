@@ -1,6 +1,6 @@
 import {GLTFLoader} from '../demo/vendor/loaders/GLTFLoader.js';
 import {createConstructionProjector} from './construction-projector.js';
-import {vehiclePose} from './builder-kinematics.js';
+import {vehiclePose,worldToVehicle} from './builder-kinematics.js';
 import {buildKord} from '../demo/kord.js';
 import {vehicleKit,batchRigidMeshes,createFieldVehicle} from './field-vehicles.js';
 
@@ -8,8 +8,10 @@ import {vehicleKit,batchRigidMeshes,createFieldVehicle} from './field-vehicles.j
 class PoseBatch{
  constructor(T,parent,prototype,capacity){this.T=T;this.prototype=prototype;this.parts=[];prototype.updateMatrixWorld(true);prototype.traverse(node=>{
   if(!node.isMesh)return;let geometry=node.geometry,material=node.material,emission=null,signal=null;
-  if(['projector_optics','projector_emitter_core'].includes(material.name)){
-   geometry=geometry.clone();material=material.clone();signal='projector';material.emissiveIntensity=material.name==='projector_optics'?2.6:4.3;emission=new T.InstancedBufferAttribute(new Float32Array(capacity),1);geometry.setAttribute('instanceEmission',emission);
+  if(['projector_optics','projector_emitter_core','flamer_igniter'].includes(material.name)){
+   geometry=geometry.clone();material=material.clone();signal=material.name==='flamer_igniter'?'ignition':'projector';
+   material.emissiveIntensity=signal==='ignition'?3.2:material.name==='projector_optics'?2.6:4.3;
+   emission=new T.InstancedBufferAttribute(new Float32Array(capacity),1);geometry.setAttribute('instanceEmission',emission);
    material.onBeforeCompile=shader=>{shader.vertexShader='attribute float instanceEmission;varying float vInstanceEmission;\n'+shader.vertexShader;shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvInstanceEmission=instanceEmission;');shader.fragmentShader='varying float vInstanceEmission;\n'+shader.fragmentShader;shader.fragmentShader=shader.fragmentShader.replace('#include <emissivemap_fragment>','#include <emissivemap_fragment>\ntotalEmissiveRadiance*=vInstanceEmission;');};material.customProgramCacheKey=()=> 'builder_instance_emission_v1';
   }
   const mesh=new T.InstancedMesh(geometry,material,capacity);mesh.instanceMatrix.setUsage(T.DynamicDrawUsage);mesh.frustumCulled=false;mesh.castShadow=mesh.receiveShadow=true;mesh.count=0;parent.add(mesh);this.parts.push({node,mesh,emission,signal});
@@ -25,7 +27,10 @@ export async function createVehicleLayer(T,scene,field,config) {
  root.name='modular_vehicle_instances';
  scene.add(root);
  const scale=config.worldScale,loader=new GLTFLoader(),capacity=80;
- const loaded=await Promise.all([0,1,2].map(lod=>Promise.all(['C01','B01'].map(id=>loader.loadAsync('../assets/vehicles/'+id+'/'+id+'-lod'+lod+'.glb')))));
+ const [loaded,flamerAsset]=await Promise.all([
+  Promise.all([0,1,2].map(lod=>Promise.all(['C01','B01'].map(id=>loader.loadAsync('../assets/vehicles/'+id+'/'+id+'-lod'+lod+'.glb'))))),
+  loader.loadAsync('../assets/vehicles/'+config.units.flamer.model),
+ ]);
  const lods=loaded.map(assets=>assets.map((asset,index)=>{
   const proto=asset.scene, id=index?'B01':'C01';
   proto.rotation.x=Math.PI/2;
@@ -59,21 +64,11 @@ export async function createVehicleLayer(T,scene,field,config) {
  const kord=buildKord(T,gun,palette,kit);
  batchRigidMeshes(T,gun);
  const gunBatch=new PoseBatch(T,root,gun,capacity);
- const flame=new T.Group();
- flame.name='U04_field_flamer';
- flame.position.set(0,-.65,2.7);
- kit.cylinder(flame,.45,.08,[0,0,.04],palette.olive);
- const flameYaw=kit.group(flame,[0,0,.08],'flame_yaw');
- const tanks=new T.MeshStandardMaterial({color:'#8a6743',metalness:.52,roughness:.65});
- for(const x of [-.21,.21]){
-  kit.cylinder(flameYaw,.155,.66,[x,-.24,.23],tanks,'Y');
-  kit.cylinder(flameYaw,.16,.04,[x,-.49,.23],palette.dark,'Y');
- }
- kit.box(flameYaw,[.34,.51,.23],[0,.12,.29],palette.olive);
- kit.cylinder(flameYaw,.075,.65,[0,.62,.30],palette.dark,'Y');
- kit.cylinder(flameYaw,.113,.15,[0,.92,.30],palette.steel,'Y');
- const flameMuzzle=kit.group(flameYaw,[0,.995,.30],'fx_muzzle');
- batchRigidMeshes(T,flame);
+ const flame=flamerAsset.scene;
+ const mount=lods[0][1].batch.prototype.getObjectByName('upper_mount');
+ mount.getWorldPosition(flame.position);
+ const flameYaw=flame.getObjectByName('turret_yaw'),flamePitch=flame.getObjectByName('equipment_pitch'),flameMuzzle=flame.getObjectByName('fx_muzzle');
+ flame.traverse(node=>{if(node.isMesh&&node.material.name==='flamer_igniter')node.material.emissiveIntensity=0;});
  const flameBatch=new PoseBatch(T,root,flame,capacity);
 
  const command=createFieldVehicle(T,'command',kit,palette);
@@ -142,8 +137,10 @@ export async function createVehicleLayer(T,scene,field,config) {
      entry.batch.add(matrix,color);
     }
    }
-   let aim=0;
-   if(unit.aimTarget)aim=turnDelta(Math.atan2(x-unit.aimTarget.x,unit.aimTarget.y-y),heading);
+   const aimPoint=unit.aimTarget;
+   const aim=aimPoint?worldToVehicle([aimPoint.x,aimPoint.y,aimPoint.z??field.heightAt(aimPoint.x,aimPoint.y)+1.5*scale],pose):null;
+   const yawTo=(px,py)=>aim?Math.atan2(px-aim[0],aim[1]-py):0;
+   const pitchTo=(px,py,pz,low,high)=>aim?T.MathUtils.clamp(Math.atan2(aim[2]-pz,Math.hypot(aim[0]-px,aim[1]-py)),low,high):0;
    const age=now-(shotTimes.get(unit.id)??-Infinity),recoil=age<.065 ? -.025*Math.sin(age/.065*Math.PI) : 0;
    color.set('#ffffff');
    if(unit.kind==='builder'){
@@ -153,19 +150,17 @@ export async function createVehicleLayer(T,scene,field,config) {
    }else if(unit.kind==='command'){
     commandBatch.add(matrix,color);
    }else if(unit.kind==='raider'){
-    raiderYaw.rotation.z=aim;raiderRecoil.position.y=recoil;
+    raiderYaw.rotation.z=yawTo(0,-1.19);raiderRecoil.position.y=recoil;
     raiderBatch.add(matrix,color);
     muzzles.set(unit.id,raiderMuzzle.getWorldPosition(new T.Vector3()).applyMatrix4(matrix));
    }else if(unit.kind==='flamer'){
-    flameYaw.rotation.z=aim;flameBatch.add(matrix,color);
+    flameYaw.rotation.z=yawTo(flame.position.x,flame.position.y);
+    flamePitch.rotation.x=pitchTo(flame.position.x,flame.position.y,flame.position.z+.422,-.22,.56);
+    flameBatch.add(matrix,color,{ignition:age<.46?.72+.18*Math.sin(age*51):0});
     muzzles.set(unit.id,flameMuzzle.getWorldPosition(new T.Vector3()).applyMatrix4(matrix));
    }else{
-    kord.yaw.rotation.z=aim;kord.recoil.position.y=recoil;
-    if(unit.aimTarget){
-     const dx=unit.aimTarget.x-x,dy=unit.aimTarget.y-y;
-     const dz=field.heightAt(unit.aimTarget.x,unit.aimTarget.y)+1.5*scale-dummy.position.z-3.28*scale;
-     kord.pitch.rotation.x=T.MathUtils.clamp(Math.atan2(dz,Math.hypot(dx,dy))-dummy.rotation.x*Math.cos(aim),-.32,.48);
-    }else kord.pitch.rotation.x=0;
+    kord.yaw.rotation.z=yawTo(0,-.65);kord.recoil.position.y=recoil;
+    kord.pitch.rotation.x=pitchTo(0,-.65,3.28,-.32,.48);
     gunBatch.add(matrix,color);
     muzzles.set(unit.id,kord.muzzle.getWorldPosition(new T.Vector3()).applyMatrix4(matrix));
    }

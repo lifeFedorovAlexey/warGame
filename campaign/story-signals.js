@@ -42,7 +42,7 @@ export function createStorySignals(T, scene, field) {
   ring.name='field_signal_ring';column.name='southern_energy_trace';
   ring.visible=column.visible=false;
   scene.add(ring,column);
-  const spill={value:new T.Vector3()};
+  const spill={value:new T.Vector3()},observer={value:new T.Vector2()};
   let current=null,born=0;
 
   function show(signal, now=performance.now()/1000) {
@@ -74,6 +74,7 @@ export function createStorySignals(T, scene, field) {
     if(!current)return;
     if(current.kind==='anomaly'){
       column.visible=true;
+      observer.value.set(camera.position.x,camera.position.y);
       column.rotation.z=Math.atan2(camera.position.y-current.y,camera.position.x-current.x)+Math.PI/2;
       const burst=Math.exp(-Math.pow((age-.44)/.53,2));
       const fade=Math.max(0,1-age/duration);
@@ -94,5 +95,5 @@ export function createStorySignals(T, scene, field) {
     ctx.restore();
   }
 
-  return {show,update,drawMap,spill,get current(){return current;}};
+  return {show,update,drawMap,spill,observer,get current(){return current;}};
 }

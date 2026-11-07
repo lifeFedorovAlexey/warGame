@@ -78,6 +78,9 @@
       </div>
       <div id="actions" class="panel" hidden></div>
       <div id="queue" hidden></div>
+      <div id="order-feedback" hidden>
+        <span aria-live="polite"></span><button id="select-blocked" class="quiet" hidden>Выбрать</button>
+      </div>
       <div class="tactical-dock">
         <div class="squad">
           <div class="selection-title"><strong id="selection">Техника</strong><small id="details"></small></div>
@@ -86,7 +89,7 @@
         <div class="order-bar" aria-label="Действия">
           <button id="build-toggle" title="Строительство · B" aria-expanded="false"><svg aria-hidden="true"><use href="hud-icons.svg#build"/></svg><span>Строить</span><kbd>B</kbd></button>
           <button id="move-order" title="Движение · M"><svg aria-hidden="true"><use href="hud-icons.svg#move"/></svg><span>Маршрут</span><kbd>M</kbd></button>
-          <button id="attack-order" title="Атака · T"><svg aria-hidden="true"><use href="hud-icons.svg#attack"/></svg><span>Атака</span><kbd>T</kbd></button>
+          <button id="attack-order" title="Атака по цели или с продвижением · T"><svg aria-hidden="true"><use href="hud-icons.svg#attack"/></svg><span>Атака</span><kbd>T</kbd></button>
           <button id="stop"><svg aria-hidden="true"><use href="hud-icons.svg#stop"/></svg><span>Стоп</span></button>
         </div>
       </div>

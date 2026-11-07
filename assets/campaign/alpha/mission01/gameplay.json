@@ -23,7 +23,7 @@
     "bukhanka": {"name": "Буханка · пулемёт", "components": ["C01", "B01", "U01"], "cost": 130, "seconds": 18, "hp": 320, "speed": 30, "range": 145, "damage": 9, "cooldown": 0.55, "vision": 210, "role": "combat"},
     "builder": {"name": "Строитель", "components": ["C01", "B01", "U25"], "cost": 160, "seconds": 22, "hp": 280, "speed": 24, "range": 0, "damage": 0, "cooldown": 1, "vision": 180, "role": "builder"},
     "command": {"name": "Командирский УАЗ", "components": ["C01", "B01", "U21"], "cost": 0, "seconds": 0, "hp": 420, "speed": 34, "range": 0, "damage": 0, "cooldown": 1, "vision": 280, "role": "command"},
-    "flamer": {"name": "Буханка · огнемёт", "components": ["C01", "B01", "mission-flamer"], "artStatus": "temporary gameplay representation", "requires": "flamethrower", "cost": 180, "seconds": 24, "hp": 350, "speed": 27, "range": 80, "damage": 24, "cooldown": 0.65, "vision": 190, "role": "combat"},
+    "flamer": {"name": "Буханка · огнемёт", "components": ["C01", "B01", "mission-flamer"], "model": "field-flamer/field-flamer.glb", "requires": "flamethrower", "cost": 180, "seconds": 24, "hp": 350, "speed": 27, "range": 80, "damage": 24, "cooldown": 0.65, "vision": 190, "role": "combat"},
     "raider": {"name": "Машина отбросов", "cost": 0, "seconds": 0, "hp": 170, "speed": 23, "range": 115, "damage": 6, "cooldown": 0.8, "vision": 180, "role": "combat"}
   },
   "buildings": {

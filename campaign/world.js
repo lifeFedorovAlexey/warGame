@@ -13,6 +13,9 @@ import {createConstructionEffects} from './construction-effects.js';
 import {createFogMask} from './fog-mask.js';
 import {createStorySignals} from './story-signals.js';
 import {createFieldArtifact} from './field-artifacts.js';
+import {combatContact} from './combat-contact.js';
+import {vehicleLocalBoxes} from './vehicle-collision.js';
+import {buildLayerHeight} from './builder-optics.js';
 
 export async function createCampaignWorld(host,config,sound){
  const renderer=new T.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
@@ -27,18 +30,20 @@ export async function createCampaignWorld(host,config,sound){
  controls.addEventListener('start',()=>{controls.maxPolarAngle=normalCameraLimit;});
  const fog=createFogMask(T);
  const storySignals=createStorySignals(T,scene,field);
- const foggedMaterials=new Set();function addFog(material){if(!material||foggedMaterials.has(material))return;foggedMaterials.add(material);const before=material.onBeforeCompile,cache=material.customProgramCacheKey.bind(material);material.onBeforeCompile=shader=>{before.call(material,shader);shader.uniforms.missionFog={value:fog.texture};shader.uniforms.missionExtent={value:field.extent};shader.uniforms.storySpill=storySignals.spill;shader.vertexShader='varying vec2 vMissionXY;\n'+shader.vertexShader;shader.vertexShader=shader.vertexShader.replace('#include <worldpos_vertex>','#include <worldpos_vertex>\nvMissionXY=(modelMatrix*vec4(transformed,1.)).xy;');shader.fragmentShader='uniform sampler2D missionFog;uniform float missionExtent;uniform vec3 storySpill;varying vec2 vMissionXY;\n'+shader.fragmentShader;shader.fragmentShader=shader.fragmentShader.replace('#include <dithering_fragment>',`#include <dithering_fragment>
+ const foggedMaterials=new Set();function addFog(material){if(!material||foggedMaterials.has(material))return;foggedMaterials.add(material);const before=material.onBeforeCompile,cache=material.customProgramCacheKey.bind(material);material.onBeforeCompile=shader=>{before.call(material,shader);shader.uniforms.missionFog={value:fog.texture};shader.uniforms.missionExtent={value:field.extent};shader.uniforms.storySpill=storySignals.spill;shader.uniforms.storyObserver=storySignals.observer;shader.vertexShader='varying vec2 vMissionXY;\n'+shader.vertexShader;shader.vertexShader=shader.vertexShader.replace('#include <worldpos_vertex>','#include <worldpos_vertex>\nvMissionXY=(modelMatrix*vec4(transformed,1.)).xy;');shader.fragmentShader='uniform sampler2D missionFog;uniform float missionExtent;uniform vec3 storySpill;uniform vec2 storyObserver;varying vec2 vMissionXY;\n'+shader.fragmentShader;shader.fragmentShader=shader.fragmentShader.replace('#include <dithering_fragment>',`#include <dithering_fragment>
  vec2 missionUv=vec2(vMissionXY.x,-vMissionXY.y)/missionExtent+.5;
  vec2 visibility=texture2D(missionFog,clamp(missionUv,vec2(0.),vec2(1.))).rg;
  float inside=step(0.,missionUv.x)*step(missionUv.x,1.)*step(0.,missionUv.y)*step(missionUv.y,1.);
  vec3 hidden=vec3(.023,.029,.031);
  if(storySpill.z>0.){
    float halo=1.-smoothstep(24.,460.,length(vMissionXY-storySpill.xy));
+   float haze=smoothstep(770.,2450.,length(vMissionXY-storyObserver))*min(1.,storySpill.z*3.6);
    float surface=dot(gl_FragColor.rgb,vec3(.299,.587,.114));
+   hidden=mix(hidden,vec3(.153,.246,.286),haze);
    hidden+=vec3(.19,.24,.35)*halo*storySpill.z*(.3+.7*surface);
  }
  gl_FragColor.rgb=mix(hidden,gl_FragColor.rgb,(visibility.g*.30+visibility.r*.70)*inside);
- `);};material.customProgramCacheKey=()=>cache()+'_mission_fog_v3';material.needsUpdate=true;}
+ `);};material.customProgramCacheKey=()=>cache()+'_mission_fog_v4';material.needsUpdate=true;}
  for(const material of terrain.terrainMaterials) addFog(material);
  const vehicles=await createVehicleLayer(T,scene,field,config),buildingRoot=new T.Group();scene.add(buildingRoot);const buildings=new Map(),prefabs=new Map(),selectionRoot=new T.Group();scene.add(selectionRoot);
  const groundEffects=createGroundEffects(T,scene,field,config.worldScale),shotTimes=new Map();
@@ -71,9 +76,42 @@ export async function createCampaignWorld(host,config,sound){
  let headlightCount=0;
  const construction=createConstructionEffects(T,scene,config.worldScale);
  const dustCanvas=document.createElement('canvas');dustCanvas.width=dustCanvas.height=64;const dc=dustCanvas.getContext('2d'),gradient=dc.createRadialGradient(32,32,0,32,32,30);gradient.addColorStop(0,'rgba(255,255,255,.7)');gradient.addColorStop(1,'rgba(255,255,255,0)');dc.fillStyle=gradient;dc.fillRect(0,0,64,64);const dustPositions=new Float32Array(256*3),dustGeometry=new T.BufferGeometry();dustGeometry.setAttribute('position',new T.BufferAttribute(dustPositions,3));dustGeometry.setDrawRange(0,0);const dust=new T.Points(dustGeometry,new T.PointsMaterial({map:new T.CanvasTexture(dustCanvas),color:'#b5a180',size:8,transparent:true,opacity:.13,depthWrite:false}));dust.frustumCulled=false;scene.add(dust);const particles=[];let dustTime=0;
- const ray=new T.Raycaster(),ndc=new T.Vector2(),vector=new T.Vector3();const keys=new Set();
+ const ray=new T.Raycaster(),ndc=new T.Vector2(),vector=new T.Vector3();
+ const localRay=new T.Ray(),inverse=new T.Matrix4(),pickBox=new T.Box3(),pickPoint=new T.Vector3();
+ const keys=new Set();
  const resize=()=>{renderer.setSize(host.clientWidth,host.clientHeight,false);camera.aspect=host.clientWidth/host.clientHeight;camera.updateProjectionMatrix();};new ResizeObserver(resize).observe(host);resize();
- function ground(clientX,clientY){const rect=renderer.domElement.getBoundingClientRect();ndc.set((clientX-rect.left)/rect.width*2-1,-(clientY-rect.top)/rect.height*2+1);ray.setFromCamera(ndc,camera);let lo=0,hi=20000;for(let i=0;i<28;i++){const middle=(lo+hi)/2,p=ray.ray.at(middle,vector);if(p.z>field.heightAt(p.x,p.y))lo=middle;else hi=middle;}const point=ray.ray.at((lo+hi)/2,new T.Vector3());return Math.abs(point.x)<=field.half&&Math.abs(point.y)<=field.half?{x:point.x,y:point.y,z:point.z}:null;}
+ function pointerRay(clientX,clientY){
+  const rect=renderer.domElement.getBoundingClientRect();
+  ndc.set((clientX-rect.left)/rect.width*2-1,-(clientY-rect.top)/rect.height*2+1);
+  ray.setFromCamera(ndc,camera);
+ }
+ function ground(clientX,clientY){pointerRay(clientX,clientY);let lo=0,hi=20000;for(let i=0;i<28;i++){const middle=(lo+hi)/2,p=ray.ray.at(middle,vector);if(p.z>field.heightAt(p.x,p.y))lo=middle;else hi=middle;}const point=ray.ray.at((lo+hi)/2,new T.Vector3());return Math.abs(point.x)<=field.half&&Math.abs(point.y)<=field.half?{x:point.x,y:point.y,z:point.z}:null;}
+ function pickEntity(mission,clientX,clientY){
+  pointerRay(clientX,clientY);
+  let selected=null,nearest=Infinity;
+  for(const b of mission.state.buildings){
+   const model=buildings.get(b.id);
+   if(!model?.visible||b.hp<=0||b.owner!=='rai'&&!mission.visibleAt(b.x,b.y))continue;
+   const layer=b.completed?Infinity:buildLayerHeight(b,config.buildings[b.kind],config.worldScale);
+   for(const hit of ray.intersectObject(model,true)){
+    if(hit.distance>=nearest)break;
+    if(hit.point.z>layer||!hit.object.parent?.visible||!hit.object.visible)continue;
+    nearest=hit.distance;selected=b;break;
+   }
+  }
+  for(const unit of mission.state.units){
+   const pose=vehicles.transforms.get(unit.id);
+   if(!pose||unit.hp<=0||unit.owner!=='rai'&&!mission.visibleAt(unit.x,unit.y))continue;
+   localRay.copy(ray.ray).applyMatrix4(inverse.copy(pose.matrix).invert());
+   for(const [width,y,depth,z,height] of vehicleLocalBoxes(unit.kind)){
+    pickBox.min.set(-width,y-depth,z-height);pickBox.max.set(width,y+depth,z+height);
+    if(!localRay.intersectBox(pickBox,pickPoint))continue;
+    const distance=pickPoint.applyMatrix4(pose.matrix).distanceTo(ray.ray.origin);
+    if(distance<nearest){nearest=distance;selected=unit;}
+   }
+  }
+  return selected;
+ }
  function screen(entity,height=8){const pose=entity.id&&vehicles.transforms.get(entity.id);const point=(pose?pose.position.clone():new T.Vector3(entity.x,entity.y,field.heightAt(entity.x,entity.y)));point.z+=height;point.project(camera);const rect=renderer.domElement.getBoundingClientRect();return{x:(point.x+1)*rect.width/2+rect.left,y:(1-point.y)*rect.height/2+rect.top,visible:point.z>-1&&point.z<1};}
  function centre(entity,distance){const offset=camera.position.clone().sub(controls.target);controls.maxPolarAngle=normalCameraLimit;controls.target.set(entity.x,entity.y,field.heightAt(entity.x,entity.y));if(distance)offset.setLength(distance);camera.position.copy(controls.target).add(offset);controls.update();}
  function focusStorySignal(signal,foreground){
@@ -197,13 +235,21 @@ export async function createCampaignWorld(host,config,sound){
   let index=0;for(const id of selected){const entity=mission.entity(id);if(!entity||index>=selectionRings.length)continue;const ring=selectionRings[index++],pose=vehicles.transforms.get(id)?.position;ring.visible=true;ring.position.set(pose?.x??entity.x,pose?.y??entity.y,(pose?.z??field.heightAt(entity.x,entity.y))+.35);ring.scale.setScalar(entity.path?8:Math.max(entity.halfWidth,entity.halfDepth)*1.1);}for(;index<selectionRings.length;index++)selectionRings[index].visible=false;
   for(const event of shotsThisFrame){
    const from=mission.entity(event.from);
-   if(!from||from.owner!=='rai'&&!mission.visibleAt(from.x,from.y))continue;
+   const end=new T.Vector3(event.to.x,event.to.y,event.to.z);
+   if(!from||from.owner!=='rai'&&!mission.visibleAt(from.x,from.y)){
+    if(mission.visibleAt(end.x,end.y))combat.hit(end,event,now,camera);
+    continue;
+   }
    const building=buildings.get(from.id),mount=building?.getObjectByName('muzzle');
    const start=vehicles.muzzles.get(from.id)??(mount?mount.getWorldPosition(new T.Vector3()):new T.Vector3(from.x,from.y,(from.groundHeight??field.heightAt(from.x,from.y))+(from.kind==='mg-tower'?10.8:1.5)*config.worldScale));
-   const end=new T.Vector3(event.to.x,event.to.y,field.heightAt(event.to.x,event.to.y)+5);
-   combat.spawn(start,end,event.weapon,now,camera);
+   combat.spawn(start,end,event.weapon,now,camera,event);
   }
-  combat.update(now,camera,renderer.domElement.height);
+  combat.update(now,camera,renderer.domElement.height,shot=>{
+   const target=mission.entity(shot.targetId);
+   if(!target||target.owner!=='rai'&&!mission.visibleAt(target.x,target.y))return null;
+   const p=combatContact(shot.start,target,config,field);
+   return new T.Vector3(p.x,p.y,p.z);
+  });
   for(const oil of oilMarkers)oil.root.visible=mission.exploredAt(oil.x,oil.y)&&!mission.state.buildings.some(b=>b.kind==='derrick'&&b.hp>0&&Math.hypot(b.x-oil.x,b.y-oil.y)<5);
   const knownArtifacts=mission.state.artifacts.filter(a=>!a.collected&&mission.exploredAt(a.x,a.y));
   const artifactIds=new Set(knownArtifacts.map(a=>a.id));
@@ -242,5 +288,5 @@ export async function createCampaignWorld(host,config,sound){
   renderer.render(scene,camera);
   lastWorldTime=time;
  }
- return{renderer,scene,camera,controls,terrain,field,vehicles,ground,screen,centre,focusStorySignal,setGhost,commandMarker,buildingCards,drawMinimapFog:fog.drawMinimap,storySignals,update,keys,buildingObjects:buildings,get statistics(){return{drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,vehicleDrawCalls:vehicles.drawCalls,vehicleLod:vehicles.lod,dustParticles:particles.length,dustLimit:256,...combat.statistics,...groundEffects.statistics,headlightBeams:headlightCount,projectors:construction.active,frameMs:frameAverage*1000,renderScale:renderer.getPixelRatio(),terrainMode};}};
+ return{renderer,scene,camera,controls,terrain,field,vehicles,ground,pickEntity,screen,centre,focusStorySignal,setGhost,commandMarker,buildingCards,drawMinimapFog:fog.drawMinimap,storySignals,update,keys,buildingObjects:buildings,get statistics(){return{drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,vehicleDrawCalls:vehicles.drawCalls,vehicleLod:vehicles.lod,dustParticles:particles.length,dustLimit:256,...combat.statistics,...groundEffects.statistics,headlightBeams:headlightCount,projectors:construction.active,frameMs:frameAverage*1000,renderScale:renderer.getPixelRatio(),terrainMode};}};
 }

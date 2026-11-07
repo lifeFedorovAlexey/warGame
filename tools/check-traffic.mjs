@@ -274,11 +274,52 @@ function factoryApron(blockerKind){
 }
 const factoryExit={idleAlly:factoryApron('ally'),enemyRemoved:factoryApron('enemy'),wallRemoved:factoryApron('wall')};
 
+function combatRoute(action){
+ const m=session({...field,roadNetwork:null,roadBlendAt:null});
+ const front=m.addUnit('bukhanka','rai',{x:-180,y:0},{heading:-Math.PI/2});
+ const support=m.addUnit('bukhanka','rai',{x:-330,y:0},{heading:-Math.PI/2});
+ const enemies=[-65,80].map(x=>m.addUnit('raider','scavs',{x,y:30},{hp:18,heading:Math.PI/2}));
+ m.updateFog();
+ const goal={x:195,y:0};
+ assert.equal(m.order([front.id,support.id],action,action==='attack'?enemies[0]:goal).assigned,2);
+ return {m,front,support,enemies,goal};
+}
+function combatTick(m,ids){
+ m.state.time+=.1;
+ for(const id of ids)m.updateUnit(m.entity(id),.1);
+ m.updateFog();
+}
+const march=combatRoute('attack-move');
+const troop=[march.front.id,march.support.id];
+const marchPath=structuredClone(march.front.path);
+combatTick(march.m,troop);
+assert.equal(march.front.x,-180);
+assert(march.support.x>-330);
+assert.equal(march.enemies[0].hp,9);
+assert.deepEqual(march.front.path,marchPath);
+assert.equal(march.front.task.type,'attack-move');
+assert.equal(march.m.order(troop,'attack-move',march.goal).assigned,troop.length);
+assert.deepEqual(march.front.path,marchPath,'Repeating the same ground order during contact preserves the route');
+const marchSave=march.m.save();
+const continued=session(march.m.field);
+continued.load(marchSave);
+assert.equal(continued.save(),marchSave);
+for(let ticks=0;ticks<600&&troop.some(id=>continued.entity(id).task);ticks++)combatTick(continued,troop);
+assert(march.enemies.every(enemy=>!continued.entity(enemy.id)));
+assert(troop.every(id=>{const u=continued.entity(id);return u.x>180&&!u.task&&!u.path.length;}));
+
+const plain=combatRoute('move');
+combatTick(plain.m,[plain.front.id,plain.support.id]);
+assert(plain.front.x>-180&&plain.enemies[0].hp===9,'Plain movement still fires opportunistically and keeps driving');
+const targeted=combatRoute('attack');
+for(let i=0;i<15;i++)combatTick(targeted.m,[targeted.front.id,targeted.support.id]);
+assert(!targeted.m.entity(targeted.enemies[0].id)&&targeted.front.x===-180&&!targeted.front.task);
+
 console.log(JSON.stringify({
  tripCost:total,directCost:nav.travelCost(from,to),asphaltPeak:result.peak,
  opposite:{gap:result.gap,complete:result.complete},
  merge:{leftAhead:leftAhead.leader,rightAhead:rightAhead.leader,tied:tied.leader},touching,oldSave,
  alpha:{parkedRowGap:parkedRow.gap,bendGap:actualBend.gap,roadConvoy:{completed:roadConvoy.complete,gap:roadConvoy.gap}},
  singleFile,wideFunnel,mixedExit:{completed:group.length,seconds:Math.round(mixedExit.seconds*10)/10,gap:mixedExit.gap},
- closedGateRejected:true,factoryExit
+ closedGateRejected:true,factoryExit,attackMove:{bothArrived:true,twoContacts:true,saveRoundTrip:true}
 },null,2));

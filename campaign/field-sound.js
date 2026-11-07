@@ -7,6 +7,12 @@ const driveFiles = {
 const driveBase = '../assets/campaign/alpha/mission01/vehicle-sfx/';
 const radioBase = '../assets/campaign/alpha/mission01/unit-radio/';
 const ambienceBase = '../assets/campaign/alpha/mission01/field-ambience/';
+const combatBase = '../assets/campaign/alpha/mission01/combat-sfx/';
+const combatFiles = {
+  mg:'mg-burst.ogg', flame:'flame-roar.ogg', armor:'armor-hit.ogg',
+  structure:'structure-hit.ogg', debris:'debris-fall.ogg',
+};
+const combatVoiceLimit = 10;
 const voiceKinds = ['select', 'move', 'attack', 'build', 'stop'];
 const voiceCooldown = 1250;
 const voiceMaxAge = 1300;
@@ -16,6 +22,8 @@ export class FieldSound {
     this.toggle = toggle;
     this.last = new Map();
     this.lastVoice = new Map();
+    this.combatClips = new Map();
+    this.combatVoices = new Set();
     this.drivingUpdated = -Infinity;
     this.previousRolling = 0;
     this.slipping = false;
@@ -32,6 +40,7 @@ export class FieldSound {
         this.voiceSource?.stop();
         this.voiceSource = null;
         this.anomalySource?.stop();
+        for (const source of this.combatVoices) source.stop();
       }
     };
   }
@@ -69,6 +78,11 @@ export class FieldSound {
     this.loadRecordings();
     this.loadVoices();
     this.loadProjector();
+    for (const [kind, file] of Object.entries(combatFiles)) {
+      this.loadClip(combatBase, file)
+        .then(buffer => this.combatClips.set(kind, buffer))
+        .catch(error => console.warn('Боевой звук недоступен:', error.message));
+    }
     this.loadClip(ambienceBase, 'desert-wind.ogg')
       .then(buffer => { this.wind = this.startLoop(buffer); })
       .catch(error => console.warn('Запись ветра недоступна:', error.message));
@@ -209,18 +223,41 @@ export class FieldSound {
     source.stop(now + duration + .01);
   }
 
-  shot(weapon, level, pan) {
-    if (level < .012 || !this.limit('shot-' + weapon, .044)) return;
-    if (weapon === 'flame') {
-      this.transient({duration:.24, frequency:430, end:210, level:.22*level, pan});
-      return;
-    }
-    this.transient({duration:.09, frequency:1450, end:630, level:.67*level, pan});
-    this.transient({duration:.13, frequency:107, end:48, level:.34*level, pan, tone:'triangle'});
+  playCombat(kind, level, pan) {
+    const clip = this.combatClips.get(kind);
+    if (!clip || this.combatVoices.size >= combatVoiceLimit) return;
+    const ctx = this.context, source = ctx.createBufferSource();
+    const gain = ctx.createGain(), stereo = ctx.createStereoPanner();
+    source.buffer = clip;
+    source.playbackRate.value = .96 + Math.random() * .08;
+    gain.gain.value = level;
+    stereo.pan.value = Number.isFinite(pan) ? Math.max(-1, Math.min(1, pan)) : 0;
+    source.connect(gain).connect(stereo).connect(this.output);
+    this.combatVoices.add(source);
+    source.onended = () => {
+      this.combatVoices.delete(source);
+      source.disconnect();
+      gain.disconnect();
+      stereo.disconnect();
+    };
+    source.start();
   }
 
-  impact(level, pan) {
-    if (level > .04 && this.limit('impact', .085)) this.transient({duration:.12, frequency:910, end:310, level:.17*level, pan});
+  shot(weapon, level, pan) {
+    const kind = weapon === 'flame' ? 'flame' : 'mg';
+    const volume = clampLevel(level);
+    if (volume < .012 || !this.limit('shot-' + kind, .044)) return;
+    this.playCombat(kind, volume * (kind === 'flame' ? .61 : .92), pan);
+  }
+
+  impact(level, pan, surface = 'armor') {
+    const volume = clampLevel(level);
+    if (volume <= .04 || surface === 'flame') return;
+    const debris = surface === 'debris';
+    const kind = debris ? 'debris' : ['ground','structure'].includes(surface) ? 'structure' : 'armor';
+    if (this.limit(debris ? 'debris' : 'impact', debris ? .32 : .085)) {
+      this.playCombat(kind, volume * (debris ? .72 : .46), pan);
+    }
   }
 
   update({engine = 0, rolling = 0, slip = 0, road = 0, welding = 0, field = false} = {}) {

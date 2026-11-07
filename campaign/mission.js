@@ -5,6 +5,7 @@ import {passageStillOpen,preparePassageEgress} from './passage-egress.js';
 import {vehicleRecipes,starterProjects,matchingRecipe,projectDesignation,designNameKey,projectAssemblyKey,latestVehicleProjects} from './vehicle-designs.js';
 import {angleDelta} from './builder-kinematics.js';
 import {workProjection,projectorHasSight} from './builder-optics.js';
+import {combatContact} from './combat-contact.js';
 
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 
@@ -329,16 +330,17 @@ export class Mission{
   return null;
  }
  order(ids,action,target){
-  if(!['move','attack','build','repair'].includes(action)||!target||!Number.isFinite(target.x)||!Number.isFinite(target.y))return this.fail('Недопустимый приказ');
+  if(!['move','attack-move','attack','build','repair'].includes(action)||!target||!Number.isFinite(target.x)||!Number.isFinite(target.y))return this.fail('Недопустимый приказ');
+  const travel=action==='move'||action==='attack-move',combat=action==='attack'||action==='attack-move';
   if(action==='attack'&&(target.owner==='rai'||!this.entity(target.id)||!this.visibleAt(target.x,target.y)))return this.fail('Цель не обнаружена');
   if(action==='build'&&target.clearing)return this.fail('Техника освобождает площадку');
   if(['build','repair'].includes(action)&&(target.owner!=='rai'||!this.entity(target.id)))return this.fail('Нужна своя техника или постройка');
-  const units=this.state.units.filter(u=>ids.includes(u.id)&&u.owner==='rai'&&u.hp>0&&(!['build','repair'].includes(action)||this.unitSpec(u).role==='builder')&&(action!=='attack'||this.unitSpec(u).damage));if(!units.length)return this.fail('Не выбрана подходящая техника');const assigned=new Set();
+  const units=this.state.units.filter(u=>ids.includes(u.id)&&u.owner==='rai'&&u.hp>0&&(!['build','repair'].includes(action)||this.unitSpec(u).role==='builder')&&(!combat||this.unitSpec(u).damage));if(!units.length)return this.fail('Не выбрана подходящая техника');const assigned=new Set();
   const repeat=new Map();
   for(const unit of units){
    const order=unit.routeOrder;
-   if(action==='move'&&order&&distance(order.request,target)<3){
-    if(unit.task?.type==='move'&&unit.path.length)repeat.set(unit.id,unit.path.at(-1));
+   if(travel&&order&&(order.type??'move')===action&&distance(order.request,target)<3){
+    if(unit.task?.type===action&&unit.path.length)repeat.set(unit.id,unit.path.at(-1));
     else if(!unit.task&&distance(unit,order.destination)<5)repeat.set(unit.id,unit);
    }
    const last=unit.task?.type==='attack'&&unit.task.targetId===target.id&&unit.path.at(-1);
@@ -346,7 +348,7 @@ export class Mission{
   }
   const reserved=[...repeat.values()];
   const groupCentre=units.reduce((centre,unit)=>({x:centre.x+unit.x/units.length,y:centre.y+unit.y/units.length}),{x:0,y:0});
-  const roadCandidate=action==='move'&&!target.id?this.nav.roads.formation(target,groupCentre,units.length,this.config.worldScale):null;
+  const roadCandidate=travel&&!target.id?this.nav.roads.formation(target,groupCentre,units.length,this.config.worldScale):null;
   const progress=new Map();
   if(roadCandidate)for(const unit of units){
    const position=this.nav.roads.formationProgress(unit,roadCandidate,this.config.worldScale);
@@ -355,7 +357,7 @@ export class Mission{
   const roadFormation=progress.size>=Math.max(2,Math.ceil(units.length/2))?roadCandidate:null;
   const roadSlots=roadFormation?.slots;
   let nextRoadSlot=0;
-  const passage=action==='move'&&!roadFormation&&units.length>=3
+  const passage=travel&&!roadFormation&&units.length>=3
    ?this.nav.passageBetween(groupCentre,target,this.config.worldScale):null;
   const egress=passage?preparePassageEgress(this,passage,units,target):null;
   if(egress?.blocked)return this.fail('Не удалось проложить безопасный выезд из прохода');
@@ -372,7 +374,7 @@ export class Mission{
    units.sort((a,b)=>(progress.get(b)??-Infinity)-(progress.get(a)??-Infinity)||distance(a,target)-distance(b,target));
   }else if(passage){
    units.sort((a,b)=>distance(a,passage.entrance)-distance(b,passage.entrance));
-  }else if(action==='move'){
+  }else if(travel){
    units.sort((a,b)=>(b.x-a.x)*forward.x+(b.y-a.y)*forward.y);
    for(let index=0;index<units.length;index+=3){
     const row=units.slice(index,index+3).sort((a,b)=>(a.x-b.x)*right.x+(a.y-b.y)*right.y);
@@ -403,10 +405,10 @@ export class Mission{
    if(egress&&!viaPassage)continue;
    const path=action==='attack'?this.attackPath(unit,target,reserved):['build','repair'].includes(action)?this.workPath(unit,target,workOffset):roadPath??viaPassage??this.movePath(unit,formation,reserved,parkingRadius)??this.movePath(unit,goal,reserved,parkingRadius);
    if(!path)continue;
-   const destination=action==='move'?path.at(-1)??goal:goal;
-   if(action==='move'||action==='attack')reserved.push(path.at(-1)??unit);
-   const targetId=action==='move'?null:target.id??null;
-   if(unit.task?.type!==action||unit.task?.targetId!==targetId||action==='move'&&distance(unit.task,destination)>5){
+   const destination=travel?path.at(-1)??goal:goal;
+   if(travel||action==='attack')reserved.push(path.at(-1)??unit);
+   const targetId=travel?null:target.id??null;
+   if(unit.task?.type!==action||unit.task?.targetId!==targetId||travel&&distance(unit.task,destination)>5){
     delete unit.detour;delete unit.traffic;delete unit.trafficHold;delete unit.driveWatch;delete unit.reverseDebt;delete unit.failedArcs;
    }
    delete unit.passage;
@@ -418,7 +420,10 @@ export class Mission{
     }
     preceding=unit.id;
    }
-   if(action==='move')unit.routeOrder={request:{x:target.x,y:target.y},destination};
+   if(travel){
+    unit.routeOrder={request:{x:target.x,y:target.y},destination};
+    if(action==='attack-move')unit.routeOrder.type=action;
+   }
    else delete unit.routeOrder;
    unit.path=path;unit.task={type:action,targetId,x:destination.x,y:destination.y,workOffset};
    if(action==='build')unit.resumeConstructionId=target.id;
@@ -509,16 +514,26 @@ export class Mission{
  research(id,key){const lab=this.entity(id),spec=this.config.research[key];if(!lab||lab.kind!=='lab'||lab.owner!=='rai'||!lab.completed)return this.fail('Нужен исследовательский центр');if(!spec||!this.state.artifactKeys.includes(key))return this.fail('Сначала найдите артефакт');if(this.state.research[key]||this.state.buildings.some(b=>b.hp>0&&b.research?.key===key))return this.fail('Исследование уже выполнено или выполняется');if(lab.research)return this.fail('Лаборатория занята');if(!this.canSpend(spec.cost))return this.fail('Недостаточно энергии');this.state.energy-=spec.cost;lab.research={key,progress:0,cost:spec.cost};this.emit('research-start',{key});return {ok:true};}
  lineOfSight(from,to){const a=this.field.heightAt(from.x,from.y)+(from.kind==='mg-tower'?12:3.2)*this.config.worldScale,b=this.field.heightAt(to.x,to.y)+1.5*this.config.worldScale;for(let i=1;i<12;i++){const t=i/12;if(this.field.heightAt(from.x+(to.x-from.x)*t,from.y+(to.y-from.y)*t)+.4>a+(b-a)*t)return false;}return true;}
  damage(target,amount,source){if(target.hp<=0)return;target.hp=Math.max(0,target.hp-amount);if(!target.hp){this.emit('destroyed',{target:target.id,owner:target.owner,kind:target.kind});if(target.owner==='scavs')this.state.statistics.enemiesDestroyed++;this.navigationDirty=true;}else if(target.owner==='rai'&&this.state.time-(target.lastDamageBark??-20)>12){target.lastDamageBark=this.state.time;this.emit('unit-damaged',{target:target.id});}}
- attack(attacker,target,spec){if(attacker.cooldown>0||distance(attacker,target)>spec.range||!this.lineOfSight(attacker,target))return false;attacker.cooldown=spec.cooldown;const multiplier=attacker.owner==='rai'&&this.state.research['mg-ammo-1']&&attacker.kind!=='flamer'?1.25:1;this.damage(target,spec.damage*multiplier,attacker);attacker.aimTarget={x:target.x,y:target.y};this.effects.push({type:'shot',from:attacker.id,to:{x:target.x,y:target.y},weapon:attacker.kind==='flamer'?'flame':'mg'});if(this.effects.length>128)this.effects.shift();return true;}
+ attack(attacker,target,spec){
+  if(attacker.cooldown>0||distance(attacker,target)>spec.range||!this.lineOfSight(attacker,target))return false;
+  attacker.cooldown=spec.cooldown;
+  const multiplier=attacker.owner==='rai'&&this.state.research['mg-ammo-1']&&attacker.kind!=='flamer'?1.25:1;
+  const {x,y,z,surface}=combatContact(attacker,target,this.config,this.field);
+  this.damage(target,spec.damage*multiplier,attacker);
+  attacker.aimTarget={x,y,z};
+  this.effects.push({type:'shot',from:attacker.id,targetId:target.id,to:attacker.aimTarget,surface,destroyed:target.hp<=0,weapon:attacker.kind==='flamer'?'flame':'mg'});
+  if(this.effects.length>128)this.effects.shift();
+  return true;
+ }
  enemyOf(item,other){return other.hp>0&&item.owner!==other.owner&&(!other.campId||this.inBounds(other.x,other.y));}
- nearestEnemy(item,range){let nearest=null,best=range;for(const target of [...this.state.units,...this.state.buildings]){if(!this.enemyOf(item,target))continue;const d=distance(item,target);if(d<best&&(item.owner!=='rai'||this.visibleAt(target.x,target.y))){best=d;nearest=target;}}return nearest;}
+ nearestEnemy(item,range,canTarget=null){let nearest=null,best=range;for(const target of [...this.state.units,...this.state.buildings]){if(!this.enemyOf(item,target))continue;const d=distance(item,target);if(d<best&&(item.owner!=='rai'||this.visibleAt(target.x,target.y))&&(!canTarget||canTarget(target))){best=d;nearest=target;}}return nearest;}
  requestPassage(unit,blockers){
   if(unit.task?.type==='clear-site')return;
   const scale=this.config.worldScale;
   for(const other of blockers){
    if(other.owner!==unit.owner||other.path.length||other.task||other.detour||this.unitSpec(other).role==='builder'
     ||other.trafficRest>this.state.time||distance(unit,other)>scale*6)continue;
-   if(!other.routeOrder&&(unit.task?.type!=='move'||this.unitSpec(unit).role==='builder'))continue;
+   if(!other.routeOrder&&(!['move','attack-move'].includes(unit.task?.type)||this.unitSpec(unit).role==='builder'))continue;
    other.trafficRest=this.state.time+5;
    const park=this.parkingManeuver(other,unit,(from,to)=>this.vehicleMotionClear(other,from,to));
    if(!park)continue;
@@ -896,8 +911,9 @@ export class Mission{
   this.requestPassage(unit,blockers);
 
   const target=unit.task?.targetId?this.entity(unit.task.targetId):null;
-  const destination=['move','clear-site'].includes(unit.task?.type)?unit.task:unit.path.at(-1);
-  const stalledNearParked=unit.task?.type==='move'&&[...blockers].some(other=>!other.path.length);
+  const travel=['move','attack-move'].includes(unit.task?.type);
+  const destination=travel||unit.task?.type==='clear-site'?unit.task:unit.path.at(-1);
+  const stalledNearParked=travel&&[...blockers].some(other=>!other.path.length);
   const routeStale=stalledNearParked&&unit.trafficReplan&&distance(unit,unit.trafficReplan)<scale*.7
    &&this.state.time-unit.trafficReplan.time<4;
   if(blockers.size&&watch.attempts%2===1&&!routeStale){
@@ -931,7 +947,7 @@ export class Mission{
   }
   if(target&&['build','repair'].includes(unit.task.type))unit.path=this.workPath(unit,target)??unit.path;
   else if(target&&unit.task.type==='attack')unit.path=this.attackPath(unit,target)??unit.path;
-  else if(unit.task?.type==='move'&&watch.attempts>=3&&distance(unit,destination)<scale*12){
+  else if(travel&&watch.attempts>=3&&distance(unit,destination)<scale*12){
    const parkingAllowed=point=>gate?.parkingEdge===undefined||(point[gate.along]-gate.parkingEdge)*gate.direction>=0;
    if(!next&&d<scale*5.5&&watch.attempts%5===3){
     const parking=this.nearbyParking(unit,destination,allowed,reverseBudget,parkingAllowed);
@@ -1042,6 +1058,22 @@ export class Mission{
   if(unit.hp<=0)return;unit.previousX=unit.x;unit.previousY=unit.y;unit.previousHeading=unit.heading;unit.previousWheelDistance=unit.wheelDistance??0;unit.previousSteering=unit.steering??0;unit.cooldown=Math.max(0,unit.cooldown-dt);const spec=this.unitSpec(unit);
   if(spec.role==='builder'){this.updateBuilder(unit,dt);return;}
   if(unit.foldTime>0){unit.foldTime=Math.max(0,unit.foldTime-dt);unit.tool=Math.max(0,unit.tool-dt/2.6);return;}
+  if(unit.task?.type==='attack-move'){
+   const enemy=this.nearestEnemy(unit,spec.range,target=>this.lineOfSight(unit,target));
+   if(enemy){
+    unit.driveSpeed=0;unit.steering=(unit.steering??0)*.68;
+    this.attack(unit,enemy,spec);
+    return;
+   }
+   if(!unit.path.length){
+    if(distance(unit,unit.task)<24)unit.task=null;
+    else if(this.state.time-(unit.lastRepath??-10)>1){
+     unit.path=this.vehiclePath(unit,unit.task)??[];unit.lastRepath=this.state.time;
+    }
+   }
+   this.move(unit,dt);
+   return;
+  }
   let target=unit.task?.targetId?this.entity(unit.task.targetId):null;
   if(unit.task?.targetId&&(!target||unit.task.type==='build'&&target.completed)){unit.task=null;unit.path=[];if(unit.tool>.01)unit.foldTime=2.6;target=null;}
   if(unit.owner==='scavs'){

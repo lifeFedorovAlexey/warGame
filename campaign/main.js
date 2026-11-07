@@ -27,6 +27,11 @@ function visibleRaidContact(){
   if(!flags.raidStarted||flags.raidWon)return null;
   return units.find(unit=>flags.raidIds?.includes(unit.id)&&unit.hp>0&&mission.visibleAt(unit.x,unit.y));
 }
+function tacticalFocus(contact){
+  if(contact)return {x:contact.x,y:contact.y,kind:'threat',label:'К месту контакта',distance:420};
+  if(mission.state.status==='running'&&mission.state.flags.lastRevealed&&!mission.state.camps[3].cleared)return missionSignal('last-camp',mission);
+  return null;
+}
 const isMobile = entity => entity?.owner === 'rai' && !!config.units[entity.kind];
 const names = {bukhanka:'Пулемёт', builder:'Строитель', command:'Связь', flamer:'Огнемёт'};
 const taskNames = {base:'Передовая база', power:'Энергоснабжение', production:'Производство', research:'Исследования', security:'Лагеря отбросов'};
@@ -133,6 +138,7 @@ function start(restore = false) {
   radio.reset();
   world.storySignals.show(null);
   blockedOrders.clear();
+  $('order-feedback').hidden=true;
   $('welcome').hidden = true;
   $('result').hidden = true;
   $('mission-hud').hidden = false;
@@ -157,10 +163,11 @@ function ordersAt(point, target, mode) {
   if (!chosen.some(isMobile)) return toast('Выберите машину на карте или в списке');
   let action = 'move';
   let destination = point;
-  if (mode === 'attack' || (!mode && target?.owner === 'scavs')) {
-    if (target?.owner !== 'scavs') return toast('Укажите видимого противника');
+  if ((mode === 'attack'||!mode) && target?.owner === 'scavs') {
     action = 'attack';
     destination = target;
+  } else if (mode === 'attack') {
+    action='attack-move';
   } else if (!mode && target?.owner === 'rai' && chosen.some(entity => entity.kind === 'builder')) {
     if (target.completed === false) action = 'build';
     else if (isMobile(target) && target.hp < target.maxHp) action = 'repair';
@@ -173,16 +180,23 @@ function ordersAt(point, target, mode) {
   }
   const result = mission.order([...selected], action, destination);
   if (!report(result)) return;
-  world.commandMarker(destination, action === 'attack');
-  const eligible = chosen.filter(entity => liveMobile(entity) && (action !== 'attack' || config.units[entity.kind].damage) && (!['build', 'repair'].includes(action) || entity.kind === 'builder'));
+  const combatOrder=action==='attack'||action==='attack-move';
+  world.commandMarker(destination,combatOrder);
+  const eligible = chosen.filter(entity => liveMobile(entity) && (!combatOrder || config.units[entity.kind].damage) && (!['build', 'repair'].includes(action) || entity.kind === 'builder'));
   blockedOrders=new Set(result.unassigned);
-  blockedUntil=performance.now()+4800;
-  if(blockedOrders.size)toast('Приказ приняли '+result.assigned+' из '+eligible.length+'. Машины без маршрута отмечены в списке.',4800);
-  sound.acknowledge(action === 'repair' ? 'build' : action, eligible.filter(unit=>!blockedOrders.has(unit.id)).map(unit => unit.id));
+  blockedUntil=performance.now()+7500;
+  const feedback=$('order-feedback');
+  const text=blockedOrders.size?result.assigned+' из '+eligible.length+' · без маршрута '+blockedOrders.size:action==='repair'?'Строитель принял приказ на ремонт':'';
+  feedback.querySelector('span').textContent=text;
+  feedback.hidden=!text;
+  $('select-blocked').hidden=!blockedOrders.size;
+  sound.acknowledge(combatOrder?'attack':action==='repair'?'build':action,eligible.filter(unit=>!blockedOrders.has(unit.id)).map(unit=>unit.id));
   orderMode = null;
   updateUi();
 }
 function hitEntity(x, y) {
+  const direct=world.pickEntity(mission,x,y);
+  if(direct)return direct;
   let nearest = null, best = 24;
   for (const entity of [...mission.state.units, ...mission.state.buildings]) {
     if (entity.hp <= 0 || entity.owner !== 'rai' && !mission.visibleAt(entity.x, entity.y)) continue;
@@ -400,9 +414,10 @@ function updateRoster() {
   const counts={};
   for(const unit of units){
     counts[unit.kind]=(counts[unit.kind]??0)+1;
-    const key=stack?(unit.designId??unit.kind):unit.id;
+    const blocked=blockedOrders.has(unit.id),separate=blocked&&blockedOrders.size<=4;
+    const key=stack&&!separate?(blocked?'blocked:':'')+(unit.designId??unit.kind):unit.id;
     if(!groups.has(key)){
-      const label=unit.designName??(names[unit.kind]??config.units[unit.kind].name)+(stack?'':' '+counts[unit.kind]);
+      const label=unit.designName??(names[unit.kind]??config.units[unit.kind].name)+(stack&&!separate?'':' '+counts[unit.kind]);
       groups.set(key,{label,kind:unit.kind,units:[]});
     }
     groups.get(key).units.push(unit);
@@ -524,7 +539,7 @@ function updateContext(first) {
 }
 function updateUi() {
   if (!active) return;
-  if(blockedOrders.size&&performance.now()>=blockedUntil)blockedOrders.clear();
+  if(performance.now()>=blockedUntil){blockedOrders.clear();$('order-feedback').hidden=true;}
   const s = mission.state;
   for (const id of selected) if (!mission.entity(id)) selected.delete(id);
   const group = selection(), first = group[0], mobile = group.filter(isMobile);
@@ -555,13 +570,16 @@ function updateUi() {
     }));
   }
   const contact=visibleRaidContact();
-  $('raid-focus').hidden=!contact;
+  const marker=tacticalFocus(contact);
+  $('raid-focus').hidden=!marker;
+  if(marker)$('raid-focus').textContent=marker.label;
   const raidHint=contact?'Рейдеры в зоне обзора.':s.flags.raidStarted?'Рейдеры в пути.':'Прикройте базу. Ожидается рейд.';
-  $('hint').textContent = s.status !== 'running' ? '' : s.flags.contact && !s.flags.raidWon ? raidHint : !s.powered ? 'Генератор через «Строить». Вышка по клику на нефтяную точку.' : !tasks[0].done ? 'Завод, лаборатория и укрытие.' : s.flags.lastRevealed ? 'Четвёртый лагерь открыт на юге.' : 'Разведайте лагеря и доставьте артефакты.';
+  const repair=mobile.some(u=>u.kind==='builder')&&vehicles().some(u=>u.hp<u.maxHp);
+  $('hint').textContent = s.status !== 'running' ? '' : s.flags.contact && !s.flags.raidWon ? raidHint : repair ? 'ПКМ по повреждённой машине — ремонт.' : !s.powered ? 'Генератор через «Строить». Вышка по клику на нефтяную точку.' : !tasks[0].done ? 'Завод, лаборатория и укрытие.' : s.flags.lastRevealed ? 'Четвёртый лагерь открыт на юге.' : 'Разведайте лагеря и доставьте артефакты.';
   $('selection').textContent = group.length > 1 ? 'Группа · ' + group.length : first?.designName ?? (config.units[first?.kind] ?? config.buildings[first?.kind])?.name ?? (first ? 'Лагерь отбросов' : 'Нет выделения');
   const hp = group.reduce((sum,entity)=>sum+entity.hp,0), maxHp = group.reduce((sum,entity)=>sum+entity.maxHp,0);
   const wellStatus=group.length===1&&first?.kind==='derrick'&&first.completed?(first.powered?' · Качает':' · Нет питания'):'';
-  $('details').textContent = orderMode ? (orderMode === 'attack' ? 'ЛКМ — выбрать врага' : 'ЛКМ — выбрать точку') : first?.clearing ? 'Освобождение площадки' : first?.awaitingWorkers ? 'В очереди строителей' : first ? Math.ceil(hp) + '/' + maxHp + (first.completed === false ? ' · ' + Math.floor(first.progress*100) + '%' : ' HP')+wellStatus : 'Выберите машину';
+  $('details').textContent = orderMode ? (orderMode === 'attack' ? 'ЛКМ по врагу или по земле' : 'ЛКМ — выбрать точку') : first?.clearing ? 'Освобождение площадки' : first?.awaitingWorkers ? 'В очереди строителей' : first ? Math.ceil(hp) + '/' + maxHp + (first.completed === false ? ' · ' + Math.floor(first.progress*100) + '%' : ' HP')+wellStatus : 'Выберите машину';
   $('move-order').classList.toggle('active', orderMode === 'move');
   $('attack-order').classList.toggle('active', orderMode === 'attack');
   $('move-order').disabled = !vehicles().length;
@@ -735,10 +753,15 @@ try {
   $('attack-order').onclick = () => beginOrder('attack');
   $('home').onclick = () => world.centre(world.field.gridToWorld(config.startGrid), 360);
   $('raid-focus').onclick = () => {
-    const contact=visibleRaidContact();
-    if(!contact)return;
-    presentSignal({x:contact.x,y:contact.y,kind:'threat'});
-    world.centre(contact,420);
+    const signal=tacticalFocus(visibleRaidContact());
+    if(!signal)return;
+    presentSignal(signal);
+    focusSignal(signal);
+  };
+  $('select-blocked').onclick = () => {
+    const live=[...blockedOrders].map(id=>mission.entity(id)).filter(Boolean);
+    if(live.length===1)focusUnit(live[0]);
+    else if(live.length)select(live.map(unit=>unit.id));
   };
   $('stop').onclick = () => {
     const ids = selection().filter(liveMobile).map(unit => unit.id);
