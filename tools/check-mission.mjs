@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import assert from 'node:assert/strict';
 import {Mission} from '../campaign/mission.js';
 import {raidApproachSignal, waterTower, waterTowerSignal} from '../campaign/threat-guidance.js';
+import {vehicleClearance} from '../campaign/vehicle-motion.js';
 import {createHeightfield} from '../demo/map-route.js';
 import {shapeMesaRims} from '../demo/mesa-shaping.js';
 import {refineRoadHeightfield} from '../demo/road-heightfield.js';
@@ -33,6 +34,25 @@ reveal(approach);
 assert.deepEqual([raidApproachSignal(scout).x,raidApproachSignal(scout).y],[approach.x,approach.y]);
 scout.state.flags.raidWon=true;
 assert.equal(raidApproachSignal(scout),null,'Clear the warning once the raid is over');
+const traffic=new Mission(config,field);
+const stalledPair=[
+ {x:-1391.9818,y:783.6999,heading:1.33193,waypoint:{x:-1392,y:800},goal:{x:-794.54,y:1077.31}},
+ {x:-1375.9505,y:795.6683,heading:1.05886,waypoint:{x:-1360,y:784},goal:{x:-805.46,y:1098.69}},
+];
+const vans=stalledPair.map(({waypoint,goal,...pose})=>traffic.addUnit('bukhanka','rai',pose,{
+ heading:pose.heading,path:[waypoint,...traffic.nav.findPath(waypoint,goal)],task:{type:'move',...goal},
+}));
+const firstMotion=[null,null];
+for(let step=0;step<300;step++){
+ traffic.advance(.1);
+ assert(vehicleClearance(...vans,config.worldScale,field)>=0,'Recovery sweeps must keep the two vans apart');
+ for(const [index,van] of vans.entries())if(Math.hypot(van.x-stalledPair[index].x,van.y-stalledPair[index].y)>.1)firstMotion[index]??=(step+1)/10;
+}
+for(const [index,van] of vans.entries()){
+ const origin=stalledPair[index];
+ assert(firstMotion[index]!==null&&firstMotion[index]<=7,`Van ${van.id} waited ${firstMotion[index]} seconds before moving`);
+ assert(Math.hypot(van.x-origin.x,van.y-origin.y)>12,`Van ${van.id} must leave the mutual deadlock`);
+}
 function dismiss(){for(const key of [...mission.state.pendingCinematics]){seen.push({key,time:mission.state.time});mission.finishCinematic(key);}}
 const mechanics={workSteps:0,constructionGated:true,repairGated:true,interruptProjection:false,movingRepair:false,builderHandoff:false};
 function step(){

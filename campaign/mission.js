@@ -711,7 +711,7 @@ export class Mission{
   }
   return null;
  }
- recoverTrafficCluster(unit,includeParked=false){
+ recoverTrafficCluster(unit,includeParked=false,blockers){
   const scale=this.config.worldScale;
   const idle=other=>!other.path.length&&!other.task&&!other.builderWorking&&!other.tool&&!other.foldTime;
   const neighbours=this.state.units.filter(other=>other.owner===unit.owner&&other.hp>0
@@ -721,14 +721,16 @@ export class Mission{
    const current=cluster[index];
    for(const other of neighbours){
     if(cluster.includes(other)||distance(current,other)>scale*6.5)continue;
-    if(vehicleClearance(current,other,scale,this.field)<scale*.52)cluster.push(other);
+    // A turning sweep can hit a vehicle even when both parked hulls are clear.
+    const sweptBlocker=current===unit&&blockers?.has(other)&&other.path.length&&(other.driveSpeed??0)<scale*.18;
+    if(sweptBlocker||vehicleClearance(current,other,scale,this.field)<scale*.52)cluster.push(other);
    }
   }
   if(cluster.length<2||cluster.some(other=>other.detour||other.trafficHold))return false;
   const yieldSpace=(vehicle,legs,rough=true)=>{
    vehicle.detour={legs,parking:true,rough,idleYield:true,blocked:0};
    vehicle.trafficRest=this.state.time+6;
-   for(const other of cluster)if(other.path.length)other.trafficHold=vehicle.id;
+   for(const other of cluster)if(other!==vehicle&&other.path.length)other.trafficHold=vehicle.id;
    return true;
   };
   if(includeParked&&cluster.length>=4
@@ -752,6 +754,13 @@ export class Mission{
     continue;
    }
    if(includeParked)return yieldSpace(vehicle,legs);
+   if(others.length===1&&(blockers?.has(vehicle)||blockers?.has(others[0]))
+    &&vehicleClearance(vehicle,others[0],scale,this.field)>=scale*.52){
+    // Once this manoeuvre clears a known blocker, both vans can resume.
+    const normal=checkManeuver(vehicle,legs,scale,(from,to)=>this.vehicleMotionClear(vehicle,from,to));
+    for(const other of cluster)other.trafficRecoveryUntil=this.state.time+32;
+    return yieldSpace(vehicle,legs,!normal);
+   }
    const leader=others.slice().sort((a,b)=>Number(a.id.slice(1))-Number(b.id.slice(1)))[0];
    vehicle.detour={legs,parking:true,rough:true,blocked:0};
    vehicle.traffic={leader:leader.id,since:this.state.time,phase:'move'};
@@ -946,6 +955,7 @@ export class Mission{
   const passing=cruising&&!roadLane?this.passingLane(unit,point,course,scale):null;
   const waypoint=roadLane??passing??point,remaining=distance(unit,waypoint);
   const slope=this.field.gradientAt(unit.x,unit.y);
+  const slopeBlockers=Math.hypot(slope.x,slope.y)>=.42?blockers:undefined;
   const grade=(slope.x*(waypoint.x-unit.x)+slope.y*(waypoint.y-unit.y))/Math.max(1,remaining);
   const aligned=-Math.sin(unit.heading)*course.x+Math.cos(unit.heading)*course.y>.72;
   const trafficLimit=cruising&&aligned?this.trafficSpeed(unit,course,roadLane,scale):Infinity;
@@ -960,18 +970,27 @@ export class Mission{
   if(pose)applyPose(pose);else stop();
 
   let watch=unit.driveWatch;
+  const resuming=unit.trafficRecoveryUntil>this.state.time;
   if(!watch||watch.x!==point.x||watch.y!==point.y){
-   watch=unit.driveWatch={x:point.x,y:point.y,distance:d,elapsed:0,blocked:0,attempts:0};
+   watch=unit.driveWatch={x:point.x,y:point.y,distance:d,elapsed:0,blocked:0,
+    attempts:resuming?(watch?.attempts??0):0,stalledAt:resuming?watch?.stalledAt:undefined};
   }
   watch.elapsed+=dt;
   watch.blocked=pose?0:(watch.blocked??0)+dt;
-  if(watch.elapsed<2.1&&watch.blocked<.85)return !!pose;
+  const stoppedPair=()=>!pose&&!gate&&!unit.traffic&&slopeBlockers?.size===1&&[...slopeBlockers].some(other=>other.owner===unit.owner
+   &&other.path.length&&!other.traffic&&!other.passage&&(other.driveSpeed??0)<scale*.18
+   &&vehicleClearance(unit,other,scale,this.field)>=scale*.52);
+  const blockDelay=stoppedPair() ? .55 : .85;
+  if(watch.elapsed<2.1&&watch.blocked<blockDelay)return !!pose;
   const waiting=trafficLimit<speed*.3&&!blockers.size&&(!pose||pose.driveSpeed<speed*.14);
   unit.queueSince=waiting?unit.queueSince??this.state.time:undefined;
   const queued=waiting&&this.state.time-unit.queueSince<2.4;
-  const jammed=!queued&&(watch.distance-d<2.2||watch.blocked>=.85);
+  const jammed=!queued&&(watch.distance-d<2.2||watch.blocked>=blockDelay);
   watch.distance=d;watch.elapsed=0;watch.blocked=0;
-  if(!jammed){watch.attempts=0;return !!pose;}
+  if(!jammed){watch.attempts=0;delete watch.stalledAt;return !!pose;}
+  if(resuming&&(!watch.stalledAt||distance(unit,watch.stalledAt)>=scale*.75)){
+   watch.stalledAt={x:unit.x,y:unit.y};watch.attempts=0;
+  }
   watch.attempts=(watch.attempts??0)+1;
   if(egress?.phase==='approach'){
    if(blockers.size||trafficLimit<speed*.4)return !!pose;
@@ -983,6 +1002,7 @@ export class Mission{
 
   const target=unit.task?.targetId?this.entity(unit.task.targetId):null;
   const travel=['move','attack-move'].includes(unit.task?.type);
+  if(travel&&stoppedPair()&&this.recoverTrafficCluster(unit,false,slopeBlockers))return !!pose;
   const destination=travel||unit.task?.type==='clear-site'?unit.task:unit.path.at(-1);
   const stalledNearParked=travel&&[...blockers].some(other=>!other.path.length);
   const routeStale=stalledNearParked&&unit.trafficReplan&&distance(unit,unit.trafficReplan)<scale*.7
@@ -1000,10 +1020,27 @@ export class Mission{
   const legs=planManeuver(unit,point,{...maneuverOptions,reverseBudget:0})
    ??(reverseBudget>=scale*.6?planManeuver(unit,point,{...maneuverOptions,reverseBudget}):null);
   if(legs){unit.detour={legs,parking:false,blocked:0};return !!pose;}
-  if(blockers.size&&watch.attempts>=2&&unit.task?.type!=='clear-site'){
-   if(this.recoverTrafficCluster(unit)||travel&&unit.owner==='rai'&&this.recoverTrafficCluster(unit,true))return !!pose;
+  if(blockers.size&&(watch.attempts>=2||travel&&stoppedPair())&&unit.task?.type!=='clear-site'){
+   if(this.recoverTrafficCluster(unit,false,slopeBlockers)
+    ||travel&&unit.owner==='rai'&&this.recoverTrafficCluster(unit,true,slopeBlockers))return !!pose;
   }
   if(!blockers.size&&watch.attempts>=2){
+   if(resuming&&travel&&next&&watch.attempts%4===2){
+    // The cheapest grid waypoint can be behind a vehicle facing up a slope.
+    // Find a reachable start pose and validate the turn onto its new route.
+    for(const remaining of [scale*7,scale*5,scale*3]){
+     const first={direction:1,curve:0,remaining};
+     const exit=checkManeuver(unit,[first],scale,roughAllowed);
+     if(!exit)continue;
+     const path=this.vehiclePath(exit,destination,{ignoreUnits:new Set([unit]),avoidMoving:true,fallback:false,maxGoalDistance:8});
+     if(!path?.length)continue;
+     const onward=planManeuver(exit,path[0],{scale,allowed:roughAllowed,attempts:2,reverseBudget:0,maximumLegs:5});
+     if(!onward)continue;
+     unit.path=path;
+     unit.detour={legs:[first,...onward],parking:false,rough:true,blocked:0};
+     return !!pose;
+    }
+   }
    const rough=planManeuver(unit,point,{...maneuverOptions,allowed:roughAllowed,
     failedArcs:[],maximumLegs:5,reverseBudget});
    if(rough){unit.detour={legs:rough,parking:false,rough:true,blocked:0};return !!pose;}
