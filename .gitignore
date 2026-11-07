@@ -3,3 +3,7 @@ __pycache__/
 *.pyc
 demo/previews/
 demo/reports/
+tools/.runtime-media/
+assets/campaign/**/audio-source/
+campaign/previews/
+campaign/reports/

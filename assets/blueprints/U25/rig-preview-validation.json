@@ -1,0 +1,27 @@
+{
+  "errors": 0,
+  "warnings": 0,
+  "geometry": {
+    "id": "U25",
+    "lod": 0,
+    "triangles": 876,
+    "vertices": 1053,
+    "primitives": 16,
+    "materials": 6,
+    "removedDegenerate": 0,
+    "inputTriangles": 876,
+    "bytes": 56256,
+    "boundsMm": {
+      "min": [
+        -538,
+        -715,
+        0
+      ],
+      "max": [
+        580,
+        800,
+        1150
+      ]
+    }
+  }
+}

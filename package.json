@@ -12,6 +12,10 @@
     "check:driving": "node tools/drive-smoke.cjs",
     "check:map": "node tools/check-alpha-map.cjs",
     "check:roads": "node tools/check-road-tour.cjs",
+    "check:cinematics": "node tools/check-cinematics.cjs",
+    "check:builder": "node tools/check-builder.cjs",
+    "build:campaign-content": "python tools/build-mission-content.py",
+    "build:campaign-audio": "python tools/build-campaign-audio.py",
     "build:map": "python tools/build-alpha-map.py",
     "build:map-textures": "node tools/build-alpha-texture.cjs",
     "build:roads": "node tools/build-roads.cjs"

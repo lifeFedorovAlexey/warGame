@@ -1,0 +1,145 @@
+{
+  "provider": "built-in image_gen",
+  "assets": [
+    {
+      "scene": "m01-s02",
+      "file": "stills/barracks.webp",
+      "width": 1600,
+      "height": 900,
+      "promptFile": "barracks.prompt.txt",
+      "sourceGeneratedPath": "C:\\Users\\Алексей\\.codex\\generated_images\\01a1b190-9555-74e0-998c-666b99493b3e\\exec-446e15b2-8b6d-48e7-a7d0-a38d95ec5b27.png",
+      "sha256": "e2d11e55a649b528f4f26b07a5b9457c084a949470bde7c1c039af6343320c94",
+      "bytes": 208878
+    },
+    {
+      "scene": "m01-s01",
+      "file": "stills/last-dream.webp",
+      "width": 1600,
+      "height": 900,
+      "promptFile": "last-dream.prompt.txt",
+      "sourceGeneratedPath": "C:\\Users\\Алексей\\.codex\\generated_images\\01a1b190-9555-74e0-998c-666b99493b3e\\exec-2d262519-ae2c-4d9e-95f2-5d8ea8a3e958.png",
+      "sha256": "2215c0062bab2e2bc38d056dcb01497459474bd2fee048d5cda925de633b8976",
+      "bytes": 343760
+    },
+    {
+      "scene": "m01-s03",
+      "file": "stills/base-gate.webp",
+      "width": 1600,
+      "height": 900,
+      "promptFile": "base-gate.prompt.txt",
+      "sourceGeneratedPath": "C:\\Users\\Алексей\\.codex\\generated_images\\01a1b190-9555-74e0-998c-666b99493b3e\\exec-a6e60bdc-9f74-40d4-8ace-d4666d71d470.png",
+      "sha256": "3b832fb1fba5bf7497d3eacebe10e74a9818c0af723aa7a7b2634b60e7a9fe26",
+      "bytes": 415698
+    },
+    {
+      "scene": "m01-s04",
+      "file": "stills/briefing.webp",
+      "width": 1600,
+      "height": 900,
+      "promptFile": "briefing.prompt.txt",
+      "sourceGeneratedPath": "C:\\Users\\Алексей\\.codex\\generated_images\\01a1b190-9555-74e0-998c-666b99493b3e\\exec-aed5ff7a-948d-4621-a274-c75b07aea473.png",
+      "sha256": "ad65f45617b5a8673efe37c8d26240db3ec6dae08b798c9bdb3c97fe618e9234",
+      "bytes": 282742
+    },
+    {
+      "scene": "m01-s05",
+      "file": "stills/operations-map.webp",
+      "width": 1600,
+      "height": 900,
+      "promptFile": "operations-map.prompt.txt",
+      "sourceGeneratedPath": "C:\\Users\\Алексей\\.codex\\generated_images\\01a1b190-9555-74e0-998c-666b99493b3e\\exec-68d04c59-e4c5-4d56-a5db-55eb9b9506c9.png",
+      "sha256": "4b15ba33c36f745afca105d7a6f811467e8f49b782641b5e5d21a23b4c6df00e",
+      "bytes": 279926
+    },
+    {
+      "scene": "m01-s06",
+      "file": "stills/convoy.webp",
+      "width": 1600,
+      "height": 900,
+      "promptFile": "convoy.prompt.txt",
+      "sourceGeneratedPath": "C:\\Users\\Алексей\\.codex\\generated_images\\01a1b190-9555-74e0-998c-666b99493b3e\\exec-8905d614-4896-4c21-b0f1-a5b53bd9823b.png",
+      "sha256": "311550b5b70467ae0aa38c9828c19ba8b412765ded806996ea45646d2b63d7e8",
+      "bytes": 467386
+    },
+    {
+      "scene": "m01-s07",
+      "file": "stills/first-contact.webp",
+      "width": 1600,
+      "height": 900,
+      "promptFile": "first-contact.prompt.txt",
+      "sourceGeneratedPath": "C:\\Users\\Алексей\\.codex\\generated_images\\01a1b190-9555-74e0-998c-666b99493b3e\\exec-7c110316-9329-4ad4-913f-cf7ed1688442.png",
+      "sha256": "163ed73fc0f7cbeb102d04e538dbbf5d52d0358731ecb3c77967ca39cb8ec768",
+      "bytes": 406770
+    },
+    {
+      "scene": "m01-s08",
+      "file": "stills/artifact.webp",
+      "width": 1600,
+      "height": 900,
+      "promptFile": "artifact.prompt.txt",
+      "sourceGeneratedPath": "C:\\Users\\Алексей\\.codex\\generated_images\\01a1b190-9555-74e0-998c-666b99493b3e\\exec-d7896291-7765-4712-844f-56786dbe0544.png",
+      "sha256": "e227d84bc8bc8221e7c0ca823aee74a875006efa1c870e7a4662e20017b41199",
+      "bytes": 287786
+    },
+    {
+      "scene": "m01-s09",
+      "file": "stills/ammo-cache.webp",
+      "width": 1600,
+      "height": 900,
+      "promptFile": "ammo-cache.prompt.txt",
+      "sourceGeneratedPath": "C:\\Users\\Алексей\\.codex\\generated_images\\01a1b190-9555-74e0-998c-666b99493b3e\\exec-05d088a1-d92a-4eee-b15f-cef18e0f2a2e.png",
+      "sha256": "589c771182ddb612ebe54c903ceb59c5181ec409c572ae4468b69f041feebbf9",
+      "bytes": 323564
+    },
+    {
+      "scene": "m01-s10",
+      "file": "stills/water-tower.webp",
+      "width": 1600,
+      "height": 900,
+      "promptFile": "water-tower.prompt.txt",
+      "sourceGeneratedPath": "C:\\Users\\Алексей\\.codex\\generated_images\\01a1b190-9555-74e0-998c-666b99493b3e\\exec-9dc61331-e2a2-43cb-85a8-3030f02798dc.png",
+      "sha256": "42eb6b67ac96decf57c79a3805039fc6ad67f7a97edff9f67a108441dd02e489",
+      "bytes": 328772
+    },
+    {
+      "scene": "m01-s11",
+      "file": "stills/last-camp.webp",
+      "width": 1600,
+      "height": 900,
+      "promptFile": "last-camp.prompt.txt",
+      "sourceGeneratedPath": "C:\\Users\\Алексей\\.codex\\generated_images\\01a1b190-9555-74e0-998c-666b99493b3e\\exec-4ebd82d5-cd22-4ea1-a743-0bea2dd7c88a.png",
+      "sha256": "cd41091ef3bf6bf4f552f9f50a9c9a3d130bb30f72066450b09ac436e10330eb",
+      "bytes": 412318
+    },
+    {
+      "scene": "m01-s12",
+      "file": "stills/victory-report.webp",
+      "width": 1600,
+      "height": 900,
+      "promptFile": "victory-report.prompt.txt",
+      "sourceGeneratedPath": "C:\\Users\\Алексей\\.codex\\generated_images\\01a1b190-9555-74e0-998c-666b99493b3e\\exec-47c4b1ee-fa37-4edc-a1ec-1e3f5a4cab62.png",
+      "sha256": "e408f101e3556f3d5f7f12d1df3939a10d563b36be9aed6a5bbc2eb06ae036d8",
+      "bytes": 391796
+    },
+    {
+      "scene": "m01-s13",
+      "file": "stills/evening-base.webp",
+      "width": 1600,
+      "height": 900,
+      "promptFile": "evening-base.prompt.txt",
+      "sourceGeneratedPath": "C:\\Users\\Алексей\\.codex\\generated_images\\01a1b190-9555-74e0-998c-666b99493b3e\\exec-175e5373-c4aa-4b68-9733-1ef32f8d7ab2.png",
+      "sha256": "d1fe860470073b10dfeb40e2b09bf09fa406f9dd429e0ab5655171815d922041",
+      "bytes": 341456
+    },
+    {
+      "scene": "m01-s14",
+      "file": "stills/energy-anomaly.webp",
+      "width": 1600,
+      "height": 900,
+      "promptFile": "energy-anomaly.prompt.txt",
+      "sourceGeneratedPath": "C:\\Users\\Алексей\\.codex\\generated_images\\01a1b190-9555-74e0-998c-666b99493b3e\\exec-6081b388-bc27-4387-a161-1b5999b01fa5.png",
+      "sha256": "b2c715d5264c4ed37313aa0e287010c21d81f48a3248ad4e409e6c8627ddd990",
+      "bytes": 272392
+    }
+  ]
+}

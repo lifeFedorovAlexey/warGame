@@ -1,0 +1,118 @@
+import {TerrainNavigator} from './navigation.js';
+
+const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+
+// Authoritative game state has no renderer objects, audio clocks or DOM references.
+export class Mission{
+ constructor(config,field){
+  this.config=config;this.field=field;this.nav=new TerrainNavigator(field,{bounds:config.initialMapBounds.slice()});this.accumulator=0;this.serial=1;this.randomState=19452;this.events=[];this.effects=[];
+  this.state={version:1,mission:config.id,time:0,status:'running',energy:config.initialEnergy,energyRate:0,powered:false,oilLinked:0,units:[],buildings:[],camps:[],artifacts:[],research:{},artifactKeys:[],seenCinematics:[],pendingCinematics:['intro','briefing','arrival'],flags:{},statistics:{produced:0,buildingsCompleted:0,enemiesDestroyed:0},bounds:config.initialMapBounds.slice()};
+  this.visible=new Uint8Array(128*128);this.explored=new Uint8Array(128*128);this.fogTimer=1;
+  const start=field.gridToWorld(config.startGrid);
+  config.initialUnits.forEach((kind,index)=>this.addUnit(kind,'rai',{x:start.x+(index%3-1)*28,y:start.y-45-Math.floor(index/3)*30}));
+  config.camps.forEach((data,index)=>{const point=field.gridToWorld(data.grid),gate=field.gridToWorld(data.gateGrid),camp={...data,index,x:point.x,y:point.y,gate,cleared:false,artifactSpawned:false};this.state.camps.push(camp);this.addStructure('camp-core','scavs',point,{campId:data.id,hp:750*data.strength,halfWidth:28,halfDepth:22});if(index>=2)for(let j=0;j<(index===3?2:1);j++)this.addStructure('mg-tower','scavs',{x:point.x+(j?48:-48),y:point.y-30},{campId:data.id,hp:850*data.strength});for(let i=0;i<data.units;i++)this.addUnit('raider','scavs',{x:gate.x+(i%3-1)*24,y:gate.y+30+Math.floor(i/3)*24},{campId:data.id,guard:{...gate}});});
+  this.rebuildNavigation();this.updateFog();
+ }
+ id(prefix){return prefix+this.serial++;}
+ random(){this.randomState=(Math.imul(this.randomState,1664525)+1013904223)>>>0;return this.randomState/4294967296;}
+ emit(type,data={}){this.events.push({id:this.id('e'),type,time:this.state.time,...data});}
+ drainEvents(){return this.events.splice(0);}
+ drainEffects(){return this.effects.splice(0);}
+ cinematic(id){if(!this.state.seenCinematics.includes(id)&&!this.state.pendingCinematics.includes(id)){this.state.pendingCinematics.push(id);this.emit('cinematic',{chapter:id});}}
+ finishCinematic(id){const index=this.state.pendingCinematics.indexOf(id);if(index>=0)this.state.pendingCinematics.splice(index,1);if(!this.state.seenCinematics.includes(id))this.state.seenCinematics.push(id);}
+ unitSpec(unit){return this.config.units[unit.kind];}
+ buildingSpec(building){return this.config.buildings[building.kind]??{name:'Лагерь отбросов',seconds:1,hp:750,vision:180,power:0};}
+ entity(id){return [...this.state.units,...this.state.buildings].find(item=>item.id===id&&item.hp>0);}
+ addUnit(kind,owner,point,extra={}){const spec=this.config.units[kind],unit={id:this.id('u'),kind,owner,x:point.x,y:point.y,previousX:point.x,previousY:point.y,hp:spec.hp,maxHp:spec.hp,heading:0,path:[],task:null,cooldown:0,tool:0,foldTime:0,...extra};this.state.units.push(unit);return unit;}
+ addStructure(kind,owner,point,extra={}){const spec=this.config.buildings[kind]??{},scale=this.config.worldScale,foot=spec.footprintMetres??[14,12],item={id:this.id('b'),kind,owner,x:point.x,y:point.y,rotation:0,hp:spec.hp??750,maxHp:spec.hp??750,halfWidth:foot[0]*scale/2,halfDepth:foot[1]*scale/2,progress:owner==='rai'?0:1,completed:owner!=='rai',queue:[],research:null,cooldown:0,...extra};item.maxHp=item.hp;this.state.buildings.push(item);return item;}
+ rebuildNavigation(){this.nav.bounds=this.state.bounds.slice();this.nav.rebuild(this.state.buildings);}
+ fail(reason){return {ok:false,reason};}
+ canSpend(cost){return this.state.energy+1e-6>=cost;}
+ inBounds(x,y){const [gx,gy]=this.field.worldToGrid(x,y),b=this.state.bounds;return gx>=b[0]&&gx<=b[2]&&gy>=b[1]&&gy<=b[3];}
+ exploredAt(x,y){const [gx,gy]=this.field.worldToGrid(x,y),col=Math.round(gx),row=Math.round(gy);return col>=0&&row>=0&&col<128&&row<128&&!!this.explored[row*128+col];}
+ visibleAt(x,y){const [gx,gy]=this.field.worldToGrid(x,y),col=Math.round(gx),row=Math.round(gy);return col>=0&&row>=0&&col<128&&row<128&&!!this.visible[row*128+col];}
+ placement(kind,x,y,rotation=0,{checkMoney=true}={}){
+  const spec=this.config.buildings[kind];if(!spec)return this.fail('Неизвестное здание');if(spec.requires&&!this.state.research[spec.requires])return this.fail('Требуется исследование: '+this.config.research[spec.requires].name);if(checkMoney&&!this.canSpend(spec.cost))return this.fail('Недостаточно энергии');if(!this.inBounds(x,y)||!this.exploredAt(x,y))return this.fail('Район ещё не разведан');
+  if(spec.requiresOil){const oil=this.config.oilFields.map(grid=>this.field.gridToWorld(grid)).find(p=>Math.hypot(p.x-x,p.y-y)<25);if(!oil)return this.fail('Нужна нефтяная точка');x=oil.x;y=oil.y;}
+  else{x=Math.round(x/this.config.buildingGridMetres)*this.config.buildingGridMetres;y=Math.round(y/this.config.buildingGridMetres)*this.config.buildingGridMetres;}
+  const rotate=Math.abs(Math.round(rotation/(Math.PI/2)))%2,foot=rotate?[spec.footprintMetres[1],spec.footprintMetres[0]]:spec.footprintMetres,w=foot[0]*this.config.worldScale/2,d=foot[1]*this.config.worldScale/2,heights=[];
+  for(const dx of [-w,0,w])for(const dy of [-d,0,d]){if(!this.inBounds(x+dx,y+dy)||!this.exploredAt(x+dx,y+dy))return this.fail('Пятно застройки выходит за разведанный район');const g=this.field.gradientAt(x+dx,y+dy);if(Math.hypot(g.x,g.y)>this.config.maxBuildingGrade)return this.fail('Слишком крутой склон');heights.push(this.field.heightAt(x+dx,y+dy));}
+  if(Math.max(...heights)-Math.min(...heights)>2.5)return this.fail('Нужна ровная площадка');
+  if(!spec.requiresOil)for(const grid of this.config.oilFields){const oil=this.field.gridToWorld(grid);if(Math.abs(x-oil.x)<w+this.config.worldScale*5+5&&Math.abs(y-oil.y)<d+this.config.worldScale*5+5)return this.fail('Нефтяной участок зарезервирован для вышки');}
+  for(const building of this.state.buildings)if(building.hp>0&&Math.abs(x-building.x)<w+building.halfWidth+8&&Math.abs(y-building.y)<d+building.halfDepth+8)return this.fail('Пересечение с постройкой');
+  for(const unit of this.state.units)if(unit.hp>0&&Math.abs(x-unit.x)<w+7&&Math.abs(y-unit.y)<d+11)return this.fail('Площадка занята техникой');
+  return {ok:true,x,y,rotation:Math.round(rotation/(Math.PI/2))*Math.PI/2,halfWidth:w,halfDepth:d,height:Math.max(...heights)};
+ }
+ workPoint(building,offset=0){if(this.config.units[building.kind])return{x:building.x+Math.sin(building.heading)*20+Math.cos(building.heading)*offset,y:building.y-Math.cos(building.heading)*20+Math.sin(building.heading)*offset};const spec=this.buildingSpec(building),local=spec.workAnchor??[0,-building.halfDepth/this.config.worldScale-4,0],c=Math.cos(building.rotation),s=Math.sin(building.rotation),scale=this.config.worldScale;return{x:building.x+(local[0]*c-local[1]*s)*scale+c*offset,y:building.y+(local[0]*s+local[1]*c)*scale+s*offset};}
+ order(ids,action,target){
+  const units=this.state.units.filter(u=>ids.includes(u.id)&&u.owner==='rai'&&u.hp>0&&(!['build','repair'].includes(action)||this.unitSpec(u).role==='builder')&&(action!=='attack'||this.unitSpec(u).damage));if(!units.length)return this.fail('Не выбрана подходящая техника');let assigned=0;
+  for(let index=0;index<units.length;index++){const unit=units[index],workOffset=(index-(units.length-1)/2)*18,goal=action==='build'||action==='repair'?this.workPoint(target,workOffset):target,columns=Math.min(3,units.length);
+   const destination=action==='move'?{x:goal.x+(index%columns-(columns-1)/2)*20,y:goal.y-Math.floor(index/columns)*22}:goal,path=this.nav.findPath(unit,destination);if(!path)continue;
+   unit.path=path;unit.task={type:action,targetId:target.id??null,x:goal.x,y:goal.y,workOffset};if(unit.tool>.01)unit.foldTime=2.6;assigned++;
+  }
+  return assigned?{ok:true,assigned}:this.fail('Нет доступного пути или подходящего строителя');
+ }
+ build(ids,kind,x,y,rotation=0){
+  const builders=this.state.units.filter(u=>ids.includes(u.id)&&u.owner==='rai'&&u.hp>0&&this.unitSpec(u).role==='builder');if(!builders.length)return this.fail('Выберите строителя');const place=this.placement(kind,x,y,rotation);if(!place.ok)return place;
+  const building=this.addStructure(kind,'rai',place,{rotation:place.rotation,halfWidth:place.halfWidth,halfDepth:place.halfDepth,groundHeight:place.height,cost:this.config.buildings[kind].cost});this.rebuildNavigation();const result=this.order(builders.map(u=>u.id),'build',building);if(!result.ok){this.state.buildings.pop();this.rebuildNavigation();return result;}this.state.energy-=building.cost;this.emit('construction-start',{building:building.id});return {ok:true,id:building.id};
+ }
+ cancelBuilding(id){const building=this.entity(id);if(!building||building.owner!=='rai'||building.completed)return this.fail('Отменить можно только незавершённую стройку');this.state.energy=Math.min(this.config.energyCapacity,this.state.energy+building.cost*(1-building.progress));building.hp=0;for(const unit of this.state.units)if(unit.task?.targetId===id){unit.task=null;unit.path=[];unit.foldTime=2.6;}this.rebuildNavigation();this.emit('construction-cancelled',{building:id});return {ok:true};}
+ produce(id,kind){const factory=this.entity(id),spec=this.config.units[kind];if(!factory||factory.owner!=='rai'||factory.kind!=='factory'||!factory.completed)return this.fail('Нужен построенный завод');if(!this.config.buildings.factory.production.includes(kind)||!spec)return this.fail('Этот образец недоступен');if(spec.requires&&!this.state.research[spec.requires])return this.fail('Требуется исследование');if(!this.canSpend(spec.cost))return this.fail('Недостаточно энергии');if(this.state.units.filter(u=>u.owner==='rai'&&u.hp>0).length+this.state.buildings.reduce((sum,b)=>sum+b.queue.length,0)>=48)return this.fail('Достигнут предел техники');this.state.energy-=spec.cost;factory.queue.push({kind,progress:0,cost:spec.cost});return {ok:true};}
+ research(id,key){const lab=this.entity(id),spec=this.config.research[key];if(!lab||lab.kind!=='lab'||lab.owner!=='rai'||!lab.completed)return this.fail('Нужен исследовательский центр');if(!spec||!this.state.artifactKeys.includes(key))return this.fail('Сначала найдите артефакт');if(this.state.research[key]||this.state.buildings.some(b=>b.hp>0&&b.research?.key===key))return this.fail('Исследование уже выполнено или выполняется');if(lab.research)return this.fail('Лаборатория занята');if(!this.canSpend(spec.cost))return this.fail('Недостаточно энергии');this.state.energy-=spec.cost;lab.research={key,progress:0,cost:spec.cost};this.emit('research-start',{key});return {ok:true};}
+ lineOfSight(from,to){const a=this.field.heightAt(from.x,from.y)+(from.kind==='mg-tower'?12:3.2)*this.config.worldScale,b=this.field.heightAt(to.x,to.y)+1.5*this.config.worldScale;for(let i=1;i<12;i++){const t=i/12;if(this.field.heightAt(from.x+(to.x-from.x)*t,from.y+(to.y-from.y)*t)+.4>a+(b-a)*t)return false;}return true;}
+ damage(target,amount,source){if(target.hp<=0)return;target.hp=Math.max(0,target.hp-amount);if(!target.hp){this.emit('destroyed',{target:target.id,owner:target.owner,kind:target.kind});if(target.owner==='scavs')this.state.statistics.enemiesDestroyed++;this.navigationDirty=true;}else if(target.owner==='rai'&&this.state.time-(target.lastDamageBark??-20)>12){target.lastDamageBark=this.state.time;this.emit('unit-damaged',{target:target.id});}}
+ attack(attacker,target,spec){if(attacker.cooldown>0||distance(attacker,target)>spec.range||!this.lineOfSight(attacker,target))return false;attacker.cooldown=spec.cooldown;const multiplier=attacker.owner==='rai'&&this.state.research['mg-ammo-1']&&attacker.kind!=='flamer'?1.25:1;this.damage(target,spec.damage*multiplier,attacker);attacker.aimTarget={x:target.x,y:target.y};this.effects.push({type:'shot',from:attacker.id,to:{x:target.x,y:target.y},weapon:attacker.kind==='flamer'?'flame':'mg'});if(this.effects.length>128)this.effects.shift();return true;}
+ enemyOf(item,other){return other.hp>0&&item.owner!==other.owner&&(!other.campId||this.inBounds(other.x,other.y));}
+ nearestEnemy(item,range){let nearest=null,best=range;for(const target of [...this.state.units,...this.state.buildings]){if(!this.enemyOf(item,target))continue;const d=distance(item,target);if(d<best&&(item.owner!=='rai'||this.visibleAt(target.x,target.y))){best=d;nearest=target;}}return nearest;}
+ move(unit,dt){
+  if(!unit.path.length)return false;const point=unit.path[0],d=distance(unit,point);if(d<2.5){unit.path.shift();return true;}const spec=this.unitSpec(unit),z0=this.field.heightAt(unit.x,unit.y),z1=this.field.heightAt(point.x,point.y),grade=(z1-z0)/Math.max(1,d),speed=spec.speed*clamp(1-grade*1.8,.5,1.22),step=Math.min(d,speed*dt);let dx=(point.x-unit.x)/d*step,dy=(point.y-unit.y)/d*step;
+  for(const other of this.state.units){if(other===unit||other.hp<=0)continue;const gap=distance(unit,other);if(gap<12&&gap>.1){dx+=(unit.x-other.x)/gap*(12-gap)*dt*.65;dy+=(unit.y-other.y)/gap*(12-gap)*dt*.65;}}
+  const [col,row]=this.nav.grid(unit.x+dx,unit.y+dy);if(this.nav.allowed(col,row)){unit.x+=dx;unit.y+=dy;unit.heading=Math.atan2(-dx,dy);return true;}unit.repath=(unit.repath??0)+dt;if(unit.repath>1){unit.repath=0;unit.path=this.nav.findPath(unit,point)??[];}return false;
+ }
+ updateUnit(unit,dt){
+  if(unit.hp<=0)return;unit.previousX=unit.x;unit.previousY=unit.y;unit.cooldown=Math.max(0,unit.cooldown-dt);const spec=this.unitSpec(unit);
+  if(unit.foldTime>0){unit.foldTime=Math.max(0,unit.foldTime-dt);unit.tool=Math.max(0,unit.tool-dt/2.6);return;}
+  let target=unit.task?.targetId?this.entity(unit.task.targetId):null;
+  if(unit.task?.type==='attack'&&!target){unit.task=null;unit.path=[];}
+  if(unit.owner==='scavs'){
+   if(!this.inBounds(unit.x,unit.y))return;const enemy=this.nearestEnemy(unit,spec.range*1.7);if(enemy){unit.task={type:'attack',targetId:enemy.id};target=enemy;if(distance(unit,enemy)>spec.range*.9&&(!unit.path.length||this.state.time-(unit.lastRepath??0)>2)){unit.path=this.nav.findPath(unit,enemy)??[];unit.lastRepath=this.state.time;}}
+  }
+  if(unit.task?.type==='attack'&&target&&spec.damage){if(distance(unit,target)<=spec.range&&this.lineOfSight(unit,target)){unit.path=[];this.attack(unit,target,spec);}else if(!unit.path.length||this.state.time-(unit.lastRepath??0)>3){unit.path=this.nav.findPath(unit,target)??[];unit.lastRepath=this.state.time;}}
+  else if(spec.damage){const enemy=this.nearestEnemy(unit,spec.range);if(enemy)this.attack(unit,enemy,spec);}
+  const working=target&&['build','repair'].includes(unit.task?.type)&&!unit.path.length&&distance(unit,this.workPoint(target,unit.task.workOffset??0))<=this.config.builderRangeMetres;
+  if(working){unit.path=[];unit.tool=Math.min(1,unit.tool+dt/2.6);unit.aimTarget={x:target.x,y:target.y};if(unit.tool<.99)return;
+   if(unit.task.type==='build'&&!target.completed){target.progress=Math.min(1,target.progress+dt/this.buildingSpec(target).seconds);if(target.progress>=1){target.completed=true;this.state.statistics.buildingsCompleted++;this.emit('construction-complete',{kind:target.kind,building:target.id});}}
+   else if(unit.task.type==='repair'&&target.hp<target.maxHp&&this.state.energy>dt*1.5){target.hp=Math.min(target.maxHp,target.hp+dt*40);this.state.energy-=dt*1.5;}
+   if((unit.task.type==='build'&&target.completed)||(unit.task.type==='repair'&&target.hp>=target.maxHp)){unit.task=null;unit.foldTime=2.6;}
+  }else{if(unit.tool>0){unit.foldTime=2.6;return;}if(target&&['build','repair'].includes(unit.task?.type)&&!unit.path.length&&this.state.time-(unit.lastRepath??-10)>1){unit.path=this.nav.findPath(unit,this.workPoint(target,unit.task.workOffset??0))??[];unit.lastRepath=this.state.time;}this.move(unit,dt);if(unit.task?.type==='move'&&!unit.path.length)unit.task=null;}
+ }
+ updateEconomy(dt){
+  const structures=this.state.buildings.filter(b=>b.owner==='rai'&&b.hp>0&&b.completed),generators=structures.filter(b=>b.kind==='generator'),wells=structures.filter(b=>b.kind==='derrick');this.state.oilLinked=Math.min(wells.length,generators.length*4);this.state.powered=this.state.oilLinked>0;let use=0;for(const b of structures)if(b.queue.length||b.research)use+=this.buildingSpec(b).power??0;this.state.energyRate=this.state.powered?this.state.oilLinked*5-use:0;this.state.energy=clamp(this.state.energy+this.state.energyRate*dt,0,this.config.energyCapacity);
+  for(const building of structures){building.cooldown=Math.max(0,building.cooldown-dt);const spec=this.buildingSpec(building);if(spec.damage){const target=this.nearestEnemy(building,spec.range);if(target)this.attack(building,target,spec);}if(!this.state.powered)continue;
+   if(building.queue.length){const item=building.queue[0],unitSpec=this.config.units[item.kind];item.progress=Math.min(1,item.progress+dt/unitSpec.seconds);if(item.progress>=1){const local=spec.exitAnchor,c=Math.cos(building.rotation),s=Math.sin(building.rotation),point={x:building.x+(local[0]*c-local[1]*s)*this.config.worldScale,y:building.y+(local[0]*s+local[1]*c)*this.config.worldScale},exit=this.nav.nearest(point.x,point.y,5);if(exit&&!this.state.units.some(u=>u.hp>0&&distance(u,exit)<14)){const unit=this.addUnit(item.kind,'rai',exit);building.queue.shift();this.state.statistics.produced++;this.emit('unit-produced',{unit:unit.id,kind:unit.kind,first:this.state.statistics.produced===1});}}}
+   if(building.research){const task=building.research;task.progress=Math.min(1,task.progress+dt/this.config.research[task.key].seconds);if(task.progress>=1){this.state.research[task.key]=true;this.emit('research-complete',{key:task.key});this.cinematic('research-'+task.key);building.research=null;}}
+  }
+ }
+ updateFog(){
+  this.visible.fill(0);const stamp=(item,vision)=>{const [gx,gy]=this.field.worldToGrid(item.x,item.y),r=vision/32,b=this.state.bounds;for(let row=Math.max(0,Math.floor(gy-r));row<=Math.min(127,Math.ceil(gy+r));row++)for(let col=Math.max(0,Math.floor(gx-r));col<=Math.min(127,Math.ceil(gx+r));col++)if(col>=b[0]&&col<=b[2]&&row>=b[1]&&row<=b[3]&&Math.hypot(col-gx,row-gy)<=r){this.visible[row*128+col]=255;this.explored[row*128+col]=255;}};
+  for(const unit of this.state.units)if(unit.owner==='rai'&&unit.hp>0)stamp(unit,this.unitSpec(unit).vision);for(const b of this.state.buildings)if(b.owner==='rai'&&b.hp>0&&b.completed)stamp(b,this.buildingSpec(b).vision);
+ }
+ updateMission(){
+  const s=this.state,captured=s.camps.filter(c=>c.cleared).length;
+  for(const camp of s.camps){if(camp.cleared)continue;const hostile=[...s.units,...s.buildings].some(e=>e.campId===camp.id&&e.hp>0);if(!hostile){camp.cleared=true;this.emit('camp-cleared',{camp:camp.id});if(camp.artifact&&!camp.artifactSpawned){const point=this.nav.nearest(camp.x+35,camp.y,8)??camp;s.artifacts.push({id:this.id('a'),key:camp.artifact,x:point.x,y:point.y,collected:false});camp.artifactSpawned=true;}}}
+  for(const artifact of s.artifacts)if(!artifact.collected&&s.units.some(u=>u.owner==='rai'&&u.hp>0&&distance(u,artifact)<24)){artifact.collected=true;if(!s.artifactKeys.includes(artifact.key))s.artifactKeys.push(artifact.key);this.emit('artifact-collected',{key:artifact.key});if(artifact.key!=='mg-tower')this.cinematic('artifact-'+artifact.key);}
+  const enemyVisible=s.units.some(u=>u.owner==='scavs'&&u.hp>0&&this.visibleAt(u.x,u.y));const has=kind=>s.buildings.some(b=>b.owner==='rai'&&b.hp>0&&b.completed&&b.kind===kind);
+  if(!s.flags.contact&&(enemyVisible||(has('factory')&&has('lab')&&s.statistics.produced>0))){s.flags.contact=true;this.cinematic('first-contact');s.flags.raidAt=s.time+12;}
+  if(s.flags.contact&&!s.flags.raidStarted&&s.time>=s.flags.raidAt){s.flags.raidStarted=true;const camp=s.camps[0],target=this.field.gridToWorld(this.config.startGrid);s.flags.raidIds=[];for(let i=0;i<4;i++){const point=this.nav.nearest(camp.gate.x+i*18,camp.gate.y-30,5);if(!point)continue;const unit=this.addUnit('raider','scavs',point,{raid:true});unit.path=this.nav.findPath(unit,target)??[];unit.task={type:'move',x:target.x,y:target.y};s.flags.raidIds.push(unit.id);}this.emit('raid-start');}
+  if(s.flags.raidStarted&&!s.flags.raidWon&&s.flags.raidIds.length&&s.flags.raidIds.every(id=>!this.entity(id))){s.flags.raidWon=true;this.cinematic('raid-won');}
+  const third=s.camps[2];if(!s.flags.thirdSighted&&this.visibleAt(third.x,third.y)){s.flags.thirdSighted=true;this.cinematic('camp3-sighted');}
+  if(!s.flags.lastRevealed&&s.camps.filter(c=>c.cleared).length>=3){s.flags.lastRevealed=true;s.bounds=this.config.finalMapBounds.slice();this.rebuildNavigation();this.cinematic('last-camp');this.emit('map-expanded',{bounds:s.bounds});}
+  if(s.camps.every(c=>c.cleared)&&has('generator')&&has('derrick')&&has('factory')&&has('lab')&&(has('bunker')||has('mg-tower'))&&s.statistics.produced>0&&Object.keys(this.config.research).every(key=>s.research[key])&&s.flags.raidWon){s.status='victory';this.cinematic('victory');this.cinematic('outro');this.emit('victory');}
+  if(!s.units.some(u=>u.owner==='rai'&&u.hp>0&&this.unitSpec(u).role==='builder')&&!s.buildings.some(b=>b.owner==='rai'&&b.hp>0&&b.completed&&b.kind==='factory')){s.status='defeat';this.emit('defeat',{reason:'Утрачены строители и производство'});}
+ }
+ tick(dt){if(this.state.status!=='running'||this.state.pendingCinematics.length)return;this.state.time+=dt;for(const unit of this.state.units)this.updateUnit(unit,dt);this.updateEconomy(dt);for(const b of this.state.buildings)if(b.owner==='scavs'&&b.hp>0){b.cooldown=Math.max(0,b.cooldown-dt);const spec=this.buildingSpec(b);if(spec.damage){const enemy=this.nearestEnemy(b,spec.range);if(enemy)this.attack(b,enemy,spec);}}this.fogTimer+=dt;if(this.fogTimer>=.25){this.fogTimer=0;this.updateFog();}this.updateMission();if(this.navigationDirty){this.rebuildNavigation();this.navigationDirty=false;}}
+ advance(seconds){this.accumulator+=Math.max(0,seconds);let ticks=0;while(this.accumulator+1e-8>=this.config.simulationStep){this.accumulator-=this.config.simulationStep;this.tick(this.config.simulationStep);ticks++;}return ticks;}
+ objectives(){const s=this.state,has=kind=>s.buildings.some(b=>b.owner==='rai'&&b.hp>0&&b.completed&&b.kind===kind);return [{id:'base',name:'Развернуть передовую базу',done:has('generator')&&has('factory')&&has('lab')&&(has('bunker')||has('mg-tower'))},{id:'power',name:'Обеспечить энергоснабжение',done:s.powered},{id:'production',name:'Наладить производство техники',done:s.statistics.produced>0},{id:'research',name:'Организовать научные исследования',done:Object.keys(this.config.research).every(key=>s.research[key]),progress:Object.keys(s.research).length+'/3'},{id:'security',name:s.flags.contact?'Уничтожить четыре лагеря':'Обеспечить безопасность района',done:s.camps.every(c=>c.cleared)&&s.flags.raidWon,progress:s.camps.filter(c=>c.cleared).length+'/4'}];}
+ save(){return JSON.stringify({version:1,mission:this.config.id,serial:this.serial,randomState:this.randomState,state:this.state,explored:Array.from(this.explored)});}
+ load(json){const data=typeof json==='string'?JSON.parse(json):json;if(data.version!==1||data.mission!==this.config.id||!Array.isArray(data.state?.units)||data.explored?.length!==16384)throw new Error('Несовместимое сохранение');this.state=data.state;this.serial=data.serial;this.randomState=data.randomState;this.explored.set(data.explored);this.events=[];this.effects=[];this.accumulator=0;this.rebuildNavigation();this.updateFog();}
+}
