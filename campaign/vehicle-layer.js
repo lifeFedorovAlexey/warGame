@@ -12,8 +12,8 @@ import {SCAV_PROFILES,isInfantry} from './scav-unit-profiles.js';
 import {contactRockAt} from './vehicle-contact-rock.js';
 
 // One instance stream per GLB primitive. More units do not add draw calls.
-class PoseBatch{
- constructor(T,parent,prototype,capacity,damage,category='body',lod=0,profile={}){this.T=T;this.prototype=prototype;this.parts=[];this.capacity=capacity;this.damage=damage;this.damageAttribute=new T.InstancedBufferAttribute(new Float32Array(capacity*2),2).setUsage(T.DynamicDrawUsage);prototype.updateMatrixWorld(true);prototype.traverse(node=>{
+export class PoseBatch{
+ constructor(T,parent,prototype,capacity,damage,category='body',lod=0,profile={}){this.T=T;this.prototype=prototype;this.parts=[];this.capacity=capacity;this.damage=damage;this.colorAttribute=new T.InstancedBufferAttribute(new Float32Array(capacity*3),3).setUsage(T.DynamicDrawUsage);this.damageAttribute=new T.InstancedBufferAttribute(new Float32Array(capacity*2),2).setUsage(T.DynamicDrawUsage);prototype.updateMatrixWorld(true);prototype.traverse(node=>{
   if(!node.isMesh)return;let geometry=node.geometry,material=node.material,emission=null,signal=null;
   if(['projector_optics','projector_emitter_core','flamer_igniter'].includes(material.name)){
    geometry=geometry.clone();material=material.clone();signal=material.name==='flamer_igniter'?'ignition':'projector';
@@ -35,10 +35,13 @@ class PoseBatch{
   if(emission)geometry.setAttribute('instanceEmission',emission);
   geometry.setAttribute('instanceDamage',this.damageAttribute);
   const mesh=new T.InstancedMesh(geometry,material,capacity);
+  // Every primitive receives the same vehicle tint and instance ordering.
+  // One shared stream avoids checking and uploading that tint per primitive.
+  mesh.instanceColor=this.colorAttribute;
   if(baked)mesh.instanceMatrix=this.rigidMatrix??=new T.InstancedBufferAttribute(new Float32Array(capacity*16),16).setUsage(T.DynamicDrawUsage);
   mesh.instanceMatrix.setUsage(T.DynamicDrawUsage);mesh.frustumCulled=false;mesh.castShadow=mesh.receiveShadow=true;mesh.count=0;damage.attach(mesh,binding,{instanced:true});parent.add(mesh);this.parts.push({node,mesh,emission,signal,binding,baked});
  });this.staticPrototype=category==='body'&&this.parts.every(p=>!p.binding.dynamic);this.world=new T.Matrix4();this.combined=new T.Matrix4();this.index=0;}
- begin(){this.index=0;this.damageDirty=this.rigidDirty=false;for(const p of this.parts)p.matrixDirty=p.colorDirty=p.emissionDirty=false;}
+ begin(){this.index=0;this.damageDirty=this.rigidDirty=this.colorDirty=false;for(const p of this.parts)p.matrixDirty=p.emissionDirty=false;}
  motion(nodes){this.prototype.traverse(node=>{node.matrixAutoUpdate=false;});for(const node of nodes.filter(Boolean))node.matrixAutoUpdate=true;this.selectiveMotion=true;return this;}
  updatePose(key){
   const revision=this.prototype.userData.damagePoseRevision??0;
@@ -46,10 +49,13 @@ class PoseBatch{
   this.prototype.updateMatrixWorld(!this.selectiveMotion);this.poseKey=key;this.poseRevision=revision;
  }
  grow(){const T=this.T,capacity=this.capacity*2,attr=new T.InstancedBufferAttribute(new Float32Array(capacity*2),2).setUsage(T.DynamicDrawUsage);attr.array.set(this.damageAttribute.array);this.damageAttribute=attr;
+  const colors=new T.InstancedBufferAttribute(new Float32Array(capacity*3),3).setUsage(T.DynamicDrawUsage);colors.array.set(this.colorAttribute.array);this.colorAttribute=colors;
   if(this.rigidMatrix){const grown=new T.InstancedBufferAttribute(new Float32Array(capacity*16),16).setUsage(T.DynamicDrawUsage);grown.array.set(this.rigidMatrix.array);this.rigidMatrix=grown;}
-  for(const part of this.parts){const mesh=part.mesh;mesh.dispose();const matrix=part.baked?this.rigidMatrix:new T.InstancedBufferAttribute(new Float32Array(capacity*16),16).setUsage(T.DynamicDrawUsage);if(!part.baked)matrix.array.set(mesh.instanceMatrix.array);mesh.instanceMatrix=matrix;if(mesh.instanceColor){const color=new T.InstancedBufferAttribute(new Float32Array(capacity*3),3);color.array.set(mesh.instanceColor.array);mesh.instanceColor=color;}mesh.geometry.setAttribute('instanceDamage',attr);if(part.emission){const emission=new T.InstancedBufferAttribute(new Float32Array(capacity),1);emission.array.set(part.emission.array);part.emission=emission;mesh.geometry.setAttribute('instanceEmission',emission);}}this.capacity=capacity;}
+  for(const part of this.parts){const mesh=part.mesh;mesh.dispose();const matrix=part.baked?this.rigidMatrix:new T.InstancedBufferAttribute(new Float32Array(capacity*16),16).setUsage(T.DynamicDrawUsage);if(!part.baked)matrix.array.set(mesh.instanceMatrix.array);mesh.instanceMatrix=matrix;mesh.instanceColor=colors;mesh.geometry.setAttribute('instanceDamage',attr);if(part.emission){const emission=new T.InstancedBufferAttribute(new Float32Array(capacity),1);emission.array.set(part.emission.array);part.emission=emission;mesh.geometry.setAttribute('instanceEmission',emission);}}this.capacity=capacity;}
  add(transform,color,signals={},damageInfo={row:0,lod:2},poseKey=null){
   if(this.index>=this.capacity)this.grow();const index=this.index++;
+  const colors=this.colorAttribute;
+  if(colors.getX(index)!==Math.fround(color.r)||colors.getY(index)!==Math.fround(color.g)||colors.getZ(index)!==Math.fround(color.b)){colors.setXYZ(index,color.r,color.g,color.b);this.colorDirty=true;}
   if(this.damageAttribute.getX(index)!==damageInfo.row||this.damageAttribute.getY(index)!==damageInfo.lod){this.damageAttribute.setXY(index,damageInfo.row,damageInfo.lod);this.damageDirty=true;}
   if(!this.staticPrototype)this.updatePose(poseKey);
   let rigidWritten=false;
@@ -61,12 +67,10 @@ class PoseBatch{
    if(changed){part.mesh.setMatrixAt(index,combined);if(part.baked)this.rigidDirty=true;else part.matrixDirty=true;}
    if(part.baked)rigidWritten=true;
    }
-   const c=part.mesh.instanceColor;
-   if(!c||c.getX(index)!==Math.fround(color.r)||c.getY(index)!==Math.fround(color.g)||c.getZ(index)!==Math.fround(color.b)){part.mesh.setColorAt(index,color);part.colorDirty=true;}
    if(part.emission&&part.emission.getX(index)!==Math.fround(signals[part.signal]??0)){part.emission.setX(index,signals[part.signal]??0);part.emissionDirty=true;}
   }
  }
- end(){if(this.damageDirty)this.damageAttribute.needsUpdate=true;if(this.rigidDirty)this.rigidMatrix.needsUpdate=true;for(const p of this.parts){const {mesh,emission}=p;mesh.count=this.index;mesh.visible=this.index>0;if(p.matrixDirty)mesh.instanceMatrix.needsUpdate=true;if(p.colorDirty)mesh.instanceColor.needsUpdate=true;if(emission&&p.emissionDirty)emission.needsUpdate=true;}}
+ end(){if(this.damageDirty)this.damageAttribute.needsUpdate=true;if(this.rigidDirty)this.rigidMatrix.needsUpdate=true;if(this.colorDirty)this.colorAttribute.needsUpdate=true;for(const p of this.parts){const {mesh,emission}=p;mesh.count=this.index;mesh.visible=this.index>0;if(p.matrixDirty)mesh.instanceMatrix.needsUpdate=true;if(emission&&p.emissionDirty)emission.needsUpdate=true;}}
  visible(value){for(const {mesh} of this.parts)mesh.visible=value;}
 }
 
