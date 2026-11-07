@@ -399,6 +399,7 @@ function updatePalette() {
   $('build-cards').style.setProperty('--build-columns',entries.length);
   $('build-cards').replaceChildren(...entries.map(([kind,spec]) => {
     const b = button(spec.name, spec.cost + ' ⚡ · ' + spec.seconds + ' с', () => beginPlacement(kind), !available([kind,spec]));
+    if (spec.oilSlots) b.title = 'До ' + spec.oilSlots + ' вышек';
     const image = document.createElement('img');
     image.src = cards[kind];
     image.alt = '';
@@ -577,12 +578,13 @@ function updateUi() {
   if(marker)$('raid-focus').textContent=marker.label;
   const raidHint=contact?'Рейдеры в зоне обзора.':s.flags.raidStarted?'Рейдеры в пути.':'Прикройте базу. Ожидается рейд.';
   const repair=mobile.some(u=>u.kind==='builder')&&vehicles().some(u=>u.hp<u.maxHp);
-  $('hint').textContent = s.status !== 'running' ? '' : s.flags.contact && !s.flags.raidWon ? raidHint : repair ? 'ПКМ по повреждённой машине — ремонт.' : !s.powered ? 'Генератор через «Строить». Вышка по клику на нефтяную точку.' : !tasks[0].done ? 'Завод, НИИ и ДОТ.' : s.flags.lastRevealed ? 'Четвёртый лагерь открыт на юге.' : 'Разведайте лагеря и доставьте артефакты.';
+  $('hint').textContent = s.status !== 'running' ? '' : s.flags.contact && !s.flags.raidWon ? raidHint : repair ? 'ПКМ по повреждённой машине — ремонт.' : !s.powered ? 'АЭС через «Строить». Вышка по клику на нефтяную точку.' : !tasks[0].done ? 'Завод, НИИ и ДОТ.' : s.flags.lastRevealed ? 'Четвёртый лагерь открыт на юге.' : 'Разведайте лагеря и доставьте артефакты.';
   const entityName = first && (projectLabel(first.kind,first.projectId,first.designName)
     ?? config.buildings[first.kind]?.name ?? config.camps.find(camp=>camp.id===first.campId)?.name ?? 'Лагерь');
   $('selection').textContent = group.length > 1 ? 'Группа · ' + group.length : entityName ?? 'Нет выделения';
   const hp = group.reduce((sum,entity)=>sum+entity.hp,0), maxHp = group.reduce((sum,entity)=>sum+entity.maxHp,0);
-  const wellStatus=group.length===1&&first?.kind==='derrick'&&first.completed?(first.powered?' · Качает':' · Нет питания'):'';
+  const wellStatus=group.length===1&&first?.owner==='rai'&&first.kind==='derrick'&&first.completed
+    ? ' · '+(first.powered?'Качает':s.powered?'Лимит АЭС':'Нет питания'):'';
   $('details').textContent = orderMode ? (orderMode === 'attack' ? 'ЛКМ по врагу или по земле' : 'ЛКМ — выбрать точку') : first?.clearing ? 'Освобождение площадки' : first?.awaitingWorkers ? 'В очереди строителей' : first ? Math.ceil(hp) + '/' + maxHp + (first.completed === false ? ' · ' + Math.floor(first.progress*100) + '%' : ' HP')+wellStatus : 'Выберите машину';
   $('move-order').classList.toggle('active', orderMode === 'move');
   $('attack-order').classList.toggle('active', orderMode === 'attack');

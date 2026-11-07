@@ -56,7 +56,7 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   assert.deepEqual(buildLayout,{rows:1,scroll:false,mapClick:true},
    'The compact build tray leaves the empty part of the dock clickable on the map');
   await page.setViewportSize(viewport);
-  await page.getByRole('button',{name:/^Генератор/}).click();
+  await page.getByRole('button',{name:/^АЭС/}).click();
   await page.locator('#suggest-site').click();
   const position=await page.evaluate(()=>{const w=window.campaign.world;return w.screen(w.controls.target,0);});
   await page.mouse.click(position.x,position.y);

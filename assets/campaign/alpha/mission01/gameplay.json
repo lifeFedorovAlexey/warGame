@@ -27,7 +27,7 @@
     "raider": {"name": "Рейдер", "cost": 0, "seconds": 0, "hp": 170, "speed": 23, "range": 115, "damage": 6, "cooldown": 0.8, "vision": 180, "role": "combat"}
   },
   "buildings": {
-    "generator": {"name": "Генератор", "realSizeMetres": [12, 10, 5], "footprintMetres": [14, 12], "cost": 140, "seconds": 20, "hp": 950, "vision": 130, "power": 0, "oilSlots": 4, "workAnchor": [0, -8, 0]},
+    "generator": {"name": "АЭС", "realSizeMetres": [12, 10, 5], "footprintMetres": [14, 12], "cost": 140, "seconds": 20, "hp": 950, "vision": 130, "power": 0, "oilSlots": 4, "workAnchor": [0, -8, 0]},
     "derrick": {"name": "Вышка", "realSizeMetres": [8, 8, 14], "footprintMetres": [10, 10], "cost": 90, "seconds": 16, "hp": 650, "vision": 100, "power": 0, "energyPerSecond": 5, "requiresOil": true, "workAnchor": [0, -6, 0]},
     "factory": {"name": "Завод", "realSizeMetres": [26, 20, 9], "footprintMetres": [28, 24], "cost": 220, "seconds": 35, "hp": 1400, "vision": 150, "power": 1, "workAnchor": [0, -14, 0], "exitAnchor": [0, -18, 0], "production": ["bukhanka", "builder", "flamer"]},
     "lab": {"name": "НИИ", "realSizeMetres": [16, 14, 7], "footprintMetres": [18, 16], "cost": 180, "seconds": 28, "hp": 1000, "vision": 150, "power": 0.7, "workAnchor": [0, -10, 0]},
