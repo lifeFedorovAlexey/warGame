@@ -1,6 +1,6 @@
 {
   "id": "lab",
-  "name": "Исследовательский центр",
+  "name": "НИИ",
   "status": "industrial-atlas",
   "reference": "references/buildings/industrial-atlas.png",
   "units": "metres",

@@ -575,7 +575,7 @@ function updateUi() {
   if(marker)$('raid-focus').textContent=marker.label;
   const raidHint=contact?'Рейдеры в зоне обзора.':s.flags.raidStarted?'Рейдеры в пути.':'Прикройте базу. Ожидается рейд.';
   const repair=mobile.some(u=>u.kind==='builder')&&vehicles().some(u=>u.hp<u.maxHp);
-  $('hint').textContent = s.status !== 'running' ? '' : s.flags.contact && !s.flags.raidWon ? raidHint : repair ? 'ПКМ по повреждённой машине — ремонт.' : !s.powered ? 'Генератор через «Строить». Вышка по клику на нефтяную точку.' : !tasks[0].done ? 'Завод, лаборатория и укрытие.' : s.flags.lastRevealed ? 'Четвёртый лагерь открыт на юге.' : 'Разведайте лагеря и доставьте артефакты.';
+  $('hint').textContent = s.status !== 'running' ? '' : s.flags.contact && !s.flags.raidWon ? raidHint : repair ? 'ПКМ по повреждённой машине — ремонт.' : !s.powered ? 'Генератор через «Строить». Вышка по клику на нефтяную точку.' : !tasks[0].done ? 'Завод, НИИ и ДОТ.' : s.flags.lastRevealed ? 'Четвёртый лагерь открыт на юге.' : 'Разведайте лагеря и доставьте артефакты.';
   $('selection').textContent = group.length > 1 ? 'Группа · ' + group.length : first?.designName ?? (config.units[first?.kind] ?? config.buildings[first?.kind])?.name ?? (first ? 'Лагерь отбросов' : 'Нет выделения');
   const hp = group.reduce((sum,entity)=>sum+entity.hp,0), maxHp = group.reduce((sum,entity)=>sum+entity.maxHp,0);
   const wellStatus=group.length===1&&first?.kind==='derrick'&&first.completed?(first.powered?' · Качает':' · Нет питания'):'';
@@ -652,7 +652,7 @@ function events() {
     }
     if (event.type === 'unit-produced') toast((event.name ?? config.units[event.kind].name) + ' · готово к выезду');
     if (event.type === 'construction-refused') toast(event.reason);
-    if (event.type === 'artifact-collected') toast('Артефакт доставлен в лабораторию');
+    if (event.type === 'artifact-collected') toast('Артефакт доставлен в НИИ');
     if (event.type === 'camp-cleared') toast('Лагерь зачищен');
   }
 }
