@@ -1,0 +1,1391 @@
+{
+  "schemaVersion": 2,
+  "source": {
+    "path": "docs/campaign/alpha/mission01-script-v3.md",
+    "sha256": "a155ba61e84be384d0b919d5249a07334542317cf9ea353344f2425a78a780a4"
+  },
+  "speakers": {
+    "narrator": {
+      "name": "Диктор",
+      "voice": "dmitri",
+      "lengthScale": 1.08,
+      "pitchSemitones": -0.8,
+      "effect": "clean"
+    },
+    "commander": {
+      "name": "Командир",
+      "voice": "denis",
+      "lengthScale": 1.04,
+      "pitchSemitones": -1.0,
+      "effect": "clean"
+    },
+    "warrant": {
+      "name": "Прапорщик",
+      "voice": "dmitri",
+      "lengthScale": 1.12,
+      "pitchSemitones": -1.6,
+      "effect": "clean"
+    },
+    "general": {
+      "name": "Генерал",
+      "voice": "dmitri",
+      "lengthScale": 1.16,
+      "pitchSemitones": -0.5,
+      "effect": "clean"
+    },
+    "radio": {
+      "name": "Радист",
+      "voice": "denis",
+      "lengthScale": 0.97,
+      "pitchSemitones": 0.5,
+      "effect": "radio"
+    },
+    "scientist": {
+      "name": "Учёный",
+      "voice": "dmitri",
+      "lengthScale": 1.06,
+      "pitchSemitones": 0.8,
+      "effect": "clean"
+    },
+    "scout": {
+      "name": "Разведчик",
+      "voice": "denis",
+      "lengthScale": 1.0,
+      "pitchSemitones": 0.8,
+      "effect": "radio"
+    },
+    "raider": {
+      "name": "Отброс",
+      "voice": "dmitri",
+      "lengthScale": 0.98,
+      "pitchSemitones": -1.4,
+      "effect": "radio"
+    },
+    "chief": {
+      "name": "Петрович",
+      "voice": "dmitri",
+      "lengthScale": 1.05,
+      "pitchSemitones": -1.7,
+      "effect": "radio"
+    },
+    "past": {
+      "name": "Голос из прошлого",
+      "voice": "dmitri",
+      "lengthScale": 1.26,
+      "pitchSemitones": -2.0,
+      "effect": "dream"
+    },
+    "soldier": {
+      "name": "Солдат",
+      "voice": "denis",
+      "lengthScale": 0.98,
+      "pitchSemitones": 1.2,
+      "effect": "room"
+    },
+    "officer": {
+      "name": "Офицер",
+      "voice": "denis",
+      "lengthScale": 1.03,
+      "pitchSemitones": -0.2,
+      "effect": "room"
+    },
+    "builder": {
+      "name": "Строитель",
+      "voice": "denis",
+      "lengthScale": 1.06,
+      "pitchSemitones": -0.4,
+      "effect": "radio"
+    },
+    "driver": {
+      "name": "Водитель",
+      "voice": "denis",
+      "lengthScale": 1.05,
+      "pitchSemitones": -0.8,
+      "effect": "radio"
+    }
+  },
+  "scenes": [
+    {
+      "id": "p01",
+      "title": "Последний сон",
+      "cues": [
+        "m01v2-p01-l001",
+        "m01v2-p01-l002"
+      ],
+      "sourceLine": 17
+    },
+    {
+      "id": "p02",
+      "title": "Казарма",
+      "cues": [
+        "m01v2-p02-l001",
+        "m01v2-p02-l002",
+        "m01v2-p02-l003",
+        "m01v2-p02-l004"
+      ],
+      "sourceLine": 31
+    },
+    {
+      "id": "p03",
+      "title": "Вывеска «Рай»",
+      "cues": [
+        "m01v2-p03-l001",
+        "m01v2-p03-l002",
+        "m01v2-p03-l003"
+      ],
+      "sourceLine": 47
+    },
+    {
+      "id": "01",
+      "title": "Кофе и электростанция",
+      "cues": [
+        "m01v2-01-l001",
+        "m01v2-01-l002",
+        "m01v2-01-l003"
+      ],
+      "sourceLine": 66
+    },
+    {
+      "id": "01a",
+      "title": "Если строительство уже началось",
+      "cues": [
+        "m01v2-01a-l001",
+        "m01v2-01a-l002",
+        "m01v2-01a-l003"
+      ],
+      "sourceLine": 83
+    },
+    {
+      "id": "01b",
+      "title": "Если электростанция уже готова",
+      "cues": [
+        "m01v2-01b-l001",
+        "m01v2-01b-l002",
+        "m01v2-01b-l003"
+      ],
+      "sourceLine": 96
+    },
+    {
+      "id": "02",
+      "title": "Выданная бронетехника",
+      "cues": [
+        "m01v2-02-l001",
+        "m01v2-02-l002",
+        "m01v2-02-l003"
+      ],
+      "sourceLine": 111
+    },
+    {
+      "id": "03",
+      "title": "Электростанция и завод",
+      "cues": [
+        "m01v2-03-l001",
+        "m01v2-03-l002",
+        "m01v2-03-l003",
+        "m01v2-03-l004"
+      ],
+      "sourceLine": 124
+    },
+    {
+      "id": "04",
+      "title": "Завод готов",
+      "cues": [
+        "m01v2-04-l001"
+      ],
+      "sourceLine": 142
+    },
+    {
+      "id": "05",
+      "title": "Первая «Буханка»",
+      "cues": [
+        "m01v2-05-l001"
+      ],
+      "sourceLine": 149
+    },
+    {
+      "id": "06",
+      "title": "Идеальный дизайн",
+      "cues": [
+        "m01v2-06-l001",
+        "m01v2-06-l002",
+        "m01v2-06-l003"
+      ],
+      "sourceLine": 156
+    },
+    {
+      "id": "07",
+      "title": "Наследники цивилизации",
+      "cues": [
+        "m01v2-07-l001",
+        "m01v2-07-l002",
+        "m01v2-07-l003"
+      ],
+      "sourceLine": 175
+    },
+    {
+      "id": "08",
+      "title": "Международная обстановка",
+      "cues": [
+        "m01v2-08-l001",
+        "m01v2-08-l002"
+      ],
+      "sourceLine": 188
+    },
+    {
+      "id": "09",
+      "title": "Синаптическая связь",
+      "cues": [
+        "m01v2-09-l001",
+        "m01v2-09-l002",
+        "m01v2-09-l003"
+      ],
+      "sourceLine": 198
+    },
+    {
+      "id": "10",
+      "title": "Неизвестные машины",
+      "cues": [
+        "m01v2-10-l001",
+        "m01v2-10-l002",
+        "m01v2-10-l003"
+      ],
+      "sourceLine": 217
+    },
+    {
+      "id": "10-alt",
+      "title": "Неизвестные машины — другое направление",
+      "cues": [
+        "m01v2-10-alt-l001",
+        "m01v2-10-alt-l002",
+        "m01v2-10-alt-l003"
+      ],
+      "sourceLine": 230
+    },
+    {
+      "id": "11",
+      "title": "Первые переговоры",
+      "cues": [
+        "m01v2-11-l001",
+        "m01v2-11-l002"
+      ],
+      "sourceLine": 232
+    },
+    {
+      "id": "12",
+      "title": "Первый сектор зачищен",
+      "cues": [
+        "m01v2-12-l001"
+      ],
+      "sourceLine": 246
+    },
+    {
+      "id": "13",
+      "title": "Кто такие отбросы",
+      "cues": [
+        "m01v2-13-l001",
+        "m01v2-13-l002",
+        "m01v2-13-l003"
+      ],
+      "sourceLine": 253
+    },
+    {
+      "id": "14",
+      "title": "Синяя изолента",
+      "cues": [
+        "m01v2-14-l001",
+        "m01v2-14-l002",
+        "m01v2-14-l003"
+      ],
+      "sourceLine": 272
+    },
+    {
+      "id": "15",
+      "title": "Жёлтая изолента",
+      "cues": [
+        "m01v2-15-l001",
+        "m01v2-15-l002",
+        "m01v2-15-l003"
+      ],
+      "sourceLine": 287
+    },
+    {
+      "id": "16",
+      "title": "Огнемёт исследован",
+      "cues": [
+        "m01v2-16-l001",
+        "m01v2-16-l002",
+        "m01v2-16-l003"
+      ],
+      "sourceLine": 302
+    },
+    {
+      "id": "16-alt",
+      "title": "Огнемёт исследован — самостоятельный доклад",
+      "cues": [
+        "m01v2-16-alt-l001",
+        "m01v2-16-alt-l002",
+        "m01v2-16-alt-l003"
+      ],
+      "sourceLine": 317
+    },
+    {
+      "id": "17",
+      "title": "Склад вооружения",
+      "cues": [
+        "m01v2-17-l001",
+        "m01v2-17-l002",
+        "m01v2-17-l003"
+      ],
+      "sourceLine": 332
+    },
+    {
+      "id": "18",
+      "title": "Пулемёты улучшены",
+      "cues": [
+        "m01v2-18-l001",
+        "m01v2-18-l002",
+        "m01v2-18-l003"
+      ],
+      "sourceLine": 347
+    },
+    {
+      "id": "19",
+      "title": "Водонапорная башня",
+      "cues": [
+        "m01v2-19-l001",
+        "m01v2-19-l002",
+        "m01v2-19-l003"
+      ],
+      "sourceLine": 366
+    },
+    {
+      "id": "20",
+      "title": "Научный прорыв",
+      "cues": [
+        "m01v2-20-l001",
+        "m01v2-20-l002",
+        "m01v2-20-l003"
+      ],
+      "sourceLine": 381
+    },
+    {
+      "id": "21",
+      "title": "Целые институты",
+      "cues": [
+        "m01v2-21-l001",
+        "m01v2-21-l002",
+        "m01v2-21-l003"
+      ],
+      "sourceLine": 394
+    },
+    {
+      "id": "22",
+      "title": "Петрович",
+      "cues": [
+        "m01v2-22-l001",
+        "m01v2-22-l002",
+        "m01v2-22-l003"
+      ],
+      "sourceLine": 411
+    },
+    {
+      "id": "23",
+      "title": "Конституция",
+      "cues": [
+        "m01v2-23-l001",
+        "m01v2-23-l002",
+        "m01v2-23-l003"
+      ],
+      "sourceLine": 426
+    },
+    {
+      "id": "24",
+      "title": "Сравнение хозяйства",
+      "cues": [
+        "m01v2-24-l001",
+        "m01v2-24-l002"
+      ],
+      "sourceLine": 441
+    },
+    {
+      "id": "25",
+      "title": "Финальный доклад",
+      "cues": [
+        "m01v2-25-l001",
+        "m01v2-25-l002"
+      ],
+      "sourceLine": 457
+    },
+    {
+      "id": "26",
+      "title": "Цивилизацию восстановили",
+      "cues": [
+        "m01v2-26-l001",
+        "m01v2-26-l002",
+        "m01v2-26-l003"
+      ],
+      "sourceLine": 469
+    },
+    {
+      "id": "27",
+      "title": "Энергетический всплеск",
+      "cues": [
+        "m01v2-27-l001",
+        "m01v2-27-l002",
+        "m01v2-27-l003"
+      ],
+      "sourceLine": 482
+    },
+    {
+      "id": "28",
+      "title": "Опасен? Ценный? Наш?",
+      "cues": [
+        "m01v2-28-l001",
+        "m01v2-28-l002",
+        "m01v2-28-l003"
+      ],
+      "sourceLine": 495
+    },
+    {
+      "id": "29",
+      "title": "Если электростанция работает",
+      "cues": [
+        "m01v2-29-l001",
+        "m01v2-29-l002",
+        "m01v2-29-l003"
+      ],
+      "sourceLine": 512
+    },
+    {
+      "id": "d01",
+      "title": "Испытания огнемёта",
+      "cues": [
+        "m01v2-d01-l001",
+        "m01v2-d01-l002",
+        "m01v2-d01-l003"
+      ],
+      "sourceLine": 531
+    },
+    {
+      "id": "d02",
+      "title": "Трофейное продовольствие",
+      "cues": [
+        "m01v2-d02-l001",
+        "m01v2-d02-l002",
+        "m01v2-d02-l003"
+      ],
+      "sourceLine": 544
+    },
+    {
+      "id": "d03",
+      "title": "Генератор опять встал",
+      "cues": [
+        "m01v2-d03-l001",
+        "m01v2-d03-l002"
+      ],
+      "sourceLine": 557
+    },
+    {
+      "id": "d04",
+      "title": "Луна",
+      "cues": [
+        "m01v2-d04-l001",
+        "m01v2-d04-l002"
+      ],
+      "sourceLine": 567
+    }
+  ],
+  "dialogue": [
+    {
+      "id": "m01v2-p01-l001",
+      "speaker": "past",
+      "text": "Мы умрём и попадём в рай…",
+      "pauseAfter": 1.2,
+      "sourceLine": 23
+    },
+    {
+      "id": "m01v2-p01-l002",
+      "speaker": "past",
+      "text": "А они просто сдохнут…",
+      "pauseAfter": 0.2,
+      "sourceLine": 27
+    },
+    {
+      "id": "m01v2-p02-l001",
+      "speaker": "commander",
+      "text": "Сон приснился. Будто все умерли.",
+      "pauseAfter": 0.2,
+      "sourceLine": 34
+    },
+    {
+      "id": "m01v2-p02-l002",
+      "speaker": "warrant",
+      "text": "А приказ на смерть личного состава был?",
+      "pauseAfter": 0.2,
+      "sourceLine": 37
+    },
+    {
+      "id": "m01v2-p02-l003",
+      "speaker": "commander",
+      "text": "Не было.",
+      "pauseAfter": 0.7,
+      "sourceLine": 40
+    },
+    {
+      "id": "m01v2-p02-l004",
+      "speaker": "commander",
+      "text": "Подъём! Родину восстанавливать будем!",
+      "pauseAfter": 0.2,
+      "sourceLine": 45
+    },
+    {
+      "id": "m01v2-p03-l001",
+      "speaker": "warrant",
+      "text": "Криво повесил.",
+      "pauseAfter": 0.2,
+      "sourceLine": 52
+    },
+    {
+      "id": "m01v2-p03-l002",
+      "speaker": "soldier",
+      "text": "Так стена кривая.",
+      "pauseAfter": 0.2,
+      "sourceLine": 55
+    },
+    {
+      "id": "m01v2-p03-l003",
+      "speaker": "warrant",
+      "text": "Тогда нормально.",
+      "pauseAfter": 0.2,
+      "sourceLine": 58
+    },
+    {
+      "id": "m01v2-01-l001",
+      "speaker": "general",
+      "text": "А кофе почему нет?",
+      "pauseAfter": 0.2,
+      "sourceLine": 73
+    },
+    {
+      "id": "m01v2-01-l002",
+      "speaker": "commander",
+      "text": "Потому что электричества нет.",
+      "pauseAfter": 0.2,
+      "sourceLine": 76
+    },
+    {
+      "id": "m01v2-01-l003",
+      "speaker": "general",
+      "text": "Так электростанцию стройте! Вам на всё приказ нужен?",
+      "pauseAfter": 0.2,
+      "sourceLine": 79
+    },
+    {
+      "id": "m01v2-01a-l001",
+      "speaker": "general",
+      "text": "Что с электростанцией?",
+      "pauseAfter": 0.2,
+      "sourceLine": 88
+    },
+    {
+      "id": "m01v2-01a-l002",
+      "speaker": "commander",
+      "text": "Строится.",
+      "pauseAfter": 0.2,
+      "sourceLine": 91
+    },
+    {
+      "id": "m01v2-01a-l003",
+      "speaker": "general",
+      "text": "Тогда и кофе подождёт. К делу!",
+      "pauseAfter": 0.2,
+      "sourceLine": 94
+    },
+    {
+      "id": "m01v2-01b-l001",
+      "speaker": "general",
+      "text": "Со светом разобрались?",
+      "pauseAfter": 0.2,
+      "sourceLine": 101
+    },
+    {
+      "id": "m01v2-01b-l002",
+      "speaker": "commander",
+      "text": "Так точно.",
+      "pauseAfter": 0.2,
+      "sourceLine": 104
+    },
+    {
+      "id": "m01v2-01b-l003",
+      "speaker": "general",
+      "text": "А кофе всё равно нет. К делу!",
+      "pauseAfter": 0.2,
+      "sourceLine": 107
+    },
+    {
+      "id": "m01v2-02-l001",
+      "speaker": "commander",
+      "text": "А бронетехника что?",
+      "pauseAfter": 0.2,
+      "sourceLine": 116
+    },
+    {
+      "id": "m01v2-02-l002",
+      "speaker": "general",
+      "text": "УАЗ-452 с пулемётным вооружением.",
+      "pauseAfter": 0.2,
+      "sourceLine": 119
+    },
+    {
+      "id": "m01v2-02-l003",
+      "speaker": "warrant",
+      "text": "Ясно. Броня пока в научной разработке.",
+      "pauseAfter": 0.2,
+      "sourceLine": 122
+    },
+    {
+      "id": "m01v2-03-l001",
+      "speaker": "commander",
+      "text": "Электростанция готова?",
+      "pauseAfter": 0.2,
+      "sourceLine": 129
+    },
+    {
+      "id": "m01v2-03-l002",
+      "speaker": "builder",
+      "text": "Так точно!",
+      "pauseAfter": 0.2,
+      "sourceLine": 132
+    },
+    {
+      "id": "m01v2-03-l003",
+      "speaker": "commander",
+      "text": "А почему завод без электричества?",
+      "pauseAfter": 0.2,
+      "sourceLine": 135
+    },
+    {
+      "id": "m01v2-03-l004",
+      "speaker": "builder",
+      "text": "Так мы его ещё не построили, товарищ командир.",
+      "pauseAfter": 0.2,
+      "sourceLine": 138
+    },
+    {
+      "id": "m01v2-04-l001",
+      "speaker": "builder",
+      "text": "Завод построили. Осталось придумать, что выпускать.",
+      "pauseAfter": 0.2,
+      "sourceLine": 147
+    },
+    {
+      "id": "m01v2-05-l001",
+      "speaker": "builder",
+      "text": "С конвейера сошла. Сама. Никто не толкал.",
+      "pauseAfter": 0.2,
+      "sourceLine": 154
+    },
+    {
+      "id": "m01v2-06-l001",
+      "speaker": "warrant",
+      "text": "Вот «Буханку» зря обновили.",
+      "pauseAfter": 0.2,
+      "sourceLine": 161
+    },
+    {
+      "id": "m01v2-06-l002",
+      "speaker": "commander",
+      "text": "Что не так?",
+      "pauseAfter": 0.2,
+      "sourceLine": 164
+    },
+    {
+      "id": "m01v2-06-l003",
+      "speaker": "warrant",
+      "text": "Ручку дверную поменяли. Сорок лет нормально было.",
+      "pauseAfter": 0.2,
+      "sourceLine": 167
+    },
+    {
+      "id": "m01v2-07-l001",
+      "speaker": "general",
+      "text": "Организация «Рай» — единственный законный наследник цивилизации.",
+      "pauseAfter": 0.2,
+      "sourceLine": 180
+    },
+    {
+      "id": "m01v2-07-l002",
+      "speaker": "officer",
+      "text": "На каком основании?",
+      "pauseAfter": 0.2,
+      "sourceLine": 183
+    },
+    {
+      "id": "m01v2-07-l003",
+      "speaker": "general",
+      "text": "Других документов пока никто не предъявил.",
+      "pauseAfter": 0.2,
+      "sourceLine": 186
+    },
+    {
+      "id": "m01v2-08-l001",
+      "speaker": "officer",
+      "text": "Товарищ генерал, НАТО больше нет. Санкции хоть сняли?",
+      "pauseAfter": 0.2,
+      "sourceLine": 193
+    },
+    {
+      "id": "m01v2-08-l002",
+      "speaker": "general",
+      "text": "Вот это надо уточнить.",
+      "pauseAfter": 0.2,
+      "sourceLine": 196
+    },
+    {
+      "id": "m01v2-09-l001",
+      "speaker": "general",
+      "text": "Ищем довоенную синаптическую связь. Приказы прямо из мозга в мозг.",
+      "pauseAfter": 0.2,
+      "sourceLine": 203
+    },
+    {
+      "id": "m01v2-09-l002",
+      "speaker": "warrant",
+      "text": "А если у начальства мозгов нет?",
+      "pauseAfter": 0.2,
+      "sourceLine": 206
+    },
+    {
+      "id": "m01v2-09-l003",
+      "speaker": "general",
+      "text": "Поэтому технология пока экспериментальная.",
+      "pauseAfter": 0.2,
+      "sourceLine": 209
+    },
+    {
+      "id": "m01v2-10-l001",
+      "speaker": "scout",
+      "text": "Командир, на северо-востоке неизвестная техника.",
+      "pauseAfter": 0.2,
+      "sourceLine": 222
+    },
+    {
+      "id": "m01v2-10-l002",
+      "speaker": "commander",
+      "text": "Наши?",
+      "pauseAfter": 0.2,
+      "sourceLine": 225
+    },
+    {
+      "id": "m01v2-10-l003",
+      "speaker": "scout",
+      "text": "Нет. У наших номера есть.",
+      "pauseAfter": 0.2,
+      "sourceLine": 228
+    },
+    {
+      "id": "m01v2-10-alt-l001",
+      "speaker": "scout",
+      "text": "Командир, обнаружена неизвестная техника",
+      "pauseAfter": 0.2,
+      "sourceLine": 230
+    },
+    {
+      "id": "m01v2-10-alt-l002",
+      "speaker": "commander",
+      "text": "Наши?",
+      "pauseAfter": 0.2,
+      "sourceLine": 225
+    },
+    {
+      "id": "m01v2-10-alt-l003",
+      "speaker": "scout",
+      "text": "Нет. У наших номера есть.",
+      "pauseAfter": 0.2,
+      "sourceLine": 228
+    },
+    {
+      "id": "m01v2-11-l001",
+      "speaker": "raider",
+      "text": "Какая ещё Федерация?! Тут наша земля!",
+      "pauseAfter": 0.2,
+      "sourceLine": 237
+    },
+    {
+      "id": "m01v2-11-l002",
+      "speaker": "commander",
+      "text": "Значит, будете федеративным округом.",
+      "pauseAfter": 0.2,
+      "sourceLine": 240
+    },
+    {
+      "id": "m01v2-12-l001",
+      "speaker": "commander",
+      "text": "Сектор зачищен. Проверьте машины. Продолжаем операцию.",
+      "pauseAfter": 0.2,
+      "sourceLine": 251
+    },
+    {
+      "id": "m01v2-13-l001",
+      "speaker": "radio",
+      "text": "Противник идентифицирован. Отбросы. Живут на свалках.",
+      "pauseAfter": 0.2,
+      "sourceLine": 258
+    },
+    {
+      "id": "m01v2-13-l002",
+      "speaker": "commander",
+      "text": "А мы?",
+      "pauseAfter": 0.2,
+      "sourceLine": 261
+    },
+    {
+      "id": "m01v2-13-l003",
+      "speaker": "warrant",
+      "text": "У нас мусор на балансе.",
+      "pauseAfter": 0.2,
+      "sourceLine": 264
+    },
+    {
+      "id": "m01v2-14-l001",
+      "speaker": "scout",
+      "text": "Командир, нашли агрегат. Синей изолентой к машине примотан.",
+      "pauseAfter": 0.2,
+      "sourceLine": 277
+    },
+    {
+      "id": "m01v2-14-l002",
+      "speaker": "commander",
+      "text": "Снять можете?",
+      "pauseAfter": 0.2,
+      "sourceLine": 280
+    },
+    {
+      "id": "m01v2-14-l003",
+      "speaker": "scout",
+      "text": "Синюю сняли. Под ней жёлтая.",
+      "pauseAfter": 0.2,
+      "sourceLine": 283
+    },
+    {
+      "id": "m01v2-15-l001",
+      "speaker": "commander",
+      "text": "А жёлтую сняли?",
+      "pauseAfter": 0.2,
+      "sourceLine": 292
+    },
+    {
+      "id": "m01v2-15-l002",
+      "speaker": "scout",
+      "text": "Никак нельзя. Похоже, заводская.",
+      "pauseAfter": 0.2,
+      "sourceLine": 295
+    },
+    {
+      "id": "m01v2-15-l003",
+      "speaker": "commander",
+      "text": "В НИИ. Пусть по науке разбираются.",
+      "pauseAfter": 0.2,
+      "sourceLine": 298
+    },
+    {
+      "id": "m01v2-16-l001",
+      "speaker": "scientist",
+      "text": "Образец изучен. Это огнемёт.",
+      "pauseAfter": 0.2,
+      "sourceLine": 307
+    },
+    {
+      "id": "m01v2-16-l002",
+      "speaker": "commander",
+      "text": "А синяя изолента зачем?",
+      "pauseAfter": 0.2,
+      "sourceLine": 310
+    },
+    {
+      "id": "m01v2-16-l003",
+      "speaker": "scientist",
+      "text": "Чтобы жёлтая не разматывалась.",
+      "pauseAfter": 0.2,
+      "sourceLine": 313
+    },
+    {
+      "id": "m01v2-16-alt-l001",
+      "speaker": "scientist",
+      "text": "Изучили агрегат с синей и жёлтой изолентой. Это огнемёт.",
+      "pauseAfter": 0.2,
+      "sourceLine": 320
+    },
+    {
+      "id": "m01v2-16-alt-l002",
+      "speaker": "commander",
+      "text": "А зачем два слоя?",
+      "pauseAfter": 0.2,
+      "sourceLine": 323
+    },
+    {
+      "id": "m01v2-16-alt-l003",
+      "speaker": "scientist",
+      "text": "Один держал другой. Само устройство почти не пострадало.",
+      "pauseAfter": 0.2,
+      "sourceLine": 326
+    },
+    {
+      "id": "m01v2-17-l001",
+      "speaker": "scout",
+      "text": "Командир, на складе обнаружены новые пулемётные патроны.",
+      "pauseAfter": 0.2,
+      "sourceLine": 337
+    },
+    {
+      "id": "m01v2-17-l002",
+      "speaker": "commander",
+      "text": "Состояние?",
+      "pauseAfter": 0.2,
+      "sourceLine": 340
+    },
+    {
+      "id": "m01v2-17-l003",
+      "speaker": "scout",
+      "text": "Хорошее. Даже изолента сохранилась.",
+      "pauseAfter": 0.2,
+      "sourceLine": 343
+    },
+    {
+      "id": "m01v2-18-l001",
+      "speaker": "scientist",
+      "text": "Увеличена скорость подачи патронов.",
+      "pauseAfter": 0.2,
+      "sourceLine": 352
+    },
+    {
+      "id": "m01v2-18-l002",
+      "speaker": "commander",
+      "text": "За счёт чего?",
+      "pauseAfter": 0.2,
+      "sourceLine": 355
+    },
+    {
+      "id": "m01v2-18-l003",
+      "speaker": "scientist",
+      "text": "Перестали заматывать их поштучно.",
+      "pauseAfter": 0.2,
+      "sourceLine": 358
+    },
+    {
+      "id": "m01v2-19-l001",
+      "speaker": "scout",
+      "text": "Командир, отбросы поставили пулемёт на водонапорную башню.",
+      "pauseAfter": 0.2,
+      "sourceLine": 371
+    },
+    {
+      "id": "m01v2-19-l002",
+      "speaker": "commander",
+      "text": "А вода?",
+      "pauseAfter": 0.2,
+      "sourceLine": 374
+    },
+    {
+      "id": "m01v2-19-l003",
+      "speaker": "scout",
+      "text": "Не поступает. Зато пулемёт работает.",
+      "pauseAfter": 0.2,
+      "sourceLine": 377
+    },
+    {
+      "id": "m01v2-20-l001",
+      "speaker": "scientist",
+      "text": "Чертёж готов. Если пулемёт поставить выше, он стреляет дальше.",
+      "pauseAfter": 0.2,
+      "sourceLine": 386
+    },
+    {
+      "id": "m01v2-20-l002",
+      "speaker": "commander",
+      "text": "А это нельзя было сразу понять?",
+      "pauseAfter": 0.2,
+      "sourceLine": 389
+    },
+    {
+      "id": "m01v2-20-l003",
+      "speaker": "scientist",
+      "text": "Можно. Но тогда НИИ закрыли бы.",
+      "pauseAfter": 0.2,
+      "sourceLine": 392
+    },
+    {
+      "id": "m01v2-21-l001",
+      "speaker": "commander",
+      "text": "А ведь раньше целые институты были…",
+      "pauseAfter": 0.2,
+      "sourceLine": 399
+    },
+    {
+      "id": "m01v2-21-l002",
+      "speaker": "scientist",
+      "text": "Так мы и есть институт.",
+      "pauseAfter": 0.2,
+      "sourceLine": 402
+    },
+    {
+      "id": "m01v2-21-l003",
+      "speaker": "commander",
+      "text": "Вот я и говорю.",
+      "pauseAfter": 0.2,
+      "sourceLine": 405
+    },
+    {
+      "id": "m01v2-22-l001",
+      "speaker": "chief",
+      "text": "Мы тут сто лет живём! Чего вам надо?!",
+      "pauseAfter": 0.2,
+      "sourceLine": 416
+    },
+    {
+      "id": "m01v2-22-l002",
+      "speaker": "commander",
+      "text": "Кто у вас главный и какая должность?",
+      "pauseAfter": 0.2,
+      "sourceLine": 419
+    },
+    {
+      "id": "m01v2-22-l003",
+      "speaker": "chief",
+      "text": "Петрович. По обоим пунктам.",
+      "pauseAfter": 0.2,
+      "sourceLine": 422
+    },
+    {
+      "id": "m01v2-23-l001",
+      "speaker": "commander",
+      "text": "Конституция имеется?",
+      "pauseAfter": 0.2,
+      "sourceLine": 431
+    },
+    {
+      "id": "m01v2-23-l002",
+      "speaker": "chief",
+      "text": "Чего?!",
+      "pauseAfter": 0.2,
+      "sourceLine": 434
+    },
+    {
+      "id": "m01v2-23-l003",
+      "speaker": "commander",
+      "text": "Запиши. Государственное управление не установлено.",
+      "pauseAfter": 0.2,
+      "sourceLine": 437
+    },
+    {
+      "id": "m01v2-24-l001",
+      "speaker": "warrant",
+      "text": "У них вода, свет, огороды. А у нас три ангара и сортир без крыши.",
+      "pauseAfter": 0.2,
+      "sourceLine": 446
+    },
+    {
+      "id": "m01v2-24-l002",
+      "speaker": "commander",
+      "text": "Зато у нас государственная задача.",
+      "pauseAfter": 0.2,
+      "sourceLine": 449
+    },
+    {
+      "id": "m01v2-25-l001",
+      "speaker": "radio",
+      "text": "Альфа, доложите обстановку.",
+      "pauseAfter": 0.2,
+      "sourceLine": 462
+    },
+    {
+      "id": "m01v2-25-l002",
+      "speaker": "commander",
+      "text": "База действует. Все четыре лагеря зачищены.",
+      "pauseAfter": 0.2,
+      "sourceLine": 465
+    },
+    {
+      "id": "m01v2-26-l001",
+      "speaker": "warrant",
+      "text": "Ну что, товарищ командир, цивилизацию восстановили?",
+      "pauseAfter": 0.2,
+      "sourceLine": 474
+    },
+    {
+      "id": "m01v2-26-l002",
+      "speaker": "commander",
+      "text": "Электричество есть, завод работает, база построена.",
+      "pauseAfter": 0.2,
+      "sourceLine": 477
+    },
+    {
+      "id": "m01v2-26-l003",
+      "speaker": "warrant",
+      "text": "Осталось очередь за справками организовать.",
+      "pauseAfter": 0.2,
+      "sourceLine": 480
+    },
+    {
+      "id": "m01v2-27-l001",
+      "speaker": "radio",
+      "text": "Альфа! На юге зафиксирован мощный энергетический сигнал.",
+      "pauseAfter": 0.2,
+      "sourceLine": 487
+    },
+    {
+      "id": "m01v2-27-l002",
+      "speaker": "commander",
+      "text": "Что за источник?",
+      "pauseAfter": 0.2,
+      "sourceLine": 490
+    },
+    {
+      "id": "m01v2-27-l003",
+      "speaker": "radio",
+      "text": "Возможно, довоенный технологический комплекс.",
+      "pauseAfter": 0.2,
+      "sourceLine": 493
+    },
+    {
+      "id": "m01v2-28-l001",
+      "speaker": "commander",
+      "text": "Опасен, ценен, наш?",
+      "pauseAfter": 0.2,
+      "sourceLine": 500
+    },
+    {
+      "id": "m01v2-28-l002",
+      "speaker": "radio",
+      "text": "Опасен — возможно. Ценен — вероятно. Наш — пока нет.",
+      "pauseAfter": 0.6,
+      "sourceLine": 503
+    },
+    {
+      "id": "m01v2-28-l003",
+      "speaker": "commander",
+      "text": "Ну, значит, будет наш.",
+      "pauseAfter": 0.2,
+      "sourceLine": 508
+    },
+    {
+      "id": "m01v2-29-l001",
+      "speaker": "warrant",
+      "text": "А если там рабочая электростанция?",
+      "pauseAfter": 0.2,
+      "sourceLine": 517
+    },
+    {
+      "id": "m01v2-29-l002",
+      "speaker": "commander",
+      "text": "Тогда чинить ничего не придётся.",
+      "pauseAfter": 0.2,
+      "sourceLine": 520
+    },
+    {
+      "id": "m01v2-29-l003",
+      "speaker": "warrant",
+      "text": "Не верю.",
+      "pauseAfter": 0.2,
+      "sourceLine": 523
+    },
+    {
+      "id": "m01v2-d01-l001",
+      "speaker": "commander",
+      "text": "Огнемёт испытали?",
+      "pauseAfter": 0.2,
+      "sourceLine": 536
+    },
+    {
+      "id": "m01v2-d01-l002",
+      "speaker": "scientist",
+      "text": "Да. Лаборатория сгорела.",
+      "pauseAfter": 0.2,
+      "sourceLine": 539
+    },
+    {
+      "id": "m01v2-d01-l003",
+      "speaker": "commander",
+      "text": "Результат убедительный.",
+      "pauseAfter": 0.2,
+      "sourceLine": 542
+    },
+    {
+      "id": "m01v2-d02-l001",
+      "speaker": "radio",
+      "text": "Трофейное продовольствие пригодно?",
+      "pauseAfter": 0.2,
+      "sourceLine": 549
+    },
+    {
+      "id": "m01v2-d02-l002",
+      "speaker": "commander",
+      "text": "Прапорщик проверяет.",
+      "pauseAfter": 0.2,
+      "sourceLine": 552
+    },
+    {
+      "id": "m01v2-d02-l003",
+      "speaker": "warrant",
+      "text": "Теперь уже поздно проверять.",
+      "pauseAfter": 0.2,
+      "sourceLine": 555
+    },
+    {
+      "id": "m01v2-d03-l001",
+      "speaker": "soldier",
+      "text": "Товарищ прапорщик! Генератор опять встал!",
+      "pauseAfter": 0.2,
+      "sourceLine": 562
+    },
+    {
+      "id": "m01v2-d03-l002",
+      "speaker": "warrant",
+      "text": "А я говорил, не надо было его включать.",
+      "pauseAfter": 0.2,
+      "sourceLine": 565
+    },
+    {
+      "id": "m01v2-d04-l001",
+      "speaker": "commander",
+      "text": "Говорят, до войны люди на Луну летали.",
+      "pauseAfter": 0.2,
+      "sourceLine": 572
+    },
+    {
+      "id": "m01v2-d04-l002",
+      "speaker": "warrant",
+      "text": "А нам зачем? У нас тут ещё работы непочатый край.",
+      "pauseAfter": 0.2,
+      "sourceLine": 575
+    }
+  ],
+  "barks": [
+    {
+      "id": "m01v2-b001",
+      "event": "Выбран строитель",
+      "speaker": "builder",
+      "text": "Куда строить?",
+      "sourceLine": 585
+    },
+    {
+      "id": "m01v2-b002",
+      "event": "Повторно выбран",
+      "speaker": "builder",
+      "text": "Я один тут строитель, что ли?",
+      "sourceLine": 586
+    },
+    {
+      "id": "m01v2-b003",
+      "event": "Стройка заказана",
+      "speaker": "builder",
+      "text": "Сейчас сделаем. Материал бы ещё найти.",
+      "sourceLine": 587
+    },
+    {
+      "id": "m01v2-b004",
+      "event": "Постройка готова",
+      "speaker": "builder",
+      "text": "Готово. По документам.",
+      "sourceLine": 588
+    },
+    {
+      "id": "m01v2-b005",
+      "event": "Начат ремонт",
+      "speaker": "builder",
+      "text": "Держится. Только дверью не хлопайте.",
+      "sourceLine": 589
+    },
+    {
+      "id": "m01v2-b006",
+      "event": "Выбрана «Буханка»",
+      "speaker": "driver",
+      "text": "На ходу. Пока не трогали.",
+      "sourceLine": 590
+    },
+    {
+      "id": "m01v2-b007",
+      "event": "Повторный выбор",
+      "speaker": "driver",
+      "text": "Ну чё ещё?",
+      "sourceLine": 591
+    },
+    {
+      "id": "m01v2-b008",
+      "event": "Приказ атаковать",
+      "speaker": "driver",
+      "text": "Предупредить или сразу по уставу?",
+      "sourceLine": 592
+    },
+    {
+      "id": "m01v2-b009",
+      "event": "Цель уничтожена",
+      "speaker": "scout",
+      "text": "Контакт потерян. Вместе с контактом.",
+      "sourceLine": 593
+    },
+    {
+      "id": "m01v2-b010",
+      "event": "Недостаточно энергии",
+      "speaker": "warrant",
+      "text": "Экономика встала.",
+      "sourceLine": 594
+    },
+    {
+      "id": "m01v2-b011",
+      "event": "Исследование начато",
+      "speaker": "scientist",
+      "text": "Посмотрим, что там накрутили.",
+      "sourceLine": 595
+    },
+    {
+      "id": "m01v2-b012",
+      "event": "Исследование завершено",
+      "speaker": "scientist",
+      "text": "Разобрались. Собрать обратно не обещаем.",
+      "sourceLine": 596
+    },
+    {
+      "id": "m01v2-b013",
+      "event": "Повреждение машины",
+      "speaker": "driver",
+      "text": "Да это ещё с завода было.",
+      "sourceLine": 597
+    },
+    {
+      "id": "m01v2-b014",
+      "event": "Отряд долго без приказа",
+      "speaker": "driver",
+      "text": "Стоим. Никого не трогаем.",
+      "sourceLine": 598
+    },
+    {
+      "id": "m01v2-b015",
+      "event": "Подбит командирский УАЗ",
+      "speaker": "commander",
+      "text": "Рацию спасли?",
+      "sourceLine": 599
+    },
+    {
+      "id": "m01v2-b016",
+      "event": "Новая боевая техника",
+      "speaker": "driver",
+      "text": "Обкатку проводить будем или сразу в бой?",
+      "sourceLine": 600
+    },
+    {
+      "id": "m01v2-b017",
+      "event": "Обнаружен новый противник",
+      "speaker": "scout",
+      "text": "Опять местные без приглашения.",
+      "sourceLine": 601
+    },
+    {
+      "id": "m01v2-b018",
+      "event": "Приказ остановиться",
+      "speaker": "warrant",
+      "text": "Стоим организованно. Беспорядочно стоять у нас запрещено.",
+      "sourceLine": 602
+    }
+  ]
+}

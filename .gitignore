@@ -5,5 +5,7 @@ demo/previews/
 demo/reports/
 tools/.runtime-media/
 assets/campaign/**/audio-source/
+assets/campaign/**/audio-source-v*/
+.codex-attachments/
 campaign/previews/
 campaign/reports/

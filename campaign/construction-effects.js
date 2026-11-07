@@ -62,6 +62,7 @@ export function createConstructionEffects(T,scene,scale) {
         const original=mesh.material,clipped=original.clone();
         clipped.clippingPlanes=[plane];clipped.clipShadows=true;
         clipped.onBeforeCompile=shader=>{
+          original.onBeforeCompile(shader);
           shader.uniforms.buildLayer=layer;shader.uniforms.buildContacts=contacts;shader.uniforms.buildContactCount=contactCount;
           shader.vertexShader='varying vec3 vConstructionPosition;\n'+shader.vertexShader.replace(
             '#include <worldpos_vertex>','#include <worldpos_vertex>\nvConstructionPosition=(modelMatrix*vec4(transformed,1.)).xyz;');
@@ -79,6 +80,7 @@ export function createConstructionEffects(T,scene,scale) {
               #include <tonemapping_fragment>
             `);
         };
+        clipped.customProgramCacheKey=()=>original.customProgramCacheKey()+'_construction';
         mesh.material=clipped;
         materials.push({mesh,original});
       });

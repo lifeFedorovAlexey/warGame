@@ -5,20 +5,25 @@ import {createDesertSky} from '../demo/sky.js';
 import {createVehicleLayer} from './vehicle-layer.js';
 import {createBuildingPrefab} from './prefabs.js';
 import {createScavPrefab} from './scav-prefabs.js';
-import {aimTowerWeapon} from './tower-weapon.js';
+import {aimTowerWeapon,towerDamagePose} from './tower-weapon.js';
 import {mgRecoil} from './mg-burst.js';
 import {createShadowCasters} from './shadow-casters.js';
 import {createGroundEffects} from './ground-effects.js';
 import {updateOilPump} from './oil-pump.js';
 import {createHeadlightPair,setHeadlightPower} from '../demo/vehicle-effects.js';
 import {createCombatEffects} from './combat-effects.js';
+import {placeSelectionRing} from './selection-rings.js';
+import {SCAV_PROFILES,isInfantry} from './scav-unit-profiles.js';
 import {createConstructionEffects} from './construction-effects.js';
 import {createFogMask} from './fog-mask.js';
 import {createStorySignals} from './story-signals.js';
+import {createRallyFlags} from './rally-flags.js';
 import {createFieldArtifact} from './field-artifacts.js';
 import {combatContact} from './combat-contact.js';
 import {vehicleLocalBoxes} from './vehicle-collision.js';
 import {buildLayerHeight} from './builder-optics.js';
+import {createDamageSystem} from './damage-system.js';
+import {partMissing} from './damage-state.js';
 
 export async function createCampaignWorld(host,config,sound){
  const renderer=new T.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
@@ -34,6 +39,7 @@ export async function createCampaignWorld(host,config,sound){
  controls.addEventListener('start',()=>{controls.maxPolarAngle=normalCameraLimit;});
  const fog=createFogMask(T);
  const storySignals=createStorySignals(T,scene,field);
+ const rallyFlags=createRallyFlags(T,scene,field,config.worldScale);
  const foggedMaterials=new Set();function addFog(material){if(!material||foggedMaterials.has(material))return;foggedMaterials.add(material);const before=material.onBeforeCompile,cache=material.customProgramCacheKey.bind(material);material.onBeforeCompile=shader=>{before.call(material,shader);shader.uniforms.missionFog={value:fog.texture};shader.uniforms.missionExtent={value:field.extent};shader.uniforms.storySpill=storySignals.spill;shader.uniforms.storyObserver=storySignals.observer;shader.vertexShader='varying vec2 vMissionXY;\n'+shader.vertexShader;shader.vertexShader=shader.vertexShader.replace('#include <worldpos_vertex>','#include <worldpos_vertex>\nvMissionXY=(modelMatrix*vec4(transformed,1.)).xy;');shader.fragmentShader='uniform sampler2D missionFog;uniform float missionExtent;uniform vec3 storySpill;uniform vec2 storyObserver;varying vec2 vMissionXY;\n'+shader.fragmentShader;shader.fragmentShader=shader.fragmentShader.replace('#include <dithering_fragment>',`#include <dithering_fragment>
  vec2 missionUv=vec2(vMissionXY.x,-vMissionXY.y)/missionExtent+.5;
  vec2 visibility=texture2D(missionFog,clamp(missionUv,vec2(0.),vec2(1.))).rg;
@@ -49,11 +55,17 @@ export async function createCampaignWorld(host,config,sound){
  gl_FragColor.rgb=mix(hidden,gl_FragColor.rgb,(visibility.g*.30+visibility.r*.70)*inside);
  `);};material.customProgramCacheKey=()=>cache()+'_mission_fog_v4';material.needsUpdate=true;}
  for(const material of terrain.terrainMaterials) addFog(material);
- const vehicles=await createVehicleLayer(T,scene,field,config),buildingRoot=new T.Group();scene.add(buildingRoot);const buildings=new Map(),prefabs=new Map(),selectionRoot=new T.Group();scene.add(selectionRoot);
+ const damage=createDamageSystem(T,scene,field,config);
+ const vehicles=await createVehicleLayer(T,scene,field,config,damage),buildingRoot=new T.Group();scene.add(buildingRoot);const buildings=new Map(),prefabs=new Map(),selectionRoot=new T.Group();scene.add(selectionRoot);
+ damage.setTemplateProvider(entity=>{
+   const root=getPrefab(entity.kind,entity.owner,entity.campId);root.updateMatrixWorld(true);
+   const bindings=[];root.traverse(node=>{if(node.isMesh)bindings.push(damage.prepare(node,'building',0));});
+   return {bindings,parts:root.userData.damageParts??{0:{name:'structure',material:'concrete'}},pose:towerDamagePose(T,root,bindings,field,config.worldScale)};
+ });
  const groundEffects=createGroundEffects(T,scene,field,config.worldScale),shotTimes=new Map();
  if(software)sun.shadow.mapSize.set(512,512);
  sun.shadow.camera.up.set(0,0,1);
- let lastWorldTime=-1,lastScaleAt=0,frameAverage=.023,terrainMode='',lastShadowLod=-1;
+ let lastWorldTime=-1,lastScaleAt=0,frameAverage=.023,terrainMode='',lastShadowLod=-1,fixedRenderScale=false,lastDamageRows=-1,minimumCameraHeight=40;
  const shadowCasters=createShadowCasters();
  let shadowUpdates=0;
  const damageCasters=['damage_debris_pool','recoverable_parts'].map(name=>scene.getObjectByName(name)).filter(Boolean);
@@ -63,8 +75,9 @@ export async function createCampaignWorld(host,config,sound){
  const lightUp=new T.Vector3().crossVectors(lightRight,lightDirection).normalize(),stableTarget=new T.Vector3();
  const oilMarkers=config.oilFields.map(grid=>{const p=field.gridToWorld(grid),root=new T.Group();root.position.set(p.x,p.y,field.heightAt(p.x,p.y)+.25);const ring=new T.Mesh(new T.RingGeometry(10,11.5,24),new T.MeshBasicMaterial({color:'#baac72',transparent:true,opacity:.65,side:T.DoubleSide,depthWrite:false}));root.add(ring);const pipe=new T.Mesh(new T.CylinderGeometry(1.7,2,3,10),new T.MeshStandardMaterial({color:'#44463b',metalness:.6,roughness:.8}));pipe.rotation.x=Math.PI/2;pipe.position.z=1.5;root.add(pipe);scene.add(root);return{root,...p};});
  const artifactObjects=new Map();
- const ringGeometry=new T.RingGeometry(1,1.08,40),selectedMaterial=new T.MeshBasicMaterial({color:'#c0ce93',transparent:true,opacity:.85,depthWrite:false,side:T.DoubleSide}),selectionRings=[];
- for(let i=0;i<48;i++){const ring=new T.Mesh(ringGeometry,selectedMaterial);ring.visible=false;selectionRoot.add(ring);selectionRings.push(ring);}
+ const ringGeometry=new T.RingGeometry(1,1.08,64),selectedMaterial=new T.MeshBasicMaterial({color:'#c0ce93',transparent:true,opacity:.85,depthWrite:false,side:T.DoubleSide,polygonOffset:true,polygonOffsetFactor:-1}),selectionRings=[];
+ selectionRoot.name='selection_rings';
+ for(let i=0;i<48;i++){const ring=new T.Mesh(ringGeometry.clone(),selectedMaterial);ring.visible=false;selectionRoot.add(ring);selectionRings.push(ring);}
  const marker=new T.Mesh(new T.RingGeometry(6,7,32),new T.MeshBasicMaterial({color:'#cfb473',transparent:true,opacity:.7,depthWrite:false,side:T.DoubleSide}));marker.visible=false;scene.add(marker);let markerUntil=0;
  let ghost=null,ghostKind=null,ghostMaterial=new T.MeshBasicMaterial({color:'#a7c899',transparent:true,opacity:.29,depthWrite:false,side:T.DoubleSide});
  const footprint = new T.LineLoop(new T.BufferGeometry(), new T.LineBasicMaterial({color:'#d4edaa', depthTest:false}));
@@ -202,28 +215,32 @@ export async function createCampaignWorld(host,config,sound){
  function commandMarker(point,hostile=false){marker.position.set(point.x,point.y,field.heightAt(point.x,point.y)+.4);marker.material.color.set(hostile?'#f4a081':'#cfb473');marker.visible=true;markerUntil=performance.now()+1000;}
  function update(mission,selected,dt,live=false){
   const time=mission.state.time,now=performance.now()/1000,shotsThisFrame=mission.drainEffects();
-  if(time<lastWorldTime){groundEffects.reset();shotTimes.clear();combat.reset();dustTime=0;particles.length=0;}
-  for(const event of shotsThisFrame)shotTimes.set(event.from,now);
-  for(const [id,when] of shotTimes)if(now-when>.4)shotTimes.delete(id);
+  if(time<lastWorldTime){groundEffects.reset();shotTimes.clear();combat.reset();damage.reset();dustTime=0;particles.length=0;}
+  for(const event of shotsThisFrame)if(event.type==='shot')shotTimes.set(event.from,now);
+  for(const [id,when] of shotTimes)if(now-when>.75)shotTimes.delete(id);
   fog.update(mission);
   frameAverage=frameAverage*.93+Math.min(dt,.65)*.07;
-  const ratio=renderer.getPixelRatio(),elapsed=now-lastScaleAt;
-  const floor=software?.56:.67;
-  let next=ratio;
-  if(elapsed>2.5&&frameAverage>(software?.064:.042)&&ratio>floor){
-   next=Math.max(floor,ratio*.86);
-  }else if(elapsed>7&&frameAverage<(software?.038:.025)&&ratio<renderScaleCeiling()){
-   next=Math.min(renderScaleCeiling(),ratio+.06);
+  if(!fixedRenderScale){
+   const ratio=renderer.getPixelRatio(),elapsed=now-lastScaleAt;
+   const floor=software?.56:.67;
+   let next=ratio;
+   if(elapsed>2.5&&frameAverage>(software?.064:.042)&&ratio>floor){
+    next=Math.max(floor,ratio*.86);
+   }else if(elapsed>7&&frameAverage<(software?.038:.025)&&ratio<renderScaleCeiling()){
+    next=Math.min(renderScaleCeiling(),ratio+.06);
+   }
+   if(next!==ratio){renderer.setPixelRatio(next);lastScaleAt=now;}
   }
-  if(next!==ratio){renderer.setPixelRatio(next);lastScaleAt=now;}
   const distance=camera.position.distanceTo(controls.target),pan=distance*dt*.7;let dx=(keys.has('KeyD')?1:0)-(keys.has('KeyA')?1:0),dy=(keys.has('KeyW')?1:0)-(keys.has('KeyS')?1:0);if(dx||dy){const right=new T.Vector3().setFromMatrixColumn(camera.matrixWorld,0);right.z=0;right.normalize();const forward=new T.Vector3(-right.y,right.x,0);const offset=right.multiplyScalar(dx*pan).addScaledVector(forward,dy*pan);camera.position.add(offset);controls.target.add(offset);}
-  controls.target.x=T.MathUtils.clamp(controls.target.x,-field.half,field.half);controls.target.y=T.MathUtils.clamp(controls.target.y,-field.half,field.half);controls.update();camera.position.z=Math.max(camera.position.z,field.heightAt(camera.position.x,camera.position.y)+40);
+  controls.target.x=T.MathUtils.clamp(controls.target.x,-field.half,field.half);controls.target.y=T.MathUtils.clamp(controls.target.y,-field.half,field.half);controls.update();camera.position.z=Math.max(camera.position.z,field.heightAt(camera.position.x,camera.position.y)+minimumCameraHeight);
   sky.update(camera,false);
   storySignals.update(mission,camera,now);
+  rallyFlags.update(mission,selected,camera);
   const threshold=software?145:800;
   const mode=distance>(terrainMode==='close'?threshold+22:threshold-22)?'overview':'close';
   if(mode!==terrainMode){terrain.setViewMode(mode);terrainMode=mode;}
-  vehicles.update(mission,distance,shotTimes,now);
+  damage.begin(camera,dt);
+  vehicles.update(mission,distance,shotTimes,now,camera);
   construction.update(vehicles.workBeams,time);
   const texel=800/sun.shadow.mapSize.x,shadowX=controls.target.dot(lightRight),shadowY=controls.target.dot(lightUp);
   stableTarget.copy(controls.target).addScaledVector(lightRight,Math.round(shadowX/texel)*texel-shadowX).addScaledVector(lightUp,Math.round(shadowY/texel)*texel-shadowY);
@@ -256,13 +273,14 @@ export async function createCampaignWorld(host,config,sound){
   headlights.forEach(({root,spots},i)=>{
    const pose=vehicles.transforms.get(near[i]?.id);
    setHeadlightPower(spots,config.worldScale,false,!!pose);
-   if(pose){root.matrix.copy(pose.matrix).multiply(lightLift);root.matrixWorldNeedsUpdate=true;headlightCount+=2;}
+   if(pose){root.matrix.copy(pose.matrix).multiply(lightLift);root.matrixWorldNeedsUpdate=true;const unit=mission.entity(near[i].id);spots.forEach((spot,j)=>{if(partMissing(unit?.damage,j+5))spot.intensity=0;else headlightCount++;});}
   });
-  const buildingIds=new Set(mission.state.buildings.map(b=>b.id));for(const [id,object] of buildings)if(!buildingIds.has(id)){construction.release(object);buildingRoot.remove(object);buildings.delete(id);}
-  for(const b of mission.state.buildings){let object=buildings.get(b.id);if(object&&(object.userData.kind!==b.kind||object.userData.owner!==b.owner)){construction.release(object);buildingRoot.remove(object);buildings.delete(b.id);object=null;}if(!object){object=getPrefab(b.kind,b.owner,b.campId).clone(true);object.userData.entity=b.id;buildingRoot.add(object);buildings.set(b.id,object);}object.visible=b.hp>0&&(b.owner==='rai'||mission.exploredAt(b.x,b.y));if(!object.visible)continue;object.position.set(b.x,b.y,b.groundHeight??field.heightAt(b.x,b.y));object.rotation.z=b.rotation;object.scale.setScalar(config.worldScale);
-   if(b.owner==='scavs'&&b.kind==='mg-tower')aimTowerWeapon(object,b,field,config.worldScale,b.aimTarget,now-(shotTimes.get(b.id)??-Infinity));
-   if(b.owner==='rai')construction.building(object,b,config.buildings[b.kind]);
-   if(b.kind==='derrick'&&b.completed){
+  const buildingIds=new Set(mission.state.buildings.map(b=>b.id));for(const [id,object] of buildings)if(!buildingIds.has(id)){construction.release(object);damage.releaseBuilding(object);buildingRoot.remove(object);buildings.delete(id);}
+  for(const b of mission.state.buildings){let object=buildings.get(b.id);if(object&&(object.userData.kind!==b.kind||object.userData.owner!==b.owner)){construction.release(object);damage.releaseBuilding(object);buildingRoot.remove(object);buildings.delete(b.id);object=null;}if(!object){object=getPrefab(b.kind,b.owner,b.campId).clone(true);object.userData.entity=b.id;damage.attachBuilding(object,b);buildingRoot.add(object);buildings.set(b.id,object);}object.visible=(b.hp>0||b.damage?.wreck)&&(b.owner==='rai'||mission.exploredAt(b.x,b.y));if(!object.visible)continue;object.position.set(b.x,b.y,b.groundHeight??field.heightAt(b.x,b.y));object.rotation.z=b.rotation;object.scale.setScalar(config.worldScale);
+   if(b.kind==='mg-tower')aimTowerWeapon(object,b,field,config.worldScale,b.aimTarget,now-(shotTimes.get(b.id)??-Infinity));
+   if(b.owner==='rai'&&b.hp>0)construction.building(object,b,config.buildings[b.kind]);
+   damage.updateBuilding(object,b);
+   if(b.kind==='derrick'&&b.completed&&b.hp>0){
     const phase=(b.pumpTime??0)+(b.powered&&mission.state.status==='running'?Math.max(0,mission.accumulator):0);
     if(object.userData.pumpPhase!==phase){updateOilPump(object,phase);object.userData.pumpPhase=phase;}
    }
@@ -270,8 +288,12 @@ export async function createCampaignWorld(host,config,sound){
    shadowCasters.watch(b.id,b.kind,b.owner,b.campId,b.x,b.y,object.position.z,b.rotation,b.progress,b.completed,b.clearing,
     object.userData.pumpPhase,aim?.x,aim?.y,aim?.z,recoil);
   }
-  let index=0;for(const id of selected){const entity=mission.entity(id);if(!entity||index>=selectionRings.length)continue;const ring=selectionRings[index++],pose=vehicles.transforms.get(id)?.position;ring.visible=true;ring.position.set(pose?.x??entity.x,pose?.y??entity.y,(pose?.z??field.heightAt(entity.x,entity.y))+.35);ring.scale.setScalar(entity.path?8:Math.max(entity.halfWidth,entity.halfDepth)*1.1);}for(;index<selectionRings.length;index++)selectionRings[index].visible=false;
+  let index=0;for(const id of selected){const entity=mission.entity(id);if(!entity||index>=selectionRings.length)continue;const ring=selectionRings[index++],pose=vehicles.transforms.get(id)?.position,profile=SCAV_PROFILES[entity.kind];ring.visible=true;const radius=entity.path?(profile?.infantry?3:profile?Math.max(8,profile.boxes[0][2]*config.worldScale):8):Math.max(entity.halfWidth,entity.halfDepth)*1.1;placeSelectionRing(ring,field,pose?.x??entity.x,pose?.y??entity.y,radius);}for(;index<selectionRings.length;index++)selectionRings[index].visible=false;
   for(const event of shotsThisFrame){
+   if(event.type==='explosion'){
+    if(event.owner==='rai'||mission.visibleAt(event.to.x,event.to.y))combat.explode(new T.Vector3(event.to.x,event.to.y,event.to.z),event.radius,now,camera);
+    continue;
+   }
    const from=mission.entity(event.from);
    const end=new T.Vector3(event.to.x,event.to.y,event.to.z);
    if(!from||from.owner!=='rai'&&!mission.visibleAt(from.x,from.y)){
@@ -296,6 +318,7 @@ export async function createCampaignWorld(host,config,sound){
    if(!attacker||attacker.owner!=='rai'&&!mission.visibleAt(attacker.x,attacker.y))return null;
    return buildings.get(id)?.getObjectByName('muzzle')?.getWorldPosition(new T.Vector3());
   });
+  combat.updateGrenades(mission.state.projectiles??[],time,(x,y)=>mission.visibleAt(x,y));
   for(const oil of oilMarkers)oil.root.visible=mission.exploredAt(oil.x,oil.y)&&!mission.state.buildings.some(b=>b.kind==='derrick'&&b.hp>0&&Math.hypot(b.x-oil.x,b.y-oil.y)<5);
   const knownArtifacts=mission.state.artifacts.filter(a=>!a.collected&&mission.exploredAt(a.x,a.y));
   const artifactIds=new Set(knownArtifacts.map(a=>a.id));
@@ -316,10 +339,11 @@ export async function createCampaignWorld(host,config,sound){
    model.beacon.rotation.z=time*.8;
    shadowCasters.watch(artifact.id,artifact.x,artifact.y,artifact.key);
   }
-  if(time-dustTime>.16){dustTime=time;for(const unit of mission.state.units){if(unit.hp<=0||unit.owner!=='rai'&&!mission.visibleAt(unit.x,unit.y)||Math.hypot(unit.x-unit.previousX,unit.y-unit.previousY)<.15)continue;particles.push({x:unit.x+Math.sin(unit.heading)*9,y:unit.y-Math.cos(unit.heading)*9,z:field.heightAt(unit.x,unit.y)+1,born:time});}}while(particles.length>256)particles.shift();for(let i=particles.length-1;i>=0;i--)if(time-particles[i].born>2.5)particles.splice(i,1);particles.forEach((p,i)=>dustPositions.set([p.x+(time-p.born)*1.8,p.y,p.z+(time-p.born)*1.2],i*3));dustGeometry.attributes.position.needsUpdate=true;dustGeometry.setDrawRange(0,particles.length);marker.visible=performance.now()<markerUntil;
+  if(time-dustTime>.16){dustTime=time;for(const unit of mission.state.units){if(unit.hp<=0||isInfantry(unit)||unit.owner!=='rai'&&!mission.visibleAt(unit.x,unit.y)||Math.hypot(unit.x-unit.previousX,unit.y-unit.previousY)<.15)continue;particles.push({x:unit.x+Math.sin(unit.heading)*9,y:unit.y-Math.cos(unit.heading)*9,z:field.heightAt(unit.x,unit.y)+1,born:time});}}while(particles.length>256)particles.shift();for(let i=particles.length-1;i>=0;i--)if(time-particles[i].born>2.5)particles.splice(i,1);particles.forEach((p,i)=>dustPositions.set([p.x+(time-p.born)*1.8,p.y,p.z+(time-p.born)*1.2],i*3));dustGeometry.attributes.position.needsUpdate=true;dustGeometry.setDrawRange(0,particles.length);marker.visible=performance.now()<markerUntil;
   let engine=0,rolling=0,slip=0,road=0;
   for(const unit of vehicles.visible){
    const distance=Math.hypot(unit.x-controls.target.x,unit.y-controls.target.y),volume=Math.max(0,1-distance/380);
+   if(isInfantry(unit))continue;
    const speed=unit.speed/30;
    engine=Math.max(engine,volume*(.26+.74*speed));
    rolling=Math.max(rolling,volume*speed);
@@ -332,15 +356,18 @@ export async function createCampaignWorld(host,config,sound){
    return level+.55*Math.max(0,1-distance/360);
   },0);
   sound?.update({field:live,engine:Math.min(1,engine),rolling:Math.min(1,rolling),slip:Math.min(1,slip),road:Math.min(1,road),welding:Math.min(1,projection)});
+  damage.end();
   for(const group of damageCasters)if(group.visible)for(const model of group.children){
    if(!model.visible)continue;
    const {position,quaternion}=model;
    shadowCasters.watch(model.id,position.x,position.y,position.z,quaternion.x,quaternion.y,quaternion.z,quaternion.w);
   }
+  const {textureRows}=damage.statistics;
+  if(textureRows!==lastDamageRows){lastDamageRows=textureRows;renderer.shadowMap.needsUpdate=true;}
   if(shadowCasters.end()||time<lastWorldTime)renderer.shadowMap.needsUpdate=true;
   if(renderer.shadowMap.needsUpdate)shadowUpdates++;
   renderer.render(scene,camera);
   lastWorldTime=time;
  }
- return{renderer,scene,camera,controls,terrain,field,vehicles,ground,pickEntity,screen,centre,focusStorySignal,setGhost,commandMarker,buildingCards,drawMinimapFog:fog.drawMinimap,storySignals,update,keys,buildingObjects:buildings,get statistics(){return{drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,vehicleDrawCalls:vehicles.drawCalls,vehicleLod:vehicles.lod,dustParticles:particles.length,dustLimit:256,...combat.statistics,...groundEffects.statistics,headlightBeams:headlightCount,projectors:construction.active,frameMs:frameAverage*1000,renderScale:renderer.getPixelRatio(),terrainMode,shadowUpdates};}};
+ return{renderer,scene,camera,controls,terrain,field,vehicles,damage,ground,pickEntity,screen,centre,focusStorySignal,setGhost,commandMarker,buildingCards,drawMinimapFog:fog.drawMinimap,storySignals,update,keys,buildingObjects:buildings,set minimumCameraHeight(value){minimumCameraHeight=value;},set fixedRenderScale(value){fixedRenderScale=value;},get fixedRenderScale(){return fixedRenderScale;},get statistics(){return{drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,vehicleDrawCalls:vehicles.drawCalls,vehicleLod:vehicles.lod,dustParticles:particles.length,dustLimit:256,...combat.statistics,...groundEffects.statistics,headlightBeams:headlightCount,projectors:construction.active,frameMs:frameAverage*1000,renderScale:renderer.getPixelRatio(),terrainMode,shadowUpdates,damage:damage.statistics};}};
 }

@@ -1,0 +1,611 @@
+{
+  "environment": {
+    "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 (0x00002786) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "webgl": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+    "timerQuery": true,
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36 Edg/157.0.0.0",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "hardwareConcurrency": 24,
+    "browser": "157.0.4341.42",
+    "gpuDevices": [
+      {
+        "vendorId": 4318,
+        "deviceId": 10118,
+        "subSysId": 1089344600,
+        "revision": 161,
+        "vendorString": "",
+        "deviceString": "NVIDIA GeForce RTX 4070",
+        "driverVendor": "NVIDIA",
+        "driverVersion": "32.0.16.1742"
+      },
+      {
+        "vendorId": 4098,
+        "deviceId": 5710,
+        "subSysId": 2116424802,
+        "revision": 194,
+        "vendorString": "",
+        "deviceString": "AMD Radeon(TM) Graphics",
+        "driverVendor": "",
+        "driverVersion": "32.0.21036.18"
+      },
+      {
+        "vendorId": 5140,
+        "deviceId": 140,
+        "subSysId": 0,
+        "revision": 0,
+        "vendorString": "",
+        "deviceString": "Microsoft Basic Render Driver",
+        "driverVendor": "",
+        "driverVersion": "10.0.26100.9711"
+      }
+    ],
+    "date": "2026-11-07T20:11:24.762Z",
+    "damageLODOverride": null,
+    "unlimitedFrameRate": true,
+    "node": "v24.22.0",
+    "sources": {
+      "campaign/damage-contact.js": "4b30733830787a049b8ddd650189f1d620bde1bfd028f00415a4f9bae435a7c2",
+      "campaign/damage-debris.js": "1bfc7d6f38058039d23fe71bd8908e75c38de692e752874c26debea532f22b6e",
+      "campaign/damage-debug.js": "9a9fc65d18ad5505f98df4887697e564fc879df84425d33acf15a1913d12af41",
+      "campaign/damage-geometry.js": "931df0bcd1366482dca5e6db621f5723ccde868d4c56efb4fbc678172fa9fe19",
+      "campaign/damage-shader.js": "509c005de7fb4055d3dd56e6d85a747023a88eb942fcec7667b512947763254b",
+      "campaign/damage-state.js": "f1da048572439fef86ea15c0ab89465eb36ecc43f758b79fb28e86934a73f694",
+      "campaign/damage-system.js": "f6cd048148817b2fc0efd6e8734aa26f6d1fb1f1d4be025fe2d832e420a41a63",
+      "campaign/field-modification-models.js": "46ff95a51c607f7f6c9325fcdd0770fa8f2a0cea59c5a66d6a513f8ea8fae8f3",
+      "campaign/salvage-layer.js": "1630cfe866421f005f5e0e8797727ee4e3e41cfe585651ae0e87fdb1fe44768a",
+      "campaign/vehicle-salvage.js": "90bab7c4cbaffd796bc68553b38e63bf42514fbdfac1fee6b8f12c785f4d9250",
+      "campaign/vehicle-layer.js": "3f2fddfcc66f5c47c93c4b61017a78db904ce0bc4c982d626f7a32ce62d0deb6",
+      "campaign/world.js": "4ec7afaaef6e0bd3fcfe17ec88ffe53c704d3099a88a0f9a2b09bf55fbc63932",
+      "campaign/mission.js": "a52670b30a319e91ad0feca44b42b6b28d32b9049f215e366b8225bd153359f6",
+      "campaign/main.js": "b05d2832a84030c5ac93d96c77f2551003427e5c4975c2c41fbec4aed7a85a0f",
+      "campaign/fog-mask.js": "73140e5fff4316f2230d271a11b6134ef7f2cd82bb7a9a31ef539c6b1cb034c4",
+      "campaign/unit-spatial-index.js": "f027b477d1730c83f5a4be5a7057fd355ab43f2db3d2ea74fff040d29a54d19f",
+      "campaign/navigation.js": "c54b6195593398ee7adedcc39b5411962b659e5fe8f97b176f92765133f8a013",
+      "assets/campaign/alpha/mission01/gameplay.json": "81bb18786b8b6499b83910e7a8eff63b33382ec8c3759ae865b5cbb2099a8f99",
+      "tools/check-damage-browser.mjs": "025a99445fbe658479b169d6e648379d322514ffff47c23d32112f0ec2d2aefc",
+      "tools/performance-budget.json": "43d7054d3b34674db2b199eb43937eb3498b9a892da0e72a2515bd22f4b048d5",
+      "campaign/traffic-coordinator.js": "5ee16e690022dfbbe336ac8199219d594aeef130fdd1bfe8fe14837412c70151",
+      "campaign/wreck-lifecycle.js": "29c84ccd348e538b0733c62271485ab400d1fab9d8985b9aaefa5593fc2512b4",
+      "campaign/flame-effects.js": "60aff26f3a8e9816e3c550ad375a876632f09efe6b571f63c1bdd2e49ba9e8a3",
+      "campaign/combat-effects.js": "5b8ddc1981c558e3d9a5cbd19aefbced1328168238e693330180305c46528543",
+      "campaign/vehicle-motion.js": "abed272172254c7b203ca8f37ef765dc76536d3ebe9cc4ee3a9e670687d2703f",
+      "campaign/vehicle-collision.js": "0e909cdeb205da12310c905a8fe2bca7123aa43b341fe2e71a61d864e60022f7",
+      "campaign/vehicle-impact.js": "81d8d55254324580080126ba7e069abfac25b9c9af5962a6e22056b016b1954a",
+      "campaign/vehicle-contact-shadows.js": "38108521602b7d2c55084287920d6b93c8d4508b37a93d36ef26f2fb67f17bd3",
+      "campaign/builder-kinematics.js": "a679275cdd0ee0454c43aa24ce5ad93effd6d519d30daf4829daa4f875d52be5",
+      "campaign/field-vehicles.js": "04b8bd3afa3915f776d0190b7473785ef2cd2f6c9fd1bf9c66b2cee04088f2aa",
+      "campaign/vehicle-contact-rock.js": "4c84bbd8e0b702c7ff6f688e4bd155360eef58ee2176263bea85434126ac05ca",
+      "campaign/terrain-passability.js": "9eaf5115d365a1e35cd6cd92ab6d85196ec4aa9aa25cfca507a75899a0a3b8e8",
+      "campaign/combat-policy.js": "211d7766b6b27b5868b23b03f580c754e8ef5f22c20635a5eb6c9f2f4017e058",
+      "campaign/combat-deployment.js": "617f2b91dbe8ea654ea710b055e8c720de25136c415eb64faa76e5bda4d10d53"
+    }
+  },
+  "performanceBudget": {
+    "vehicles": 500,
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "minimumFps": 80,
+    "frameBudgetMs": 12.5,
+    "frameP95BudgetMs": 12.5,
+    "cpuP95BudgetMs": 12.5,
+    "gpuP95BudgetMs": 12.5,
+    "referenceGpu": "NVIDIA GeForce RTX 4070",
+    "referenceCpu": "AMD Ryzen 9 7900X",
+    "requiredPhases": [
+      "settled",
+      "impacts",
+      "simulation"
+    ]
+  },
+  "passed": false,
+  "results": [
+    {
+      "count": 500,
+      "enabled": false,
+      "phase": "settled",
+      "frames": 2278,
+      "seconds": 6.003300000000001,
+      "fps": 379.45796478603427,
+      "cpuFrameMs": {
+        "mean": 2.338542581206356,
+        "p95": 3.2000000178813934,
+        "max": 5
+      },
+      "frameIntervalMs": {
+        "mean": 2.635338015803337,
+        "p95": 3.7000000000007276,
+        "max": 5.5
+      },
+      "gpuFrameMs": {
+        "mean": 1.7256331940298568,
+        "p95": 3.139584,
+        "max": 3.7376
+      },
+      "gpuFrameReason": null,
+      "gpuSamples": 2278,
+      "drawCalls": {
+        "mean": 58,
+        "p95": 58,
+        "max": 58
+      },
+      "triangles": {
+        "mean": 3586672,
+        "p95": 3586672,
+        "max": 3586672
+      },
+      "visibleMin": 500,
+      "movingMax": 0,
+      "simulationCpuMs": 0,
+      "simulationElapsed": 0,
+      "simulationBacklogMax": 0,
+      "activePhysicsMax": 0,
+      "damage": {
+        "hitCount": 0,
+        "hitCpuMs": 0,
+        "hitStateCpuMs": 0,
+        "deformationCpuMs": 0,
+        "geometryUpdates": 0,
+        "instanceBufferUpdates": 0,
+        "textureRows": 0,
+        "textureBytes": 0
+      },
+      "atlasBytes": 8388608,
+      "jsHeap": {
+        "used": 360006870,
+        "total": 402407854
+      },
+      "geometryCount": 183,
+      "textureCount": 18,
+      "lods": [
+        0,
+        0,
+        500,
+        0
+      ],
+      "fixture": {
+        "illegalTerrainStarts": 104,
+        "navigation": "Synthetic grid and direct forward waypoints; does not validate a mass UI order or legal route arrival"
+      },
+      "processMemory": {
+        "workingSetBytes": 1230360576,
+        "privateBytes": 1141096448,
+        "processIds": [
+          66320,
+          72348,
+          56080,
+          48584,
+          65072,
+          56248,
+          74080,
+          65564
+        ],
+        "dedicatedGpuBytes": 304697344,
+        "sharedGpuBytes": 73691136,
+        "gpuMemoryReason": null
+      }
+    },
+    {
+      "count": 500,
+      "enabled": false,
+      "phase": "impacts",
+      "frames": 2233,
+      "seconds": 6,
+      "fps": 372.16666666666663,
+      "cpuFrameMs": {
+        "mean": 2.3624720104569232,
+        "p95": 3.4000000059604645,
+        "max": 8.600000023841858
+      },
+      "frameIntervalMs": {
+        "mean": 2.6869682042095837,
+        "p95": 3.900000000001455,
+        "max": 9.700000000000728
+      },
+      "gpuFrameMs": {
+        "mean": 1.7902438692342209,
+        "p95": 3.25632,
+        "max": 8.32
+      },
+      "gpuFrameReason": null,
+      "gpuSamples": 2233,
+      "drawCalls": {
+        "mean": 58,
+        "p95": 58,
+        "max": 58
+      },
+      "triangles": {
+        "mean": 3586672,
+        "p95": 3586672,
+        "max": 3586672
+      },
+      "visibleMin": 500,
+      "movingMax": 0,
+      "simulationCpuMs": 0,
+      "simulationElapsed": 0,
+      "simulationBacklogMax": 0,
+      "activePhysicsMax": 0,
+      "damage": {
+        "hitCount": 0,
+        "hitCpuMs": 0,
+        "hitStateCpuMs": 0,
+        "deformationCpuMs": 0,
+        "geometryUpdates": 0,
+        "instanceBufferUpdates": 0,
+        "textureRows": 0,
+        "textureBytes": 0
+      },
+      "atlasBytes": 8388608,
+      "jsHeap": {
+        "used": 439212114,
+        "total": 505954734
+      },
+      "geometryCount": 183,
+      "textureCount": 18,
+      "lods": [
+        0,
+        0,
+        500,
+        0
+      ],
+      "fixture": {
+        "illegalTerrainStarts": 104,
+        "navigation": "Synthetic grid and direct forward waypoints; does not validate a mass UI order or legal route arrival"
+      },
+      "processMemory": {
+        "workingSetBytes": 1334947840,
+        "privateBytes": 1255235584,
+        "processIds": [
+          66320,
+          72348,
+          56080,
+          48584,
+          65072,
+          56248,
+          74080,
+          65564
+        ],
+        "dedicatedGpuBytes": 304693248,
+        "sharedGpuBytes": 72544256,
+        "gpuMemoryReason": null
+      }
+    },
+    {
+      "count": 500,
+      "enabled": false,
+      "phase": "simulation",
+      "frames": 979,
+      "seconds": 6.0062999999999995,
+      "fps": 162.99552136922898,
+      "cpuFrameMs": {
+        "mean": 5.96098059239256,
+        "p95": 11.399999976158142,
+        "max": 27.900000005960464
+      },
+      "frameIntervalMs": {
+        "mean": 6.135137895812052,
+        "p95": 11.69999999999709,
+        "max": 32.10000000000218
+      },
+      "gpuFrameMs": {
+        "mean": 2.6390739284984672,
+        "p95": 5.311488,
+        "max": 6.268928
+      },
+      "gpuFrameReason": null,
+      "gpuSamples": 979,
+      "drawCalls": {
+        "mean": 60.9050051072523,
+        "p95": 61,
+        "max": 61
+      },
+      "triangles": {
+        "mean": 3586803.693564862,
+        "p95": 3586808,
+        "max": 3586808
+      },
+      "visibleMin": 500,
+      "movingMax": 461,
+      "simulationCpuMs": 2968.9000000059605,
+      "simulationElapsed": 5.699999999999996,
+      "simulationBacklogMax": 0.4061000000000028,
+      "activePhysicsMax": 0,
+      "damage": {
+        "hitCount": 0,
+        "hitCpuMs": 0,
+        "hitStateCpuMs": 0,
+        "deformationCpuMs": 0,
+        "geometryUpdates": 0,
+        "instanceBufferUpdates": 33285,
+        "textureRows": 0,
+        "textureBytes": 0
+      },
+      "atlasBytes": 8388608,
+      "jsHeap": {
+        "used": 400980994,
+        "total": 475945370
+      },
+      "geometryCount": 185,
+      "textureCount": 18,
+      "lods": [
+        0,
+        0,
+        500,
+        0
+      ],
+      "fixture": {
+        "illegalTerrainStarts": 104,
+        "navigation": "Synthetic grid and direct forward waypoints; does not validate a mass UI order or legal route arrival"
+      },
+      "processMemory": {
+        "workingSetBytes": 1436475392,
+        "privateBytes": 1367154688,
+        "processIds": [
+          66320,
+          72348,
+          56080,
+          48584,
+          65072,
+          56248
+        ],
+        "dedicatedGpuBytes": 303120384,
+        "sharedGpuBytes": 74510336,
+        "gpuMemoryReason": null
+      }
+    },
+    {
+      "count": 500,
+      "enabled": true,
+      "phase": "settled",
+      "frames": 2389,
+      "seconds": 6.0015,
+      "fps": 398.06714987919685,
+      "cpuFrameMs": {
+        "mean": 2.225324403296559,
+        "p95": 3,
+        "max": 4.9000000059604645
+      },
+      "frameIntervalMs": {
+        "mean": 2.512138970280452,
+        "p95": 3.5,
+        "max": 5.30000000000291
+      },
+      "gpuFrameMs": {
+        "mean": 1.9978829903725421,
+        "p95": 3.914752,
+        "max": 5.169152
+      },
+      "gpuFrameReason": null,
+      "gpuSamples": 2389,
+      "drawCalls": {
+        "mean": 61,
+        "p95": 61,
+        "max": 61
+      },
+      "triangles": {
+        "mean": 3586808,
+        "p95": 3586808,
+        "max": 3586808
+      },
+      "visibleMin": 500,
+      "movingMax": 0,
+      "simulationCpuMs": 0,
+      "simulationElapsed": 0,
+      "simulationBacklogMax": 0,
+      "activePhysicsMax": 0,
+      "damage": {
+        "hitCount": 0,
+        "hitCpuMs": 0,
+        "hitStateCpuMs": 0,
+        "deformationCpuMs": 0,
+        "geometryUpdates": 0,
+        "instanceBufferUpdates": 0,
+        "textureRows": 0,
+        "textureBytes": 0
+      },
+      "atlasBytes": 8388608,
+      "jsHeap": {
+        "used": 538338515,
+        "total": 604922723
+      },
+      "geometryCount": 185,
+      "textureCount": 18,
+      "lods": [
+        0,
+        0,
+        500,
+        0
+      ],
+      "fixture": {
+        "illegalTerrainStarts": 104,
+        "navigation": "Synthetic grid and direct forward waypoints; does not validate a mass UI order or legal route arrival"
+      },
+      "processMemory": {
+        "workingSetBytes": 1407832064,
+        "privateBytes": 1337094144,
+        "processIds": [
+          66320,
+          72348,
+          56080,
+          48584,
+          65072,
+          56248
+        ],
+        "dedicatedGpuBytes": 303116288,
+        "sharedGpuBytes": 75427840,
+        "gpuMemoryReason": null
+      }
+    },
+    {
+      "count": 500,
+      "enabled": true,
+      "phase": "impacts",
+      "frames": 2120,
+      "seconds": 6.001,
+      "fps": 353.27445425762374,
+      "cpuFrameMs": {
+        "mean": 2.72386792415999,
+        "p95": 3.300000011920929,
+        "max": 108.40000000596046
+      },
+      "frameIntervalMs": {
+        "mean": 2.8306603773584906,
+        "p95": 3.5,
+        "max": 106.90000000000146
+      },
+      "gpuFrameMs": {
+        "mean": 1.9511943245283008,
+        "p95": 3.905536,
+        "max": 7.248896
+      },
+      "gpuFrameReason": null,
+      "gpuSamples": 2120,
+      "drawCalls": {
+        "mean": 61,
+        "p95": 61,
+        "max": 61
+      },
+      "triangles": {
+        "mean": 3586808,
+        "p95": 3586808,
+        "max": 3586808
+      },
+      "visibleMin": 500,
+      "movingMax": 0,
+      "simulationCpuMs": 0,
+      "simulationElapsed": 0,
+      "simulationBacklogMax": 0,
+      "activePhysicsMax": 0,
+      "damage": {
+        "hitCount": 6000,
+        "hitCpuMs": 788.0999992787838,
+        "hitStateCpuMs": 240.90000063180923,
+        "deformationCpuMs": 57.900000154972076,
+        "geometryUpdates": 0,
+        "instanceBufferUpdates": 0,
+        "textureRows": 6000,
+        "textureBytes": 49152000
+      },
+      "atlasBytes": 8388608,
+      "jsHeap": {
+        "used": 279032951,
+        "total": 498770739
+      },
+      "geometryCount": 185,
+      "textureCount": 18,
+      "lods": [
+        0,
+        0,
+        500,
+        0
+      ],
+      "fixture": {
+        "illegalTerrainStarts": 104,
+        "navigation": "Synthetic grid and direct forward waypoints; does not validate a mass UI order or legal route arrival"
+      },
+      "processMemory": {
+        "workingSetBytes": 1496043520,
+        "privateBytes": 1424805888,
+        "processIds": [
+          66320,
+          72348,
+          56080,
+          48584,
+          65072,
+          56248
+        ],
+        "dedicatedGpuBytes": 303116288,
+        "sharedGpuBytes": 75296768,
+        "gpuMemoryReason": null
+      }
+    },
+    {
+      "count": 500,
+      "enabled": true,
+      "phase": "simulation",
+      "frames": 897,
+      "seconds": 6.010799999999995,
+      "fps": 149.23138350968267,
+      "cpuFrameMs": {
+        "mean": 6.4537346714249955,
+        "p95": 12.400000005960464,
+        "max": 23.799999982118607
+      },
+      "frameIntervalMs": {
+        "mean": 6.701003344481601,
+        "p95": 12.69999999999709,
+        "max": 30.599999999998545
+      },
+      "gpuFrameMs": {
+        "mean": 2.993318671125974,
+        "p95": 5.501952,
+        "max": 11.05408
+      },
+      "gpuFrameReason": null,
+      "gpuSamples": 897,
+      "drawCalls": {
+        "mean": 61,
+        "p95": 61,
+        "max": 61
+      },
+      "triangles": {
+        "mean": 3586808,
+        "p95": 3586808,
+        "max": 3586808
+      },
+      "visibleMin": 500,
+      "movingMax": 461,
+      "simulationCpuMs": 2825.799999922514,
+      "simulationElapsed": 5.699999999999996,
+      "simulationBacklogMax": 0.47779999999999667,
+      "activePhysicsMax": 0,
+      "damage": {
+        "hitCount": 0,
+        "hitCpuMs": 0,
+        "hitStateCpuMs": 0,
+        "deformationCpuMs": 0,
+        "geometryUpdates": 0,
+        "instanceBufferUpdates": 30030,
+        "textureRows": 0,
+        "textureBytes": 0
+      },
+      "atlasBytes": 8388608,
+      "jsHeap": {
+        "used": 554440419,
+        "total": 632451891
+      },
+      "geometryCount": 185,
+      "textureCount": 18,
+      "lods": [
+        0,
+        0,
+        500,
+        0
+      ],
+      "fixture": {
+        "illegalTerrainStarts": 104,
+        "navigation": "Synthetic grid and direct forward waypoints; does not validate a mass UI order or legal route arrival"
+      },
+      "processMemory": {
+        "workingSetBytes": 1438683136,
+        "privateBytes": 1369272320,
+        "processIds": [
+          66320,
+          72348,
+          56080,
+          48584,
+          65072,
+          56248
+        ],
+        "dedicatedGpuBytes": 303116288,
+        "sharedGpuBytes": 74510336,
+        "gpuMemoryReason": null
+      }
+    }
+  ],
+  "errors": []
+}

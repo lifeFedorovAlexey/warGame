@@ -1,0 +1,114 @@
+/* Field UI floats over the full map; groups have no enclosing plate or frame. */
+:root { --hud-top: 44px; --hud-bottom: 156px; --map-size: 132px; }
+#world { inset: 0; }
+.top { height: var(--hud-top); min-height: 0; padding: 4px 16px; gap: 8px; background: none; text-shadow: 0 1px 3px #111a10; }
+.top > a { font-size: 12px; }
+.top .resources { margin: 0 auto 0 20px; gap: 20px; }
+.resource { min-width: 60px; }
+.resource-energy { min-width: 102px; }
+.resource meter { display: none; }
+.top #power { font-size: 11px; }
+.top #power.online { display: none; }
+.top button.icon-button, .top summary.icon-button { --button-size: 36px; --icon-size: 26px; }
+#hint.mission-hint { position: fixed; z-index: 2; top: calc(var(--hud-top) + 12px); left: 16px; width: min(340px, calc(100vw - 32px)); margin: 0; color: #d7d0a9; font-size: 11px; text-shadow: 0 1px 3px #111a10, 0 2px 8px #111a10; pointer-events: none; }
+#hint:empty { display: none; }
+
+#minimap-panel { padding: 0; width: var(--map-size); }
+#minimap { width: var(--map-size); height: var(--map-size); }
+.selection-title { min-height: 18px; padding: 0; gap: 8px; }
+.selection-title[hidden] { display: none; }
+.selection-title strong { font-size: 11px; font-weight: 600; }
+.selection-title small { font-size: 10px; }
+.squad { max-width: 280px; }
+#roster { grid-template-columns: repeat(var(--roster-cols, 5), 40px); gap: 4px; max-width: none; max-height: 88px; overflow-y: auto; scrollbar-width: thin; }
+#roster button.icon-button { --button-size: 40px; --icon-size: 34px; display: flex; align-items: center; justify-content: center; height: 40px; padding: 3px; }
+#roster button.icon-button.active { outline: 1px solid #e3d5a980; outline-offset: -1px; }
+#roster button.icon-button.active::after { content: none; }
+#roster i { left: 6px; right: 6px; bottom: 1px; }
+#roster .stack-count { right: 0; font-size: 9px; }
+.order-bar { display: flex; flex-wrap: wrap; max-width: 304px; gap: 4px; }
+.order-bar button.icon-button { --button-size: 40px; --icon-size: 32px; flex: 0 0 40px; padding: 3px; }
+#build-palette { width: 100%; max-width: none; max-height: none; padding: 0; margin: 0 0 6px; overflow: visible; }
+.tray-heading { max-width: 300px; min-height: 22px; padding: 0; }
+.tray-heading strong { font-size: 11px; font-weight: 600; }
+.tray-heading button.icon-button { --button-size: 24px; --icon-size: 18px; padding: 2px; }
+#build-cards { display: flex; flex-wrap: wrap; gap: 4px; }
+#build-cards button.icon-button { --button-size: 48px; --icon-size: 42px; flex: 0 0 48px; width: 48px; height: 48px; min-width: 48px; max-height: none; aspect-ratio: auto; padding: 3px; }
+#actions { gap: 4px; padding: 0; margin-bottom: 6px; }
+#actions button.icon-button { --button-size: 48px; --icon-size: 42px; padding: 3px; }
+#actions.factory-actions { max-height: 96px; }
+#actions.factory-actions button.icon-button { width: calc(var(--icon-size) + 22px); min-width: calc(var(--icon-size) + 22px); display: grid; grid-template-columns: var(--icon-size) 18px; column-gap: 4px; padding: 0; }
+#actions .production-count { display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: #d9c18b; color: #172019; font: 700 10px/1 Arial, sans-serif; font-variant-numeric: tabular-nums; pointer-events: none; text-shadow: none; }
+#actions .production-count[hidden] { display: grid; visibility: hidden; }
+#actions .is-producing .production-count { background: #eda33f; }
+#actions button.has-queue.cannot-produce .game-icon { opacity: .65; filter: saturate(.65); }
+#queue { padding: 0; margin-bottom: 6px; font-size: 10px; text-shadow: none; }
+#placement { margin-bottom: 6px; padding: 0; gap: 4px; }
+#placement strong { font-size: 11px; }
+#placement p { font-size: 10px; }
+#placement button.icon-button, #select-blocked.icon-button { --button-size: 32px; --icon-size: 26px; }
+#order-feedback { font-size: 10px; padding: 0; }
+#toast { top: auto; bottom: calc(var(--hud-bottom) + 12px); font-size: 12px; }
+#result { bottom: calc(var(--hud-bottom) + 16px); }
+
+@media (max-width: 1100px) {
+  :root { --hud-bottom: 208px; --map-size: 112px; }
+}
+@media (max-width: 700px) {
+  :root { --hud-bottom: 184px; --map-size: 88px; }
+  .top { padding-inline: 12px; gap: 4px; }
+  .top .resources { margin-left: 12px; gap: 12px; font-size: 11px; }
+  .resource { min-width: 44px; }
+  .resource-energy { min-width: 88px; }
+  .top #power { display: none; }
+  #hint.mission-hint { left: 12px; width: calc(100vw - 24px); font-size: 10px; }
+  #build-cards button.icon-button { --button-size: 40px; --icon-size: 36px; flex-basis: 40px; width: 40px; min-width: 40px; height: 40px; }
+  #actions button.icon-button { --button-size: 40px; --icon-size: 36px; }
+  #actions.factory-actions { max-height: 80px; }
+  .selection-title small { display: inline; }
+  #toast { max-width: calc(100vw - 24px); }
+}
+@media (max-width: 370px) {
+  .command-deck { gap: 6px; padding-inline: 8px; --map-size: 72px; }
+  .order-bar, #roster { gap: 2px; }
+  .top > a { display: none; }
+  .top .resources { margin-left: 0; }
+}
+@media (min-width: 701px) and (max-height: 480px) {
+  :root { --hud-bottom: 136px; --map-size: 88px; }
+  .squad { max-width: 216px; }
+  #roster { grid-template-columns: repeat(var(--roster-cols, 5), 32px); }
+  #roster button.icon-button { --button-size: 32px; --icon-size: 28px; height: 32px; }
+  .order-bar { max-width: 248px; }
+  .order-bar button.icon-button { --button-size: 32px; --icon-size: 26px; flex-basis: 32px; }
+  #build-cards button.icon-button { --button-size: 40px; --icon-size: 36px; flex-basis: 40px; width: 40px; min-width: 40px; height: 40px; }
+  #actions button.icon-button { --button-size: 40px; --icon-size: 36px; }
+}
+
+/* Workshop controls use the same bare, centred pictograms as the field HUD. */
+#designer .designer-tabs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.design-field-note { margin: 0; font-size: 11px; line-height: 1.4; color: #c5cbb4; }
+#designer :is(.designer-tabs button, .design-part) {
+  --icon-size: 44px; display: inline-flex; align-items: center; justify-content: center;
+  width: 100%; min-width: 0; height: 56px; padding: 4px; gap: 0;
+}
+#designer .designer-cards { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; }
+#designer .design-part { --icon-size: 48px; flex: 0 0 60px; width: 60px; height: 60px; }
+#designer .design-part svg { width: var(--icon-size); height: var(--icon-size); }
+#designer :is(.designer-tabs button, .design-part, .designer-filters button):is(:hover,[aria-pressed=true]) { background: transparent; box-shadow: none; }
+#designer :is(.designer-tabs button, .design-part)[aria-pressed=true]::after { content: ''; }
+#designer button:focus-visible { outline: none; }
+#designer .designer-filters { justify-content: center; }
+#designer .designer-filters button.icon-button { --button-size: 32px; --icon-size: 26px; padding: 3px; }
+#designer .designer-pagination button.icon-button { --button-size: 28px; --icon-size: 22px; width: 28px; height: 28px; padding: 2px; }
+#designer .designer-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 0; }
+#designer .design-salvage-options { box-shadow: none; }
+#designer .design-salvage-options .designer-stats { grid-template-columns: 1fr 1fr; margin-top: 12px; }
+#designer .design-salvage summary.icon-button { --button-size: 32px; --icon-size: 26px; padding: 3px; }
+#designer .designer-footer button[type=submit] { --button-size: 36px; --icon-size: 28px; width: 36px; height: 34px; min-height: 34px; padding: 3px; border: 0; background: none; box-shadow: none; }
+#designer .designer-name button.icon-button { width: 30px; min-width: 30px; padding: 3px; }
+#designer .garage-view-controls button.icon-button { width: 30px; height: 30px; padding: 3px; }
+@media (max-height: 520px), (max-width: 680px) {
+  #designer :is(.designer-tabs button, .design-part) { --icon-size: 34px; height: 44px; }
+  #designer .design-part { flex-basis: 48px; width: 48px; }
+}

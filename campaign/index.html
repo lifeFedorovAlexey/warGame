@@ -6,8 +6,11 @@
   <link rel="icon" href="data:,">
   <title>Операция «Рай» · Освоение целины</title>
   <link rel="stylesheet" href="mission.css">
-  <link rel="stylesheet" href="designer.css">
   <script type="importmap">{"imports":{"three":"../demo/vendor/three.module.js"}}</script>
+  <link rel="stylesheet" href="designer.css">
+<link rel="stylesheet" href="../assets/ui/icons.css">
+<link rel="stylesheet" href="hud-layout.css">
+<link rel="stylesheet" href="combat-menu.css">
 </head>
 <body>
 <main id="game">
@@ -17,8 +20,7 @@
 
   <div id="mission-hud" hidden>
     <header class="top">
-      <a href="../demo/" title="Вернуться к осмотру машины">РАЙ <span>/ АЛЬФА</span></a>
-      <b class="mission-name">Освоение целины</b>
+      <a href="../demo/" title="Вернуться к осмотру машины">РАЙ</a>
       <div class="resources">
         <div class="resource resource-energy">
           <span><span class="resource-icon" aria-hidden="true">⚡</span><b id="energy">760</b><small id="income"></small></span>
@@ -29,12 +31,11 @@
           <meter id="fleet-meter" aria-label="Лимит техники" min="0" max="48" value="5"></meter>
         </div>
         <span id="power" title="Питание от АЭС"></span>
-        <button id="objective-focus" class="quiet" hidden></button>
+        <button id="objective-focus" class="quiet" hidden data-icon="focus" aria-label="К цели"></button>
       </div>
-      <button id="pause" title="Пауза · Пробел">Пауза</button>
-      <button id="design-toggle" aria-controls="designer" aria-expanded="false">Конструктор</button>
+      <button id="pause" title="Пауза · Пробел" data-icon="pause" aria-label="Пауза"></button>
       <details class="settings">
-        <summary aria-label="Меню операции">Меню</summary>
+        <summary data-icon="menu" aria-label="Меню операции"></summary>
         <div class="operation-menu">
           <div class="operation-sections" role="group" aria-label="Разделы меню">
             <button class="icon-button" type="button" title="Задачи" aria-label="Задачи" aria-pressed="true" aria-controls="operation-tasks">
@@ -45,6 +46,9 @@
             </button>
             <button class="icon-button" type="button" title="Звук и связь" aria-label="Звук и связь" aria-pressed="false" aria-controls="operation-audio">
               <svg class="game-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15v-3a8 8 0 0 1 16 0v3" fill="none" stroke="#d9c69b" stroke-width="2.2"/><path d="M3 12h5v7H5l-2-2zm13 0h5v5l-2 2h-3z" fill="#f3ae54"/></svg>
+            </button>
+            <button class="icon-button" type="button" title="Журнал" aria-label="Журнал" aria-pressed="false" aria-controls="operation-journal">
+              <svg class="game-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h7l2 2 2-2h7v17h-7l-2 1-2-1H3z" fill="none" stroke="#d9c69b" stroke-width="2"/><path d="M12 5v15M6 8h3m-3 4h3m6-4h3m-3 4h3" stroke="#f3ae54" stroke-width="1.5"/></svg>
             </button>
             <button id="controls-help" class="icon-button" type="button" title="Управление" aria-label="Управление" aria-pressed="false" aria-controls="control-hints">
               <svg class="game-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 6h20v12H2z" fill="none" stroke="#d9c69b" stroke-width="1.6"/><path d="M5 9h2m2 0h2m2 0h2m2 0h2M5 12h2m2 0h2m2 0h2m2 0h2M7 15h10" stroke="#f3ae54" stroke-width="1.4"/></svg>
@@ -58,79 +62,87 @@
           <section id="operation-actions" class="operation-pane" aria-labelledby="operation-controls" hidden>
             <h2 id="operation-controls">Операция</h2>
             <div class="settings-actions">
-              <button id="save">Сохранить</button>
-              <button id="load">Загрузить</button>
-              <button id="tempo" title="Скорость симуляции">×1</button>
-              <button id="home" title="К начальной базе · Home">К базе</button>
+              <button id="save" data-icon="save" aria-label="Сохранить"></button>
+              <button id="load" data-icon="load" aria-label="Загрузить"></button>
+              <button id="tempo" title="Скорость симуляции" data-icon="speed-one" aria-label="Скорость симуляции"></button>
+              <button id="home" title="К начальной базе · Home" data-icon="home" aria-label="К базе"></button>
             </div>
           </section>
           <section id="operation-audio" class="operation-pane" aria-labelledby="communication-controls" hidden>
             <h2 id="communication-controls">Звук и связь</h2>
             <div class="settings-actions">
-              <button id="radio-toggle"></button>
-              <button id="sound-toggle">Звук: вкл.</button>
-              <button id="story-voice-toggle">Голос радио: вкл.</button>
+              <button id="radio-toggle" data-icon="radio" aria-label="Радио: вкл."></button>
+              <button id="sound-toggle" data-icon="sound" aria-label="Звук: вкл."></button>
+              <button id="story-voice-toggle" data-icon="voice" aria-label="Голос радио: вкл."></button>
             </div>
+          </section>
+          <section id="operation-journal" class="operation-pane" aria-labelledby="journal-title" hidden>
+            <h2 id="journal-title">Журнал</h2>
+            <div id="journal-entries"></div>
           </section>
           <section id="control-hints" class="operation-pane" aria-labelledby="control-hints-title" hidden>
             <h2 id="control-hints-title">Управление</h2>
             <dl class="key-guide">
               <dt>ЛКМ</dt><dd>Выбрать</dd>
+              <dt>2× ЛКМ</dt><dd>Весь тип на экране</dd>
               <dt>ПКМ</dt><dd>Отдать приказ</dd>
               <dt>Колесо</dt><dd>Масштаб</dd>
               <dt><abbr title="Средняя кнопка мыши">СКМ</abbr></dt><dd>Поворот камеры</dd>
               <dt><kbd>WASD</kbd></dt><dd>Движение камеры</dd>
-              <dt><kbd>B</kbd> / <kbd>M</kbd> / <kbd>T</kbd></dt><dd>Стройка / ход / атака</dd>
+              <dt><kbd>B</kbd> / <kbd>M</kbd> / <kbd>F</kbd></dt><dd>Стройка / ход / атака</dd>
             </dl>
-            <p id="hint"></p>
           </section>
         </div>
       </details>
     </header>
 
+
     <aside id="radio" aria-label="Полевое радио" aria-live="polite" hidden>
-      <div class="radio-copy">
-        <strong></strong><p></p>
-        <button class="quiet" data-skip-all>Пропустить все реплики</button>
-      </div>
+      <div class="radio-copy"><strong></strong><p></p></div>
       <div class="radio-actions">
         <button class="quiet radio-focus" data-focus hidden data-icon="focus" aria-label=""></button>
-        <button data-dismiss data-icon="close" aria-label="Пропустить реплику">×</button>
+        <button data-dismiss data-icon="close" aria-label="Пропустить разговор"></button>
       </div>
     </aside>
 
+    <aside id="field-tasks" aria-label="Текущие задачи" hidden><ol id="field-objectives"></ol></aside>
     <div class="command-deck">
-    <div class="squad">
-      <div class="selection-title"><strong id="selection">Техника</strong><small id="details"></small></div>
+    <section class="squad" aria-label="Выбранная техника">
+      <div class="selection-title" hidden><strong id="selection"></strong><small id="details"></small></div>
       <div id="roster" aria-label="Своя техника"></div>
-    </div>
+    </section>
+
     <aside id="minimap-panel" class="panel">
       <canvas id="minimap" width="224" height="224" aria-label="Миникарта. Нажмите для перемещения камеры"></canvas>
     </aside>
 
     <section id="commands" aria-label="Приказы">
       <div id="build-palette" class="panel" hidden>
-        <div class="tray-heading"><strong>Стройка</strong><button id="close-build" aria-label="Закрыть стройку">×</button></div>
+        <div class="tray-heading"><strong>Стройка</strong><button id="close-build" data-icon="close" aria-label="Закрыть стройку"></button></div>
         <div id="build-cards"></div>
       </div>
       <div id="placement" class="panel" hidden>
         <div><strong id="placement-name"></strong><p id="placement-status"></p></div>
-        <button id="suggest-site">К площадке</button>
-        <button id="cancel-order" aria-label="Отменить размещение">×</button>
+        <button id="suggest-site" data-icon="focus" aria-label="К площадке"></button>
+        <button id="cancel-order" data-icon="close" aria-label="Отменить размещение"></button>
       </div>
       <div id="actions" class="panel" hidden></div>
       <div id="queue" hidden></div>
       <div id="order-feedback" hidden>
-        <span aria-live="polite"></span><button id="select-blocked" class="quiet" hidden>Выбрать</button>
+        <span aria-live="polite"></span><button id="select-blocked" class="quiet" hidden data-icon="focus" aria-label="Выбрать"></button>
       </div>
       <div class="tactical-dock">
         <div class="order-bar" aria-label="Действия">
-          <button id="build-toggle" title="Строительство · B" aria-expanded="false"><svg aria-hidden="true"><use href="hud-icons.svg#build"/></svg><span>Строить</span><kbd>B</kbd></button>
-          <button id="move-order" title="Движение · M"><svg aria-hidden="true"><use href="hud-icons.svg#move"/></svg><span>Маршрут</span><kbd>M</kbd></button>
-          <button id="attack-order" title="По земле — движение с боем · T"><svg aria-hidden="true"><use href="hud-icons.svg#attack"/></svg><span>Атака</span><kbd>T</kbd></button>
-          <button id="stop"><svg aria-hidden="true"><use href="hud-icons.svg#stop"/></svg><span>Стоп</span></button>
+          <button id="build-toggle" title="Строительство · B" aria-expanded="false" data-icon="build" aria-label="Строить"></button>
+          <button id="production-toggle" title="Производство · Завод" data-icon="factory" aria-label="Производство"></button>
+          <button id="lab-toggle" title="НИИ · Исследования" data-icon="lab" aria-label="НИИ"></button>
+          <button id="design-toggle" aria-controls="designer" aria-expanded="false" data-icon="tools" aria-label="Конструктор"></button>
+          <button id="move-order" title="Движение · M. Строй · Alt+1…4. Группа · Ctrl+G" data-icon="move" aria-label="Маршрут" aria-keyshortcuts="M Control+G Alt+1 Alt+2 Alt+3 Alt+4"></button>
+          <button id="attack-order" title="ЛКМ / F — режим атаки. По земле — движение с боем. ПКМ — настройки" data-icon="attack" aria-label="Атака" aria-keyshortcuts="F" aria-pressed="false" aria-controls="combat-menu" aria-expanded="false" aria-haspopup="dialog"></button>
+          <button id="stop" data-icon="stop" aria-label="Стоп"></button>
         </div>
       </div>
+      <div id="combat-menu" role="dialog" aria-label="Настройки атаки выделенных машин" hidden></div>
     </section>
     </div>
   </div>
@@ -139,7 +151,15 @@
     <header class="designer-heading">
       <h2 id="designer-title">Конструктор</h2>
       <div class="designer-header-actions">
-        <button type="button" data-close-designer aria-label="Закрыть конструктор">×</button>
+        <details class="design-salvage">
+          <summary data-icon="armor-upgrade" aria-label="Полевые модификации"></summary>
+          <div class="design-salvage-options">
+            <label><input type="checkbox" data-salvage-enabled> Автомонтаж при подборе</label>
+            <div data-salvage-recipes></div>
+            <p>Совместимая машина установит деталь, если изучен её чертёж.</p>
+          </div>
+        </details>
+        <button type="button" data-close-designer data-icon="close" aria-label="Закрыть конструктор"></button>
       </div>
     </header>
     <div class="garage-layout">
@@ -148,22 +168,24 @@
         <p class="garage-stage-status" data-design-stage-status role="status"></p>
         <div class="garage-view-controls">
           <small>Вращение перетаскиванием</small>
-          <div><button type="button" data-design-explode aria-pressed="false">Разобрать</button><button type="button" data-design-reset aria-label="Сбросить вид">Сброс</button></div>
+          <div><button type="button" data-design-explode aria-pressed="false" data-icon="explode" aria-label="Разобрать"></button><button type="button" data-design-reset data-icon="restart" aria-label="Сбросить вид"></button></div>
         </div>
       </section>
       <form id="design-form">
         <div class="garage-config">
           <div class="designer-tabs" role="group" aria-label="Узлы машины">
-            <button type="button" data-design-slot="chassis"><span class="designer-slot-copy"><small>Ходовая</small><strong></strong></span></button>
-            <button type="button" data-design-slot="body"><span class="designer-slot-copy"><small>Корпус</small><strong></strong></span></button>
-            <button type="button" data-design-slot="upper"><span class="designer-slot-copy"><small>Модуль</small><strong></strong></span></button>
+            <button type="button" data-design-slot="chassis" data-icon="wheels" aria-label="01 · Ходовая"></button>
+            <button type="button" data-design-slot="body" data-icon="body" aria-label="02 · Корпус"></button>
+            <button type="button" data-design-slot="upper" data-icon="turret-ring" aria-label="03 · Модуль"></button>
+            <button type="button" data-design-slot="field" data-icon="armor-upgrade" aria-label="04 · Навесные модули"></button>
           </div>
           <div class="designer-filters" data-design-filters role="group" aria-label="Назначение деталей" hidden></div>
           <div class="designer-cards" data-design-cards role="group" aria-label="Доступные детали"></div>
+          <p class="design-field-note" data-design-field-note hidden></p>
           <div class="designer-pagination" data-design-pages hidden>
-            <button type="button" data-design-prev aria-label="Предыдущая страница деталей">‹</button>
+            <button type="button" data-design-prev data-icon="previous" aria-label="Предыдущая страница деталей"></button>
             <output data-design-page aria-label="Страница деталей" aria-live="polite"></output>
-            <button type="button" data-design-next aria-label="Следующая страница деталей">›</button>
+            <button type="button" data-design-next data-icon="next" aria-label="Следующая страница деталей"></button>
           </div>
         </div>
         <dl class="designer-stats">
@@ -181,10 +203,10 @@
             <label for="project-name">Проект</label>
             <div>
               <input id="project-name" name="projectName" maxlength="36" autocomplete="off" placeholder="Авто">
-              <button type="button" data-design-auto-name aria-label="Автоматическое имя">Авто</button>
+              <button type="button" data-design-auto-name data-icon="restart" aria-label="Автоматическое имя"></button>
             </div>
           </div>
-          <button type="submit" class="primary">Сохранить</button>
+          <button type="submit" class="primary" data-icon="save" aria-label="Сохранить проект"></button>
           <p data-design-status role="status"></p>
         </div>
       </form>
@@ -195,17 +217,19 @@
     <p class="eyebrow">ОПЕРАЦИЯ «РАЙ» / АЛЬФА</p>
     <h1>Освоение целины</h1>
     <p id="loading-status">Подготовка карты…</p>
-    <button id="begin" class="primary" disabled>Начать</button>
-    <button id="resume-save" hidden>Продолжить</button>
+    <button id="begin" class="primary" disabled data-icon="play" aria-label="Начать"></button>
+    <button id="prologue" disabled data-icon="radio" aria-label="Прослушать пролог"></button>
+    <button id="resume-save" hidden data-icon="load" aria-label="Продолжить"></button>
   </section>
   <section id="result" class="corner-card panel" hidden>
     <h1 id="result-title"></h1>
     <p id="result-message"></p>
-    <button id="result-close">Карта</button>
-    <button id="result-signal" hidden>К сигналу</button>
-    <button id="restart">Заново</button>
+    <button id="result-close" data-icon="map" aria-label="Карта"></button>
+    <button id="result-signal" hidden data-icon="radar" aria-label="К сигналу"></button>
+    <button id="restart" data-icon="restart" aria-label="Заново"></button>
   </section>
 </main>
 <script type="module" src="main.js"></script>
+<script type="module" src="../assets/ui/icons.js"></script>
 </body>
 </html>

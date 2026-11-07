@@ -1,20 +1,115 @@
 import {RoadTraffic, asphaltBonus, gradeSpeed, surfaceTravelCost} from './road-traffic.js';
 import {sweepAvoidsFootprint, vehicleSweep} from './vehicle-collision.js';
+import {buildTerrainPassability} from './terrain-passability.js';
 
 const climbableGrade = .52;
+const completeSteps=iterator=>{let step;do{step=iterator.next();}while(!step.done);return step.value;};
 
 // A* on a cached terrain grid. Dynamic building footprints are rasterized once
 // per structural change; movement never falls back to teleporting.
 export class TerrainNavigator{
- constructor(field,{cell=8,bounds=[0,0,127,127]}={}){
+ constructor(field,{cell=8,bounds=[0,0,127,127],vehicleScale=4.5}={}){
+  this.vehicleScale=vehicleScale;
   this.field=field;this.cell=cell;this.clearance=11+cell/2;this.size=Math.round(field.extent/cell)+1;this.bounds=bounds;const count=this.size*this.size;this.heights=new Float32Array(count);this.walkable=new Uint8Array(count);this.occupied=new Uint8Array(count);this.edgeCache=new Uint8Array(count*8);this.searchId=0;this.closed=new Uint32Array(count);this.visited=new Uint32Array(count);this.cost=new Float32Array(count);this.parent=new Int32Array(count);
   this.roads=new RoadTraffic(field);this.surfaceCosts=new Float32Array(count);this.pavedTripCosts=new Float32Array(count);this.slopes=new Float32Array(count);this.solids=[];
-  for(let row=0;row<this.size;row++)for(let col=0;col<this.size;col++){const p=this.position(col,row),id=row*this.size+col,g=field.gradientAt(p.x,p.y);this.heights[id]=field.heightAt(p.x,p.y);this.slopes[id]=Math.hypot(g.x,g.y);this.walkable[id]=this.slopes[id]<.55?1:0;}
+  this.topologyRevision=0;this.topologyBounds=bounds.join(',');this.regionVersions=new Map();this.footprintCounts=new Uint16Array(count);this.staticFootprints=new Map();
+  this.terrainAllowed=buildTerrainPassability(field,this.roads);
+  for(let row=0;row<this.size;row++)for(let col=0;col<this.size;col++){const p=this.position(col,row),id=row*this.size+col,g=field.gradientAt(p.x,p.y);this.heights[id]=field.heightAt(p.x,p.y);this.slopes[id]=Math.hypot(g.x,g.y);this.walkable[id]=this.slopes[id]<.55&&this.terrainAllowed(p.x,p.y)?1:0;}
  }
  position(col,row){return{x:col*this.cell-this.field.half,y:this.field.half-row*this.cell};}
  grid(x,y){return [Math.max(0,Math.min(this.size-1,Math.round((x+this.field.half)/this.cell))),Math.max(0,Math.min(this.size-1,Math.round((this.field.half-y)/this.cell)))];}
  allowed(col,row){const gx=col*this.cell/32,gy=row*this.cell/32,b=this.bounds;return col>=0&&row>=0&&col<this.size&&row<this.size&&gx>=b[0]&&gy>=b[1]&&gx<=b[2]&&gy<=b[3]&&this.walkable[row*this.size+col]&&!this.occupied[row*this.size+col];}
- rebuild(structures){this.occupied.fill(0);this.solids=structures.filter(item=>item.hp>0);for(const item of this.solids){const [cx,cy]=this.grid(item.x,item.y),rx=Math.ceil((item.halfWidth+this.clearance)/this.cell),ry=Math.ceil((item.halfDepth+this.clearance)/this.cell);for(let row=cy-ry;row<=cy+ry;row++)for(let col=cx-rx;col<=cx+rx;col++){if(row<0||col<0||row>=this.size||col>=this.size)continue;const p=this.position(col,row);if(Math.abs(p.x-item.x)<item.halfWidth+this.clearance&&Math.abs(p.y-item.y)<item.halfDepth+this.clearance)this.occupied[row*this.size+col]=1;}}}
+ rebuild(structures){
+  const previous=this.staticFootprints,next=new Map(),changed=new Set(),counts=this.footprintCounts;
+  this.solids=structures.filter(item=>item.hp>0||item.damage?.wreck);
+  const mark=cells=>{for(const id of cells)changed.add(Math.floor((id%this.size)/16)+','+Math.floor(Math.floor(id/this.size)/16));};
+  const remove=record=>{for(const id of record.cells){counts[id]--;this.occupied[id]=counts[id]>0?1:0;}mark(record.cells);};
+  for(const item of this.solids){
+   const key=item.id??item,signature=[item.x,item.y,item.halfWidth,item.halfDepth,this.clearance].join('|'),old=previous.get(key);
+   if(old?.signature===signature){next.set(key,old);continue;}
+   if(old)remove(old);
+   const cells=[],[cx,cy]=this.grid(item.x,item.y),rx=Math.ceil((item.halfWidth+this.clearance)/this.cell),ry=Math.ceil((item.halfDepth+this.clearance)/this.cell);
+   for(let row=Math.max(0,cy-ry);row<=Math.min(this.size-1,cy+ry);row++)for(let col=Math.max(0,cx-rx);col<=Math.min(this.size-1,cx+rx);col++){
+    const p=this.position(col,row);
+    if(Math.abs(p.x-item.x)>=item.halfWidth+this.clearance||Math.abs(p.y-item.y)>=item.halfDepth+this.clearance)continue;
+    const id=row*this.size+col;cells.push(id);counts[id]++;this.occupied[id]=1;
+   }
+   next.set(key,{signature,cells});mark(cells);
+  }
+  for(const [key,record] of previous)if(!next.has(key))remove(record);
+  this.staticFootprints=next;this.lastChangedRegions=[...changed];
+  const boundsChanged=this.topologyBounds!==this.bounds.join(',');this.topologyBounds=this.bounds.join(',');
+  if(changed.size||boundsChanged){
+   this.topologyRevision++;
+   for(const key of changed)this.regionVersions.set(key,(this.regionVersions.get(key)??0)+1);
+  }
+ }
+ pathRegions(from,path){
+  const regions=new Map(),put=(x,y)=>{const [col,row]=this.grid(x,y),key=Math.floor(col/16)+','+Math.floor(row/16);regions.set(key,this.regionVersions.get(key)??0);};
+  let a=from;
+  for(const b of path){
+   const times=[0,1],cross=(q0,q1)=>{if(Math.abs(q1-q0)<1e-9)return;for(let k=Math.ceil(Math.min(q0,q1));k<Math.max(q0,q1);k++){const t=(k-q0)/(q1-q0);if(t>0&&t<1)times.push(t);}};
+   cross(((a.x+this.field.half)/this.cell+.5)/16,((b.x+this.field.half)/this.cell+.5)/16);
+   cross(((this.field.half-a.y)/this.cell+.5)/16,((this.field.half-b.y)/this.cell+.5)/16);
+   times.sort((x,y)=>x-y);
+   let previous=0;
+   for(const t of times){for(const p of [t,(previous+t)/2])put(a.x+(b.x-a.x)*p,a.y+(b.y-a.y)*p);previous=t;}
+   a=b;
+  }
+  return regions;
+ }
+ regionsUnchanged(regions){return !!regions&&[...regions].every(([key,version])=>(this.regionVersions.get(key)??0)===version);}
+ createSearchContext(){
+  // Terrain and immutable edge/surface caches are shared. A suspended command
+  // search must not overwrite the movement search's heap or predecessor tree.
+  const context=Object.create(this),count=this.size*this.size;
+  Object.assign(context,{baseNavigator:this,occupied:new Uint8Array(count),closed:new Uint32Array(count),
+   visited:new Uint32Array(count),cost:new Float32Array(count),parent:new Int32Array(count),
+   heapIds:new Int32Array(4096),heapPriorities:new Float64Array(4096),searchId:0,
+   pathCache:new Map(),pathCacheRegions:new Map(),pathCachePoints:0,corridors:[],sharedCorridors:true,beforeSynchronousSearch:null,workDeadline:Infinity,topologyRevision:-1});
+  context.refreshContext();return context;
+ }
+ refreshContext(){
+  const base=this.baseNavigator;if(!base)return;
+  this.topologyRevision=base.topologyRevision;this.occupied.set(base.occupied);this.solids=base.solids;this.bounds=base.bounds.slice();
+ }
+ *reuseCorridor(from,to,options){
+  if(options.terrainEscape||options.acceptEnd&&!options.acceptEnd(to)||Math.hypot(to.x-from.x,to.y-from.y)<this.cell*12)return null;
+  if(this.lineClear(from,to,false,true)){
+   const paved=this.roads.nearPavement(from)&&this.roads.nearPavement(to);
+   if(!this.roads.buckets.size||!this.roads.worthChecking(from,to,this.travelCost(from,to,paved),paved))return null;
+  }
+  // A formation can span hundreds of world metres. Distance is only a
+  // shortlist bound; both exact connectors still pass the terrain/building
+  // checks below, so nearby members need not repeat the same global search.
+  const maximum=Math.max(this.cell*16,Math.min(this.cell*64,Math.hypot(to.x-from.x,to.y-from.y)*.65));
+  const candidates=(this.corridors??[]).filter(c=>c.kind===(from.kind??'')&&c.scale===this.vehicleScale&&c.bounds===this.bounds.join(',')
+   &&Math.hypot(c.from.x-from.x,c.from.y-from.y)<=maximum&&Math.hypot(c.to.x-to.x,c.to.y-to.y)<=maximum)
+   .sort((a,b)=>Math.hypot(a.from.x-from.x,a.from.y-from.y)+Math.hypot(a.to.x-to.x,a.to.y-to.y)
+    -Math.hypot(b.from.x-from.x,b.from.y-from.y)-Math.hypot(b.to.x-to.x,b.to.y-to.y)).slice(0,4);
+  for(const corridor of candidates){
+   const unchanged=this.regionsUnchanged(corridor.regions)&&corridor.occupancyKey===options.occupancyKey;
+   // A cached corridor is only a candidate. Validate its exact connectors and
+   // every retained segment against this request's current occupancy/terrain.
+   for(let entry=0;entry<Math.min(4,corridor.path.length);entry++){
+    if(!this.lineClear(from,corridor.path[entry],false,true))continue;
+    let previous=from,valid=true;const path=[];
+    for(let i=entry;i<corridor.path.length;i++){
+     const point=corridor.path[i];
+     if((previous===from||!unchanged)&&!this.lineClear(previous,point,false,previous===from)){valid=false;break;}
+     path.push({...point});previous=point;
+     if(i>=corridor.path.length-3&&this.lineClear(previous,to)){
+      if(Math.hypot(previous.x-to.x,previous.y-to.y)>.01)path.push({x:to.x,y:to.y});
+      this.corridorHits=(this.corridorHits??0)+1;return path;
+     }
+     if(performance.now()>=(this.workDeadline??Infinity))yield;
+    }
+    if(valid&&this.lineClear(previous,to)){path.push({x:to.x,y:to.y});this.corridorHits=(this.corridorHits??0)+1;return path;}
+   }
+   if(performance.now()>=(this.workDeadline??Infinity))yield;
+  }
+  return null;
+ }
  nearbySolids(point,radius){
   return this.solids.filter(item=>Math.abs(point.x-item.x)<item.halfWidth+radius&&Math.abs(point.y-item.y)<item.halfDepth+radius);
  }
@@ -32,28 +127,32 @@ export class TerrainNavigator{
     const low=Math.max(a[along]-a[depth],b[along]-b[depth]);
     const high=Math.min(a[along]+a[depth],b[along]+b[depth]);
     if(high-low<scale*8)continue;
-    if(direction>0?from[along]>=low-staging||to[along]<=high+staging:
-     from[along]<=high+staging||to[along]>=low-staging)continue;
+    if(direction>0?to[along]<=high+staging:to[along]>=low-staging)continue;
     const left=a[side]<b[side]?a:b,right=left===a?b:a;
     const gapStart=left[side]+left[span],gapEnd=right[side]-right[span],width=gapEnd-gapStart;
     if(width<scale*2.8||width>scale*8.1||Math.min(left[span],right[span])<scale*6)continue;
     const transverse=(gapStart+gapEnd)/2;
-    const entrance={[along]:direction>0?low-staging:high+staging,[side]:transverse};
+    const inside=from[along]>low-staging&&from[along]<high+staging&&Math.abs(from[side]-transverse)<width/2;
+    if(!inside&&(direction>0?from[along]>=low-staging:from[along]<=high+staging))continue;
+    const entrance=inside?{x:from.x,y:from.y}:{[along]:direction>0?low-staging:high+staging,[side]:transverse};
     const exit={[along]:direction>0?high+staging:low-staging,[side]:transverse};
-    const length=Math.hypot(from.x-entrance.x,from.y-entrance.y)+high-low+2*staging+Math.hypot(exit.x-to.x,exit.y-to.y);
+    const length=Math.hypot(from.x-entrance.x,from.y-entrance.y)+Math.hypot(exit.x-entrance.x,exit.y-entrance.y)+Math.hypot(exit.x-to.x,exit.y-to.y);
     if(length>=bestLength||length>direct*1.3)continue;
     const heading=Math.atan2(entrance.x-exit.x,exit.y-entrance.y);
     if(!this.lineClear(entrance,exit,false,true,climbableGrade,true))continue;
-    const sweep=vehicleSweep({...entrance,heading},{...exit,heading},scale,this.field);
+    // An already parked occupant may leave the conservative raster margin,
+    // but its actual pose and complete swept hull must fit the same throat.
+    const sweep=vehicleSweep({...entrance,heading:inside?from.heading??heading:heading,kind:from.kind},{...exit,heading,kind:from.kind},scale,this.field);
     if(!this.clearSolidSweep(sweep,this.solids))continue;
-    best={entrance,exit,along,direction,heading,mouth:direction>0?high:low,admit:(direction>0?low:high)+direction*scale*6};
+    best={entrance,exit,along,direction,heading,mouth:direction>0?high:low,admit:(direction>0?low:high)+direction*scale*6,
+     throat:{along,side,low,high,centre:transverse,width}};
     bestLength=length;
    }
   }
   return best;
  }
  nearest(x,y,maxRadius=12){const [cx,cy]=this.grid(x,y);for(let r=0;r<=maxRadius;r++){let best=null,distance=Infinity;for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(r&&Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const col=cx+dx,row=cy+dy;if(!this.allowed(col,row))continue;const p=this.position(col,row),d=Math.hypot(p.x-x,p.y-y);if(d<distance){distance=d;best={...p,col,row};}}if(best)return best;}return null;}
- lineClear(a,b,terrainOnly=false,leaveGridEdge=false,maximumGrade=climbableGrade,physical=false,checkOccupancy=false){
+ lineClear(a,b,terrainOnly=false,leaveGridEdge=false,maximumGrade=climbableGrade,physical=false,checkOccupancy=false,terrainEscape=null){
   const length=Math.hypot(b.x-a.x,b.y-a.y),times=[0,1],half=this.field.half,cell=this.field.renderCell??this.cell;
   if([a,b].some(point=>Math.abs(point.x)>half||Math.abs(point.y)>half))return false;
   // Height is affine within each heightfield triangle. Split exactly at its X,
@@ -66,6 +165,14 @@ export class TerrainNavigator{
   const mayLeave=leaveGridEdge&&(physical||!this.occupied[startId])&&gx>=bounds[0]&&gx<=bounds[2]&&gy>=bounds[1]&&gy<=bounds[3];
   const allowed=t=>{
    const x=a.x+(b.x-a.x)*t,y=a.y+(b.y-a.y)*t,[col,row]=this.grid(x,y);
+   // Applies to smoothing, road lanes, parking and physical recovery alike.
+   if(!this.terrainAllowed(x,y)){
+    // Explicit evacuation of an already-invalid saved pose. It cannot be
+    // started from legal ground or renewed along a ridge. A small fixed rise
+    // permits reversing to turn before descending from the old saved pose.
+    if(!terrainEscape||this.terrainAllowed(a.x,a.y)||Math.hypot(x-terrainEscape.x,y-terrainEscape.y)>terrainEscape.radius
+      ||this.field.heightAt(x,y)>terrainEscape.height+(terrainEscape.maxRise??.5))return false;
+   }
    if(terrainOnly)return this.walkable[row*this.size+col];
    if(physical){
     if(checkOccupancy&&this.occupied[row*this.size+col])return false;
@@ -107,16 +214,47 @@ export class TerrainNavigator{
   }
   return total;
  }
- findPath(from,to,{maxGoalDistance=Infinity,escapeSteepStart=false}={}){
+ findPath(...args){this.beforeSynchronousSearch?.();return completeSteps(this.findPathSteps(...args));}
+ *findPathSteps(from,to,{maxGoalDistance=Infinity,escapeSteepStart=false,occupancyKey='',terrainEscape=null,acceptEnd=null,acceptEndKey=''}={}){
+  // Exact requests only: no quantisation of start, goal or dynamic obstacles.
+  // Callers receive their own waypoint array because driving consumes it.
+  this.lastExhaustedReachability=null;
+  const cache=this.pathCache??=new Map(),key=[from.x,from.y,from.heading??0,from.kind??'',this.vehicleScale,to.x,to.y,maxGoalDistance,escapeSteepStart,terrainEscape?.x,terrainEscape?.y,terrainEscape?.height,terrainEscape?.radius,terrainEscape?.maxRise,...this.bounds,acceptEndKey].join('|')+'|'+occupancyKey;
+  const metadata=this.pathCacheRegions??=new Map();
+  if(cache.has(key)){
+   const path=cache.get(key),dependency=metadata.get(key);
+   if(path?this.regionsUnchanged(dependency?.regions):dependency?.revision===this.topologyRevision){cache.delete(key);cache.set(key,path);return path?.map(p=>({...p}))??null;}
+   this.pathCachePoints-=(path?.length??0);cache.delete(key);metadata.delete(key);
+  }
+  const reachabilityKey=[from.x,from.y,from.heading??0,from.kind??'',this.vehicleScale,escapeSteepStart,terrainEscape?.x,terrainEscape?.y,terrainEscape?.height,terrainEscape?.radius,terrainEscape?.maxRise,...this.bounds,this.topologyRevision].join('|')+'|'+occupancyKey;
+  const options={maxGoalDistance,escapeSteepStart,terrainEscape,reachabilityKey,acceptEnd,occupancyKey};
+  const reused=this.sharedCorridors?(yield* this.reuseCorridor(from,to,options)):null;
+  const path=reused??(yield* this.computePathSteps(from,to,options));
+  if(!path)this.lastExhaustedReachability=this.exhaustedReachability?.get(reachabilityKey)??this.lastExhaustedReachability;
+  cache.set(key,path?.map(p=>({...p}))??null);this.pathCachePoints=(this.pathCachePoints??0)+(path?.length??0);
+  metadata.set(key,{revision:this.topologyRevision,regions:path?this.pathRegions(from,path):null});
+  while(cache.size>1024||this.pathCachePoints>16384){const first=cache.keys().next().value;this.pathCachePoints-=cache.get(first)?.length??0;cache.delete(first);metadata.delete(first);}
+  if(this.sharedCorridors&&!reused&&path?.length>1&&!terrainEscape){
+   const corridors=this.corridors??=[];
+   corridors.unshift({from:{x:from.x,y:from.y},to:{x:to.x,y:to.y},kind:from.kind??'',scale:this.vehicleScale,bounds:this.bounds.join(','),
+    topologyRevision:this.topologyRevision,regions:this.pathRegions(from,path),occupancyKey,path:path.map(p=>({...p}))});
+   if(corridors.length>64)corridors.pop();
+  }
+  return path;
+ }
+ computePath(...args){this.beforeSynchronousSearch?.();return completeSteps(this.computePathSteps(...args));}
+ *computePathSteps(from,to,{maxGoalDistance=Infinity,escapeSteepStart=false,terrainEscape=null,reachabilityKey=null,acceptEnd=null,occupancyKey=''}={}){
   const gx=(to.x+this.field.half)/32,gy=(this.field.half-to.y)/32,bounds=this.bounds;if(gx<bounds[0]||gy<bounds[1]||gx>bounds[2]||gy>bounds[3])return null;
   const end=this.nearest(to.x,to.y);if(!end)return null;
-  const direct=this.lineClear(from,to,false,true)?[{x:to.x,y:to.y}]:null;
+  const goalAccepted=!acceptEnd||acceptEnd(to);
+  const direct=goalAccepted&&this.lineClear(from,to,false,true)?[{x:to.x,y:to.y}]:null;
   const roads=this.roads.buckets.size>0;
   const pavedTrip=roads&&this.roads.nearPavement(from)&&this.roads.nearPavement(to);
   const directCost=roads&&direct?this.travelCost(from,to,pavedTrip):Infinity;
   if(direct&&(!roads||!this.roads.worthChecking(from,to,directCost,pavedTrip)))return direct;
   const [cx,cy]=this.grid(from.x,from.y),entries=[];
-  for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){
+  const entryRadius=terrainEscape?Math.ceil(terrainEscape.radius/this.cell):2;
+  for(let dy=-entryRadius;dy<=entryRadius;dy++)for(let dx=-entryRadius;dx<=entryRadius;dx++){
    const col=cx+dx,row=cy+dy;
    if(this.allowed(col,row))entries.push({...this.position(col,row),col,row});
   }
@@ -125,17 +263,45 @@ export class TerrainNavigator{
   // A vehicle can have wheel support even when its centre is on a steep cell.
   // Let it reach the nearby grid using the same grade limits as vehicle motion.
   if(escapeSteepStart&&!starts.length&&!this.walkable[startId]&&!this.occupied[startId]){
-   starts=entries.filter(point=>this.lineClear(from,point,false,true,climbableGrade,true,true));
+   starts=entries.filter(point=>this.lineClear(from,point,false,true,climbableGrade,true,true,terrainEscape));
+  }
+  if(!starts.length&&this.occupied[startId]){
+   // Building clearance is a planning margin, not a wall. A car parked in
+   // that margin must be able to leave through a physically clear corridor.
+   const heading=from.heading??0,start={...from,heading};
+   starts=entries.filter(point=>this.lineClear(from,point,false,true,climbableGrade,true)
+    &&this.clearSolidSweep(vehicleSweep(start,{...point,heading,kind:from.kind},this.vehicleScale,this.field),this.nearbySolids(point,40)));
   }
   if(!starts.length)return direct;
-  const n=this.size,endIds=new Set(),maxEndDistance=Math.min(maxGoalDistance,Math.hypot(end.x-to.x,end.y-to.y)+this.cell*1.5);for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){const col=end.col+dx,row=end.row+dy,p=this.position(col,row);if(this.allowed(col,row)&&Math.hypot(p.x-to.x,p.y-to.y)<=maxEndDistance)endIds.add(row*n+col);}if(!endIds.size)return direct;
-  const stamp=++this.searchId,heap=[];let destination=null;
-  const push=(id,priority)=>{let i=heap.length;heap.push({id,priority});while(i){const p=(i-1)>>1;if(heap[p].priority<=priority)break;heap[i]=heap[p];i=p;}heap[i]={id,priority};};
-  const pop=()=>{const first=heap[0],last=heap.pop();if(heap.length){let i=0;while(i*2+1<heap.length){let child=i*2+1;if(child+1<heap.length&&heap[child+1].priority<heap[child].priority)child++;if(heap[child].priority>=last.priority)break;heap[i]=heap[child];i=child;}heap[i]=last;}return first.id;};
+  const n=this.size,endIds=new Set(),exact=maxGoalDistance<=.01,maxEndDistance=exact?this.cell*1.5:Math.min(maxGoalDistance,Math.hypot(end.x-to.x,end.y-to.y)+this.cell*1.5);
+  for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){
+   const col=end.col+dx,row=end.row+dy,p=this.position(col,row);
+   if(this.allowed(col,row)&&Math.hypot(p.x-to.x,p.y-to.y)<=maxEndDistance&&(!exact||goalAccepted&&this.lineClear(p,to))
+    &&(!acceptEnd||acceptEnd(p)||goalAccepted&&this.lineClear(p,to)))endIds.add(row*n+col);
+  }
+  if(!endIds.size)return direct;
+  // Connectivity is independent of road costs and the requested destination.
+  // An exhausted static search also answers other starts whose complete set
+  // of valid entry cells belongs to that proven component. Dynamic detours
+  // and terrain-escape connectors cannot share this proof.
+  const staticSearch=this.sharedCorridors&&!occupancyKey&&!terrainEscape;
+  const component=staticSearch&&this.staticComponents?.find(proof=>proof.revision===this.topologyRevision
+   &&proof.bounds===this.bounds.join(',')&&starts.every(p=>{const id=p.row*n+p.col;return proof.reachable[id>>>5]&(1<<(id&31));}));
+  const exhausted=(reachabilityKey&&this.exhaustedReachability?.get(reachabilityKey))??component?.reachable;
+  if(exhausted&&![...endIds].some(id=>exhausted[id>>>5]&(1<<(id&31)))){
+   this.lastExhaustedReachability=exhausted;this.reachabilityRejects=(this.reachabilityRejects??0)+1;return direct;
+  }
+  const stamp=++this.searchId;let destination=null,heapLength=0;
+  let ids=this.heapIds??=new Int32Array(4096),priorities=this.heapPriorities??=new Float64Array(4096);
+  const push=(id,priority)=>{
+   if(heapLength===ids.length){const nextIds=new Int32Array(ids.length*2),nextPriorities=new Float64Array(ids.length*2);nextIds.set(ids);nextPriorities.set(priorities);ids=this.heapIds=nextIds;priorities=this.heapPriorities=nextPriorities;}
+   let i=heapLength++;while(i){const p=(i-1)>>1;if(priorities[p]<=priority)break;ids[i]=ids[p];priorities[i]=priorities[p];i=p;}ids[i]=id;priorities[i]=priority;
+  };
+  const pop=()=>{const first=ids[0],last=ids[--heapLength],priority=priorities[heapLength];if(heapLength){let i=0;while(i*2+1<heapLength){let child=i*2+1;if(child+1<heapLength&&priorities[child+1]<priorities[child])child++;if(priorities[child]>=priority)break;ids[i]=ids[child];priorities[i]=priorities[child];i=child;}ids[i]=last;priorities[i]=priority;}return first;};
   const bestSpeed=roads?(1+asphaltBonus)*1.18:1;
   const heuristic=(col,row)=>Math.max(0,(Math.hypot(col-end.col,row-end.row)*this.cell-maxEndDistance)/bestSpeed);
   for(const start of starts){const source=start.row*n+start.col,cost=roads?this.travelCost(from,start,pavedTrip):Math.hypot(start.x-from.x,start.y-from.y);this.cost[source]=cost;this.parent[source]=-1;this.visited[source]=stamp;push(source,cost+heuristic(start.col,start.row));}let expanded=0,found=false;
-  while(heap.length&&expanded++<100000){const id=pop();if(this.closed[id]===stamp)continue;this.closed[id]=stamp;if(endIds.has(id)){destination=id;found=true;break;}const col=id%n,row=Math.floor(id/n);
+  while(heapLength&&expanded++<100000){if(expanded%32===0&&performance.now()>=(this.workDeadline??Infinity))yield;const id=pop();if(this.closed[id]===stamp)continue;this.closed[id]=stamp;if(endIds.has(id)){destination=id;found=true;break;}const col=id%n,row=Math.floor(id/n);
    for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
     if(!dx&&!dy)continue;
     const x=col+dx,y=row+dy,next=y*n+x;
@@ -151,17 +317,38 @@ export class TerrainNavigator{
     if(this.visited[next]!==stamp||cost<this.cost[next]){this.visited[next]=stamp;this.cost[next]=cost;this.parent[next]=id;push(next,cost+heuristic(x,y));}
    }
   }
-  if(!found)return direct;
+  if(!found){
+   // An exhausted search proves the entire reachable component for this exact
+   // start and occupancy. Nearby rejected parking candidates need no new A*.
+   // The expansion limit is not such a proof and is never cached as one.
+   if(reachabilityKey&&!heapLength&&expanded<100000){
+    const reachable=new Uint32Array(Math.ceil(this.closed.length/32));
+    for(let id=0;id<this.closed.length;id++){
+     if(this.closed[id]===stamp)reachable[id>>>5]|=1<<(id&31);
+     if(id%4096===0&&performance.now()>=(this.workDeadline??Infinity))yield;
+    }
+    const cache=this.exhaustedReachability??=new Map();cache.set(reachabilityKey,reachable);
+    if(cache.size>32)cache.delete(cache.keys().next().value);
+    if(staticSearch){
+     const components=this.staticComponents??=[];
+     components.unshift({revision:this.topologyRevision,bounds:this.bounds.join(','),reachable});
+     if(components.length>16)components.pop();
+    }
+   }
+   return direct;
+  }
   const path=[];
   for(let id=destination;id!==-1;id=this.parent[id])path.push(this.position(id%n,Math.floor(id/n)));
   path.reverse();
   const endPoint=path.at(-1);
-  if(Math.hypot(endPoint.x-to.x,endPoint.y-to.y)>.01&&this.lineClear(endPoint,to))path.push({x:to.x,y:to.y});
+  if(goalAccepted&&Math.hypot(endPoint.x-to.x,endPoint.y-to.y)>.01&&this.lineClear(endPoint,to))path.push({x:to.x,y:to.y});
   const simplified=[];
   let anchor=from,index=0,total=0;
   while(index<path.length){
+   if(performance.now()>=(this.workDeadline??Infinity))yield;
    let next=index,cost=roads?this.travelCost(anchor,path[index],pavedTrip):0;
    while(next+1<path.length&&this.lineClear(anchor,path[next+1])){
+    if(performance.now()>=(this.workDeadline??Infinity))yield;
     const travel=roads?this.travelCost(anchor,path[next+1],pavedTrip):0;
     if(roads&&travel>cost+this.travelCost(path[next],path[next+1],pavedTrip)+.04*this.cell)break;
     next++;cost=travel;

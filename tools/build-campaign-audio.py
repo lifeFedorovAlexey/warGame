@@ -1,5 +1,6 @@
 """Build Russian dialogue and quiet diegetic sound from the canonical screenplay."""
 from pathlib import Path
+import argparse
 import array
 import hashlib
 import json
@@ -22,22 +23,71 @@ def run(args,**kwargs):
 
 def ffmpeg():return imageio_ffmpeg.get_ffmpeg_exe()
 
-def main():
+def recording_metadata(cue_id,entry):
+    source=(BASE/entry['file']).resolve()
+    if not source.is_relative_to(BASE.resolve()):raise ValueError('Recording outside mission assets: '+cue_id)
+    data=source.read_bytes();digest=hashlib.sha256(data).hexdigest()
+    if digest!=entry['sha256']:raise ValueError('Recording checksum changed: '+cue_id)
+    pcm=run([ffmpeg(),'-hide_banner','-loglevel','error','-i',source,'-f','s16le','-ac','1','-ar','24000','pipe:1']).stdout
+    duration=len(pcm)/48000
+    if duration<=.15:raise ValueError('Recording is empty or too short: '+cue_id)
+    return {'file':entry['file'],'duration':duration,'speaker':entry['speaker'],
+        'sha256':digest,'bytes':len(data),'origin':'user-recording'}
+
+def recorded_clips(story):
+    """Keep supplied performances intact, including when rebuilding Piper placeholders."""
+    index=BASE/'audio-overrides.json'
+    if not index.exists():return {}
+    cues={cue['id']:cue for cue in story['dialogue']+story['barks']}
+    clips={}
+    for cue_id,entry in json.loads(index.read_text(encoding='utf-8'))['clips'].items():
+        cue=cues.get(cue_id)
+        if not cue or entry['text']!=cue['text'] or entry['speaker']!=cue['speaker']:
+            raise ValueError('Recorded dialogue no longer matches screenplay: '+cue_id)
+        clips[cue_id]=recording_metadata(cue_id,entry)
+    return clips
+
+def recorded_reactions(story):
+    index=BASE/'audio-overrides.json'
+    if not index.exists():return {}
+    cues={cue['id'] for cue in story['dialogue']}
+    reactions={}
+    for cue_id,entry in json.loads(index.read_text(encoding='utf-8')).get('reactions',{}).items():
+        if entry['afterCue'] not in cues or entry['speaker'] not in story['speakers']:
+            raise ValueError('Unknown reaction speaker or dialogue anchor: '+cue_id)
+        reactions[cue_id]={**recording_metadata(cue_id,entry),'afterCue':entry['afterCue']}
+    return reactions
+
+def main(recordings_only=False):
     story=json.loads((BASE/'story.json').read_text(encoding='utf-8'))
+    recordings=recorded_clips(story)
+    reactions=recorded_reactions(story)
+    if recordings_only:
+        manifest=json.loads((BASE/'audio.json').read_text(encoding='utf-8'))
+        if manifest['source']!=story['source']:raise ValueError('Rebuild audio for the current screenplay first')
+        manifest['clips'].update(recordings)
+        if reactions:manifest.setdefault('reactions',{}).update(reactions)
+        (BASE/'audio.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+        print(json.dumps({'recordingsApplied':len(recordings),'reactions':len(reactions)}),flush=True)
+        return
     raw=BASE/'audio-source';out=BASE/'audio';raw.mkdir(parents=True,exist_ok=True);out.mkdir(exist_ok=True)
     manifest={'schemaVersion':1,'language':'ru-RU','source':story['source'],'voices':story['speakers'],'clips':{}}
+    if reactions:manifest['reactions']=reactions
     cues=story['dialogue']+story['barks']
     for speaker,profile in story['speakers'].items():
         group=[cue for cue in cues if cue['speaker']==speaker]
         if not group:continue
         def key(cue):return hashlib.sha256(json.dumps([cue['text'],profile],ensure_ascii=False,sort_keys=True).encode('utf-8')).hexdigest()
-        pending=[cue for cue in group if not(raw/(cue['id']+'.wav')).exists() or not(raw/(cue['id']+'.key')).exists() or (raw/(cue['id']+'.key')).read_text()!=key(cue)]
+        pending=[cue for cue in group if cue['id'] not in recordings and (not(raw/(cue['id']+'.wav')).exists() or not(raw/(cue['id']+'.key')).exists() or (raw/(cue['id']+'.key')).read_text()!=key(cue))]
         if pending:
             lines=[json.dumps({'text':cue['text'],'output_file':str(raw/(cue['id']+'.wav'))},ensure_ascii=False) for cue in pending]
             args=[RUNTIME/'piper/piper.exe','--model',RUNTIME/f'voices/ru_RU-{profile["voice"]}-medium.onnx','--json-input','--length_scale',profile['lengthScale'],'--sentence_silence',.16,'--quiet']
             run(args,input=('\n'.join(lines)+'\n').encode('utf-8'),cwd=RUNTIME/'piper')
             for cue in pending:(raw/(cue['id']+'.key')).write_text(key(cue))
         for cue in group:
+            if cue['id'] in recordings:
+                manifest['clips'][cue['id']]=recordings[cue['id']]
+                continue
             source=raw/(cue['id']+'.wav');target=out/(cue['id']+'.ogg')
             ratio=2**(profile['pitchSemitones']/12)
             filters=[f'asetrate=22050*{ratio:.8f}','aresample=22050',f'atempo={1/ratio:.8f}','highpass=f=65','lowpass=f=10000']
@@ -75,4 +125,7 @@ def main():
     (BASE/'audio.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print(json.dumps({'clips':len(manifest['clips']),'speechMinutes':sum(c['duration'] for c in manifest['clips'].values())/60,'ambienceLoops':len(manifest['ambience'])}),flush=True)
 
-if __name__=='__main__':main()
+if __name__=='__main__':
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--recordings-only',action='store_true',help='Apply supplied dialogue without regenerating other voices or ambience')
+    main(recordings_only=parser.parse_args().recordings_only)

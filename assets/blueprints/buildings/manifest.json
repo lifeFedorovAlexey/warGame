@@ -30,7 +30,7 @@
       "path": "lab/prototype.glb",
       "spec": "lab/module.json",
       "triangles": 4564,
-      "bytes": 246568
+      "bytes": 255832
     },
     {
       "id": "bunker",
@@ -43,8 +43,8 @@
       "id": "mg-tower",
       "path": "mg-tower/prototype.glb",
       "spec": "mg-tower/module.json",
-      "triangles": 348,
-      "bytes": 22312
+      "triangles": 3720,
+      "bytes": 200700
     }
   ]
 }

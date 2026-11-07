@@ -1,0 +1,11 @@
+КОМАНДИР — НАПРАВЛЕНИЕ ГОЛОСА
+
+Описание для Voice Design:
+Russian speech with a subtle Nigerian accent. Male, around 40. A deep bass-baritone with strong chest resonance and a naturally coarse, gravelly texture. Calm, grounded military commander with concise, measured delivery and an unhurried conversational pace. Fluent, clearly intelligible Russian; the accent remains light and consistent. Natural human vocal detail. Clean, dry recording.
+
+Тестовая реплика (raid-won.mp3):
+[Deep, gravelly voice, subtle Nigerian accent] [Calm and firm] Сектор зачищен. Проверьте машины. Продолжаем операцию.
+
+Образец raid-won.mp3 получен от владельца и подключён к игровому радио 2026-11-07. Остальные реплики ожидают перезаписи тем же голосом.
+https://elevenlabs.io/docs/eleven-creative/voices/voice-design
+https://elevenlabs.io/docs/overview/capabilities/text-to-speech/best-practices

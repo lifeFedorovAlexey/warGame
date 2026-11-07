@@ -1,3 +1,4 @@
+import {setButtonIcon, setButtonLabel} from '../assets/ui/icons.js';
 import * as T from 'three';
 import { OrbitControls } from './vendor/OrbitControls.js';
 import { buildBukhanka } from './bukhanka.js';
@@ -121,10 +122,10 @@ function mode(value){
 }
 
 document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>mode(b.dataset.mode));
-for(const key of ['fire','lights','night'])document.getElementById(key).onclick=()=>{state[key]=!state[key];document.getElementById(key).setAttribute('aria-pressed',state[key]);if(key==='fire')document.getElementById(key).textContent='Огонь: '+(state.fire?'вкл':'выкл');if(key==='lights')document.getElementById(key).textContent='Фары: '+(state.lights?'вкл':'выкл');if(key==='night')document.getElementById(key).textContent=state.night?'Дневной свет':'Сумерки';};
-document.getElementById('pause').onclick=()=>{state.paused=!state.paused;document.getElementById('pause').textContent=state.paused?'Продолжить':'Пауза';};
+for(const key of ['fire','lights','night'])document.getElementById(key).onclick=()=>{state[key]=!state[key];document.getElementById(key).setAttribute('aria-pressed',state[key]);if(key==='fire')setButtonIcon(document.getElementById(key),state.fire?'machinegun':'stop','Огонь: '+(state.fire?'вкл':'выкл'));if(key==='lights')setButtonIcon(document.getElementById(key),state.lights?'lights':'lights-off','Фары: '+(state.lights?'вкл':'выкл'));if(key==='night')setButtonIcon(document.getElementById(key),state.night?'day':'night',state.night?'Дневной свет':'Сумерки');};
+document.getElementById('pause').onclick=()=>{state.paused=!state.paused;setButtonIcon(document.getElementById('pause'),state.paused?'play':'pause',state.paused?'Продолжить':'Пауза');};
 document.getElementById('reset').onclick=()=>{if(state.mode==='arena')navigation.setCamera(state.cameraMode);else mode(state.mode);};
-document.getElementById('terrain').onclick=()=>{terrain.path.visible=!terrain.path.visible;document.getElementById('terrain').textContent='Маршрут: '+(terrain.path.visible?'вкл':'выкл');document.getElementById('terrain').setAttribute('aria-pressed',terrain.path.visible);};
+document.getElementById('terrain').onclick=()=>{terrain.path.visible=!terrain.path.visible;setButtonLabel(document.getElementById('terrain'),'Маршрут: '+(terrain.path.visible?'вкл':'выкл'));document.getElementById('terrain').setAttribute('aria-pressed',terrain.path.visible);};
 
 function resize(){const w=host.clientWidth,h=host.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();if(navigation)navigation.resize();}
 let navigation;new ResizeObserver(resize).observe(host);resize();

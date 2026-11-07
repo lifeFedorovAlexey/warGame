@@ -51,6 +51,282 @@
         "m01-s13": "relaxed",
         "m01-s14": "neutral"
       }
+    },
+    "warrant": {
+      "name": "Прапорщик",
+      "file": "warrant-atlas.png",
+      "width": 1536,
+      "height": 1024,
+      "source": "User-provided six warrant officer portraits, 2026-11-07",
+      "sha256": "f2ba73eafb8c6df427c39ea6b75f2760c0fadea3d577f7f2f2ceffe07579e6e2",
+      "defaultState": "neutral",
+      "states": {
+        "neutral": {
+          "crop": [
+            40,
+            20,
+            432,
+            454
+          ],
+          "description": "Спокойный, слушает и комментирует"
+        },
+        "tea": {
+          "crop": [
+            552,
+            20,
+            432,
+            454
+          ],
+          "description": "С кружкой, бытовые разговоры"
+        },
+        "stern": {
+          "crop": [
+            1064,
+            20,
+            432,
+            454
+          ],
+          "description": "Строго указывает, отдаёт распоряжение"
+        },
+        "relaxed": {
+          "crop": [
+            40,
+            532,
+            432,
+            454
+          ],
+          "description": "Отдыхает после боя"
+        },
+        "radio": {
+          "crop": [
+            552,
+            532,
+            432,
+            454
+          ],
+          "description": "Слушает и отвечает по связи"
+        },
+        "map": {
+          "crop": [
+            1064,
+            532,
+            432,
+            454
+          ],
+          "description": "Изучает карту и обсуждает задачу"
+        }
+      },
+      "sceneStates": {
+        "m01-s02": "neutral",
+        "m01-s03": "neutral",
+        "m01-s05": "map",
+        "m01-s07": "radio",
+        "m01-s11": "map",
+        "m01-s12": "tea",
+        "m01-s13": "relaxed",
+        "m01-s14": "radio"
+      }
+    },
+    "scout": {
+      "name": "Разведчик",
+      "file": "scout.png",
+      "width": 1254,
+      "height": 1254,
+      "source": "User-provided scout portrait, 2026-11-07",
+      "sourceName": "Пустынный разведчик с рацией.png",
+      "sha256": "c52bfd128fa967199a0776d2169d334ef4dda921e9c85bc67b37c2e9d24537b3",
+      "defaultState": "radio",
+      "states": {
+        "radio": {
+          "crop": [
+            190,
+            0,
+            900,
+            946
+          ],
+          "description": "Докладывает по рации; портрет владельца, кадрирование при отрисовке"
+        }
+      }
+    },
+    "general": {
+      "name": "Генерал",
+      "file": "general-v2-temp.png",
+      "width": 1254,
+      "height": 1254,
+      "source": "Temporary portrait: built-in image_gen, 2026-11-08",
+      "sha256": "2a9cb2b5fbb202d6094adf03569de1b35d037cb88a1524195a532024504a5ad9",
+      "defaultState": "radio",
+      "states": {
+        "radio": {
+          "crop": [
+            0,
+            0,
+            1254,
+            1254
+          ],
+          "description": "Временный портрет для проверки сценария v2"
+        }
+      }
+    },
+    "radio": {
+      "name": "Радист",
+      "file": "radio-v2-temp.png",
+      "width": 1254,
+      "height": 1254,
+      "source": "Temporary portrait: built-in image_gen, 2026-11-08",
+      "sha256": "d3bfd5583e0601f1cc8721d3bfcc8b24871890f54ac989c0dde96bb19eb1158e",
+      "defaultState": "radio",
+      "states": {
+        "radio": {
+          "crop": [
+            0,
+            0,
+            1254,
+            1254
+          ],
+          "description": "Временный портрет для проверки сценария v2"
+        }
+      }
+    },
+    "scientist": {
+      "name": "Учёный",
+      "file": "scientist-v2-temp.png",
+      "width": 1254,
+      "height": 1254,
+      "source": "Temporary portrait: built-in image_gen, 2026-11-08",
+      "sha256": "090f5a6181b2804c5ed0602a3d3d9d4215e609dc483031c47c7ad49b70bb01e9",
+      "defaultState": "radio",
+      "states": {
+        "radio": {
+          "crop": [
+            0,
+            0,
+            1254,
+            1254
+          ],
+          "description": "Временный портрет для проверки сценария v2"
+        }
+      }
+    },
+    "chief": {
+      "name": "Петрович",
+      "file": "chief-v2-temp.png",
+      "width": 1254,
+      "height": 1254,
+      "source": "Temporary portrait: built-in image_gen, 2026-11-08",
+      "sha256": "8b1bb4b7ab12bee96a737fd406cc483274364a8ff05e5e2b86927407dc2cb8ae",
+      "defaultState": "radio",
+      "states": {
+        "radio": {
+          "crop": [
+            0,
+            0,
+            1254,
+            1254
+          ],
+          "description": "Временный портрет для проверки сценария v2"
+        }
+      }
+    },
+    "builder": {
+      "name": "Строитель",
+      "file": "builder-v2-temp.png",
+      "width": 1254,
+      "height": 1254,
+      "source": "Temporary portrait: built-in image_gen, 2026-11-08",
+      "sha256": "aefff57296fb1e9ed71aa4d4dbb3a9b3bab244cd6546dff9a87bc0355ab9c698",
+      "defaultState": "radio",
+      "states": {
+        "radio": {
+          "crop": [
+            0,
+            0,
+            1254,
+            1254
+          ],
+          "description": "Временный портрет для проверки сценария v2"
+        }
+      }
+    },
+    "officer": {
+      "name": "Офицер",
+      "file": "officer-v2-temp.png",
+      "width": 1254,
+      "height": 1254,
+      "source": "Temporary portrait: built-in image_gen, 2026-11-08",
+      "sha256": "1ec75c8c1a5263ff04ef7283fc39ffdc6118862166e9c76901c73e4ac92807da",
+      "defaultState": "radio",
+      "states": {
+        "radio": {
+          "crop": [
+            0,
+            0,
+            1254,
+            1254
+          ],
+          "description": "Временный портрет для проверки сценария v2"
+        }
+      }
+    },
+    "soldier": {
+      "name": "Солдат",
+      "file": "soldier-v2-temp.png",
+      "width": 1254,
+      "height": 1254,
+      "source": "Temporary portrait: built-in image_gen, 2026-11-08",
+      "sha256": "aba309255bbaa6440769ac019e459b99682b006cfa8ea4aa41663e16341a0f10",
+      "defaultState": "radio",
+      "states": {
+        "radio": {
+          "crop": [
+            0,
+            0,
+            1254,
+            1254
+          ],
+          "description": "Временный портрет для проверки сценария v2"
+        }
+      }
+    },
+    "raider": {
+      "name": "Отброс",
+      "file": "raider-v2-temp.png",
+      "width": 1254,
+      "height": 1254,
+      "source": "Temporary portrait: built-in image_gen, 2026-11-08",
+      "sha256": "f93bbdd837608ddb2fd8ef42e2f86860f5bd1de9908d5c0e1c772da17c49dbb8",
+      "defaultState": "radio",
+      "states": {
+        "radio": {
+          "crop": [
+            0,
+            0,
+            1254,
+            1254
+          ],
+          "description": "Временный портрет для проверки сценария v2"
+        }
+      }
+    },
+    "driver": {
+      "name": "Водитель",
+      "file": "driver-v2-temp.png",
+      "width": 1254,
+      "height": 1254,
+      "source": "Temporary portrait: built-in image_gen, 2026-11-08",
+      "sha256": "3883ce0728662f8efb8b971bad8ecad03ae0e40f0c9d82bdce54ffc5f09fab6f",
+      "defaultState": "radio",
+      "states": {
+        "radio": {
+          "crop": [
+            0,
+            0,
+            1254,
+            1254
+          ],
+          "description": "Временный портрет для проверки сценария v2"
+        }
+      }
     }
   }
 }

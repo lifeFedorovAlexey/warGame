@@ -39,6 +39,10 @@
     "file": "research-mg-ammo-1.ogg",
     "duration": 2.32
   },
+  "warrant-upgrade": {
+    "file": "../warrant-radio/upgrade.mp3",
+    "duration": 14.367
+  },
   "camp3-sighted": {
     "file": "camp3-sighted.ogg",
     "duration": 2.32

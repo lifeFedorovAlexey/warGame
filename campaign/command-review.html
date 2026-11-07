@@ -22,6 +22,7 @@
     @media(max-width:700px){main{grid-template-columns:1fr}aside{border-right:0;border-bottom:1px solid #444d40;padding:16px}#parts{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}#view{min-height:58dvh}.part{padding:6px}.part small{font-size:11px}}
   </style>
   <script type="importmap">{"imports":{"three":"../demo/vendor/three.module.js"}}</script>
+<link rel="stylesheet" href="../assets/ui/icons.css">
 </head>
 <body>
 <main>
@@ -30,13 +31,13 @@
     <h1>Командирский УАЗ</h1>
     <p>Четыре подушки под кузовом и отдельный сокет радиоблока на крыше.</p>
     <div class="buttons" aria-label="Сборка и разборка">
-      <button id="assemble" aria-pressed="true" disabled>Сборка</button>
-      <button id="explode" aria-pressed="false" disabled>Разборка</button>
+      <button id="assemble" aria-pressed="true" disabled data-icon="assemble" aria-label="Сборка"></button>
+      <button id="explode" aria-pressed="false" disabled data-icon="explode" aria-label="Разборка"></button>
     </div>
     <div class="buttons" aria-label="Камера и движение узлов">
-      <button id="front" aria-pressed="true" disabled>Спереди</button>
-      <button id="rear" aria-pressed="false" disabled>Сзади</button>
-      <button id="motion" aria-pressed="false" disabled>Движение узлов</button>
+      <button id="front" aria-pressed="true" disabled data-icon="front" aria-label="Спереди"></button>
+      <button id="rear" aria-pressed="false" disabled data-icon="rear" aria-label="Сзади"></button>
+      <button id="motion" aria-pressed="false" disabled data-icon="engine" aria-label="Движение узлов"></button>
     </div>
     <div id="parts" aria-label="Независимые компоненты"></div>
     <output id="status" aria-live="polite">Загрузка трёх GLB…</output>
@@ -47,5 +48,6 @@
   </section>
 </main>
 <script type="module" src="command-review.js"></script>
+<script type="module" src="../assets/ui/icons.js"></script>
 </body>
 </html>

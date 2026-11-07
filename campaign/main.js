@@ -1,29 +1,44 @@
+import {setButtonIcon, speedIcon} from '../assets/ui/icons.js';
 import {createCampaignWorld} from './world.js';
 import {Mission} from './mission.js';
 import {FieldRadio, missionSignal} from './field-radio.js';
 import {raidApproachSignal, visibleRaidContact, warehouseAdvanceHint, waterTowerSignal} from './threat-guidance.js';
 import {restoreRadioStory} from './radio-save.js';
 import {FieldSound} from './field-sound.js';
+import {StoryDirector, loadMissionStory} from './story-director.js';
+import {storyObjectives} from './story-objectives.js';
 import {buildLayerHeight} from './builder-optics.js';
 import {VehicleDesigner} from './designer.js';
+import {SCAV_PROFILES} from './scav-unit-profiles.js';
+import {CombatMenu} from './combat-menu.js';
+import {pickupTarget} from './pickup-orders.js';
 
 const $ = id => document.getElementById(id);
 const saveKey = 'warGame.alpha.mission01.v1';
 const dataUrl = '../assets/campaign/alpha/mission01/gameplay.json';
 const selected = new Set();
 const miniBackground = new Image();
-let world, mission, config, radio, sound, designer;
+let world, mission, config, radio, sound, designer, combatMenu;
 let active = false, paused = false, speed = 1, resultShown = false;
+let prologuePlaying = false;
 let pausedBeforeDesigner = false;
 let buildOpen = false, buildKind = null, rotation = 0, orderMode = null;
 let pointer = null, drag = null, site = null, placing = null;
 let last = performance.now(), lastUi = 0, lastMini = 0, toastUntil = 0;
-let actionKey = '', rosterKey = '', paletteKey = '', taskKey = '', queueKey = '', cards;
+let actionKey = '', rosterKey = '', paletteKey = '', taskKey = '', queueKey = '';
 let blockedOrders = new Set(), blockedUntil = 0;
+let lastCommandRevision=null,lastCommandFeedback='';
+let navigationDebug, navigationDebugLoading;
+async function toggleNavigationDebug(force){
+ navigationDebug??=await (navigationDebugLoading??=import('./navigation-debug.js').then(({installNavigationDebug})=>installNavigationDebug(world,mission,()=>selected)));
+ navigationDebug.setEnabled(force??!navigationDebug.enabled);
+ if(window.campaign)window.campaign.navigationDebug=navigationDebug;
+}
 
 const vehicles = () => mission.state.units.filter(unit => unit.owner === 'rai' && unit.hp > 0);
 const builders = () => vehicles().filter(unit => config.units[unit.kind].role === 'builder');
 const selection = () => [...selected].map(id => mission.entity(id)).filter(Boolean);
+const unitType = unit => [unit.kind,...(unit.components??config.units[unit.kind].components??[]),unit.engineUpgradeLevel??0].join('/');
 function firstPowerSites(){
   const owned=mission.state.buildings.filter(b=>b.owner==='rai'&&b.hp>0);
   return {plant:owned.find(b=>b.kind==='generator'),well:owned.find(b=>b.kind==='derrick')};
@@ -83,19 +98,10 @@ function tacticalFocus(contact,{well,threat=staticThreat(contact),artifact=known
 function staticThreat(contact){
   return mission.state.status==='running'&&!contact ? raidApproachSignal(mission)??waterTowerSignal(mission) : null;
 }
-function powerHint({plant,well},oilFound){
-  const oilHint=oilFound?'ЛКМ по нефтяной точке — вышка.':'Разведайте нефтяную точку.';
-  if(!plant&&!well)return 'АЭС через «Строить». '+oilHint;
-  if(!plant)return 'Для питания вышки постройте АЭС.';
-  if(!well)return oilHint;
-  if(plant.completed)return 'Достройте вышку.';
-  if(well.completed)return 'Достройте АЭС.';
-  return 'Достройте АЭС и вышку для подачи питания.';
-}
 const isMobile = entity => entity?.owner === 'rai' && !!config.units[entity.kind];
-const taskNames = {base:'База', power:'Питание', production:'Производство', research:'Исследования', security:'Лагеря'};
 const hpColor = fraction => fraction > .58 ? '#9cdd69' : fraction > .28 ? '#f1cc58' : '#ed6a4d';
 const sampleNames = {'flamethrower':'Устройство №001','mg-ammo-1':'Образец со склада','mg-tower':'Узел башни'};
+const sampleIcons = {'flamethrower':'technology','mg-ammo-1':'ammunition','mg-tower':'turret-ring'};
 const projectLabel = (kind, id, name) => (id && id === kind ? config.units[kind]?.name : name) ?? config.units[kind]?.name;
 
 function toast(message, milliseconds = 2600) {
@@ -105,18 +111,33 @@ function toast(message, milliseconds = 2600) {
 }
 function report(result) {
   if (!result?.ok) toast(result?.reason ?? 'Приказ не выполнен');
+  if(!result?.ok&&result?.reason==='Недостаточно энергии')sound.bark(10);
   return result?.ok;
 }
-function cancelMode() {
+function commandFeedback(){
+ if(lastCommandRevision===null)return;
+ const record=mission.state.commandOrders?.find(r=>r.revision===lastCommandRevision);
+ if(!record||record.status!=='complete')return;
+ const blocked=record.ids.filter(id=>{const u=mission.entity(id);return u?.hp>0&&u.pendingOrder?.revision===record.revision&&u.pendingOrder.status==='blocked';});
+ const key=record.revision+':'+blocked.join(',')+':'+record.assigned.length;
+ if(key===lastCommandFeedback)return;lastCommandFeedback=key;
+ blockedOrders=new Set(blocked);blockedUntil=performance.now()+7500;
+ const feedback=$('order-feedback');
+ feedback.querySelector('span').textContent=blocked.length?`${record.assigned.length} из ${record.ids.length} · нет проезда: ${blocked.length}`:'';
+ feedback.hidden=!blocked.length;$('select-blocked').hidden=!blocked.length;
+}
+function cancelMode({keepAttack=false}={}) {
+  combatMenu?.close();
   buildKind = null;
   buildOpen = false;
-  orderMode = null;
+  orderMode = keepAttack && orderMode === 'attack' ? 'attack' : null;
   site = placing = null;
   world.setGhost(null);
   updateUi();
 }
 function toggleDesigner() {
   if (designer.visible) return designer.close();
+  document.querySelector('.settings').open = false;
   cancelMode();
   world.keys.clear();
   designer.open();
@@ -127,7 +148,7 @@ function liveMobile(entity) {
 function select(ids, append = false, speak = true) {
   if (!append) selected.clear();
   for (const id of ids) if (mission.entity(id)) selected.add(id);
-  cancelMode();
+  cancelMode({keepAttack:true});
   if (speak && active && ids.some(id => liveMobile(mission.entity(id)))) {
     sound.acknowledge('select', selection().filter(liveMobile).map(unit => unit.id));
   }
@@ -135,6 +156,15 @@ function select(ids, append = false, speak = true) {
 function focusUnit(unit) {
   select([unit.id]);
   world.centre(unit, 320);
+}
+function availableBuilding(kind) {
+  return mission.state.buildings.filter(b=>b.owner==='rai'&&b.kind===kind&&b.hp>0)
+    .sort((a,b)=>Number(b.completed)-Number(a.completed))[0];
+}
+function openBuilding(kind, focus = false) {
+  const building=availableBuilding(kind);
+  if(building){select([building.id]);if(focus)world.centre(building,360);}
+  else if(!focus)beginPlacement(kind);
 }
 function chooseBuilder(kind) {
   const current = selection().filter(entity => isMobile(entity) && entity.kind === 'builder');
@@ -147,6 +177,7 @@ function chooseBuilder(kind) {
   return current.length?current:live;
 }
 function toggleBuild() {
+  combatMenu?.close();
   if (buildOpen || buildKind) return cancelMode();
   if (!builders().length) return toast('Нет строителей. Закажите машину на заводе.');
   orderMode = null;
@@ -157,6 +188,7 @@ function beginPlacement(kind) {
   const available = chooseBuilder(kind);
   if (!available.length) return;
   select(available.map(unit => unit.id), false, false);
+  orderMode = null;
   buildKind = kind;
   rotation = 0;
   $('toast').hidden = true;
@@ -164,8 +196,8 @@ function beginPlacement(kind) {
   updateUi();
 }
 function beginOrder(mode) {
-  if (!selection().some(isMobile)) {
-    const unit = vehicles().find(unit => config.units[unit.kind].damage > 0) ?? vehicles()[0];
+  if (!selection().some(unit=>isMobile(unit)&&(mode!=='attack'||config.units[unit.kind].damage>0))) {
+    const unit = vehicles().find(unit => config.units[unit.kind].damage > 0) ?? (mode!=='attack'&&vehicles()[0]);
     if (!unit) return;
     select([unit.id], false, false);
   }
@@ -173,6 +205,7 @@ function beginOrder(mode) {
   orderMode = mode;
   updateUi();
 }
+function toggleAttackOrder(){if(orderMode==='attack')cancelMode();else beginOrder('attack');}
 function saveGame(notify = true) {
   try {
     localStorage.setItem(saveKey, mission.save());
@@ -181,7 +214,14 @@ function saveGame(notify = true) {
     if (notify) toast('Сохранение недоступно');
   }
 }
+function stopPrologue() {
+  if(!prologuePlaying)return;
+  radio.reset();radio.director.stopPrologue();prologuePlaying=false;
+  document.body.classList.remove('prologue-playing');$('mission-hud').hidden=!active;
+  setButtonIcon($('prologue'),'radio','Прослушать пролог');
+}
 function start(restore = false) {
+  stopPrologue();
   if (restore) {
     try {
       const data = localStorage.getItem(saveKey);
@@ -192,18 +232,19 @@ function start(restore = false) {
       return toast('Сохранение не открывается. ' + error.message);
     }
   }
+  if(!restore)mission.state.storyConstruction={enabled:true,unlocked:['generator']};
   designer.close(false);
   active = true;
   paused = false;
   resultShown = false;
   radio.reset();
   world.storySignals.show(null);
-  world.storySignals.setThreat(null);
   blockedOrders.clear();
   $('order-feedback').hidden=true;
   $('welcome').hidden = true;
   $('result').hidden = true;
   $('mission-hud').hidden = false;
+  document.querySelector('.settings').open = false;
   const worker = builders()[0];
   const centre = restore ? vehicles()[0] : world.field.gridToWorld(config.startGrid);
   if (centre) world.centre(centre, 360);
@@ -232,16 +273,17 @@ function ordersAt(point, target, mode) {
     action='attack-move';
   } else if (!mode && target?.owner === 'rai' && chosen.some(entity => entity.kind === 'builder')) {
     if (target.completed === false) action = 'build';
-    else if (isMobile(target) && target.hp < target.maxHp) action = 'repair';
+    else if (target.hp < target.maxHp) action = 'repair';
     if (action !== 'move') destination = target;
   }
   if (!destination) return toast('Укажите точку на карте');
-  if (action === 'move') {
-    const artifact=mission.state.artifacts.find(item=>!item.collected&&mission.exploredAt(item.x,item.y)&&Math.hypot(item.x-destination.x,item.y-destination.y)<18);
-    if(artifact)destination=artifact;
+  if (action === 'move'||action === 'attack-move') {
+    const pickup=pickupTarget(mission,destination);
+    if(pickup){destination=pickup.item;action='move';}
   }
-  const result = mission.order([...selected], action, destination);
+  const result = mission.submitOrder([...selected], action, destination);
   if (!report(result)) return;
+  lastCommandRevision=result.revision??null;lastCommandFeedback='';
   const combatOrder=action==='attack'||action==='attack-move';
   world.commandMarker(destination,combatOrder);
   const eligible = chosen.filter(entity => liveMobile(entity) && (!combatOrder || config.units[entity.kind].damage) && (!['build', 'repair'].includes(action) || entity.kind === 'builder'));
@@ -252,8 +294,9 @@ function ordersAt(point, target, mode) {
   feedback.querySelector('span').textContent=text;
   feedback.hidden=!text;
   $('select-blocked').hidden=!blockedOrders.size;
-  sound.acknowledge(combatOrder?'attack':action==='repair'?'build':action,eligible.filter(unit=>!blockedOrders.has(unit.id)).map(unit=>unit.id));
-  orderMode = null;
+  sound.acknowledge(combatOrder?'attack':action,result.assignedIds??eligible.filter(unit=>!blockedOrders.has(unit.id)).map(unit=>unit.id));
+  orderMode = mode === 'attack' ? 'attack' : null;
+  combatMenu?.close();
   updateUi();
 }
 function hitEntity(x, y) {
@@ -274,6 +317,7 @@ function hitEntity(x, y) {
   return point && mission.state.buildings.find(b => b.hp > 0 && (b.owner === 'rai' || mission.visibleAt(b.x, b.y)) && Math.abs(point.x - b.x) < b.halfWidth && Math.abs(point.y - b.y) < b.halfDepth);
 }
 function oilAt(x,y) {
+  if(!mission.constructionUnlocked('derrick'))return null;
   let best = null, radius = 17;
   for (const grid of config.oilFields) {
     const point = world.field.gridToWorld(grid);
@@ -355,10 +399,15 @@ function installInput() {
   settings.addEventListener('toggle', () => {
     if (!settings.open) showOperationSection(sections[0]);
   });
+  let lastSelectionClick=null;
+  document.addEventListener('pointerdown', event => {
+    if (settings.open && !settings.contains(event.target) && !$('radio').contains(event.target)) settings.open = false;
+  });
   canvas.addEventListener('contextmenu', event => event.preventDefault());
   canvas.addEventListener('pointerdown', event => {
     if (!active || mission.state.status !== 'running') return;
     if (event.button === 2) {
+      lastSelectionClick=null;
       event.preventDefault();
       if (buildKind) return cancelMode();
       ordersAt(world.ground(event.clientX, event.clientY), hitEntity(event.clientX, event.clientY), orderMode);
@@ -378,7 +427,7 @@ function installInput() {
       return;
     }
     canvas.style.cursor = orderMode ? 'crosshair' : oil ? 'pointer' : '';
-    if (!drag || orderMode) return;
+    if (!drag || orderMode === 'move') return;
     const box = $('drag-box');
     box.hidden = Math.hypot(pointer.x - drag.x, pointer.y - drag.y) < 6;
     box.style.left = Math.min(pointer.x, drag.x) + 'px';
@@ -389,6 +438,8 @@ function installInput() {
   canvas.addEventListener('pointerup', event => {
     if (!drag || event.button !== 0) return;
     const origin = drag;
+    const previousClick=lastSelectionClick;
+    lastSelectionClick=null;
     drag = null;
     $('drag-box').hidden = true;
     const x = event.clientX, y = event.clientY;
@@ -408,8 +459,10 @@ function installInput() {
       }
       return;
     }
-    if (orderMode) return ordersAt(world.ground(x,y), hitEntity(x,y), orderMode);
-    if (Math.hypot(x - origin.x, y - origin.y) > 6) {
+    const selecting=Math.hypot(x - origin.x, y - origin.y)>6;
+    const ownTarget=orderMode==='attack'?hitEntity(x,y):null;
+    if (orderMode && !(orderMode==='attack'&&(selecting||ownTarget?.owner==='rai'))) return ordersAt(world.ground(x,y), ownTarget??hitEntity(x,y), orderMode);
+    if (selecting) {
       const ids = vehicles().filter(unit => {
         const p = world.screen(unit);
         return p.visible && p.x >= Math.min(x,origin.x) && p.x <= Math.max(x,origin.x)
@@ -417,16 +470,61 @@ function installInput() {
       }).map(unit => unit.id);
       select(ids, origin.append);
     } else {
-      const oil = !event.shiftKey && oilAt(x,y);
+      const oil = !orderMode && !event.shiftKey && oilAt(x,y);
       if (oil) return orderDerrick(oil);
       const target = hitEntity(x,y);
       select(target ? [target.id] : [], origin.append);
+      if(target)lastSelectionClick={id:target.id,repeated:previousClick?.id===target.id};
     }
   });
-  canvas.addEventListener('pointercancel', () => { drag = null; $('drag-box').hidden = true; });
+  canvas.addEventListener('dblclick', event => {
+    if(!active||designer.visible||mission.state.status!=='running'||buildKind||orderMode==='move'||!lastSelectionClick?.repeated)return;
+    const target=hitEntity(event.clientX,event.clientY);
+    if(!liveMobile(target)||target.owner!=='rai'||target.id!==lastSelectionClick.id)return;
+    const type=unitType(target),rect=canvas.getBoundingClientRect();
+    const ids=vehicles().filter(unit=>{
+      if(unitType(unit)!==type)return false;
+      const p=world.screen(unit);
+      return p.visible&&p.x>=rect.left&&p.x<=rect.right&&p.y>=rect.top&&p.y<=rect.bottom;
+    }).map(unit=>unit.id);
+    select(ids,event.shiftKey);
+    event.preventDefault();
+  });
+  canvas.addEventListener('pointercancel', () => { drag = null; lastSelectionClick=null; $('drag-box').hidden = true; });
   document.addEventListener('keydown', event => {
-    if (!active || designer.visible || event.target.matches('input, select, textarea') || event.ctrlKey || event.metaKey || event.altKey) return;
+    if (!active || designer.visible || event.target.matches('input, select, textarea')) return;
     const {code} = event;
+    if(event.ctrlKey&&code==='KeyG'&&!event.repeat){
+      event.preventDefault();
+      const result=mission.configureGroup(selection().filter(liveMobile).map(u=>u.id));
+      if(report(result))toast('Подразделение · '+result.members.length);
+      return;
+    }
+    if(event.altKey&&/^Digit[1-4]$/.test(code)&&!event.repeat){
+      event.preventDefault();
+      const modes=['column','line','dispersed','concentrate'],labels=['Колонна','Линия','Рассредоточиться','Сосредоточиться'];
+      const index=Number(code.at(-1))-1,chosen=selection().filter(liveMobile);
+      const group=chosen.length===1&&mission.state.commandGroups?.find(g=>g.leaderId===chosen[0].id);
+      const ids=group?.members??chosen.map(u=>u.id),result=mission.configureGroup(ids,{formation:modes[index]});
+      if(report(result)){
+        toast(labels[index]);
+        const members=result.members.map(id=>mission.entity(id)),request=members[0]?.routeOrder;
+        if(request&&members.every(u=>u.routeOrder?.request.x===request.request.x&&u.routeOrder?.request.y===request.request.y&&u.task?.type===(request.type??'move')))
+          mission.submitOrder(result.members,request.type??'move',request.request);
+      }
+      return;
+    }
+    if(event.altKey&&code==='KeyR'&&!event.repeat){
+      event.preventDefault();const result=mission.retreat(selection().filter(liveMobile).map(u=>u.id));
+      if(report(result))toast('Отходим к базе');
+      return;
+    }
+    if(event.ctrlKey||event.metaKey||event.altKey)return;
+    if(code==='KeyG'&&!event.repeat){
+      const first=selection().find(liveMobile),group=first&&mission.state.commandGroups?.find(g=>g.id===first.commandGroupId);
+      if(group){event.preventDefault();select(group.members);}
+      return;
+    }
     if (code === 'Escape') {
       if (settings.open) {
         settings.open = false;
@@ -437,9 +535,10 @@ function installInput() {
     } else if (code === 'Space' && !event.target.closest('button, summary')) {
       event.preventDefault();
       $('pause').click();
-    } else if (code === 'KeyB' && !event.repeat) toggleBuild();
+    } else if (code === 'F8' && !event.repeat) {event.preventDefault();void toggleNavigationDebug();}
+    else if (code === 'KeyB' && !event.repeat) toggleBuild();
     else if (code === 'KeyM' && !event.repeat) beginOrder('move');
-    else if (code === 'KeyT' && !event.repeat) beginOrder('attack');
+    else if (code === 'KeyF' && !event.repeat) toggleAttackOrder();
     else if (code === 'KeyR' && buildKind) {
       rotation = (rotation + Math.PI / 2) % (2 * Math.PI);
       updatePlacement();
@@ -457,12 +556,9 @@ function installInput() {
     world.centre(point);
   });
 }
-function button(label, detail, callback, disabled) {
+function button(label, detail, callback, disabled, icon = 'tools') {
   const item = document.createElement('button');
-  item.textContent = label;
-  const sub = document.createElement('small');
-  sub.textContent = detail;
-  item.append(sub);
+  setButtonIcon(item, icon, label, detail);
   item.disabled = !!disabled;
   item.onclick = callback;
   return item;
@@ -472,21 +568,23 @@ function updatePalette() {
   $('build-toggle').setAttribute('aria-expanded', String(buildOpen));
   $('build-toggle').disabled = !builders().length;
   $('build-toggle').classList.toggle('active', buildOpen || !!buildKind);
+  for(const [kind,id,label] of [['lab','lab-toggle','НИИ · Исследования'],['factory','production-toggle','Производство · Завод']]){
+    const building=availableBuilding(kind),control=$(id),spec=config.buildings[kind];
+    control.hidden=!building&&!mission.constructionUnlocked(kind);
+    control.disabled=!building&&(!builders().length||!mission.canSpend(spec.cost)||!mission.constructionUnlocked(kind));
+    control.title=building?label+' · Двойной клик — к зданию':'Построить '+spec.name+' · '+spec.cost+' ⚡';
+    control.classList.toggle('active',!!building&&selected.has(building.id));
+  }
   if (!buildOpen) return;
-  const s = mission.state, entries = Object.entries(config.buildings).filter(([,spec])=>!spec.requires||s.research[spec.requires]);
+  const s = mission.state, entries = Object.entries(config.buildings).filter(([kind,spec])=>mission.constructionUnlocked(kind)&&(!spec.requires||s.research[spec.requires]));
   const available = ([kind,spec]) => (!spec.requires || s.research[spec.requires]) && mission.canSpend(spec.cost);
-  const key = entries.map(entry => Number(available(entry))).join('') + Object.keys(s.research).join(',');
+  const key = entries.map(entry => entry[0]+Number(available(entry))).join(',') + Object.keys(s.research).join(',');
   if (key === paletteKey) return;
   paletteKey = key;
-  cards ??= world.buildingCards();
   $('build-cards').style.setProperty('--build-columns',entries.length);
   $('build-cards').replaceChildren(...entries.map(([kind,spec]) => {
-    const b = button(spec.name, spec.cost + ' ⚡ · ' + spec.seconds + ' с', () => beginPlacement(kind), !available([kind,spec]));
-    if (spec.oilSlots) b.title = 'До ' + spec.oilSlots + ' вышек';
-    const image = document.createElement('img');
-    image.src = cards[kind];
-    image.alt = '';
-    b.prepend(image);
+    const b = button(spec.name, spec.cost + ' ⚡ · ' + spec.seconds + ' с', () => beginPlacement(kind), !available([kind,spec]), kind);
+    if (spec.oilSlots) b.title += ' · До ' + spec.oilSlots + ' вышек';
     return b;
   }));
 }
@@ -495,35 +593,38 @@ function updateRoster() {
   const tileWidth=roster.firstElementChild?.offsetWidth||40;
   const gap=parseFloat(getComputedStyle(roster).columnGap)||0;
   const columns=Math.max(1,Math.min(6,Math.floor((roster.clientWidth+gap)/(tileWidth+gap))));
-  const groups=new Map();
+  const groups=new Map(),types=new Map();
   const stack=units.length>columns;
   const counts={};
   for(const unit of units){
     counts[unit.kind]=(counts[unit.kind]??0)+1;
     const blocked=blockedOrders.has(unit.id),separate=blocked&&blockedOrders.size<=4;
-    const key=stack&&!separate?(blocked?'blocked:':'')+(unit.designId??unit.kind):unit.id;
+    const design=unitType(unit);
+    if(!types.has(design))types.set(design,types.size);
+    const key=stack&&!separate?[blocked,design,selected.has(unit.id)].join(':'):unit.id;
     if(!groups.has(key)){
       const customName=unit.projectId===unit.kind?null:unit.designName;
       const label=customName??config.units[unit.kind].name+(stack&&!separate?'':' '+counts[unit.kind]);
-      groups.set(key,{label,kind:unit.kind,units:[]});
+      groups.set(key,{label,kind:unit.kind,design,units:[]});
     }
     groups.get(key).units.push(unit);
   }
-  const tiles=[...groups.values()];
-  const visibleColumns=Math.min(tiles.length,Math.max(columns,Math.ceil(tiles.length/3)));
+  const tiles=[...groups.values()].sort((a,b)=>types.get(a.design)-types.get(b.design));
+  const visibleColumns=Math.min(tiles.length,columns);
   roster.style.setProperty('--roster-cols',Math.max(1,visibleColumns));
-  const key=tiles.map(tile=>tile.units.map(unit=>unit.id+(selected.has(unit.id)?'+':'-')).join('/')).join(',');
+  const tileKey=tile=>tile.units.map(unit=>unit.id).join('/');
+  const key=tiles.map(tileKey).join(',');
   if(key!==rosterKey){
     rosterKey=key;
-    const svgNS='http://www.w3.org/2000/svg';
+    const previous=new Map([...roster.children].map(b=>[b.dataset.units,b]));
     roster.replaceChildren(...tiles.map(tile=>{
-      const b=document.createElement('button'),icon=document.createElementNS(svgNS,'svg'),use=document.createElementNS(svgNS,'use');
-      use.setAttribute('href','hud-icons.svg#'+tile.kind);
-      icon.setAttribute('aria-hidden','true');icon.append(use);
-      b.append(icon,document.createElement('i'));
-      const ids=tile.units.map(unit=>unit.id),active=ids.filter(id=>selected.has(id)).length;
-      b.classList.toggle('active',active===ids.length);
-      b.classList.toggle('partial',active>0&&active<ids.length);
+      const existing=previous.get(tileKey(tile));
+      if(existing)return existing;
+      const b=document.createElement('button');
+      b.dataset.units=tileKey(tile);
+      setButtonIcon(b,tile.kind,tile.label);
+      b.append(document.createElement('i'));
+      const ids=tile.units.map(unit=>unit.id);
       b.setAttribute('aria-label',ids.length>1?tile.label+' · '+ids.length+' машин':tile.label);
       if(ids.length>1){
         const amount=document.createElement('span');
@@ -543,6 +644,9 @@ function updateRoster() {
   }
   for(let i=0;i<tiles.length;i++){
     const {units,label}=tiles[i],b=roster.children[i];
+    const active=units.every(unit=>selected.has(unit.id));
+    b.classList.toggle('active',active);
+    b.setAttribute('aria-pressed',String(active));
     const lowest=units.reduce((min,unit)=>unit.hp/unit.maxHp<min.hp/min.maxHp?unit:min);
     b.style.setProperty('--hp',100*lowest.hp/lowest.maxHp+'%');
     b.style.setProperty('--hp-color',hpColor(lowest.hp/lowest.maxHp));
@@ -556,35 +660,43 @@ function updateContext(first) {
   const energy = s.energy;
   const thresholds = [...Object.values(config.units), ...Object.values(config.research)].map(spec => Number(energy >= spec.cost)).join('');
   const factory = first?.owner === 'rai' && first.completed && first.kind === 'factory';
+  const projects = factory ? mission.factoryProjects() : [];
   const designs = factory ? s.designs.map(project => project.id + ':' + project.name).join(',') : '';
-  const key = [first?.id, first?.completed, first?.clearing, first?.research?.key, s.artifactKeys.join(), Object.keys(s.research).join(), thresholds, designs, builders().length].join('|');
+  const activeResearch = s.buildings.filter(b=>b.hp>0&&b.research).map(b=>b.research.key);
+  const key = [first?.id, first?.completed, first?.clearing, first?.research?.key, activeResearch.join(), s.artifactKeys.join(), Object.keys(s.research).join(), thresholds, designs, builders().length].join('|');
   if (key !== actionKey) {
     actionKey = key;
     const items = [];
-    const add = (label, detail, action, disabled) => items.push(button(label, detail, () => {report(action()); updateUi();}, disabled));
+    const add = (label, detail, action, disabled, icon) => {
+      const item = button(label, detail, () => {report(action()); updateUi();}, disabled, icon);
+      items.push(item);
+      return item;
+    };
     if (factory) {
-      items.push(button('Конструктор', 'Новый проект', toggleDesigner));
-      for (const {id, kind, name, spec} of mission.factoryProjects()) {
+      for (const {id, kind, name, spec} of projects) {
         const label=projectLabel(kind,id,name);
-        add(label, spec.cost + ' ⚡ · ' + spec.seconds + ' с', () => {
+        const control=add(label, spec.cost + ' ⚡ · ' + spec.seconds + ' с', () => {
           const result=mission.produce(first.id,id);
-          if(result.ok){
-            const count=mission.entity(first.id).queue.length;
-            toast('В очереди · '+label+' · '+count);
-            sound.signal('order');
-          }
+          if(result.ok)sound.signal('order');
           return result;
-        }, !mission.canSpend(spec.cost));
+        }, false, kind);
+        control.dataset.production=id;control.dataset.baseTitle=control.title;
+        control.oncontextmenu=event=>{
+          event.preventDefault();
+          if(!first.queue.some(job=>mission.productionProjectId(job)===id))return;
+          const result=mission.cancelProduction(first.id,id);
+          report(result);if(result.ok)sound.signal('order');updateUi();
+        };
+        const count=document.createElement('span');count.className='production-count';count.hidden=true;count.setAttribute('aria-hidden','true');control.append(count);
       }
     }
     if (first?.owner === 'rai' && first.completed && first.kind === 'lab') {
       for (const [id,spec] of Object.entries(config.research)) {
         const done = s.research[id], known = s.artifactKeys.includes(id);
-        if(!done&&!known)continue;
-        const label=done?spec.completedName??spec.name:sampleNames[id]??'Неизвестный образец';
-        add(label, done ? 'Готово' : spec.cost + ' ⚡ · ' + spec.seconds + ' с', () => mission.research(first.id,id), done || !!first.research || energy < spec.cost);
+        if(done||!known||first.research||activeResearch.includes(id)||!mission.canSpend(spec.cost))continue;
+        const label=sampleNames[id]??'Неизвестный образец';
+        add(label, spec.cost + ' ⚡ · ' + spec.seconds + ' с', () => mission.research(first.id,id), false, sampleIcons[id] ?? 'research').dataset.research = id;
       }
-      if(!items.length){const hint=document.createElement('span');hint.textContent='Нет образцов';items.push(hint);}
     }
     if (first?.owner === 'rai' && first.completed === false) {
       add('Достроить', 'Отправить строителей', () => {
@@ -592,76 +704,103 @@ function updateContext(first) {
         const result = mission.order(ids, 'build', first);
         if (result.ok) sound.acknowledge('build', ids);
         return result;
-      }, first.clearing||!builders().length);
-      add('Отменить', 'Вернуть остаток энергии', () => mission.cancelBuilding(first.id));
+      }, first.clearing||!builders().length, 'build');
+      add('Отменить', 'Вернуть остаток энергии', () => mission.cancelBuilding(first.id), false, 'close');
     }
     $('actions').replaceChildren(...items);
     $('actions').classList.toggle('factory-actions', !!factory);
     $('actions').hidden = !items.length;
   }
-  const queue=$('queue'), jobs=first?.queue??[], job=jobs[0]??first?.research;
+  const queue=$('queue');
+  if(factory){
+    queue.hidden=true;queue.replaceChildren();queueKey='';
+    const jobs=first.queue,counts=new Map();
+    const projectId=job=>mission.productionProjectId(job,projects);
+    for(const job of jobs){const id=projectId(job);counts.set(id,(counts.get(id)??0)+1);}
+    const current=jobs[0]&&projectId(jobs[0]);
+    for(const control of $('actions').querySelectorAll('[data-production]')){
+      const id=control.dataset.production,count=counts.get(id)??0,badge=control.querySelector('.production-count'),running=count>0&&id===current;
+      const canProduce=mission.canSpend(projects.find(project=>project.id===id).spec.cost);
+      // A queued project stays interactive so it can be cancelled without energy.
+      control.disabled=!canProduce&&!count;
+      control.classList.toggle('cannot-produce',!canProduce);
+      badge.hidden=!count;badge.textContent=String(count);
+      control.classList.toggle('has-queue',count>0);control.classList.toggle('is-producing',running&&s.powered&&!first.exitBlocked);
+      const status=count?'В очереди: '+count+(running?(first.exitBlocked?' · Ждёт выезда':!s.powered?' · Нет питания':' · Выпуск '+Math.floor(jobs[0].progress*100)+'%'):''):'';
+      control.title=control.dataset.baseTitle+' · ЛКМ — заказать · ПКМ — отменить один'+(status?' · '+status:'');
+      if(status)control.setAttribute('aria-description',status);else control.removeAttribute('aria-description');
+    }
+    return;
+  }
+  const job=first?.research;
   queue.hidden = !job;
   if (job) {
-    const label=entry=>projectLabel(entry.kind,entry.projectId,entry.name)??sampleNames[entry.key]??'Образец';
-    const blocked=jobs.length&&first.exitBlocked===true;
-    const nextKey=[first.id,s.powered,blocked,...(jobs.length?jobs:[job]).map(label)].join('|');
+    const label=sampleNames[job.key]??'Образец';
+    const nextKey=[first.id,s.powered,job.key].join('|');
     if(nextKey!==queueKey){
       queueKey=nextKey;
       const running=document.createElement('div'),progress=document.createElement('progress');
-      running.textContent=(s.powered?'':'Нет питания · ')+(blocked?'Ждёт выезда · ':jobs.length?'Выпуск · ':'Анализ · ')+label(job);
+      running.textContent=(s.powered?'':'Нет питания · ')+'Анализ · '+label;
       progress.max=1;running.append(progress);
       queue.replaceChildren(running);
-      if(jobs.length>1){
-        const waiting=document.createElement('div'),batches=[];
-        for(const entry of jobs.slice(1)){
-          const name=label(entry),last=batches.at(-1);
-          if(last?.name===name)last.count++;
-          else batches.push({name,count:1});
-        }
-        waiting.textContent='Далее · '+batches.slice(0,4).map(({name,count})=>name+(count>1?' ×'+count:'')).join(' → ')+(batches.length>4?' → ещё '+batches.slice(4).reduce((sum,item)=>sum+item.count,0):'');
-        queue.append(waiting);
-      }
     }
     queue.querySelector('progress').value=job.progress;
   }
+}
+function positionFieldTasks(){
+  $('field-tasks').style.top=($('radio').hidden?54:$('radio').offsetTop+$('radio').offsetHeight+12)+'px';
 }
 function updateUi() {
   if (!active) return;
   if(performance.now()>=blockedUntil){blockedOrders.clear();$('order-feedback').hidden=true;}
   const s = mission.state;
+  const journal=$('journal-entries'),entries=s.radioStory?.journal??[];
+  const journalKey=JSON.stringify(entries);
+  if(journal.dataset.contents!==journalKey){
+    journal.dataset.contents=journalKey;
+    journal.replaceChildren(...entries.map(item=>{
+      const entry=document.createElement('p'),title=document.createElement('strong');
+      title.textContent=item.title+' · ';entry.append(title,document.createTextNode(item.text));return entry;
+    }));
+    if(!entries.length)journal.textContent='Записей пока нет.';
+  }
   for (const id of selected) if (!mission.entity(id)) selected.delete(id);
   const group = selection(), first = group[0], mobile = group.filter(isMobile);
   $('energy').textContent = Math.floor(s.energy);
   $('income').textContent = (s.energyRate >= 0 ? '+' : '') + s.energyRate.toFixed(1) + '/с';
   $('income').classList.toggle('deficit',s.energyRate<0);
   const population=vehicles().length;
-  $('population').textContent = population + ' / 48';
+  $('population').textContent = population + ' / ' + (config.unitLimit??48);
   $('energy-meter').max=config.energyCapacity;
   $('energy-meter').value=s.energy;
   $('fleet-meter').value=population;
   $('power').textContent = s.powered ? 'Сеть онлайн' : 'Нет питания';
   $('power').classList.toggle('online',s.powered);
-  $('pause').textContent = paused ? 'Продолжить' : 'Пауза';
-  $('tempo').textContent = '×' + speed;
+  setButtonIcon($('pause'), paused ? 'play' : 'pause', paused ? 'Продолжить' : 'Пауза', 'Пробел');
+  setButtonIcon($('tempo'), speedIcon(speed), 'Скорость ×' + speed);
   const tasks = mission.objectives();
-  $('objective-count').textContent = tasks.filter(task => task.done).length + '/' + tasks.length;
-  const nextTasks = tasks.map(task=>task.id+task.done+(task.progress??'')).join(',');
+  const assigned=storyObjectives(mission,{radioEnabled:radio.enabled});
+  $('objective-count').textContent = assigned.length || '';
+  const nextTasks = JSON.stringify(assigned);
   if (nextTasks !== taskKey) {
     taskKey = nextTasks;
-    $('objectives').replaceChildren(...tasks.map(task => {
+    const rows=assigned.map(task => {
       const row = document.createElement('li'), name = document.createElement('span'), amount = document.createElement('small');
       row.classList.toggle('done', Boolean(task.done));
-      name.textContent = taskNames[task.id];
+      name.textContent = task.name;
       amount.textContent = task.progress ?? '';
       row.append(name,amount);
       return row;
-    }));
+    });
+    $('objectives').replaceChildren(...rows);
+    $('field-objectives').replaceChildren(...rows.map(row=>row.cloneNode(true)));
+    $('field-tasks').hidden=!assigned.length;
   }
+  positionFieldTasks();
   const contact=visibleRaidContact(mission),threat=staticThreat(contact);
-  world.storySignals.setThreat(threat);
   const sites=firstPowerSites(),artifact=knownArtifact(mission),southernApproach=missionSignal('last-camp',mission);
   const marker=tacticalFocus(contact,{...sites,threat,artifact,southernApproach});
-  const objectiveHint = $('objective-hint'), hint = nextObjectiveHint(s,sites,tasks,artifact,contact,southernApproach,warehouseAdvanceHint(mission));
+  const objectiveHint = $('objective-hint'), hint = s.storyConstruction?.enabled?(assigned[0]?.name??''):assigned.length?nextObjectiveHint(s,sites,tasks,artifact,contact,southernApproach,warehouseAdvanceHint(mission)):'';
   if(objectiveHint.textContent!==hint)objectiveHint.textContent=hint;
   objectiveHint.hidden=!hint;
   const signal=world.storySignals.current;
@@ -669,26 +808,24 @@ function updateUi() {
   const focus=$('objective-focus');
   focus.hidden=!marker;
   if(marker){
-    focus.textContent=marker.label;
-    focus.title=marker.kind==='guidance'?'ЛКМ по нефтяной точке — поставить вышку':
-      marker.kind==='artifact'?'ПКМ по ящику — подобрать':marker.label;
+    const focusIcons={threat:'attack',guidance:'derrick',artifact:'research',recon:'radar'};
+    const focusDetails={guidance:'ЛКМ по нефтяной точке — поставить вышку',artifact:'ПКМ по ящику — подобрать'};
+    setButtonIcon(focus,focusIcons[marker.kind]??'focus',marker.label,focusDetails[marker.kind]);
     focus.classList.toggle('threat',marker.kind==='threat');
   }
-  const raidHint=contact?'Рейдеры в зоне обзора.':s.flags.raidStarted?'Рейдеры в пути. Прикройте въезд.':'Готовится рейд. Прикройте въезд.';
-  const repair=mobile.some(u=>u.kind==='builder')&&vehicles().some(u=>u.hp<u.maxHp);
-  const oilFound=marker?.kind==='guidance'||radio.current?.kind==='guidance';
-  $('hint').textContent = s.status !== 'running' ? '' : s.flags.contact && !s.flags.raidWon ? raidHint : repair ? 'ПКМ по повреждённой машине — ремонт.' : !s.powered ? powerHint(sites,oilFound) : !tasks[0].done ? 'Завод, НИИ и ДОТ.' : s.flags.lastRevealed ? 'Четвёртый лагерь открыт на юге.' : 'Разведайте лагеря и доставьте артефакты.';
   const entityName = first && (projectLabel(first.kind,first.projectId,first.designName)
     ?? config.buildings[first.kind]?.name ?? config.camps.find(camp=>camp.id===first.campId)?.name ?? 'Лагерь');
-  $('selection').textContent = group.length > 1 ? 'Группа · ' + group.length : entityName ?? 'Нет выделения';
+  $('selection').parentElement.hidden=!first;
+  $('selection').textContent = group.length > 1 ? 'Группа · ' + group.length : entityName ?? '';
   const hp = group.reduce((sum,entity)=>sum+entity.hp,0), maxHp = group.reduce((sum,entity)=>sum+entity.maxHp,0);
   const wellStatus=group.length===1&&first?.owner==='rai'&&first.kind==='derrick'&&first.completed
     ? ' · '+(first.powered?'Качает':s.powered?'Лимит АЭС':'Нет питания'):'';
-  $('details').textContent = orderMode ? (orderMode === 'attack' ? 'ЛКМ по врагу или по земле' : 'ЛКМ — выбрать точку') : first?.clearing ? 'Освобождение площадки' : first?.awaitingWorkers ? 'В очереди строителей' : first ? Math.ceil(hp) + '/' + maxHp + (first.completed === false ? ' · ' + Math.floor(first.progress*100) + '%' : ' HP')+wellStatus : 'Выберите машину';
+  $('details').textContent = first?.clearing ? 'Освобождение площадки' : first?.awaitingWorkers ? 'В очереди строителей' : first ? Math.ceil(hp) + '/' + maxHp + (first.completed === false ? ' · ' + Math.floor(first.progress*100) + '%' : ' HP')+wellStatus : '';
   $('move-order').classList.toggle('active', orderMode === 'move');
   $('attack-order').classList.toggle('active', orderMode === 'attack');
+  $('attack-order').setAttribute('aria-pressed',String(orderMode==='attack'));
   $('move-order').disabled = !vehicles().length;
-  $('attack-order').disabled = !mobile.some(unit => config.units[unit.kind].damage > 0);
+  $('attack-order').disabled = orderMode!=='attack'&&!mobile.some(unit => config.units[unit.kind].damage > 0);
   $('stop').disabled = !mobile.length;
   $('placement').hidden = !buildKind;
   if (buildKind) $('placement-name').textContent = config.buildings[buildKind].name;
@@ -696,6 +833,7 @@ function updateUi() {
   updatePalette();
   updateContext(first);
   designer.refresh();
+  combatMenu?.refresh();
 }
 function minimap(){const canvas=$('minimap'),ctx=canvas.getContext('2d'),size=canvas.width,field=world.field;ctx.fillStyle='#171e1c';ctx.fillRect(0,0,size,size);if(miniBackground.complete&&miniBackground.naturalWidth)ctx.drawImage(miniBackground,0,0,size,size);
  world.drawMinimapFog(ctx,size);
@@ -725,7 +863,7 @@ function labels() {
     const spec = config.buildings[entity.kind];
     const top = entity.completed===false&&spec
       ? buildLayerHeight(entity,spec,config.worldScale)-world.field.heightAt(entity.x,entity.y)
-      : (unit ? (entity.kind === 'builder' ? 3.65 : 3.2) : (spec?.realSizeMetres[2] ?? 4)) * config.worldScale;
+      : (unit ? (SCAV_PROFILES[entity.kind]?.height ?? (entity.kind === 'builder' ? 3.65 : 3.2)) : (spec?.realSizeMetres[2] ?? 4)) * config.worldScale;
     const p = world.screen(entity,top), ground = world.screen(entity,0);
     const visibleHeight = Math.hypot(p.x-ground.x,p.y-ground.y);
     if (!p.visible || visibleHeight < 6 || p.x < 0 || p.x > innerWidth || p.y < 45 || p.y > innerHeight) continue;
@@ -750,12 +888,15 @@ function labels() {
 
 function events() {
   for (const event of mission.drainEvents()) {
+    radio?.director?.note(event,mission);
+    sound?.storyEvent?.(event);
     if (event.type === 'construction-complete') {
       toast('Построено · ' + config.buildings[event.kind].name);
       sound.signal('complete');
       saveGame(false);
     }
     if (event.type === 'unit-produced') toast((event.name ?? config.units[event.kind].name) + ' · готово к выезду');
+    if (event.type === 'field-modification') toast('Установлено · '+event.name+' · +'+event.hpBonus+' HP');
     if (event.type === 'construction-refused') toast(event.reason);
     if (event.type === 'artifact-collected') toast('Артефакт доставлен в НИИ');
     if (event.type === 'camp-cleared') toast('Лагерь зачищен');
@@ -777,16 +918,19 @@ function frame(now) {
   const dt = Math.min(.65, (now - last) / 1000);
   last = now;
   if (!world || !mission) return;
+  if(window.campaign?.renderSuspended)return;
   if (designer?.visible) {
     sound.update();
     return;
   }
   if (active) {
-    if (!paused) mission.advance(dt * speed);
+    if (!paused) mission.advance(dt * speed,{budgetMs:mission.config.simulationCpuBudgetMs,rate:speed});
     events();
     radio.consume(mission, now);
   }
+  if(prologuePlaying){radio.consume(mission,now);if(radio.director.prologueDone)stopPrologue();}
   world.update(mission, selected, dt, active && !paused && mission.state.status==='running');
+  navigationDebug?.update();
   if (active) {
     labels();
     if (now - lastMini > 200) { lastMini = now; minimap(); }
@@ -794,12 +938,13 @@ function frame(now) {
       lastUi = now;
       if (buildKind) updatePlacement();
       updateUi();
+      commandFeedback();
     }
     if (mission.state.status !== 'running' && !resultShown) {
       resultShown = true;
       const victory=mission.state.status==='victory';
       $('result-title').textContent = victory ? 'Миссия завершена' : 'Операция прервана';
-      $('result-message').textContent = victory ? 'Передовая база действует. К югу зафиксирован энергетический всплеск.' : 'Утрачены строители и производство.';
+      $('result-message').textContent = victory ? 'Передовая база действует. Все четыре лагеря зачищены.' : 'Утрачены строители и производство.';
       $('result-signal').hidden=!victory;
       $('result').hidden = false;
     }
@@ -811,15 +956,18 @@ try {
   const response = await fetch(dataUrl);
   if (!response.ok) throw new Error('Конфигурация миссии ' + response.status);
   config = await response.json();
+  const story = await loadMissionStory();
   sound = new FieldSound($('sound-toggle'), $('story-voice-toggle'));
   world = await createCampaignWorld($('world'), config, sound);
   mission = new Mission(config, world.field);
+  world.damage.bindMission(mission);
   designer = new VehicleDesigner($('designer'), $('design-toggle'), mission, {
     makeModel: components => world.vehicles.makeDesignModel(components),
     onActiveChange(open) {
       if (open) {
         pausedBeforeDesigner = paused;
         paused = true;
+        radio?.suspendDialogue();
         sound.stopStory();
         sound.update({engine:0,rolling:0,slip:0,welding:0});
       } else paused = pausedBeforeDesigner;
@@ -832,25 +980,41 @@ try {
     },
   });
   radio = new FieldRadio($('radio'), $('radio-toggle'), {
-    onSignal(signal,chapter,keepCaptionUntil,urgent) {
-      if(chapter&&signal?.kind!=='anomaly')sound.signal('radio');
-      sound.playStory(chapter,keepCaptionUntil,urgent);
+    director:new StoryDirector(story),
+    onSignal(signal,chapter,keepCaptionUntil,urgent,cue) {
+      if(chapter&&!cue&&signal?.kind!=='anomaly')sound.signal('radio');
+      sound.playStory(chapter,keepCaptionUntil,urgent,cue);
       presentSignal(signal);
     },
     onFocus:focusSignal,
   });
+  sound.configureStoryVoices(story,mission,()=>!!radio.entry||prologuePlaying);
+  new ResizeObserver(positionFieldTasks).observe($('radio'));
   window.campaign = {
     ready: true, mission, world, select, radio,
     get drivingAudio() { return {running:sound.ready(), recordings:!!sound.recordings}; },
-    get storyAudio() { return {playing:!!sound.storyPlayback, enabled:sound.storyEnabled, chapter:sound.storyPlayback?.chapter, urgent:!!sound.storyPlayback?.urgent}; },
+    get storyAudio() { return {playing:!!sound.storyPlayback, enabled:sound.storyEnabled, chapter:sound.storyPlayback?.chapter, cueId:sound.storyPlayback?.cueId, urgent:!!sound.storyPlayback?.urgent}; },
+    get unitVoice() {return {playing:!!sound.voiceSource,cueId:sound.voiceCueId};},
     get selected() { return [...selected]; },
     get state() { return {active, paused, speed, buildKind, orderMode}; },
     advance(seconds) { mission.advance(seconds); events(); radio.consume(mission, performance.now()); updateUi(); return mission.state; },
   };
+  if(new URLSearchParams(location.search).has('damage')){
+    const [{installDamageDebug},T]=await Promise.all([import('./damage-debug.js'),import('three')]);
+    window.campaign.damageDebug=installDamageDebug(T,world,mission,window.campaign);
+  }
+  if(new URLSearchParams(location.search).has('navigation'))await toggleNavigationDebug(true);
   miniBackground.src = '../assets/maps/alpha/macro-albedo.jpg';
   installInput();
   $('loading-status').textContent = 'Карта готова. Первый приказ — развернуть базу.';
   $('begin').disabled = false;
+  $('prologue').disabled = false;
+  $('prologue').onclick = () => {
+    if(prologuePlaying)return stopPrologue();
+    radio.reset();radio.setEnabled(true);radio.director.startPrologue();
+    prologuePlaying=true;document.body.classList.add('prologue-playing');$('mission-hud').hidden=false;
+    setButtonIcon($('prologue'),'close','Закончить пролог');sound.unlock();radio.consume(mission,performance.now());
+  };
   try { $('resume-save').hidden = !localStorage.getItem(saveKey); } catch {}
   $('begin').onclick = () => start();
   $('resume-save').onclick = $('load').onclick = () => start(true);
@@ -859,10 +1023,14 @@ try {
   $('tempo').onclick = () => { speed = speed === 1 ? 2 : speed === 2 ? 4 : 1; updateUi(); };
   $('design-toggle').onclick = toggleDesigner;
   $('build-toggle').onclick = toggleBuild;
+  $('lab-toggle').onclick = () => openBuilding('lab');
+  $('lab-toggle').ondblclick = () => openBuilding('lab', true);
+  $('production-toggle').onclick = () => openBuilding('factory');
+  $('production-toggle').ondblclick = () => openBuilding('factory', true);
   $('close-build').onclick = $('cancel-order').onclick = cancelMode;
   $('suggest-site').onclick = suggestSite;
   $('move-order').onclick = () => beginOrder('move');
-  $('attack-order').onclick = () => beginOrder('attack');
+  combatMenu=new CombatMenu({button:$('attack-order'),mission,selection,isActive:()=>orderMode==='attack',onOpen:()=>beginOrder('attack'),onDeactivate:()=>cancelMode(),onChange:result=>{if(report(result))sound.signal('order');updateUi();}});
   $('home').onclick = () => {
     document.querySelector('.settings').open = false;
     world.centre(world.field.gridToWorld(config.startGrid), 360);
@@ -870,6 +1038,7 @@ try {
   $('objective-focus').onclick = () => {
     const signal=tacticalFocus(visibleRaidContact(mission));
     if(!signal)return;
+    document.querySelector('.settings').open = false;
     presentSignal(signal);
     focusSignal(signal);
   };
@@ -881,7 +1050,7 @@ try {
   $('stop').onclick = () => {
     const ids = selection().filter(liveMobile).map(unit => unit.id);
     if (report(mission.stop(ids))) sound.acknowledge('stop', ids);
-    cancelMode();
+    cancelMode({keepAttack:true});
   };
   $('result-close').onclick = () => { $('result').hidden = true; };
   $('result-signal').onclick = () => {

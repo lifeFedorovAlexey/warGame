@@ -1,0 +1,377 @@
+{
+  "date": "2026-11-07",
+  "scope": "All 21 originally supplied commander recordings and the corrected full take of m01-s07-l007",
+  "method": {
+    "type": "local-automatic-transcription",
+    "runtime": "speech.cpp 0.10.1",
+    "model": "Qwen3-ASR-0.6B-Q4_K",
+    "language": "ru",
+    "scriptTextProvidedToRecognizer": false,
+    "note": "Автоматическое распознавание не заменяет прослушивание. Фонетически близкие расхождения не считаются подтверждёнными ошибками записи."
+  },
+  "summary": {
+    "files": 22,
+    "asrMatches": 8,
+    "needsListening": 0,
+    "mislabeledOrDuplicate": 5,
+    "missingCorrectTake": [],
+    "userConfirmedMatches": 5,
+    "userConfirmedWordingDifferences": 4,
+    "userConfirmedMislabeledOrDuplicate": 5,
+    "correctedBindings": 4,
+    "unresolvedBindings": 0,
+    "preservedUnusedDuplicates": 1,
+    "pendingWordingDecisions": [],
+    "userApprovedWordingDifferences": 4,
+    "replacementTakes": 1,
+    "pendingSpokenTextConfirmation": []
+  },
+  "runtimeRemappingApplied": true,
+  "recordings": [
+    {
+      "id": "raid-won",
+      "number": null,
+      "expectedText": "Сектор зачищен. Проверьте машины. Продолжаем операцию.",
+      "file": "field-radio/raid-won.mp3",
+      "sha256": "0fd6f7d4bfd07211c9a571d39aa866a481d524ac922af9886c8dce8d95142fc7",
+      "recognizedText": "Сектор зачищен. Проверьте машины. Продолжаем операцию.",
+      "status": "asr-matches-script"
+    },
+    {
+      "id": "victory",
+      "number": null,
+      "expectedText": "База действует. Все четыре лагеря зачищены.",
+      "file": "field-radio/victory.mp3",
+      "sha256": "dcba50b5246926398e3763a1ac1aa04a05d596be13f09ed3386b5469f2e9a557",
+      "recognizedText": "База действует. Все четыре лагеря зачищены.",
+      "status": "asr-matches-script"
+    },
+    {
+      "id": "m01-s02-l001",
+      "number": 1,
+      "expectedText": "Опять эта херня…",
+      "file": "recordings/commander/m01-s02-l001.mp3",
+      "sha256": "86cfe2bcd1792ff2ebc6729999875100b24c3415da73df0c2f374796ad8e10e9",
+      "recognizedText": "Опять это херня.",
+      "status": "user-approved-wording",
+      "userReportedText": "опять херня",
+      "confirmedSpokenText": "Опять херня.",
+      "transcriptNote": "Орфография, запись числа словами и пунктуация нормализованы; исходное сообщение сохранено в userReportedText.",
+      "confirmedByUser": "2026-11-07",
+      "wordingApproved": true,
+      "approvedByUser": "2026-11-07",
+      "currentScriptText": "Опять херня."
+    },
+    {
+      "id": "m01-s02-l003",
+      "number": 2,
+      "expectedText": "Сон приснился. Будто все умерли.",
+      "file": "recordings/commander/m01-s02-l003.mp3",
+      "sha256": "0ef4535fc76297db4a41b7ff5ed781ba747fe429fbd9b58ee0264bf910d734b9",
+      "recognizedText": "Сон приснился, будто все умерли.",
+      "status": "asr-matches-script"
+    },
+    {
+      "id": "m01-s02-l005",
+      "number": 3,
+      "expectedText": "На что?",
+      "file": "recordings/commander/m01-s02-l005.mp3",
+      "sha256": "4bdb9e75dd4cd34f1ea6d8c873fe63add641193dc5eb3e3224c479ba7bcab75f",
+      "recognizedText": "На что",
+      "status": "asr-matches-script"
+    },
+    {
+      "id": "m01-s02-l007",
+      "number": 4,
+      "expectedText": "Не было.",
+      "file": "recordings/commander/m01-s02-l007.mp3",
+      "sha256": "f4702a08562ef9c7482aaddecb62e4fc7085a76affe0f9e6c3d60caeb5e2e574",
+      "recognizedText": "Не было.",
+      "status": "asr-matches-script"
+    },
+    {
+      "id": "m01-s02-l009",
+      "number": 5,
+      "expectedText": "А сколько времени?",
+      "file": "recordings/commander/m01-s02-l009.mp3",
+      "sha256": "3361a22ab8dd8f9b2580829c573370b34ae6fe03e7cc234a5c571ae6cae74ad4",
+      "recognizedText": "А сколько времени?",
+      "status": "asr-matches-script"
+    },
+    {
+      "id": "m01-s02-l011",
+      "number": 6,
+      "expectedText": "Подъём в семь.",
+      "file": "recordings/commander/m01-s02-l011.mp3",
+      "sha256": "2b64fdea46b545f36a043c2f2ebbd173353b4117466a8e8e78786587a5273c45",
+      "recognizedText": "Подъем всеми.",
+      "status": "user-confirmed-matches-script",
+      "userReportedText": "подьем в 7",
+      "confirmedSpokenText": "Подъём в семь.",
+      "transcriptNote": "Орфография, запись числа словами и пунктуация нормализованы; исходное сообщение сохранено в userReportedText.",
+      "confirmedByUser": "2026-11-07"
+    },
+    {
+      "id": "m01-s02-l013",
+      "number": 7,
+      "expectedText": "Подъём, суки! Родину восстанавливать будем!",
+      "file": "recordings/commander/m01-s02-l013.mp3",
+      "sha256": "910c09c6d036ed2cc374f08cf0ecced9e6a8a97356b81e5aafd7d72591bcd6d1",
+      "recognizedText": "Подъем суки. Родину восстановлять будем.",
+      "status": "user-approved-wording",
+      "userReportedText": "подьем родину восстанавливать будем",
+      "confirmedSpokenText": "Подъём! Родину восстанавливать будем!",
+      "transcriptNote": "Орфография, запись числа словами и пунктуация нормализованы; исходное сообщение сохранено в userReportedText.",
+      "confirmedByUser": "2026-11-07",
+      "wordingApproved": true,
+      "approvedByUser": "2026-11-07",
+      "currentScriptText": "Подъём! Родину восстанавливать будем!"
+    },
+    {
+      "id": "m01-s05-l012",
+      "number": 8,
+      "expectedText": "А бронетехника?",
+      "file": "recordings/commander/m01-s05-l012.mp3",
+      "sha256": "dee41084d7ebbb57f3820428bfa9f082046d21b2b3efc7e7e711b5b5b7d1aaba",
+      "recognizedText": "Оброни техника. Что?",
+      "status": "user-approved-wording",
+      "userReportedText": "а бронитехника что",
+      "confirmedSpokenText": "А бронетехника что?",
+      "transcriptNote": "Орфография, запись числа словами и пунктуация нормализованы; исходное сообщение сохранено в userReportedText.",
+      "confirmedByUser": "2026-11-07",
+      "wordingApproved": true,
+      "approvedByUser": "2026-11-07",
+      "currentScriptText": "А бронетехника что?"
+    },
+    {
+      "id": "m01-s05-l014",
+      "number": 9,
+      "expectedText": "Я имею в виду защищённую.",
+      "file": "recordings/commander/m01-s05-l014.mp3",
+      "sha256": "0666bd5a805836324ee32516c49c7306b3362ad9f08a467731769957c7c08cf7",
+      "recognizedText": "Я имею в виду защищённую.",
+      "status": "asr-matches-script"
+    },
+    {
+      "id": "m01-s06-l002",
+      "number": 10,
+      "expectedText": "Вас понял. На месте. Приступаем.",
+      "file": "recordings/commander/m01-s06-l002.mp3",
+      "sha256": "9d286f8f53b8b2ebdbab0baf4dae1cd52ef8d0568678bb931958faafc47d9302",
+      "recognizedText": "Воспомнил, на месте приступаем.",
+      "status": "user-approved-wording",
+      "userReportedText": "вас понял на месте",
+      "confirmedSpokenText": "Вас понял. На месте.",
+      "transcriptNote": "Орфография, запись числа словами и пунктуация нормализованы; исходное сообщение сохранено в userReportedText.",
+      "confirmedByUser": "2026-11-07",
+      "wordingApproved": true,
+      "approvedByUser": "2026-11-07",
+      "currentScriptText": "Вас понял. На месте."
+    },
+    {
+      "id": "m01-s06-l004",
+      "number": 11,
+      "expectedText": "Тут электростанция рядом есть. Старая.",
+      "file": "recordings/commander/m01-s06-l004.mp3",
+      "sha256": "ac1de0af5aacea970d97717c4b2d7dc1b8ead8b71f289f639fc36ec7420c9d14",
+      "recognizedText": "Тут электростанция рядом есть, старая.",
+      "status": "asr-matches-script"
+    },
+    {
+      "id": "m01-s06-l006",
+      "number": 12,
+      "expectedText": "Нет.",
+      "file": "recordings/commander/m01-s06-l006.mp3",
+      "sha256": "f866b897dedb5b5dc188b52acb2952c169049ee73524e96daedec8ee6ee57b04",
+      "recognizedText": "Тут электростанция рядом есть, старая.",
+      "status": "duplicate-other-cue-user-confirmed",
+      "suggestedCue": "m01-s06-l004",
+      "confirmedSpokenText": "Тут электростанция рядом есть. Старая.",
+      "userReportedText": "да",
+      "confirmationContext": "Подтверждение вопроса: в m01-s06-l006 повторяется фраза про электростанцию вместо «Нет».",
+      "confirmedByUser": "2026-11-07",
+      "disposition": "unused-duplicate-preserved"
+    },
+    {
+      "id": "m01-s06-l008",
+      "number": 13,
+      "expectedText": "Электричества нет.",
+      "file": "recordings/commander/m01-s06-l008.mp3",
+      "sha256": "2cd019917984b7f9a4e9f4dfce907a990255cd8daec9f33e4e44ebcac9eb22cd",
+      "recognizedText": "Нет.",
+      "status": "mislabeled-user-confirmed",
+      "suggestedCue": "m01-s06-l006",
+      "confirmedSpokenText": "Нет.",
+      "userReportedText": "да",
+      "confirmationContext": "Подтверждение вопроса: в m01-s06-l008 звучит только «Нет».",
+      "confirmedByUser": "2026-11-07",
+      "mappingApplied": true
+    },
+    {
+      "id": "m01-s07-l002",
+      "number": 14,
+      "expectedText": "Кто?",
+      "file": "recordings/commander/m01-s07-l002.mp3",
+      "sha256": "3ddb97446f3b9e7db327117aec79f5c37d7ed2b226154a1e936dacb0c406ef2f",
+      "recognizedText": "Потому что электричество нет.",
+      "status": "mislabeled-user-approved-wording",
+      "suggestedCue": "m01-s06-l008",
+      "confirmedSpokenText": "Потому что электричества нет.",
+      "userReportedText": "Потому что электричества нет это я изменил лучше звучит",
+      "confirmedByUser": "2026-11-07",
+      "wordingApproved": true,
+      "mappingApplied": true
+    },
+    {
+      "id": "m01-s07-l004",
+      "number": 15,
+      "expectedText": "Наши?",
+      "file": "recordings/commander/m01-s07-l004.mp3",
+      "sha256": "597083bcf6cbb47a67b0df0e4079c55d12f17a7e18b45b2f4b3e174001126da9",
+      "recognizedText": "Кто",
+      "status": "mislabeled-user-confirmed",
+      "suggestedCue": "m01-s07-l002",
+      "confirmedSpokenText": "Кто?",
+      "userReportedText": "да",
+      "confirmationContext": "Подтверждение вопроса: в присланном m01-s07-l004 звучит «Кто?».",
+      "confirmedByUser": "2026-11-07",
+      "mappingApplied": true
+    },
+    {
+      "id": "m01-s07-l007",
+      "number": 16,
+      "expectedText": "Спецназ Вооружённых сил Российской Федерации. Группа «Альфа». Предлагаю сложить оружие.",
+      "file": "recordings/commander/pending/m01-s07-l007.mp3",
+      "sha256": "62b98474be794dbf39ba089738c05c25fee408a8b4dd2995b1559e2d93a57cb4",
+      "recognizedText": "Наши",
+      "status": "mislabeled-user-confirmed",
+      "suggestedCue": "m01-s07-l004",
+      "confirmedSpokenText": "Наши?",
+      "userReportedText": "нет эта фраза наши",
+      "confirmedByUser": "2026-11-07",
+      "mappingApplied": true
+    },
+    {
+      "id": "m01-s07-l009",
+      "number": 17,
+      "expectedText": "Значит, будете федеративным округом.",
+      "file": "recordings/commander/m01-s07-l009.mp3",
+      "sha256": "dce3d422efdae6f89d023bef69ff95d2fd330237b6bd36e24c6524964221f410",
+      "recognizedText": "Значит будете федеративным округом.",
+      "status": "user-confirmed-matches-script",
+      "confirmedSpokenText": "Значит, будете федеративным округом.",
+      "userReportedText": "да",
+      "confirmationContext": "Подтверждение вопроса: в m01-s07-l009 звучит «Значит, будете федеративным округом».",
+      "confirmedByUser": "2026-11-07"
+    },
+    {
+      "id": "m01-s07-l011",
+      "number": 18,
+      "expectedText": "Почему отбросы?",
+      "file": "recordings/commander/m01-s07-l011.mp3",
+      "sha256": "cd0b338885b5f2fe2bfbe344b1be07d5fb7b678e8714f4ec97e01e7204bc5e74",
+      "recognizedText": "Почему отбросы?",
+      "status": "user-confirmed-matches-script",
+      "confirmedSpokenText": "Почему отбросы?",
+      "userReportedText": "да",
+      "confirmationContext": "Подтверждение вопроса: в m01-s07-l011 звучит «Почему отбросы?».",
+      "confirmedByUser": "2026-11-07"
+    },
+    {
+      "id": "m01-s07-l013",
+      "number": 19,
+      "expectedText": "А мы?",
+      "file": "recordings/commander/m01-s07-l013.mp3",
+      "sha256": "96e1aca567864bfc64d4f330d569135b527bdc226f9e9b569f86735f7e33cf8c",
+      "recognizedText": "А мы",
+      "status": "user-confirmed-matches-script",
+      "confirmedSpokenText": "А мы?",
+      "userReportedText": "да",
+      "confirmationContext": "Подтверждение вопроса: в m01-s07-l013 звучит «А мы?».",
+      "confirmedByUser": "2026-11-07"
+    }
+  ],
+  "scriptRevisions": [
+    {
+      "cue": "m01-s06-l008",
+      "previousText": "Электричества нет.",
+      "approvedText": "Потому что электричества нет.",
+      "approvedByUser": "2026-11-07"
+    },
+    {
+      "cue": "m01-s02-l001",
+      "previousText": "Опять эта херня…",
+      "approvedText": "Опять херня.",
+      "approvedByUser": "2026-11-07"
+    },
+    {
+      "cue": "m01-s02-l013",
+      "previousText": "Подъём, суки! Родину восстанавливать будем!",
+      "approvedText": "Подъём! Родину восстанавливать будем!",
+      "approvedByUser": "2026-11-07"
+    },
+    {
+      "cue": "m01-s05-l012",
+      "previousText": "А бронетехника?",
+      "approvedText": "А бронетехника что?",
+      "approvedByUser": "2026-11-07"
+    },
+    {
+      "cue": "m01-s06-l002",
+      "previousText": "Вас понял. На месте. Приступаем.",
+      "approvedText": "Вас понял. На месте.",
+      "approvedByUser": "2026-11-07"
+    }
+  ],
+  "runtimeRemappings": [
+    {
+      "cue": "m01-s06-l006",
+      "file": "recordings/commander/m01-s06-l008.mp3",
+      "sha256": "2cd019917984b7f9a4e9f4dfce907a990255cd8daec9f33e4e44ebcac9eb22cd",
+      "text": "Нет.",
+      "date": "2026-11-07"
+    },
+    {
+      "cue": "m01-s06-l008",
+      "file": "recordings/commander/m01-s07-l002.mp3",
+      "sha256": "3ddb97446f3b9e7db327117aec79f5c37d7ed2b226154a1e936dacb0c406ef2f",
+      "text": "Потому что электричества нет.",
+      "date": "2026-11-07"
+    },
+    {
+      "cue": "m01-s07-l002",
+      "file": "recordings/commander/m01-s07-l004.mp3",
+      "sha256": "597083bcf6cbb47a67b0df0e4079c55d12f17a7e18b45b2f4b3e174001126da9",
+      "text": "Кто?",
+      "date": "2026-11-07"
+    },
+    {
+      "cue": "m01-s07-l004",
+      "file": "recordings/commander/pending/m01-s07-l007.mp3",
+      "sha256": "62b98474be794dbf39ba089738c05c25fee408a8b4dd2995b1559e2d93a57cb4",
+      "text": "Наши?",
+      "date": "2026-11-07"
+    }
+  ],
+  "replacementRecordings": [
+    {
+      "id": "m01-s07-l007",
+      "number": 16,
+      "expectedText": "Спецназ Вооружённых сил Российской Федерации. Группа «Альфа». Предлагаю сложить оружие.",
+      "file": "recordings/commander/m01-s07-l007.mp3",
+      "sourceName": "m01-s07-l007.mp3",
+      "sha256": "f0ac73d691c1873747e7e1ba996ccae36592e693a821e03235bd612c9196bf75",
+      "duration": 6.687375,
+      "recognizedText": "Специз на вооруженных сил Российской Федерации. Группа Альфа предлагает уложить оружие.",
+      "status": "user-confirmed-matches-script",
+      "received": "2026-11-07",
+      "replacesMislabeledSourceName": "m01-s07-l007.mp3.mp3",
+      "runtimeApplied": true,
+      "confirmedSpokenText": "Спецназ Вооружённых сил Российской Федерации. Группа «Альфа». Предлагаю сложить оружие.",
+      "confirmedByUser": "2026-11-07",
+      "userReportedText": "да",
+      "confirmationContext": "Подтверждение полного текста нового дубля: Спецназ Вооружённых сил Российской Федерации. Группа «Альфа». Предлагаю сложить оружие."
+    }
+  ],
+  "reviewStatus": "complete"
+}

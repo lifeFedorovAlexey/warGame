@@ -1,16 +1,43 @@
-import {placeExtraCampGuards,updateScavReinforcements} from './scav-reinforcements.js';
 import {TerrainNavigator} from './navigation.js';
 import {waterTower} from './threat-guidance.js';
-import {driveStep,clearOfVehicles,vehicleClearance,planManeuver,maneuverStep,checkManeuver} from './vehicle-motion.js';
-import {footprintSupport,vehicleEnvelope,vehicleSweep,vehicleGroundSafe} from './vehicle-collision.js';
+import {constructionUnlocked} from './story-construction.js';
+import {driveStep,clearOfVehicles,vehicleClearance,planManeuver,planManeuverSteps,maneuverStep,checkManeuver} from './vehicle-motion.js';
+import {footprintSupport,vehicleEnvelope,vehicleSweep,vehicleGroundSafe,vehicleObstacle} from './vehicle-collision.js';
 import {passageStillOpen,preparePassageEgress} from './passage-egress.js';
 import {vehicleRecipes,starterProjects,matchingRecipe,projectDesignation,designNameKey,projectAssemblyKey,latestVehicleProjects} from './vehicle-designs.js';
 import {angleDelta} from './builder-kinematics.js';
 import {workProjection,projectorHasSight} from './builder-optics.js';
 import {combatContact} from './combat-contact.js';
+import {clearCombatSight} from './combat-sight.js';
+import {recordDamage} from './damage-contact.js';
+import {destroyDamage,damageMobility,partMissing,upgradeDamageState} from './damage-state.js';
+import {ensureSalvage,updateSalvage,armorMultiplier,salvageFromWreck,availableFieldRecipes,modificationInstalled,touchesSalvage,canInstallRecipe,syncFieldHp} from './vehicle-salvage.js';
+import {scheduleWreck,updateWrecks} from './wreck-lifecycle.js';
+const completeSteps=iterator=>{let step;do{step=iterator.next();}while(!step.done);return step.value;};
+import {UnitSpatialIndex} from './unit-spatial-index.js';
+import {vehicleContact,impactPower,fallbackVehicleImpact} from './vehicle-impact.js';
+import {kickContactRock} from './vehicle-contact-rock.js';
+import {TrafficCoordinator} from './traffic-coordinator.js';
+import {prepareTrafficDeparture,departureSlotOrder,rememberYieldHome,recordYieldStep,resumeYieldHome,borrowedHomeClear} from './traffic-start.js';
+import {checkedRouteShortcut,recoveryConditions,unchangedRecoveryFailure,rememberRecoveryFailure} from './traffic-shortcut.js';
+import {maneuverAdmissionBlocker} from './maneuver-admission.js';
+import {SCAV_PROFILES,SCAV_ROSTERS,isInfantry} from './scav-unit-profiles.js';
+import {placeExtraCampGuards,updateScavReinforcements} from './scav-reinforcements.js';
+import {alertScavs,updateScavCombat} from './scav-ai.js';
+import {configureCombat,normalizeCombatPolicy,rememberHostileHit,cancelCombatRetreat,automaticCombatTarget,updateCombatRetreat,shouldAutoRetreat,forceCombatRetreat} from './combat-policy.js';
+import {cancelCombatDeployment,updateCombatDeployment,updateCombatParking,combatPositionConditions} from './combat-deployment.js';
+import {pickupTarget,orderPickup,updatePickupOrder} from './pickup-orders.js';
+import {roadTrafficRank,compareRoadTrafficRanks} from './traffic-priority.js';
+import {roadDrivingLane,deferRoadMerge} from './road-merge.js';
+import {turningHeadway} from './turning-headway.js';
+import {passageWaitClear} from './passage-reservations.js';
+import {beginNavigationStep,navigationDecision,finishNavigationStep,auditNavigationWaits} from './navigation-state.js';
+import {CommandPlanner} from './command-planner.js';
+import {ArrivalPlanner} from './arrival-planner.js';
+import {configureCommandGroup,refreshCommandGroups,expandCommandIds,commandGroupFor,formationRequest} from './group-command.js';
 
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
-const routeOrderRevision=1;
+const routeOrderRevision=2;
 const workArrivalTolerance=.08;
 function halfFootprint(footprint,scale,rotation){
  const [w,d]=footprint.map(length=>length*scale/2);
@@ -20,9 +47,14 @@ function halfFootprint(footprint,scale,rotation){
 // Authoritative game state has no renderer objects, audio clocks or DOM references.
 export class Mission{
  constructor(config,field){
-  this.config=config;this.field=field;this.nav=new TerrainNavigator(field,{bounds:config.initialMapBounds.slice()});this.accumulator=0;this.serial=1;this.randomState=19452;this.events=[];this.effects=[];
+  this.config=config;this.field=field;this.nav=new TerrainNavigator(field,{bounds:config.initialMapBounds.slice(),vehicleScale:config.worldScale});this.accumulator=0;this.serial=1;this.randomState=19452;this.events=[];this.effects=[];
   this.state={version:1,mission:config.id,time:0,status:'running',energy:config.initialEnergy,energyRate:0,powered:false,oilLinked:0,units:[],buildings:[],camps:[],artifacts:[],research:{},artifactKeys:[],seenCinematics:[],pendingCinematics:['intro','briefing','arrival'],flags:{},statistics:{produced:0,buildingsCompleted:0,enemiesDestroyed:0},bounds:config.initialMapBounds.slice()};
   this.vehicleRecipes=vehicleRecipes(config);
+  this.unitIndex=new UnitSpatialIndex();this.unitIndexActive=false;
+  this.trafficCoordinator=new TrafficCoordinator();
+  this.pendingTick=null;this.unitFrameTimes=new WeakMap();
+  this.nav.beforeSynchronousSearch=()=>this.finishPendingStep();
+  ensureSalvage(this);
   this.state.designs=starterProjects(this.vehicleRecipes);
   this.visible=new Uint8Array(128*128);this.explored=new Uint8Array(128*128);this.visionSources=[];this.fogTimer=1;this.fogRevision=0;
   const start=field.gridToWorld(config.startGrid);
@@ -36,8 +68,10 @@ export class Mission{
    for(const grid of data.towerGrids??[]){
     this.addStructure('mg-tower','scavs',field.gridToWorld(grid),{campId:data.id,hp:850*data.strength});
    }
-   for(let i=0;i<data.units;i++)this.addUnit('raider','scavs',{x:gate.x+(i%3-1)*24,y:gate.y+30+Math.floor(i/3)*24},{campId:data.id,guard:{...gate}});
+   const roster=SCAV_ROSTERS[data.id];
+   for(let i=0;i<data.units;i++)this.addUnit(roster?.[i%roster.length]??'raider','scavs',{x:gate.x+(i%3-1)*40,y:gate.y+36+Math.floor(i/3)*40},{campId:data.id,guard:{...gate}});
   });
+  this.state.scavRosterVersion=1;this.state.projectiles=[];
   this.rebuildNavigation();this.updateFog();this.reserveRaid();placeExtraCampGuards(this);
  }
  id(prefix){return prefix+this.serial++;}
@@ -61,8 +95,9 @@ export class Mission{
     const path=this.nav.findPath(point,target);
     if(!path?.length)continue;
     positions.push(point);
+    const roster=this.config.raidRoster;
     const heading=staging?Math.atan2(point.x-path[0].x,path[0].y-point.y):0;
-    const unit=this.addUnit('raider','scavs',point,{heading,raidReserve:true,guard:{x:point.x,y:point.y}});
+    const unit=this.addUnit(roster?.[(positions.length-1)%roster.length]??'raider','scavs',point,{heading,raidReserve:true,guard:{x:point.x,y:point.y}});
     this.state.raidReserve.push(unit.id);
    }
   }
@@ -110,15 +145,17 @@ export class Mission{
  unitSpec(unit){return this.config.units[unit.kind];}
  buildingSpec(building){return this.config.buildings[building.kind]??{name:'Лагерь отбросов',seconds:1,hp:750,vision:180,power:0};}
  entity(id){return [...this.state.units,...this.state.buildings].find(item=>item.id===id&&item.hp>0);}
- addUnit(kind,owner,point,extra={}){const spec=this.config.units[kind],unit={id:this.id('u'),kind,owner,x:point.x,y:point.y,previousX:point.x,previousY:point.y,hp:spec.hp,maxHp:spec.hp,heading:0,path:[],task:null,cooldown:0,tool:0,foldTime:0,...extra};this.state.units.push(unit);return unit;}
+ addUnit(kind,owner,point,extra={}){const spec=this.config.units[kind],unit={id:this.id('u'),kind,owner,x:point.x,y:point.y,previousX:point.x,previousY:point.y,hp:spec.hp,maxHp:spec.hp,heading:0,path:[],task:null,cooldown:0,tool:0,foldTime:0,...extra};this.state.units.push(unit);if(this.unitIndexActive)this.unitIndex.insert(unit,this.state.units.length-1);return unit;}
  addStructure(kind,owner,point,extra={}){const spec=this.config.buildings[kind]??{},scale=this.config.worldScale,foot=spec.footprintMetres??[14,12],item={id:this.id('b'),kind,owner,x:point.x,y:point.y,rotation:0,hp:spec.hp??750,maxHp:spec.hp??750,halfWidth:foot[0]*scale/2,halfDepth:foot[1]*scale/2,progress:owner==='rai'?0:1,completed:owner!=='rai',queue:[],research:null,cooldown:0,...extra};item.maxHp=item.hp;this.state.buildings.push(item);return item;}
- rebuildNavigation(){this.nav.bounds=this.state.bounds.slice();this.nav.rebuild(this.state.buildings.filter(building=>!building.clearing));}
+ rebuildNavigation(){this.finishPendingStep();this.nav.bounds=this.state.bounds.slice();this.nav.rebuild(this.state.buildings.filter(building=>!building.clearing));}
  fail(reason){return {ok:false,reason};}
  canSpend(cost){return this.state.energy+1e-6>=cost;}
  inBounds(x,y){const [gx,gy]=this.field.worldToGrid(x,y),b=this.state.bounds;return gx>=b[0]&&gx<=b[2]&&gy>=b[1]&&gy<=b[3];}
  exploredAt(x,y){const [gx,gy]=this.field.worldToGrid(x,y),col=Math.round(gx),row=Math.round(gy);return col>=0&&row>=0&&col<128&&row<128&&!!this.explored[row*128+col];}
  visibleAt(x,y){const [gx,gy]=this.field.worldToGrid(x,y),col=Math.round(gx),row=Math.round(gy);return col>=0&&row>=0&&col<128&&row<128&&!!this.visible[row*128+col];}
+ constructionUnlocked(kind){return constructionUnlocked(this.state,kind);}
  placement(kind,x,y,rotation=0,{checkMoney=true}={}){
+  if(!this.constructionUnlocked(kind))return this.fail('Строительство ещё не открыто');
   const spec=this.config.buildings[kind];if(!spec)return this.fail('Неизвестное здание');if(spec.requires&&!this.state.research[spec.requires])return this.fail('Требуется исследование: '+this.config.research[spec.requires].name);if(checkMoney&&!this.canSpend(spec.cost))return this.fail('Недостаточно энергии');if(!this.inBounds(x,y)||!this.exploredAt(x,y))return this.fail('Район ещё не разведан');
   if(spec.requiresOil){const oil=this.config.oilFields.map(grid=>this.field.gridToWorld(grid)).find(p=>Math.hypot(p.x-x,p.y-y)<25);if(!oil)return this.fail('Нужна нефтяная точка');x=oil.x;y=oil.y;}
   else{x=Math.round(x/this.config.buildingGridMetres)*this.config.buildingGridMetres;y=Math.round(y/this.config.buildingGridMetres)*this.config.buildingGridMetres;}
@@ -126,10 +163,11 @@ export class Mission{
   for(const dx of [-w,0,w])for(const dy of [-d,0,d]){if(!this.inBounds(x+dx,y+dy)||!this.exploredAt(x+dx,y+dy))return this.fail('Пятно застройки выходит за разведанный район');const g=this.field.gradientAt(x+dx,y+dy);if(Math.hypot(g.x,g.y)>this.config.maxBuildingGrade)return this.fail('Слишком крутой склон');heights.push(this.field.heightAt(x+dx,y+dy));}
   if(Math.max(...heights)-Math.min(...heights)>2.5)return this.fail('Нужна ровная площадка');
   if(!spec.requiresOil)for(const grid of this.config.oilFields){const oil=this.field.gridToWorld(grid);if(Math.abs(x-oil.x)<w+this.config.worldScale*5+5&&Math.abs(y-oil.y)<d+this.config.worldScale*5+5)return this.fail('Нефтяной участок зарезервирован для вышки');}
-  for(const building of this.state.buildings)if(building.hp>0&&Math.abs(x-building.x)<w+building.halfWidth+8&&Math.abs(y-building.y)<d+building.halfDepth+8)return this.fail('Пересечение с постройкой');
+  for(const building of this.state.buildings)if((building.hp>0||building.damage?.wreck)&&Math.abs(x-building.x)<w+building.halfWidth+8&&Math.abs(y-building.y)<d+building.halfDepth+8)return this.fail('Пересечение с постройкой');
   const exitBox=(bx,by,angle,source)=>{const local=source.exitAnchor,c=Math.cos(angle),s=Math.sin(angle),scale=this.config.worldScale,px=bx+(local[0]*c-local[1]*s)*scale,py=by+(local[0]*s+local[1]*c)*scale;return{x:px,y:py,halfWidth:Math.abs(c)*14+Math.abs(s)*24,halfDepth:Math.abs(s)*14+Math.abs(c)*24};};
   for(const building of this.state.buildings){if(building.hp<=0)continue;const otherSpec=this.buildingSpec(building);if(otherSpec.exitAnchor){const exit=exitBox(building.x,building.y,building.rotation,otherSpec);if(Math.abs(x-exit.x)<w+exit.halfWidth&&Math.abs(y-exit.y)<d+exit.halfDepth)return this.fail('Нельзя перекрывать выезд завода');}if(spec.exitAnchor){const exit=exitBox(x,y,rotation,spec);if(Math.abs(building.x-exit.x)<building.halfWidth+exit.halfWidth&&Math.abs(building.y-exit.y)<building.halfDepth+exit.halfDepth)return this.fail('Для выезда завода нет места');}}
   const blockers=this.siteUnits({kind,x,y,rotation,halfWidth:w,halfDepth:d});
+  if(blockers.some(unit=>unit.damage?.wreck))return this.fail('Площадку занимает остов машины');
   if(blockers.some(unit=>unit.owner!=='rai'))return this.fail('На площадке противник');
   const work=spec.workAnchor,c=Math.cos(rotation),s=Math.sin(rotation),wx=x+(work[0]*c-work[1]*s)*this.config.worldScale,wy=y+(work[0]*s+work[1]*c)*this.config.worldScale,[col,row]=this.nav.grid(wx,wy);let approach=false;
   for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){const p=this.nav.position(col+dx,row+dy);if(this.nav.allowed(col+dx,row+dy)&&Math.hypot(p.x-wx,p.y-wy)<=this.config.builderRangeMetres&&(Math.abs(p.x-x)>=w+this.nav.clearance||Math.abs(p.y-y)>=d+this.nav.clearance))approach=true;}
@@ -143,17 +181,35 @@ export class Mission{
  siteUnits(site){
   const {left,right,bottom,top}=this.siteBounds(site);
   const contains=point=>point.x>left&&point.x<right&&point.y>bottom&&point.y<top;
-  return this.state.units.filter(unit=>unit.hp>0&&(contains(unit)||contains(this.nav.position(...this.nav.grid(unit.x,unit.y)))));
+  return this.state.units.filter(unit=>vehicleObstacle(unit)&&(contains(unit)||contains(this.nav.position(...this.nav.grid(unit.x,unit.y)))));
  }
- vehiclePath(unit,goal,{avoidMoving=false,avoidPoint=null,fallback=true,ignoreUnits=null,escapeSteepStart=unit.owner==='rai',...options}={}){
-  const occupied=this.nav.occupied,changed=[],radius=this.config.worldScale*(avoidMoving?3.1:2.18);
-  for(const other of this.state.units){
-   if(other===unit||ignoreUnits?.has(other)||other.hp<=0||other.owner!==unit.owner&&!this.visibleAt(other.x,other.y))continue;
-   if(other.path.length&&(!avoidMoving||distance(unit,other)>56))continue;
+ vehiclePath(...args){this.finishPendingStep();return completeSteps(this.vehiclePathSteps(...args));}
+ terrainEscapeFor(unit){
+  if(this.nav.terrainAllowed(unit.x,unit.y)){delete unit.terrainEscape;return null;}
+  // Preserve the initial bounds until the car has physically left the old
+  // invalid pose. Repeated clicks cannot renew a licence to traverse a ridge.
+  return unit.terrainEscape??={x:unit.x,y:unit.y,height:this.field.heightAt(unit.x,unit.y),radius:this.field.cellMetres*2,maxRise:this.config.worldScale*1.5};
+ }
+ *vehiclePathSteps(unit,goal,{avoidMoving=false,avoidPoint=null,fallback=true,ignoreUnits=null,escapeSteepStart=unit.owner==='rai',...options}={}){
+  const terrainEscape=escapeSteepStart?this.terrainEscapeFor(unit):null;
+  const occupied=this.nav.occupied,changed=[],scale=this.config.worldScale;
+  const own=vehicleEnvelope(unit,scale,this.field),padding=Math.hypot(own.width,own.depth)+.1*scale;
+  // Commands share a terrain/building corridor. Temporary bodies are handled
+  // by endpoint reservation and swept local avoidance, not baked into A*.
+  const staticCommand=this.commandJob&&!avoidMoving&&!avoidPoint;
+  for(const other of staticCommand?[]:this.state.units){
+   if(other===unit||unit.id&&other.id===unit.id||ignoreUnits?.has(other)||!vehicleObstacle(other)||other.hp>0&&other.owner!==unit.owner&&!this.visibleAt(other.x,other.y))continue;
+   if(other.hp>0&&other.path.length&&(!avoidMoving||distance(unit,other)>56))continue;
+   const shape=vehicleEnvelope(other,scale,this.field),radius=Math.hypot(shape.width,shape.depth)+padding;
+   const gap=p=>{const dx=p.x-shape.x,dy=p.y-shape.y;return Math.hypot(Math.max(0,Math.abs(dx*shape.c+dy*shape.s)-shape.width),Math.max(0,Math.abs(-dx*shape.s+dy*shape.c)-shape.depth))-padding;};
+   const startGap=gap(unit);
    const [col,row]=this.nav.grid(other.x,other.y),r=Math.ceil(radius/this.nav.cell),size=this.nav.size;
    for(let y=Math.max(0,row-r);y<=Math.min(size-1,row+r);y++)for(let x=Math.max(0,col-r);x<=Math.min(size-1,col+r);x++){
     const i=y*size+x,p=this.nav.position(x,y);
-    if(!occupied[i]&&distance(other,p)<radius&&distance(unit,p)>this.nav.cell*.78){occupied[i]=1;changed.push(i);}
+    // Plan for the whole vehicle, not a point which drives into a neighbour's
+    // side before it can turn. A close start can leave the inflated envelope.
+    const clearance=gap(p),escape=startGap<0&&clearance>=startGap-.01&&distance(unit,p)<this.nav.cell*2.5;
+    if(!occupied[i]&&clearance<0&&!escape&&distance(unit,p)>this.nav.cell*.78){occupied[i]=1;changed.push(i);}
    }
   }
   if(avoidPoint){
@@ -163,16 +219,36 @@ export class Mission{
     if(!occupied[i]&&distance(p,unit)>this.nav.cell&&distance(p,goal)>this.nav.cell*2){occupied[i]=1;changed.push(i);}
    }
   }
-  let path;
-  try{path=this.nav.findPath(unit,goal,{...options,escapeSteepStart});}
-  finally{for(const i of changed)occupied[i]=0;}
-  return path??(fallback&&changed.length?this.nav.findPath(unit,goal,{...options,escapeSteepStart}):null);
+  const search=this.nav.findPathSteps(unit,goal,{...options,escapeSteepStart,terrainEscape,occupancyKey:changed.slice().sort((a,b)=>a-b).join(',')});
+  let result;
+  do{
+   for(const i of changed)occupied[i]=1;
+   try{result=search.next();}finally{for(const i of changed)occupied[i]=0;}
+   // Temporary vehicle cells must never leak into UI placement or another
+   // frame while the search is suspended. The simulation order stays fixed.
+   if(!result.done)yield;
+  }while(!result.done);
+  const path=result.value;
+  return path??(fallback&&changed.length?(yield* this.nav.findPathSteps(unit,goal,{...options,escapeSteepStart,terrainEscape})):null);
  }
- movePath(unit,goal,reserved=[],parkingRadius=0,roadOnly=false,parkingAllowed=()=>true){
+ movePath(...args){this.finishPendingStep();return completeSteps(this.movePathSteps(...args));}
+ *movePathSteps(unit,goal,reserved=[],parkingRadius=0,roadOnly=false,parkingAllowed=()=>true,pathOptions={}){
+  const {compareDetours=false,...searchOptions}=pathOptions;
   const spacing=this.config.worldScale*4.55;
-  const occupied=point=>reserved.some(other=>distance(point,other)<spacing)
-   ||this.state.units.some(other=>other!==unit&&other.hp>0&&!other.path.length
-    &&(other.owner===unit.owner||this.visibleAt(other.x,other.y))&&distance(point,other)<spacing);
+  const liveOccupied=point=>reserved.some(other=>distance(point,other)<spacing)
+   ||this.state.units.some(other=>other!==unit&&other.id!==unit.id&&vehicleObstacle(other)&&(!other.path.length||other.damage?.wreck)
+    &&(other.damage?.wreck||other.owner===unit.owner||this.visibleAt(other.x,other.y))&&distance(point,other)<spacing);
+  const buckets=new Map(),add=point=>{const key=Math.floor(point.x/spacing)+','+Math.floor(point.y/spacing);const bucket=buckets.get(key)??[];bucket.push({x:point.x,y:point.y});buckets.set(key,bucket);};
+  reserved.forEach(add);
+  for(const other of this.state.units)if(other!==unit&&other.id!==unit.id&&vehicleObstacle(other)&&(!other.path.length||other.damage?.wreck)
+   &&(other.damage?.wreck||other.owner===unit.owner||this.visibleAt(other.x,other.y)))add(other);
+  const occupied=point=>{
+   const x=Math.floor(point.x/spacing),y=Math.floor(point.y/spacing);
+   for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(buckets.get((x+dx)+','+(y+dy))?.some(other=>distance(point,other)<spacing))return true;
+   return false;
+  };
+  const acceptEnd=point=>parkingAllowed(point)&&!occupied(point)&&(!roadOnly||this.nav.roads.coverage(point.x,point.y)>=.58);
+  const acceptEndKey=this.nav.endFilterSerial=(this.nav.endFilterSerial??0)+1;
   const candidates=[goal];
   const searchRadius=Math.max(parkingRadius,occupied(goal)?spacing*2.35:0);
   for(let radius=spacing;radius<=searchRadius;radius+=spacing*.7){
@@ -182,13 +258,31 @@ export class Mission{
     candidates.push({x:goal.x+Math.cos(angle)*radius,y:goal.y+Math.sin(angle)*radius});
    }
   }
+  let fallbackPath=null,fallbackCost=Infinity,searched=0,reachableEnd=false;
+  const detourLimit=compareDetours&&parkingRadius>0?distance(unit,goal)*1.6+this.config.worldScale*12:Infinity;
   for(const candidate of candidates){
+   if(performance.now()>=(this.nav.workDeadline??Infinity))yield;
    if(!parkingAllowed(candidate)||occupied(candidate)||roadOnly&&this.nav.roads.coverage(candidate.x,candidate.y)<.58)continue;
-   const path=this.vehiclePath(unit,candidate,{maxGoalDistance:16});
+   searched++;
+   const path=(yield* this.vehiclePathSteps(unit,candidate,{maxGoalDistance:16,...searchOptions,acceptEnd,acceptEndKey}));
    const end=path?.at(-1);
-   if(end&&parkingAllowed(end)&&!occupied(end)&&(!roadOnly||this.nav.roads.coverage(end.x,end.y)>=.58))return path;
+   if(end)reachableEnd=true;
+   if(end&&parkingAllowed(end)&&!liveOccupied(end)&&(!roadOnly||this.nav.roads.coverage(end.x,end.y)>=.58)){
+    let length=0,previous=unit;for(const point of path){length+=distance(previous,point);previous=point;}
+    if(length<=detourLimit)return path;
+    // Adjacent cells can lie on different sides of a ridge. Check the other
+    // allowed parking places before sending one member on a huge detour.
+    const cost=length+distance(end,goal)*2;
+    if(cost<fallbackCost){fallbackCost=cost;fallbackPath=path;}
+   }
   }
-  return null;
+  if(!fallbackPath&&this.commandJob){
+   const obstruction=this.nav.solids.find(solid=>Math.abs(goal.x-solid.x)<solid.halfWidth&&Math.abs(goal.y-solid.y)<solid.halfDepth);
+   const reason=obstruction?'destination-occupied':!this.nav.terrainAllowed(goal.x,goal.y)?'destination-terrain-forbidden'
+    :reachableEnd?'parking-claimed-during-search':'no-free-parking-in-area';
+   this.commandJob.failures[unit.id??this.commandJob.currentUnit]={reason,blockerId:obstruction?.id??null};
+  }
+  return fallbackPath;
  }
  siteExit(unit,site,occupied=[]){
   const {left,right,bottom,top}=this.siteBounds(site);
@@ -309,7 +403,8 @@ export class Mission{
   }
  }
  workPoint(building,offset=0){if(this.config.units[building.kind])return{x:building.x+Math.sin(building.heading)*20+Math.cos(building.heading)*offset,y:building.y-Math.cos(building.heading)*20+Math.sin(building.heading)*offset};const spec=this.buildingSpec(building),local=spec.workAnchor??[0,-building.halfDepth/this.config.worldScale-4,0],c=Math.cos(building.rotation),s=Math.sin(building.rotation),scale=this.config.worldScale;return{x:building.x+(local[0]*c-local[1]*s)*scale+c*offset,y:building.y+(local[0]*s+local[1]*c)*scale+s*offset};}
- workPath(unit,target,offset=unit.task?.workOffset??0){
+ workPath(...args){this.finishPendingStep();return completeSteps(this.workPathSteps(...args));}
+ *workPathSteps(unit,target,offset=unit.task?.workOffset??0){
   const repair=!!this.config.units[target.kind],scale=this.config.worldScale;
   if(this.canWorkHere(unit,target))return [];
   const goal=this.workPoint(target,offset),[col,row]=this.nav.grid(goal.x,goal.y),candidates=[],seen=new Set();
@@ -349,12 +444,13 @@ export class Mission{
   const cost=p=>distance(p,unit)+distance(p,goal)*(repair?.18:.31);
   candidates.sort((a,b)=>cost(a)-cost(b));
   for(const p of candidates.slice(0,24)){
-   const path=this.vehiclePath(unit,p,{maxGoalDistance:.01});
+   const path=(yield* this.vehiclePathSteps(unit,p,{maxGoalDistance:.01}));
    if(path)return path;
   }
   return null;
  }
- attackPath(unit,target,reserved=[]){
+ attackPath(...args){this.finishPendingStep();return completeSteps(this.attackPathSteps(...args));}
+ *attackPathSteps(unit,target,reserved=[]){
   const spec=this.unitSpec(unit);
   if(distance(unit,target)<=spec.range&&this.lineOfSight(unit,target))return[];
   const last=unit.task?.targetId===target.id&&unit.path.at(-1);
@@ -364,7 +460,7 @@ export class Mission{
    for(const offset of [0,.28,-.28,.55,-.55,.9,-.9,1.4,-1.4,Math.PI]){
     const goal={x:target.x+Math.cos(angle+offset)*radius,y:target.y+Math.sin(angle+offset)*radius};
     if(!this.inBounds(goal.x,goal.y))continue;
-    const path=this.vehiclePath(unit,goal,{maxGoalDistance:16}),end=path?.at(-1);
+    const path=(yield* this.vehiclePathSteps(unit,goal,{maxGoalDistance:16})),end=path?.at(-1);
     if(!end||distance(end,target)>spec.range||!this.lineOfSight({...unit,...end},target))continue;
     if(reserved.some(point=>distance(end,point)<this.config.worldScale*4.55))continue;
     if(this.state.units.some(other=>other!==unit&&other.hp>0&&other.owner===unit.owner&&!other.path.length&&distance(end,other)<this.config.worldScale*4.55))continue;
@@ -373,25 +469,59 @@ export class Mission{
   }
   return null;
  }
- order(ids,action,target){
+ salvagePath(...args){this.finishPendingStep();return completeSteps(this.salvagePathSteps(...args));}
+ *salvagePathSteps(unit,item){
+  const state=ensureSalvage(this),scale=this.config.worldScale;
+  if(!state.enabled||!availableFieldRecipes(this).some(r=>state.wanted.includes(r.id)&&r.stock===item.stock&&canInstallRecipe(this,unit,r)&&!modificationInstalled(unit,r.part)))return null;
+  const candidates=[];
+  for(let i=0;i<12;i++){
+   const angle=i*Math.PI/6,dx=Math.cos(angle),dy=Math.sin(angle),heading=Math.atan2(dx,-dy);
+   const end={x:item.x+dx*scale*2.2,y:item.y+dy*scale*2.2,heading,kind:unit.kind};
+   const approach={...end,x:end.x+dx*scale*4,y:end.y+dy*scale*4};
+   if(!clearOfVehicles(unit,end,this.state.units,scale,true,end,this.field)||!this.vehicleMotionClear(unit,approach,end))continue;
+   candidates.push({end,approach,cost:distance(unit,approach)});
+  }
+  candidates.sort((a,b)=>a.cost-b.cost);
+  for(const {end,approach} of candidates){
+   const path=yield* this.vehiclePathSteps(unit,approach,{maxGoalDistance:.01,fallback:false});
+   if(path)return [...path,{x:end.x,y:end.y}];
+  }
+  return null;
+ }
+ configureGroup(ids,options){this.finishPendingStep();return configureCommandGroup(this,ids,options);}
+ retreat(ids){this.finishPendingStep();return forceCombatRetreat(this,expandCommandIds(this,ids));}
+ submitOrder(ids,action,target){if(action==='retreat')return this.retreat(ids);return (this.commandPlanner??=new CommandPlanner(this)).submit(expandCommandIds(this,ids),action,target);}
+ order(ids,action,target){ids=expandCommandIds(this,ids);this.finishPendingStep();const result=completeSteps(this.orderSteps(ids,action,target));if(result.ok)this.commandPlanner?.cancel(result.assignedIds??ids.filter(id=>!result.unassigned?.includes(id)));return result;}
+ *orderSteps(ids,action,target){
   if(!['move','attack-move','attack','build','repair'].includes(action)||!target||!Number.isFinite(target.x)||!Number.isFinite(target.y))return this.fail('Недопустимый приказ');
   const travel=action==='move'||action==='attack-move',combat=action==='attack'||action==='attack-move';
   if(action==='attack'&&(target.owner==='rai'||!this.entity(target.id)||!this.visibleAt(target.x,target.y)))return this.fail('Цель не обнаружена');
   if(action==='build'&&target.clearing)return this.fail('Техника освобождает площадку');
   if(['build','repair'].includes(action)&&(target.owner!=='rai'||!this.entity(target.id)))return this.fail('Нужна своя техника или постройка');
   const units=this.state.units.filter(u=>ids.includes(u.id)&&u.owner==='rai'&&u.hp>0&&(!['build','repair'].includes(action)||this.unitSpec(u).role==='builder')&&(!combat||this.unitSpec(u).damage));if(!units.length)return this.fail('Не выбрана подходящая техника');const assigned=new Set();
+  const pickup=action==='move'?pickupTarget(this,target):null;
+  if(pickup)return orderPickup(this,units,pickup);
+  const commandGroup=commandGroupFor(this,units),formationMode=commandGroup?.formation??'auto';
   const repeat=new Map();
   for(const unit of units){
    const order=unit.routeOrder;
-   if(travel&&order?.revision===routeOrderRevision&&(order.type??'move')===action&&distance(order.request,target)<3){
+   const deployment=unit.combatDeployment;
+   if(deployment&&(action==='attack'&&deployment.resume.targetId===target.id
+     ||action==='attack-move'&&order?.type===action&&order.revision===routeOrderRevision&&distance(order.request,target)<3)){
+    repeat.set(unit.id,deployment.goal??unit);continue;
+   }
+   if(travel&&order?.revision===routeOrderRevision&&(order.formation??'auto')===formationMode&&(order.type??'move')===action&&distance(order.request,target)<3){
     if(unit.task?.type===action&&unit.path.length)repeat.set(unit.id,unit.path.at(-1));
     else if(!unit.task&&distance(unit,order.destination)<5)repeat.set(unit.id,unit);
    }
    const last=unit.task?.type==='attack'&&unit.task.targetId===target.id&&unit.path.at(-1);
    if(action==='attack'&&last&&distance(last,target)<=this.unitSpec(unit).range&&this.lineOfSight({...unit,...last},target))repeat.set(unit.id,last);
   }
-  const reserved=[...repeat.values()];
+  if(repeat.size===units.length)return {ok:true,assigned:units.length,unassigned:[]};
+  const reserved=[...repeat.values()],changedTraffic=new Set();
+  const combatGroup=combat?'combat-'+(this.state.combatOrderSerial=(this.state.combatOrderSerial??0)+1):null;
   const groupCentre=units.reduce((centre,unit)=>({x:centre.x+unit.x/units.length,y:centre.y+unit.y/units.length}),{x:0,y:0});
+  const requestedFormation=travel?formationRequest(this,units,target):null;
   const roadCandidate=travel&&!target.id?this.nav.roads.formation(target,groupCentre,units.length,this.config.worldScale):null;
   const progress=new Map();
   if(roadCandidate)for(const unit of units){
@@ -401,8 +531,10 @@ export class Mission{
   const roadFormation=progress.size>=Math.max(2,Math.ceil(units.length/2))?roadCandidate:null;
   const roadSlots=roadFormation?.slots;
   let nextRoadSlot=0;
-  const passage=travel&&!roadFormation&&units.length>=3
-   ?this.nav.passageBetween(groupCentre,target,this.config.worldScale):null;
+  // A road can pass through a throat narrower than the conservative grid
+  // clearance. Road parking does not replace the checked physical passage.
+  const passage=travel
+   ?this.nav.passageBetween(units.length===1?units[0]:groupCentre,target,this.config.worldScale):null;
   const egress=passage?preparePassageEgress(this,passage,units,target):null;
   if(egress?.blocked)return this.fail('Не удалось проложить безопасный выезд из прохода');
   const departure=egress?.end??passage?.exit;
@@ -410,18 +542,30 @@ export class Mission{
   let preceding=null;
   const direction=Math.atan2(groupCentre.x-target.x,target.y-groupCentre.y);
   const forward={x:-Math.sin(direction),y:Math.cos(direction)},right={x:forward.y,y:-forward.x};
+  const departureOrder=travel&&!requestedFormation&&!roadFormation&&!passage?departureSlotOrder(units,target,this.config.worldScale):null;
+  const columns=requestedFormation?.columns??departureOrder?.columns??(units.length>16?Math.ceil(Math.sqrt(units.length)):Math.min(3,units.length));
+  const formationSpacing=requestedFormation?.spacing??(this.commandJob&&units.length>12
+   ?Math.max(24,...units.map(unit=>{const box=vehicleEnvelope(unit,this.config.worldScale,this.field);return 2*Math.hypot(box.width,box.depth)+this.config.worldScale*.4;})):24);
+  const formationOptions={...(travel&&units.length>=32?{ignoreUnits:new Set(units)}:{}),compareDetours:action==='attack-move'};
   const parkingClearance=egress?.parkingClearance??this.config.worldScale*3.6;
   const beyondPassage=point=>!passage||(point[passage.along]-departure[passage.along])*passage.direction>=parkingClearance;
-  const tail=passage?Math.floor((units.length-1)/3)*24*Math.abs(forward[passage.along])+24*Math.abs(right[passage.along]):0;
+  const tail=passage?Math.floor((units.length-1)/columns)*formationSpacing*Math.abs(forward[passage.along])+(columns-1)*formationSpacing/2*Math.abs(right[passage.along]):0;
   const passageShift=passage?Math.max(0,tail+parkingClearance-(target[passage.along]-departure[passage.along])*passage.direction):0;
   if(roadFormation){
-   units.sort((a,b)=>(progress.get(b)??-Infinity)-(progress.get(a)??-Infinity)||distance(a,target)-distance(b,target));
+   // The car which merges first also owns the furthest parking slot. Giving
+   // that slot to a yielding neighbour makes it pass a car that has parked.
+   const ranks=new Map(units.map(unit=>[unit,roadTrafficRank(unit,progress.get(unit),
+    this.nav.roads.nearest(unit,this.config.worldScale*14),roadFormation.direction,this.config.worldScale)]));
+   units.sort((a,b)=>compareRoadTrafficRanks(ranks.get(a),ranks.get(b)));
   }else if(passage){
    units.sort((a,b)=>distance(a,passage.entrance)-distance(b,passage.entrance));
+  }else if(departureOrder){
+   const rank=new Map(departureOrder.orderedIds.map((id,index)=>[id,index]));
+   units.sort((a,b)=>rank.get(a.id)-rank.get(b.id));
   }else if(travel){
    units.sort((a,b)=>(b.x-a.x)*forward.x+(b.y-a.y)*forward.y);
-   for(let index=0;index<units.length;index+=3){
-    const row=units.slice(index,index+3).sort((a,b)=>(a.x-b.x)*right.x+(a.y-b.y)*right.y);
+   for(let index=0;index<units.length;index+=columns){
+    const row=units.slice(index,index+columns).sort((a,b)=>(a.x-b.x)*right.x+(a.y-b.y)*right.y);
     units.splice(index,row.length,...row);
    }
   }else if(this.commandJob&&action==='attack'){
@@ -429,29 +573,43 @@ export class Mission{
    const ready=new Set(units.filter(unit=>distance(unit,target)<=this.unitSpec(unit).range&&this.lineOfSight(unit,target)));
    units.sort((a,b)=>Number(ready.has(b))-Number(ready.has(a))||distance(a,target)-distance(b,target));
   }
-  for(let index=0;index<units.length;index++){const unit=units[index],workOffset=(index-(units.length-1)/2)*18,goal=action==='build'||action==='repair'?this.workPoint(target,workOffset):target,columns=Math.min(3,units.length);
+  const arrivals=this.commandJob&&travel&&!passage?new ArrivalPlanner(this,units,target,{forward,right,spacing:formationSpacing,reserved}):null;
+  for(let index=0;index<units.length;index++){const unit=units[index],workOffset=(index-(units.length-1)/2)*18,goal=action==='build'||action==='repair'?this.workPoint(target,workOffset):target;
+   if(performance.now()>=(this.nav.workDeadline??Infinity))yield;
+   if(this.commandJob&&unit.pendingOrder?.revision!==this.commandJob.revision)continue;
+   const planningUnit=this.commandJob?{...unit}:unit;
+   if(this.commandJob)this.commandJob.currentUnit=unit.id;
    if(repeat.has(unit.id)){assigned.add(unit.id);if(unit.passage)preceding=unit.id;continue;}
-   const side=(index%columns-(columns-1)/2)*24, row=Math.floor(index/columns)*24;
-   const formation={x:goal.x+right.x*side-forward.x*row,y:goal.y+right.y*side-forward.y*row};
+   const side=(index%columns-(columns-1)/2)*formationSpacing, row=Math.floor(index/columns)*formationSpacing;
+   const formation={...(requestedFormation?.slots.get(unit.id)??{x:goal.x+right.x*side-forward.x*row,y:goal.y+right.y*side-forward.y*row})};
    if(passage)formation[passage.along]+=passageShift*passage.direction;
    const parkingRadius=units.length>1?this.config.worldScale*11:0;
    let roadPath=null;
-   while(roadSlots?.[nextRoadSlot]&&!roadPath){
+   while(!passage&&roadSlots?.[nextRoadSlot]&&!roadPath){
     const slot=roadSlots[nextRoadSlot++];
-    roadPath=this.movePath(unit,slot,reserved,0,true);
+    roadPath=arrivals?(yield* arrivals.path(planningUnit,slot,{roadOnly:true,pathOptions:formationOptions}))
+     :(yield* this.movePathSteps(planningUnit,slot,reserved,0,true));
    }
    let viaPassage=null;
    if(passage){
-    const approach=this.vehiclePath(unit,passage.entrance,{maxGoalDistance:10,ignoreUnits:convoy});
+    const approach=distance(planningUnit,passage.entrance)<.01?[{...passage.entrance}]
+     :yield* this.vehiclePathSteps(planningUnit,passage.entrance,{maxGoalDistance:10,ignoreUnits:convoy});
     const departureRadius=egress?this.config.worldScale*18:parkingRadius;
-    const far=this.movePath(departure,formation,reserved,departureRadius,false,beyondPassage)
-     ??this.movePath(departure,goal,reserved,departureRadius,false,beyondPassage);
+    let roadFar=null;
+    while(roadSlots?.[nextRoadSlot]&&!roadFar){
+     const slot=roadSlots[nextRoadSlot++];
+     roadFar=yield* this.movePathSteps(departure,slot,reserved,0,true,beyondPassage);
+    }
+    const far=roadFar??(yield* this.movePathSteps(departure,formation,reserved,departureRadius,false,beyondPassage))
+     ??(yield* this.movePathSteps(departure,goal,reserved,departureRadius,false,beyondPassage));
     if(approach?.length&&far?.length&&distance(approach.at(-1),passage.entrance)<.1){
      viaPassage=[...approach,egress?.start??passage.exit,...far];
     }
    }
    if(egress&&!viaPassage)continue;
-   let path=action==='attack'?this.attackPath(unit,target,reserved):['build','repair'].includes(action)?this.workPath(unit,target,workOffset):roadPath??viaPassage??this.movePath(unit,formation,reserved,parkingRadius)??this.movePath(unit,goal,reserved,parkingRadius);
+   let path=action==='attack'?(yield* this.attackPathSteps(planningUnit,target,reserved)):['build','repair'].includes(action)?(yield* this.workPathSteps(planningUnit,target,workOffset)):roadPath??viaPassage??(arrivals
+    ?(yield* arrivals.path(planningUnit,formation,{pathOptions:formationOptions}))
+    :(yield* this.movePathSteps(planningUnit,formation,reserved,parkingRadius,false,()=>true,formationOptions))??(yield* this.movePathSteps(planningUnit,goal,reserved,parkingRadius,false,()=>true,formationOptions)));
    let remainingEscape=null;
    if(!path&&travel){
     const [startCol,startRow]=this.nav.grid(unit.x,unit.y);
@@ -467,7 +625,7 @@ export class Mission{
     for(const legs of starts){
      const exit=checkManeuver(unit,legs,scale,allowed);
      if(!exit)continue;
-     const onwardPath=this.movePath(exit,formation,reserved,parkingRadius)??this.movePath(exit,goal,reserved,parkingRadius);
+     const onwardPath=(yield* this.movePathSteps(exit,formation,reserved,parkingRadius))??(yield* this.movePathSteps(exit,goal,reserved,parkingRadius));
      if(!onwardPath?.length)continue;
      const turn=planManeuver(exit,onwardPath[0],{scale,allowed,attempts:2,reverseBudget:0,maximumLegs:5});
      if(!turn)continue;
@@ -477,15 +635,24 @@ export class Mission{
     }
    }
    if(!path)continue;
+   if(this.commandJob){
+    // A private search may run while a movement tick is suspended, but route
+    // replacement is committed only at a deterministic tick boundary.
+    while(!this.commandJob.copiedIds?.has(unit.id)&&this.commandJob.mission.pendingTick){this.commandJob.waitingTick=true;yield;}
+    this.commandJob.waitingTick=false;
+    if(unit.hp<=0||unit.pendingOrder?.revision!==this.commandJob.revision)continue;
+   }
    const destination=travel?path.at(-1)??goal:goal;
    if(travel||action==='attack')reserved.push(path.at(-1)??unit);
    const targetId=travel?null:target.id??null;
+   delete unit.yieldReturn;
+   if(unit.detour?.departure)delete unit.detour;
    if(unit.task?.type!==action||unit.task?.targetId!==targetId||travel&&(unit.routeOrder?.revision!==routeOrderRevision||distance(unit.task,destination)>5)){
     delete unit.detour;delete unit.traffic;delete unit.trafficHold;delete unit.driveWatch;delete unit.reverseDebt;delete unit.failedArcs;delete unit.workEscapeRetryAt;
    }
    delete unit.passage;
    if(viaPassage){
-    unit.passage={preceding,along:passage.along,direction:passage.direction,admit:passage.admit};
+    unit.passage={preceding,along:passage.along,direction:passage.direction,admit:passage.admit,throat:passage.throat};
     if(egress){
      unit.passage.egress={...egress,leader:preceding,phase:'approach'};
      unit.passage.parkingEdge=departure[passage.along]+passage.direction*parkingClearance;
@@ -494,33 +661,65 @@ export class Mission{
    }
    if(travel){
     unit.routeOrder={revision:routeOrderRevision,request:{x:target.x,y:target.y},destination};
+    if(commandGroup){unit.routeOrder.groupId=commandGroup.id;unit.routeOrder.formation=formationMode;}
     if(action==='attack-move')unit.routeOrder.type=action;
+    // A single car may have to park beside a currently occupied click. Keep
+    // the reason so a subsequent departure order can release that claim.
+    // Group slots are intentional and must never collapse onto the click.
+    if(units.length===1&&distance(destination,target)>3){
+     const own=vehicleEnvelope(unit,this.config.worldScale,this.field);
+     const blockers=this.state.units.filter(other=>{
+      if(other===unit||!vehicleObstacle(other)||other.path.length||other.owner!==unit.owner)return false;
+      const shape=vehicleEnvelope(other,this.config.worldScale,this.field);
+      return distance(other,target)<Math.hypot(own.width,own.depth)+Math.hypot(shape.width,shape.depth)+this.nav.cell*1.5;
+     });
+     if(blockers.length)unit.routeOrder.goalBlockers=blockers.map(other=>other.id);
+    }
    }
    else delete unit.routeOrder;
+   cancelCombatRetreat(unit,!combat);
+   cancelCombatDeployment(unit);
+   if(combat&&units.length>1)unit.combatGroup=combatGroup;
    unit.path=path;unit.task={type:action,targetId,x:destination.x,y:destination.y,workOffset};
+   delete unit.mergeTraffic;changedTraffic.add(unit.id);
    if(remainingEscape)unit.detour=remainingEscape;
    if(action==='build')unit.resumeConstructionId=target.id;
    assigned.add(unit.id);
+   if(this.commandJob){delete unit.pendingOrder;this.commandJob.assigned.push(unit.id);yield;}
   }
-  if(action==='move'&&target.id&&this.state.artifacts.some(artifact=>artifact.id===target.id&&!artifact.collected)
-   &&!units.some(unit=>distance(unit.path.at(-1)??unit,target)<22)){
-   for(const unit of units.slice().sort((a,b)=>distance(a,target)-distance(b,target))){
-    const original=unit.path.at(-1);
-    const path=this.movePath(unit,target,reserved.filter(point=>point!==original));
-    const end=path?.at(-1);
-    if(!end||distance(end,target)>=22)continue;
-    unit.path=path;unit.task={type:'move',x:end.x,y:end.y};
-    unit.routeOrder={revision:routeOrderRevision,request:{x:target.x,y:target.y},destination:end};
-    delete unit.passage;delete unit.detour;delete unit.traffic;delete unit.trafficHold;delete unit.driveWatch;delete unit.failedArcs;
-    assigned.add(unit.id);
-    break;
-   }
-  }
+  yield* this.releaseParkingGoalsSteps(changedTraffic);
   if(action==='build'&&assigned.size){target.awaitingWorkers=false;delete target.builderIds;}
   return assigned.size?{ok:true,assigned:assigned.size,unassigned:units.filter(unit=>!assigned.has(unit.id)).map(unit=>unit.id)}:
    this.fail('Нет доступного пути или подходящего строителя');
  }
- build(ids,kind,x,y,rotation=0){
+ releaseParkingGoals(changed){return completeSteps(this.releaseParkingGoalsSteps(changed));}
+ *releaseParkingGoalsSteps(changed){
+  if(!changed.size)return;
+  const spacing=this.config.worldScale*4.55;
+  for(const unit of this.state.units){
+   const order=unit.routeOrder;
+   if(unit.hp<=0||!order?.goalBlockers?.some(id=>changed.has(id))||!['move','attack-move'].includes(unit.task?.type)
+    ||!unit.path.length||unit.combatRetreat||unit.combatDeployment||unit.passage||unit.detour)continue;
+   const goal=order.request;
+   const occupied=this.state.units.some(other=>other!==unit&&vehicleObstacle(other)
+    &&(!other.path.length&&distance(other,goal)<spacing
+     ||other.path.length&&['move','attack-move'].includes(other.task?.type)&&distance(other.task,goal)<spacing));
+   if(occupied)continue;
+   const path=yield* this.vehiclePathSteps(unit,goal,{maxGoalDistance:.01,fallback:false});
+   if(!path?.length||distance(path.at(-1),goal)>.01)continue;
+   const destination={x:goal.x,y:goal.y};
+   unit.path=path;Object.assign(unit.task,destination);
+   unit.routeOrder={...order,destination};delete unit.routeOrder.goalBlockers;
+   delete unit.traffic;delete unit.trafficHold;delete unit.driveWatch;delete unit.failedArcs;delete unit.passingLane;delete unit.mergeTraffic;
+   changed.add(unit.id);
+   if(performance.now()>=(this.nav.workDeadline??Infinity))yield;
+  }
+  // Replaced routes supersede merge leases in both directions. Exact repeat
+  // commands never enter this method with changed members.
+  for(const other of this.state.units)for(const id of Object.keys(other.mergeTraffic??{}))
+   if(changed.has(id))delete other.mergeTraffic[id];
+ }
+ build(ids,kind,x,y,rotation=0){this.finishPendingStep();
   const builders=this.state.units.filter(u=>ids.includes(u.id)&&u.owner==='rai'&&u.hp>0&&this.unitSpec(u).role==='builder');if(!builders.length)return this.fail('Выберите строителя');const place=this.placement(kind,x,y,rotation);if(!place.ok)return place;
   const exits=[];
   for(const id of place.blockers){
@@ -542,9 +741,10 @@ export class Mission{
   if(!result.ok){this.state.buildings.pop();this.rebuildNavigation();return result;}
   this.state.energy-=building.cost;return {ok:true,id:building.id,waiting:result.waiting};
  }
- stop(ids){for(const unit of this.state.units)if(ids.includes(unit.id)&&unit.owner==='rai'&&unit.hp>0){unit.task=null;unit.path=[];unit.builderWorking=false;delete unit.resumeConstructionId;}return{ok:true};}
+ setCombatPolicy(ids,changes){this.finishPendingStep();return configureCombat(this,ids,changes);}
+ stop(ids){ids=expandCommandIds(this,ids);this.commandPlanner?.cancel(ids);this.finishPendingStep();for(const unit of this.state.units)if(ids.includes(unit.id)&&unit.owner==='rai'&&unit.hp>0){delete unit.yieldReturn;unit.task=null;unit.path=[];unit.builderWorking=false;cancelCombatRetreat(unit);cancelCombatDeployment(unit);delete unit.detour;delete unit.traffic;delete unit.trafficHold;delete unit.resumeConstructionId;}return{ok:true};}
  setRally(id,point){const factory=this.entity(id);if(factory?.kind!=='factory'||factory.owner!=='rai'||!factory.completed)return this.fail('Выберите готовый завод');if(!this.inBounds(point.x,point.y)||!this.exploredAt(point.x,point.y))return this.fail('Точка сбора должна быть разведана');factory.rally={x:point.x,y:point.y};return{ok:true};}
- cancelBuilding(id){const building=this.entity(id);if(!building||building.owner!=='rai'||building.completed)return this.fail('Отменить можно только незавершённую стройку');this.state.energy=Math.min(this.config.energyCapacity,this.state.energy+building.cost*(1-building.progress));building.hp=0;this.rebuildNavigation();this.releaseSite(building);for(const unit of this.state.units)if(unit.task?.targetId===id){unit.task=null;unit.path=[];unit.foldTime=2.6;}this.emit('construction-cancelled',{building:id});return {ok:true};}
+ cancelBuilding(id){this.finishPendingStep();const building=this.entity(id);if(!building||building.owner!=='rai'||building.completed)return this.fail('Отменить можно только незавершённую стройку');this.state.energy=Math.min(this.config.energyCapacity,this.state.energy+building.cost*(1-building.progress));building.hp=0;this.rebuildNavigation();this.releaseSite(building);for(const unit of this.state.units)if(unit.task?.targetId===id){unit.task=null;unit.path=[];unit.foldTime=2.6;}this.emit('construction-cancelled',{building:id});return {ok:true};}
  availableVehicleRecipes(){
   return this.vehicleRecipes.filter(({spec})=>!spec.requires||this.state.research[spec.requires]);
  }
@@ -570,7 +770,23 @@ export class Mission{
   this.state.designs=[...others,{id,name:title,components:[...recipe.components]}];
   return {ok:true,id};
  }
- produce(id,projectId){
+ productionProjectId(job,projects=this.factoryProjects()){
+  return projects.find(project=>project.id===job.projectId)?.id
+   ??projects.find(project=>project.kind===job.kind&&(!job.components||projectAssemblyKey(project)===projectAssemblyKey(job)))?.id;
+ }
+ cancelProduction(id,projectId){this.finishPendingStep();
+  const factory=this.entity(id);
+  if(!factory||factory.hp<=0||factory.owner!=='rai'||factory.kind!=='factory'||!factory.completed)return this.fail('Нужен построенный завод');
+  const projects=this.factoryProjects();
+  // Remove the newest matching order first, preserving work already in progress.
+  const index=factory.queue.findLastIndex(job=>this.productionProjectId(job,projects)===projectId);
+  if(index<0)return this.fail('В очереди нет этого проекта');
+  const [job]=factory.queue.splice(index,1),refund=job.cost*(1-clamp(job.progress,0,1));
+  this.state.energy=Math.min(this.config.energyCapacity,this.state.energy+refund);
+  if(index===0){delete factory.exitBlocked;delete factory.exitRetryAt;}
+  return {ok:true,refund};
+ }
+ produce(id,projectId){this.finishPendingStep();
   const factory=this.entity(id);
   if(!factory||factory.owner!=='rai'||factory.kind!=='factory'||!factory.completed)return this.fail('Нужен построенный завод');
   const project=this.factoryProjects().find(candidate=>candidate.id===projectId);
@@ -579,44 +795,125 @@ export class Mission{
   if(!this.canSpend(spec.cost))return this.fail('Недостаточно энергии');
   const deployed=this.state.units.filter(unit=>unit.owner==='rai'&&unit.hp>0).length;
   const queued=this.state.buildings.reduce((sum,building)=>sum+building.queue.length,0);
-  if(deployed+queued>=48)return this.fail('Достигнут предел техники');
+  if(deployed+queued>=(this.config.unitLimit??48))return this.fail('Достигнут предел техники');
   this.state.energy-=spec.cost;
   factory.queue.push({kind,projectId,name,components:[...components],progress:0,cost:spec.cost});
   return {ok:true};
  }
- research(id,key){const lab=this.entity(id),spec=this.config.research[key];if(!lab||lab.kind!=='lab'||lab.owner!=='rai'||!lab.completed)return this.fail('Нужен исследовательский центр');if(!spec||!this.state.artifactKeys.includes(key))return this.fail('Сначала найдите артефакт');if(this.state.research[key]||this.state.buildings.some(b=>b.hp>0&&b.research?.key===key))return this.fail('Исследование уже выполнено или выполняется');if(lab.research)return this.fail('Лаборатория занята');if(!this.canSpend(spec.cost))return this.fail('Недостаточно энергии');this.state.energy-=spec.cost;lab.research={key,progress:0,cost:spec.cost};this.emit('research-start',{key});return {ok:true};}
- lineOfSight(from,to){const a=this.field.heightAt(from.x,from.y)+(from.kind==='mg-tower'?12:3.2)*this.config.worldScale,b=this.field.heightAt(to.x,to.y)+1.5*this.config.worldScale;for(let i=1;i<12;i++){const t=i/12;if(this.field.heightAt(from.x+(to.x-from.x)*t,from.y+(to.y-from.y)*t)+.4>a+(b-a)*t)return false;}return true;}
- damage(target,amount,source){if(target.hp<=0)return;target.hp=Math.max(0,target.hp-amount);if(!target.hp){this.emit('destroyed',{target:target.id,owner:target.owner,kind:target.kind});if(target.owner==='scavs')this.state.statistics.enemiesDestroyed++;this.navigationDirty=true;}else if(target.owner==='rai'&&this.state.time-(target.lastDamageBark??-20)>12){target.lastDamageBark=this.state.time;this.emit('unit-damaged',{target:target.id});}}
+ research(id,key){this.finishPendingStep();const lab=this.entity(id),spec=this.config.research[key];if(!lab||lab.kind!=='lab'||lab.owner!=='rai'||!lab.completed)return this.fail('Нужен исследовательский центр');if(!spec||!this.state.artifactKeys.includes(key))return this.fail('Сначала найдите артефакт');if(this.state.research[key]||this.state.buildings.some(b=>b.hp>0&&b.research?.key===key))return this.fail('Исследование уже выполнено или выполняется');if(lab.research)return this.fail('Лаборатория занята');if(!this.canSpend(spec.cost))return this.fail('Недостаточно энергии');this.state.energy-=spec.cost;lab.research={key,progress:0,cost:spec.cost};this.emit('research-start',{key});return {ok:true};}
+ lineOfSight(from,to){return clearCombatSight(this,from,to);}
+ damage(target,amount,source,contact){
+  this.finishPendingStep();if(target.hp<=0||!Number.isFinite(amount)||amount<=0)return;
+  const hit=recordDamage(this,target,amount,source,contact);
+  target.hp=Math.max(0,target.hp-amount*armorMultiplier(hit,target));
+  syncFieldHp(this,target);
+  rememberHostileHit(this,target,source);
+  alertScavs(this,target,source);
+  if(!target.hp){
+   if(this.config.units[target.kind]){
+    this.freezeWreck(target);
+    // Queue only affected parking claims. Their route search uses the next
+    // simulation tick's budget instead of blocking an explosion's damage loop.
+    if(this.state.units.some(unit=>unit.routeOrder?.goalBlockers?.includes(target.id)))
+     (this.state.parkingGoalReleases??=[]).push(target.id);
+   }
+   if(target.damage){destroyDamage(target.damage);if(!isInfantry(target))target.damage.burn=Math.max(target.damage.burn,.48);salvageFromWreck(this,target,hit);this.onDamageDestroyed?.(target,hit);}
+   scheduleWreck(this,target);
+   this.explodeWreck(target);
+   this.emit('destroyed',{target:target.id,owner:target.owner,kind:target.kind});
+   if(target.owner==='scavs')this.state.statistics.enemiesDestroyed++;
+   this.navigationDirty=true;
+  }else if(target.owner==='rai'&&this.state.time-(target.lastDamageBark??-20)>12){target.lastDamageBark=this.state.time;this.emit('unit-damaged',{target:target.id});}
+  return hit;
+ }
+ explodeWreck(target){
+  if(isInfantry(target))return;
+  const mobile=!!this.config.units[target.kind],scale=this.config.worldScale;
+  this.effects.push({type:'explosion',targetId:target.id,owner:target.owner,to:{x:target.x,y:target.y,z:(target.groundHeight??this.field.heightAt(target.x,target.y))+(mobile?1:.8)*scale},radius:mobile?2.4*scale:Math.min(32,Math.max(target.halfWidth,target.halfDepth)*.7)});
+ }
  attack(attacker,target,spec){
-  if(attacker.cooldown>0||distance(attacker,target)>spec.range||!this.lineOfSight(attacker,target))return false;
+  if(attacker.cooldown>0||partMissing(attacker.damage,9)||distance(attacker,target)>spec.range||!this.lineOfSight(attacker,target))return false;
   attacker.cooldown=spec.cooldown;
+  const weapon=spec.weapon??(attacker.kind==='flamer'?'flame':'mg');
+  if(weapon==='grenade'){
+   const scale=this.config.worldScale,to={x:target.x,y:target.y,z:this.field.heightAt(target.x,target.y)+.2};
+   const duration=clamp(distance(attacker,target)/(18*scale),.55,1.4),born=this.state.time;
+   const from={x:attacker.x,y:attacker.y,z:this.field.heightAt(attacker.x,attacker.y)+1.4*scale};
+   this.state.projectiles.push({id:this.id('g'),owner:attacker.owner,sourceId:attacker.id,sourceKind:attacker.kind,from,to,born,impactAt:born+duration,damage:spec.damage,radius:spec.splash});
+   attacker.aimTarget=to;attacker.lastThrowAt=born;
+   this.effects.push({type:'shot',from:attacker.id,to,weapon:'grenade'});
+   return true;
+  }
   const multiplier=attacker.owner==='rai'&&this.state.research['mg-ammo-1']&&attacker.kind!=='flamer'?1.25:1;
   const {x,y,z,surface}=combatContact(attacker,target,this.config,this.field);
-  this.damage(target,spec.damage*multiplier,attacker);
-  attacker.aimTarget={x,y,z};
-  this.effects.push({type:'shot',from:attacker.id,targetId:target.id,to:attacker.aimTarget,surface,destroyed:target.hp<=0,weapon:attacker.kind==='flamer'?'flame':'mg'});
+  const hit=this.damage(target,spec.damage*multiplier,attacker);
+  attacker.aimTarget=hit?.worldPoint?{x:hit.worldPoint[0],y:hit.worldPoint[1],z:hit.worldPoint[2]}:{x,y,z};
+  this.effects.push({type:'shot',from:attacker.id,targetId:target.id,to:attacker.aimTarget,surface,destroyed:target.hp<=0,weapon});
   if(this.effects.length>128)this.effects.shift();
   return true;
  }
  enemyOf(item,other){return other.hp>0&&item.owner!==other.owner&&(!other.campId||this.inBounds(other.x,other.y));}
- nearestEnemy(item,range,canTarget=null){let nearest=null,best=range;for(const target of [...this.state.units,...this.state.buildings]){if(!this.enemyOf(item,target))continue;const d=distance(item,target);if(d<best&&(item.owner!=='rai'||this.visibleAt(target.x,target.y))&&(!canTarget||canTarget(target))){best=d;nearest=target;}}return nearest;}
- requestPassage(unit,blockers){
+ updateProjectiles(){
+  const waiting=[];
+  for(const shot of this.state.projectiles){
+   if(shot.impactAt>this.state.time){waiting.push(shot);continue;}
+   const source={id:shot.sourceId,kind:shot.sourceKind,owner:shot.owner,...shot.from};
+   for(const target of [...this.state.units,...this.state.buildings]){
+    const d=distance(target,shot.to);
+    if(target.hp>0&&target.owner!==shot.owner&&d<=shot.radius)this.damage(target,shot.damage*(1-.6*d/shot.radius),source);
+   }
+   this.effects.push({type:'explosion',owner:shot.owner,to:shot.to,radius:shot.radius*.55});
+  }
+  this.state.projectiles=waiting;
+ }
+ nearbyUnits(point,range,excludeOwner){return this.unitIndexActive?this.unitIndex.query(point,range,excludeOwner):this.state.units;}
+ nearestEnemy(item,range,canTarget=null){let nearest=null,best=range;for(const target of [...this.nearbyUnits(item,range,item.owner),...this.state.buildings]){if(!this.enemyOf(item,target))continue;const d=distance(item,target);if(d<best&&(item.owner!=='rai'||this.visibleAt(target.x,target.y))&&(!canTarget||canTarget(target))){best=d;nearest=target;}}return nearest;}
+ *planManeuverSteps(unit,goal,options){return yield* planManeuverSteps(unit,goal,{...options,deadline:()=>this.nav.workDeadline??Infinity});}
+ requestPassage(...args){this.finishPendingStep();return completeSteps(this.requestPassageSteps(...args));}
+ *requestPassageSteps(unit,blockers){
   if(unit.task?.type==='clear-site'||unit.detour||unit.traffic||unit.trafficHold)return false;
   const scale=this.config.worldScale,workOrder=['build','repair'].includes(unit.task?.type);
   for(const other of blockers){
-   if(other.hp<=0||other.owner!==unit.owner||other.path.length||other.task||other.detour||this.unitSpec(other).role==='builder'
-    ||other.trafficRest>this.state.time||distance(unit,other)>scale*6)continue;
-   if(!other.routeOrder&&!workOrder&&(!['move','attack-move'].includes(unit.task?.type)||this.unitSpec(unit).role==='builder'))continue;
+   const holding=other.combatDeployment&&['arrived','reserve'].includes(other.combatDeployment.status);
+   if(other.hp<=0||other.owner!==unit.owner||other.path.length||other.task&&!holding||other.detour||this.unitSpec(other).role==='builder'
+    ||other.trafficRest>this.state.time||distance(unit,other)>scale*7)continue;
+   if(!other.routeOrder&&!holding&&!workOrder&&(!['move','attack-move','combat-position'].includes(unit.task?.type)||this.unitSpec(unit).role==='builder'))continue;
    other.trafficRest=this.state.time+5;
-   const park=this.parkingManeuver(other,unit,(from,to)=>this.vehicleMotionClear(other,from,to));
-   if(!park)continue;
+   const parkingBlockers=new Set();
+   const park=yield* this.parkingManeuverSteps(other,unit,(from,to)=>this.vehicleMotionClear(other,from,to,.52,parkingBlockers));
+   if(!park){
+    // A parked vehicle can be unable to turn because the requester occupies
+    // its only reversing exit. Check both phases before moving either: the
+    // requester backs out, then the parked member clears the entire route.
+    if(parkingBlockers.has(unit)){
+     const budget=Math.max(0,scale*4-(unit.reverseDebt??0));
+     for(const length of [scale*2,scale*3,scale*4]){
+      if(length>budget)continue;
+      const legs=[{direction:-1,curve:0,remaining:length}];
+      const exit=checkManeuver(unit,legs,scale,(from,to)=>this.vehicleMotionClear(unit,from,to));
+      if(!exit)continue;
+      const leader={...unit,...exit},obstacles=this.state.units.map(candidate=>candidate===unit?leader:candidate);
+      const yielding=yield* this.parkingManeuverSteps(other,leader,(from,to)=>this.vehicleMotionClear(other,from,to,.52,undefined,obstacles));
+      if(!yielding)continue;
+      unit.detour={legs,parking:false,blocked:0,yieldHandoff:{id:other.id,legs:yielding.legs}};
+      return true;
+     }
+    }
+    continue;
+   }
+   rememberYieldHome(other,[unit],false,this.state.time,this);
    other.detour={legs:park.legs,parking:true,idleYield:true,blocked:0};
    unit.trafficHold=other.id;
    return true;
   }
-  const course=vehicle=>Math.atan2(vehicle.path[0].y-vehicle.y,vehicle.path[0].x-vehicle.x);
+  // Predictive braking may stop an opposing pair before a collision sweep
+  // reports a blocker. It still needs a checked right-side reversing exit.
+  const passing=unit.passingLane&&this.entity(unit.passingLane.otherId);
+  const candidatesForPassage=new Set(blockers);
+  if(passing&&(unit.driveSpeed??0)<scale*.18&&(passing.driveSpeed??0)<scale*.18)candidatesForPassage.add(passing);
+  const course=vehicle=>{const point=vehicle.path.at(-1);return Math.atan2(point.y-vehicle.y,point.x-vehicle.x);};
   const direction=course(unit);
-  const candidates=[...blockers].filter(other=>other.hp>0&&other.owner===unit.owner&&other.path.length
+  const candidates=[...candidatesForPassage].filter(other=>other.hp>0&&other.owner===unit.owner&&other.path.length
    &&!other.traffic&&!other.detour&&!other.trafficHold&&!other.passage
    &&(other.driveSpeed??0)<scale*.18
    &&other.task?.type!=='clear-site'&&distance(unit,other)<this.config.worldScale*6
@@ -627,7 +924,7 @@ export class Mission{
   const other=candidates[0],higher=serial(unit)<serial(other);
   const leader=higher?unit:other, follower=higher?other:unit;
   if(follower.trafficRest>this.state.time)return false;
-  const park=this.parkingManeuver(follower,leader,(from,to)=>this.vehicleMotionClear(follower,from,to));
+  const park=yield* this.parkingManeuverSteps(follower,leader,(from,to)=>this.vehicleMotionClear(follower,from,to));
   if(!park){follower.trafficRest=this.state.time+1.2;return false;}
   // Reserve both sides after the sweep is checked, so neither starts a second manoeuvre.
   follower.detour={legs:park.legs,parking:true,blocked:0};
@@ -635,7 +932,7 @@ export class Mission{
   leader.trafficHold=follower.id;
   return true;
  }
- workRouteExit(unit,goal){
+ *workRouteExitSteps(unit,goal){
   const scale=this.config.worldScale;
   const allowed=(from,to)=>this.vehicleMotionClear(unit,from,to);
   const ignoreUnits=new Set([unit]);
@@ -643,12 +940,13 @@ export class Mission{
   // Check both the backing arc and the turn onto the new route before moving.
   for(const length of [1.5,2.5,3.5]){
    for(const steering of [0,curve/2,-curve/2,curve,-curve]){
+    if(performance.now()>=this.nav.workDeadline)yield;
     const first={direction:-1,curve:steering,remaining:length*scale};
     const exit=checkManeuver(unit,[first],scale,allowed);
     if(!exit)continue;
-    const path=this.vehiclePath(exit,goal,{ignoreUnits,avoidMoving:true,fallback:false,maxGoalDistance:.01});
+    const path=yield* this.vehiclePathSteps(exit,goal,{ignoreUnits,avoidMoving:true,fallback:false,maxGoalDistance:.01});
     if(!path?.length)continue;
-    const onward=planManeuver(exit,path[0],{scale,allowed,attempts:2,reverseBudget:0,maximumLegs:5});
+    const onward=yield* this.planManeuverSteps(exit,path[0],{scale,allowed,attempts:2,reverseBudget:0,maximumLegs:5});
     if(onward)return {path,legs:[first,...onward]};
    }
   }
@@ -656,7 +954,10 @@ export class Mission{
  }
  vehicleMotionClear(unit,from,to,grade=.52,blockers,obstacles=this.state.units){
   const field=this.field,scale=this.config.worldScale;
-  if(!this.nav.lineClear(from,to,false,true,grade,true))return false;
+  if(!passageWaitClear(this,unit,from,to))return false;
+  if(obstacles===this.state.units)obstacles=this.nearbyUnits(to,7*scale);
+  const terrainEscape=unit.owner==='rai'?this.terrainEscapeFor(unit):null;
+  if(!this.nav.lineClear(from,to,false,true,grade,true,false,terrainEscape))return false;
   const envelope=vehicleEnvelope(to,scale,field);
   if(!vehicleGroundSafe(envelope,grade)){
    const previous=vehicleEnvelope(from,scale,field);
@@ -669,59 +970,146 @@ export class Mission{
    &&clearOfVehicles(unit,to,obstacles,scale,false,from,field,blockers,sweep);
  }
  passingLane(unit,point,course,scale){
-  const look=22,range=112;
-  if(distance(unit,point)<look+8||-Math.sin(unit.heading)*course.x+Math.cos(unit.heading)*course.y<.72){
-   delete unit.passingLane;
-   return null;
+  const admission=this.trafficCoordinator.passageDecisions.get(unit.id),throat=unit.passage?.throat;
+  if(admission&&throat){
+   const shape=vehicleEnvelope(unit,scale,this.field),half=throat.along==='x'?footprintSupport(shape,1,0):footprintSupport(shape,0,1);
+   const centre=throat.along==='x'?shape.x:shape.y;
+   const outside=unit.passage.direction>0?centre-half>throat.high+scale*.055:centre+half<throat.low-scale*.055;
+   const apron=2.6*scale/Math.tan(.67)*2+Math.hypot(shape.width,shape.depth)+shape.depth;
+   const before=unit.passage.direction>0?centre+half<throat.low-apron:centre-half>throat.high+apron;
+   if(!admission.admitted||!outside&&!before)return null;
   }
-  const opposite=this.state.units.some(other=>{
-   if(other===unit||other.hp<=0||other.owner!==unit.owner||!other.path.length)return false;
-   const dx=other.x-unit.x,dy=other.y-unit.y,forward=dx*course.x+dy*course.y;
-   if(forward< -scale*4||forward>range||Math.abs(dx*course.y-dy*course.x)>scale*3.6)return false;
-   const goal=other.path[0],length=distance(other,goal);
-   return length>look+8&&(goal.x-other.x)*course.x+(goal.y-other.y)*course.y< -length*.75;
-  });
+  // A short intermediate waypoint is not the end of an encounter. Reserve
+  // one stable right-hand corridor until both complete hulls have passed.
+  const goal=unit.path.at(-1)??point,length=distance(unit,goal),range=160;
+  if(length<.1){delete unit.passingLane;return null;}
+  const ux=(goal.x-unit.x)/length,uy=(goal.y-unit.y)/length;
   let lane=unit.passingLane;
-  if(lane&&lane.ux*course.x+lane.uy*course.y<.83)lane=null;
-  if(!lane&&!opposite)return null;
-  if(!lane)lane={x:unit.x,y:unit.y,ux:course.x,uy:course.y,expires:0};
-  if(opposite)lane.expires=this.state.time+2.2;
-  if(lane.expires<this.state.time){delete unit.passingLane;return null;}
-  const along=(unit.x-lane.x)*lane.ux+(unit.y-lane.y)*lane.uy+look;
-  const offset=scale*1.5;
-  const goal={x:lane.x+lane.ux*along+lane.uy*offset,y:lane.y+lane.uy*along-lane.ux*offset};
-  const pose={...goal,heading:Math.atan2(-lane.ux,lane.uy),kind:unit.kind};
-  if(!this.nav.lineClear(unit,goal,false,true,.52,true)||
-   !this.nav.clearSolidSweep(vehicleSweep(pose,pose,scale,this.field),this.nav.nearbySolids(goal,scale*4)))return null;
-  unit.passingLane=lane;
-  return goal;
+  if(lane&&(lane.goalX!==goal.x||lane.goalY!==goal.y))lane=null;
+  const eligible=other=>{
+   if(!other||other===unit||other.hp<=0||other.owner!==unit.owner||!other.path.length)return false;
+   const next=other.path.at(-1),d=distance(other,next);if(d<.1)return false;
+   const dx=other.x-unit.x,dy=other.y-unit.y,along=dx*ux+dy*uy;
+   const opposing=((next.x-other.x)*ux+(next.y-other.y)*uy)/d;
+   return along> -scale*6&&along<range&&Math.abs(dx*uy-dy*ux)<scale*4.5
+    &&(opposing<-.97||opposing<-.83&&Math.cos(unit.heading-other.heading)<-.97);
+  };
+  const neighbours=this.nearbyUnits(unit,range+scale*4);
+  let other=lane?neighbours.find(candidate=>candidate.id===lane.otherId):null;
+  const otherGoal=other?.path.at(-1);
+  if(lane&&otherGoal&&(lane.otherGoalX!==otherGoal.x||lane.otherGoalY!==otherGoal.y))lane=null;
+  const retained=other?.hp>0&&other.owner===unit.owner&&otherGoal
+   &&lane&&lane.otherGoalX===otherGoal.x&&lane.otherGoalY===otherGoal.y
+   &&(other.x-unit.x)*lane.ux+(other.y-unit.y)*lane.uy> -scale*6;
+  if(!retained&&!eligible(other)){
+   other=null;let closest=Infinity;
+   for(const candidate of neighbours)if(eligible(candidate)){
+    const d=distance(unit,candidate);if(d<closest){other=candidate;closest=d;}
+   }
+  }
+  if(!other){delete unit.passingLane;return null;}
+  // A checked shoulder manoeuvre has already cleared this leader's route.
+  // Continuing to reserve the yielder's hypothetical future trajectory would
+  // brake the leader again while the yielder is explicitly waiting for it.
+  if(other.traffic?.leader===unit.id&&other.traffic.phase==='parked')return null;
+  if(!lane||lane.otherId!==other.id){
+   const shared=other.passingLane;
+   const otherGoal=other.path.at(-1);
+   if(shared?.otherId===unit.id&&shared.goalX===otherGoal.x&&shared.goalY===otherGoal.y)lane={x:shared.x,y:shared.y,ux:-shared.ux||0,uy:-shared.uy||0};
+   else{
+    const next=other.path.at(-1),d=distance(other,next),dx=ux-(next.x-other.x)/d,dy=uy-(next.y-other.y)/d,l=Math.hypot(dx,dy);
+    lane={x:(unit.x+other.x)/2,y:(unit.y+other.y)/2,ux:dx/l,uy:dy/l};
+   }
+   Object.assign(lane,{otherId:other.id,goalX:goal.x,goalY:goal.y,otherGoalX:otherGoal.x,otherGoalY:otherGoal.y});
+  }
+  const shape=vehicleEnvelope(unit,scale,this.field),obstacle=vehicleEnvelope(other,scale,this.field),rx=lane.uy,ry=-lane.ux;
+  const otherAdmission=this.trafficCoordinator.passageDecisions.get(other.id);
+  const offset=(otherAdmission&&!otherAdmission.admitted?shape.width+obstacle.width:Math.max(shape.width,obstacle.width))+scale*.9;
+  const along=(unit.x-lane.x)*lane.ux+(unit.y-lane.y)*lane.uy+scale*3.6;
+  const target={x:lane.x+lane.ux*along+rx*offset,y:lane.y+lane.uy*along+ry*offset};
+  // Until lateral separation fits the actual oriented hulls, share the
+  // available braking distance. A right-side target alone does not prevent
+  // two fast vehicles meeting before their steering arcs have separated.
+  const dx=obstacle.x-shape.x,dy=obstacle.y-shape.y,ahead=dx*lane.ux+dy*lane.uy;
+  const across=Math.abs(dx*rx+dy*ry),width=footprintSupport(shape,rx,ry)+footprintSupport(obstacle,rx,ry)+scale*.11;
+  const gap=ahead-footprintSupport(shape,lane.ux,lane.uy)-footprintSupport(obstacle,lane.ux,lane.uy)-scale*.4;
+  target.trafficLimit=ahead>0&&across<width?Math.max(0,Math.sqrt(22*Math.max(0,gap)+2.2**2)-2.2):Infinity;
+  const pose={...target,heading:Math.atan2(-lane.ux,lane.uy),kind:unit.kind};
+  if(!this.nav.lineClear(unit,target,false,true,.52,true)||
+   !this.nav.clearSolidSweep(vehicleSweep(pose,pose,scale,this.field),this.nav.nearbySolids(target,scale*4))){
+   // An unavailable shoulder removes the steering target, not the actual
+   // opposing hull or its stopping distance.
+   unit.passingLane=lane;return {...point,trafficLimit:target.trafficLimit};
+  }
+  // The checked encounter corridor may pass a short A* waypoint sideways.
+  // Do not U-turn back to it afterwards. Only discard intermediate points
+  // already behind this corridor, and validate the connector to the next.
+  while(unit.path.length>1){
+   const first=unit.path[0],next=unit.path[1];
+   if((first.x-unit.x)*lane.ux+(first.y-unit.y)*lane.uy>=0
+    ||(next.x-unit.x)*lane.ux+(next.y-unit.y)*lane.uy<=0
+    ||!this.nav.lineClear(unit,next,false,true,.52,true))break;
+   unit.path.shift();
+  }
+  unit.passingLane=lane;return target;
+ }
+ drivingIntent(unit,point,course,scale){
+  const cruising=!['build','repair','clear-site','combat-position'].includes(unit.task?.type)&&!unit.combatRetreat;
+  const paved=cruising?roadDrivingLane(this,unit,point,scale):null;
+  const roadLane=paved&&this.nav.lineClear(unit,paved,false,true,.52,true)?paved:null;
+  const passing=cruising?this.passingLane(unit,point,course,scale):null;
+  const waypoint=passing??roadLane??point,d=distance(unit,waypoint);
+  return deferRoadMerge(this,unit,{point,waypoint,roadLane:passing?null:roadLane,trafficLimit:passing?.trafficLimit??Infinity,
+   course:d>0?{x:(waypoint.x-unit.x)/d,y:(waypoint.y-unit.y)/d}:course},scale);
  }
  trafficSpeed(unit,course,lane,scale,stoppedObstacles){
+  // Solve v²/(2a) + dt*v <= free distance. A constant 3.24-world
+  // standstill buffer unnecessarily stopped every row of a compact column.
+  const reaction=22*(this.config.simulationStep??.1);
+  const brakingSpeed=gap=>Math.max(0,Math.sqrt(44*Math.max(0,gap)+reaction**2)-reaction);
+  // Match the collision skin AND the swept-volume padding. Stopping exactly
+  // on the static skin repeatedly trips the .012-world sweep allowance.
+  const standstill=scale*.055+.02;
   const field=this.field,shape=vehicleEnvelope(unit,scale,field);
   const front=footprintSupport(shape,course.x,course.y);
   const width=footprintSupport(shape,course.y,-course.x);
-  const priority=vehicle=>{
-   let hash=19452;
-   for(const char of vehicle.id)hash=Math.imul(hash^char.charCodeAt(0),0x45d9f3b);
-   return (hash^(hash>>>16))>>>0;
-  };
+  const laneRank=lane?roadTrafficRank(unit,lane.progress,this.nav.roads.nearest(unit,scale*7),lane.direction,scale):null;
   for(const [id,merge] of Object.entries(unit.mergeTraffic??{})){
    if(merge.expires<this.state.time)delete unit.mergeTraffic[id];
   }
-  let limit=Infinity;
-  for(const other of this.state.units){
+  let limit=this.trafficCoordinator.limit(unit);
+  for(const other of this.nearbyUnits(unit,scale*13)){
    if(other===unit||other.hp<=0||other.owner!==unit.owner||distance(unit,other)>scale*13)continue;
+   // Actual bodies constrain every moving vehicle, regardless of route
+   // alignment. A turning neighbour can cross this corridor while its next
+   // waypoint points behind it and has no straight junction reservation.
+   {
+    const obstacle=vehicleEnvelope(other,scale,field),dx=obstacle.x-shape.x,dy=obstacle.y-shape.y;
+    const fx=-Math.sin(unit.heading),fy=Math.cos(unit.heading);
+    const along=dx*fx+dy*fy,across=Math.abs(dx*fy-dy*fx);
+    const speed=(other.driveSpeed??0)*(other.reversing?-1:1),look=other.combatRetreat?.status==='moving'?.7:0;
+    const vx=-Math.sin(other.heading)*speed*look,vy=Math.cos(other.heading)*speed*look;
+    const lateral=dx*fy-dy*fx,nextLateral=lateral+vx*fy-vy*fx;
+    const sweepAcross=lateral*nextLateral<=0?0:Math.min(across,Math.abs(nextLateral));
+    const sweepAlong=Math.min(along,along+vx*fx+vy*fy);
+    const turning=look>0?Math.hypot(obstacle.width,obstacle.depth):null;
+    if(along>0&&sweepAcross<footprintSupport(shape,fy,-fx)+(turning??footprintSupport(obstacle,fy,-fx))+scale*(look?.5:.055)){
+     const gap=sweepAlong-footprintSupport(shape,fx,fy)-(turning??footprintSupport(obstacle,fx,fy))-(look?scale*2:standstill);
+     limit=Math.min(limit,brakingSpeed(gap));
+     if(gap<scale*.3&&(other.driveSpeed??0)<scale*.3)stoppedObstacles?.add(other);
+    }
+   }
    const point=other.path[0];
-   if(!point){
-    if(!['move','attack-move'].includes(unit.task?.type))continue;
-    // Stop clears the leader's route immediately. Its solid hull still needs
-    // a braking interval; normal stalled-path recovery can then plan a pass.
+   if(!point||(other.driveSpeed??0)<scale*.18){
+    if(!['move','attack-move','combat-position'].includes(unit.task?.type))continue;
+    // A stopped body is solid even when it retains a route whose next point
+    // is behind it. Route alignment must never suppress physical braking.
     const obstacle=vehicleEnvelope(other,scale,field),dx=obstacle.x-shape.x,dy=obstacle.y-shape.y;
     const along=dx*course.x+dy*course.y,across=Math.abs(dx*course.y-dy*course.x);
     if(along>0&&across<width+footprintSupport(obstacle,course.y,-course.x)+scale*.15){
-     const gap=along-front-footprintSupport(obstacle,course.x,course.y)-scale*.72;
+     const gap=along-front-footprintSupport(obstacle,course.x,course.y)-standstill;
      if(gap<scale*.18&&(other.driveSpeed??0)<scale*.18&&!other.detour)stoppedObstacles?.add(other);
-     limit=Math.min(limit,Math.sqrt(44*Math.max(0,gap)));
+     limit=Math.min(limit,brakingSpeed(gap));
     }
     continue;
    }
@@ -732,14 +1120,14 @@ export class Mission{
    if(aligned<.77)continue;
    const obstacle=vehicleEnvelope(other,scale,field);
    const dx=obstacle.x-shape.x,dy=obstacle.y-shape.y;
-   const otherLane=lane?this.nav.roads.rightLane(other,point,scale):null;
+   const otherLane=lane?roadDrivingLane(this,other,point,scale):null;
    if(otherLane&&lane.path===otherLane.path&&lane.direction===otherLane.direction){
     const along=otherLane.progress-lane.progress;
     if(Math.abs(along)>scale*8)continue;
     let merge=unit.mergeTraffic?.[other.id];
     if(!merge||merge.path!==lane.path||merge.direction!==lane.direction||merge.expires<this.state.time){
-     const tie=Math.abs(along)<scale*.24;
-     const leader=(tie?priority(unit)<priority(other):along<0)?unit:other;
+     const otherRank=roadTrafficRank(other,otherLane.progress,this.nav.roads.nearest(other,scale*7),otherLane.direction,scale);
+     const leader=compareRoadTrafficRanks(laneRank,otherRank)<=0?unit:other;
      merge={leader:leader.id,path:lane.path,direction:lane.direction,expires:this.state.time+1.8};
      (unit.mergeTraffic??={})[other.id]=merge;
      (other.mergeTraffic??={})[unit.id]={...merge};
@@ -748,26 +1136,13 @@ export class Mission{
     (other.mergeTraffic??={})[unit.id]={...merge};
     if(merge.leader!==unit.id){
      const rear=footprintSupport(obstacle,lane.ux,lane.uy);
-     const gap=along-footprintSupport(shape,lane.ux,lane.uy)-rear-scale*.72;
-     const lead=other.driveSpeed??0;
-     limit=Math.min(limit,gap<0?0:Math.sqrt(lead*lead+44*gap));
+     const gap=along-footprintSupport(shape,lane.ux,lane.uy)-rear-standstill;
+     limit=Math.min(limit,brakingSpeed(gap));
     }
     continue;
    }
    const dot=course.x*otherCourse.x+course.y*otherCourse.y;
-   if(dot>-.53&&dot<.81){
-    const cross=course.x*otherCourse.y-course.y*otherCourse.x;
-    const own=(dx*otherCourse.y-dy*otherCourse.x)/cross;
-    const theirs=(dx*course.y-dy*course.x)/cross;
-    const priorityMargin=scale*.26;
-    if(own>0&&theirs> -scale*2.6&&own<scale*12&&theirs<Math.min(goalDistance+scale*2,scale*10)
-      &&(own>theirs+priorityMargin||Math.abs(own-theirs)<=priorityMargin&&priority(unit)>priority(other))){
-     const rear=footprintSupport(obstacle,course.x,course.y);
-     const gap=own-front-rear-scale*.58;
-     limit=Math.min(limit,Math.sqrt(44*Math.max(0,gap)));
-    }
-    continue;
-   }
+   if(dot>-.53&&dot<.81)continue; // One shared junction decision above.
    if(dot<.81)continue;
    const alignment=-Math.sin(other.heading)*course.x+Math.cos(other.heading)*course.y;
    if(alignment<.76)continue;
@@ -776,38 +1151,69 @@ export class Mission{
    const across=Math.abs(dx*course.y-dy*course.x);
    const following=across<Math.min(scale*2.4,width+footprintSupport(obstacle,course.y,-course.x)+scale*.15);
    if(!following||along<=0)continue;
-   const gap=along-front-rear-scale*.72;
-   const lead=Math.max(0,(other.driveSpeed??0)*alignment);
-   const limitHere=Math.sqrt(lead*lead+44*Math.max(0,gap));
+   const gap=along-front-rear-standstill;
+   // Keep enough room to stop even when the leader receives an immediate Stop.
+   const limitHere=brakingSpeed(gap);
    limit=Math.min(limit,limitHere);
   }
   return limit;
  }
- parkingManeuver(unit,leader,allowed){
+ parkingManeuver(...args){this.finishPendingStep();return completeSteps(this.parkingManeuverSteps(...args));}
+ *parkingManeuverSteps(unit,leader,allowed){
   const point=leader.path[0];
-  const angle=point?Math.atan2(point.y-leader.y,point.x-leader.x):leader.heading+Math.PI/2;
+  const encounter=unit.passingLane?.otherId===leader.id?unit.passingLane:null;
+  const angle=encounter?Math.atan2(-encounter.uy,-encounter.ux):point?Math.atan2(point.y-leader.y,point.x-leader.x):leader.heading+Math.PI/2;
   const forward={x:Math.cos(angle),y:Math.sin(angle)},right={x:forward.y,y:-forward.x};
   const scale=this.config.worldScale;
   const lateral=p=>(p.x-leader.x)*right.x+(p.y-leader.y)*right.y;
   const side=Math.sign(lateral(unit))||1;
+  // Reserve the next part of the route, including bends and the last partial
+  // segment. A nearly reached first waypoint does not end the passing aisle.
+  const aisle=[],append=pose=>{
+   const previous=aisle.at(-1)?.pose??leader;
+   aisle.push({pose,sweep:vehicleSweep(previous,pose,scale,this.field),previous});
+  };
+  let origin={x:leader.x,y:leader.y,heading:leader.heading,kind:leader.kind},remaining=scale*12;
+  append({...origin});
+  for(const end of leader.path){
+   const length=distance(origin,end);if(length<1e-6)continue;
+   const lengthHere=Math.min(length,remaining),ux=(end.x-origin.x)/length,uy=(end.y-origin.y)/length;
+   const heading=Math.atan2(-ux,uy),turn=angleDelta(heading,origin.heading);
+   // Include the actual initial heading and the rotated full body at bends.
+   const turns=Math.ceil(Math.abs(turn)/.15);
+   for(let i=1;i<=turns;i++)append({...origin,heading:origin.heading+turn*i/turns});
+   const steps=Math.ceil(lengthHere/scale);
+   for(let i=1;i<=steps;i++)append({x:origin.x+ux*lengthHere*i/steps,y:origin.y+uy*lengthHere*i/steps,heading,kind:leader.kind});
+   origin=aisle.at(-1).pose;remaining-=lengthHere;if(remaining<=1e-6)break;
+  }
   const clearLane=pose=>{
-   const end=leader.path[0],length=Math.min(distance(leader,end),scale*12);
-   const heading=Math.atan2(-forward.x,forward.y);
-   for(let d=0;d<=length;d+=scale){
-    const passing={x:leader.x+forward.x*d,y:leader.y+forward.y*d,heading,kind:leader.kind};
-    if(vehicleClearance(pose,passing,scale,this.field)<scale*.35)return false;
+   const obstacle={...pose,kind:unit.kind,hp:1};
+   for(const passing of aisle){
+    if(vehicleClearance(obstacle,passing.pose,scale,this.field)<scale*.35
+     ||!clearOfVehicles(leader,passing.pose,[obstacle],scale,false,passing.previous,this.field,undefined,passing.sweep))return false;
    }
    return true;
   };
-  for(const sign of [side,-side]){
-   const goal={x:unit.x+right.x*scale*5*sign,y:unit.y+right.y*scale*5*sign};
-   const path=planManeuver(unit,goal,{scale,allowed,attempts:2,
-    accept:pose=>lateral(pose)*sign>scale*1.3&&distance(pose,unit)>scale*.6&&clearLane(pose)});
+  const final=leader.path.at(-1),previous=leader.path.at(-2)??leader;
+  const finalPose=final&&{...final,heading:Math.atan2(previous.x-final.x,final.y-previous.y),kind:leader.kind,hp:1};
+  const reserveReturn=finalPose&&clearOfVehicles(null,unit,[finalPose],scale,true,null,this.field);
+  const canReturn=(pose,legs)=>!reserveReturn||!!checkManeuver(pose,
+   legs.slice().reverse().map(leg=>({direction:-leg.direction,curve:-leg.curve,remaining:leg.remaining})),scale,
+   (from,to)=>clearOfVehicles(null,to,[finalPose],scale,false,from,this.field));
+  // In a head-on encounter the yielder's right is the leader's left. Never
+  // try the opposite shoulder merely because that search was cheaper.
+  for(const offset of encounter?[5]:[5,7,9])for(const sign of encounter?[-1]:[side,-side]){
+   const goal={x:unit.x+right.x*scale*offset*sign,y:unit.y+right.y*scale*offset*sign};
+   const path=yield* this.planManeuverSteps(unit,goal,{scale,allowed,attempts:2,
+    maximumLegs:encounter?12:offset===5?9:offset===7?12:15,reverseBudget:scale*(encounter?4:6),
+    accept:(pose,legs)=>lateral(pose)*sign>scale*1.3&&distance(pose,unit)>scale*.6&&clearLane(pose)&&canReturn(pose,legs)
+     &&(!encounter||-Math.sin(pose.heading)*encounter.ux+Math.cos(pose.heading)*encounter.uy>.85)});
    if(path)return {legs:path,forward};
   }
   return null;
  }
- recoverTrafficCluster(unit,includeParked=false,blockers,{aisleOnly=false}={}){
+ recoverTrafficCluster(...args){this.finishPendingStep();return completeSteps(this.recoverTrafficClusterSteps(...args));}
+ *recoverTrafficClusterSteps(unit,includeParked=false,blockers,{aisleOnly=false}={}){
   const scale=this.config.worldScale;
   const idle=other=>!other.path.length&&!other.task&&!other.builderWorking&&!other.tool&&!other.foldTime;
   const neighbours=this.state.units.filter(other=>other.owner===unit.owner&&other.hp>0
@@ -822,8 +1228,9 @@ export class Mission{
     if(sweptBlocker||vehicleClearance(current,other,scale,this.field)<scale*.52)cluster.push(other);
    }
   }
-  if(cluster.length<2||cluster.some(other=>other.detour||other.trafficHold))return false;
+  if(cluster.length<2||cluster.some(other=>other.detour||other.trafficHold||other.traffic))return false;
   const yieldSpace=(vehicle,legs,rough=true)=>{
+   rememberYieldHome(vehicle,cluster.filter(other=>other!==vehicle&&other.path.length),rough,this.state.time,this);
    vehicle.detour={legs,parking:true,rough,idleYield:true,blocked:0};
    vehicle.trafficRest=this.state.time+6;
    for(const other of cluster)if(other!==vehicle&&other.path.length)other.trafficHold=vehicle.id;
@@ -831,7 +1238,7 @@ export class Mission{
   };
   if(includeParked&&cluster.length>=4
    &&(aisleOnly||cluster.every(other=>other===unit||vehicleClearance(unit,other,scale,this.field)>=0))
-   &&this.clearParkedAisle(unit,neighbours.filter(idle),yieldSpace))return true;
+   &&(yield* this.clearParkedAisleSteps(unit,neighbours.filter(idle),yieldSpace)))return true;
   if(aisleOnly)return false;
   const centre=cluster.reduce((sum,other)=>({x:sum.x+other.x/cluster.length,y:sum.y+other.y/cluster.length}),{x:0,y:0});
   // A van on a forbidden slope needs to gain ground along its route as it separates.
@@ -847,7 +1254,7 @@ export class Mission{
    const goal=escaping?escapePoint:{x:vehicle.x+offset.x/radius*scale*4.5,y:vehicle.y+offset.y/radius*scale*4.5};
    const others=cluster.filter(other=>other!==vehicle);
    const allowed=(from,to)=>this.vehicleMotionClear(vehicle,from,to,.60);
-   const legs=planManeuver(vehicle,goal,{scale,allowed,attempts:2,maximumLegs:escaping?10:6,
+   const legs=yield* this.planManeuverSteps(vehicle,goal,{scale,allowed,attempts:2,maximumLegs:escaping?10:6,
     accept:pose=>(!escaping||distance(pose,goal)<distance(vehicle,goal)-scale)
      &&distance(vehicle,pose)>scale*2.5&&distance(pose,centre)>radius+scale*1.3
      &&others.every(other=>vehicleClearance(pose,other,scale,this.field)>scale*.4)});
@@ -856,6 +1263,21 @@ export class Mission{
     continue;
    }
    if(includeParked)return yieldSpace(vehicle,legs);
+   // Advancing the front of an aligned file is departure, not yielding to
+   // the vehicle behind it. Parking here would recreate the obstruction and
+   // hold the whole file until the unrelated nine-second lease expired.
+   const forward={x:-Math.sin(vehicle.heading),y:Math.cos(vehicle.heading)};
+   const sameCourse=other=>{
+    const point=other.path[0],d=point&&distance(other,point);
+    return d>.1&&Math.cos(other.heading-vehicle.heading)>.85
+     &&((point.x-other.x)*forward.x+(point.y-other.y)*forward.y)/d>.85;
+   };
+   if(legs.every(leg=>leg.direction===1&&leg.curve===0)&&sameCourse(vehicle)&&others.every(sameCourse)){
+    const departure=[{direction:1,curve:0,remaining:legs.reduce((sum,leg)=>sum+leg.remaining,0)}];
+    const normal=checkManeuver(vehicle,departure,scale,(from,to)=>this.vehicleMotionClear(vehicle,from,to));
+    vehicle.detour={legs:departure,parking:false,rough:!normal,blocked:0};
+    return true;
+   }
    if(others.length===1&&(blockers?.has(vehicle)||blockers?.has(others[0]))
     &&vehicleClearance(vehicle,others[0],scale,this.field)>=scale*.52){
     // Once this manoeuvre clears a known blocker, both vans can resume.
@@ -871,7 +1293,8 @@ export class Mission{
   }
   return false;
  }
- clearParkedAisle(unit,parked,yieldSpace){
+ clearParkedAisle(...args){this.finishPendingStep();return completeSteps(this.clearParkedAisleSteps(...args));}
+ *clearParkedAisleSteps(unit,parked,yieldSpace){
   // A boxed vehicle must drive along its row before it has room to turn.
   const scale=this.config.worldScale,fx=-Math.sin(unit.heading),fy=Math.cos(unit.heading);
   const along=other=>(other.x-unit.x)*fx+(other.y-unit.y)*fy;
@@ -885,9 +1308,9 @@ export class Mission{
     const legs=[{direction,curve:0,remaining:length}];
     const exit=checkManeuver(unit,legs,scale,allowed);
     if(!exit)continue;
-    const path=this.vehiclePath(exit,unit.task,{ignoreUnits,maxGoalDistance:8,fallback:false});
+    const path=(yield* this.vehiclePathSteps(exit,unit.task,{ignoreUnits,maxGoalDistance:8,fallback:false}));
     if(!path?.length)continue;
-    const onward=planManeuver(exit,path[0],{scale,allowed,attempts:2,reverseBudget:0,maximumLegs:7});
+    const onward=yield* this.planManeuverSteps(exit,path[0],{scale,allowed,attempts:2,reverseBudget:0,maximumLegs:7});
     if(!onward)continue;
     unit.path=path;
     unit.detour={legs:[...legs,...onward],parking:false,blocked:0};
@@ -910,35 +1333,78 @@ export class Mission{
   }
   return false;
  }
- move(unit,dt){
+ move(...args){this.finishPendingStep();return completeSteps(this.moveSteps(...args));}
+ *moveSteps(unit,dt){
+  if(isInfantry(unit))return this.walk(unit,dt);
+  yield* resumeYieldHome(this,unit);
+  yield* updateCombatParking(this,unit);
+  yield* prepareTrafficDeparture(this,unit);
   const stop=()=>{unit.driveSpeed=0;unit.steering=(unit.steering??0)*.68;};
   const idleYield=!unit.path.length&&unit.detour?.idleYield;
   if(!unit.path.length&&!idleYield){stop();delete unit.detour;delete unit.traffic;delete unit.trafficHold;delete unit.passingLane;delete unit.passage;return false;}
   const gate=unit.passage;
+  const passageAdmission=this.trafficCoordinator.passageDecisions.get(unit.id);
+  if(passageAdmission&&!passageAdmission.admitted&&!unit.detour&&passageAdmission.limit<.01&&(unit.driveSpeed??0)<.01){
+   navigationDecision(unit,'WAITING_RESERVATION','opposing-passage-batch',passageAdmission.yieldTo,'admit-after-actual-exit');
+   stop();return false;
+  }
+  // Arrival tolerance must not occupy another member's reserved parking
+  // slot. Otherwise the first van parks across the tail's approach.
+  if(!gate&&!unit.detour?.arrival&&unit.combatGroup&&unit.task?.type==='attack-move'&&distance(unit,unit.task)<this.config.worldScale*4
+    &&this.nav.lineClear(unit,unit.task,false,true)&&this.vehicleMotionClear(unit,unit,unit)
+    &&!this.nearbyUnits(unit,this.config.worldScale*20).some(other=>{
+      if(other===unit||other.hp<=0||other.combatGroup!==unit.combatGroup||other.task?.type!=='attack-move')return false;
+      const clearance=this.config.worldScale*5.5;
+      if(distance(unit,other.task)<clearance)return true;
+      let from=other;
+      for(const to of other.path){
+       const dx=to.x-from.x,dy=to.y-from.y,t=clamp(((unit.x-from.x)*dx+(unit.y-from.y)*dy)/Math.max(.01,dx*dx+dy*dy),0,1);
+       if(Math.hypot(unit.x-from.x-t*dx,unit.y-from.y-t*dy)<clearance)return true;
+       from=to;
+      }
+      return false;
+    })){
+   unit.path=[];unit.task=null;stop();delete unit.detour;delete unit.traffic;delete unit.trafficHold;delete unit.combatArrivalBlockedAt;
+   if(unit.routeOrder)unit.routeOrder.destination={x:unit.x,y:unit.y};
+   return true;
+  }
   if(gate?.preceding){
    const leader=this.entity(gate.preceding);
    const leaderGate=leader?.passage;
+   const leaderAdmission=leader&&this.trafficCoordinator.passageDecisions.get(leader.id);
+   const alongX=gate.along==='x'?gate.direction:0,alongY=gate.along==='y'?gate.direction:0;
+   const sameFile=leader&&passageAdmission?.admitted&&leaderAdmission?.admitted
+    &&passageAdmission.key===leaderAdmission.key&&!gate.egress&&!leaderGate?.egress
+    &&Math.cos(unit.heading-leader.heading)>.97
+    &&-Math.sin(unit.heading)*alongX+Math.cos(unit.heading)*alongY>.98
+    &&Math.abs((leader.x-unit.x)*alongY-(leader.y-unit.y)*alongX)<this.config.worldScale*.3
+    &&(leader.x-unit.x)*alongX+(leader.y-unit.y)*alongY
+      >footprintSupport(vehicleEnvelope(unit,this.config.worldScale,this.field),alongX,alongY)
+       +footprintSupport(vehicleEnvelope(leader,this.config.worldScale,this.field),alongX,alongY)+this.config.worldScale*.055+.02;
    if(leader?.hp>0&&leader.path.length&&leaderGate?.along===gate.along&&leaderGate.admit===gate.admit
-    &&(leader[gate.along]-gate.admit)*gate.direction<0){
+    &&(leader[gate.along]-gate.admit)*gate.direction<0&&!sameFile){
+    navigationDecision(unit,'WAITING_RESERVATION','passage-predecessor',leader.id,'follow-predecessor');
     stop();return false;
    }
    gate.preceding=null;
   }
   if(unit.trafficHold){
-   if(this.entity(unit.trafficHold)?.detour?.parking){stop();return false;}
+   if(this.entity(unit.trafficHold)?.detour?.parking){navigationDecision(unit,'YIELDING','vehicle-clearing-passage',unit.trafficHold,'resume-when-clear');stop();return false;}
    delete unit.trafficHold;
   }
   const egress=gate?.egress;
   const scale=this.config.worldScale;
   if(egress?.phase==='approach'&&!egress.admitted&&distance(unit,egress.entry)<scale*7){
-   if(egress.admitAfter>this.state.time){stop();return false;}
-   if(!passageStillOpen(this,egress)){egress.admitAfter=this.state.time+1.2;stop();return false;}
+   // Replay the already planned sweep; this does not run a new path search.
+   // A departing/destroyed blocker releases admission on the next step.
+   if(!passageStillOpen(this,egress)){navigationDecision(unit,'WAITING_RESERVATION','exit-occupied',null,'recheck-planned-sweep');stop();return false;}
+   delete egress.admitAfter;
    egress.admitted=true;
   }
   const point=unit.path[0]??unit, next=unit.path[1], d=distance(unit,point);
   const atPivot=egress?.phase==='approach'&&point.x===egress.start.x&&point.y===egress.start.y;
   const precise=!next&&['build','repair'].includes(unit.task?.type);
-  const tolerance=atPivot?.45:precise?.65:2;
+  const tolerance=atPivot?.45:(precise||unit.task?.salvageId)?.65:2;
   const blockers=new Set();
   const applyPose=pose=>{
    const travelled=distance(unit,pose),debt=unit.reverseDebt??0;
@@ -960,7 +1426,8 @@ export class Mission{
    const leader=this.entity(egress.leader);
    const awaitingLeader=leader?.hp>0&&leader.path.length&&leader.passage?.egress
     &&(!advancingThroughExit(leader)||distance(unit,leader)<scale*8);
-   if(awaitingLeader||egress.retryAt>this.state.time){
+   if(awaitingLeader){
+    navigationDecision(unit,'WAITING_RESERVATION','predecessor-in-exit',leader.id,'follow-predecessor');
     stop();return false;
    }
    // Moving vehicles ahead can clear the planned arc before this unit gets
@@ -968,11 +1435,17 @@ export class Mission{
    const obstacles=this.state.units.filter(other=>!advancingThroughExit(other));
    const exitClear=(from,to)=>this.vehicleMotionClear(unit,from,to,.52,undefined,obstacles);
    const end=checkManeuver(unit,egress.legs,scale,exitClear);
-   const legs=end&&distance(end,egress.end)<scale*1.4?egress.legs:
-    planManeuver(unit,egress.end,{scale,allowed:exitClear,attempts:3,maximumLegs:25,reverseBudget:0,
+   let legs=end&&distance(end,egress.end)<scale*1.4?egress.legs:null;
+   if(!legs){
+    // Throttle only a failed expensive search. The cached sweep above is
+    // checked first, so a now-free exit never waits for this cooldown.
+    if(egress.retryAt>this.state.time){navigationDecision(unit,'BLOCKED','exit-sweep-blocked',null,'recheck-planned-sweep');stop();return false;}
+    legs=yield* this.planManeuverSteps(unit,egress.end,{scale,allowed:exitClear,attempts:3,maximumLegs:25,reverseBudget:0,
      accept:pose=>distance(pose,egress.end)<scale*.65&&Math.cos(pose.heading-egress.end.heading)>.94
       &&this.nav.lineClear(pose,egress.end,false,true)});
-   if(!legs){egress.retryAt=this.state.time+1.8;stop();return false;}
+   }
+   if(!legs){egress.retryAt=this.state.time+1.8;navigationDecision(unit,'BLOCKED','no-local-exit',null,'recheck-planned-sweep');stop();return false;}
+   delete egress.retryAt;
    unit.detour={legs:legs.map(leg=>({...leg})),passageExit:true,blocked:0};
    egress.phase='turning';
   }
@@ -986,9 +1459,10 @@ export class Mission{
     delete unit.traffic;unit.trafficRest=this.state.time+1.2;
     if(unit.detour?.parking)delete unit.detour;
    }else if(traffic.phase==='parked'){
+    navigationDecision(unit,'YIELDING','reserved-passing-order',leader.id,'resume-after-passing');
     stop();return false;
    }else if(traffic.phase==='seek'&&!unit.detour){
-    const park=this.parkingManeuver(unit,leader,allowed);
+    const park=yield* this.parkingManeuverSteps(unit,leader,allowed);
     if(park){
      unit.detour={legs:park.legs,parking:true,blocked:0};
      traffic.phase='move';traffic.forward=park.forward;
@@ -996,21 +1470,50 @@ export class Mission{
     else{delete unit.traffic;unit.trafficRest=this.state.time+2;}
    }
   }
+  const pickup=!next&&unit.task?.salvageId&&this.state.salvage.items.find(item=>item.id===unit.task.salvageId);
+  if(pickup&&!unit.detour&&d<scale*6&&this.state.time>=(unit.pickupRetryAt??0)){
+   const touches=pose=>touchesSalvage({...pose,previousX:pose.x,previousY:pose.y,previousHeading:pose.heading},pickup,scale);
+   if(!touches(unit)){
+    const legs=yield* this.planManeuverSteps(unit,pickup,{scale,allowed,attempts:2,maximumLegs:8,reverseBudget:scale*6,accept:touches});
+    if(legs)unit.detour={legs,blocked:0,pickup:true};
+    else unit.pickupRetryAt=this.state.time+1;
+   }
+  }
   if(unit.detour){
    const plan=unit.detour,leg=plan.legs[0];
-   const throughSpeed=plan.legs[1]?.direction===leg.direction
+   const throughSpeed=plan.departure?plan.departureSpeed??13:plan.legs[1]?.direction===leg.direction
     ?plan.passageExit?16:plan.parking&&!plan.rough?8:0:0;
-   const step=maneuverStep(unit,leg,dt,{scale,allowed:plan.rough?roughAllowed:allowed,crawl:!!plan.rough,
-    throughSpeed,forwardSpeed:plan.passageExit?18:13});
+   const detourAllowed=plan.rough?roughAllowed:allowed;
+   const admitted=(from,to)=>{
+    if(!detourAllowed(from,to))return false;
+    if(!plan.departure){
+     const blocker=maneuverAdmissionBlocker(this,unit,from,to,dt);
+     if(blocker){blockers.add(blocker);return false;}
+    }
+    return true;
+   };
+   const step=maneuverStep(unit,leg,dt,{scale,allowed:admitted,crawl:!!plan.rough,
+    throughSpeed,forwardSpeed:plan.departure?plan.departureSpeed??13:plan.passageExit?18:13});
    if(step){
     applyPose(step.pose);
+    recordYieldStep(unit,plan,leg,step.length);
     leg.remaining-=step.length;
     plan.blocked=0;
     if(leg.remaining<1e-6){
      plan.legs.shift();
-     if(plan.legs[0]?.direction!==leg.direction)unit.driveSpeed=0;
+     if(plan.legs[0]?.direction!==leg.direction&&!(plan.departure&&!plan.legs.length&&unit.path.length))unit.driveSpeed=0;
     }
     if(!plan.legs.length){
+     if(plan.yieldReturning)delete unit.yieldReturn;
+     if(plan.yieldHandoff){
+      const other=this.entity(plan.yieldHandoff.id),legs=plan.yieldHandoff.legs;
+      if(other?.hp>0&&!other.path.length&&!other.task&&!other.detour
+       &&checkManeuver(other,legs,scale,(from,to)=>this.vehicleMotionClear(other,from,to))){
+       rememberYieldHome(other,[unit],false,this.state.time,this);
+       other.detour={legs,parking:true,idleYield:true,blocked:0};
+       unit.trafficHold=other.id;
+      }
+     }
      if(plan.parking&&unit.traffic)unit.traffic.phase='parked';
      if(plan.passageExit&&gate)delete gate.egress;
      delete unit.detour;delete unit.driveWatch;
@@ -1018,6 +1521,7 @@ export class Mission{
     return true;
    }
    stop();
+   navigationDecision(unit,'BLOCKED','manoeuvre-sweep-blocked',blockers.values().next().value?.id??null,'local-recovery');
    if(plan.passageExit&&[...blockers].some(advancingThroughExit))return false;
    plan.blocked+=dt;
    if(plan.blocked<1)return false;
@@ -1039,7 +1543,7 @@ export class Mission{
 
   const repair=unit.task?.type==='repair';
   const workTarget=repair||precise&&d<4?this.entity(unit.task.targetId):null;
-  const targetStopped=!repair||workTarget&&Math.hypot(workTarget.x-workTarget.previousX,workTarget.y-workTarget.previousY)<.05;
+  const targetStopped=!repair||workTarget&&(!this.config.units[workTarget.kind]||Math.hypot(workTarget.x-workTarget.previousX,workTarget.y-workTarget.previousY)<.05);
   const atWork=workTarget&&targetStopped&&this.canWorkHere(unit,workTarget);
   const canRoundCorner=!atPivot&&next&&d<Math.max(5,Math.min(10,(unit.driveSpeed??0)*.42))
    &&this.nav.lineClear(unit,next,false,true);
@@ -1048,50 +1552,99 @@ export class Mission{
    stop();
    return true;
   }
+  const finalTravel=!next&&['move','attack-move'].includes(unit.task?.type);
+  const fitsBorrowedHome=!finalTravel||borrowedHomeClear(this,unit);
+  if(finalTravel&&!fitsBorrowedHome&&d<scale*.7){
+   const parking=yield* this.planManeuverSteps(unit,unit.task,{scale,allowed,attempts:2,
+    tolerance:.5,maximumLegs:8,reverseBudget:scale*3,
+    accept:pose=>distance(pose,unit.task)<1.95&&borrowedHomeClear(this,unit,pose)});
+   if(parking){unit.detour={legs:parking,arrival:true,parking:false,blocked:0};return false;}
+  }
   // A position within the normal driving tolerance can still be outside the
   // projector's reach at the top layer. Keep driving to the checked work spot.
-  if(atWork||d<(precise?workArrivalTolerance:tolerance)||canRoundCorner){
+  if(atWork||d<(precise?workArrivalTolerance:tolerance)&&fitsBorrowedHome||canRoundCorner){
    unit.path.shift();
    if(!unit.path.length)stop();
    return true;
   }
   const course={x:(point.x-unit.x)/d,y:(point.y-unit.y)/d};
   const cruising=!precise&&unit.task?.type!=='clear-site';
-  const paved=cruising?this.nav.roads.rightLane(unit,point,scale):null;
-  const roadLane=paved&&this.nav.lineClear(unit,paved,false,true,.52,true)?paved:null;
-  const passing=cruising&&!roadLane?this.passingLane(unit,point,course,scale):null;
-  const waypoint=roadLane??passing??point,remaining=distance(unit,waypoint);
+  const planned=this.trafficCoordinator.intents.get(unit.id);
+  const {waypoint,roadLane,course:motionCourse}=planned?.point===point?planned:this.drivingIntent(unit,point,course,scale);
+  const remaining=distance(unit,waypoint);
   const slope=this.field.gradientAt(unit.x,unit.y);
   const slopeBlockers=Math.hypot(slope.x,slope.y)>=.42?blockers:undefined;
   const grade=(slope.x*(waypoint.x-unit.x)+slope.y*(waypoint.y-unit.y))/Math.max(1,remaining);
-  const motionCourse=remaining>0?{x:(waypoint.x-unit.x)/remaining,y:(waypoint.y-unit.y)/remaining}:course;
   const forward={x:-Math.sin(unit.heading),y:Math.cos(unit.heading)};
   const aligned=forward.x*motionCourse.x+forward.y*motionCourse.y>.72;
   // Braking for a parked van can stop us before a movement sweep ever hits it.
   const stoppedObstacles=new Set();
+  const coordinatorLimit=cruising?this.trafficCoordinator.limit(unit):Infinity;
   // On a sharp turn, brake for the current heading and let the sweep handle
-  // the final low-speed manoeuvre.
-  const checkingTurn=cruising&&!aligned&&(unit.driveSpeed??0)>scale*2.5;
-  const trafficLimit=cruising&&aligned?this.trafficSpeed(unit,motionCourse,roadLane,scale,stoppedObstacles)
-   :checkingTurn?Math.max(scale,this.trafficSpeed(unit,forward,null,scale,stoppedObstacles)):Infinity;
-  const speed=this.unitSpec(unit).speed*this.nav.roads.factor(unit.x,unit.y);
+  // the final low-speed manoeuvre. A shared yield still has priority.
+  const checkingTurn=cruising&&!aligned;
+  let trafficLimit=cruising&&aligned?this.trafficSpeed(unit,motionCourse,roadLane,scale,stoppedObstacles)
+   :checkingTurn?Math.min(coordinatorLimit,this.trafficSpeed(unit,forward,null,scale,stoppedObstacles)):coordinatorLimit;
+  const speed=this.unitSpec(unit).speed*this.nav.roads.factor(unit.x,unit.y)*damageMobility(unit.damage);
+  if(unit.navigation)unit.navigation.desiredSpeed=speed;
+  if(cruising)trafficLimit=Math.min(trafficLimit,turningHeadway(this,unit,waypoint,dt,scale,stoppedObstacles));
+  let contactSpeed;
+  const onBlockedContact=speed=>{contactSpeed=speed;};
   let pose=driveStep(unit,waypoint,dt,{speed,grade,scale,tolerance,trafficLimit,
-   reverseLimit:unit.task?.type==='clear-site'?scale*4:precise?scale*1.5:0,allowed});
+   reverseLimit:unit.task?.type==='clear-site'?scale*4:precise?scale*1.5:0,allowed,onBlockedContact});
   if(!pose&&aligned&&cruising&&trafficLimit>speed*.25&&[...blockers].some(other=>
    other.owner===unit.owner&&Math.cos(unit.heading-other.heading)>.85)){
    const forward={x:unit.x-Math.sin(unit.heading)*scale*6,y:unit.y+Math.cos(unit.heading)*scale*6};
-   pose=driveStep(unit,forward,dt,{speed:Math.min(9,speed),grade,scale,tolerance,allowed});
+   pose=driveStep(unit,forward,dt,{speed:Math.min(9,speed),grade,scale,tolerance,allowed,onBlockedContact});
   }
+  const impactSpeed=pose?.impactSpeed??(!pose?contactSpeed:undefined);if(pose)delete pose.impactSpeed;
+  if((!pose||pose.driveSpeed<=.01)&&trafficLimit<=.01&&!blockers.size){
+   const decision=this.trafficCoordinator.decisions.get(unit.id);
+   const merge=Object.values(unit.mergeTraffic??{}).find(item=>item.leader!==unit.id&&this.entity(item.leader)?.hp>0);
+   const blocker=decision?.yieldTo??merge?.leader??stoppedObstacles.values().next().value?.id??unit.passingLane?.otherId??null;
+   navigationDecision(unit,'YIELDING',decision?'junction-reservation':merge?'road-merge':'headway',blocker,'resume-when-clear',speed);
+  }
+  else if(!pose)navigationDecision(unit,'BLOCKED',blockers.size?'vehicle-sweep-blocked':'terrain-or-steering-blocked',blockers.values().next().value?.id??null,'local-recovery',speed);
   if(pose)applyPose(pose);else stop();
+  if(impactSpeed){this.vehicleCollision(unit,impactSpeed,blockers);if(unit.hp<=0)return !!pose;}
+
+  if(unit.passingLane&&(unit.driveSpeed??0)<scale*.18
+   &&this.trafficCoordinator.intents.get(unit.id)?.trafficLimit===0
+   &&(yield* this.requestPassageSteps(unit,blockers)))return !!pose;
 
   let watch=unit.driveWatch;
   const resuming=unit.trafficRecoveryUntil>this.state.time;
   if(!watch||watch.x!==point.x||watch.y!==point.y){
-   watch=unit.driveWatch={x:point.x,y:point.y,distance:d,elapsed:0,blocked:0,
-    attempts:resuming?(watch?.attempts??0):0,stalledAt:resuming?watch?.stalledAt:undefined};
+   const sameFailure=watch?.origin&&distance(unit,watch.origin)<scale*.25;
+   // Large formations must not all launch a costly recovery search on the
+   // same tick. Only the first retry is staggered; collisions stay immediate.
+   let phase=0;
+   if(this.state.units.length>=128){let hash=0;for(const c of unit.id)hash=(hash*31+c.charCodeAt(0))>>>0;phase=(hash%10)*.1;}
+   watch=unit.driveWatch={x:point.x,y:point.y,distance:d,elapsed:-phase,blocked:-phase,
+    origin:sameFailure?watch.origin:{x:unit.x,y:unit.y},
+    attempts:resuming||sameFailure?(watch?.attempts??0):0,stalledAt:resuming?watch?.stalledAt:undefined};
   }
   watch.elapsed+=dt;
   watch.blocked=pose?0:(watch.blocked??0)+dt;
+  const waiting=trafficLimit<speed*.3&&!blockers.size&&(!pose||pose.driveSpeed<speed*.14);
+  const mergeQueue=waiting&&Object.values(unit.mergeTraffic??{}).some(lease=>{
+   const leader=this.entity(lease.leader);
+   return lease.leader!==unit.id&&lease.expires>=this.state.time&&leader?.hp>0&&leader.path.length
+    &&(planned?.point===point&&planned.mergeYieldTo===leader.id
+     ||roadLane&&lease.path===roadLane.path&&lease.direction===roadLane.direction);
+  });
+  // A low speed limit is not itself a queue: the steering probe can also
+  // fail on terrain. Only a live reservation/merge dependency suspends
+  // recovery; otherwise a safe alternative arc must be attempted now.
+  const queued=waiting&&(this.trafficCoordinator.queueing(unit)||mergeQueue);
+  const resumedQueue=watch.queued&&!queued;
+  watch.queued=queued;
+  if(queued||resumedQueue){
+   // Waiting at a reservation is not failed progress. Start the stall clock
+   // from the release, so acceleration cannot trigger a spurious detour.
+   watch.distance=d;watch.elapsed=0;watch.blocked=0;watch.attempts=0;delete watch.stalledAt;
+   return !!pose;
+  }
   const stoppedPair=()=>!pose&&!gate&&!unit.traffic&&slopeBlockers?.size===1&&[...slopeBlockers].some(other=>other.owner===unit.owner
    &&other.path.length&&!other.traffic&&!other.passage&&(other.driveSpeed??0)<scale*.18
    &&vehicleClearance(unit,other,scale,this.field)>=scale*.52);
@@ -1099,25 +1652,30 @@ export class Mission{
    other.hp>0&&other.owner===unit.owner&&(other.driveSpeed??0)<scale*.18));
   const blockDelay=stoppedPair() ? .55 : nearbyStall&&this.state.units.length<128 ? .35 : .85;
   if(watch.elapsed<2.1&&watch.blocked<blockDelay)return !!pose;
-  const waiting=trafficLimit<speed*.3&&!blockers.size&&(!pose||pose.driveSpeed<speed*.14);
-  unit.queueSince=waiting?unit.queueSince??this.state.time:undefined;
-  const queued=waiting&&!stoppedObstacles.size&&this.state.time-unit.queueSince<2.4;
-  const jammed=!queued&&(watch.distance-d<2.2||watch.blocked>=blockDelay);
+  const jammed=watch.distance-d<2.2||watch.blocked>=blockDelay;
   watch.distance=d;watch.elapsed=0;watch.blocked=0;
   if(!jammed){watch.attempts=0;delete watch.stalledAt;return !!pose;}
+  const recoveryCondition=!pose?recoveryConditions(this,unit):null;
+  if(recoveryCondition&&unchangedRecoveryFailure(unit,recoveryCondition)){
+   navigationDecision(unit,'BLOCKED','unchanged-local-obstruction',blockers.values().next().value?.id
+    ??stoppedObstacles.values().next().value?.id??null,'retry-after-obstruction-changes',speed);
+   return false;
+  }
+  const recoveryRoute=unit.path.map(point=>point.x+','+point.y).join(';');
   if(resuming&&(!watch.stalledAt||distance(unit,watch.stalledAt)>=scale*.75)){
    watch.stalledAt={x:unit.x,y:unit.y};watch.attempts=0;
   }
   watch.attempts=(watch.attempts??0)+1;
   if(egress?.phase==='approach'){
    if(blockers.size||trafficLimit<speed*.4)return !!pose;
-   const local=planManeuver(unit,point,{scale,allowed,tolerance,attempts:2,reverseBudget:scale*2,maximumLegs:5});
+   const local=yield* this.planManeuverSteps(unit,point,{scale,allowed,tolerance,attempts:2,reverseBudget:scale*2,maximumLegs:5});
    if(local)unit.detour={legs:local,parking:false,blocked:0};
    return !!pose;
   }
   const target=unit.task?.targetId?this.entity(unit.task.targetId):null;
-  const travel=['move','attack-move'].includes(unit.task?.type);
-  if(travel&&stoppedPair()&&this.recoverTrafficCluster(unit,false,slopeBlockers))return !!pose;
+  const travel=['move','attack-move','combat-position'].includes(unit.task?.type);
+  const fixedGoal=travel&&unit.routeOrder&&!unit.combatParking;
+  if(travel&&stoppedPair()&&(yield* this.recoverTrafficClusterSteps(unit,false,slopeBlockers)))return !!pose;
   for(const other of stoppedObstacles)blockers.add(other);
   // A parked yielder and the vehicle waiting for it form a temporary queue.
   // Give that queue time to clear before planning a detour around both hulls.
@@ -1131,14 +1689,14 @@ export class Mission{
   // along the one straight aisle that still permits a checked exit.
   if(travel&&!pose&&watch.attempts<=2&&unit.owner==='rai'&&[...blockers].some(other=>
    other.owner===unit.owner&&other.hp>0&&!other.path.length&&vehicleClearance(unit,other,scale,this.field)<0)
-   &&this.recoverTrafficCluster(unit,true,blockers,{aisleOnly:true}))return !!pose;
-  if(this.requestPassage(unit,blockers))return !!pose;
+   &&(yield* this.recoverTrafficClusterSteps(unit,true,blockers,{aisleOnly:true})))return !!pose;
+  if(yield* this.requestPassageSteps(unit,blockers))return !!pose;
   const destination=travel||unit.task?.type==='clear-site'?unit.task:unit.path.at(-1);
   const stalledNearParked=travel&&[...blockers].some(other=>!other.path.length);
   const routeStale=stalledNearParked&&unit.trafficReplan&&distance(unit,unit.trafficReplan)<scale*.7
    &&this.state.time-unit.trafficReplan.time<4;
   if(blockers.size&&watch.attempts%2===1&&!routeStale){
-   const bypass=this.vehiclePath(unit,destination,{avoidMoving:true,fallback:false,maxGoalDistance:precise?.01:8});
+   const bypass=(yield* this.vehiclePathSteps(unit,destination,{avoidMoving:true,fallback:false,maxGoalDistance:precise||fixedGoal?.01:8}));
    if(bypass?.length&&distance(bypass[0],point)>4&&distance(unit,bypass[0])>4){
     unit.path=bypass;
     if(stalledNearParked)unit.trafficReplan={x:unit.x,y:unit.y,time:this.state.time};
@@ -1147,12 +1705,57 @@ export class Mission{
   }
   const reverseBudget=Math.max(0,scale*4-(unit.reverseDebt??0));
   const maneuverOptions={scale,allowed,tolerance,attempts:watch.attempts,failedArcs:unit.failedArcs?.legs??[]};
-  const legs=planManeuver(unit,point,{...maneuverOptions,reverseBudget:0})
-   ??(reverseBudget>=scale*.6?planManeuver(unit,point,{...maneuverOptions,reverseBudget}):null);
+  // A coarse grid corner can end up behind a vehicle that has already
+  // cleared it while yielding. Repeatedly accepting a small manoeuvre back
+  // toward that corner prevents the later route-repair branch from running.
+  // Discard only an intermediate point, and only after checking a complete
+  // kinematic connector to its successor against terrain and every hull.
+  const behind=(point.x-unit.x)*forward.x+(point.y-unit.y)*forward.y<0;
+  const passedCorner=next&&(unit.x-point.x)*(next.x-point.x)+(unit.y-point.y)*(next.y-point.y)>0;
+  const cornerPose={...point,heading:unit.heading,kind:unit.kind};
+  const cornerBlockers=new Set();
+  const occupiedCorner=next&&!this.vehicleMotionClear(unit,cornerPose,cornerPose,.52,cornerBlockers);
+  if(occupiedCorner&&watch.attempts>=2){
+   if(cornerBlockers.size&&(yield* this.requestPassageSteps(unit,cornerBlockers)))return !!pose;
+   const replacement=yield* this.vehiclePathSteps(unit,destination,{avoidMoving:true,avoidPoint:point,
+    fallback:false,maxGoalDistance:fixedGoal ? .01 : 8});
+   if(replacement?.length&&distance(replacement[0],point)>4){
+    unit.path=replacement;delete unit.driveWatch;delete unit.failedArcs;return !!pose;
+   }
+  }
+  if(next&&(behind&&passedCorner||occupiedCorner)&&watch.attempts>=2){
+   for(let index=Math.min(2,unit.path.length-1);index>=1;index--){
+    const successor=unit.path[index];if(distance(unit,successor)>=scale*12)continue;
+    const connector=yield* this.planManeuverSteps(unit,successor,{scale,allowed,attempts:2,
+     maximumLegs:14,reverseBudget,accept:pose=>distance(pose,successor)<tolerance});
+    if(connector){
+     // Retain normal headway/traffic control while following the connector;
+     // its feasibility proof does not reserve moving neighbours in time.
+     unit.path.splice(0,index);
+     delete unit.driveWatch;delete unit.failedArcs;
+     return !!pose;
+    }
+   }
+  }
+  // A temporary connector around a former queue can remain ahead of us,
+  // yet be too close to reach with the current steering radius. Prove the
+  // entire drive to its successor, including long final segments, before
+  // dropping that intermediate point. Passage pivots retain their contract.
+  if(next&&travel&&!gate&&watch.attempts>=2){
+   for(let index=Math.min(2,unit.path.length-1);index>=1;index--){
+    if(yield* checkedRouteShortcut(this,unit,unit.path[index],{
+     allowed:(from,to)=>this.vehicleMotionClear(unit,from,to),tolerance})){
+     unit.path.splice(0,index);delete unit.driveWatch;delete unit.failedArcs;
+     return !!pose;
+    }
+   }
+  }
+  const legs=(yield* this.planManeuverSteps(unit,point,{...maneuverOptions,reverseBudget:0}))
+   ??(reverseBudget>=scale*.6?(yield* this.planManeuverSteps(unit,point,{...maneuverOptions,reverseBudget})):null);
   if(legs){unit.detour={legs,parking:false,blocked:0};return !!pose;}
   if(target&&['build','repair'].includes(unit.task.type)&&watch.attempts>=2&&this.state.time>=(unit.workEscapeRetryAt??0)){
    unit.workEscapeRetryAt=this.state.time+4;
-   const escape=this.workRouteExit(unit,destination);
+   const escape=yield* this.workRouteExitSteps(unit,destination);
    if(escape){
     unit.path=escape.path;
     unit.detour={legs:escape.legs,parking:false,blocked:0};
@@ -1160,8 +1763,8 @@ export class Mission{
    }
   }
   if(blockers.size&&(watch.attempts>=2||travel&&stoppedPair())&&unit.task?.type!=='clear-site'){
-   if(this.recoverTrafficCluster(unit,false,slopeBlockers)
-    ||travel&&unit.owner==='rai'&&this.recoverTrafficCluster(unit,true,slopeBlockers))return !!pose;
+   if((yield* this.recoverTrafficClusterSteps(unit,false,slopeBlockers))
+    ||travel&&unit.owner==='rai'&&(yield* this.recoverTrafficClusterSteps(unit,true,slopeBlockers)))return !!pose;
   }
   if(!blockers.size&&watch.attempts>=2){
    const [col,row]=this.nav.grid(unit.x,unit.y),steepStart=!this.nav.walkable[row*this.nav.size+col];
@@ -1174,53 +1777,57 @@ export class Mission{
      const first={direction:Math.sign(length),curve:0,remaining:Math.abs(length)};
      const exit=checkManeuver(unit,[first],scale,roughAllowed);
      if(!exit)continue;
-     const path=this.vehiclePath(exit,destination,{ignoreUnits:new Set([unit]),avoidMoving:true,fallback:false,maxGoalDistance:8});
+     const path=(yield* this.vehiclePathSteps(exit,destination,{ignoreUnits:new Set([unit]),avoidMoving:true,fallback:false,maxGoalDistance:fixedGoal?.01:8}));
      if(!path?.length)continue;
-     const onward=planManeuver(exit,path[0],{scale,allowed:roughAllowed,attempts:2,reverseBudget:0,maximumLegs:5});
+     const onward=yield* this.planManeuverSteps(exit,path[0],{scale,allowed:roughAllowed,attempts:2,reverseBudget:0,maximumLegs:5});
      if(!onward)continue;
      unit.path=path;
      unit.detour={legs:[first,...onward],parking:false,rough:true,blocked:0};
      return !!pose;
     }
    }
-   const rough=planManeuver(unit,point,{...maneuverOptions,allowed:roughAllowed,
+   const rough=yield* this.planManeuverSteps(unit,point,{...maneuverOptions,allowed:roughAllowed,
     failedArcs:[],maximumLegs:5,reverseBudget});
    if(rough){unit.detour={legs:rough,parking:false,rough:true,blocked:0};return !!pose;}
   }
   if(next&&watch.attempts>=2){
-   const alternative=this.vehiclePath(unit,destination,{avoidMoving:true,avoidPoint:point,fallback:false,maxGoalDistance:precise?.01:12});
+   const alternative=(yield* this.vehiclePathSteps(unit,destination,{avoidMoving:true,avoidPoint:point,fallback:false,maxGoalDistance:precise||fixedGoal?.01:12}));
    if(alternative?.length&&distance(alternative[0],point)>4){
     unit.path=alternative;return !!pose;
    }
    if(distance(unit,next)<scale*10){
-    const around=planManeuver(unit,next,{...maneuverOptions,reverseBudget});
+    const around=yield* this.planManeuverSteps(unit,next,{...maneuverOptions,reverseBudget});
     if(around){unit.path.shift();unit.detour={legs:around,parking:false,blocked:0};return !!pose;}
    }
   }
-  if(target&&['build','repair'].includes(unit.task.type))unit.path=this.workPath(unit,target)??unit.path;
-  else if(target&&unit.task.type==='attack')unit.path=this.attackPath(unit,target)??unit.path;
-  else if(travel&&watch.attempts>=3&&distance(unit,destination)<scale*12){
+  if(target&&['build','repair'].includes(unit.task.type))unit.path=(yield* this.workPathSteps(unit,target))??unit.path;
+  else if(target&&unit.task.type==='attack')unit.path=(yield* this.attackPathSteps(unit,target))??unit.path;
+  else if(travel&&!unit.combatParking&&watch.attempts>=3&&distance(unit,destination)<scale*12){
    const parkingAllowed=point=>gate?.parkingEdge===undefined||(point[gate.along]-gate.parkingEdge)*gate.direction>=0;
    if(!next&&d<scale*5.5&&watch.attempts%5===3){
-    const parking=this.nearbyParking(unit,destination,allowed,reverseBudget,parkingAllowed);
-    if(parking){
-     unit.path=[parking.point];
-     Object.assign(unit.task,parking.point);
-     if(unit.routeOrder)unit.routeOrder.destination=parking.point;
+    const parking=yield* this.nearbyParkingSteps(unit,destination,allowed,reverseBudget,parkingAllowed);
+    if(parking&&(!fixedGoal||this.nav.lineClear(parking.point,destination,false,true))){
+     // Parking is an intermediate recovery manoeuvre. It cannot silently
+     // replace the accepted destination of a player's movement order.
+     unit.path=fixedGoal?[parking.point,{x:destination.x,y:destination.y}]:[parking.point];
+     if(!fixedGoal)Object.assign(unit.task,parking.point);
      unit.detour={legs:parking.legs,parking:false,blocked:0};
      return !!pose;
     }
    }
-   const parking=this.movePath(unit,destination,[],scale*14,false,parkingAllowed);
-   if(parking?.length&&distance(parking.at(-1),destination)>2){
-    unit.path=parking;
-    Object.assign(unit.task,parking.at(-1));
-    if(unit.routeOrder)unit.routeOrder.destination=parking.at(-1);
+   const parking=(yield* this.movePathSteps(unit,destination,[],scale*14,false,parkingAllowed));
+   if(parking?.length&&distance(parking.at(-1),destination)>2
+    &&(!fixedGoal||this.nav.lineClear(parking.at(-1),destination,false,true))){
+    unit.path=fixedGoal?[...parking,{x:destination.x,y:destination.y}]:parking;
+    if(!fixedGoal)Object.assign(unit.task,parking.at(-1));
    }
-  }else unit.path=this.vehiclePath(unit,destination,{avoidMoving:true,maxGoalDistance:precise?.01:16})??unit.path;
+  }else unit.path=(yield* this.vehiclePathSteps(unit,destination,{avoidMoving:true,maxGoalDistance:precise||fixedGoal?.01:unit.combatParking?4:16,fallback:!unit.combatParking&&!fixedGoal}))??unit.path;
+  if(recoveryCondition&&watch.attempts>=3&&!unit.detour&&unit.path.map(point=>point.x+','+point.y).join(';')===recoveryRoute)
+   rememberRecoveryFailure(unit,recoveryCondition);
   return !!pose;
  }
- nearbyParking(unit,goal,allowed,reverseBudget,parkingAllowed){
+ nearbyParking(...args){this.finishPendingStep();return completeSteps(this.nearbyParkingSteps(...args));}
+ *nearbyParkingSteps(unit,goal,allowed,reverseBudget,parkingAllowed){
   const scale=this.config.worldScale;
   const initialDistance=distance(unit,goal),candidates=[];
   for(const radius of [scale*1.5,scale*2.6,scale*3.7]){
@@ -1239,7 +1846,7 @@ export class Mission{
   }
   candidates.sort((a,b)=>a.score-b.score);
   for(const {point} of candidates.slice(0,7)){
-   const legs=planManeuver(unit,point,{scale,allowed,attempts:2,maximumLegs:6,reverseBudget,
+   const legs=yield* this.planManeuverSteps(unit,point,{scale,allowed,attempts:2,maximumLegs:6,reverseBudget,
     accept:pose=>distance(pose,point)<1.8});
    if(legs)return {point,legs};
   }
@@ -1254,7 +1861,8 @@ export class Mission{
   if(!this.projectorAim(unit,target))return false;
   return !!this.config.units[target.kind]||!!workProjection(unit,{...target,progress:1},this.config,this.field);
  }
- updateBuilder(unit,dt){
+ updateBuilder(...args){this.finishPendingStep();return completeSteps(this.updateBuilderSteps(...args));}
+ *updateBuilderSteps(unit,dt){
   unit.builderWorking=false;
   unit.builderContact=null;
   unit.projector??={yaw:0,pitch:0};
@@ -1280,16 +1888,16 @@ export class Mission{
    return;
   }
   if(working&&!unit.path.length&&this.state.time-(unit.lastRepath??-10)>1){
-   unit.path=this.workPath(unit,target)??[];unit.lastRepath=this.state.time;
+   unit.path=(yield* this.workPathSteps(unit,target))??[];unit.lastRepath=this.state.time;
   }
-  this.move(unit,dt);
+  (yield* this.moveSteps(unit,dt));
   if(unit.task?.type==='move'&&!unit.path.length){
-   if(distance(unit,unit.task)<24){
+   if(distance(unit,unit.task)<(unit.routeOrder?2:24)&&borrowedHomeClear(this,unit)){
     unit.task=null;
     const building=unit.resumeConstructionId&&this.entity(unit.resumeConstructionId);
     if(building&&!building.completed&&!building.clearing&&this.canWorkHere(unit,building))this.order([unit.id],'build',building);
    }
-   else if(this.state.time-(unit.lastRepath??-10)>1){unit.path=this.vehiclePath(unit,unit.task)??[];unit.lastRepath=this.state.time;}
+   else if(this.state.time-(unit.lastRepath??-10)>=.4){unit.path=(yield* this.vehiclePathSteps(unit,unit.task,unit.routeOrder?{fallback:false,maxGoalDistance:.01}:{}))??[];unit.lastRepath=this.state.time;}
   }
  }
  finalizeBuilderContacts(dt){
@@ -1306,40 +1914,98 @@ export class Mission{
    }else unit.builderWorking=false;
   }
  }
- updateUnit(unit,dt){
+ updateUnit(...args){this.finishPendingStep();return completeSteps(this.updateUnitSteps(...args));}
+ *updateUnitSteps(unit,dt){
+  const x=unit.x,y=unit.y;beginNavigationStep(unit);
+  try{return yield* this.executeUnitSteps(unit,dt);}
+  finally{finishNavigationStep(this,unit,dt,x,y);}
+ }
+ *executeUnitSteps(unit,dt){
   if(unit.hp<=0)return;unit.previousX=unit.x;unit.previousY=unit.y;unit.previousHeading=unit.heading;unit.previousWheelDistance=unit.wheelDistance??0;unit.previousSteering=unit.steering??0;unit.cooldown=Math.max(0,unit.cooldown-dt);const spec=this.unitSpec(unit);
-  if(spec.role==='builder'){this.updateBuilder(unit,dt);return;}
+  if(unit.pendingOrder&&shouldAutoRetreat(unit,spec)){
+   // Invalidate only this member's queued command. The planner's revision
+   // checks discard its stale result; retreat search still uses this tick's
+   // normal yielding work budget below.
+   delete unit.pendingOrder;delete unit.commandRevision;
+  }
+  if(unit.pendingOrder){
+   unit.driveSpeed=0;
+   const pending=unit.pendingOrder,blocked=pending.status==='blocked';
+   const unreachable=blocked&&['static-disconnected','destination-terrain-forbidden'].includes(pending.reason);
+   navigationDecision(unit,unreachable?'UNREACHABLE':blocked?'BLOCKED':'GLOBAL_REPLAN',pending.reason??'command-route-pending',pending.blockerId??null,blocked?'await-changed-conditions':'apply-current-order-result');
+   return;
+  }
+  if(unit.task?.artifactId||unit.task?.salvageId){
+   if(yield* updateCombatRetreat(this,unit,spec,dt))return;
+   if(yield* updatePickupOrder(this,unit)){
+    const enemy=spec.damage&&automaticCombatTarget(this,unit,spec);if(enemy)this.attack(unit,enemy,spec);
+    return;
+   }
+  }
+  if(unit.combatRetreat?.forced){
+   if(unit.foldTime>0){unit.foldTime=Math.max(0,unit.foldTime-dt);unit.tool=Math.max(0,unit.tool-dt/2.6);return;}
+   if(yield* updateCombatRetreat(this,unit,spec,dt))return;
+  }
+  if(spec.role==='builder'){(yield* this.updateBuilderSteps(unit,dt));return;}
   if(unit.foldTime>0){unit.foldTime=Math.max(0,unit.foldTime-dt);unit.tool=Math.max(0,unit.tool-dt/2.6);return;}
+  if(yield* updateScavCombat(this,unit,spec,dt))return;
+  if(yield* updateCombatRetreat(this,unit,spec,dt))return;
+  if(yield* updateCombatDeployment(this,unit,spec,dt))return;
   if(unit.task?.type==='attack-move'){
-   const enemy=this.nearestEnemy(unit,spec.range,target=>this.lineOfSight(unit,target));
+   const enemy=automaticCombatTarget(this,unit,spec);
    if(enemy){
+    navigationDecision(unit,'ARRIVED','engaging-visible-target',enemy.id,'resume-after-engagement');
     unit.driveSpeed=0;unit.steering=(unit.steering??0)*.68;
     this.attack(unit,enemy,spec);
     return;
    }
+   yield* updateCombatParking(this,unit);
    if(!unit.path.length){
-    if(distance(unit,unit.task)<24)unit.task=null;
-    else if(this.state.time-(unit.lastRepath??-10)>1){
-     unit.path=this.vehiclePath(unit,unit.task)??[];unit.lastRepath=this.state.time;
+    if(distance(unit,unit.task)<(unit.combatParking?this.config.worldScale*4:unit.routeOrder?2:24)
+      &&(!unit.combatParking||this.nav.lineClear(unit,unit.task,false,true))&&borrowedHomeClear(this,unit))unit.task=null;
+    else if(this.state.time-(unit.lastRepath??-10)>=.4){
+     unit.path=(yield* this.vehiclePathSteps(unit,unit.task,unit.combatParking?{fallback:false,maxGoalDistance:4}:unit.routeOrder?{fallback:false,maxGoalDistance:.01}:{}))??[];unit.lastRepath=this.state.time;
     }
    }
-   this.move(unit,dt);
+   (yield* this.moveSteps(unit,dt));
    return;
   }
   let target=unit.task?.targetId?this.entity(unit.task.targetId):null;
   if(unit.task?.targetId&&(!target||unit.task.type==='build'&&target.completed)){unit.task=null;unit.path=[];if(unit.tool>.01)unit.foldTime=2.6;target=null;}
-  if(unit.owner==='scavs'){
-   if(unit.raidReserve)return;
-   if(!this.inBounds(unit.x,unit.y))return;const enemy=this.nearestEnemy(unit,spec.range*1.7);if(enemy){unit.task={type:'attack',targetId:enemy.id};target=enemy;if(distance(unit,enemy)>spec.range*.9&&(!unit.path.length||this.state.time-(unit.lastRepath??0)>2)){unit.path=this.attackPath(unit,enemy)??[];unit.lastRepath=this.state.time;}}
+  if(unit.task?.type==='attack'&&target&&spec.damage){
+   if(distance(unit,target)<=spec.range&&this.lineOfSight(unit,target)){
+    unit.path=[];navigationDecision(unit,'ARRIVED','engaging-visible-target',target.id,'follow-if-target-leaves-range');this.attack(unit,target,spec);
+   }else if(!unit.path.length||unit.attackRouteTarget&&distance(unit.attackRouteTarget,target)>spec.range*.2){
+    const conditions=combatPositionConditions(this,unit,target);
+    if(unit.attackFailedConditions!==conditions){
+     navigationDecision(unit,'GLOBAL_REPLAN','seeking-target-approach',target.id,'apply-attack-route');
+     unit.path=(yield* this.attackPathSteps(unit,target))??[];
+     unit.attackRouteTarget={x:target.x,y:target.y};
+     if(!unit.path.length)unit.attackFailedConditions=conditions;else delete unit.attackFailedConditions;
+    }
+    if(!unit.path.length)navigationDecision(unit,'BLOCKED','attack-position-unavailable',target.id,'retry-on-obstacle-change');
+   }else unit.attackRouteTarget??={x:target.x,y:target.y};
   }
-  if(unit.task?.type==='attack'&&target&&spec.damage){if(distance(unit,target)<=spec.range&&this.lineOfSight(unit,target)){unit.path=[];this.attack(unit,target,spec);}else if((!unit.path.length||this.state.time-(unit.lastRepath??0)>3)&&this.state.time-(unit.lastRepath??-10)>1){unit.path=this.attackPath(unit,target)??[];unit.lastRepath=this.state.time;}}
-  else if(spec.damage){const enemy=this.nearestEnemy(unit,spec.range);if(enemy)this.attack(unit,enemy,spec);}
+  else if(spec.damage){const enemy=automaticCombatTarget(this,unit,spec);if(enemy)this.attack(unit,enemy,spec);}
   const working=target&&['build','repair'].includes(unit.task?.type)&&!unit.path.length&&distance(unit,this.workPoint(target,unit.task.workOffset??0))<=this.config.builderRangeMetres;
   if(working){unit.path=[];unit.tool=Math.min(1,unit.tool+dt/2.6);unit.aimTarget={x:target.x,y:target.y};if(unit.tool<.99)return;
    if(unit.task.type==='build'&&!target.completed){target.progress=Math.min(1,target.progress+dt/this.buildingSpec(target).seconds);if(target.progress>=1){target.completed=true;this.state.statistics.buildingsCompleted++;this.emit('construction-complete',{kind:target.kind,building:target.id});}}
    else if(unit.task.type==='repair'&&target.hp<target.maxHp&&this.state.energy>dt*1.5){target.hp=Math.min(target.maxHp,target.hp+dt*40);this.state.energy-=dt*1.5;}
    if((unit.task.type==='build'&&target.completed)||(unit.task.type==='repair'&&target.hp>=target.maxHp)){unit.task=null;unit.foldTime=2.6;}
-  }else{if(unit.tool>0){unit.foldTime=2.6;return;}if(target&&['build','repair'].includes(unit.task?.type)&&!unit.path.length&&this.state.time-(unit.lastRepath??-10)>1){unit.path=this.workPath(unit,target);unit.lastRepath=this.state.time;}if(unit.task?.type==='move'&&!unit.path.length){if(distance(unit,unit.task)<24)unit.task=null;else if(this.state.time-(unit.lastRepath??-10)>1){unit.path=this.nav.findPath(unit,unit.task)??[];unit.lastRepath=this.state.time;}}this.move(unit,dt);}
+  }else{
+   if(unit.tool>0){unit.foldTime=2.6;return;}
+   if(target&&['build','repair'].includes(unit.task?.type)&&!unit.path.length&&this.state.time-(unit.lastRepath??-10)>1){
+    unit.path=(yield* this.workPathSteps(unit,target));unit.lastRepath=this.state.time;
+   }
+   if(unit.task?.type==='move'&&!unit.path.length){
+    if(distance(unit,unit.task)<(unit.routeOrder?2:24)&&borrowedHomeClear(this,unit))unit.task=null;
+    else if(this.state.time-(unit.lastRepath??-10)>=.4){
+     unit.path=(yield* this.vehiclePathSteps(unit,unit.task,unit.routeOrder?{fallback:false,maxGoalDistance:.01}:{}))??[];
+     unit.lastRepath=this.state.time;
+    }
+   }
+   yield* this.moveSteps(unit,dt);
+  }
  }
  clearFactoryApron(building,departure,blockers){
   const idle=other=>other.owner===building.owner&&!other.task&&!other.path.length&&!other.detour
@@ -1475,10 +2141,112 @@ export class Mission{
   if(s.camps.every(c=>c.cleared)&&has('generator')&&has('derrick')&&has('factory')&&has('lab')&&(has('bunker')||has('mg-tower'))&&s.statistics.produced>0&&Object.keys(this.config.research).every(key=>s.research[key])&&s.flags.raidWon){s.status='victory';this.cinematic('victory');this.cinematic('outro');this.emit('victory');}
   if(!s.units.some(u=>u.owner==='rai'&&u.hp>0&&this.unitSpec(u).role==='builder')&&!s.buildings.some(b=>b.owner==='rai'&&b.hp>0&&b.completed&&b.kind==='factory')){s.status='defeat';this.emit('defeat',{reason:'Утрачены строители и производство'});}
  }
- tick(dt){if(this.state.status!=='running')return;this.state.time+=dt;for(const unit of this.state.units)this.updateUnit(unit,dt);this.finalizeBuilderContacts(dt);this.updateConstructionSites();this.updateEconomy(dt);for(const b of this.state.buildings)if(b.owner==='scavs'&&b.hp>0){b.cooldown=Math.max(0,b.cooldown-dt);const spec=this.buildingSpec(b);if(spec.damage){const enemy=this.nearestEnemy(b,spec.range);if(enemy)this.attack(b,enemy,spec);}}this.fogTimer+=dt;if(this.fogTimer>=.25){this.fogTimer=0;this.updateFog();}this.updateMission();if(this.navigationDirty){this.rebuildNavigation();this.navigationDirty=false;}}
- advance(seconds){this.accumulator+=Math.max(0,seconds);let ticks=0;while(this.accumulator+1e-8>=this.config.simulationStep){this.accumulator-=this.config.simulationStep;this.tick(this.config.simulationStep);ticks++;}return ticks;}
+ beginTick(dt,budgeted=false){
+  refreshCommandGroups(this);
+  auditNavigationWaits(this);
+  this.state.time+=dt;this.unitIndex.rebuild(this.state.units);
+  this.unitIndexActive=true;
+  try{this.trafficCoordinator.update(this);}finally{this.unitIndexActive=false;}
+  this.pendingTick={dt,cursor:0,units:this.state.units.slice(),budgeted};
+  if(this.state.parkingGoalReleases?.length){
+   this.pendingTick.goalRelease=this.releaseParkingGoalsSteps(new Set(this.state.parkingGoalReleases));
+   delete this.state.parkingGoalReleases;
+  }
+ }
+ continueTick(deadline=Infinity){
+  const pending=this.pendingTick;if(!pending)return true;
+  const {dt}=pending;this.unitIndexActive=true;this.nav.workDeadline=deadline;
+  try{
+   while(pending.goalRelease){
+    if(pending.goalRelease.next().done)pending.goalRelease=null;
+    if(performance.now()>=deadline)return false;
+   }
+   while(pending.cursor<pending.units.length){
+    const unit=pending.units[pending.cursor];
+    pending.iterator??=this.updateUnitSteps(unit,dt);
+    if(!pending.iterator.next().done){if(performance.now()>=deadline)return false;continue;}
+    pending.iterator=null;pending.cursor++;this.unitIndex.update(unit);
+    if(pending.budgeted)this.unitFrameTimes.set(unit,performance.now());
+    if(performance.now()>=deadline&&pending.cursor<pending.units.length)return false;
+   }
+   this.updateProjectiles();updateSalvage(this);updateWrecks(this);this.finalizeBuilderContacts(dt);this.updateConstructionSites();this.updateEconomy(dt);
+   for(const b of this.state.buildings)if(b.owner==='scavs'&&b.hp>0){b.cooldown=Math.max(0,b.cooldown-dt);const spec=this.buildingSpec(b);if(spec.damage){const enemy=this.nearestEnemy(b,spec.range);if(enemy)this.attack(b,enemy,spec);}}
+   this.fogTimer+=dt;if(this.fogTimer>=.25){this.fogTimer=0;this.updateFog();}this.updateMission();if(this.navigationDirty){this.rebuildNavigation();this.navigationDirty=false;}
+   this.pendingTick=null;return true;
+  }finally{this.unitIndexActive=false;this.nav.workDeadline=Infinity;}
+ }
+ vehicleCollision(unit,speed,blockers){
+  const scale=this.config.worldScale,pairs=this.collisionPairs??=new Map(),rockPairs=this.contactRockPairs??=new Map();
+  const vx=-Math.sin(unit.heading)*speed,vy=Math.cos(unit.heading)*speed;
+  for(const other of blockers){
+   if(!vehicleObstacle(other)||other===unit)continue;
+   const contact=vehicleContact(unit,other,scale,this.field);if(contact.gap>1.5||contact.gap<-.25*scale)continue;
+   const v=other.hp>0?(other.driveSpeed??0)*(other.reversing?-1:1):0,n=contact.normal;
+   const closing=((vx+Math.sin(other.heading)*v)*n[0]+(vy-Math.cos(other.heading)*v)*n[1])/scale,power=impactPower(closing);
+   if(closing<=.18)continue;
+   const key=[unit.id,other.id].sort().join('|'),rock=this.state.time-(rockPairs.get(key)??-Infinity)>=.35,
+    damage=power>=1&&this.state.time-(pairs.get(key)??-Infinity)>=.6;
+   if(!rock&&!damage)continue;
+   if(rock){rockPairs.set(key,this.state.time);if(rockPairs.size>512)rockPairs.delete(rockPairs.keys().next().value);}
+   if(damage){pairs.set(key,this.state.time);if(pairs.size>512)pairs.delete(pairs.keys().next().value);}
+   for(const [target,source,sign] of [[unit,other,-1],[other,unit,1]]){
+    const direction=n.map(v=>v*sign),point=contact.point.slice();point[2]=this.field.heightAt(point[0],point[1])+(target.kind==='raider'||target.kind==='command'?1.22:1.65)*scale;
+    if(rock&&!isInfantry(target))kickContactRock(target,direction,closing,this.state.time);
+    if(!damage)continue;
+    const hit=this.resolveVehicleImpact?this.resolveVehicleImpact(target,point,direction):fallbackVehicleImpact(target,point,direction,this.field,scale);
+    if(!hit)continue;
+    if(target.hp>0)this.damage(target,power*.2,source,{...hit,type:'collision',kineticPower:power});
+    else recordDamage(this,target,power,source,{...hit,type:'collision'});
+   }
+  }
+ }
+ freezeWreck(unit){unit.previousX=unit.x;unit.previousY=unit.y;unit.previousHeading=unit.heading;unit.previousWheelDistance=unit.wheelDistance??0;unit.previousSteering=unit.steering??0;unit.driveSpeed=0;unit.path=[];unit.task=null;delete unit.detour;delete unit.traffic;delete unit.trafficHold;}
+ walk(unit,dt){
+  unit.driveSpeed=0;unit.steering=0;unit.reversing=false;
+  const point=unit.path[0];if(!point)return false;
+  const d=distance(unit,point);if(d<1){unit.path.shift();return true;}
+  const travel=Math.min(d,this.unitSpec(unit).speed*dt),heading=Math.atan2(unit.x-point.x,point.y-unit.y);
+  const step=heading=>({x:unit.x-Math.sin(heading)*travel,y:unit.y+Math.cos(heading)*travel,heading,kind:unit.kind});
+  const blockers=new Set();
+  let next=step(heading);
+  if(!this.vehicleMotionClear(unit,unit,next,.6,blockers)){
+   next=null;
+   // The route grid is coarser than a person. Resolve a nearby body with
+   // short checked steps before asking for the same global route again.
+   if(blockers.size)for(const offset of [.45,-.45,.9,-.9,1.35,-1.35]){
+    const side=step(heading+offset);
+    if(this.vehicleMotionClear(unit,unit,side,.6)){next=side;break;}
+   }
+  }
+  if(!next){
+   if(this.state.time-(unit.lastWalkRepath??-10)>1.5){unit.path=this.nav.findPath(unit,unit.path.at(-1))??unit.path;unit.lastWalkRepath=this.state.time;}
+   return false;
+  }
+  unit.x=next.x;unit.y=next.y;unit.heading=next.heading;unit.driveSpeed=travel/dt;unit.wheelDistance=(unit.wheelDistance??0)+travel;
+  if(distance(unit,point)<1)unit.path.shift();return true;
+ }
+ finishPendingStep(){if(this.pendingTick&&!this.unitIndexActive)this.continueTick();}
+ tick(dt){this.continueTick();if(this.state.status!=='running')return;this.beginTick(dt);this.continueTick();}
+ advance(seconds,{budgetMs=Infinity,rate=1}={}){
+  const frameStarted=performance.now();
+  if(!this.commandPlanner&&this.state.commandOrders?.some(order=>['queued','planning'].includes(order.status)))this.commandPlanner=new CommandPlanner(this);
+  this.commandPlanner?.advance(Number.isFinite(budgetMs)?Math.min(2,Math.max(0,budgetMs)):2);
+  this.presentationRate=Math.max(.01,rate);
+  this.accumulator+=Math.max(0,seconds);let ticks=0;
+  const budgeted=Number.isFinite(budgetMs);
+  const backlog=this.accumulator+(this.pendingTick?this.config.simulationStep:0);
+  const catchup=budgetMs>0?Math.min(2.5,Math.max(0,backlog-.1)*20):0;
+  const deadline=budgeted?frameStarted+budgetMs+catchup:Infinity;
+  while(this.pendingTick||this.accumulator+1e-8>=this.config.simulationStep){
+   if(!this.pendingTick){this.accumulator-=this.config.simulationStep;if(this.state.status!=='running')continue;this.beginTick(this.config.simulationStep,budgeted);}
+   if(!this.continueTick(deadline))break;ticks++;
+   if(performance.now()>=deadline)break;
+  }
+  return ticks;
+ }
+ renderUnitPhase(unit,nowMs){const at=this.unitFrameTimes.get(unit);return at===undefined?null:clamp((nowMs-at)*(this.presentationRate??1)/(this.config.simulationStep*1000),0,1);}
  objectives(){const s=this.state,has=kind=>s.buildings.some(b=>b.owner==='rai'&&b.hp>0&&b.completed&&b.kind===kind);return [{id:'base',name:'Развернуть передовую базу',done:has('generator')&&has('factory')&&has('lab')&&(has('bunker')||has('mg-tower'))},{id:'power',name:'Обеспечить энергоснабжение',done:s.powered},{id:'production',name:'Наладить производство техники',done:s.statistics.produced>0},{id:'research',name:'Организовать научные исследования',done:Object.keys(this.config.research).every(key=>s.research[key]),progress:Object.keys(s.research).length+'/3'},{id:'security',name:s.flags.contact?'Уничтожить четыре лагеря':'Обеспечить безопасность района',done:s.camps.every(c=>c.cleared)&&s.flags.raidWon,progress:s.camps.filter(c=>c.cleared).length+'/4'}];}
- save(){this.updateFog();return JSON.stringify({version:1,mission:this.config.id,serial:this.serial,randomState:this.randomState,accumulator:this.accumulator,fogTimer:this.fogTimer,state:this.state,explored:Array.from(this.explored)});}
+ save(){this.continueTick();this.updateFog();return JSON.stringify({version:1,mission:this.config.id,serial:this.serial,randomState:this.randomState,accumulator:this.accumulator,fogTimer:this.fogTimer,state:this.state,explored:Array.from(this.explored)});}
  updateUnrevealedCampLayout(){
   // Revealed camps keep their saved positions so ongoing battles can resume.
   if(this.state.flags.lastRevealed)return;
@@ -1498,6 +2266,24 @@ export class Mission{
   }
  }
  load(json){const data=typeof json==='string'?JSON.parse(json):json;if(data.version!==1||data.mission!==this.config.id||!Array.isArray(data.state?.units)||data.explored?.length!==16384)throw new Error('Несовместимое сохранение');this.state=data.state;
+  this.commandPlanner=null;
+  this.pendingTick=null;this.unitFrameTimes=new WeakMap();this.unitIndexActive=false;this.collisionPairs=new Map();this.contactRockPairs=new Map();this.trafficCoordinator=new TrafficCoordinator();
+  ensureSalvage(this);
+  this.state.projectiles??=[];
+  if(!this.state.scavRosterVersion){
+   const convert=(unit,kind)=>{if(unit.kind!=='raider'||unit.hp!==unit.maxHp||unit.damage?.hits||!this.config.units[kind])return;unit.kind=kind;unit.hp=unit.maxHp=this.config.units[kind].hp;};
+   for(const camp of this.config.camps){const roster=SCAV_ROSTERS[camp.id];this.state.units.filter(u=>u.owner==='scavs'&&u.campId===camp.id).forEach((u,i)=>convert(u,roster?.[i%roster.length]));}
+   this.state.units.filter(u=>u.raidReserve).forEach((u,i)=>convert(u,this.config.raidRoster?.[i%this.config.raidRoster.length]));
+   this.state.scavRosterVersion=1;
+  }
+  for(const unit of this.state.units)if(unit.hp<=0&&unit.damage?.wreck)this.freezeWreck(unit);
+  const legacyWrecks=[];
+  for(const entity of [...this.state.units,...this.state.buildings]){
+   if(entity.combatPolicy)entity.combatPolicy=normalizeCombatPolicy(entity.combatPolicy);
+   upgradeDamageState(entity.damage,!!this.config.units[entity.kind]);
+   if(this.config.units[entity.kind])syncFieldHp(this,entity);
+   if(entity.hp<=0){if(entity.destroyedAt===undefined)legacyWrecks.push(entity);scheduleWreck(this,entity);}
+  }
   this.updateUnrevealedCampLayout();
   const bunker=this.config.buildings.bunker;
   if(bunker)for(const building of this.state.buildings){
@@ -1506,5 +2292,12 @@ export class Mission{
    building.halfWidth=Math.min(building.halfWidth,halfWidth);
    building.halfDepth=Math.min(building.halfDepth,halfDepth);
   }
-  this.state.bounds=(this.state.flags.lastRevealed?this.config.finalMapBounds:this.config.initialMapBounds).slice();this.state.designs=Array.isArray(this.state.designs)?latestVehicleProjects(this.state.designs):starterProjects(this.vehicleRecipes);this.serial=data.serial;this.randomState=data.randomState;this.explored.set(data.explored);this.events=[];this.effects=[];this.accumulator=data.accumulator??0;this.fogTimer=data.fogTimer??0;this.navigationDirty=false;this.linkOilWells(this.state.buildings.filter(b=>b.owner==='rai'&&b.hp>0&&b.completed),0);this.rebuildNavigation();this.updateFog();}
+  this.state.bounds=(this.state.flags.lastRevealed?this.config.finalMapBounds:this.config.initialMapBounds).slice();this.state.designs=Array.isArray(this.state.designs)?latestVehicleProjects(this.state.designs):starterProjects(this.vehicleRecipes);this.serial=data.serial;this.randomState=data.randomState;this.explored.set(data.explored);this.events=[];this.effects=[];this.accumulator=data.accumulator??0;this.fogTimer=data.fogTimer??0;this.navigationDirty=false;this.linkOilWells(this.state.buildings.filter(b=>b.owner==='rai'&&b.hp>0&&b.completed),0);this.rebuildNavigation();this.updateFog();
+  for(const entity of legacyWrecks){
+   const state=entity.damage,mark=state?.marks?.at(-1);
+   if(state){state.burn=Math.max(state.burn,.48);state.revision++;}
+   if(mark)salvageFromWreck(this,entity,{point:mark.point,power:state.lastImpact?.power??0});
+   this.explodeWreck(entity);
+  }
+ }
 }

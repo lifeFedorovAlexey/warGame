@@ -52,9 +52,12 @@ export function batchRigidMeshes(T, root) {
   }
   for(const [material,meshes] of groups){
     if(meshes.length===1)continue;
+    const tagged=meshes.some(mesh=>mesh.geometry.attributes.damagePart);
     const flat=meshes.map(mesh=>{
       mesh.updateMatrix();
-      return (mesh.geometry.index?mesh.geometry.toNonIndexed():mesh.geometry.clone()).applyMatrix4(mesh.matrix);
+      const geometry=(mesh.geometry.index?mesh.geometry.toNonIndexed():mesh.geometry.clone()).applyMatrix4(mesh.matrix);
+      if(tagged&&!geometry.attributes.damagePart)geometry.setAttribute('damagePart',new T.Float32BufferAttribute(new Float32Array(geometry.attributes.position.count),1));
+      return geometry;
     });
     root.add(new T.Mesh(mergeGeometries(flat),material));
     for(const geo of flat)geo.dispose();
@@ -138,6 +141,8 @@ export function createFieldVehicle(T, kind, kit, palette) {
   const body=isCommand?group(bodyModule,[0,0,-commandMountHeight],'body_panels'):bodyModule;
   const paint=new T.MeshStandardMaterial({color:isCommand?'#58614a':'#825a46',metalness:.43,roughness:.64});
   const trim=new T.MeshStandardMaterial({color:isCommand?'#45483a':'#684537',metalness:.18,roughness:.85});
+  paint.name='field_body_paint';trim.name='field_body_trim';
+  const part=(node,id)=>{node.geometry.setAttribute('damagePart',new T.Float32BufferAttribute(new Float32Array(node.geometry.attributes.position.count).fill(id),1));return node;};
   const lamp=new T.MeshStandardMaterial({color:'#fff0cc',emissive:'#ffce83',emissiveIntensity:2.4,roughness:.34});
   const rear=new T.MeshStandardMaterial({color:'#81382b',emissive:'#ba3820',emissiveIntensity:.6,roughness:.43});
   const wheels=[];
@@ -146,8 +151,8 @@ export function createFieldVehicle(T, kind, kit, palette) {
     cylinder(chassis,.073,1.65,[0,y,.43],steel,'X');
     for(const x of [-.79,.79]){
       const stem=`axle_${y>0?'1':'2'}_${x<0?'L':'R'}`;
-      const steer=group(chassis,[x,y,.43],isCommand?stem+'_steer':y>0?'front_steer':'rear_axle');
-      const wheel=group(steer,[0,0,0],isCommand?stem+'_wheel':'wheel');
+      const steer=group(chassis,[x,y,.43],stem+'_steer');
+      const wheel=group(steer,[0,0,0],stem+'_wheel');
       cylinder(wheel,.43,.25,[0,0,0],rubber,'X',16);
       cylinder(wheel,.255,.255,[0,0,0],steel,'X',12);
       cylinder(wheel,.095,.278,[0,0,0],dark,'X',10);
@@ -164,11 +169,11 @@ export function createFieldVehicle(T, kind, kit, palette) {
     box(body,[.045,.04,.53],[x*.963,-.12,1.77],trim);
     box(body,[.035,.15,.044],[x*.988,-.66,1.44],dark);
     cylinder(body,.139,.07,[x*.72,1.97,1.23],dark,'Y');
-    cylinder(body,.113,.035,[x*.72,2.015,1.23],lamp,'Y');
+    part(cylinder(body,.113,.035,[x*.72,2.015,1.23],lamp,'Y'),x<0?5:6);
     box(body,[.12,.054,.115],[x*.9,-2.03,1.15],rear);
   }
-  box(body,[1.88,.17,.15],[0,2.024,.85],dark);
-  box(body,[1.84,.15,.15],[0,-2.02,.85],dark);
+  part(box(body,[1.88,.17,.15],[0,2.024,.85],dark),7);
+  part(box(body,[1.84,.15,.15],[0,-2.02,.85],dark),8);
   box(body,[.81,.052,.27],[0,1.985,1.23],dark);
   for(let x=-.33;x<=.34;x+=.115)box(body,[.035,.028,.22],[x,2.021,1.235],steel);
   if(isCommand){
@@ -184,8 +189,8 @@ export function createFieldVehicle(T, kind, kit, palette) {
   } else {
     for(const x of [-.84,.84]){
       box(body,[.06,1.30,.34],[x,-1.34,1.53],paint,[0,0,0]);
-      rod(body,[x,-1.92,1.51],[x,-1.92,2.23],.047,steel);
-      rod(body,[x,-1.92,2.23],[x,-.81,2.05],.047,dark);
+      part(rod(body,[x,-1.92,1.51],[x,-1.92,2.23],.047,steel),x<0?24:25);
+      part(rod(body,[x,-1.92,2.23],[x,-.81,2.05],.047,dark),x<0?24:25);
     }
     cylinder(body,.235,.74,[.49,-1.50,1.53],trim,'Z');
     box(body,[.44,.53,.25],[-.52,-1.61,1.52],steel);

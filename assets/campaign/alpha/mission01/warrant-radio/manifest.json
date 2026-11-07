@@ -1,0 +1,26 @@
+{
+  "speaker": "warrant",
+  "origin": "User-supplied recordings, 2026-11-07; original MP3 bytes preserved",
+  "clips": {
+    "upgrade": {
+      "file": "upgrade.mp3",
+      "sourceName": "Вот «Буханку» опять обновили. - зачем.mp3",
+      "duration": 14.367,
+      "text": "Вот «Буханку» опять обновили. Зря, конечно. Хорошая была машина. Сорок лет ничего не меняли — и правильно делали. А теперь ручку дверную другую поставили. Спрашивается, зачем?",
+      "transcriptSource": "user-message",
+      "trigger": "After research-mg-ammo-1, following the laboratory announcement",
+      "bytes": 246814,
+      "sha256": "1d1f17d3c1067f7de3725a75aeda47afc38e62541226ae8fed41d30d3435db2b"
+    },
+    "stop": {
+      "file": "stop.mp3",
+      "sourceName": "Стоим организованно Беспорядочно стоять у нас — запрещено..mp3",
+      "duration": 5.564,
+      "text": "Стоим организованно. Беспорядочно стоять у нас — запрещено.",
+      "transcriptSource": "user-filename",
+      "trigger": "Stop order; minimum 45 seconds between repeats; new movement, attack or build order interrupts the remark",
+      "bytes": 105962,
+      "sha256": "1c49f25188fc7e2cdf8e5cbc1e3d1f87c4a88adffd872c4b31531602ae203cf0"
+    }
+  }
+}

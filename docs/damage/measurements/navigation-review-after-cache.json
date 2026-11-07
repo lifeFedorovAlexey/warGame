@@ -1,0 +1,50 @@
+{
+  "firstPose": {
+    "x": 38,
+    "y": 30,
+    "heading": 3.9269908169872414,
+    "kind": "bukhanka"
+  },
+  "secondPose": {
+    "x": 38,
+    "y": 30,
+    "heading": 0,
+    "kind": "bukhanka"
+  },
+  "target": {
+    "x": -100,
+    "y": 80
+  },
+  "first": [
+    {
+      "x": 24,
+      "y": 48
+    },
+    {
+      "x": -100,
+      "y": 80
+    }
+  ],
+  "cached": [
+    {
+      "x": 40,
+      "y": 48
+    },
+    {
+      "x": -100,
+      "y": 80
+    }
+  ],
+  "correct": [
+    {
+      "x": 40,
+      "y": 48
+    },
+    {
+      "x": -100,
+      "y": 80
+    }
+  ],
+  "cachedConnectorClear": true,
+  "freshConnectorClear": true
+}

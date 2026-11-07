@@ -1,0 +1,196 @@
+{
+  "speaker": "commander",
+  "recorded": [
+    "raid-won",
+    "victory",
+    "m01-s02-l001",
+    "m01-s02-l003",
+    "m01-s02-l005",
+    "m01-s02-l007",
+    "m01-s02-l009",
+    "m01-s02-l011",
+    "m01-s02-l013",
+    "m01-s05-l012",
+    "m01-s05-l014",
+    "m01-s06-l002",
+    "m01-s06-l004",
+    "m01-s06-l006",
+    "m01-s06-l008",
+    "m01-s07-l002",
+    "m01-s07-l004",
+    "m01-s07-l007",
+    "m01-s07-l009",
+    "m01-s07-l011",
+    "m01-s07-l013",
+    "m01-s07-l015",
+    "m01-s08-l002",
+    "m01-s08-l004",
+    "m01-s08-l006",
+    "m01-s08-l008",
+    "m01-s08-l010",
+    "m01-s08-l012",
+    "m01-s08-l014",
+    "m01-s08-l016",
+    "m01-s08-l018"
+  ],
+  "remaining": 40,
+  "batches": [
+    {
+      "batch": 1,
+      "file": "commander-01.txt",
+      "recordings": [
+        "victory",
+        "m01-s02-l001",
+        "m01-s02-l003",
+        "m01-s02-l005",
+        "m01-s02-l007",
+        "m01-s02-l009",
+        "m01-s02-l011",
+        "m01-s02-l013",
+        "m01-s05-l012",
+        "m01-s05-l014"
+      ],
+      "status": "recorded",
+      "remaining": 0
+    },
+    {
+      "batch": 2,
+      "file": "commander-02.txt",
+      "recordings": [
+        "m01-s06-l002",
+        "m01-s06-l004",
+        "m01-s06-l006",
+        "m01-s06-l008",
+        "m01-s07-l002",
+        "m01-s07-l004",
+        "m01-s07-l007",
+        "m01-s07-l009",
+        "m01-s07-l011",
+        "m01-s07-l013"
+      ],
+      "status": "recorded",
+      "remaining": 0
+    },
+    {
+      "batch": 3,
+      "file": "commander-03.txt",
+      "recordings": [
+        "m01-s07-l015",
+        "m01-s08-l002",
+        "m01-s08-l004",
+        "m01-s08-l006",
+        "m01-s08-l008",
+        "m01-s08-l010",
+        "m01-s08-l012",
+        "m01-s08-l014",
+        "m01-s08-l016",
+        "m01-s08-l018"
+      ],
+      "status": "recorded",
+      "remaining": 0
+    },
+    {
+      "batch": 4,
+      "file": "commander-04.txt",
+      "recordings": [
+        "m01-s08-l020",
+        "m01-s08-l022",
+        "m01-s09-l002",
+        "m01-s09-l004",
+        "m01-s09-l007",
+        "m01-s09-l009",
+        "m01-s09-l011",
+        "m01-s10-l002",
+        "m01-s10-l004",
+        "m01-s10-l006"
+      ],
+      "status": "awaiting-user-recording",
+      "remaining": 10
+    },
+    {
+      "batch": 5,
+      "file": "commander-05.txt",
+      "recordings": [
+        "m01-s10-l008",
+        "m01-s10-l010",
+        "m01-s10-l012",
+        "m01-s10-l014",
+        "m01-s10-l016",
+        "m01-s10-l018",
+        "m01-s10-l020",
+        "m01-s11-l002",
+        "m01-s11-l004",
+        "m01-s11-l006"
+      ],
+      "status": "awaiting-user-recording",
+      "remaining": 10
+    },
+    {
+      "batch": 6,
+      "file": "commander-06.txt",
+      "recordings": [
+        "m01-s11-l008",
+        "m01-s11-l010",
+        "m01-s11-l012",
+        "m01-s11-l014",
+        "m01-s12-l002",
+        "m01-s12-l004",
+        "m01-s12-l006",
+        "m01-s12-l008",
+        "m01-s12-l011",
+        "m01-s13-l002"
+      ],
+      "status": "awaiting-user-recording",
+      "remaining": 10
+    },
+    {
+      "batch": 7,
+      "file": "commander-07.txt",
+      "recordings": [
+        "m01-s13-l004",
+        "m01-s14-l002",
+        "m01-s14-l004",
+        "m01-s14-l006",
+        "m01-s14-l008",
+        "m01-s14-l010",
+        "m01-s14-l012",
+        "m01-s14-l014",
+        "m01-s14-l016",
+        "m01-b018"
+      ],
+      "status": "awaiting-user-recording",
+      "remaining": 10
+    }
+  ],
+  "mislabeledRecordings": [
+    {
+      "sourceName": "m01-s07-l007.mp3.mp3",
+      "expectedCue": "m01-s07-l007",
+      "reportedText": "Наши?",
+      "matchesCue": "m01-s07-l004"
+    }
+  ],
+  "recordingMappings": [
+    {
+      "cue": "m01-s06-l006",
+      "sourceFile": "recordings/commander/m01-s06-l008.mp3",
+      "text": "Нет."
+    },
+    {
+      "cue": "m01-s06-l008",
+      "sourceFile": "recordings/commander/m01-s07-l002.mp3",
+      "text": "Потому что электричества нет."
+    },
+    {
+      "cue": "m01-s07-l002",
+      "sourceFile": "recordings/commander/m01-s07-l004.mp3",
+      "text": "Кто?"
+    },
+    {
+      "cue": "m01-s07-l004",
+      "sourceFile": "recordings/commander/pending/m01-s07-l007.mp3",
+      "text": "Наши?"
+    }
+  ],
+  "pendingSpokenTextConfirmation": []
+}

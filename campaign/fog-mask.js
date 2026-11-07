@@ -53,12 +53,15 @@ export function createFogMask(T){
     for(const source of mission.visionSources){
       const x0=first(source.x,source.radius,left),x1=last(source.x,source.radius,right);
       const y0=first(source.y,source.radius,top),y1=last(source.y,source.radius,bottom);
+      const outer2=source.radius*source.radius,inner2=Math.max(0,source.radius-feather)**2;
       for(let y=y0;y<=y1;y++){
         const dy=samples[y].grid-source.y;
         for(let x=x0;x<=x1;x++){
-          const dx=samples[x].grid-source.x;
-          const light=255*smoothstep((source.radius-Math.sqrt(dx*dx+dy*dy))/feather);
           const i=(y*textureSize+x)*2;
+          if(data[i]===255)continue; // max(union) is already saturated here
+          const dx=samples[x].grid-source.x,d2=dx*dx+dy*dy;
+          if(d2>=outer2)continue;
+          const light=source.radius>=feather&&d2<=inner2?255:255*smoothstep((source.radius-Math.sqrt(d2))/feather);
           if(light>data[i])data[i]=light;
           if(light>data[i+1])data[i+1]=light;
         }

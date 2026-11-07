@@ -8,12 +8,13 @@ const {chromium}=require('C:/Users/Алексей/.cache/codex-runtimes/codex-pr
  try{
   const page=await browser.newPage({viewport:{width:1280,height:720}}),errors=[];
   page.on('pageerror',error=>errors.push(error.message));
+  page.on('requestfailed',request=>{if(request.failure()?.errorText!=='net::ERR_ABORTED')console.error(request.url(),request.failure()?.errorText);});
   page.on('console',message=>{if(message.type()==='error')errors.push(message.text());});
-  await page.goto('http://127.0.0.1:8766/campaign/');
+  await page.goto((process.env.DAMAGE_BASE_URL??'http://127.0.0.1:8766')+'/campaign/');
   try{await page.waitForFunction(()=>window.campaign?.ready,{},{timeout:60000});}
   catch(error){throw new Error(errors.join('\n')||await page.locator('#loading-status').textContent(),{cause:error});}
   await page.locator('#begin').click();
-  await page.locator('[data-skip-all]').click();
+  if(await page.locator('[data-skip-all]').isVisible())await page.locator('[data-skip-all]').click();
   await page.locator('#pause').click();
   const fixture=await page.evaluate(async ()=>{
    const c=window.campaign,m=c.mission,w=c.world,p=w.field.gridToWorld(m.config.startGrid);
@@ -48,7 +49,7 @@ const {chromium}=require('C:/Users/Алексей/.cache/codex-runtimes/codex-pr
    const c=window.campaign,p=c.world.field.gridToWorld(c.mission.config.startGrid);
    return c.world.screen({x:p.x-93,y:p.y-20},0);
   });
-  await page.locator('#attack-order').click();
+  assert.equal(await page.evaluate(()=>window.campaign.state.orderMode),'attack');
   await page.mouse.click(move.x,move.y);
   assert.equal(await page.evaluate(id=>window.campaign.mission.entity(id).task?.type,fixture.gun),'attack-move');
   const effects=await page.evaluate(fixture=>{

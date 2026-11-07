@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import {scheduleWreck,updateWrecks,WRECK_LIMITS} from '../campaign/wreck-lifecycle.js';
+const m={config:{units:{bukhanka:{}}},state:{time:4,units:[],buildings:[]}};
+const unit={id:'car',kind:'bukhanka',hp:0},building={id:'camp',kind:'camp-core',hp:0};
+m.state.units=[unit];m.state.buildings=[building];scheduleWreck(m,unit);scheduleWreck(m,building);
+assert.equal(unit.removeAt,16);assert.equal(building.removeAt,10);
+m.state.time=9;assert(!updateWrecks(m));
+m.state=JSON.parse(JSON.stringify(m.state));scheduleWreck(m,m.state.units[0]);assert.equal(m.state.units[0].removeAt,16,'Reload must not extend retention');
+m.state.time=10;assert(updateWrecks(m));assert.equal(m.state.buildings.length,0);assert.equal(m.state.units.length,1);assert(m.navigationDirty);
+m.state.time=16;assert(updateWrecks(m));assert.equal(m.state.units.length,0);
+m.state.units=Array.from({length:100},(_,i)=>({id:'wreck'+i,kind:'bukhanka',hp:0}));updateWrecks(m);assert.equal(m.state.units.length,WRECK_LIMITS.vehicles);
+console.log(JSON.stringify({passed:true,saveDeadlines:true,buildingSeconds:6,vehicleSeconds:12,boundedWrecks:true,navigationReleased:true}));

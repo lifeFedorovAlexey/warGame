@@ -18,6 +18,10 @@ export function createScavPrefab(T, kind, site) {
   };
   const batches = new Map(), surfaces = [[structure,batches]];
   let activeBatches = batches;
+  let damagePart=0;
+  let nextDamagePart=16;
+  const damageParts={0:{name:'structure',material:'metal'},9:{name:'weapon',material:'equipment',detachable:true,strength:210}};
+  root.userData.damageParts=damageParts;
   function shape(geometry, material, position, rotation = [0,0,0]) {
     const object = new T.Object3D();
     object.position.set(...position);
@@ -25,6 +29,7 @@ export function createScavPrefab(T, kind, site) {
     object.updateMatrix();
     geometry.applyMatrix4(object.matrix);
     const flat = geometry.index ? geometry.toNonIndexed() : geometry;
+    flat.setAttribute('damagePart',new T.Float32BufferAttribute(new Float32Array(flat.attributes.position.count).fill(damagePart),1));
     if (flat !== geometry) geometry.dispose();
     if (!activeBatches.has(material)) activeBatches.set(material, []);
     activeBatches.get(material).push(flat);
@@ -55,8 +60,12 @@ export function createScavPrefab(T, kind, site) {
     const door = loadingBay ? x : x-width*.19;
     box([width*(loadingBay ? .56 : .32),.09,height*.76], [door,y-depth/2-.04,height*.38], mats.dark);
     const slope = .23;
+    const oldPart=damagePart;
+    damagePart=nextDamagePart++;damageParts[damagePart]={name:'roof_front_'+x+'_'+y,material:'metal',detachable:true,strength:95};
     box([width+.30, depth/2+.22, .12], [x,y-depth/4,height+.17], mats.tin, [slope,0,0]);
+    damagePart=nextDamagePart++;damageParts[damagePart]={name:'roof_back_'+x+'_'+y,material:'metal',detachable:true,strength:95};
     box([width+.30, depth/2+.22, .12], [x,y+depth/4,height+.17], mats.rust, [-slope,0,0]);
+    damagePart=oldPart;
     for (let i=0; i<Math.ceil(width*3); i++) {
       const u = x - width/2 + (i+.5)*width/Math.ceil(width*3);
       if (loadingBay && Math.abs(u-door)<width*.28) continue;
@@ -114,8 +123,10 @@ export function createScavPrefab(T, kind, site) {
     yaw.add(pitch);pitch.add(recoil);recoil.add(muzzle);
     activeBatches = new Map();
     surfaces.push([recoil,activeBatches]);
+    damagePart=9;
     box([.42,.66,.34],[0,0,-.02],mats.dark);
     beam([0,-.14,0],[0,-barrelLength,0],.095,mats.dark);
+    damagePart=0;
     activeBatches = batches;
   } else if (site === 'nw-pocket') {
     shed(-2.6,.40,4.2,4.3,2.65,mats.rust);
@@ -211,10 +222,13 @@ export function createScavPrefab(T, kind, site) {
 
     const roofSlope=-.13;
     for (const [side,x,width,z,material] of [['front',-.43,2.71,2.66,mats.tin],['back',2.46,3.14,2.61,mats.rust]]) {
+      damagePart=nextDamagePart++;
+      damageParts[damagePart]={name:'roof_'+side+'_1.25_0.8',material:'metal',detachable:true,strength:95};
       box([width,4.72,.12],[x,.24,z],material,[roofSlope,0,0]);
       for(let rib=x-width/2+.20;rib<x+width/2-.1;rib+=.54)box([.066,4.70,.047],[rib,.24,z+.075],material,[roofSlope,0,0]);
       if(side==='back')box([1.25,1.44,.04],[2.55,-.70,2.82],mats.tarp,[roofSlope,0,-.05]);
     }
+    damagePart=0;
 
     // The open bay exposes the motor and the pipe that feeds the salvaged tank.
     box([2.35,1.26,.17],[-.17,-.91,.25],mats.rust);
@@ -286,6 +300,7 @@ export function createScavPrefab(T, kind, site) {
   for (const [parent,grouped] of surfaces) for (const [mat, geometries] of grouped) {
     const geometry = mergeGeometries(geometries);
     const mesh = new T.Mesh(geometry, mat);
+    mesh.userData.damageParts=damageParts;
     mesh.castShadow = mesh.receiveShadow = true;
     parent.add(mesh);
     for (const item of geometries) item.dispose();

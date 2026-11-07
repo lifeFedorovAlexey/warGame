@@ -1,4 +1,5 @@
 import {vehiclePose} from './builder-kinematics.js';
+import {SCAV_PROFILES} from './scav-unit-profiles.js';
 
 const modular = [
   [1.177, -.008, 2.417, .75, .75],
@@ -7,7 +8,10 @@ const modular = [
 const fieldCar = [[1.03, -.075, 2.18, .43, .47], [.96, -.06, 2.10, 1.48, .78]];
 const cached = new WeakMap();
 const skin = .055;
-export const vehicleLocalBoxes = kind => kind === 'command' || kind === 'raider' ? fieldCar : modular;
+export const vehicleLocalBoxes = kind => SCAV_PROFILES[kind]?.boxes ?? (kind === 'command' || kind === 'raider' ? fieldCar : modular);
+// Death releases the driving space immediately. A retained visual wreck and
+// collectible parts have their own lifetimes, but are never traffic obstacles.
+export const vehicleObstacle = unit => unit.hp > 0;
 
 // Local dimensions follow the C01/B01 GLB bounds. Project both the lower
 // running gear and the higher body onto the ground using the render pose.
@@ -16,7 +20,7 @@ export function vehicleEnvelope(unit, scale, field) {
   const entry = cached.get(unit);
   if (entry && entry.x === unit.x && entry.y === unit.y && entry.heading === heading
       && entry.scale === scale && entry.field === field && entry.kind === kind) return entry.envelope;
-  const pose = field ? vehiclePose({...unit, heading}, field, scale) : {pitch: 0, roll: 0};
+  const pose = field ? vehiclePose(unit, field, scale) : {pitch: 0, roll: 0};
   const cp = Math.cos(pose.pitch), sp = Math.sin(pose.pitch), cr = Math.cos(pose.roll), sr = Math.sin(pose.roll);
   let xmin = Infinity, xmax = -Infinity, ymin = Infinity, ymax = -Infinity;
   for (const [hx, y, hy, z, hz] of vehicleLocalBoxes(kind)) {
@@ -42,14 +46,11 @@ export function footprintSupport(shape, x, y) {
     shape.depth * Math.abs(shape.c * y - shape.s * x);
 }
 
-function axesOf(shape) {
-  return [[shape.c, shape.s], [-shape.s, shape.c]];
-}
-
 function poseGap(a, b) {
   const dx = b.x - a.x, dy = b.y - a.y;
   let gap = -Infinity;
-  for (const [x, y] of [...axesOf(a), ...axesOf(b)]) {
+  for(let axis=0;axis<4;axis++){
+    const shape=axis<2?a:b,x=axis%2?-shape.s:shape.c,y=axis%2?shape.c:shape.s;
     gap = Math.max(gap, Math.abs(dx * x + dy * y) - footprintSupport(a, x, y) - footprintSupport(b, x, y));
   }
   return gap;
@@ -76,7 +77,8 @@ export function vehicleSweep(from, to, scale, field) {
 function sweepGap(sweep, obstacle) {
   const {start, middle, end, padding} = sweep;
   let gap = -Infinity;
-  for (const [x, y] of [...axesOf(start), ...axesOf(middle), ...axesOf(end), ...axesOf(obstacle)]) {
+  for(let axis=0;axis<8;axis++){
+    const shape=axis<2?start:axis<4?middle:axis<6?end:obstacle,x=axis%2?-shape.s:shape.c,y=axis%2?shape.c:shape.s;
     const sa = footprintSupport(start, x, y), sm = footprintSupport(middle, x, y), sb = footprintSupport(end, x, y);
     const a = (start.x - obstacle.x) * x + (start.y - obstacle.y) * y;
     const m = (middle.x - obstacle.x) * x + (middle.y - obstacle.y) * y;
@@ -106,7 +108,7 @@ export function clearOfVehicles(unit, next, units, scale, strict = false, previo
   let sweep = prepared, end;
   let clear = true;
   for (const other of units) {
-    if (other === unit || other.hp <= 0 || Math.abs(next.x - other.x) > 7 * scale
+    if (other === unit || !vehicleObstacle(other) || Math.abs(next.x - other.x) > 7 * scale
         || Math.abs(next.y - other.y) > 7 * scale) continue;
     const obstacle = vehicleEnvelope(other, scale, field);
     end ??= sweep?.end ?? vehicleEnvelope(current, scale, field);

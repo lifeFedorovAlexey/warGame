@@ -1,5 +1,5 @@
 export function createFlameEffects(T,scene,scale) {
-  const pulses=[],scorches=[],dustHits=[],pulseLimit=14,scorchLimit=16,dustLimit=12,segments=6;
+  const pulses=[],scorches=[],blasts=[],dustHits=[],blastLimit=16,pulseLimit=14,scorchLimit=16,dustLimit=12,segments=6;
   const vertexShader=`
     attribute float diameter; attribute float opacity; attribute vec3 shade;
     uniform float viewportHeight; varying float vOpacity; varying vec3 vShade;
@@ -43,8 +43,8 @@ export function createFlameEffects(T,scene,scale) {
       get count(){return count;},
     };
   }
-  const flame=batch('red_flame_particles',pulseLimit*32,false);
-  const smoke=batch('black_flame_smoke',pulseLimit*20+scorchLimit*6+dustLimit*3,true);
+  const flame=batch('red_flame_particles',pulseLimit*32+blastLimit*12,false);
+  const smoke=batch('black_flame_smoke',pulseLimit*20+scorchLimit*6+blastLimit*16+dustLimit*3,true);
   const jetGeometry=new T.BufferGeometry(),jetCapacity=pulseLimit*segments*12;
   const jetPosition=new T.Float32BufferAttribute(new Float32Array(jetCapacity*3),3).setUsage(T.DynamicDrawUsage);
   const jetShape=new T.Float32BufferAttribute(new Float32Array(jetCapacity*3),3).setUsage(T.DynamicDrawUsage);
@@ -83,11 +83,12 @@ export function createFlameEffects(T,scene,scale) {
       scorches.push({point,born:now,destroyed,seed:++serial});
       if(scorches.length>scorchLimit)scorches.shift();
     },
+    blast(point,now,radius){blasts.push({point:point.clone(),born:now,radius,seed:++serial});if(blasts.length>blastLimit)blasts.shift();},
     dustImpact(point,now){
       dustHits.push({point:point.clone(),born:now,seed:++serial});
       if(dustHits.length>dustLimit)dustHits.shift();
     },
-    reset(){pulses.length=scorches.length=dustHits.length=0;},
+    reset(){pulses.length=scorches.length=blasts.length=dustHits.length=0;},
     update(now,viewportHeight){
       flame.start(viewportHeight);smoke.start(viewportHeight);
       jet.material.uniforms.clock.value=now;
@@ -145,6 +146,20 @@ export function createFlameEffects(T,scene,scale) {
             point.z+(t*(2.4+random(seed,j))+.17)*scale,size,Math.sin(Math.PI*t)**.65*.68,.020,.014,.012);
         }
       }
+      for(let i=blasts.length-1;i>=0;i--){
+        const {point,born,radius,seed}=blasts[i],age=now-born;
+        if(age>5){blasts.splice(i,1);continue;}
+        for(let j=0;j<12;j++){
+          const t=age-.025*j;if(t<0||t>1)continue;
+          const angle=j*2.399+seed,r=radius*t*(.35+random(seed,j)*.65);
+          flame.add(point.x+Math.cos(angle)*r,point.y+Math.sin(angle)*r,point.z+radius*t*(.3+random(j,seed)),radius*(.5+t*.9),Math.sin(Math.PI*Math.min(1,t*1.4))*(1-t),1,.16+.5*(1-t),.018);
+        }
+        for(let j=0;j<16;j++){
+          const t=(age-.04*j)/4.3;if(t<0||t>1)continue;
+          const angle=j*2.399+seed,r=radius*(.25+1.1*t),shade=.10+random(seed,j)*.12;
+          smoke.add(point.x+Math.cos(angle)*r+t*radius*.5,point.y+Math.sin(angle)*r,point.z+radius*(.15+t*1.5),radius*(.65+t*1.9),Math.sin(Math.PI*t)**.4*.72,shade,shade*.9,shade*.74);
+        }
+      }
       for(let i=dustHits.length-1;i>=0;i--){
         const {point,born,seed}=dustHits[i],age=now-born;
         if(age>.47){dustHits.splice(i,1);continue;}
@@ -160,6 +175,6 @@ export function createFlameEffects(T,scene,scale) {
       if(vertices)jetPosition.needsUpdate=jetShape.needsUpdate=true;
       flame.flush();smoke.flush();
     },
-    get statistics(){return{flameParticles:flame.count,smokeParticles:smoke.count,flameCoreVertices:jetGeometry.drawRange.count};},
+    get statistics(){return{flameParticles:flame.count,smokeParticles:smoke.count,flameCoreVertices:jetGeometry.drawRange.count,explosions:blasts.length,explosionLimit:blastLimit};},
   };
 }

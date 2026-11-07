@@ -1,5 +1,7 @@
 import {matchingRecipe, projectAssemblyKey, projectDesignation, vehicleComponentName} from './vehicle-designs.js';
 import {DesignPreview} from './design-preview.js';
+import {FIELD_RECIPES,ensureSalvage} from './vehicle-salvage.js';
+import {setButtonIcon} from '../assets/ui/icons.js';
 
 const catalogue = {
   C01: {role:'wheeled', detail:'Полный привод', icon:'move', massKg:1120},
@@ -10,7 +12,6 @@ const catalogue = {
 };
 
 const roleNames = {combat:'Боевые', builder:'Инженерные', support:'Поддержка', recon:'Разведка', wheeled:'Колёсные', tracked:'Гусеничные', light:'Лёгкие', heavy:'Тяжёлые', other:'Прочие'};
-const svgNS = 'http://www.w3.org/2000/svg';
 const tons = new Intl.NumberFormat('ru-RU', {maximumFractionDigits:2});
 const partsPerPage = 4;
 
@@ -44,12 +45,18 @@ export class VehicleDesigner {
     this.choicePage = null;
     this.manualName = false;
     this.components = [];
+    this.previewModules = new Set();
+    this.fieldNote = panel.querySelector('[data-design-field-note]');
     this.recipes = [];
+    this.salvageToggle=panel.querySelector('[data-salvage-enabled]');
+    this.salvageChoices=panel.querySelector('[data-salvage-recipes]');
+    this.salvageToggle.onchange=()=>{const state=ensureSalvage(this.mission);state.enabled=this.salvageToggle.checked;state.userConfigured=true;this.paintSalvage();};
     for (const [index, tab] of this.tabs.entries()) tab.onclick = () => {
       this.activeSlot = index;
       this.activeRole = '';
       this.choicePage = null;
       this.paintChoices();
+      this.paintFieldNote();
     };
     this.previousPage.onclick = () => { this.choicePage--; this.paintChoices(); };
     this.nextPage.onclick = () => { this.choicePage++; this.paintChoices(); };
@@ -80,6 +87,7 @@ export class VehicleDesigner {
     if (this.visible) return;
     this.opener = document.activeElement;
     this.panel.showModal();
+    this.panel.querySelector('.design-salvage').open = false;
     this.toggle.setAttribute('aria-expanded', 'true');
     this.modelKey = null;
     try {
@@ -107,6 +115,7 @@ export class VehicleDesigner {
 
   refresh(force = false) {
     if (!this.visible) return;
+    this.paintSalvage();
     const recipes = this.mission.availableVehicleRecipes();
     const key = recipes.map(recipe => recipe.components.join('/')).join('|');
     if (!force && key === this.recipeKey) return;
@@ -123,12 +132,30 @@ export class VehicleDesigner {
     return {name:vehicleComponentName(id, config), role, detail:'', icon:'build', ...catalogue[id], ...config.vehicleComponents?.[id]};
   }
 
+  paintSalvage(){
+    const state=ensureSalvage(this.mission),key=JSON.stringify([state.enabled,state.recipes,state.wanted]);
+    if(this.salvageKey===key)return;this.salvageKey=key;this.salvageToggle.checked=state.enabled;
+    this.salvageChoices.replaceChildren(...Object.entries(FIELD_RECIPES).map(([id,recipe])=>{
+      const label=document.createElement('label'),input=document.createElement('input');input.type='checkbox';input.checked=state.wanted.includes(id);input.disabled=!state.enabled||!state.recipes.includes(id);
+      label.append(input,document.createTextNode(' '+recipe.name+' · +'+recipe.hpBonus+' HP'+(state.recipes.includes(id)?'':' · нет чертежа')));
+      input.onchange=()=>{state.wanted=input.checked?[...new Set([...state.wanted,id])]:state.wanted.filter(key=>key!==id);this.paintSalvage();};return label;
+    }));
+  }
+
   paintChoices() {
     for (const [index, tab] of this.tabs.entries()) {
+      if(index===3){
+        tab.setAttribute('aria-pressed',String(this.activeSlot===3));
+        setButtonIcon(tab,'armor-upgrade','04 · Навесные модули');
+        continue;
+      }
       const id = this.components[index];
       tab.setAttribute('aria-pressed', String(index === this.activeSlot));
-      tab.querySelector('strong').textContent = id ? this.componentInfo(id).name : '—';
+      const slotName = ['Ходовая', 'Корпус', 'Модуль'][index];
+      const partName = id ? this.componentInfo(id).name : '—';
+      setButtonIcon(tab, ['wheels', 'body', 'turret-ring'][index], slotName + ' · ' + partName);
     }
+    if(this.activeSlot===3)return this.paintFieldChoices();
     const index = this.activeSlot;
     const prefix = this.components.slice(0, index);
     const candidates = this.recipes.filter(recipe => prefix.every((id, slot) => recipe.components[slot] === id));
@@ -161,7 +188,8 @@ export class VehicleDesigner {
     this.filters.replaceChildren(...[['', 'Все'], ...groups].map(([role, label]) => {
       const button = document.createElement('button');
       button.type = 'button';
-      button.textContent = label;
+      const roleIcons = {combat:'machinegun', builder:'tools', support:'repair', recon:'recon', wheeled:'wheels', tracked:'tracks', light:'body', heavy:'shield', other:'all'};
+      setButtonIcon(button, roleIcons[role] ?? 'all', label);
       button.setAttribute('aria-pressed', String(role === this.activeRole));
       button.onclick = () => {
         this.activeRole = role;
@@ -175,24 +203,13 @@ export class VehicleDesigner {
 
   partCard(id, info, candidates) {
     const button = document.createElement('button');
-    const copy = document.createElement('span');
-    copy.className = 'design-part-copy';
-    const name = document.createElement('strong');
-    const detail = document.createElement('small');
-    const icon = document.createElementNS(svgNS, 'svg');
-    const use = document.createElementNS(svgNS, 'use');
     button.type = 'button';
     button.className = 'design-part';
     button.dataset.designComponent = id;
     button.setAttribute('aria-pressed', String(this.components[this.activeSlot] === id));
-    if (Number.isFinite(info.massKg)) button.title = 'Расчётная масса · ' + info.massKg + ' кг';
-    name.textContent = info.name;
-    detail.textContent = info.detail || id;
-    icon.setAttribute('aria-hidden', 'true');
-    use.setAttribute('href', 'hud-icons.svg#' + info.icon);
-    icon.append(use);
-    copy.append(name, detail);
-    button.append(icon, copy);
+    const known = ['C01', 'B01', 'U01', 'U25', 'mission-flamer'].includes(id);
+    setButtonIcon(button, known ? id : info.icon, info.name,
+      [info.tag ?? id, info.detail, Number.isFinite(info.massKg) ? 'Масса ' + info.massKg + ' кг' : ''].filter(Boolean).join(' · '));
     button.onclick = () => this.choosePart(id, candidates);
     return button;
   }
@@ -212,15 +229,17 @@ export class VehicleDesigner {
 
   paintAssembly() {
     const recipe = matchingRecipe(this.recipes, this.components);
+    const modifications=this.fieldPreview();
     this.saveButton.disabled = !recipe;
     this.modelName.textContent = recipe?.spec.name ?? 'Нет доступных сочетаний';
     this.paintStats(recipe);
+    this.paintFieldNote();
     this.syncName();
-    const modelKey = this.components.join('/');
+    const modelKey = this.components.join('/')+'|'+modifications.map(r=>r.id).join('/');
     if (recipe && this.preview && modelKey !== this.modelKey) {
       this.modelKey = modelKey;
       try {
-        this.preview.setModel(this.makeModel(this.components));
+        this.preview.setModel(this.makeModel(this.components),modifications.map(r=>r.id));
         this.stageStatus.textContent = '';
       } catch (error) {
         this.preview.clearModel();
@@ -236,25 +255,57 @@ export class VehicleDesigner {
     const body = this.components[1] ? this.componentInfo(this.components[1]) : null;
     const masses = this.components.map(id => this.componentInfo(id).massKg);
     const total = masses.length && masses.every(Number.isFinite) ? masses.reduce((sum, mass) => sum + mass, 0) : 0;
+    const modifications=this.fieldPreview(),bonus=modifications.reduce((sum,r)=>sum+r.hpBonus,0);
     const values = {
-      hp:spec?.hp,
+      hp:spec ? spec.hp+bonus : null,
       cost:spec && spec.cost + ' ⚡',
       time:spec && spec.seconds + ' с',
       speed:spec && spec.speed + ' м/с',
       range:spec?.range ? spec.range + ' м' : null,
       vision:spec && spec.vision + ' м',
       mass:total ? '≈ ' + tons.format(total / 1000) + ' т' : null,
-      armor:body?.armor,
+      armor:bonus?'Навесная · +'+bonus+' HP':body?.armor,
     };
     for (const [key, value] of Object.entries(values)) this.panel.querySelector('[data-design-' + key + ']').textContent = value ?? '—';
-    this.panel.querySelector('[data-design-armor]').title = body?.armorDetail ?? '';
+    this.panel.querySelector('[data-design-armor]').title = bonus?modifications.map(r=>r.name).join(', '):body?.armorDetail ?? '';
+  }
+
+  fieldChoices() {
+    const state=ensureSalvage(this.mission);
+    return Object.entries(FIELD_RECIPES).filter(([id,r])=>state.recipes.includes(id)&&this.components.includes(r.body))
+      .map(([id,recipe])=>({id,...recipe}));
+  }
+
+  fieldPreview() {return this.fieldChoices().filter(r=>this.previewModules.has(r.id));}
+
+  paintFieldChoices() {
+    this.filters.hidden=this.pages.hidden=true;
+    this.cards.replaceChildren(...this.fieldChoices().map(recipe=>{
+      const button=document.createElement('button');button.type='button';button.className='design-part';
+      button.dataset.designModification=recipe.id;
+      button.setAttribute('aria-pressed',String(this.previewModules.has(recipe.id)));
+      setButtonIcon(button,recipe.id==='hood-guard'?'armor-plate':'wall',recipe.name,'Показать на машине · +'+recipe.hpBonus+' HP');
+      button.onclick=()=>{
+        if(this.previewModules.has(recipe.id))this.previewModules.delete(recipe.id);else this.previewModules.add(recipe.id);
+        this.paintFieldChoices();this.paintAssembly();
+      };
+      return button;
+    }));
+    this.paintFieldNote();
+  }
+
+  paintFieldNote() {
+    const modules=this.fieldPreview();
+    this.fieldNote.hidden=this.activeSlot!==3&&!modules.length;
+    this.fieldNote.textContent=modules.length?modules.map(r=>r.name+' +'+r.hpBonus+' HP').join(' · ')+'. Установка при подборе деталей.'
+      :this.fieldChoices().length?'Выберите модуль для осмотра на машине. Установка при подборе деталей.':'Нет доступных навесных модулей для этого корпуса.';
   }
 
   syncName() {
     const {state, config} = this.mission;
     const assembly = projectAssemblyKey({components:this.components});
     const current = state.designs.find(project => projectAssemblyKey(project) === assembly);
-    this.saveButton.title = current ? 'Заменит проект «' + current.name + '» для этого набора деталей' : '';
+    this.saveButton.title = current ? 'Заменит проект «' + current.name + '» для этого набора деталей' : 'Новый проект';
     this.autoName.disabled = !this.manualName || !this.components.length;
     if (!this.manualName) {
       this.name.value = this.components.length ? projectDesignation(this.components, state.designs, config, state.research) : '';
@@ -264,7 +315,7 @@ export class VehicleDesigner {
   syncStageControls() {
     const exploded = !!this.preview?.exploded;
     this.explodeButton.disabled = this.resetButton.disabled = !this.preview?.model;
-    this.explodeButton.textContent = exploded ? 'Собрать' : 'Разобрать';
+    setButtonIcon(this.explodeButton, exploded ? 'assemble' : 'explode', exploded ? 'Собрать' : 'Разобрать');
     this.explodeButton.setAttribute('aria-pressed', String(exploded));
   }
 

@@ -5,7 +5,7 @@
   "campaign": "Операция «Рай»",
   "source": {
     "path": "docs/campaign/alpha/mission01-script.md",
-    "sha256": "f26d184f4b5a6e5e09847780766ead372d10d720c88be8e3758992644e0e1c8a"
+    "sha256": "75fdf1b882500122168dac0ced3c0da446dd76fe2e91bb3de52d22e3323e24a9"
   },
   "presentation": {
     "tone": "Серьёзная военная хроника; юмор в тексте и паузах, без комедийных эффектов.",
@@ -990,10 +990,10 @@
     {
       "id": "m01-s02-l001",
       "speaker": "commander",
-      "text": "Опять эта херня…",
+      "text": "Опять херня.",
       "sourceLine": 51,
       "phase": "before",
-      "pauseAfter": 0.85
+      "pauseAfter": 0.5
     },
     {
       "id": "m01-s02-l002",
@@ -1086,7 +1086,7 @@
     {
       "id": "m01-s02-l013",
       "speaker": "commander",
-      "text": "Подъём, суки! Родину восстанавливать будем!",
+      "text": "Подъём! Родину восстанавливать будем!",
       "sourceLine": 109,
       "phase": "before",
       "pauseAfter": 0.5
@@ -1254,7 +1254,7 @@
     {
       "id": "m01-s05-l012",
       "speaker": "commander",
-      "text": "А бронетехника?",
+      "text": "А бронетехника что?",
       "sourceLine": 257,
       "phase": "before",
       "pauseAfter": 0.85
@@ -1310,7 +1310,7 @@
     {
       "id": "m01-s06-l002",
       "speaker": "commander",
-      "text": "Вас понял. На месте. Приступаем.",
+      "text": "Вас понял. На месте.",
       "sourceLine": 308,
       "phase": "before",
       "pauseAfter": 0.5
@@ -1358,7 +1358,7 @@
     {
       "id": "m01-s06-l008",
       "speaker": "commander",
-      "text": "Электричества нет.",
+      "text": "Потому что электричества нет.",
       "sourceLine": 332,
       "phase": "before",
       "pauseAfter": 0.5
@@ -1542,7 +1542,7 @@
     {
       "id": "m01-s08-l006",
       "speaker": "commander",
-      "text": "Отлично. Что за агрегат?",
+      "text": "Отлично. И что за агрегат?",
       "sourceLine": 491,
       "phase": "before",
       "pauseAfter": 0.85
@@ -1558,7 +1558,7 @@
     {
       "id": "m01-s08-l008",
       "speaker": "commander",
-      "text": "Ну снимайте жёлтую.",
+      "text": "Ну снимайте и жёлтую.",
       "sourceLine": 499,
       "phase": "before",
       "pauseAfter": 0.5
@@ -1606,7 +1606,7 @@
     {
       "id": "m01-s08-l014",
       "speaker": "commander",
-      "text": "И?",
+      "text": "И что обнаружили?",
       "sourceLine": 537,
       "phase": "research-complete",
       "pauseAfter": 0.85

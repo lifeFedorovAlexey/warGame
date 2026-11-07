@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+  <!-- Missing tactical meanings, in the supplied pack's sand / olive / amber palette. -->
+  <defs>
+    <g id="car"><path fill="#8c9160" stroke="#d9c69b" stroke-width="2.5" d="M12 32h9l6-10h16l7 10h7v15H12z"/><path fill="#d9c69b" d="M29 26h10l5 7H25z"/><circle cx="23" cy="47" r="5" fill="#273322" stroke="#d9c69b" stroke-width="2"/><circle cx="47" cy="47" r="5" fill="#273322" stroke="#d9c69b" stroke-width="2"/></g>
+    <g id="gun"><path fill="#d9c69b" d="M6 29h31v12H17l-6 10H5l4-13H3v-9zm31 3h17v6H37z"/><path fill="#8c9160" d="M18 23h12v6H18zM23 41h8l3 13H24z"/></g>
+    <g id="aim" fill="none" stroke="#d9c69b" stroke-width="4"><path d="M17 5H5v12M47 5h12v12M5 47v12h12m30 0h12V47"/></g>
+    <g id="shield"><path fill="#8c9160" stroke="#d9c69b" stroke-width="3" d="m32 11 17 6v16c0 10-9 18-17 22-8-4-17-12-17-22V17z"/></g>
+  </defs>
+  <symbol id="combat-retreat-light" viewBox="0 0 64 64"><use href="#car"/><path d="M53 11H12" stroke="#f39a29" stroke-width="6"/><path fill="#f39a29" d="m19 1-13 10 13 10z"/><path fill="#273322" d="M9 56h47v6H9z"/><path fill="#d9c69b" d="M9 56h38v6H9z"/></symbol>
+  <symbol id="combat-retreat-heavy" viewBox="0 0 64 64"><use href="#car"/><path d="M53 11H12" stroke="#f39a29" stroke-width="6"/><path fill="#f39a29" d="m19 1-13 10 13 10z"/><path d="m36 24-6 10 6 6-5 10" stroke="#f39a29" stroke-width="4" fill="none"/><path fill="#273322" d="M9 56h47v6H9z"/><path fill="#f39a29" d="M9 56h16v6H9z"/></symbol>
+  <symbol id="combat-hold-fire" viewBox="0 0 64 64"><use href="#gun"/><path d="M11 57 54 7" stroke="#273322" stroke-width="11"/><path d="M11 57 54 7" stroke="#f39a29" stroke-width="6"/></symbol>
+  <symbol id="combat-return-fire" viewBox="0 0 64 64"><use href="#gun"/><path d="M51 27V11H15" fill="none" stroke="#f39a29" stroke-width="5"/><path fill="#f39a29" d="M21 2 8 11l13 9z"/></symbol>
+  <symbol id="combat-fire" viewBox="0 0 64 64"><use href="#gun"/><path fill="#f39a29" d="m53 32 3-11 3 8 5-6-2 11 2 10-6-5-3 9-2-10z"/><path d="M40 10h7M36 17h9" stroke="#f39a29" stroke-width="3"/></symbol>
+  <symbol id="combat-nearest" viewBox="0 0 64 64"><use href="#aim"/><circle cx="36" cy="32" r="16" stroke="#8c9160" stroke-width="5" fill="none"/><circle cx="36" cy="32" r="5" fill="#f39a29"/><path d="M3 32h18" stroke="#f39a29" stroke-width="6"/><path fill="#f39a29" d="m18 22 12 10-12 10z"/></symbol>
+  <symbol id="combat-armored" viewBox="0 0 64 64"><use href="#aim"/><use href="#shield"/><path d="m23 26 9-5 9 5m-18 10 9-5 9 5m-18 10 9-5 9 5" stroke="#f39a29" stroke-width="4.5" fill="none"/></symbol>
+  <symbol id="combat-wounded" viewBox="0 0 64 64"><use href="#aim"/><path fill="#8c9160" stroke="#d9c69b" stroke-width="2.5" d="m29 12-14 5v16q0 10 14 19l-4-13 7-7-8-7zm7 0 13 5v16q0 10-14 19l4-15-8-5 9-9z"/><path fill="#273322" d="M18 55h28v6H18z"/><path fill="#f39a29" d="M18 55h8v6h-8z"/></symbol>
+  <symbol id="combat-threat" viewBox="0 0 64 64"><use href="#aim"/><path fill="#f39a29" d="m32 10 5 15 13-9-7 15 12 5-15 5 3 13-12-9-12 8 2-14-12-6 15-5z"/><path fill="#273322" d="M29 22h6l-1 14h-4zm0 18h6v6h-6z"/></symbol>
+</svg>

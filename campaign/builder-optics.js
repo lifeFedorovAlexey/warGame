@@ -1,4 +1,4 @@
-import {vehiclePose, vehicleToWorld, worldToVehicle} from './builder-kinematics.js';
+import {vehiclePose, vehicleToWorld, worldToVehicle, buildingWorkRail} from './builder-kinematics.js';
 import {vehicleLocalBoxes} from './vehicle-collision.js';
 import {generatorWorkPoints} from './generator-layout.js';
 
@@ -22,7 +22,13 @@ export function workProjection(unit,target,config,field) {
     const angle=target.rotation, c=Math.cos(angle), s=Math.sin(angle);
     const dx=unit.x-target.x,dy=unit.y-target.y,localX=dx*c+dy*s,localY=-dx*s+dy*c;
     const layer=buildLayerHeight(target,spec,scale);
-    if(target.kind==='generator'){
+    if(target.completed){
+      // Completed buildings have a physical service rail; construction uses the rising layer.
+      const rail=buildingWorkRail(spec),faceY=rail.position[1]-rail.depth/2;
+      if(localY>=faceY*scale)return null;
+      const x=Math.max(-rail.width/2+.12,Math.min(rail.width/2-.12,localX/scale));
+      contacts=[[target.x+(x*c-faceY*s)*scale,target.y+(x*s+faceY*c)*scale,target.groundHeight+rail.position[2]*scale]];
+    }else if(target.kind==='generator'){
       contacts=generatorWorkPoints(spec.realSizeMetres,localX/scale,localY/scale,(layer-target.groundHeight)/scale)
         .map(([x,y,z])=>[target.x+(x*c-y*s)*scale,target.y+(x*s+y*c)*scale,target.groundHeight+z*scale]);
     }else{

@@ -1,0 +1,15 @@
+ГЕНЕРАЛ — НОВОЕ НАЧАЛО МИССИИ
+Четыре новые записи. Во всех использовать один голос генерала.
+
+m01-opening-general-coffee.mp3
+[impatient] А кофе почему нет?
+
+m01-opening-general-power-order.mp3
+[angry] Так электростанцию стройте! Вам на всё приказ нужен?
+
+m01-opening-general-power-building.mp3
+[brisk] Строится? Хорошо. Тогда слушайте задачу.
+
+m01-opening-general-power-ready.mp3
+[businesslike] Со светом разобрались. Теперь к делу.
+

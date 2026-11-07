@@ -1,0 +1,19 @@
+{
+  "passed": 14,
+  "tests": [
+    "Local, directional, accumulated deformation and seam continuity",
+    "Bounded mark history does not erase structural damage",
+    "Material profiles and independent detachable parts",
+    "LOD hysteresis, offscreen and restoration preserve authoritative state",
+    "Destroyed state keeps dents, marks and missing parts",
+    "Invalid hits never mutate state",
+    "BVH hits actual deformed surface and skips detached geometry",
+    "Original building prefabs have tagged windows and equipment within budget",
+    "Rigid animated parts raycast in their current pose and retain rest coordinates",
+    "Custom model cage survives serialization and rigid equipment does not dent the body",
+    "Debris has bounded active physics, retained capacity, sleep and resource removal",
+    "Shell preparation preserves authored part IDs, UVs and the original flat surface",
+    "Local BVH bounds match a brute-force deformed mesh after multidirectional impacts",
+    "Construction clips future structure but keeps the existing foundation targetable"
+  ]
+}

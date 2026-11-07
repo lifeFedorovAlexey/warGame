@@ -1,3 +1,4 @@
+import {SCAV_PROFILES,isInfantry} from './scav-unit-profiles.js';
 function treadTexture(T) {
   const canvas = document.createElement('canvas');
   canvas.width = 48;
@@ -53,6 +54,7 @@ export function createGroundEffects(T, scene, field, scale) {
       const before=cursor;
       const ids=new Set();
       if(cameraDistance<1100)for(const unit of visible){
+        if(isInfantry(unit))continue;
         ids.add(unit.id);
         const old=previous.get(unit.id);
         if(!old){previous.set(unit.id,{x:unit.x,y:unit.y,heading:unit.heading});continue;}
@@ -63,7 +65,8 @@ export function createGroundEffects(T, scene, field, scale) {
         const stamps=Math.min(42,Math.floor(length/stride));
         for(let i=1;i<=stamps;i++){
           const t=i*stride/length,h=old.heading+turn*t,c=Math.cos(h),s=Math.sin(h),x=old.x+(unit.x-old.x)*t,y=old.y+(unit.y-old.y)*t;
-          for(const side of [-1,1])stamp(x+(c*side*.73+s*1.25)*scale,y+(s*side*.73-c*1.25)*scale,h);
+          const profile=SCAV_PROFILES[unit.kind],width=profile?.track??.73,rear=profile?.rear??-1.25;
+          for(const side of [-1,1])stamp(x+(c*side*width-s*rear)*scale,y+(s*side*width+c*rear)*scale,h);
         }
         const used=stamps*stride/length;
         previous.set(unit.id,{x:old.x+(unit.x-old.x)*used,y:old.y+(unit.y-old.y)*used,heading:old.heading+turn*used});

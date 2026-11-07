@@ -26,6 +26,8 @@ export function createCombatEffects(T,scene,scale,sound) {
   const sparkMesh=new T.Points(sparkGeometry,new T.PointsMaterial({size:.31*scale,vertexColors:true,transparent:true,opacity:.85,depthWrite:false}));
   sparkMesh.name='field_impact_particles';sparkMesh.frustumCulled=false;scene.add(sparkMesh);
   const flame=createFlameEffects(T,scene,scale);
+  const grenades=new T.InstancedMesh(new T.IcosahedronGeometry(.095*scale,1),new T.MeshStandardMaterial({color:'#605c3c',roughness:.95}),limit);
+  grenades.name='thrown_grenades';grenades.frustumCulled=false;grenades.count=0;grenades.instanceMatrix.setUsage(T.DynamicDrawUsage);scene.add(grenades);
   const shade=new T.Color();
 
   function spatial(position,camera) {
@@ -57,6 +59,7 @@ export function createCombatEffects(T,scene,scale,sound) {
 
   return {
     spawn(start,end,weapon,now,camera,{from,targetId,surface='armor',destroyed=false}={}) {
+      if(weapon==='grenade')return;
       const round=roundFrom(start,end,weapon);
       if(!round)return;
       shots.push({from,start,end,weapon,born:now,targetId,surface,destroyed,rounds:[round]});
@@ -66,7 +69,20 @@ export function createCombatEffects(T,scene,scale,sound) {
       sound?.shot(weapon,gain,pan);
     },
     hit,
-    reset(){shots.length=impacts.length=0;flame.reset();},
+    explode(point,radius,now,camera){flame.blast(point,now,radius);const {gain,pan}=spatial(point,camera);sound?.impact(gain,pan,'debris');},
+    reset(){shots.length=impacts.length=0;grenades.count=0;flame.reset();},
+    updateGrenades(projectiles,time,visible){
+      let count=0;
+      for(const shot of projectiles){
+        if(count>=limit)break;
+        const t=T.MathUtils.clamp((time-shot.born)/(shot.impactAt-shot.born),0,1);
+        const x=T.MathUtils.lerp(shot.from.x,shot.to.x,t),y=T.MathUtils.lerp(shot.from.y,shot.to.y,t);
+        if(!visible(x,y))continue;
+        matrix.position.set(x,y,T.MathUtils.lerp(shot.from.z,shot.to.z,t)+Math.sin(t*Math.PI)*3.6*scale);
+        matrix.rotation.set(t*9,t*6,0);matrix.scale.setScalar(1);matrix.updateMatrix();grenades.setMatrixAt(count++,matrix.matrix);
+      }
+      grenades.count=count;if(count)grenades.instanceMatrix.needsUpdate=true;
+    },
     update(now,camera,viewportHeight,resolveImpact,resolveMuzzle) {
       let tracerCount=0,flashCount=0,lightDistance=Infinity;
       flareLight.intensity=0;
@@ -137,6 +153,6 @@ export function createCombatEffects(T,scene,scale,sound) {
       sparkGeometry.setDrawRange(0,sparkCount);
       if(sparkCount)sparks.needsUpdate=shades.needsUpdate=true;
     },
-    get statistics(){return {shots:shots.length,shotLimit:limit,tracers:tracer.count,impacts:impacts.length,...flame.statistics};},
+    get statistics(){return {shots:shots.length,shotLimit:limit,tracers:tracer.count,grenades:grenades.count,impacts:impacts.length,...flame.statistics};},
   };
 }

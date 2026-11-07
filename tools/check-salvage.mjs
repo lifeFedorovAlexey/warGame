@@ -1,0 +1,62 @@
+import assert from 'node:assert/strict';
+import * as T from '../demo/vendor/three.module.js';
+import {registerHooks} from 'node:module';
+registerHooks({resolve(specifier,context,next){return next(specifier==='three'?new URL('../demo/vendor/three.module.js',import.meta.url).href:specifier,context);}});
+const {createFieldModification}=await import('../campaign/field-modification-models.js');
+const {prepareDamageGeometry,createDamageCollider}=await import('../campaign/damage-geometry.js');
+const {ensureSalvage,salvageFromImpact,salvageFromWreck,updateSalvage,armorMultiplier,SALVAGE_LIMITS,touchesSalvage,syncFieldHp}=await import('../campaign/vehicle-salvage.js');
+const {createDamageState,applyDamageHit,VEHICLE_PARTS}=await import('../campaign/damage-state.js');
+const tests=[];const test=(name,fn)=>{fn();tests.push(name);};
+const fixture=()=>{const m={config:{worldScale:4.5,salvage:{initialRecipes:['hood-guard','window-grille']},units:{bukhanka:{components:['C01','B01','U01']},raider:{}}},state:{time:0,units:[]},emit(){}};ensureSalvage(m);return m;};
+const donor=id=>({id,kind:'bukhanka',x:0,y:0,hp:0,heading:0,damage:{...createDamageState(),parts:{7:{damage:1,detached:true}}}});
+const drop=(m,id='donor',power=160)=>{salvageFromImpact(m,donor(id),{power,worldPoint:[0,0,0]},{detached:true,partId:7,secondaryFailures:[]});return m.state.salvage.items.at(-1);};
+test('Recoverable stock is bounded, deterministic and rejects pulverised parts',()=>{
+  const m=fixture();drop(m,'dust',1000);assert.equal(m.state.salvage.items.length,0);
+  for(let i=0;i<40;i++)drop(m,'d'+i);assert.equal(m.state.salvage.items.length,SALVAGE_LIMITS.items);
+  m.state.time=SALVAGE_LIMITS.lifetime+1;updateSalvage(m);assert.equal(m.state.salvage.items.length,0);
+});
+test('Pickup respects disable, recipe, compatibility, ownership and settling',()=>{
+  const m=fixture(),item=drop(m);assert(m.state.salvage.enabled);m.state.salvage.enabled=false;
+  const u={id:'receiver',kind:'bukhanka',owner:'rai',hp:100,maxHp:320,x:item.x,y:item.y};m.state.units=[u];
+  updateSalvage(m);assert(!u.damage);m.state.salvage.enabled=true;updateSalvage(m);assert(!u.damage);
+  m.state.time=3;m.state.salvage.recipes=[];updateSalvage(m);assert(!u.damage);
+  m.state.salvage.recipes=['hood-guard'];u.kind='raider';updateSalvage(m);assert(!u.damage);
+  u.kind='bukhanka';u.owner='scavs';updateSalvage(m);assert(!u.damage);
+  u.owner='rai';u.hp=0;updateSalvage(m);assert(!u.damage);
+  u.hp=100;updateSalvage(m);assert(u.damage.parts[22].installed);assert.equal(u.hp,220);assert.equal(u.maxHp,440);assert.equal(m.state.salvage.items.length,0);
+});
+test('Swept pickup survives saving, cannot duplicate an installed mod and consumes exactly once',()=>{
+  const m=fixture(),item=drop(m);m.state.salvage.enabled=true;m.state.salvage.wanted=['hood-guard'];m.state.time=3;
+  m.state.units=[{id:'a',kind:'bukhanka',owner:'rai',hp:100,x:12,y:item.y,previousX:-12,previousY:item.y},{id:'b',kind:'bukhanka',owner:'rai',hp:100,x:0,y:item.y}];
+  m.state=JSON.parse(JSON.stringify(m.state));updateSalvage(m);assert(m.state.units[0].damage.parts[22].installed);assert(!m.state.units[1].damage);assert.equal(m.state.salvage.items.length,0);
+  drop(m,'another');m.state.time=6;m.state.units.pop();updateSalvage(m);assert.equal(m.state.salvage.items.length,1);
+  const u=m.state.units[0],hit={point:[0,2.2,1.6],normal:[0,1,0],direction:[0,-1,0],partId:22,type:'bullet',power:130};
+  applyDamageHit(u.damage,hit,VEHICLE_PARTS[22]);assert(u.damage.parts[22].installed&&u.damage.parts[22].detached);updateSalvage(m);assert(!u.damage.parts[22].detached);assert.equal(m.state.salvage.items.length,0);
+});
+test('Protection is local to a real installed guard and supports destruction',()=>{
+  const root=createFieldModification(T,'hood-guard');root.updateMatrixWorld(true);const binding=prepareDamageGeometry(T,root.children[0],'body'),collider=createDamageCollider(T,[binding]),state=createDamageState();
+  assert.equal(collider.trace([0,5,1.47],[0,-1,0],state),null);
+  state.parts[22]={installed:true,damage:0,detached:false};const hit=collider.trace([0,5,1.47],[0,-1,0],state);assert.equal(hit?.partId,22);
+  const unit={damage:state};assert.equal(armorMultiplier({...hit,type:'bullet'},unit),.65);assert.equal(armorMultiplier({...hit,type:'shell'},unit),1);assert.equal(armorMultiplier({partId:0,type:'bullet'},unit),1);
+  applyDamageHit(state,{...hit,direction:[0,-1,0],power:140,type:'bullet'},VEHICLE_PARTS[22]);assert(state.parts[22].installed);assert.equal(collider.trace([0,5,1.47],[0,-1,0],state),null);
+});
+test('Module HP stacks once, survives loading, and replaces broken protection without growing the cap',()=>{
+  const m=fixture(),item=drop(m),u={id:'receiver',kind:'bukhanka',owner:'rai',hp:100,maxHp:320,x:item.x,y:item.y};
+  m.state.units=[u];m.state.time=3;updateSalvage(m);
+  assert.deepEqual([u.hp,u.maxHp,u.fieldHpBonus],[220,440,120]);
+  drop(m,'second');m.state.time=6;updateSalvage(m);
+  assert.deepEqual([u.hp,u.maxHp,u.fieldHpBonus],[300,520,200]);
+  syncFieldHp(m,u);assert.equal(u.maxHp-u.hp,220,'Installing steel does not repair existing hull damage');
+  const loaded=JSON.parse(JSON.stringify(u));syncFieldHp(m,loaded);
+  assert.deepEqual(loaded,u,'Loading an already counted bonus does not grant HP again');
+  const legacy=structuredClone(u);delete legacy.fieldHpBonus;legacy.hp=100;legacy.maxHp=320;
+  syncFieldHp(m,legacy);assert.deepEqual([legacy.hp,legacy.maxHp],[300,520]);
+  syncFieldHp(m,legacy);assert.deepEqual([legacy.hp,legacy.maxHp],[300,520],'Legacy migration is idempotent');
+  const hit={point:[0,2.2,1.6],normal:[0,1,0],direction:[0,-1,0],partId:22,type:'bullet',power:130};
+  applyDamageHit(u.damage,hit,VEHICLE_PARTS[22]);u.hp-=130*armorMultiplier(hit,u);const afterHit=u.hp;
+  syncFieldHp(m,u);assert.equal(u.maxHp,400);assert.equal(u.hp,afterHit,'Detachment must not deal the same damage twice');
+  drop(m,'replacement');m.state.time=9;updateSalvage(m);
+  assert.equal(u.maxHp,520);assert.equal(u.hp,afterHit+120);
+  u.hp=0;syncFieldHp(m,u);assert.equal(u.hp,0,'A bonus never resurrects a wreck');assert.equal(u.maxHp,320);
+});
+console.log(JSON.stringify({passed:tests.length,tests},null,2));

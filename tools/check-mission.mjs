@@ -82,8 +82,11 @@ const stalledPair=[
  {x:-1375.9505,y:795.6683,heading:1.05886,waypoint:{x:-1360,y:784},goal:{x:-805.46,y:1098.69}},
 ];
 const vans=stalledPair.map(({waypoint,goal,...pose})=>traffic.addUnit('bukhanka','rai',pose,{
- heading:pose.heading,path:[waypoint,...traffic.nav.findPath(waypoint,goal)],task:{type:'move',...goal},
+ heading:pose.heading,path:[waypoint],task:{type:'move',...goal},
 }));
+// These saved poses are inside an original cliff cell. A stale route through
+// that cell is no longer legal; a replacement order must physically evacuate.
+for(const [index,van] of vans.entries())assert(traffic.order([van.id],'move',stalledPair[index].goal).ok,'Saved cliff pose receives a bounded exit route');
 const firstMotion=[null,null];
 for(let step=0;step<300;step++){
  traffic.advance(.1);
@@ -92,6 +95,7 @@ for(let step=0;step<300;step++){
 }
 for(const [index,van] of vans.entries()){
  const origin=stalledPair[index];
+ if(process.argv.includes('--diagnose'))console.log(JSON.stringify({case:'old cliff pose',firstMotion:firstMotion[index],van}));
  assert(firstMotion[index]!==null&&firstMotion[index]<=7,`Van ${van.id} waited ${firstMotion[index]} seconds before moving`);
  assert(Math.hypot(van.x-origin.x,van.y-origin.y)>12,`Van ${van.id} must leave the mutual deadlock`);
 }
@@ -126,7 +130,7 @@ assert(Math.hypot(turningVan.x-turningStart.x,turningVan.y-turningStart.y)>60
 function dismiss(){for(const key of [...mission.state.pendingCinematics]){seen.push({key,time:mission.state.time});mission.finishCinematic(key);}}
 const mechanics={workSteps:0,constructionGated:true,repairGated:true,interruptProjection:false,movingRepair:false,builderHandoff:false};
 function step(){
- const progress=new Map(mission.state.buildings.map(b=>[b.id,b.progress])),hp=new Map(mission.state.units.map(u=>[u.id,u.hp]));
+ const progress=new Map(mission.state.buildings.map(b=>[b.id,b.progress])),hp=new Map(mission.state.units.map(u=>[u.id,u.hp])),armor=new Map(mission.state.units.map(u=>[u.id,u.fieldHpBonus??0]));
  dismiss();mission.advance(.1);events.push(...mission.drainEvents());mission.drainEffects();
  const workers=mission.state.units.filter(u=>u.hp>0&&u.kind==='builder');
  for(const unit of workers){
@@ -137,7 +141,10 @@ function step(){
 
  }
  for(const b of mission.state.buildings)if(b.progress>(progress.get(b.id)??b.progress))assert(workers.some(u=>u.builderWorking&&u.task?.type==='build'&&u.task.targetId===b.id),'Construction progresses without contact');
- for(const u of mission.state.units)if(u.hp>(hp.get(u.id)??u.hp))assert(workers.some(w=>w.builderWorking&&w.task?.type==='repair'&&w.task.targetId===u.id),'Healing without contact');
+ for(const u of mission.state.units)if(u.hp>(hp.get(u.id)??u.hp)){
+  const addedArmor=Math.max(0,(u.fieldHpBonus??0)-(armor.get(u.id)??0));
+  assert(u.hp-hp.get(u.id)<=addedArmor+1e-8||workers.some(w=>w.builderWorking&&w.task?.type==='repair'&&w.task.targetId===u.id),'Healing without contact');
+ }
  if(!mechanics.movingRepair){const worker=workers.find(u=>u.builderWorking&&u.task?.type==='repair'&&mission.entity(u.task.targetId)?.hp<mission.entity(u.task.targetId)?.maxHp-4);if(worker)testMovingRepair(worker);}
 }
 function orderNearby(m,unit){for(const [dx,dy] of [[64,0],[-64,0],[0,64],[0,-64],[48,48],[-48,-48]]){const p=m.nav.nearest(unit.x+dx,unit.y+dy,3);if(p&&Math.hypot(p.x-unit.x,p.y-unit.y)>30&&m.order([unit.id],'move',p).ok)return true;}return false;}
@@ -270,8 +277,9 @@ if(process.argv.includes('--full')){
   const rally=camp.index===3?field.gridToWorld(config.camps[3].approachGrid):null;
   if(camp.index===3){
    const mustered=()=>army().filter(u=>Math.hypot(u.x-rally.x,u.y-rally.y)<100);
-   assert(mission.setRally(factory.id,rally).ok);
    reportOrder(mission.order(ids(),'move',rally),'Muster outside tower range');
+   until(()=>mission.exploredAt(rally.x,rally.y),220,'Scout the legal southern approach');
+   assert(mission.setRally(factory.id,rally).ok);
    const reinforcements=Math.max(0,12-army().length);
    for(let i=0;i<reinforcements;i++){
     until(()=>mission.canSpend(config.units.bukhanka.cost),100,'Reinforcement resources');
@@ -297,7 +305,7 @@ if(process.argv.includes('--full')){
    const target=tower??visible[0];
    if(target)reportOrder(mission.order(ids(),'attack',target),camp.id);
    else reportOrder(mission.order(ids(),camp.index===3?'attack-move':'move',camp.gate),camp.id);
-   for(let i=0;i<50;i++)step();if(!army().length)throw new Error('Combat force lost at '+camp.id);
+   for(let i=0;i<50;i++)step();if(!army().length){fs.writeFileSync('campaign/reports/mission-failure.json',mission.save());throw new Error('Combat force lost at '+camp.id);}
   }
   if(!camp.cleared)fs.writeFileSync('campaign/reports/mission-failure.json',mission.save());assert(camp.cleared,'Camp did not clear: '+camp.id);console.log('cleared',camp.id,mission.state.time.toFixed(1),'survivors',army().length);
   if(camp.artifact){const artifact=mission.state.artifacts.find(a=>a.key===camp.artifact);reportOrder(mission.order(ids(),'move',artifact),camp.id+' artifact');until(()=>mission.state.artifactKeys.includes(camp.artifact),150,'Collect '+camp.artifact);until(()=>mission.canSpend(config.research[camp.artifact].cost),100,'Research funds');assert(mission.research(lab.id,camp.artifact).ok);until(()=>mission.state.research[camp.artifact],100,'Research '+camp.artifact);}

@@ -9,10 +9,10 @@ const steeringLimit = .67;
 const maximumCurve = Math.tan(steeringLimit);
 
 // X is right, Y is forward. Sweep the whole Ackermann arc, including the rotating footprint.
-function traceArc(start, direction, curve, length, scale, allowed) {
+function traceArc(start, direction, curve, length, scale, allowed,blocked) {
   if (length <= 1e-8) return start;
   const curvature = curve / (2.6 * scale);
-  let previous = start;
+  let previous = start,previousArc=0;
   const first = Math.min(.14, length), steps = Math.ceil((length - first) / 1.25);
   for (let index = 0; index <= steps; index++) {
     const arc = steps ? first + (length - first) * index / steps : first;
@@ -23,8 +23,9 @@ function traceArc(start, direction, curve, length, scale, allowed) {
       y: start.y + Math.cos(middle) * chord * direction,
       heading: wrap(start.heading + turn), kind: start.kind
     };
-    if (!allowed(previous, pose)) return null;
+    if (!allowed(previous, pose)){if(blocked)Object.assign(blocked,{from:previous,to:pose,travelled:previousArc});return null;}
     previous = pose;
+    previousArc=arc;
   }
   return previous;
 }
@@ -39,7 +40,7 @@ function vehiclePose(unit, pose, direction, curve, length, dt) {
   };
 }
 
-export function driveStep(unit, point, dt, {speed, grade, scale, tolerance, reverseLimit = 0, trafficLimit = Infinity, allowed}) {
+export function driveStep(unit, point, dt, {speed, grade, scale, tolerance, reverseLimit = 0, trafficLimit = Infinity, allowed, onBlockedContact}) {
   const distance = lengthBetween(unit, point);
   const direct = wrap(headingTo(unit, point) - unit.heading);
   const reverse = distance < reverseLimit && Math.abs(direct) > (unit.reversing ? Math.PI * .47 : Math.PI * .61);
@@ -53,7 +54,10 @@ export function driveStep(unit, point, dt, {speed, grade, scale, tolerance, reve
   const travel = Math.min(distance, Math.max(0, nextSpeed * dt));
   if (travel < .001) return null;
   const curve = Math.tan(clamp(angle * 1.55, -steeringLimit, steeringLimit));
-  const pose = traceArc(unit, direction, curve, travel, scale, allowed);
+  // A gentle physical contact also triggers suspension feedback. Combat
+  // damage keeps its separate, much higher kinetic-energy threshold.
+  const blocked=lastSpeed>.18*scale?{}:null;
+  const pose = traceArc(unit, direction, curve, travel, scale, allowed,blocked);
   if (pose) return vehiclePose(unit, pose, direction, curve, travel, dt);
   const fallbackTravel = travel * .70;
   for (const alternative of [maximumCurve, -maximumCurve, 0]) {
@@ -62,12 +66,22 @@ export function driveStep(unit, point, dt, {speed, grade, scale, tolerance, reve
       return vehiclePose(unit, next, direction, alternative, fallbackTravel, dt);
     }
   }
+  if(blocked?.from){
+    // Suspension feedback must not turn a failed low-speed move into a
+    // successful pose: that would reset the traffic recovery stall timer.
+    if(lastSpeed<=1.8*scale){onBlockedContact?.(lastSpeed*direction);return null;}
+    const {x,y,heading,kind}=blocked.from;
+    return {...vehiclePose(unit,{x,y,heading,kind},direction,curve,blocked.travelled,dt),driveSpeed:0,impactSpeed:lastSpeed*direction};
+  }
   return null;
 }
 
 // A small deterministic search in pose space handles corners and parking.
 // Reverse is confined to these local manoeuvres and paid for in both distance and cost.
-export function planManeuver(unit, goal, {scale, allowed, accept, tolerance = 2, attempts = 0, reverseBudget = 4 * scale, failedArcs = [], maximumLegs = 9}) {
+export function planManeuver(...args) {
+  const search=planManeuverSteps(...args);let step;do{step=search.next();}while(!step.done);return step.value;
+}
+export function* planManeuverSteps(unit, goal, {scale, allowed, accept, tolerance = 2, attempts = 0, reverseBudget = 4 * scale, failedArcs = [], maximumLegs = 9, deadline = ()=>Infinity}) {
   const curves = [0, maximumCurve / 2, -maximumCurve / 2, maximumCurve, -maximumCurve];
   const initialDistance = lengthBetween(unit, goal);
   const stride = 1.2 * scale;
@@ -78,6 +92,7 @@ export function planManeuver(unit, goal, {scale, allowed, accept, tolerance = 2,
   };
   let level = [{pose: unit, cost: 0, reverse: 0, legs: []}];
   const seen = new Map();
+  let work=0;
   for (let depth = 0; depth < maximumLegs; depth++) {
     const next = [];
     for (const entry of level) {
@@ -85,6 +100,7 @@ export function planManeuver(unit, goal, {scale, allowed, accept, tolerance = 2,
       const long = Math.min(stride, Math.max(tolerance * .6, remaining));
       for (const direction of [1, -1]) {
         for (const curve of curves) {
+          if(++work%8===0&&performance.now()>=deadline())yield;
           if (!depth && failedArcs.some(leg => leg.direction === direction && leg.curve === curve)) continue;
           let length = direction > 0 ? long : Math.min(long, reverseBudget - entry.reverse);
           if (length < tolerance * .55) continue;
@@ -102,7 +118,7 @@ export function planManeuver(unit, goal, {scale, allowed, accept, tolerance = 2,
           const facingGoal = !accept && distance < initialDistance + 6 && toGoal < .65
             && traceArc(pose, 1, Math.tan(clamp(wrap(headingTo(pose, goal) - pose.heading), -steeringLimit, steeringLimit)),
               Math.min(distance, 2.5 * scale), scale, allowed);
-          if (accept ? accept(pose) : distance <= tolerance || depth > 0 && facingGoal) return legs;
+          if (accept ? accept(pose, legs) : distance <= tolerance || depth > 0 && facingGoal) return legs;
           const key = [Math.round(pose.x / (stride * .48)), Math.round(pose.y / (stride * .48)),
             Math.round(pose.heading / .24), direction].join(',');
           const gearChange = entry.legs.length && entry.legs.at(-1).direction !== direction ? 3 : 0;

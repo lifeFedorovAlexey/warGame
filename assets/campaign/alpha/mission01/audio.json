@@ -3,7 +3,7 @@
   "language": "ru-RU",
   "source": {
     "path": "docs/campaign/alpha/mission01-script.md",
-    "sha256": "f26d184f4b5a6e5e09847780766ead372d10d720c88be8e3758992644e0e1c8a"
+    "sha256": "75fdf1b882500122168dac0ced3c0da446dd76fe2e91bb3de52d22e3323e24a9"
   },
   "voices": {
     "narrator": {
@@ -114,207 +114,236 @@
       "bytes": 32169
     },
     "m01-s02-l001": {
-      "file": "audio/m01-s02-l001.ogg",
-      "duration": 1.5545,
+      "file": "recordings/commander/m01-s02-l001.mp3",
+      "duration": 2.037541666666667,
       "speaker": "commander",
-      "sha256": "edf489c24cc8cee159010b977ceab4cc76c0c2a39b9af6c9b8241d1f8b6bfa94",
-      "bytes": 7539
+      "sha256": "86cfe2bcd1792ff2ebc6729999875100b24c3415da73df0c2f374796ad8e10e9",
+      "bytes": 49537,
+      "origin": "user-recording"
     },
     "m01-s02-l003": {
-      "file": "audio/m01-s02-l003.ogg",
-      "duration": 2.8535416666666666,
+      "file": "recordings/commander/m01-s02-l003.mp3",
+      "duration": 3.6310416666666665,
       "speaker": "commander",
-      "sha256": "ea8790a0ce1e3ab8ad92a4e464ae41e5581c6c6c07dd8ae1eafdca85cbf0e1a6",
-      "bytes": 13817
+      "sha256": "0ef4535fc76297db4a41b7ff5ed781ba747fe429fbd9b58ee0264bf910d734b9",
+      "bytes": 75033,
+      "origin": "user-recording"
     },
     "m01-s02-l005": {
-      "file": "audio/m01-s02-l005.ogg",
-      "duration": 0.9166666666666666,
+      "file": "recordings/commander/m01-s02-l005.mp3",
+      "duration": 1.306125,
       "speaker": "commander",
-      "sha256": "1fcb2620181dbc1f89e89ac5fbf267ab39ba5a458465971db15b88eb26e6d343",
-      "bytes": 4349
+      "sha256": "4bdb9e75dd4cd34f1ea6d8c873fe63add641193dc5eb3e3224c479ba7bcab75f",
+      "bytes": 37834,
+      "origin": "user-recording"
     },
     "m01-s02-l007": {
-      "file": "audio/m01-s02-l007.ogg",
-      "duration": 0.9275416666666667,
+      "file": "recordings/commander/m01-s02-l007.mp3",
+      "duration": 1.410625,
       "speaker": "commander",
-      "sha256": "f264cb36842a0f29558d20a2f92ef9bf5d1c24d699545ce7abc955d8af461a23",
-      "bytes": 4367
+      "sha256": "f4702a08562ef9c7482aaddecb62e4fc7085a76affe0f9e6c3d60caeb5e2e574",
+      "bytes": 39506,
+      "origin": "user-recording"
     },
     "m01-s02-l009": {
-      "file": "audio/m01-s02-l009.ogg",
-      "duration": 1.4506666666666668,
+      "file": "recordings/commander/m01-s02-l009.mp3",
+      "duration": 1.6457083333333333,
       "speaker": "commander",
-      "sha256": "be229fe1608b4b2ad8344aa728bf36b68b1cccd82e7c66cdcb347850428651c7",
-      "bytes": 6996
+      "sha256": "3361a22ab8dd8f9b2580829c573370b34ae6fe03e7cc234a5c571ae6cae74ad4",
+      "bytes": 43268,
+      "origin": "user-recording"
     },
     "m01-s02-l011": {
-      "file": "audio/m01-s02-l011.ogg",
-      "duration": 1.2294166666666666,
+      "file": "recordings/commander/m01-s02-l011.mp3",
+      "duration": 1.5673333333333332,
       "speaker": "commander",
-      "sha256": "1c45fb0e2f874f2773fda386735379446b0db2cf37b87170f2864f97d6754bc3",
-      "bytes": 5832
+      "sha256": "2b64fdea46b545f36a043c2f2ebbd173353b4117466a8e8e78786587a5273c45",
+      "bytes": 42014,
+      "origin": "user-recording"
     },
     "m01-s02-l013": {
-      "file": "audio/m01-s02-l013.ogg",
-      "duration": 3.3411666666666666,
+      "file": "recordings/commander/m01-s02-l013.mp3",
+      "duration": 3.5526666666666666,
       "speaker": "commander",
-      "sha256": "8647f0dc43456a4d8ff21002d7ddb4fe0780f162c9490da2eda0cb7b17b57760",
-      "bytes": 16357
+      "sha256": "910c09c6d036ed2cc374f08cf0ecced9e6a8a97356b81e5aafd7d72591bcd6d1",
+      "bytes": 73779,
+      "origin": "user-recording"
     },
     "m01-s05-l012": {
-      "file": "audio/m01-s05-l012.ogg",
-      "duration": 1.4848333333333332,
+      "file": "recordings/commander/m01-s05-l012.mp3",
+      "duration": 2.1942916666666665,
       "speaker": "commander",
-      "sha256": "b5b66719130b67b28054e9033f0eb6ff3997080192a72bccee734d0f17019a9c",
-      "bytes": 7195
+      "sha256": "dee41084d7ebbb57f3820428bfa9f082046d21b2b3efc7e7e711b5b5b7d1aaba",
+      "bytes": 52045,
+      "origin": "user-recording"
     },
     "m01-s05-l014": {
-      "file": "audio/m01-s05-l014.ogg",
-      "duration": 2.077625,
+      "file": "recordings/commander/m01-s05-l014.mp3",
+      "duration": 2.925708333333333,
       "speaker": "commander",
-      "sha256": "c889f01c0a7163c192b352141c1400432b7c01b892873cdd7ebd0b99175415e8",
-      "bytes": 11357
+      "sha256": "0666bd5a805836324ee32516c49c7306b3362ad9f08a467731769957c7c08cf7",
+      "bytes": 63748,
+      "origin": "user-recording"
     },
     "m01-s06-l002": {
-      "file": "audio/m01-s06-l002.ogg",
-      "duration": 3.408125,
+      "file": "recordings/commander/m01-s06-l002.mp3",
+      "duration": 3.0040833333333334,
       "speaker": "commander",
-      "sha256": "1de03bf76bd255fc5044cc4eb2658530ea02b49ad4f44eb1979622f3084ec87c",
-      "bytes": 15974
+      "sha256": "9d286f8f53b8b2ebdbab0baf4dae1cd52ef8d0568678bb931958faafc47d9302",
+      "bytes": 65002,
+      "origin": "user-recording"
     },
     "m01-s06-l004": {
-      "file": "audio/m01-s06-l004.ogg",
-      "duration": 3.1321666666666665,
+      "file": "recordings/commander/m01-s06-l004.mp3",
+      "duration": 3.3175416666666666,
       "speaker": "commander",
-      "sha256": "0bf6ee0f663a1ca6a49f19ee263780326709fd5cc51ae85a09e8fa0c523b5ee1",
-      "bytes": 15069
+      "sha256": "ac1de0af5aacea970d97717c4b2d7dc1b8ead8b71f289f639fc36ec7420c9d14",
+      "bytes": 70017,
+      "origin": "user-recording"
     },
     "m01-s06-l006": {
-      "file": "audio/m01-s06-l006.ogg",
-      "duration": 0.7882083333333333,
+      "file": "recordings/commander/m01-s06-l008.mp3",
+      "duration": 1.22775,
       "speaker": "commander",
-      "sha256": "8438cd4e94e23dac64b13b707bbe9c963f94b5e3495fa8b067cc38f507743b78",
-      "bytes": 3573
+      "sha256": "2cd019917984b7f9a4e9f4dfce907a990255cd8daec9f33e4e44ebcac9eb22cd",
+      "bytes": 36581,
+      "origin": "user-recording"
     },
     "m01-s06-l008": {
-      "file": "audio/m01-s06-l008.ogg",
-      "duration": 1.520375,
+      "file": "recordings/commander/m01-s07-l002.mp3",
+      "duration": 2.429375,
       "speaker": "commander",
-      "sha256": "9fffe560061f0fdbc5edc5dbf8dd52cce5e7cd2f2742fd4a2ea666016e61926b",
-      "bytes": 7424
+      "sha256": "3ddb97446f3b9e7db327117aec79f5c37d7ed2b226154a1e936dacb0c406ef2f",
+      "bytes": 55807,
+      "origin": "user-recording"
     },
     "m01-s07-l002": {
-      "file": "audio/m01-s07-l002.ogg",
-      "duration": 0.7076666666666667,
+      "file": "recordings/commander/m01-s07-l004.mp3",
+      "duration": 0.8359166666666666,
       "speaker": "commander",
-      "sha256": "6d3c41feda7278b153c5f35705a12c62e5a507bea4cf8af9d3ff1ba2da2a19b9",
-      "bytes": 3241
+      "sha256": "597083bcf6cbb47a67b0df0e4079c55d12f17a7e18b45b2f4b3e174001126da9",
+      "bytes": 30311,
+      "origin": "user-recording"
     },
     "m01-s07-l004": {
-      "file": "audio/m01-s07-l004.ogg",
-      "duration": 0.9043333333333333,
+      "file": "recordings/commander/pending/m01-s07-l007.mp3",
+      "duration": 1.5673333333333332,
       "speaker": "commander",
-      "sha256": "ef3875eabac23678baa66293e0c037f067fccc930e5f194c25e8977a78fdd3be",
-      "bytes": 4137
+      "sha256": "62b98474be794dbf39ba089738c05c25fee408a8b4dd2995b1559e2d93a57cb4",
+      "bytes": 42014,
+      "origin": "user-recording"
     },
     "m01-s07-l007": {
-      "file": "audio/m01-s07-l007.ogg",
-      "duration": 6.507375,
+      "file": "recordings/commander/m01-s07-l007.mp3",
+      "duration": 6.687333333333333,
       "speaker": "commander",
-      "sha256": "eee5bb86030d068ead4b6a10cf4b0fdbed75520191b5e0c66d1268f9762a7bb2",
-      "bytes": 31552
+      "sha256": "f0ac73d691c1873747e7e1ba996ccae36592e693a821e03235bd612c9196bf75",
+      "bytes": 123934,
+      "origin": "user-recording"
     },
     "m01-s07-l009": {
-      "file": "audio/m01-s07-l009.ogg",
-      "duration": 2.460125,
+      "file": "recordings/commander/m01-s07-l009.mp3",
+      "duration": 3.3959166666666665,
       "speaker": "commander",
-      "sha256": "19c96b6d44300b9216da31c6ae75f107a4a3ef0e91fe29a0840102c7b86f867b",
-      "bytes": 12338
+      "sha256": "dce3d422efdae6f89d023bef69ff95d2fd330237b6bd36e24c6524964221f410",
+      "bytes": 71271,
+      "origin": "user-recording"
     },
     "m01-s07-l011": {
-      "file": "audio/m01-s07-l011.ogg",
-      "duration": 1.438375,
+      "file": "recordings/commander/m01-s07-l011.mp3",
+      "duration": 1.8024583333333333,
       "speaker": "commander",
-      "sha256": "75485a254b4ea60b5ea4bc5c0eb0948e80752311060533f6c8fd8b72f109d8dd",
-      "bytes": 6943
+      "sha256": "cd0b338885b5f2fe2bfbe344b1be07d5fb7b678e8714f4ec97e01e7204bc5e74",
+      "bytes": 45776,
+      "origin": "user-recording"
     },
     "m01-s07-l013": {
-      "file": "audio/m01-s07-l013.ogg",
-      "duration": 0.857875,
+      "file": "recordings/commander/m01-s07-l013.mp3",
+      "duration": 1.0710416666666667,
       "speaker": "commander",
-      "sha256": "717b3eb4d83599d2acd6307a68ca2bfefe7e4e8ce4cc49f87f949fd6dd992684",
-      "bytes": 4018
+      "sha256": "96e1aca567864bfc64d4f330d569135b527bdc226f9e9b569f86735f7e33cf8c",
+      "bytes": 34073,
+      "origin": "user-recording"
     },
     "m01-s07-l015": {
-      "file": "audio/m01-s07-l015.ogg",
-      "duration": 2.6213333333333333,
+      "file": "recordings/commander/m01-s07-l015.mp3",
+      "duration": 2.8473333333333333,
       "speaker": "commander",
-      "sha256": "36c501ea38d1bdbdb95dd23ab3fddafb982145860de8b3747e6cf858a6ff567d",
-      "bytes": 12566
+      "sha256": "75aa9cc0a59bf98e8a9773d675d7e01fbbe7a4fcf5bde9aa740342dd6588999c",
+      "bytes": 62494,
+      "origin": "user-recording"
     },
     "m01-s08-l002": {
-      "file": "audio/m01-s08-l002.ogg",
-      "duration": 1.2649166666666667,
+      "file": "recordings/commander/m01-s08-l002.mp3",
+      "duration": 1.489,
       "speaker": "commander",
-      "sha256": "33f28ae339c2c6eeec21d630208147ed33e60debbe8e3e41befb78f32869048f",
-      "bytes": 5746
+      "sha256": "ea777725fc8d4d9b89dadd103651148070487383a028c4e9ef5f058e6a7cd95a",
+      "bytes": 40760,
+      "origin": "user-recording"
     },
     "m01-s08-l004": {
-      "file": "audio/m01-s08-l004.ogg",
-      "duration": 2.4232916666666666,
+      "file": "recordings/commander/m01-s08-l004.mp3",
+      "duration": 2.272666666666667,
       "speaker": "commander",
-      "sha256": "bfbf61c5b9fcc3fbffbd65ddc394bd568cd2c099d72b555fcfabcc45bb1771c7",
-      "bytes": 11398
+      "sha256": "8a8d90257d75820881c2aff7f9c70acee5eebcfda83725d22b75c97d3fb2eb96",
+      "bytes": 53299,
+      "origin": "user-recording"
     },
     "m01-s08-l006": {
-      "file": "audio/m01-s08-l006.ogg",
-      "duration": 2.26075,
+      "file": "recordings/commander/m01-s08-l006.mp3",
+      "duration": 3.0040833333333334,
       "speaker": "commander",
-      "sha256": "7f0f6536b2f892ae97bed94581483dbb7690654f4356ce1be3481e8f2d70679e",
-      "bytes": 10571
+      "sha256": "7b3a70a1f2e2d32acbebaeadc4ee2a7f49f3f260769003dd193e908d61a1000e",
+      "bytes": 65002,
+      "origin": "user-recording"
     },
     "m01-s08-l008": {
-      "file": "audio/m01-s08-l008.ogg",
-      "duration": 1.6132083333333334,
+      "file": "recordings/commander/m01-s08-l008.mp3",
+      "duration": 2.1159166666666667,
       "speaker": "commander",
-      "sha256": "879c3fbf7d5ee5937219d77f791269bead725194470ae18e3f75c1841675ca19",
-      "bytes": 7899
+      "sha256": "548d347bc74fe2524a035e371fd1abfae07cb155cb8c73bc8ba2eb0daa2b772c",
+      "bytes": 50791,
+      "origin": "user-recording"
     },
     "m01-s08-l010": {
-      "file": "audio/m01-s08-l010.ogg",
-      "duration": 0.9398333333333333,
+      "file": "recordings/commander/m01-s08-l010.mp3",
+      "duration": 1.149375,
       "speaker": "commander",
-      "sha256": "3fe3bb5ff45f604d0854d30684e598436b3563adaa880bafce3a69798e48834b",
-      "bytes": 4467
+      "sha256": "2532b1c8a743116d2105c2812b58bb201c2bccca76d306a331b38dab517ecf73",
+      "bytes": 35327,
+      "origin": "user-recording"
     },
     "m01-s08-l012": {
-      "file": "audio/m01-s08-l012.ogg",
-      "duration": 3.410791666666667,
+      "file": "recordings/commander/m01-s08-l012.mp3",
+      "duration": 3.5526666666666666,
       "speaker": "commander",
-      "sha256": "2ee4cf46dcfab763fb4d8f9e1d494b79d4c427c555494375044d422b934504bf",
-      "bytes": 16527
+      "sha256": "9399115e364d86f9b9eceb7c3e2946f1a07eb9263b29ca10b8aa16a11718f568",
+      "bytes": 73779,
+      "origin": "user-recording"
     },
     "m01-s08-l014": {
-      "file": "audio/m01-s08-l014.ogg",
-      "duration": 0.41670833333333335,
+      "file": "recordings/commander/m01-s08-l014.mp3",
+      "duration": 1.8024583333333333,
       "speaker": "commander",
-      "sha256": "b9e7cf95a893d4ff188de6f07ee6e6157577a05011d94d5c5b4c980f6b250a0e",
-      "bytes": 1993
+      "sha256": "6a3f4af02f8a81002f62f4140cc4ed895bdf186ed5e3cf05be0f9a1e7cbf7ada",
+      "bytes": 45776,
+      "origin": "user-recording"
     },
     "m01-s08-l016": {
-      "file": "audio/m01-s08-l016.ogg",
-      "duration": 1.8563333333333334,
+      "file": "recordings/commander/m01-s08-l016.mp3",
+      "duration": 2.429375,
       "speaker": "commander",
-      "sha256": "1bb909ade432fdc6530990042d26da874c7f41b0ce10e79ddd7e621a11dc8e06",
-      "bytes": 9186
+      "sha256": "50f49e9a00c83aef4e491dc9deba5ab29604ef2de93c18121dd9d455b6334993",
+      "bytes": 55807,
+      "origin": "user-recording"
     },
     "m01-s08-l018": {
-      "file": "audio/m01-s08-l018.ogg",
-      "duration": 1.5080416666666667,
+      "file": "recordings/commander/m01-s08-l018.mp3",
+      "duration": 1.6457083333333333,
       "speaker": "commander",
-      "sha256": "77417d5e66ff40d67ce656d2b0b8bcc6cb54f4918972722b1f499377853d229a",
-      "bytes": 7295
+      "sha256": "c7597953606c127f669d0c840123c04edac8afb53b4602fb38a1cc611b5c4d88",
+      "bytes": 43268,
+      "origin": "user-recording"
     },
     "m01-s08-l020": {
       "file": "audio/m01-s08-l020.ogg",
@@ -597,172 +626,196 @@
       "bytes": 7165
     },
     "m01-s02-l002": {
-      "file": "audio/m01-s02-l002.ogg",
-      "duration": 1.8339583333333334,
+      "file": "recordings/warrant/m01-s02-l002.mp3",
+      "duration": 2.8473333333333333,
       "speaker": "warrant",
-      "sha256": "463812317f64d02ae4d76ef1ec82ae2c989274a2971441043b7857c2c80972f4",
-      "bytes": 8996
+      "sha256": "126add19dc59951edfe36337a509941b1731a13540926e917bc431f85877e806",
+      "bytes": 62494,
+      "origin": "user-recording"
     },
     "m01-s02-l004": {
-      "file": "audio/m01-s02-l004.ogg",
-      "duration": 1.299875,
+      "file": "recordings/warrant/m01-s02-l004.mp3",
+      "duration": 1.7240833333333334,
       "speaker": "warrant",
-      "sha256": "194c08a6631930b4e6749e3a80a0c0f2f6fb42c98d8f5092f09d834f980dc087",
-      "bytes": 6286
+      "sha256": "8e529f614b943b2abc76458e67da77e7befed7d8bab3aeeae4f4df6251abd083",
+      "bytes": 44522,
+      "origin": "user-recording"
     },
     "m01-s02-l006": {
-      "file": "audio/m01-s02-l006.ogg",
-      "duration": 1.76425,
+      "file": "recordings/warrant/m01-s02-l006.mp3",
+      "duration": 2.1942916666666665,
       "speaker": "warrant",
-      "sha256": "875bb61d936ce9882a706d201cb11f29ab3c6bd2848174d282ed197da1319c1b",
-      "bytes": 8695
+      "sha256": "cca4df2cb10ae49847f38569a7921bd4f361cbc5d91be0ed48861645f3135561",
+      "bytes": 52045,
+      "origin": "user-recording"
     },
     "m01-s02-l008": {
-      "file": "audio/m01-s02-l008.ogg",
-      "duration": 2.9556666666666667,
+      "file": "recordings/warrant/m01-s02-l008.mp3",
+      "duration": 3.3959166666666665,
       "speaker": "warrant",
-      "sha256": "d8427e7cc56dbe9083a5b73518361c550f3ea31235694b7921cb03cb6e1efc10",
-      "bytes": 13876
+      "sha256": "53ae5021d6b5f39bc7b5d26c3055d8e0e552b76fc25a92824d14529c50ff08f2",
+      "bytes": 71271,
+      "origin": "user-recording"
     },
     "m01-s02-l010": {
-      "file": "audio/m01-s02-l010.ogg",
-      "duration": 0.9410416666666667,
+      "file": "recordings/warrant/m01-s02-l010.mp3",
+      "duration": 1.6457083333333333,
       "speaker": "warrant",
-      "sha256": "05797e4ebc407a55ef3cd85811232ff7cb09321332568bcdbc69f68fabda7958",
-      "bytes": 4907
+      "sha256": "dd5a6ca30da414e97f76895e7dc3bca20f81e24dde37b6bc486790915d3f2989",
+      "bytes": 43268,
+      "origin": "user-recording"
     },
     "m01-s02-l012": {
-      "file": "audio/m01-s02-l012.ogg",
-      "duration": 1.0676666666666668,
+      "file": "recordings/warrant/m01-s02-l012.mp3",
+      "duration": 1.149375,
       "speaker": "warrant",
-      "sha256": "df387adaf5e3e7d531b08d36c4549cfceca950daecbe5cf8f65eea233319e16e",
-      "bytes": 5076
+      "sha256": "e5f4922870a0e49669791530d15090aa86a7ec3673d11b4e63036e2690f365dc",
+      "bytes": 35327,
+      "origin": "user-recording"
     },
     "m01-s03-l001": {
-      "file": "audio/m01-s03-l001.ogg",
-      "duration": 1.2069583333333334,
+      "file": "recordings/warrant/m01-s03-l001.mp3",
+      "duration": 1.5673333333333332,
       "speaker": "warrant",
-      "sha256": "e8d6231d022ae32d51b2ac3604e25945e514d24c1c2a7777a238c54f23166edc",
-      "bytes": 5807
+      "sha256": "bd64fa8e549c91dffb9bfc35373ddc789e0b025ab75e7b5fb994e299dd64d5a6",
+      "bytes": 42014,
+      "origin": "user-recording"
     },
     "m01-s03-l003": {
-      "file": "audio/m01-s03-l003.ogg",
-      "duration": 1.2302083333333333,
+      "file": "recordings/warrant/m01-s03-l003.mp3",
+      "duration": 1.410625,
       "speaker": "warrant",
-      "sha256": "b69f24a9c4f190d93a6f9eb6742a5d109056ae05881d4aac4826874488a98cf9",
-      "bytes": 5910
+      "sha256": "cba558655f22a008266c80c48e048ae6e6af7c8c232cb56a660705c7d46a3a73",
+      "bytes": 39506,
+      "origin": "user-recording"
     },
     "m01-s05-l003": {
-      "file": "audio/m01-s05-l003.ogg",
-      "duration": 1.3357916666666667,
+      "file": "recordings/warrant/m01-s05-l003.mp3",
+      "duration": 1.6457083333333333,
       "speaker": "warrant",
-      "sha256": "c7b2000b4e2385a8afad837b1a6d2ac43e972b5642f5b2089272a836954fae27",
-      "bytes": 6544
+      "sha256": "e20fb5377b7e7fb8ddc4ee1aadf071367831fc31adff70f89cb0b3ecf0285e58",
+      "bytes": 43268,
+      "origin": "user-recording"
     },
     "m01-s05-l005": {
-      "file": "audio/m01-s05-l005.ogg",
-      "duration": 4.50375,
+      "file": "recordings/warrant/m01-s05-l005.mp3",
+      "duration": 4.675916666666667,
       "speaker": "warrant",
-      "sha256": "fe1d2bf38beab4f8ef9aa2d4b158a20e686a4333dbbe2d2a5c82553d9d1392b2",
-      "bytes": 22300
+      "sha256": "d87253c9f21814b579eefefcfdd4b679419318e8b76a2d73714dc2f627d4cb52",
+      "bytes": 91751,
+      "origin": "user-recording"
     },
     "m01-s05-l007": {
-      "file": "audio/m01-s05-l007.ogg",
-      "duration": 1.9163333333333334,
+      "file": "recordings/warrant/m01-s05-l007.mp3",
+      "duration": 2.272666666666667,
       "speaker": "warrant",
-      "sha256": "5d093e3242506f3665f49f6f5d60d26144810b24235254f564ea150a6da6eb00",
-      "bytes": 9453
+      "sha256": "d186e66cba67c8a16510021d4a58683719434f8c7339a5797633c9f42ba9825d",
+      "bytes": 53299,
+      "origin": "user-recording"
     },
     "m01-s05-l016": {
-      "file": "audio/m01-s05-l016.ogg",
-      "duration": 2.8655416666666667,
+      "file": "recordings/warrant/m01-s05-l016.mp3",
+      "duration": 3.3175416666666666,
       "speaker": "warrant",
-      "sha256": "fa48864a7174b0393ca483d7f5ba2984772f1c7f72ee3ebb1f81370140b17a9a",
-      "bytes": 13820
+      "sha256": "d5af2aee698135f2c0bfce571897afc63a6741b2e59508e97ac5ac69410233be",
+      "bytes": 70017,
+      "origin": "user-recording"
     },
     "m01-s07-l016": {
-      "file": "audio/m01-s07-l016.ogg",
-      "duration": 2.1357916666666665,
+      "file": "recordings/warrant/m01-s07-l016.mp3",
+      "duration": 2.586125,
       "speaker": "warrant",
-      "sha256": "29bc8f06b56f77febcfa6d16163e326e8c6beba32d8d5db516134159f73f3dd0",
-      "bytes": 10476
+      "sha256": "45c6e9df6e5538fae48cf845cc96e47ea07f2ab8bcb937e5195ada6aa0d4fca8",
+      "bytes": 58314,
+      "origin": "user-recording"
     },
     "m01-s11-l011": {
-      "file": "audio/m01-s11-l011.ogg",
-      "duration": 5.316458333333333,
+      "file": "recordings/warrant/m01-s11-l011.mp3",
+      "duration": 6.034291666666666,
       "speaker": "warrant",
-      "sha256": "3e19d2eeb294caaaea4d10d3d883ece195bafe1935bd4b33a9c988c280f97761",
-      "bytes": 26251
+      "sha256": "1774a45afac4fefa5087ee8e98dea6646ed081adbe306878ec92294b060ff49d",
+      "bytes": 113485,
+      "origin": "user-recording"
     },
     "m01-s11-l013": {
-      "file": "audio/m01-s11-l013.ogg",
-      "duration": 3.1934583333333335,
+      "file": "recordings/warrant/m01-s11-l013.mp3",
+      "duration": 3.78775,
       "speaker": "warrant",
-      "sha256": "7d201544cb5ae90d64ca2df752df4beb0b9d2ff022ba1c4fab0e8d4b4e6e1aea",
-      "bytes": 15903
+      "sha256": "2d7308ac2dc7f350e8c85237d0841e1fd0ace20690e92c9ae8211c0ab36bcd68",
+      "bytes": 77541,
+      "origin": "user-recording"
     },
     "m01-s12-l009": {
-      "file": "audio/m01-s12-l009.ogg",
-      "duration": 3.0076666666666667,
+      "file": "recordings/warrant/m01-s12-l009.mp3",
+      "duration": 4.205708333333333,
       "speaker": "warrant",
-      "sha256": "24523097553adaacabe62a12a80d5a890a1121bbc2de226310ebd617f5ca3472",
-      "bytes": 15115
+      "sha256": "7f5527897bd03e97eb7a0014b3f35d2d82cc30edf084e32b36e3774a1cf5b73e",
+      "bytes": 84228,
+      "origin": "user-recording"
     },
     "m01-s12-l012": {
-      "file": "audio/m01-s12-l012.ogg",
-      "duration": 1.6714166666666668,
+      "file": "recordings/warrant/m01-s12-l012.mp3",
+      "duration": 2.50775,
       "speaker": "warrant",
-      "sha256": "109b50c79f178d1b81472a4d1caed504f464568f54dccd244f9e9a147d37864c",
-      "bytes": 8564
+      "sha256": "0bbd87e53a4d7775162d7f18988600c2849da94cfe3f58a8164aa64fde96019d",
+      "bytes": 57061,
+      "origin": "user-recording"
     },
     "m01-s12-l014": {
-      "file": "audio/m01-s12-l014.ogg",
-      "duration": 1.508875,
+      "file": "recordings/warrant/m01-s12-l014.mp3",
+      "duration": 4.519208333333333,
       "speaker": "warrant",
-      "sha256": "1f5461e59d492a9cd158be6c01f0d3c310ed22f724b01ef7571d591d7726714e",
-      "bytes": 7528
+      "sha256": "0203fa6896fdcea3dc8a6e79b250aad9c278b6c3cae3ec62152c7d939c2d15e0",
+      "bytes": 89243,
+      "origin": "user-recording"
     },
     "m01-s13-l001": {
-      "file": "audio/m01-s13-l001.ogg",
-      "duration": 3.33,
+      "file": "recordings/warrant/m01-s13-l001.mp3",
+      "duration": 4.284083333333333,
       "speaker": "warrant",
-      "sha256": "6fb73cdaf0ae983b52ef7a6ef12c334425b8f6ebd73fbcd34155da14a724619b",
-      "bytes": 16163
+      "sha256": "2ea1365f45a57841b29744a2ee0159ba7179bf2752015a6239f7f887a5873cb8",
+      "bytes": 85482,
+      "origin": "user-recording"
     },
     "m01-s13-l003": {
-      "file": "audio/m01-s13-l003.ogg",
-      "duration": 3.7374583333333335,
+      "file": "recordings/warrant/m01-s13-l003.mp3",
+      "duration": 3.78775,
       "speaker": "warrant",
-      "sha256": "77c87a009a4e8e4cf18c7ab546624d24a7e275401f7b581f729fa38a50627cf2",
-      "bytes": 18273
+      "sha256": "8d69011ea846834298f069aff658d34bb33e8f59c70e5f52440dfba0e4cd7472",
+      "bytes": 77541,
+      "origin": "user-recording"
     },
     "m01-s14-l011": {
-      "file": "audio/m01-s14-l011.ogg",
-      "duration": 2.6234166666666665,
+      "file": "recordings/warrant/m01-s14-l011.mp3",
+      "duration": 3.2392083333333335,
       "speaker": "warrant",
-      "sha256": "d1b873ca646bb569c8057dade4476e4ba286a5c48f0d22420e4c72941285f99c",
-      "bytes": 13005
+      "sha256": "ad508d0fe01709c108caba4d95fdc3df224870056d3f9b90fa80db897647fc7b",
+      "bytes": 68763,
+      "origin": "user-recording"
     },
     "m01-s14-l013": {
-      "file": "audio/m01-s14-l013.ogg",
-      "duration": 1.3463333333333334,
+      "file": "recordings/warrant/m01-s14-l013.mp3",
+      "duration": 1.5673333333333332,
       "speaker": "warrant",
-      "sha256": "194be0beccee67956d81fc65f6fbaf88eb3bc2f04337a0b851f21a813a6065e3",
-      "bytes": 6439
+      "sha256": "0d5173c4793da6514bbc89bea256b6e76244f2eaa7298ee9b8be0259664c1ed0",
+      "bytes": 42014,
+      "origin": "user-recording"
     },
     "m01-s14-l015": {
-      "file": "audio/m01-s14-l015.ogg",
-      "duration": 1.276625,
+      "file": "recordings/warrant/m01-s14-l015.mp3",
+      "duration": 1.6457083333333333,
       "speaker": "warrant",
-      "sha256": "406cb488d1500c71f8e41ec96e1debd5d4045565e27cf73de23198f17dfac760",
-      "bytes": 6219
+      "sha256": "f1d2ae2f58d03e1e7be689dab67e44c49a1c5098fa54e3b0f4c5edfe39d98e48",
+      "bytes": 43268,
+      "origin": "user-recording"
     },
     "m01-s14-l017": {
-      "file": "audio/m01-s14-l017.ogg",
-      "duration": 0.9643333333333334,
+      "file": "recordings/warrant/m01-s14-l017.mp3",
+      "duration": 1.410625,
       "speaker": "warrant",
-      "sha256": "2baefc43ff9bc5c151b19d0c2d66dce3da793071dd6784cfa439cdc0bf8d3e2d",
-      "bytes": 4467
+      "sha256": "dad219d72f4f2483a2ae7e64102835fc88683b25bcbd5fc8fb24ecf7cb9baebb",
+      "bytes": 39506,
+      "origin": "user-recording"
     },
     "m01-s04-l001": {
       "file": "audio/m01-s04-l001.ogg",
@@ -1506,6 +1559,17 @@
       "duration": 12,
       "source": "Procedural synthesis in build-campaign-audio.py",
       "sha256": "a3f9e8dea224c26c7d3fd48477942384b39913430bdc13bd14f62816e7fd8d0c"
+    }
+  },
+  "reactions": {
+    "m01-s14-warrant-sigh": {
+      "file": "recordings/warrant/m01-s14-warrant-sigh.mp3",
+      "duration": 3.3175416666666666,
+      "speaker": "warrant",
+      "sha256": "e6a5ae217ee6952741cede688873518af7384ab471dcea93d8017236779a741f",
+      "bytes": 70017,
+      "origin": "user-recording",
+      "afterCue": "m01-s14-l018"
     }
   }
 }

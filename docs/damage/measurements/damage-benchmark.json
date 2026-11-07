@@ -1,0 +1,1569 @@
+{
+  "environment": {
+    "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 (0x00002786) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "webgl": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+    "timerQuery": true,
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36 Edg/157.0.0.0",
+    "viewport": [
+      1280,
+      720
+    ],
+    "hardwareConcurrency": 24,
+    "browser": "157.0.4341.42",
+    "gpuDevices": [
+      {
+        "vendorId": 4318,
+        "deviceId": 10118,
+        "subSysId": 1089344600,
+        "revision": 161,
+        "vendorString": "",
+        "deviceString": "NVIDIA GeForce RTX 4070",
+        "driverVendor": "NVIDIA",
+        "driverVersion": "32.0.16.1742"
+      },
+      {
+        "vendorId": 4098,
+        "deviceId": 5710,
+        "subSysId": 2116424802,
+        "revision": 194,
+        "vendorString": "",
+        "deviceString": "AMD Radeon(TM) Graphics",
+        "driverVendor": "",
+        "driverVersion": "32.0.21036.18"
+      },
+      {
+        "vendorId": 5140,
+        "deviceId": 140,
+        "subSysId": 0,
+        "revision": 0,
+        "vendorString": "",
+        "deviceString": "Microsoft Basic Render Driver",
+        "driverVendor": "",
+        "driverVersion": "10.0.26100.9711"
+      }
+    ],
+    "date": "2026-11-07T12:47:06.046Z",
+    "damageLODOverride": null,
+    "node": "v24.22.0",
+    "sources": {
+      "campaign/damage-contact.js": "3d91c4c43e5ff0edd9483b93da2a0d685d69fcfece23d110b93c2d679333a659",
+      "campaign/damage-debris.js": "46b2aca3b26871415c509b281fc0be7b14a02b76e3662c1948e7a8d102e21fda",
+      "campaign/damage-debug.js": "9a9fc65d18ad5505f98df4887697e564fc879df84425d33acf15a1913d12af41",
+      "campaign/damage-geometry.js": "6607f482e015a0b9998b1161f3d00a53b0e00ebed64335da6095281204bd6c3a",
+      "campaign/damage-shader.js": "563fe881dfc20e26a5c67ac78556cd7f45f7a80568e61843d727fa39e9ac3d96",
+      "campaign/damage-state.js": "8aa14c508707cd0b2713836f3a265c7f6c0373fd4558791dcbcd89c89f86d219",
+      "campaign/damage-system.js": "19627b6dbe982fa2836d37cc5441cc3eeac6ffaa11ea74df926cfe0e1aaa83ad",
+      "campaign/vehicle-layer.js": "07f0f766e38154ea1b8d4e382651d129e567182d35b43b84b9c1df2d2c5edfdd",
+      "campaign/world.js": "8555837efdde804e27e3c36fa0c926630b3394153ad0933754e001a8f5bac239",
+      "campaign/mission.js": "d28064b7f069e9317174000dd7508deac69dc966b633e6e4a8470bd9b2ba1a68",
+      "tools/check-damage-browser.mjs": "a010a37bb709c7acde1abdc013104ebe01ba170fc52f2cc52a65411abc0fc4dd"
+    }
+  },
+  "results": [
+    {
+      "count": 1,
+      "enabled": false,
+      "phase": "settled",
+      "frames": 360,
+      "seconds": 6.000299999999999,
+      "fps": 59.99700014999251,
+      "cpuFrameMs": {
+        "mean": 0.9830555548270543,
+        "p95": 1.300000011920929,
+        "max": 1.699999988079071
+      },
+      "frameIntervalMs": {
+        "mean": 16.667499999999997,
+        "p95": 16.799999999999272,
+        "max": 16.899999999999636
+      },
+      "gpuFrameMs": {
+        "mean": 3.3379328000000013,
+        "p95": 4.31104,
+        "max": 4.67456
+      },
+      "gpuFrameReason": null,
+      "gpuSamples": 360,
+      "drawCalls": {
+        "mean": 54.833333333333336,
+        "p95": 55,
+        "max": 55
+      },
+      "triangles": {
+        "mean": 122930.66666666667,
+        "p95": 122934,
+        "max": 122934
+      },
+      "visibleMin": 1,
+      "activePhysicsMax": 0,
+      "damage": {
+        "hitCount": 0,
+        "hitCpuMs": 0,
+        "hitStateCpuMs": 0,
+        "deformationCpuMs": 0,
+        "geometryUpdates": 0,
+        "instanceBufferUpdates": 0,
+        "textureRows": 0,
+        "textureBytes": 0
+      },
+      "atlasBytes": 8388608,
+      "jsHeap": {
+        "used": 138210627,
+        "total": 206325487
+      },
+      "geometryCount": 168,
+      "textureCount": 18,
+      "lods": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "processMemory": {
+        "workingSetBytes": 973791232,
+        "privateBytes": 811429888,
+        "processIds": [
+          46672,
+          21568,
+          44788,
+          16496,
+          43984,
+          45856,
+          38172,
+          38752
+        ],
+        "dedicatedGpuBytes": 235057152,
+        "sharedGpuBytes": 67358720,
+        "gpuMemoryReason": null
+      }
+    },
+    {
+      "count": 1,
+      "enabled": false,
+      "phase": "impacts",
+      "frames": 360,
+      "seconds": 6.000099999999999,
+      "fps": 59.99900001666641,
+      "cpuFrameMs": {
+        "mean": 0.9438888884252972,
+        "p95": 1.2999999821186066,
+        "max": 1.7999999821186066
+      },
+      "frameIntervalMs": {
+        "mean": 16.66694444444444,
+        "p95": 16.799999999999272,
+        "max": 16.80000000000291
+      },
+      "gpuFrameMs": {
+        "mean": 3.8878890666666632,
+        "p95": 4.733952,
+        "max": 5.797888
+      },
+      "gpuFrameReason": null,
+      "gpuSamples": 360,
+      "drawCalls": {
+        "mean": 54,
+        "p95": 54,
+        "max": 54
+      },
+      "triangles": {
+        "mean": 122914,
+        "p95": 122914,
+        "max": 122914
+      },
+      "visibleMin": 1,
+      "activePhysicsMax": 0,
+      "damage": {
+        "hitCount": 0,
+        "hitCpuMs": 0,
+        "hitStateCpuMs": 0,
+        "deformationCpuMs": 0,
+        "geometryUpdates": 0,
+        "instanceBufferUpdates": 0,
+        "textureRows": 0,
+        "textureBytes": 0
+      },
+      "atlasBytes": 8388608,
+      "jsHeap": {
+        "used": 131896091,
+        "total": 204419359
+      },
+      "geometryCount": 168,
+      "textureCount": 18,
+      "lods": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "processMemory": {
+        "workingSetBytes": 973770752,
+        "privateBytes": 811155456,
+        "processIds": [
+          46672,
+          21568,
+          44788,
+          16496,
+          43984,
+          45856,
+          38172,
+          38752
+        ],
+        "dedicatedGpuBytes": 235057152,
+        "sharedGpuBytes": 67358720,
+        "gpuMemoryReason": null
+      }
+    },
+    {
+      "count": 1,
+      "enabled": true,
+      "phase": "settled",
+      "frames": 360,
+      "seconds": 6.000199999999997,
+      "fps": 59.998000066664474,
+      "cpuFrameMs": {
+        "mean": 0.950833334442642,
+        "p95": 1.2999999821186066,
+        "max": 1.5
+      },
+      "frameIntervalMs": {
+        "mean": 16.667222222222215,
+        "p95": 16.799999999999272,
+        "max": 16.80000000000291
+      },
+      "gpuFrameMs": {
+        "mean": 3.6669809777777793,
+        "p95": 4.604928,
+        "max": 4.804608
+      },
+      "gpuFrameReason": null,
+      "gpuSamples": 360,
+      "drawCalls": {
+        "mean": 54,
+        "p95": 54,
+        "max": 54
+      },
+      "triangles": {
+        "mean": 122914,
+        "p95": 122914,
+        "max": 122914
+      },
+      "visibleMin": 1,
+      "activePhysicsMax": 0,
+      "damage": {
+        "hitCount": 0,
+        "hitCpuMs": 0,
+        "hitStateCpuMs": 0,
+        "deformationCpuMs": 0,
+        "geometryUpdates": 0,
+        "instanceBufferUpdates": 0,
+        "textureRows": 0,
+        "textureBytes": 0
+      },
+      "atlasBytes": 8388608,
+      "jsHeap": {
+        "used": 131485126,
+        "total": 134164722
+      },
+      "geometryCount": 168,
+      "textureCount": 18,
+      "lods": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "processMemory": {
+        "workingSetBytes": 865112064,
+        "privateBytes": 726384640,
+        "processIds": [
+          46672,
+          21568,
+          44788,
+          16496,
+          43984,
+          45856
+        ],
+        "dedicatedGpuBytes": 233279488,
+        "sharedGpuBytes": 67358720,
+        "gpuMemoryReason": null
+      }
+    },
+    {
+      "count": 1,
+      "enabled": true,
+      "phase": "impacts",
+      "frames": 360,
+      "seconds": 6.000100000000006,
+      "fps": 59.99900001666633,
+      "cpuFrameMs": {
+        "mean": 0.9616666673786111,
+        "p95": 1.300000011920929,
+        "max": 2.7999999821186066
+      },
+      "frameIntervalMs": {
+        "mean": 16.66694444444446,
+        "p95": 16.80000000000291,
+        "max": 16.900000000001455
+      },
+      "gpuFrameMs": {
+        "mean": 3.6686364444444446,
+        "p95": 4.62848,
+        "max": 5.071872
+      },
+      "gpuFrameReason": null,
+      "gpuSamples": 360,
+      "drawCalls": {
+        "mean": 54,
+        "p95": 54,
+        "max": 54
+      },
+      "triangles": {
+        "mean": 122914,
+        "p95": 122914,
+        "max": 122914
+      },
+      "visibleMin": 1,
+      "activePhysicsMax": 0,
+      "damage": {
+        "hitCount": 12,
+        "hitCpuMs": 5.300000041723251,
+        "hitStateCpuMs": 1.699999988079071,
+        "deformationCpuMs": 1.399999976158142,
+        "geometryUpdates": 0,
+        "instanceBufferUpdates": 0,
+        "textureRows": 12,
+        "textureBytes": 98304
+      },
+      "atlasBytes": 8388608,
+      "jsHeap": {
+        "used": 131783158,
+        "total": 134164722
+      },
+      "geometryCount": 168,
+      "textureCount": 18,
+      "lods": [
+        1,
+        0,
+        0,
+        0
+      ],
+      "processMemory": {
+        "workingSetBytes": 863797248,
+        "privateBytes": 724455424,
+        "processIds": [
+          46672,
+          21568,
+          44788,
+          16496,
+          43984,
+          45856
+        ],
+        "dedicatedGpuBytes": 233279488,
+        "sharedGpuBytes": 67358720,
+        "gpuMemoryReason": null
+      }
+    },
+    {
+      "count": 10,
+      "enabled": false,
+      "phase": "settled",
+      "frames": 360,
+      "seconds": 6.000300000000003,
+      "fps": 59.99700014999247,
+      "cpuFrameMs": {
+        "mean": 1.033888889186912,
+        "p95": 1.4000000059604645,
+        "max": 1.7000000178813934
+      },
+      "frameIntervalMs": {
+        "mean": 16.667500000000008,
+        "p95": 16.80000000000291,
+        "max": 17
+      },
+      "gpuFrameMs": {
+        "mean": 3.823550577777773,
+        "p95": 4.294656,
+        "max": 5.859328
+      },
+      "gpuFrameReason": null,
+      "gpuSamples": 360,
+      "drawCalls": {
+        "mean": 55,
+        "p95": 55,
+        "max": 55
+      },
+      "triangles": {
+        "mean": 587624,
+        "p95": 587624,
+        "max": 587624
+      },
+      "visibleMin": 10,
+      "activePhysicsMax": 0,
+      "damage": {
+        "hitCount": 0,
+        "hitCpuMs": 0,
+        "hitStateCpuMs": 0,
+        "deformationCpuMs": 0,
+        "geometryUpdates": 0,
+        "instanceBufferUpdates": 0,
+        "textureRows": 0,
+        "textureBytes": 0
+      },
+      "atlasBytes": 8388608,
+      "jsHeap": {
+        "used": 132792987,
+        "total": 136786195
+      },
+      "geometryCount": 168,
+      "textureCount": 18,
+      "lods": [
+        10,
+        0,
+        0,
+        0
+      ],
+      "processMemory": {
+        "workingSetBytes": 868147200,
+        "privateBytes": 729645056,
+        "processIds": [
+          46672,
+          21568,
+          44788,
+          16496,
+          43984,
+          45856
+        ],
+        "dedicatedGpuBytes": 233545728,
+        "sharedGpuBytes": 67489792,
+        "gpuMemoryReason": null
+      }
+    },
+    {
+      "count": 10,
+      "enabled": false,
+      "phase": "impacts",
+      "frames": 360,
+      "seconds": 6.000100000000006,
+      "fps": 59.99900001666633,
+      "cpuFrameMs": {
+        "mean": 1.043055556466182,
+        "p95": 1.4000000059604645,
+        "max": 1.5
+      },
+      "frameIntervalMs": {
+        "mean": 16.66694444444446,
+        "p95": 16.799999999995634,
+        "max": 17
+      },
+      "gpuFrameMs": {
+        "mean": 3.853784177777779,
+        "p95": 4.12672,
+        "max": 5.838848
+      },
+      "gpuFrameReason": null,
+      "gpuSamples": 360,
+      "drawCalls": {
+        "mean": 55,
+        "p95": 55,
+        "max": 55
+      },
+      "triangles": {
+        "mean": 587624,
+        "p95": 587624,
+        "max": 587624
+      },
+      "visibleMin": 10,
+      "activePhysicsMax": 0,
+      "damage": {
+        "hitCount": 0,
+        "hitCpuMs": 0,
+        "hitStateCpuMs": 0,
+        "deformationCpuMs": 0,
+        "geometryUpdates": 0,
+        "instanceBufferUpdates": 0,
+        "textureRows": 0,
+        "textureBytes": 0
+      },
+      "atlasBytes": 8388608,
+      "jsHeap": {
+        "used": 133045003,
+        "total": 137310483
+      },
+      "geometryCount": 168,
+      "textureCount": 18,
+      "lods": [
+        10,
+        0,
+        0,
+        0
+      ],
+      "processMemory": {
+        "workingSetBytes": 869969920,
+        "privateBytes": 730345472,
+        "processIds": [
+          46672,
+          21568,
+          44788,
+          16496,
+          43984,
+          45856
+        ],
+        "dedicatedGpuBytes": 232488960,
+        "sharedGpuBytes": 67358720,
+        "gpuMemoryReason": null
+      }
+    },
+    {
+      "count": 10,
+      "enabled": true,
+      "phase": "settled",
+      "frames": 360,
+      "seconds": 6.000200000000004,
+      "fps": 59.998000066664396,
+      "cpuFrameMs": {
+        "mean": 1.0724999994867377,
+        "p95": 1.4000000059604645,
+        "max": 1.800000011920929
+      },
+      "frameIntervalMs": {
+        "mean": 16.667222222222236,
+        "p95": 16.80000000000291,
+        "max": 16.900000000001455
+      },
+      "gpuFrameMs": {
+        "mean": 3.8475007999999997,
+        "p95": 4.13696,
+        "max": 5.10976
+      },
+      "gpuFrameReason": null,
+      "gpuSamples": 360,
+      "drawCalls": {
+        "mean": 55,
+        "p95": 55,
+        "max": 55
+      },
+      "triangles": {
+        "mean": 587624,
+        "p95": 587624,
+        "max": 587624
+      },
+      "visibleMin": 10,
+      "activePhysicsMax": 0,
+      "damage": {
+        "hitCount": 0,
+        "hitCpuMs": 0,
+        "hitStateCpuMs": 0,
+        "deformationCpuMs": 0,
+        "geometryUpdates": 0,
+        "instanceBufferUpdates": 0,
+        "textureRows": 0,
+        "textureBytes": 0
+      },
+      "atlasBytes": 8388608,
+      "jsHeap": {
+        "used": 135141264,
+        "total": 139145524
+      },
+      "geometryCount": 168,
+      "textureCount": 18,
+      "lods": [
+        10,
+        0,
+        0,
+        0
+      ],
+      "processMemory": {
+        "workingSetBytes": 856027136,
+        "privateBytes": 714199040,
+        "processIds": [
+          46672,
+          21568,
+          44788,
+          16496,
+          43984,
+          45856
+        ],
+        "dedicatedGpuBytes": 232488960,
+        "sharedGpuBytes": 67358720,
+        "gpuMemoryReason": null
+      }
+    },
+    {
+      "count": 10,
+      "enabled": true,
+      "phase": "impacts",
+      "frames": 360,
+      "seconds": 6.000199999999997,
+      "fps": 59.998000066664474,
+      "cpuFrameMs": {
+        "mean": 1.1974999991556008,
+        "p95": 1.699999988079071,
+        "max": 5.5999999940395355
+      },
+      "frameIntervalMs": {
+        "mean": 16.667222222222215,
+        "p95": 16.80000000000291,
+        "max": 16.89999999999418
+      },
+      "gpuFrameMs": {
+        "mean": 3.7731783111111072,
+        "p95": 4.084736,
+        "max": 5.356544
+      },
+      "gpuFrameReason": null,
+      "gpuSamples": 360,
+      "drawCalls": {
+        "mean": 55,
+        "p95": 55,
+        "max": 55
+      },
+      "triangles": {
+        "mean": 587624,
+        "p95": 587624,
+        "max": 587624
+      },
+      "visibleMin": 10,
+      "activePhysicsMax": 0,
+      "damage": {
+        "hitCount": 120,
+        "hitCpuMs": 20.30000004172325,
+        "hitStateCpuMs": 4.400000065565109,
+        "deformationCpuMs": 2.5000000298023224,
+        "geometryUpdates": 0,
+        "instanceBufferUpdates": 0,
+        "textureRows": 120,
+        "textureBytes": 983040
+      },
+      "atlasBytes": 8388608,
+      "jsHeap": {
+        "used": 137727532,
+        "total": 144126260
+      },
+      "geometryCount": 168,
+      "textureCount": 18,
+      "lods": [
+        10,
+        0,
+        0,
+        0
+      ],
+      "processMemory": {
+        "workingSetBytes": 859295744,
+        "privateBytes": 717180928,
+        "processIds": [
+          46672,
+          21568,
+          44788,
+          16496,
+          43984,
+          45856
+        ],
+        "dedicatedGpuBytes": 232488960,
+        "sharedGpuBytes": 67358720,
+        "gpuMemoryReason": null
+      }
+    },
+    {
+      "count": 50,
+      "enabled": false,
+      "phase": "settled",
+      "frames": 360,
+      "seconds": 6.000199999999997,
+      "fps": 59.998000066664474,
+      "cpuFrameMs": {
+        "mean": 1.9477777786552906,
+        "p95": 2.699999988079071,
+        "max": 6.4000000059604645
+      },
+      "frameIntervalMs": {
+        "mean": 16.667222222222215,
+        "p95": 16.80000000000291,
+        "max": 16.80000000000291
+      },
+      "gpuFrameMs": {
+        "mean": 4.19273386666667,
+        "p95": 4.924416,
+        "max": 5.590016
+      },
+      "gpuFrameReason": null,
+      "gpuSamples": 360,
+      "drawCalls": {
+        "mean": 58,
+        "p95": 58,
+        "max": 58
+      },
+      "triangles": {
+        "mean": 1064260,
+        "p95": 1064260,
+        "max": 1064260
+      },
+      "visibleMin": 50,
+      "activePhysicsMax": 0,
+      "damage": {
+        "hitCount": 0,
+        "hitCpuMs": 0,
+        "hitStateCpuMs": 0,
+        "deformationCpuMs": 0,
+        "geometryUpdates": 0,
+        "instanceBufferUpdates": 0,
+        "textureRows": 0,
+        "textureBytes": 0
+      },
+      "atlasBytes": 8388608,
+      "jsHeap": {
+        "used": 135451858,
+        "total": 143864266
+      },
+      "geometryCount": 168,
+      "textureCount": 18,
+      "lods": [
+        0,
+        50,
+        0,
+        0
+      ],
+      "processMemory": {
+        "workingSetBytes": 860131328,
+        "privateBytes": 717807616,
+        "processIds": [
+          46672,
+          21568,
+          44788,
+          16496,
+          43984,
+          45856
+        ],
+        "dedicatedGpuBytes": 232488960,
+        "sharedGpuBytes": 68538368,
+        "gpuMemoryReason": null
+      }
+    },
+    {
+      "count": 50,
+      "enabled": false,
+      "phase": "impacts",
+      "frames": 360,
+      "seconds": 6.000100000000006,
+      "fps": 59.99900001666633,
+      "cpuFrameMs": {
+        "mean": 2.071944443550375,
+        "p95": 2.5999999940395355,
+        "max": 5.4000000059604645
+      },
+      "frameIntervalMs": {
+        "mean": 16.66694444444446,
+        "p95": 16.79999999998836,
+        "max": 16.80000000000291
+      },
+      "gpuFrameMs": {
+        "mean": 3.8302350222222223,
+        "p95": 4.759552,
+        "max": 5.714944
+      },
+      "gpuFrameReason": null,
+      "gpuSamples": 360,
+      "drawCalls": {
+        "mean": 58,
+        "p95": 58,
+        "max": 58
+      },
+      "triangles": {
+        "mean": 1064260,
+        "p95": 1064260,
+        "max": 1064260
+      },
+      "visibleMin": 50,
+      "activePhysicsMax": 0,
+      "damage": {
+        "hitCount": 0,
+        "hitCpuMs": 0,
+        "hitStateCpuMs": 0,
+        "deformationCpuMs": 0,
+        "geometryUpdates": 0,
+        "instanceBufferUpdates": 0,
+        "textureRows": 0,
+        "textureBytes": 0
+      },
+      "atlasBytes": 8388608,
+      "jsHeap": {
+        "used": 132101161,
+        "total": 150679977
+      },
+      "geometryCount": 168,
+      "textureCount": 18,
+      "lods": [
+        0,
+        50,
+        0,
+        0
+      ],
+      "processMemory": {
+        "workingSetBytes": 866160640,
+        "privateBytes": 723238912,
+        "processIds": [
+          46672,
+          21568,
+          44788,
+          16496,
+          43984,
+          45856
+        ],
+        "dedicatedGpuBytes": 232488960,
+        "sharedGpuBytes": 68538368,
+        "gpuMemoryReason": null
+      }
+    },
+    {
+      "count": 50,
+      "enabled": true,
+      "phase": "settled",
+      "frames": 360,
+      "seconds": 6.000099999999991,
+      "fps": 59.99900001666647,
+      "cpuFrameMs": {
+        "mean": 2.0852777774963114,
+        "p95": 2.5999999940395355,
+        "max": 3.0999999940395355
+      },
+      "frameIntervalMs": {
+        "mean": 16.66694444444442,
+        "p95": 16.70000000001164,
+        "max": 16.80000000000291
+      },
+      "gpuFrameMs": {
+        "mean": 9.76223004444444,
+        "p95": 15.405056,
+        "max": 18.993152
+      },
+      "gpuFrameReason": null,
+      "gpuSamples": 360,
+      "drawCalls": {
+        "mean": 58,
+        "p95": 58,
+        "max": 58
+      },
+      "triangles": {
+        "mean": 1064260,
+        "p95": 1064260,
+        "max": 1064260
+      },
+      "visibleMin": 50,
+      "activePhysicsMax": 0,
+      "damage": {
+        "hitCount": 0,
+        "hitCpuMs": 0,
+        "hitStateCpuMs": 0,
+        "deformationCpuMs": 0,
+        "geometryUpdates": 0,
+        "instanceBufferUpdates": 0,
+        "textureRows": 0,
+        "textureBytes": 0
+      },
+      "atlasBytes": 8388608,
+      "jsHeap": {
+        "used": 138762192,
+        "total": 154350200
+      },
+      "geometryCount": 168,
+      "textureCount": 18,
+      "lods": [
+        0,
+        50,
+        0,
+        0
+      ],
+      "processMemory": {
+        "workingSetBytes": 868450304,
+        "privateBytes": 729223168,
+        "processIds": [
+          46672,
+          21568,
+          44788,
+          16496,
+          43984,
+          45856
+        ],
+        "dedicatedGpuBytes": 235896832,
+        "sharedGpuBytes": 67751936,
+        "gpuMemoryReason": null
+      }
+    },
+    {
+      "count": 50,
+      "enabled": true,
+      "phase": "impacts",
+      "frames": 360,
+      "seconds": 6.000300000000003,
+      "fps": 59.99700014999247,
+      "cpuFrameMs": {
+        "mean": 2.445000000960297,
+        "p95": 2.5999999940395355,
+        "max": 20.80000001192093
+      },
+      "frameIntervalMs": {
+        "mean": 16.667500000000008,
+        "p95": 16.70000000001164,
+        "max": 16.80000000000291
+      },
+      "gpuFrameMs": {
+        "mean": 9.290678044444451,
+        "p95": 15.6416,
+        "max": 18.998272
+      },
+      "gpuFrameReason": null,
+      "gpuSamples": 360,
+      "drawCalls": {
+        "mean": 58,
+        "p95": 58,
+        "max": 58
+      },
+      "triangles": {
+        "mean": 1064260,
+        "p95": 1064260,
+        "max": 1064260
+      },
+      "visibleMin": 50,
+      "activePhysicsMax": 0,
+      "damage": {
+        "hitCount": 600,
+        "hitCpuMs": 102.39999982714653,
+        "hitStateCpuMs": 18.40000009536743,
+        "deformationCpuMs": 12.000000029802322,
+        "geometryUpdates": 0,
+        "instanceBufferUpdates": 0,
+        "textureRows": 600,
+        "textureBytes": 4915200
+      },
+      "atlasBytes": 8388608,
+      "jsHeap": {
+        "used": 140543976,
+        "total": 169030072
+      },
+      "geometryCount": 168,
+      "textureCount": 18,
+      "lods": [
+        0,
+        50,
+        0,
+        0
+      ],
+      "processMemory": {
+        "workingSetBytes": 887046144,
+        "privateBytes": 746926080,
+        "processIds": [
+          46672,
+          21568,
+          44788,
+          16496,
+          43984,
+          45856
+        ],
+        "dedicatedGpuBytes": 235896832,
+        "sharedGpuBytes": 68800512,
+        "gpuMemoryReason": null
+      }
+    },
+    {
+      "count": 100,
+      "enabled": false,
+      "phase": "settled",
+      "frames": 360,
+      "seconds": 6.000099999999991,
+      "fps": 59.99900001666647,
+      "cpuFrameMs": {
+        "mean": 2.1802777780426874,
+        "p95": 2.7000000178813934,
+        "max": 3.0999999940395355
+      },
+      "frameIntervalMs": {
+        "mean": 16.66694444444442,
+        "p95": 16.80000000000291,
+        "max": 16.89999999999418
+      },
+      "gpuFrameMs": {
+        "mean": 4.441329777777779,
+        "p95": 5.310464,
+        "max": 5.863424
+      },
+      "gpuFrameReason": null,
+      "gpuSamples": 360,
+      "drawCalls": {
+        "mean": 58,
+        "p95": 58,
+        "max": 58
+      },
+      "triangles": {
+        "mean": 2057060,
+        "p95": 2057060,
+        "max": 2057060
+      },
+      "visibleMin": 100,
+      "activePhysicsMax": 0,
+      "damage": {
+        "hitCount": 0,
+        "hitCpuMs": 0,
+        "hitStateCpuMs": 0,
+        "deformationCpuMs": 0,
+        "geometryUpdates": 0,
+        "instanceBufferUpdates": 0,
+        "textureRows": 0,
+        "textureBytes": 0
+      },
+      "atlasBytes": 8388608,
+      "jsHeap": {
+        "used": 140919464,
+        "total": 171914060
+      },
+      "geometryCount": 168,
+      "textureCount": 18,
+      "lods": [
+        0,
+        100,
+        0,
+        0
+      ],
+      "processMemory": {
+        "workingSetBytes": 886603776,
+        "privateBytes": 743608320,
+        "processIds": [
+          46672,
+          21568,
+          44788,
+          16496,
+          43984,
+          45856
+        ],
+        "dedicatedGpuBytes": 231960576,
+        "sharedGpuBytes": 67358720,
+        "gpuMemoryReason": null
+      }
+    },
+    {
+      "count": 100,
+      "enabled": false,
+      "phase": "impacts",
+      "frames": 360,
+      "seconds": 6.000100000000006,
+      "fps": 59.99900001666633,
+      "cpuFrameMs": {
+        "mean": 2.188333332952526,
+        "p95": 2.7000000178813934,
+        "max": 3
+      },
+      "frameIntervalMs": {
+        "mean": 16.66694444444446,
+        "p95": 16.80000000000291,
+        "max": 16.80000000000291
+      },
+      "gpuFrameMs": {
+        "mean": 4.289979733333333,
+        "p95": 5.210112,
+        "max": 5.684224
+      },
+      "gpuFrameReason": null,
+      "gpuSamples": 360,
+      "drawCalls": {
+        "mean": 58,
+        "p95": 58,
+        "max": 58
+      },
+      "triangles": {
+        "mean": 2057060,
+        "p95": 2057060,
+        "max": 2057060
+      },
+      "visibleMin": 100,
+      "activePhysicsMax": 0,
+      "damage": {
+        "hitCount": 0,
+        "hitCpuMs": 0,
+        "hitStateCpuMs": 0,
+        "deformationCpuMs": 0,
+        "geometryUpdates": 0,
+        "instanceBufferUpdates": 0,
+        "textureRows": 0,
+        "textureBytes": 0
+      },
+      "atlasBytes": 8388608,
+      "jsHeap": {
+        "used": 155106484,
+        "total": 175059788
+      },
+      "geometryCount": 168,
+      "textureCount": 18,
+      "lods": [
+        0,
+        100,
+        0,
+        0
+      ],
+      "processMemory": {
+        "workingSetBytes": 889290752,
+        "privateBytes": 745742336,
+        "processIds": [
+          46672,
+          21568,
+          44788,
+          16496,
+          43984,
+          45856
+        ],
+        "dedicatedGpuBytes": 231960576,
+        "sharedGpuBytes": 67358720,
+        "gpuMemoryReason": null
+      }
+    },
+    {
+      "count": 100,
+      "enabled": true,
+      "phase": "settled",
+      "frames": 360,
+      "seconds": 6,
+      "fps": 59.99999999999999,
+      "cpuFrameMs": {
+        "mean": 2.2769444454047414,
+        "p95": 2.9000000059604645,
+        "max": 3.5
+      },
+      "frameIntervalMs": {
+        "mean": 16.666666666666668,
+        "p95": 16.80000000000291,
+        "max": 16.80000000000291
+      },
+      "gpuFrameMs": {
+        "mean": 8.99842275555555,
+        "p95": 16.462848,
+        "max": 18.893824
+      },
+      "gpuFrameReason": null,
+      "gpuSamples": 360,
+      "drawCalls": {
+        "mean": 58,
+        "p95": 58,
+        "max": 58
+      },
+      "triangles": {
+        "mean": 2057060,
+        "p95": 2057060,
+        "max": 2057060
+      },
+      "visibleMin": 100,
+      "activePhysicsMax": 0,
+      "damage": {
+        "hitCount": 0,
+        "hitCpuMs": 0,
+        "hitStateCpuMs": 0,
+        "deformationCpuMs": 0,
+        "geometryUpdates": 0,
+        "instanceBufferUpdates": 0,
+        "textureRows": 0,
+        "textureBytes": 0
+      },
+      "atlasBytes": 8388608,
+      "jsHeap": {
+        "used": 157165844,
+        "total": 190526080
+      },
+      "geometryCount": 168,
+      "textureCount": 18,
+      "lods": [
+        0,
+        100,
+        0,
+        0
+      ],
+      "processMemory": {
+        "workingSetBytes": 909361152,
+        "privateBytes": 768512000,
+        "processIds": [
+          46672,
+          21568,
+          44788,
+          16496,
+          43984,
+          45856
+        ],
+        "dedicatedGpuBytes": 235905024,
+        "sharedGpuBytes": 69193728,
+        "gpuMemoryReason": null
+      }
+    },
+    {
+      "count": 100,
+      "enabled": true,
+      "phase": "impacts",
+      "frames": 360,
+      "seconds": 6.000199999999997,
+      "fps": 59.998000066664474,
+      "cpuFrameMs": {
+        "mean": 2.796111111425691,
+        "p95": 3,
+        "max": 30.599999994039536
+      },
+      "frameIntervalMs": {
+        "mean": 16.667222222222215,
+        "p95": 16.79999999998836,
+        "max": 16.80000000000291
+      },
+      "gpuFrameMs": {
+        "mean": 8.537362577777767,
+        "p95": 16.561152,
+        "max": 17.506304
+      },
+      "gpuFrameReason": null,
+      "gpuSamples": 360,
+      "drawCalls": {
+        "mean": 58,
+        "p95": 58,
+        "max": 58
+      },
+      "triangles": {
+        "mean": 2057060,
+        "p95": 2057060,
+        "max": 2057060
+      },
+      "visibleMin": 100,
+      "activePhysicsMax": 0,
+      "damage": {
+        "hitCount": 1200,
+        "hitCpuMs": 155.19999971985817,
+        "hitStateCpuMs": 28.200000047683716,
+        "deformationCpuMs": 19.59999990463257,
+        "geometryUpdates": 0,
+        "instanceBufferUpdates": 0,
+        "textureRows": 1200,
+        "textureBytes": 9830400
+      },
+      "atlasBytes": 8388608,
+      "jsHeap": {
+        "used": 153628332,
+        "total": 209400448
+      },
+      "geometryCount": 168,
+      "textureCount": 18,
+      "lods": [
+        0,
+        100,
+        0,
+        0
+      ],
+      "processMemory": {
+        "workingSetBytes": 928210944,
+        "privateBytes": 787677184,
+        "processIds": [
+          46672,
+          21568,
+          44788,
+          16496,
+          43984,
+          45856
+        ],
+        "dedicatedGpuBytes": 235905024,
+        "sharedGpuBytes": 68014080,
+        "gpuMemoryReason": null
+      }
+    },
+    {
+      "count": 200,
+      "enabled": false,
+      "phase": "settled",
+      "frames": 360,
+      "seconds": 6.000199999999997,
+      "fps": 59.998000066664474,
+      "cpuFrameMs": {
+        "mean": 3.5269444438318414,
+        "p95": 4.299999982118607,
+        "max": 4.5999999940395355
+      },
+      "frameIntervalMs": {
+        "mean": 16.667222222222215,
+        "p95": 16.79999999998836,
+        "max": 16.89999999999418
+      },
+      "gpuFrameMs": {
+        "mean": 3.608453688888891,
+        "p95": 5.655552,
+        "max": 6.64064
+      },
+      "gpuFrameReason": null,
+      "gpuSamples": 360,
+      "drawCalls": {
+        "mean": 85,
+        "p95": 85,
+        "max": 85
+      },
+      "triangles": {
+        "mean": 2995811,
+        "p95": 2995811,
+        "max": 2995811
+      },
+      "visibleMin": 200,
+      "activePhysicsMax": 0,
+      "damage": {
+        "hitCount": 0,
+        "hitCpuMs": 0,
+        "hitStateCpuMs": 0,
+        "deformationCpuMs": 0,
+        "geometryUpdates": 0,
+        "instanceBufferUpdates": 0,
+        "textureRows": 0,
+        "textureBytes": 0
+      },
+      "atlasBytes": 8388608,
+      "jsHeap": {
+        "used": 150140684,
+        "total": 208090128
+      },
+      "geometryCount": 168,
+      "textureCount": 18,
+      "lods": [
+        0,
+        117,
+        83,
+        0
+      ],
+      "processMemory": {
+        "workingSetBytes": 933441536,
+        "privateBytes": 789082112,
+        "processIds": [
+          46672,
+          21568,
+          44788,
+          16496,
+          43984,
+          45856
+        ],
+        "dedicatedGpuBytes": 232636416,
+        "sharedGpuBytes": 68571136,
+        "gpuMemoryReason": null
+      }
+    },
+    {
+      "count": 200,
+      "enabled": false,
+      "phase": "impacts",
+      "frames": 360,
+      "seconds": 6.000100000000006,
+      "fps": 59.99900001666633,
+      "cpuFrameMs": {
+        "mean": 3.3841666657063696,
+        "p95": 4.199999988079071,
+        "max": 4.800000011920929
+      },
+      "frameIntervalMs": {
+        "mean": 16.66694444444446,
+        "p95": 16.79999999998836,
+        "max": 16.800000000017462
+      },
+      "gpuFrameMs": {
+        "mean": 3.2545024,
+        "p95": 5.238784,
+        "max": 6.566912
+      },
+      "gpuFrameReason": null,
+      "gpuSamples": 360,
+      "drawCalls": {
+        "mean": 85,
+        "p95": 85,
+        "max": 85
+      },
+      "triangles": {
+        "mean": 2995811,
+        "p95": 2995811,
+        "max": 2995811
+      },
+      "visibleMin": 200,
+      "activePhysicsMax": 0,
+      "damage": {
+        "hitCount": 0,
+        "hitCpuMs": 0,
+        "hitStateCpuMs": 0,
+        "deformationCpuMs": 0,
+        "geometryUpdates": 0,
+        "instanceBufferUpdates": 0,
+        "textureRows": 0,
+        "textureBytes": 0
+      },
+      "atlasBytes": 8388608,
+      "jsHeap": {
+        "used": 152811540,
+        "total": 209925136
+      },
+      "geometryCount": 168,
+      "textureCount": 18,
+      "lods": [
+        0,
+        117,
+        83,
+        0
+      ],
+      "processMemory": {
+        "workingSetBytes": 932810752,
+        "privateBytes": 787480576,
+        "processIds": [
+          46672,
+          21568,
+          44788,
+          16496,
+          43984,
+          45856
+        ],
+        "dedicatedGpuBytes": 232636416,
+        "sharedGpuBytes": 68571136,
+        "gpuMemoryReason": null
+      }
+    },
+    {
+      "count": 200,
+      "enabled": true,
+      "phase": "settled",
+      "frames": 360,
+      "seconds": 6.000200000000012,
+      "fps": 59.99800006666433,
+      "cpuFrameMs": {
+        "mean": 3.5294444450901614,
+        "p95": 4.4000000059604645,
+        "max": 4.9000000059604645
+      },
+      "frameIntervalMs": {
+        "mean": 16.667222222222254,
+        "p95": 16.79999999998836,
+        "max": 17.10000000000582
+      },
+      "gpuFrameMs": {
+        "mean": 11.59903288888888,
+        "p95": 16.708608,
+        "max": 18.774016
+      },
+      "gpuFrameReason": null,
+      "gpuSamples": 360,
+      "drawCalls": {
+        "mean": 85,
+        "p95": 85,
+        "max": 85
+      },
+      "triangles": {
+        "mean": 2995811,
+        "p95": 2995811,
+        "max": 2995811
+      },
+      "visibleMin": 200,
+      "activePhysicsMax": 0,
+      "damage": {
+        "hitCount": 0,
+        "hitCpuMs": 0,
+        "hitStateCpuMs": 0,
+        "deformationCpuMs": 0,
+        "geometryUpdates": 0,
+        "instanceBufferUpdates": 0,
+        "textureRows": 0,
+        "textureBytes": 0
+      },
+      "atlasBytes": 8388608,
+      "jsHeap": {
+        "used": 148122445,
+        "total": 216741885
+      },
+      "geometryCount": 168,
+      "textureCount": 18,
+      "lods": [
+        0,
+        117,
+        83,
+        0
+      ],
+      "processMemory": {
+        "workingSetBytes": 939864064,
+        "privateBytes": 798900224,
+        "processIds": [
+          46672,
+          21568,
+          44788,
+          16496,
+          43984,
+          45856
+        ],
+        "dedicatedGpuBytes": 236572672,
+        "sharedGpuBytes": 68308992,
+        "gpuMemoryReason": null
+      }
+    },
+    {
+      "count": 200,
+      "enabled": true,
+      "phase": "impacts",
+      "frames": 352,
+      "seconds": 6.000100000000006,
+      "fps": 58.66568890518486,
+      "cpuFrameMs": {
+        "mean": 4.666761363856494,
+        "p95": 4.5999999940395355,
+        "max": 53
+      },
+      "frameIntervalMs": {
+        "mean": 17.04573863636365,
+        "p95": 16.79999999998836,
+        "max": 50
+      },
+      "gpuFrameMs": {
+        "mean": 10.697510454545458,
+        "p95": 16.836608,
+        "max": 19.395584
+      },
+      "gpuFrameReason": null,
+      "gpuSamples": 352,
+      "drawCalls": {
+        "mean": 85,
+        "p95": 85,
+        "max": 85
+      },
+      "triangles": {
+        "mean": 2995811,
+        "p95": 2995811,
+        "max": 2995811
+      },
+      "visibleMin": 200,
+      "activePhysicsMax": 0,
+      "damage": {
+        "hitCount": 2400,
+        "hitCpuMs": 287.6000000834465,
+        "hitStateCpuMs": 44.80000013113022,
+        "deformationCpuMs": 33.700000047683716,
+        "geometryUpdates": 0,
+        "instanceBufferUpdates": 0,
+        "textureRows": 2400,
+        "textureBytes": 19660800
+      },
+      "atlasBytes": 8388608,
+      "jsHeap": {
+        "used": 173849449,
+        "total": 226441213
+      },
+      "geometryCount": 168,
+      "textureCount": 18,
+      "lods": [
+        0,
+        117,
+        83,
+        0
+      ],
+      "processMemory": {
+        "workingSetBytes": 946597888,
+        "privateBytes": 810782720,
+        "processIds": [
+          46672,
+          21568,
+          44788,
+          16496,
+          43984,
+          45856
+        ],
+        "dedicatedGpuBytes": 236572672,
+        "sharedGpuBytes": 68702208,
+        "gpuMemoryReason": null
+      }
+    }
+  ],
+  "errors": []
+}

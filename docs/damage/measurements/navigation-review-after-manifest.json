@@ -1,0 +1,56 @@
+{
+  "date": "2026-11-07T16:07:03.263Z",
+  "node": "v24.22.0",
+  "platform": "win32",
+  "sourcesBefore": {
+    "campaign/mission.js": "c661632eccdfd397899e5326131227b23aaa0d2dd934ef4ff424224e875cc011",
+    "campaign/navigation.js": "e1d82f35d6d72272deb468fd4b2f153e8cf23f923e7805f9a66a2de6f02a624b",
+    "campaign/vehicle-motion.js": "cd8a2ffcfe75d77893a1ab555c4e467fbd4be13914da622cc9bc8eeae7083a11",
+    "campaign/vehicle-collision.js": "dc526581dd214c1d523744b2ecace754ed20eb82c8a2f63102420eb61660d81a",
+    "campaign/traffic-coordinator.js": "5ee16e690022dfbbe336ac8199219d594aeef130fdd1bfe8fe14837412c70151",
+    "campaign/unit-spatial-index.js": "f027b477d1730c83f5a4be5a7057fd355ab43f2db3d2ea74fff040d29a54d19f",
+    "campaign/builder-kinematics.js": "910db169ff3c079de1cc312864b03178c42a49094ce75d015a956a4f2e867c19",
+    "campaign/road-traffic.js": "d139b7f1d4c895ad55d74c90189895dd05ddbfc6f7c2005be56d80c33cf2ba2a",
+    "assets/campaign/alpha/mission01/gameplay.json": "ae5e897b1d45bd456218ac3bd3e738e597b5bd7baf32ee11a1d99ec5a83572e2",
+    "tools/review-navigation-counterexamples.mjs": "a037bc16d6e60451311732f9f94ddc3cf255363f9d032a2fc4e9284ac95fb8b6",
+    "tools/review-navigation-cache.mjs": "fba70afd2a4db30e7215cdc405e471222213ffd59f60daa35de4c654d95ee718",
+    "tools/review-navigation-orders.mjs": "88aea20b76c29583eec2d1674597e08a5a20e5b40d5cac4966bec2cc41b2cd63"
+  },
+  "commands": [
+    {
+      "command": "node tools/review-navigation-counterexamples.mjs --verify",
+      "status": 1,
+      "log": "navigation-review-verification-0.log"
+    },
+    {
+      "command": "node tools/review-navigation-cache.mjs",
+      "status": 0,
+      "log": "navigation-review-verification-1.log"
+    },
+    {
+      "command": "node tools/review-navigation-orders.mjs",
+      "status": 0,
+      "log": "navigation-review-verification-2.log"
+    }
+  ],
+  "sourcesAfter": {
+    "campaign/mission.js": "c661632eccdfd397899e5326131227b23aaa0d2dd934ef4ff424224e875cc011",
+    "campaign/navigation.js": "e1d82f35d6d72272deb468fd4b2f153e8cf23f923e7805f9a66a2de6f02a624b",
+    "campaign/vehicle-motion.js": "cd8a2ffcfe75d77893a1ab555c4e467fbd4be13914da622cc9bc8eeae7083a11",
+    "campaign/vehicle-collision.js": "dc526581dd214c1d523744b2ecace754ed20eb82c8a2f63102420eb61660d81a",
+    "campaign/traffic-coordinator.js": "5ee16e690022dfbbe336ac8199219d594aeef130fdd1bfe8fe14837412c70151",
+    "campaign/unit-spatial-index.js": "f027b477d1730c83f5a4be5a7057fd355ab43f2db3d2ea74fff040d29a54d19f",
+    "campaign/builder-kinematics.js": "910db169ff3c079de1cc312864b03178c42a49094ce75d015a956a4f2e867c19",
+    "campaign/road-traffic.js": "d139b7f1d4c895ad55d74c90189895dd05ddbfc6f7c2005be56d80c33cf2ba2a",
+    "assets/campaign/alpha/mission01/gameplay.json": "ae5e897b1d45bd456218ac3bd3e738e597b5bd7baf32ee11a1d99ec5a83572e2",
+    "tools/review-navigation-counterexamples.mjs": "a037bc16d6e60451311732f9f94ddc3cf255363f9d032a2fc4e9284ac95fb8b6",
+    "tools/review-navigation-cache.mjs": "fba70afd2a4db30e7215cdc405e471222213ffd59f60daa35de4c654d95ee718",
+    "tools/review-navigation-orders.mjs": "88aea20b76c29583eec2d1674597e08a5a20e5b40d5cac4966bec2cc41b2cd63"
+  },
+  "sourcesStable": true,
+  "measurements": {
+    "docs/damage/measurements/navigation-review-after-initial-fixes.json": "eee20137d7ab44c5247741a3674e865121369c334dddca0e0fb7f0da542ec94c",
+    "docs/damage/measurements/navigation-review-after-cache.json": "27032b914c354d12d35bd8d802721d783caa9baccfdb02977818d25156796ffa",
+    "docs/damage/measurements/navigation-review-after-orders.json": "5ec42d6964fd8b4c708acf06c187c51628455ee6e5ee7fad4b06adc177561f80"
+  }
+}
