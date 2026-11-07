@@ -44,6 +44,10 @@ export function missionSignal(chapter, mission) {
     return raidApproachSignal(mission) ?? (contact ? mark(contact, 'К контакту', 'threat', 400) :
       mark(field.gridToWorld(config.startGrid), 'К базе', 'threat', 380));
   }
+  if (chapter === 'raid-won' && state.flags.raidWon && state.camps[0] && !state.camps[0].cleared && config.raidApproachGrid) {
+    const entry = field.gridToWorld(config.raidApproachGrid);
+    if (mission.exploredAt(entry.x, entry.y)) return mark(entry, 'К выезду на разведку', 'recon', 420);
+  }
   if (chapter === 'camp3-sighted') {
     return waterTowerSignal(mission);
   }

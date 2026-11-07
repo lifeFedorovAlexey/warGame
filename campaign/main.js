@@ -27,9 +27,13 @@ function firstPowerSites(){
   const owned=mission.state.buildings.filter(b=>b.owner==='rai'&&b.hp>0);
   return {plant:owned.find(b=>b.kind==='generator'),well:owned.find(b=>b.kind==='derrick')};
 }
-function nextObjectiveHint(state,{plant,well},tasks){
+function knownArtifact(mission){
+  return mission.state.artifacts.find(item=>!item.collected&&mission.exploredAt(item.x,item.y));
+}
+function nextObjectiveHint(state,{plant,well},tasks,artifact){
   if(state.status!=='running')return '';
   if(state.flags.contact&&!state.flags.raidWon)return state.flags.raidStarted ? 'Отразите рейд на базу.' : 'Прикройте въезд к базе.';
+  if(artifact)return 'Подберите артефакт.';
   if(!state.powered){
     if(!plant&&!well)return 'Постройте АЭС и вышку.';
     if(!well)return 'Поставьте вышку на нефти.';
@@ -45,6 +49,7 @@ function nextObjectiveHint(state,{plant,well},tasks){
   if(ready('factory')&&!state.statistics.produced)return 'Выпустите машину на заводе.';
   const unfinished=facilities.filter(([kind])=>!ready(kind));
   if(unfinished.length)return 'Достройте '+unfinished.map(([,name])=>name).join(' и ')+'.';
+  if(state.flags.raidWon&&state.camps[0]&&!state.camps[0].cleared)return 'Разведайте дорогу за въездом на северо-восток.';
   if(!ready('bunker')&&!ready('mg-tower'))return owned.some(b=>b.kind==='bunker'||b.kind==='mg-tower') ? 'Достройте укрепление.' : 'Постройте ДОТ.';
   if(!tasks.find(task=>task.id==='research').done){
     const hasSample=state.artifactKeys.some(key=>!state.research[key]&&!owned.some(b=>b.research?.key===key));
@@ -53,10 +58,15 @@ function nextObjectiveHint(state,{plant,well},tasks){
   }
   return state.camps.some(camp=>!camp.cleared) ? 'Зачистите лагеря Отбросов.' : 'Завершите исследования в НИИ.';
 }
-function tacticalFocus(contact,{well}=firstPowerSites(),threat=staticThreat(contact)){
+function tacticalFocus(contact,{well,threat=staticThreat(contact),artifact=knownArtifact(mission)}=firstPowerSites()){
   if(mission.state.status!=='running')return null;
   if(contact)return {x:contact.x,y:contact.y,kind:'threat',label:'К контакту',distance:420};
   if(threat)return threat;
+  if(artifact)return {x:artifact.x,y:artifact.y,kind:'artifact',label:'К артефакту',distance:300};
+  if(radio.current?.kind!=='recon'){
+    const departure=missionSignal('raid-won',mission);
+    if(departure)return departure;
+  }
   if(mission.state.flags.lastRevealed&&!mission.state.camps[3].cleared)return missionSignal('last-camp',mission);
   if(!well&&radio.current?.kind!=='guidance')return missionSignal('intro',mission);
   return null;
@@ -639,8 +649,8 @@ function updateUi() {
   }
   const contact=visibleRaidContact(mission),threat=staticThreat(contact);
   world.storySignals.setThreat(threat);
-  const sites=firstPowerSites(),marker=tacticalFocus(contact,sites,threat);
-  const objectiveHint = $('objective-hint'), hint = nextObjectiveHint(s,sites,tasks);
+  const sites=firstPowerSites(),artifact=knownArtifact(mission),marker=tacticalFocus(contact,{...sites,threat,artifact});
+  const objectiveHint = $('objective-hint'), hint = nextObjectiveHint(s,sites,tasks,artifact);
   if(objectiveHint.textContent!==hint)objectiveHint.textContent=hint;
   objectiveHint.hidden=!hint;
   const signal=world.storySignals.current;
@@ -649,7 +659,8 @@ function updateUi() {
   focus.hidden=!marker;
   if(marker){
     focus.textContent=marker.label;
-    focus.title=marker.kind==='guidance'?'ЛКМ по нефтяной точке — поставить вышку':marker.label;
+    focus.title=marker.kind==='guidance'?'ЛКМ по нефтяной точке — поставить вышку':
+      marker.kind==='artifact'?'ПКМ по ящику — подобрать':marker.label;
     focus.classList.toggle('threat',marker.kind==='threat');
   }
   const raidHint=contact?'Рейдеры в зоне обзора.':s.flags.raidStarted?'Рейдеры в пути. Прикройте въезд.':'Готовится рейд. Прикройте въезд.';
@@ -740,7 +751,7 @@ function events() {
   }
 }
 function presentSignal(signal) {
-  world.storySignals.show(signal);
+  world.storySignals.show(signal?.kind==='recon'||signal?.kind==='artifact'?null:signal);
   if(signal?.kind==='anomaly')sound.anomaly?.();
 }
 function focusSignal(signal) {
