@@ -1,5 +1,6 @@
 import {vehicleEnvelope,footprintSupport} from './vehicle-collision.js';
 import {updatePassageReservations} from './passage-reservations.js';
+import {vehicleDynamics} from './vehicle-dynamics.js';
 
 export const TRAFFIC_LIMITS={groupSize:100,zoneSize:256,horizon:3,leases:1024};
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
@@ -142,7 +143,8 @@ export class TrafficCoordinator{
    conflicts++;
    const key=[a.unit.id,b.unit.id].sort().join('|');let lease=leases.get(key);
    if(!lease){
-    const committedA=da<=ca+(a.unit.driveSpeed??0)**2/44,committedB=db<=cb+(b.unit.driveSpeed??0)**2/44;
+    const committedA=da<=ca+(a.unit.driveSpeed??0)**2/(2*vehicleDynamics(a.unit).braking);
+    const committedB=db<=cb+(b.unit.driveSpeed??0)**2/(2*vehicleDynamics(b.unit).braking);
     const waitA=now-(saved.waiting[a.unit.id]??now),waitB=now-(saved.waiting[b.unit.id]??now);
     const scoreA=(committedA?100:0)+waitA*2-Math.max(0,enterA),scoreB=(committedB?100:0)+waitB*2-Math.max(0,enterB);
     const winner=scoreA===scoreB?(a.unit.id<b.unit.id?a:b):scoreA>scoreB?a:b;
@@ -175,7 +177,8 @@ export class TrafficCoordinator{
    // Already inside: finish clearing the junction. Stopping there would
    // block its owner and cause a permanent deadlock.
    if(along<0&&!merge)continue;
-   const limit=Math.max(0,Math.sqrt(44*Math.max(0,along-clearance)+2.2**2)-2.2);
+   const braking=vehicleDynamics(loser.unit).braking,reaction=braking*(config.simulationStep??.1);
+   const limit=Math.max(0,Math.sqrt(2*braking*Math.max(0,along-clearance)+reaction**2)-reaction);
    if(limit<(this.decisions.get(loser.unit.id)?.limit??Infinity))this.decisions.set(loser.unit.id,{limit,yieldTo:lease.winner,coordinator:this.groups.find(g=>g.units.includes(loser.unit.id))?.leaderId});
   }
   // A tail waiting behind a junction queue is not stuck. Propagate that fact

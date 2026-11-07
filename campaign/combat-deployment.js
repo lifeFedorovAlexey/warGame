@@ -2,13 +2,14 @@ import {automaticCombatTarget,combatPolicy} from './combat-policy.js';
 import {assignFormation,assignFormationSteps} from './formation-assignment.js';
 import {checkManeuver} from './vehicle-motion.js';
 import {navigationDecision} from './navigation-state.js';
+import {movementCombatTarget} from './combat-orders.js';
 
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const combatTask=task=>['attack','attack-move'].includes(task?.type);
 const resetMotion=unit=>{
   for(const key of ['passage','detour','traffic','trafficHold','passingLane','driveWatch','failedArcs','reverseDebt','combatArrivalBlockedAt','combatArrivalGoal','combatParking'])delete unit[key];
 };
-export function cancelCombatDeployment(unit){delete unit.combatDeployment;delete unit.combatGroup;delete unit.combatContactAt;delete unit.combatResume;delete unit.combatArrivalBlockedAt;delete unit.combatArrivalGoal;delete unit.combatParking;delete unit.attackRouteTarget;delete unit.attackFailedConditions;}
+export function cancelCombatDeployment(unit){delete unit.combatDeployment;delete unit.combatGroup;delete unit.combatContactAt;delete unit.combatResume;delete unit.combatArrivalBlockedAt;delete unit.combatArrivalGoal;delete unit.combatParking;delete unit.attackRouteTarget;delete unit.attackFailedConditions;delete unit.combatDisengage;}
 function firingSlots(spec,scale,angle,anchor){
   const spacing=scale*7,slots=[];
   for(let radius=spec.range*.78;radius>=spec.range*.38;radius-=spacing){
@@ -66,6 +67,7 @@ function* beginDeployment(mission,unit,target){
   const members=mission.state.units.filter(other=>other.owner===unit.owner&&other.hp>0
     &&other.combatGroup===unit.combatGroup&&combatTask(other.task)&&!other.pendingOrder&&!other.combatRetreat&&!other.combatDeployment
     &&(other.task.type==='attack'||combatPolicy(other).response!=='ignore')
+    &&(other.task.type==='attack'||!other.combatDisengage?.includes(target.id))
     &&distance(other,unit)<mission.unitSpec(unit).vision*3)
     .sort((a,b)=>distance(a,target)-distance(b,target)||a.id.localeCompare(b.id)).slice(0,100);
   const existing=mission.state.units.filter(other=>other.hp>0&&other.combatDeployment?.group===unit.combatGroup&&other.combatDeployment.targetId===target.id);
@@ -138,6 +140,7 @@ function resumeMarch(mission,unit,all){
 export function* updateCombatDeployment(mission,unit,spec,dt){
   if(unit.owner!=='rai'||!unit.combatGroup)return false;
   if(unit.combatResume){
+    const resume=unit.combatResume,task=unit.task;
     const enemy=automaticCombatTarget(mission,unit,spec);if(enemy)mission.attack(unit,enemy,spec);
     const conditions=combatPositionConditions(mission,unit,unit.task);
     if(unit.combatResume.failedConditions===conditions){
@@ -153,6 +156,7 @@ export function* updateCombatDeployment(mission,unit,spec,dt){
     // final segment forever. Reserve one bounded, reachable parking place.
     const path=yield* mission.movePathSteps(unit,requested,reserved,radius,false,
       point=>distance(point,requested)<=radius,{ignoreUnits,fallback:false,maxGoalDistance:4,compareDetours:true});
+    if(unit.combatResume!==resume||unit.task!==task||unit.pendingOrder)return true;
     if(!path?.length){unit.path=[];unit.driveSpeed=0;unit.combatResume.failedConditions=conditions;navigationDecision(unit,'BLOCKED','march-route-unavailable',null,'retry-on-obstacle-change');return true;}
     unit.path=path;Object.assign(unit.task,path.at(-1));
     if(unit.routeOrder)unit.routeOrder.destination={...path.at(-1)};
@@ -165,10 +169,10 @@ export function* updateCombatDeployment(mission,unit,spec,dt){
     if(mission.state.time<(unit.combatContactAt??0))return false;
     unit.combatContactAt=mission.state.time+.25;
     const target=unit.task.type==='attack'?mission.entity(unit.task.targetId)
-      :automaticCombatTarget(mission,unit,{...spec,range:spec.vision});
+      :movementCombatTarget(mission,unit,{...spec,range:spec.vision});
     if(!target||!mission.visibleAt(target.x,target.y)||distance(unit,target)>spec.vision||!(yield* beginDeployment(mission,unit,target)))return false;
     deployment=unit.combatDeployment;
-    if(!deployment||unit.pendingOrder)return false;
+    if(!deployment||unit.pendingOrder)return true;
   }
   const target=mission.entity(deployment.targetId);
   if(!target||target.hp<=0||!mission.visibleAt(target.x,target.y)
@@ -226,8 +230,10 @@ export function* updateCombatDeployment(mission,unit,spec,dt){
     if(deployment.relocateAt)candidates.sort((a,b)=>slotCost(unit,a,scale)-slotCost(unit,b,scale));
     for(const goal of candidates){
       yield;
+      if(unit.combatDeployment!==deployment||unit.pendingOrder)return true;
       if(!validPosition(mission,unit,target,goal,reserved))continue;
       const path=yield* mission.vehiclePathSteps(unit,goal,{fallback:false,maxGoalDistance:4});
+      if(unit.combatDeployment!==deployment||unit.pendingOrder)return true;
       const end=path?.at(-1);if(!end||!validPosition(mission,unit,target,end,reserved))continue;
       unit.path=path;unit.task={type:'combat-position',...end};deployment.goal={...end};deployment.status='moving';break;
     }
@@ -290,6 +296,7 @@ export function* updateCombatParking(mission,unit){
   const legs=yield* mission.planManeuverSteps(unit,parking.anchor,{scale,allowed:sweep,attempts:2,maximumLegs:7,
     reverseBudget:Math.max(0,scale*4-(unit.reverseDebt??0)),accept:pose=>distance(unit,pose)>=scale*2.5
       &&allowed(pose)&&reserved.every(other=>distance(pose,other)>=scale*5.5)});
+  if(unit.combatParking!==parking||unit.pendingOrder)return;
   if(legs){
     const end=checkManeuver(unit,legs,scale,sweep),goal={x:end.x,y:end.y};
     unit.path=[goal];Object.assign(unit.task,goal);
@@ -300,6 +307,7 @@ export function* updateCombatParking(mission,unit){
   }
   const path=yield* mission.movePathSteps(unit,parking.anchor,reserved,scale*14,false,allowed,
     {fallback:false,maxGoalDistance:4,compareDetours:true});
+  if(unit.combatParking!==parking||unit.pendingOrder)return;
   if(!path?.length){parking.failedConditions=conditions;navigationDecision(unit,'BLOCKED','arrival-space-unavailable',null,'retry-on-position-change');return;}
   unit.path=path;Object.assign(unit.task,path.at(-1));
   if(unit.routeOrder)unit.routeOrder.destination={...path.at(-1)};

@@ -1,17 +1,16 @@
 export {clearOfVehicles, vehicleClearance} from './vehicle-collision.js';
 import {gradeSpeed} from './road-traffic.js';
+import {vehicleDynamics} from './vehicle-dynamics.js';
 
 const clamp = (value, low, high) => Math.max(low, Math.min(high, value));
 const wrap = angle => Math.atan2(Math.sin(angle), Math.cos(angle));
 const lengthBetween = (a, b) => Math.hypot(b.x - a.x, b.y - a.y);
 const headingTo = (from, to) => Math.atan2(from.x - to.x, to.y - from.y);
-const steeringLimit = .67;
-const maximumCurve = Math.tan(steeringLimit);
 
 // X is right, Y is forward. Sweep the whole Ackermann arc, including the rotating footprint.
 function traceArc(start, direction, curve, length, scale, allowed,blocked) {
   if (length <= 1e-8) return start;
-  const curvature = curve / (2.6 * scale);
+  const curvature = curve / (vehicleDynamics(start).wheelbase * scale);
   let previous = start,previousArc=0;
   const first = Math.min(.14, length), steps = Math.ceil((length - first) / 1.25);
   for (let index = 0; index <= steps; index++) {
@@ -41,16 +40,17 @@ function vehiclePose(unit, pose, direction, curve, length, dt) {
 }
 
 export function driveStep(unit, point, dt, {speed, grade, scale, tolerance, reverseLimit = 0, trafficLimit = Infinity, allowed, onBlockedContact}) {
+  const dynamics=vehicleDynamics(unit),steeringLimit=dynamics.steeringLimit,maximumCurve=Math.tan(steeringLimit);
   const distance = lengthBetween(unit, point);
   const direct = wrap(headingTo(unit, point) - unit.heading);
   const reverse = distance < reverseLimit && Math.abs(direct) > (unit.reversing ? Math.PI * .47 : Math.PI * .61);
   const direction = reverse ? -1 : 1;
   const angle = wrap(direct + (reverse ? Math.PI : 0));
   const targetSpeed = Math.min(speed * gradeSpeed(grade) * (reverse ? .59 : 1),
-    Math.sqrt(44 * Math.max(.05, distance - tolerance * .6)), speed / (1 + 1.9 * Math.abs(angle)),
+    Math.sqrt(2*dynamics.braking * Math.max(.05, distance - tolerance * .6)), speed / (1 + dynamics.turnPenalty * Math.abs(angle)),
     reverse ? Infinity : trafficLimit);
   const lastSpeed = unit.reversing === reverse ? unit.driveSpeed ?? 0 : 0;
-  const nextSpeed = lastSpeed + clamp(targetSpeed - lastSpeed, -22 * dt, 14 * dt);
+  const nextSpeed = lastSpeed + clamp(targetSpeed - lastSpeed, -dynamics.braking * dt, dynamics.acceleration * dt);
   const travel = Math.min(distance, Math.max(0, nextSpeed * dt));
   if (travel < .001) return null;
   const curve = Math.tan(clamp(angle * 1.55, -steeringLimit, steeringLimit));
@@ -82,6 +82,7 @@ export function planManeuver(...args) {
   const search=planManeuverSteps(...args);let step;do{step=search.next();}while(!step.done);return step.value;
 }
 export function* planManeuverSteps(unit, goal, {scale, allowed, accept, tolerance = 2, attempts = 0, reverseBudget = 4 * scale, failedArcs = [], maximumLegs = 9, deadline = ()=>Infinity}) {
+  const steeringLimit=vehicleDynamics(unit).steeringLimit,maximumCurve=Math.tan(steeringLimit);
   const curves = [0, maximumCurve / 2, -maximumCurve / 2, maximumCurve, -maximumCurve];
   const initialDistance = lengthBetween(unit, goal);
   const stride = 1.2 * scale;
@@ -145,10 +146,10 @@ export function checkManeuver(unit, legs, scale, allowed) {
   return pose;
 }
 
-export function maneuverStep(unit, leg, dt, {scale, allowed, crawl = false, throughSpeed = 0, forwardSpeed = 13}) {
-  const maximumSpeed = crawl ? 7 : leg.direction > 0 ? forwardSpeed : 9;
+export function maneuverStep(unit, leg, dt, {scale, allowed, crawl = false, throughSpeed = 0, forwardSpeed = vehicleDynamics(unit).maneuverForward}) {
+  const dynamics=vehicleDynamics(unit),maximumSpeed = crawl ? 7 : leg.direction > 0 ? forwardSpeed : dynamics.maneuverReverse;
   const lastSpeed = unit.reversing === (leg.direction < 0) ? unit.driveSpeed ?? 0 : 0;
-  const speed = Math.min(maximumSpeed, Math.sqrt(38 * leg.remaining + throughSpeed * throughSpeed), lastSpeed + 14 * dt);
+  const speed = Math.min(maximumSpeed, Math.sqrt(2*dynamics.braking * leg.remaining + throughSpeed * throughSpeed), lastSpeed + dynamics.acceleration * dt);
   const length = Math.min(leg.remaining, speed * dt);
   const pose = traceArc(unit, leg.direction, leg.curve, length, scale, allowed);
   if (!pose) return null;

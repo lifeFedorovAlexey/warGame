@@ -6,6 +6,9 @@ import {vehicleEnvelope,footprintSupport,vehicleClearance} from '../campaign/veh
 
 const cross=(a,b)=>a.x*b.y-a.y*b.x;
 const results=[];
+const sources=['campaign/traffic-coordinator.js','campaign/vehicle-dynamics.js','campaign/mission.js','campaign/vehicle-motion.js'];
+const hashes=()=>Object.fromEntries(sources.map(path=>[path,createHash('sha256').update(fs.readFileSync(path)).digest('hex')]));
+const sourceHashes=hashes();
 {
  const m=fixture(),a=m.addUnit('bukhanka','rai',{x:-45,y:0},{heading:-Math.PI/2}),b=m.addUnit('bukhanka','rai',{x:0,y:-45});
  const goals=[{x:90,y:0},{x:0,y:90}];
@@ -69,11 +72,17 @@ const results=[];
  for(let i=0;i<80*80&&fired.size<20;i++){
   m.advance(1/80,{budgetMs:6});for(const e of m.effects)if(e.type==='shot'&&units.some(u=>u.id===e.from))fired.add(e.from);m.effects=[];
  }
- assert(grants>10,'The real twenty-car case must exercise interacting crossing promises');
- assert.deepEqual(violations,[],'A later DAG reconciliation must not reverse a physically uncleared promise');
- assert.equal(fired.size,20,'Persistent precedence must still let the whole group reach usable firing positions');
- results.push({case:'twenty interacting approach priorities',passed:true,grants,seconds:m.state.time,fired:fired.size});
+ const failures=[];
+ if(grants<=10)failures.push('The real twenty-car case must exercise interacting crossing promises');
+ if(violations.length)failures.push('A later DAG reconciliation must not reverse a physically uncleared promise');
+ if(fired.size!==20)failures.push('Persistent precedence must still let the whole group reach usable firing positions');
+ const result={case:'twenty interacting approach priorities',passed:!failures.length,grants,seconds:m.state.time,fired:fired.size,
+  unfired:units.filter(u=>!fired.has(u.id)).map(u=>u.id),failures,violations};
+ results.push(result);
+ if(!result.passed)fs.writeFileSync('tools/fixtures/crossing-leases-failed.json',JSON.stringify({result,sourceHashes,save:JSON.parse(m.save())},null,2));
 }
-const report={passed:true,scope:'Crossing ownership and lifetime; full contact acceptance remains in check-combat-sight.mjs',results,
- sourceSHA:createHash('sha256').update(fs.readFileSync('campaign/traffic-coordinator.js')).digest('hex')};
+const sourceChanged=JSON.stringify(sourceHashes)!==JSON.stringify(hashes());
+const report={passed:results.every(r=>r.passed)&&!sourceChanged,scope:'Crossing ownership and lifetime; full contact acceptance remains in check-combat-sight.mjs',results,
+ sourceChanged,sourceHashes,sourceSHA:sourceHashes['campaign/traffic-coordinator.js']};
 fs.writeFileSync('campaign/reports/crossing-leases.json',JSON.stringify(report,null,2));console.log(JSON.stringify(report));
+assert(report.passed,'Crossing ownership acceptance failed; see the saved result and physical state');

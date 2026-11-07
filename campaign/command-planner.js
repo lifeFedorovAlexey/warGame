@@ -5,7 +5,7 @@ const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const travel=new Set(['move','attack-move','attack']);
 const plannedFields=['path','task','routeOrder','detour','traffic','trafficHold','driveWatch','reverseDebt','failedArcs','workEscapeRetryAt',
  'passage','passingLane','combatRetreat','combatDeployment','combatGroup','combatContactAt','combatResume','combatArrivalBlockedAt',
- 'combatArrivalGoal','combatParking','retreatSuppressed','mergeTraffic','yieldReturn','resumeConstructionId','terrainEscape'];
+ 'combatArrivalGoal','combatParking','combatDisengage','retreatSuppressed','mergeTraffic','yieldReturn','resumeConstructionId','terrainEscape'];
 function coupledStarts(mission,units,target){
  const range=mission.config.worldScale*7,buckets=new Map(),eligible=units.filter(u=>!isInfantry(u)&&(u.driveSpeed??0)<=.1&&!(u.tool>0)&&!(u.foldTime>0)
   &&(target.x-u.x)*-Math.sin(u.heading)+(target.y-u.y)*Math.cos(u.heading)<=-.5*distance(u,target));
@@ -33,7 +33,7 @@ export class CommandPlanner{
   this.mission=mission;this.nav=mission.nav.createSearchContext();this.active=null;
   mission.state.commandOrders??=[];
   for(const order of mission.state.commandOrders)if(order.status==='planning')order.status='queued';
-  this.stats={slices:0,cpuMs:0,maxSliceMs:0,applied:0,reused:0,cancelled:0};
+  this.stats={slices:0,cpuMs:0,maxSliceMs:0,applied:0,reused:0,cancelled:0,preemptions:0};
  }
  signature(record){
   const m=this.mission,selected=new Set(record.ids),size=m.config.worldScale*16,zones=new Set();
@@ -125,6 +125,15 @@ export class CommandPlanner{
    active.committedCohorts.add(index);
   }
  }
+ restartActive(){
+  const active=this.active;if(!active)return;
+  active.iterator.return();
+  const {record}=active,m=this.mission;
+  // Staged cohort copies are not live assignments. Drop those copies while
+  // retaining every route already committed to the corresponding revision.
+  const applied=[...new Set(record.assigned)].filter(id=>{const u=m.entity(id);return u?.hp>0&&u.commandRevision===record.revision&&!u.pendingOrder;});
+  record.assigned.splice(0,record.assigned.length,...applied);record.status='queued';this.active=null;
+ }
  advance(budgetMs=2){
   const m=this.mission,started=performance.now(),deadline=started+Math.max(0,Math.min(2,budgetMs));
   if(this.retryTime!==m.state.time||this.retryTopology!==m.nav.topologyRevision){
@@ -143,10 +152,16 @@ export class CommandPlanner{
     if(record.status==='cancelled'||!record.ids.some(id=>m.entity(id)?.pendingOrder?.revision===record.revision)
      &&!record.ids.every(id=>record.assigned.includes(id))){
      this.active.iterator.return();record.status='cancelled';this.active=null;
-    }else if(this.active.topology!==m.nav.topologyRevision||this.active.bounds!==m.nav.bounds.join(',')){this.active.iterator.return();record.status='queued';this.active=null;}
+    }else if(this.active.topology!==m.nav.topologyRevision||this.active.bounds!==m.nav.bounds.join(','))this.restartActive();
+    else if(m.state.commandOrders.some(r=>r.status==='queued'&&r.revision>record.revision)){
+     // A new explicit command to a subset must not wait for the remainder of
+     // an older group. Discard suspended A* scratch at this clean yield; a
+     // resumed old intent reconstructs only its still-owned pending members.
+     this.restartActive();this.stats.preemptions++;
+    }
    }
    if(!this.active){
-    const next=m.state.commandOrders.filter(r=>r.status==='queued').sort((a,b)=>a.priority-b.priority||a.revision-b.revision)[0];
+    const next=m.state.commandOrders.filter(r=>r.status==='queued').sort((a,b)=>b.revision-a.revision||a.priority-b.priority)[0];
     if(!next)break;
     this.active=this.start(next);if(!this.active)continue;
    }

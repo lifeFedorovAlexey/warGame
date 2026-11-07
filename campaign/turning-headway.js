@@ -1,5 +1,7 @@
 import {checkManeuver} from './vehicle-motion.js';
 import {vehicleSweep} from './vehicle-collision.js';
+import {vehicleDynamics} from './vehicle-dynamics.js';
+import {maneuverAdmissionBlocker} from './maneuver-admission.js';
 
 // A turning rear corner can hit a neighbour which is behind the centre's
 // forward corridor. Probe only the current Ackermann arc up to the braking
@@ -7,13 +9,18 @@ import {vehicleSweep} from './vehicle-collision.js';
 export function turningHeadway(mission,unit,point,dt,scale,blockers,grade=.52){
  const angle=Math.atan2(Math.sin(Math.atan2(unit.x-point.x,point.y-unit.y)-unit.heading),
   Math.cos(Math.atan2(unit.x-point.x,point.y-unit.y)-unit.heading));
- const speed=(unit.reversing?0:unit.driveSpeed??0)+14*dt;
- const horizon=Math.min(Math.hypot(point.x-unit.x,point.y-unit.y),speed*speed/44+dt*speed);
+ const dynamics=vehicleDynamics(unit),speed=(unit.reversing?0:unit.driveSpeed??0)+dynamics.acceleration*dt;
+ const horizon=Math.min(Math.hypot(point.x-unit.x,point.y-unit.y),speed*speed/(2*dynamics.braking)+dt*speed);
  if(horizon<.001)return Infinity;
- const radius=horizon+scale*4;
- if(!mission.nearbyUnits(unit,radius).some(other=>other!==unit&&other.hp>0)
+ // Include both full bodies, not just the centre's own half-length. During
+ // opposite turns their front corners meet while the centres remain farther
+ // apart than four scale units. A sharp turn also probes approaching traffic.
+ const turningOutsideRoute=Math.cos(angle)<.65,radius=horizon+scale*7;
+ if(!mission.nearbyUnits(unit,turningOutsideRoute?Math.max(radius,scale*24):radius).some(other=>other!==unit&&other.hp>0)
   &&!mission.nav.nearbySolids(unit,radius).length)return Infinity;
- const curve=Math.tan(Math.max(-.67,Math.min(.67,angle*1.55)));
+ const curve=Math.tan(Math.max(-dynamics.steeringLimit,Math.min(dynamics.steeringLimit,angle*1.55)));
+ // The shared straight-route coordinator deliberately excludes this turn.
+ // Its body arc still cannot enter a neighbour's unavoidable braking path.
  let clearDistance=0,terrainOnly=false;
  const safe=checkManeuver(unit,[{direction:1,curve,remaining:horizon}],scale,(from,to)=>{
   const hit=new Set();
@@ -25,9 +32,13 @@ export function turningHeadway(mission,unit,point,dt,scale,blockers,grade=.52){
    // arc meets terrain. A zero speed here would prevent it trying that arc.
    terrainOnly=!hit.size&&!solid;return false;
   }
+  if(turningOutsideRoute){
+   const approaching=maneuverAdmissionBlocker(mission,unit,from,to,dt);
+   if(approaching){blockers?.add(approaching);return false;}
+  }
   clearDistance+=Math.hypot(to.x-from.x,to.y-from.y);return true;
  });
  if(safe||terrainOnly)return Infinity;
- const reaction=22*dt;
- return Math.max(0,Math.sqrt(44*Math.max(0,clearDistance-.02)+reaction*reaction)-reaction);
+ const reaction=dynamics.braking*dt;
+ return Math.max(0,Math.sqrt(2*dynamics.braking*Math.max(0,clearDistance-.02)+reaction*reaction)-reaction);
 }

@@ -17,8 +17,8 @@ const config=json('assets/campaign/alpha/mission01/gameplay.json');
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),round=n=>Number.isFinite(n)?+n.toFixed(4):null;
 const args=process.argv.slice(2),option=(name,fallback)=>{const i=args.indexOf(name);return i<0?fallback:args[i+1];};
 const sources=['campaign/mission.js','campaign/main.js','campaign/group-command.js','campaign/pickup-orders.js',
- 'campaign/command-planner.js','campaign/vehicle-motion.js','campaign/vehicle-collision.js','campaign/traffic-start.js',
- 'campaign/traffic-coordinator.js','campaign/turning-headway.js','campaign/maneuver-admission.js',
+ 'campaign/command-planner.js','campaign/vehicle-motion.js','campaign/vehicle-dynamics.js','campaign/vehicle-collision.js','campaign/traffic-start.js',
+ 'campaign/traffic-coordinator.js','campaign/road-traffic.js','campaign/road-merge.js','campaign/turning-headway.js','campaign/maneuver-admission.js',
  'assets/campaign/alpha/mission01/gameplay.json','assets/maps/alpha/heightfield.json','assets/maps/alpha/roads.json'];
 const hashes=()=>Object.fromEntries(sources.map(p=>[p,createHash('sha256').update(fs.readFileSync(p)).digest('hex')]));
 let field;
@@ -68,7 +68,7 @@ export function runBuilderCase(name,{seconds=120}={}){
  const commands=[{at:0,selected:[workers[0].id],kind:'derrick',point:m.field.gridToWorld(config.oilFields[0])},
   {at:plan.secondDelay,selected:[workers[1].id],kind:plan.secondKind,point:secondPoint}];
  const initialSave=JSON.parse(m.save()),orders=[],assignmentEvents=[],contacts=[],damage=[],solidViolations=[],unrelatedOrders=[];
- const metrics=new Map(initial.map(u=>[u.id,{id:u.id,kind:u.kind,selected:workers.includes(u),firstMotion:null,
+ const metrics=new Map(initial.map(u=>[u.id,{id:u.id,kind:u.kind,selected:workers.includes(u),firstMotion:null,firstPreparing:null,firstActivity:null,
   travelled:0,maxDisplacement:0,idle:0,longestIdle:0,reasons:{},lastTask:null,workingAt:null}]));
  const expected=new Map(),cpu=[],history=[];let minGap=Infinity,frame=0,lastSample=-1;
  const collision=m.vehicleCollision.bind(m);m.vehicleCollision=(u,speed,blockers)=>{
@@ -111,6 +111,10 @@ export function runBuilderCase(name,{seconds=120}={}){
     row.lastTask=task;
    }
    if(u.builderWorking)row.workingAt??=m.state.time;
+   if(u.navigation?.reason==='preparing-projector')row.firstPreparing??=m.state.time;
+   if(command&&row.firstActivity===null&&(row.firstMotion||u.builderWorking||u.navigation?.reason==='preparing-projector'))
+    row.firstActivity={simulation:m.state.time-command.time,frame:frame/80-command.frameSeconds,
+     action:row.firstMotion?'driving':u.builderWorking?'working':'preparing-projector'};
    const active=u.task||u.path.length||u.detour||u.yieldReturn||u.pendingOrder;
    if(active&&!u.builderWorking&&travelled<1e-4){row.idle+=1/80;row.longestIdle=Math.max(row.longestIdle,row.idle);
     const reason=u.navigation?.reason??'missing-diagnostic';row.reasons[reason]=(row.reasons[reason]??0)+1/80;
@@ -128,7 +132,7 @@ export function runBuilderCase(name,{seconds=120}={}){
  if(orders.length!==2||orders.some(o=>!o.result.ok))failures.push('Both independent construction placements must be accepted');
  if(orders.some(o=>o.result.ok&&!m.entity(o.result.id)?.completed))failures.push('Both selected builders must physically complete their own structure');
  if(unrelatedOrders.length)failures.push('A command changed an unselected vehicle or stole the other construction job');
- if(workers.some(u=>!metrics.get(u.id).firstMotion||metrics.get(u.id).firstMotion.frame>.50001))failures.push('A builder did not begin meaningful motion within 500 ms');
+ if(workers.some(u=>!metrics.get(u.id).firstActivity||metrics.get(u.id).firstActivity.frame>.50001))failures.push('A builder did not begin physical travel or verified projector work within 500 ms');
  if(contacts.length)failures.push(`${contacts.length} physical contacts`);
  if(minGap<0||solidViolations.length)failures.push('Physical hull penetration');
  if(damage.length)failures.push('Damage during the construction approach; see recorded sources');
@@ -159,26 +163,30 @@ export function commandScopeChecks(){
  m.stop([first.id]);assert(!first.task&&!second.task,'The explicitly issued group Stop keeps its tactical meaning');
  return {passed:true,checks:['build-selected','repair-selected','pickup-selected','explicit-group-stop']};
 }
-export function runObstacleCase({seconds=60}={}){
+const obstacleHeadings={'two-obstacles':0,'two-obstacles-reverse':Math.PI,'two-obstacles-quarter':Math.PI/2,'two-obstacles-diagonal':Math.PI/4};
+export function runObstacleCase({seconds=60,name='two-obstacles'}={}){
  const beforeSources=hashes(),m=setup(),origin=m.field.gridToWorld(config.startGrid),rejected=[],candidates=[];
+ const heading=obstacleHeadings[name];assert(Number.isFinite(heading),'Known obstacle start orientation');
  for(let dx=-320;dx<=320;dx+=16)for(let dy=-240;dy<=240;dy+=16){
   if(Math.hypot(dx,dy)<100)continue;candidates.push({x:Math.round((origin.x+dx)/8)*8,y:Math.round((origin.y+dy)/8)*8});
  }
  candidates.sort((a,b)=>distance(a,origin)-distance(b,origin)||a.x-b.x||a.y-b.y);
  let selected;
  for(const point of candidates){
-  const sides=[m.placement('generator',point.x-40,point.y),m.placement('generator',point.x+40,point.y)];
-  const car={...point,kind:'bukhanka',heading:0,hp:320},goal={x:point.x,y:point.y+200};
+  const car={...point,kind:'bukhanka',heading,hp:320},goal={x:point.x,y:point.y+200},shape=vehicleEnvelope(car,config.worldScale,m.field);
+  const buildingHalf=config.buildings.generator.footprintMetres[0]*config.worldScale/2,
+   separation=Math.ceil((buildingHalf+footprintSupport(shape,1,0)+3)/config.buildingGridMetres)*config.buildingGridMetres;
+  const sides=[m.placement('generator',point.x-separation,point.y),m.placement('generator',point.x+separation,point.y)];
   // Choose by lawful placement and physical starting pose only; no route or
   // simulated success is considered when choosing this first deterministic site.
   const why=sides.some(p=>!p.ok||p.blockers.length)?'building-placement':!m.inBounds(goal.x,goal.y)||!m.nav.terrainAllowed(goal.x,goal.y)?'goal-terrain':
    !m.vehicleMotionClear(car,car,car)||sides.some(p=>solidGap(car,p,m)<config.worldScale*.055)?'initial-full-hull':null;
   if(why){rejected.push({point,reason:why});continue;}
-  selected={point,goal,sides};break;
+  selected={point,goal,sides,heading,separation};break;
  }
  assert(selected,'No physically legal two-obstacle starting site found in the authored explored region');
  const buildings=selected.sides.map(p=>m.addStructure('generator','rai',p,{completed:true,progress:1}));
- m.rebuildNavigation();const unit=m.addUnit('bukhanka','rai',selected.point,{heading:0}),initialSave=JSON.parse(m.save());
+ m.rebuildNavigation();const unit=m.addUnit('bukhanka','rai',selected.point,{heading}),initialSave=JSON.parse(m.save());
  const initialLegal=m.vehicleMotionClear(unit,unit,unit),initialGap=Math.min(...buildings.map(b=>solidGap(unit,b,m)));
  const contacts=[],damage=[],history=[],penetrations=[],cpu=[];let firstMotion=null,arrival=null,longestIdle=0,idle=0,travelled=0,minGap=initialGap,lastSample=-1;
  const reasons={},collision=m.vehicleCollision.bind(m);m.vehicleCollision=(u,speed,blockers)=>{
@@ -208,20 +216,20 @@ export function runObstacleCase({seconds=60}={}){
  if(!arrival)failures.push('Vehicle did not reach the original goal within the deadline');
  if(contacts.length||penetrations.length||damage.length)failures.push('Physical contact, penetration or damage; inspect retained evidence');
  const sourceChanged=JSON.stringify(beforeSources)!==JSON.stringify(hashes());if(sourceChanged)failures.push('Production sources changed during the run');
- const result={name:'two-obstacles',passed:!failures.length,failures,realTerrain:true,seconds:round(m.state.time),frameSeconds:round(frame/80),deadline:seconds,
+ const result={name,passed:!failures.length,failures,realTerrain:true,seconds:round(m.state.time),frameSeconds:round(frame/80),deadline:seconds,
   initialLegal,initialGap:round(initialGap),order,commandCpuMs,firstMotion,arrival,goal:selected.goal,goalError:round(distance(unit,selected.goal)),travelled:round(travelled),
   longestIdle:round(longestIdle),reasons,minGap:round(minGap),contacts,penetrations,damage,sourceHashes:beforeSources,sourceChanged,
   cpuMs:{total:round(cpu.reduce((a,b)=>a+b,0)),max:round(Math.max(...cpu)),scope:'Actual Mission.advance at 80 Hz; no renderer'}};
- const fixture='tools/fixtures/builder-independent-two-obstacles.json';fs.mkdirSync('tools/fixtures',{recursive:true});
- fs.writeFileSync(fixture,JSON.stringify({replay:'node tools/check-builder-independent-orders.mjs --case two-obstacles',config,selected,rejected,
+ const fixture=`tools/fixtures/builder-independent-${name}.json`;fs.mkdirSync('tools/fixtures',{recursive:true});
+ fs.writeFileSync(fixture,JSON.stringify({replay:`node tools/check-builder-independent-orders.mjs --case ${name}`,config,selected,rejected,
   initialSave,history,finalSave:JSON.parse(m.save()),result},null,2));result.fixture=fixture;return result;
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
  const scope=commandScopeChecks();
  if(args.includes('--scope-only'))console.log(JSON.stringify(scope));
  else{
-  const names=option('--case',[...Object.keys(plans),'two-obstacles'].join(',')).split(','),results=[];
-  for(const name of names){const settings={seconds:Number(option('--seconds',120))},result=name==='two-obstacles'?runObstacleCase(settings):runBuilderCase(name,settings);results.push(result);
+  const names=option('--case',[...Object.keys(plans),...Object.keys(obstacleHeadings)].join(',')).split(','),results=[];
+  for(const name of names){const settings={seconds:Number(option('--seconds',120)),name},result=name in obstacleHeadings?runObstacleCase(settings):runBuilderCase(name,settings);results.push(result);
    console.log(JSON.stringify({name,passed:result.passed,failures:result.failures,seconds:result.seconds,
     buildings:result.buildings,firstMotion:result.units?.filter(u=>u.selected).map(u=>u.firstMotion)??result.firstMotion,contacts:result.contacts.length,
     unintended:result.unrelatedOrders?.length,others:result.units?.filter(u=>!u.selected).map(u=>({id:u.id,displacement:u.maxDisplacement})),fixture:result.fixture}));}

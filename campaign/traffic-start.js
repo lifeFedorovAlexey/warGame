@@ -59,13 +59,29 @@ export function departureSlotOrder(units,goal,scale){
 function* checkDeparture(mission,member,legs,scale,members,grade=.52,blockers){
  const reach=legs.reduce((sum,leg)=>sum+leg.remaining,0)+scale*7;
  const obstacles=mission.nearbyUnits(member,reach).filter(other=>!members.has(other));
+ function* arc(from,leg,length,depth=0){
+  const rejected=blockers?new Set():undefined;
+  const end=checkManeuver(from,[{...leg,remaining:length}],scale,
+   (a,b)=>mission.vehicleMotionClear(member,a,b,grade,rejected,obstacles));
+  if(end)return end;
+  // A union of rotated hulls is conservative. A long proof interval can
+  // therefore reject the same clear curve that the executor traversed in
+  // shorter intervals. Refine that interval, retaining full swept bodies and
+  // their unchanged safety skin; never accept endpoint-only clearance.
+  if(length>.28&&depth<6){
+   if(performance.now()>=(mission.nav.workDeadline??Infinity))yield;
+   const middle=yield* arc(from,leg,length/2,depth+1);
+   return middle?yield* arc(middle,leg,length/2,depth+1):null;
+  }
+  if(rejected)for(const other of rejected)blockers.add(other);
+  return null;
+ }
  let pose=member;
  for(const leg of legs){
   let remaining=leg.remaining;
   while(remaining>1e-8){
    const length=Math.min(remaining,scale*2);
-   pose=checkManeuver(pose,[{...leg,remaining:length}],scale,
-    (from,to)=>mission.vehicleMotionClear(member,from,to,grade,blockers,obstacles));
+   pose=yield* arc(pose,leg,length);
    if(!pose)return null;
    remaining-=length;
    if(performance.now()>=(mission.nav.workDeadline??Infinity))yield;

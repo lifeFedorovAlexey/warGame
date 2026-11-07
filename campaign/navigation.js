@@ -58,7 +58,7 @@ export class TerrainNavigator{
   }
   return regions;
  }
- regionsUnchanged(regions){return !!regions&&[...regions].every(([key,version])=>(this.regionVersions.get(key)??0)===version);}
+ regionsUnchanged(regions){if(!regions)return false;for(const [key,version] of regions)if((this.regionVersions.get(key)??0)!==version)return false;return true;}
  createSearchContext(){
   // Terrain and immutable edge/surface caches are shared. A suspended command
   // search must not overwrite the movement search's heap or predecessor tree.
@@ -223,7 +223,10 @@ export class TerrainNavigator{
   const metadata=this.pathCacheRegions??=new Map();
   if(cache.has(key)){
    const path=cache.get(key),dependency=metadata.get(key);
-   if(path?this.regionsUnchanged(dependency?.regions):dependency?.revision===this.topologyRevision){cache.delete(key);cache.set(key,path);return path?.map(p=>({...p}))??null;}
+   if(path?this.regionsUnchanged(dependency?.regions):dependency?.revision===this.topologyRevision){
+    cache.delete(key);cache.set(key,path);if(!path)this.lastExhaustedReachability=dependency?.unreachableProof??null;
+    return path?.map(p=>({...p}))??null;
+   }
    this.pathCachePoints-=(path?.length??0);cache.delete(key);metadata.delete(key);
   }
   const reachabilityKey=[from.x,from.y,from.heading??0,from.kind??'',this.vehicleScale,escapeSteepStart,terrainEscape?.x,terrainEscape?.y,terrainEscape?.height,terrainEscape?.radius,terrainEscape?.maxRise,...this.bounds,this.topologyRevision].join('|')+'|'+occupancyKey;
@@ -232,7 +235,7 @@ export class TerrainNavigator{
   const path=reused??(yield* this.computePathSteps(from,to,options));
   if(!path)this.lastExhaustedReachability=this.exhaustedReachability?.get(reachabilityKey)??this.lastExhaustedReachability;
   cache.set(key,path?.map(p=>({...p}))??null);this.pathCachePoints=(this.pathCachePoints??0)+(path?.length??0);
-  metadata.set(key,{revision:this.topologyRevision,regions:path?this.pathRegions(from,path):null});
+  metadata.set(key,{revision:this.topologyRevision,regions:path?this.pathRegions(from,path):null,unreachableProof:path?null:this.lastExhaustedReachability});
   while(cache.size>1024||this.pathCachePoints>16384){const first=cache.keys().next().value;this.pathCachePoints-=cache.get(first)?.length??0;cache.delete(first);metadata.delete(first);}
   if(this.sharedCorridors&&!reused&&path?.length>1&&!terrainEscape){
    const corridors=this.corridors??=[];
@@ -301,7 +304,7 @@ export class TerrainNavigator{
   const bestSpeed=roads?(1+asphaltBonus)*1.18:1;
   const heuristic=(col,row)=>Math.max(0,(Math.hypot(col-end.col,row-end.row)*this.cell-maxEndDistance)/bestSpeed);
   for(const start of starts){const source=start.row*n+start.col,cost=roads?this.travelCost(from,start,pavedTrip):Math.hypot(start.x-from.x,start.y-from.y);this.cost[source]=cost;this.parent[source]=-1;this.visited[source]=stamp;push(source,cost+heuristic(start.col,start.row));}let expanded=0,found=false;
-  while(heapLength&&expanded++<100000){if(expanded%32===0&&performance.now()>=(this.workDeadline??Infinity))yield;const id=pop();if(this.closed[id]===stamp)continue;this.closed[id]=stamp;if(endIds.has(id)){destination=id;found=true;break;}const col=id%n,row=Math.floor(id/n);
+  while(heapLength&&expanded++<100000){if(expanded%32===0&&performance.now()>=(this.workDeadline??Infinity))yield;const id=pop();if(this.closed[id]===stamp)continue;this.closed[id]=stamp;if(endIds.has(id)){destination=id;found=true;break;}const col=id%n,row=Math.floor(id/n),surface=roads?this.surfaceCost(id,pavedTrip):0;
    for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
     if(!dx&&!dy)continue;
     const x=col+dx,y=row+dy,next=y*n+x;
@@ -312,7 +315,7 @@ export class TerrainNavigator{
     const edge=id*8+direction;
     if(!this.edgeCache[edge])this.edgeCache[edge]=this.lineClear(this.position(col,row),this.position(x,y),true)?1:2;
     if(this.edgeCache[edge]!==1)continue;
-    const edgeCost=roads?distance*(this.surfaceCost(id,pavedTrip)+this.surfaceCost(next,pavedTrip))*.5/gradeSpeed(grade):distance*(1+grade*grade*18);
+    const edgeCost=roads?distance*(surface+this.surfaceCost(next,pavedTrip))*.5/gradeSpeed(grade):distance*(1+grade*grade*18);
     const cost=this.cost[id]+edgeCost;
     if(this.visited[next]!==stamp||cost<this.cost[next]){this.visited[next]=stamp;this.cost[next]=cost;this.parent[next]=id;push(next,cost+heuristic(x,y));}
    }

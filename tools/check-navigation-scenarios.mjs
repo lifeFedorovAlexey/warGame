@@ -297,7 +297,12 @@ export function runScenario(name,{capture=true}={}){
  if(c.expectArrival&&arrived.length!==survivors.length)failures.push(`${arrived.length}/${survivors.length} surviving cars physically reached their original accepted destinations`);
  if(!c.expectArrival){
   const rejected=commandMode==='sync'?!c.rejection.ok&&c.rejection.reason:
-   units.every(u=>u.pendingOrder?.status==='blocked'&&u.pendingOrder.reason&&u.navigation?.state==='BLOCKED');
+   units.every(u=>{
+    const reason=u.pendingOrder?.reason;
+    const proof=['static-disconnected','route-unreachable','destination-terrain-forbidden'].includes(reason);
+    return u.pendingOrder?.status==='blocked'&&reason&&u.navigation?.state===(proof?'UNREACHABLE':'BLOCKED')
+     &&(name!=='isolated-target'||proof);
+   });
   if(!rejected)failures.push('An impossible exact target was not explicitly rejected with a reason');
   if(units.some(u=>u.task||u.path.length||u.detour))failures.push('The impossible order is still attempting movement');
  }

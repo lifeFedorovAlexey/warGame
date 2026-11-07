@@ -70,6 +70,53 @@ for(const partial of [false,true]){
  results.push({case:'A/B/A cancels unfinished B with '+(partial?'mixed reused/new routes':'all routes reused'),passed:true});
 }
 {
+ const m=fixture(),units=Array.from({length:500},(_,i)=>m.addUnit('bukhanka','rai',
+  {x:-600+(i%25)*48,y:-1200+Math.floor(i/25)*48},{heading:0})),ids=units.map(u=>u.id);
+ const old=m.submitOrder(ids,'move',{x:0,y:700});m.advance(1/80,{budgetMs:0});assert(m.commandPlanner.active);
+ const selected=units.at(-1),latest=m.submitOrder([selected.id],'move',{x:700,y:400});
+ let appliedAfter=null;
+ for(let frame=0;frame<40;frame++){m.advance(1/80,{budgetMs:6});if(!selected.pendingOrder){appliedAfter=(frame+1)/80;break;}}
+ assert(appliedAfter!==null&&appliedAfter<=.5,'A subset command preempts the older mass search within .5s');
+ assert.equal(selected.commandRevision,latest.revision);assert.deepEqual(selected.routeOrder.request,{x:700,y:400});
+ assert(units.slice(0,-1).some(u=>u.pendingOrder?.revision===old.revision),'The new intent must finish before the old 499-car job');
+ assert(m.commandPlanner.stats.preemptions>0);settle(m,4000);
+ assert.deepEqual(selected.routeOrder.request,{x:700,y:400},'Restarting the remainder cannot overwrite the newer subset');
+ assert(units.slice(0,-1).every(u=>!u.pendingOrder&&u.routeOrder.request.y===700));
+ results.push({case:'new subset preempts a suspended 500-car command',appliedAfter,preemptions:m.commandPlanner.stats.preemptions});
+}
+{
+ const m=fixture(),units=Array.from({length:6},(_,i)=>m.addUnit('bukhanka','rai',
+  {x:i<3?-6:6,y:(i%3-1)*26},{heading:Math.PI}));
+ const old=m.submitOrder(units.map(u=>u.id),'move',{x:0,y:500});
+ // Drive the real generator to a partially staged local cohort, one bounded
+ // slice at a time. No pose or path is injected into the simulation.
+ for(let i=0;i<2000&&!m.commandPlanner.active?.record.assigned.length;i++)m.advance(1/80,{budgetMs:0});
+ assert(m.commandPlanner.active?.copies&&m.commandPlanner.active.record.assigned.length>0);
+ assert(units.every(u=>u.pendingOrder),'A partial cohort has not physically committed');
+ const selected=units[0],latest=m.submitOrder([selected.id],'move',{x:300,y:-200});settle(m);
+ assert(!selected.pendingOrder&&selected.commandRevision===latest.revision);
+ assert.deepEqual(selected.routeOrder.request,{x:300,y:-200});
+ const record=m.state.commandOrders.find(r=>r.revision===old.revision);
+ assert.equal(new Set(record.assigned).size,record.assigned.length,'Restarted staged copies cannot double-count assignments');
+ assert(units.slice(1).every(u=>!u.pendingOrder&&u.routeOrder.request.y===500));
+ results.push({case:'preempted staged cohort preserves live poses and revision ownership',passed:true});
+}
+{
+ const m=fixture(),units=cars(m,20),selected=units.at(-1);
+ m.addStructure('factory','neutral',{x:0,y:200},{halfWidth:100,halfDepth:24,completed:true,progress:1});m.rebuildNavigation();
+ m.submitOrder(units.map(u=>u.id),'move',{x:0,y:500});
+ for(let i=0;i<500&&!m.commandPlanner.nav.searchId;i++)m.advance(1/80,{budgetMs:0});
+ assert(m.commandPlanner.active&&m.commandPlanner.nav.searchId>0,'The old private A* must actually be suspended');
+ let flushes=0;const finish=m.finishPendingStep;m.finishPendingStep=function(...args){flushes++;return finish.apply(this,args);};
+ m.submitOrder([selected.id],'move',{x:600,y:-100});
+ for(let i=0;i<40&&selected.pendingOrder;i++)m.advance(1/80,{budgetMs:6});
+ assert(!selected.pendingOrder);assert.equal(flushes,0,'Preemption must not synchronously finish a pending simulation tick');
+ assert.deepEqual(m.nav.occupied,m.commandPlanner.nav.occupied,'A discarded A* cannot leak temporary occupancy');
+ settle(m);assert.deepEqual(selected.routeOrder.request,{x:600,y:-100});
+ assert(units.slice(0,-1).every(u=>u.routeOrder?.request.y===500&&!u.pendingOrder));
+ results.push({case:'preemption discards suspended private A* without flushing simulation',passed:true});
+}
+{
  const m=fixture(),units=cars(m,50),ids=units.map(u=>u.id);m.submitOrder(ids,'move',{x:0,y:500});m.advance(1/80,{budgetMs:0});
  assert(units.some(u=>u.pendingOrder));
  const loaded=fixture();loaded.load(m.save());loaded.state.bounds=m.state.bounds.slice();loaded.rebuildNavigation();settle(loaded);

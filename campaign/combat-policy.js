@@ -67,7 +67,7 @@ export function cancelCombatRetreat(unit, suppress=true) {
   delete unit.combatRetreat;
   unit.retreatSuppressed=suppress;
 }
-export function automaticCombatTarget(mission, unit, spec) {
+export function automaticCombatTarget(mission, unit, spec, excludedIds=null) {
   if(unit.owner!=='rai')return mission.nearestEnemy(unit,spec.range);
   const policy=combatPolicy(unit);
   if(policy.response==='ignore'||!spec.damage)return null;
@@ -75,6 +75,7 @@ export function automaticCombatTarget(mission, unit, spec) {
   if(retaliation&&!unit.lastHostileHit)return null;
   let best=null,bestValue=Infinity,bestDistance=Infinity;
   const consider=target=>{
+    if(excludedIds?.includes(target.id))return;
     if(!mission.enemyOf(unit,target)||!mission.visibleAt(target.x,target.y)||retaliation&&target.id!==unit.lastHostileHit.id)return;
     const d=distance(unit,target);if(d>spec.range)return;
     const enemySpec=mission.config.units[target.kind]??mission.buildingSpec(target);
@@ -99,7 +100,7 @@ function retreatThreat(mission, unit, spec) {
 function clearMotion(unit) {
   unit.path=[];unit.task=null;
   delete unit.combatDeployment;delete unit.combatGroup;delete unit.combatResume;delete unit.combatParking;
-  for(const key of ['detour','traffic','trafficHold','passage','passingLane','driveWatch','routeOrder','failedArcs','reverseDebt','yieldReturn','pendingOrder','commandRevision','resumeConstructionId'])delete unit[key];
+  for(const key of ['detour','traffic','trafficHold','passage','passingLane','driveWatch','routeOrder','failedArcs','reverseDebt','yieldReturn','pendingOrder','commandRevision','resumeConstructionId','combatDisengage'])delete unit[key];
 }
 export function forceCombatRetreat(mission,ids){
  const selected=new Set(ids),units=mission.state.units.filter(unit=>selected.has(unit.id)&&unit.owner==='rai'&&unit.hp>0);

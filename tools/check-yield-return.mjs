@@ -93,5 +93,21 @@ assert(!parked.detour&&!parked.yieldReturn);
 assert(Math.hypot(parked.x,parked.y-1)<2&&parked.y>0,
  'A real return can stop inside its immutable goal without replaying past that goal');
 assert.deepEqual(parked.routeOrder.destination,{x:0,y:1});assert.equal(parked.hp,parked.maxHp);
+// A clear curve between close parked neighbours can fail a long conservative
+// swept-hull union. The return proof must refine it without reducing the skin.
+const narrow=fixture(),n=narrow.addUnit('bukhanka','rai',{x:0,y:26});
+for(const x of [-12,12])for(const y of [0,26])narrow.addUnit('bukhanka','rai',{x,y});
+rememberYieldHome(n,[],false,narrow.state.time,narrow);
+n.detour={parking:true,idleYield:true,blocked:0,legs:[
+ {direction:1,curve:.43853394993741707,remaining:2.97},{direction:1,curve:0,remaining:16.2},
+ {direction:1,curve:.8770678998748341,remaining:21.6},{direction:1,curve:0,remaining:5.4}]};
+for(let i=0;i<150&&n.detour;i++)narrow.advance(.1);
+assert(!n.detour&&n.yieldReturn,'The actual outbound curve completed legally');
+const back=n.yieldReturn.legs.toReversed().map(l=>({...l,direction:-l.direction,curve:-l.curve}));
+assert.equal(checkManeuver(n,back,config.worldScale,(a,b)=>narrow.vehicleMotionClear(n,a,b)),null,
+ 'This regression must exercise a conservative coarse proof rejection');
+for(let i=0;i<200&&n.yieldReturn;i++)narrow.advance(.1);
+assert(!n.yieldReturn&&Math.hypot(n.x,n.y-26)<1e-8,'Refined full sweeps return to the exact borrowed pose');
+assert(narrow.state.units.every(u=>u.hp===u.maxHp));
 console.log(JSON.stringify({roundtripError:Math.hypot(roundtrip.x-home.x,roundtrip.y-home.y),
- actualReturnError:Math.hypot(simple.u.x-home.x,simple.u.y-home.y),saveLoad:'identical',resumeAfterClear:.1,checks:9}));
+ actualReturnError:Math.hypot(simple.u.x-home.x,simple.u.y-home.y),saveLoad:'identical',resumeAfterClear:.1,checks:10}));

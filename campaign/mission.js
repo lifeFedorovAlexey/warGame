@@ -21,14 +21,16 @@ import {TrafficCoordinator} from './traffic-coordinator.js';
 import {prepareTrafficDeparture,departureSlotOrder,rememberYieldHome,recordYieldStep,resumeYieldHome,borrowedHomeClear} from './traffic-start.js';
 import {checkedRouteShortcut,recoveryConditions,unchangedRecoveryFailure,rememberRecoveryFailure} from './traffic-shortcut.js';
 import {maneuverAdmissionBlocker} from './maneuver-admission.js';
+import {vehicleDynamics} from './vehicle-dynamics.js';
 import {SCAV_PROFILES,SCAV_ROSTERS,isInfantry} from './scav-unit-profiles.js';
 import {placeExtraCampGuards,updateScavReinforcements} from './scav-reinforcements.js';
 import {alertScavs,updateScavCombat} from './scav-ai.js';
 import {configureCombat,normalizeCombatPolicy,rememberHostileHit,cancelCombatRetreat,automaticCombatTarget,updateCombatRetreat,shouldAutoRetreat,forceCombatRetreat} from './combat-policy.js';
+import {interruptedCombatTargets,movementCombatTarget} from './combat-orders.js';
 import {cancelCombatDeployment,updateCombatDeployment,updateCombatParking,combatPositionConditions} from './combat-deployment.js';
 import {pickupTarget,orderPickup,updatePickupOrder} from './pickup-orders.js';
 import {roadTrafficRank,compareRoadTrafficRanks} from './traffic-priority.js';
-import {roadDrivingLane,deferRoadMerge} from './road-merge.js';
+import {roadDrivingLane} from './road-merge.js';
 import {turningHeadway} from './turning-headway.js';
 import {passageWaitClear} from './passage-reservations.js';
 import {beginNavigationStep,navigationDecision,finishNavigationStep,auditNavigationWaits} from './navigation-state.js';
@@ -158,12 +160,12 @@ export class Mission{
  exploredAt(x,y){const [gx,gy]=this.field.worldToGrid(x,y),col=Math.round(gx),row=Math.round(gy);return col>=0&&row>=0&&col<128&&row<128&&!!this.explored[row*128+col];}
  visibleAt(x,y){const [gx,gy]=this.field.worldToGrid(x,y),col=Math.round(gx),row=Math.round(gy);return col>=0&&row>=0&&col<128&&row<128&&!!this.visible[row*128+col];}
  constructionUnlocked(kind){return constructionUnlocked(this.state,kind);}
+ researchUnlocked(){return researchUnlocked(this.state);}
+ defenseReady(){return defenseReady(this.state);}
  placement(kind,x,y,rotation=0,{checkMoney=true}={}){
   if(!this.constructionUnlocked(kind))return this.fail('Строительство ещё не открыто');
   const spec=this.config.buildings[kind];if(!spec)return this.fail('Неизвестное здание');if(spec.requires&&!this.state.research[spec.requires])return this.fail('Требуется исследование: '+this.config.research[spec.requires].name);if(checkMoney&&!this.canSpend(spec.cost))return this.fail('Недостаточно энергии');if(!this.inBounds(x,y)||!this.exploredAt(x,y))return this.fail('Район ещё не разведан');
   if(spec.requiresOil){const oil=this.config.oilFields.map(grid=>this.field.gridToWorld(grid)).find(p=>Math.hypot(p.x-x,p.y-y)<25);if(!oil)return this.fail('Нужна нефтяная точка');x=oil.x;y=oil.y;}
- researchUnlocked(){return researchUnlocked(this.state);}
- defenseReady(){return defenseReady(this.state);}
   else{x=Math.round(x/this.config.buildingGridMetres)*this.config.buildingGridMetres;y=Math.round(y/this.config.buildingGridMetres)*this.config.buildingGridMetres;}
   const [w,d]=halfFootprint(spec.footprintMetres,this.config.worldScale,rotation),heights=[];
   for(const dx of [-w,0,w])for(const dy of [-d,0,d]){if(!this.inBounds(x+dx,y+dy)||!this.exploredAt(x+dx,y+dy))return this.fail('Пятно застройки выходит за разведанный район');const g=this.field.gradientAt(x+dx,y+dy);if(Math.hypot(g.x,g.y)>this.config.maxBuildingGrade)return this.fail('Слишком крутой склон');heights.push(this.field.heightAt(x+dx,y+dy));}
@@ -508,6 +510,7 @@ export class Mission{
   const pickup=action==='move'?pickupTarget(this,target):null;
   if(pickup)return orderPickup(this,units,pickup);
   const commandGroup=commandGroupFor(this,units),formationMode=commandGroup?.formation??'auto';
+  const disengage=action==='attack-move'?(yield* interruptedCombatTargets(this,units)):[];
   const repeat=new Map();
   for(const unit of units){
    const order=unit.routeOrder;
@@ -544,7 +547,10 @@ export class Mission{
   const combatGroup=combat?'combat-'+(this.state.combatOrderSerial=(this.state.combatOrderSerial??0)+1):null;
   const groupCentre=units.reduce((centre,unit)=>({x:centre.x+unit.x/units.length,y:centre.y+unit.y/units.length}),{x:0,y:0});
   const requestedFormation=travel?formationRequest(this,units,target):null;
-  const roadCandidate=travel&&!target.id?this.nav.roads.formation(target,groupCentre,units.length,this.config.worldScale):null;
+  const passage=travel?this.nav.passageBetween(units.length===1?units[0]:groupCentre,target,this.config.worldScale):null;
+  // Asphalt affects travel cost, but does not force an open-field group into
+  // one road-bound column. Only a real physical throat requires that layout.
+  const roadCandidate=passage&&!target.id?this.nav.roads.formation(target,groupCentre,units.length,this.config.worldScale):null;
   const progress=new Map();
   if(roadCandidate)for(const unit of units){
    const position=this.nav.roads.formationProgress(unit,roadCandidate,this.config.worldScale);
@@ -555,8 +561,6 @@ export class Mission{
   let nextRoadSlot=0;
   // A road can pass through a throat narrower than the conservative grid
   // clearance. Road parking does not replace the checked physical passage.
-  const passage=travel
-   ?this.nav.passageBetween(units.length===1?units[0]:groupCentre,target,this.config.worldScale):null;
   const egress=passage?preparePassageEgress(this,passage,units,target):null;
   if(egress?.blocked)return this.fail('Не удалось проложить безопасный выезд из прохода');
   const departure=egress?.end??passage?.exit;
@@ -635,12 +639,13 @@ export class Mission{
    let remainingEscape=null;
    if(!path&&travel){
     const [startCol,startRow]=this.nav.grid(unit.x,unit.y);
-    if(this.nav.walkable[startRow*this.nav.size+startCol])continue;
+    const startCell=startRow*this.nav.size+startCol;
+    if(this.nav.walkable[startCell]&&!this.nav.occupied[startCell])continue;
     // A checked exit and turn can reach the grid even if no straight entry does.
     const scale=this.config.worldScale,allowed=(from,to)=>this.vehicleMotionClear(unit,from,to,.60);
     const starts=[];
     if(unit.detour?.rough&&!unit.detour.parking)starts.push(unit.detour.legs);
-    const limit=Math.tan(.67),curves=[0,-limit/2,limit/2,-limit,limit];
+    const limit=Math.tan(vehicleDynamics(unit).steeringLimit),curves=[0,-limit/2,limit/2,-limit,limit];
     for(const length of [2,3,5,7])for(const curve of curves)starts.push([{direction:1,curve,remaining:scale*length}]);
     const reverse=Math.min(scale*2,Math.max(0,scale*4-(unit.reverseDebt??0)));
     if(reverse>=scale)for(const curve of curves)starts.push([{direction:-1,curve,remaining:reverse}]);
@@ -708,6 +713,7 @@ export class Mission{
    else delete unit.routeOrder;
    cancelCombatRetreat(unit,!combat);
    cancelCombatDeployment(unit);
+   if(disengage.length)unit.combatDisengage=[...disengage];
    if(combat&&units.length>1)unit.combatGroup=combatGroup;
    unit.path=path;unit.task={type:action,targetId,x:destination.x,y:destination.y,workOffset};
    delete unit.mergeTraffic;changedTraffic.add(unit.id);
@@ -967,7 +973,7 @@ export class Mission{
   const scale=this.config.worldScale;
   const allowed=(from,to)=>this.vehicleMotionClear(unit,from,to);
   const ignoreUnits=new Set([unit]);
-  const curve=Math.tan(.67);
+  const curve=Math.tan(vehicleDynamics(unit).steeringLimit);
   // Check both the backing arc and the turn onto the new route before moving.
   for(const length of [1.5,2.5,3.5]){
    for(const steering of [0,curve/2,-curve/2,curve,-curve]){
@@ -1064,7 +1070,8 @@ export class Mission{
   const dx=obstacle.x-shape.x,dy=obstacle.y-shape.y,ahead=dx*lane.ux+dy*lane.uy;
   const across=Math.abs(dx*rx+dy*ry),width=footprintSupport(shape,rx,ry)+footprintSupport(obstacle,rx,ry)+scale*.11;
   const gap=ahead-footprintSupport(shape,lane.ux,lane.uy)-footprintSupport(obstacle,lane.ux,lane.uy)-scale*.4;
-  target.trafficLimit=ahead>0&&across<width?Math.max(0,Math.sqrt(22*Math.max(0,gap)+2.2**2)-2.2):Infinity;
+  const braking=Math.min(vehicleDynamics(unit).braking,vehicleDynamics(other).braking),reaction=braking*(this.config.simulationStep??.1);
+  target.trafficLimit=ahead>0&&across<width?Math.max(0,Math.sqrt(braking*Math.max(0,gap)+reaction**2)-reaction):Infinity;
   const pose={...target,heading:Math.atan2(-lane.ux,lane.uy),kind:unit.kind};
   if(!this.nav.lineClear(unit,target,false,true,.52,true)||
    !this.nav.clearSolidSweep(vehicleSweep(pose,pose,scale,this.field),this.nav.nearbySolids(target,scale*4))){
@@ -1086,18 +1093,19 @@ export class Mission{
  }
  drivingIntent(unit,point,course,scale){
   const cruising=!['build','repair','clear-site','combat-position'].includes(unit.task?.type)&&!unit.combatRetreat;
-  const paved=cruising?roadDrivingLane(this,unit,point,scale):null;
-  const roadLane=paved&&this.nav.lineClear(unit,paved,false,true,.52,true)?paved:null;
   const passing=cruising?this.passingLane(unit,point,course,scale):null;
-  const waypoint=passing??roadLane??point,d=distance(unit,waypoint);
-  return deferRoadMerge(this,unit,{point,waypoint,roadLane:passing?null:roadLane,trafficLimit:passing?.trafficLimit??Infinity,
-   course:d>0?{x:(waypoint.x-unit.x)/d,y:(waypoint.y-unit.y)/d}:course},scale);
+  // Roads affect route cost, not a compulsory steering rail. Only an actual
+  // opposing vehicle creates a passing corridor; parallel cars need not merge.
+  delete unit.mergeTraffic;
+  const waypoint=passing??point,d=distance(unit,waypoint);
+  return {point,waypoint,roadLane:null,trafficLimit:passing?.trafficLimit??Infinity,
+   course:d>0?{x:(waypoint.x-unit.x)/d,y:(waypoint.y-unit.y)/d}:course};
  }
  trafficSpeed(unit,course,lane,scale,stoppedObstacles){
   // Solve v²/(2a) + dt*v <= free distance. A constant 3.24-world
   // standstill buffer unnecessarily stopped every row of a compact column.
-  const reaction=22*(this.config.simulationStep??.1);
-  const brakingSpeed=gap=>Math.max(0,Math.sqrt(44*Math.max(0,gap)+reaction**2)-reaction);
+  const braking=vehicleDynamics(unit).braking,reaction=braking*(this.config.simulationStep??.1);
+  const brakingSpeed=gap=>Math.max(0,Math.sqrt(2*braking*Math.max(0,gap)+reaction**2)-reaction);
   // Match the collision skin AND the swept-volume padding. Stopping exactly
   // on the static skin repeatedly trips the .012-world sweep allowance.
   const standstill=scale*.055+.02;
@@ -1525,7 +1533,7 @@ export class Mission{
     return true;
    };
    const step=maneuverStep(unit,leg,dt,{scale,allowed:admitted,crawl:!!plan.rough,
-    throughSpeed,forwardSpeed:plan.departure?plan.departureSpeed??13:plan.passageExit?18:13});
+    throughSpeed,forwardSpeed:plan.departure?plan.departureSpeed??13:plan.passageExit?18:vehicleDynamics(unit).maneuverForward});
    if(step){
     applyPose(step.pose);
     recordYieldStep(unit,plan,leg,step.length);
@@ -1915,6 +1923,7 @@ export class Mission{
   const aim=parked&&!moving?this.projectorAim(unit,target):null;
   const requested=aim??{yaw:0,pitch:0};
   const yawError=angleDelta(requested.yaw,unit.projector.yaw), pitchError=requested.pitch-unit.projector.pitch;
+  const previousYaw=unit.projector.yaw,previousPitch=unit.projector.pitch;
   unit.projector.yaw=angleDelta(unit.projector.yaw+clamp(yawError,-2*dt,2*dt),0);
   unit.projector.pitch+=clamp(pitchError,-1.4*dt,1.4*dt);
   if(aim){
@@ -1922,6 +1931,10 @@ export class Mission{
    if(Math.abs(yawError)<.06&&Math.abs(pitchError)<.06){
     unit.projector.yaw=aim.yaw;unit.projector.pitch=aim.pitch;
     unit.builderWorking=true;unit.builderContact=aim.world;
+   }else if(Math.abs(angleDelta(unit.projector.yaw,previousYaw))+Math.abs(unit.projector.pitch-previousPitch)>1e-7){
+    // The parked builder is already at a verified working pose. Diagnose
+    // actual projector motion, never turn a blocked approach into a fake wait.
+    navigationDecision(unit,'IDLE','preparing-projector',null,'align-projector');
    }
    return;
   }
@@ -1990,14 +2003,18 @@ export class Mission{
   if(yield* updateCombatRetreat(this,unit,spec,dt))return;
   if(yield* updateCombatDeployment(this,unit,spec,dt))return;
   if(unit.task?.type==='attack-move'){
-   const enemy=automaticCombatTarget(this,unit,spec);
+   const enemy=movementCombatTarget(this,unit,spec);
    if(enemy){
     navigationDecision(unit,'ARRIVED','engaging-visible-target',enemy.id,'resume-after-engagement');
     unit.driveSpeed=0;unit.steering=(unit.steering??0)*.68;
     this.attack(unit,enemy,spec);
     return;
    }
+   // A deliberate position change retains turret fire without letting the
+   // previous contact replace the new movement order again.
+   if(unit.combatDisengage){const target=automaticCombatTarget(this,unit,spec);if(target)this.attack(unit,target,spec);}
    yield* updateCombatParking(this,unit);
+   if(unit.pendingOrder||unit.task?.type!=='attack-move')return;
    if(!unit.path.length){
     if(distance(unit,unit.task)<(unit.combatParking?this.config.worldScale*4:unit.routeOrder?2:24)
       &&(!unit.combatParking||this.nav.lineClear(unit,unit.task,false,true))&&borrowedHomeClear(this,unit))unit.task=null;
@@ -2017,7 +2034,9 @@ export class Mission{
     const conditions=combatPositionConditions(this,unit,target);
     if(unit.attackFailedConditions!==conditions){
      navigationDecision(unit,'GLOBAL_REPLAN','seeking-target-approach',target.id,'apply-attack-route');
-     unit.path=(yield* this.attackPathSteps(unit,target))??[];
+     const task=unit.task,path=yield* this.attackPathSteps(unit,target);
+     if(unit.task!==task||unit.pendingOrder)return;
+     unit.path=path??[];
      unit.attackRouteTarget={x:target.x,y:target.y};
      if(!unit.path.length)unit.attackFailedConditions=conditions;else delete unit.attackFailedConditions;
     }

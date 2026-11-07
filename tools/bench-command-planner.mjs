@@ -13,7 +13,7 @@ const capMs=Number(process.argv.find(a=>a.startsWith('--cap-ms='))?.split('=')[1
 const percentile=(samples,p)=>samples.slice().sort((a,b)=>a-b)[Math.min(samples.length-1,Math.floor(samples.length*p))]??0;
 const distribution=samples=>({p50:percentile(samples,.5),p95:percentile(samples,.95),p99:percentile(samples,.99),max:Math.max(0,...samples),sum:samples.reduce((a,b)=>a+b,0)});
 const report={kind:'Actual submitOrder + budgeted advance on the authored heightfield. CPU only; no renderer/FPS claims.',capMs,
- sourceHashes:Object.fromEntries(['campaign/mission.js','campaign/navigation.js','campaign/command-planner.js','campaign/arrival-planner.js'].map(p=>[p,createHash('sha256').update(fs.readFileSync(p)).digest('hex')])),results:[]};
+ sourceHashes:Object.fromEntries(['campaign/mission.js','campaign/navigation.js','campaign/command-planner.js','campaign/arrival-planner.js','campaign/shared-route-tree.js'].map(p=>[p,createHash('sha256').update(fs.readFileSync(p)).digest('hex')])),results:[]};
 for(const count of counts){
  const m=new Mission(config,field);Object.assign(m.state,{units:[],bounds:config.finalMapBounds.slice(),pendingCinematics:[]});
  m.updateMission=()=>{};m.visible.fill(1);m.explored.fill(1);m.rebuildNavigation();
@@ -31,6 +31,9 @@ for(const count of counts){
  const starts=units.map(u=>({x:u.x,y:u.y,hp:u.hp})),ids=units.map(u=>u.id),beforeHeap=process.memoryUsage().heapUsed;
  const submitted=performance.now(),response=m.submitOrder(ids,'move',goal),submitMs=performance.now()-submitted;
  const planner=m.commandPlanner,frames=[],planning=[];let computes=0,firstApplied=null,firstMotion=null,pendingAtFirstMotion=null,frame=0;
+ const profile={};if(process.argv.includes('--profile'))for(const key of ['lineClear','travelCost','surfaceCost','nearest']){
+  const original=planner.nav[key];profile[key]={calls:0,cpuMs:0};planner.nav[key]=function(...args){const started=performance.now();try{return original.apply(this,args);}finally{profile[key].calls++;profile[key].cpuMs+=performance.now()-started;}};
+ }
  const searches=[],compute=planner.nav.computePathSteps;planner.nav.computePathSteps=function*(...args){computes++;const began=performance.now(),value=yield* compute.apply(this,args);
   if(process.argv.includes('--diagnose'))searches.push({from:{x:args[0].x,y:args[0].y},to:args[1],wallMs:performance.now()-began,found:!!value});return value;};
  const started=performance.now();
@@ -52,8 +55,9 @@ for(const count of counts){
  const result={count,submitMs,response,firstApplied,firstMotion,pendingAtFirstMotion,
   wallMs:performance.now()-started,frameCount:frame+1,simulatedSeconds:m.state.time,
   ...snapshot,
-  computes,aStarSearches:planner.nav.searchId,reachabilityRejects:planner.nav.reachabilityRejects??0,corridorHits:planner.nav.corridorHits??0,frameCpuMs:distribution(frames),plannerCpuMs:distribution(planning),
-  heapDeltaBytes:process.memoryUsage().heapUsed-beforeHeap,damage:units.reduce((sum,u,i)=>sum+Math.max(0,starts[i].hp-u.hp),0),
+  computes,aStarSearches:planner.nav.searchId,reachabilityRejects:planner.nav.reachabilityRejects??0,corridorHits:planner.nav.corridorHits??0,
+  sharedTrees:[...(planner.nav.sharedRouteTrees?.values()??[])].map(t=>({queries:t.queries,expanded:t.expanded,bytes:t.bytes})),frameCpuMs:distribution(frames),plannerCpuMs:distribution(planning),
+  heapDeltaBytes:process.memoryUsage().heapUsed-beforeHeap,damage:units.reduce((sum,u,i)=>sum+Math.max(0,starts[i].hp-u.hp),0),profile,
   ...(process.argv.includes('--diagnose')?{searches,activeUnit:planner.active?.runtime.currentUnit,active:units.filter(u=>u.pendingOrder).slice(0,5).map(u=>({id:u.id,x:u.x,y:u.y,pending:structuredClone(u.pendingOrder)}))}:{} )};
  const before=computes,repeatedAt=performance.now(),repeat=m.submitOrder(ids,'move',goal),repeatMs=performance.now()-repeatedAt;
  Object.assign(result,{repeatMs,repeat,repeatedSyncSearches:computes-before});
