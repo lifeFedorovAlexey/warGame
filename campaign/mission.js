@@ -19,8 +19,9 @@ import {vehicleContact,impactPower,fallbackVehicleImpact} from './vehicle-impact
 import {kickContactRock} from './vehicle-contact-rock.js';
 import {TrafficCoordinator} from './traffic-coordinator.js';
 import {prepareTrafficDeparture,departureSlotOrder,rememberYieldHome,recordYieldStep,resumeYieldHome,borrowedHomeClear} from './traffic-start.js';
-import {checkedRouteShortcut,recoveryConditions,unchangedRecoveryFailure,rememberRecoveryFailure} from './traffic-shortcut.js';
+import {checkedRouteShortcut,checkedProgressTurn,recoveryConditions,unchangedRecoveryFailure,rememberRecoveryFailure} from './traffic-shortcut.js';
 import {maneuverAdmissionBlocker} from './maneuver-admission.js';
+import {recoverWaitCycle,resumeCycleRoute} from './traffic-cycle.js';
 import {vehicleDynamics} from './vehicle-dynamics.js';
 import {SCAV_PROFILES,SCAV_ROSTERS,isInfantry} from './scav-unit-profiles.js';
 import {placeExtraCampGuards,updateScavReinforcements} from './scav-reinforcements.js';
@@ -150,7 +151,7 @@ export class Mission{
  finishCinematic(id){const index=this.state.pendingCinematics.indexOf(id);if(index>=0)this.state.pendingCinematics.splice(index,1);if(!this.state.seenCinematics.includes(id))this.state.seenCinematics.push(id);}
  unitSpec(unit){return this.config.units[unit.kind];}
  buildingSpec(building){return this.config.buildings[building.kind]??{name:'Лагерь отбросов',seconds:1,hp:750,vision:180,power:0};}
- entity(id){return [...this.state.units,...this.state.buildings].find(item=>item.id===id&&item.hp>0);}
+ entity(id){return this.state.units.find(item=>item.id===id&&item.hp>0)??this.state.buildings.find(item=>item.id===id&&item.hp>0);}
  addUnit(kind,owner,point,extra={}){const spec=this.config.units[kind],unit={id:this.id('u'),kind,owner,x:point.x,y:point.y,previousX:point.x,previousY:point.y,hp:spec.hp,maxHp:spec.hp,heading:0,path:[],task:null,cooldown:0,tool:0,foldTime:0,...extra};this.state.units.push(unit);if(this.unitIndexActive)this.unitIndex.insert(unit,this.state.units.length-1);return unit;}
  addStructure(kind,owner,point,extra={}){const spec=this.config.buildings[kind]??{},scale=this.config.worldScale,foot=spec.footprintMetres??[14,12],item={id:this.id('b'),kind,owner,x:point.x,y:point.y,rotation:0,hp:spec.hp??750,maxHp:spec.hp??750,halfWidth:foot[0]*scale/2,halfDepth:foot[1]*scale/2,progress:owner==='rai'?0:1,completed:owner!=='rai',queue:[],research:null,cooldown:0,...extra};item.maxHp=item.hp;this.state.buildings.push(item);return item;}
  rebuildNavigation(){this.finishPendingStep();this.nav.bounds=this.state.bounds.slice();this.nav.rebuild(this.state.buildings.filter(building=>!building.clearing));}
@@ -1206,7 +1207,7 @@ export class Mission{
   return limit;
  }
  parkingManeuver(...args){this.finishPendingStep();return completeSteps(this.parkingManeuverSteps(...args));}
- *parkingManeuverSteps(unit,leader,allowed){
+ *parkingManeuverSteps(unit,leader,allowed,{accept=()=>true}={}){
   const point=leader.path[0];
   const encounter=unit.passingLane?.otherId===leader.id?unit.passingLane:null;
   const angle=encounter?Math.atan2(-encounter.uy,-encounter.ux):point?Math.atan2(point.y-leader.y,point.x-leader.x):leader.heading+Math.PI/2;
@@ -1254,7 +1255,7 @@ export class Mission{
    const goal={x:unit.x+right.x*scale*offset*sign,y:unit.y+right.y*scale*offset*sign};
    const path=yield* this.planManeuverSteps(unit,goal,{scale,allowed,attempts:2,
     maximumLegs:encounter?12:offset===5?9:offset===7?12:15,reverseBudget:scale*(encounter?4:6),
-    accept:(pose,legs)=>lateral(pose)*sign>scale*1.3&&distance(pose,unit)>scale*.6&&clearLane(pose)&&canReturn(pose,legs)
+    accept:(pose,legs)=>lateral(pose)*sign>scale*1.3&&distance(pose,unit)>scale*.6&&accept(pose)&&clearLane(pose)&&canReturn(pose,legs)
      &&(!encounter||-Math.sin(pose.heading)*encounter.ux+Math.cos(pose.heading)*encounter.uy>.85)});
    if(path)return {legs:path,forward};
   }
@@ -1384,6 +1385,7 @@ export class Mission{
  move(...args){this.finishPendingStep();return completeSteps(this.moveSteps(...args));}
  *moveSteps(unit,dt){
   if(isInfantry(unit))return this.walk(unit,dt);
+  yield* recoverWaitCycle(this,unit);
   yield* resumeYieldHome(this,unit);
   yield* updateCombatParking(this,unit);
   yield* prepareTrafficDeparture(this,unit);
@@ -1395,26 +1397,6 @@ export class Mission{
   if(passageAdmission&&!passageAdmission.admitted&&!unit.detour&&passageAdmission.limit<.01&&(unit.driveSpeed??0)<.01){
    navigationDecision(unit,'WAITING_RESERVATION','opposing-passage-batch',passageAdmission.yieldTo,'admit-after-actual-exit');
    stop();return false;
-  }
-  // Arrival tolerance must not occupy another member's reserved parking
-  // slot. Otherwise the first van parks across the tail's approach.
-  if(!gate&&!unit.detour?.arrival&&unit.combatGroup&&unit.task?.type==='attack-move'&&distance(unit,unit.task)<this.config.worldScale*4
-    &&this.nav.lineClear(unit,unit.task,false,true)&&this.vehicleMotionClear(unit,unit,unit)
-    &&!this.nearbyUnits(unit,this.config.worldScale*20).some(other=>{
-      if(other===unit||other.hp<=0||other.combatGroup!==unit.combatGroup||other.task?.type!=='attack-move')return false;
-      const clearance=this.config.worldScale*5.5;
-      if(distance(unit,other.task)<clearance)return true;
-      let from=other;
-      for(const to of other.path){
-       const dx=to.x-from.x,dy=to.y-from.y,t=clamp(((unit.x-from.x)*dx+(unit.y-from.y)*dy)/Math.max(.01,dx*dx+dy*dy),0,1);
-       if(Math.hypot(unit.x-from.x-t*dx,unit.y-from.y-t*dy)<clearance)return true;
-       from=to;
-      }
-      return false;
-    })){
-   unit.path=[];unit.task=null;stop();delete unit.detour;delete unit.traffic;delete unit.trafficHold;delete unit.combatArrivalBlockedAt;
-   if(unit.routeOrder)unit.routeOrder.destination={x:unit.x,y:unit.y};
-   return true;
   }
   if(gate?.preceding){
    const leader=this.entity(gate.preceding);
@@ -1484,15 +1466,17 @@ export class Mission{
    const exitClear=(from,to)=>this.vehicleMotionClear(unit,from,to,.52,undefined,obstacles);
    const end=checkManeuver(unit,egress.legs,scale,exitClear);
    let legs=end&&distance(end,egress.end)<scale*1.4?egress.legs:null;
+   const retryCondition=!legs?recoveryConditions(this,unit,scale*37)+'|'+egress.end.x+','+egress.end.y+','+egress.end.heading:null;
    if(!legs){
-    // Throttle only a failed expensive search. The cached sweep above is
-    // checked first, so a now-free exit never waits for this cooldown.
-    if(egress.retryAt>this.state.time){navigationDecision(unit,'BLOCKED','exit-sweep-blocked',null,'recheck-planned-sweep');stop();return false;}
+    // The previous sweep is still checked every tick. A failed alternative
+    // search is reused only while its physical search region is unchanged;
+    // an opening beside that sweep must not wait for a retry timer.
+    if(unchangedRecoveryFailure(egress,retryCondition)){navigationDecision(unit,'BLOCKED','exit-sweep-blocked',null,'retry-after-obstruction-changes');stop();return false;}
     legs=yield* this.planManeuverSteps(unit,egress.end,{scale,allowed:exitClear,attempts:3,maximumLegs:25,reverseBudget:0,
      accept:pose=>distance(pose,egress.end)<scale*.65&&Math.cos(pose.heading-egress.end.heading)>.94
       &&this.nav.lineClear(pose,egress.end,false,true)});
    }
-   if(!legs){egress.retryAt=this.state.time+1.8;navigationDecision(unit,'BLOCKED','no-local-exit',null,'recheck-planned-sweep');stop();return false;}
+   if(!legs){rememberRecoveryFailure(egress,retryCondition);navigationDecision(unit,'BLOCKED','no-local-exit',null,'retry-after-obstruction-changes');stop();return false;}
    delete egress.retryAt;
    unit.detour={legs:legs.map(leg=>({...leg})),passageExit:true,blocked:0};
    egress.phase='turning';
@@ -1500,6 +1484,9 @@ export class Mission{
 
   const traffic=unit.traffic;
   if(traffic){
+   if(traffic.cycle){
+    if(traffic.phase==='parked'&&(yield* resumeCycleRoute(this,unit)))return false;
+   }else{
    const leader=this.entity(traffic.leader),age=this.state.time-traffic.since;
    const passed=traffic.forward&&leader
     &&(unit.x-leader.x)*traffic.forward.x+(unit.y-leader.y)*traffic.forward.y < -scale*2.5;
@@ -1516,6 +1503,7 @@ export class Mission{
      traffic.phase='move';traffic.forward=park.forward;
     }
     else{delete unit.traffic;unit.trafficRest=this.state.time+2;}
+   }
    }
   }
   const pickup=!next&&unit.task?.salvageId&&this.state.salvage.items.find(item=>item.id===unit.task.salvageId);
@@ -1570,13 +1558,23 @@ export class Mission{
    }
    stop();
    navigationDecision(unit,'BLOCKED','manoeuvre-sweep-blocked',blockers.values().next().value?.id??null,'local-recovery');
+   if(leg.direction<0&&blockers.size&&!plan.parking&&!plan.idleYield&&!plan.yieldReturning
+    &&!plan.departure&&!plan.passageExit&&!plan.progressRecovery&&unit.path.length
+    &&(point.x-unit.x)*-Math.sin(unit.heading)+(point.y-unit.y)*Math.cos(unit.heading)>0
+    &&(yield* checkedRouteShortcut(this,unit,point,{allowed,tolerance}))){
+    // Traffic may have cleared the original route while a reverse recovery
+    // was being executed. Cancel only after proving the complete connector;
+    // normal motion still applies its live headway and reservation checks.
+    delete unit.detour;delete unit.driveWatch;
+    return yield* this.moveSteps(unit,dt);
+   }
    if(plan.passageExit&&[...blockers].some(advancingThroughExit))return false;
    plan.blocked+=dt;
    if(plan.blocked<1)return false;
    if(plan.passageExit&&egress){
     // Resume from the current pose using only the untraversed part of the arc.
     egress.legs=plan.legs.map(leg=>({...leg}));
-    egress.phase='waiting';egress.retryAt=this.state.time+.8;
+    egress.phase='waiting';delete egress.retryAt;
     delete unit.detour;
     return false;
    }
@@ -1584,7 +1582,10 @@ export class Mission{
     const failed=unit.failedArcs??={origin:{x:unit.x,y:unit.y},legs:[]};
     failed.legs.push({direction:leg.direction,curve:leg.curve});
    }
-   if(plan.parking&&unit.traffic)unit.traffic.phase='seek';
+   if(plan.parking&&unit.traffic){
+    if(unit.traffic.cycle)delete unit.traffic;
+    else unit.traffic.phase='seek';
+   }
    delete unit.detour;
   }
   if(idleYield)return false;
@@ -1661,6 +1662,13 @@ export class Mission{
   else if(!pose)navigationDecision(unit,'BLOCKED',blockers.size?'vehicle-sweep-blocked':'terrain-or-steering-blocked',blockers.values().next().value?.id??null,'local-recovery',speed);
   if(pose)applyPose(pose);else stop();
   if(impactSpeed){this.vehicleCollision(unit,impactSpeed,blockers);if(unit.hp<=0)return !!pose;}
+  if(!pose&&trafficLimit>0&&!blockers.size&&!stoppedObstacles.size
+   &&['move','attack-move','combat-position'].includes(unit.task?.type)
+   &&(unit.reverseDebt??0)>=scale*3.4&&(point.x-unit.x)*forward.x+(point.y-unit.y)*forward.y<0){
+   const destination=unit.routeOrder?.destination??unit.task;
+   const escape=yield* checkedProgressTurn(this,unit,point,destination,allowed);
+   if(escape){unit.detour={legs:escape,parking:false,progressRecovery:true,blocked:0};return false;}
+  }
 
   if(unit.passingLane&&(unit.driveSpeed??0)<scale*.18
    &&this.trafficCoordinator.intents.get(unit.id)?.trafficLimit===0
@@ -2028,10 +2036,10 @@ export class Mission{
    yield* updateCombatParking(this,unit);
    if(unit.pendingOrder||unit.task?.type!=='attack-move')return;
    if(!unit.path.length){
-    if(distance(unit,unit.task)<(unit.combatParking?this.config.worldScale*4:unit.routeOrder?2:24)
+    if(distance(unit,unit.task)<(unit.routeOrder?2:unit.combatParking?this.config.worldScale*4:24)
       &&(!unit.combatParking||this.nav.lineClear(unit,unit.task,false,true))&&borrowedHomeClear(this,unit))unit.task=null;
     else if(this.state.time-(unit.lastRepath??-10)>=.4){
-     unit.path=(yield* this.vehiclePathSteps(unit,unit.task,unit.combatParking?{fallback:false,maxGoalDistance:4}:unit.routeOrder?{fallback:false,maxGoalDistance:.01}:{}))??[];unit.lastRepath=this.state.time;
+     unit.path=(yield* this.vehiclePathSteps(unit,unit.task,unit.routeOrder?{fallback:false,maxGoalDistance:.01}:unit.combatParking?{fallback:false,maxGoalDistance:4}:{}))??[];unit.lastRepath=this.state.time;
     }
    }
    (yield* this.moveSteps(unit,dt));

@@ -1,12 +1,15 @@
-import {driveStep} from './vehicle-motion.js';
+import {driveStep,checkManeuver} from './vehicle-motion.js';
+import {vehicleEnvelope} from './vehicle-collision.js';
+import {vehicleDynamics} from './vehicle-dynamics.js';
 
 // Prove a shortcut using the actual steering, acceleration and full-body
 // sweep. A straight grid ray alone cannot prove that a van can make a turn.
 // This never moves the real unit or reserves moving neighbours in time.
 const failures=new WeakMap();
 const recoveryFailures=new WeakMap();
-export function recoveryConditions(mission,unit){
- const neighbours=mission.nearbyUnits(unit,mission.config.worldScale*22).filter(other=>other.hp>0);
+const progressTurnFailures=new WeakMap();
+export function recoveryConditions(mission,unit,radius=mission.config.worldScale*22){
+ const neighbours=mission.nearbyUnits(unit,radius).filter(other=>other.hp>0);
  const admission=mission.trafficCoordinator.passageDecisions.get(unit.id);
  return [mission.nav.topologyRevision,unit.routeOrder?.revision,unit.task?.type,
   unit.path.map(point=>point.x+','+point.y).join(';'),unit.reverseDebt,admission?.key,admission?.admitted,
@@ -16,11 +19,37 @@ export function recoveryConditions(mission,unit){
 }
 export function unchangedRecoveryFailure(unit,conditions){return recoveryFailures.get(unit)===conditions;}
 export function rememberRecoveryFailure(unit,conditions){recoveryFailures.set(unit,conditions);}
-export function* checkedRouteShortcut(mission,unit,goal,{allowed,tolerance=2}){
+export function* checkedProgressTurn(mission,unit,waypoint,destination,allowed){
+ const scale=mission.config.worldScale,depth=vehicleEnvelope(unit,scale,mission.field).depth,
+  distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),initial=distance(unit,destination),toWaypoint=distance(unit,waypoint);
+ if(initial<depth*2||toWaypoint<depth*2)return null;
+ const signature=recoveryConditions(mission,unit)+'|'+destination.x+','+destination.y;
+ if(progressTurnFailures.get(unit)===signature)return null;
+ let continuation;
+ const legs=yield* mission.planManeuverSteps(unit,waypoint,{scale,allowed,attempts:2,maximumLegs:14,reverseBudget:depth,
+  accept:pose=>{
+   if(distance(pose,destination)>initial-depth||distance(pose,waypoint)>toWaypoint-depth*.5)return false;
+   const turn=Math.atan2(Math.sin(Math.atan2(pose.x-waypoint.x,waypoint.y-pose.y)-pose.heading),
+    Math.cos(Math.atan2(pose.x-waypoint.x,waypoint.y-pose.y)-pose.heading));
+   if(Math.abs(turn)>.65)return false;
+   const limit=vehicleDynamics(unit).steeringLimit,
+    forward={direction:1,curve:Math.tan(Math.max(-limit,Math.min(limit,turn*1.55))),remaining:depth},
+    end=checkManeuver(pose,[forward],scale,allowed);
+   if(!end||distance(end,destination)>initial-depth||distance(end,waypoint)>=distance(pose,waypoint))return false;
+   continuation=forward;return true;
+  }});
+ // This is a complete finite escape, including its actual forward continuation.
+ // It neither resets historical reverse debt nor grants an unproved extra reverse.
+ if(legs&&continuation)return [...legs,continuation];
+ progressTurnFailures.set(unit,signature);return null;
+}
+// The optional distance cap proves a finite continuation for a cooperative
+// yield. It only reports the simulated endpoint; it never consumes a waypoint.
+export function* checkedRouteShortcut(mission,unit,goal,{allowed,tolerance=2,endpoint,maximumDistance=Infinity}){
  const scale=mission.config.worldScale,distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
  const initial=distance(unit,goal),radius=2.6*scale/Math.tan(.67);
  const nearby=mission.nearbyUnits(unit,initial+radius*2+scale*7);
- const signature=[mission.nav.topologyRevision,goal.x,goal.y,
+ const signature=[mission.nav.topologyRevision,goal.x,goal.y,maximumDistance,
   Math.round(unit.x*2),Math.round(unit.y*2),Math.round(unit.heading*20),
   ...nearby.filter(other=>other!==unit&&other.hp>0).map(other=>
    [other.id,Math.round(other.x*2),Math.round(other.y*2),Math.round(other.heading*20)].join(','))].join('|');
@@ -30,7 +59,7 @@ export function* checkedRouteShortcut(mission,unit,goal,{allowed,tolerance=2}){
  const maximumTravel=initial*2+Math.PI*radius*2,speed=mission.unitSpec(unit).speed;
  for(let step=0;step<384&&travelled<maximumTravel;step++){
   const remaining=distance(pose,goal);
-  if(remaining<tolerance)return true;
+  if(remaining<tolerance||travelled>=maximumDistance){if(endpoint){endpoint.pose=pose;endpoint.travelled=travelled;}return true;}
   const slope=mission.field.gradientAt(pose.x,pose.y);
   const grade=(slope.x*(goal.x-pose.x)+slope.y*(goal.y-pose.y))/Math.max(1,remaining);
   const next=driveStep(pose,goal,.1,{speed,grade,scale,tolerance,allowed});

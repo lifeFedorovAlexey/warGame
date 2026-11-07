@@ -1,0 +1,3079 @@
+{
+  "scope": "Raw production state observed by navigation-wait-cycle; not a flushed Mission.save",
+  "source": "tools/review-combat-waits.mjs",
+  "type": "navigation-wait-cycle",
+  "data": {
+    "units": [
+      "u46",
+      "u53",
+      "u56"
+    ]
+  },
+  "time": 9.99999999999998,
+  "units": [
+    {
+      "id": "u46",
+      "kind": "bukhanka",
+      "owner": "rai",
+      "x": -57.178235604964,
+      "y": -34.17945164007642,
+      "previousX": -57.178235604964,
+      "previousY": -34.17945164007642,
+      "hp": 320,
+      "maxHp": 320,
+      "heading": 1.475534714909928,
+      "path": [
+        {
+          "x": -80,
+          "y": -32
+        },
+        {
+          "x": -80,
+          "y": 152
+        },
+        {
+          "x": -40,
+          "y": 184
+        },
+        {
+          "x": 48,
+          "y": 184
+        },
+        {
+          "x": 79.47716255779822,
+          "y": 121.50836319409993
+        }
+      ],
+      "task": {
+        "type": "combat-position",
+        "x": 79.47716255779822,
+        "y": 121.50836319409993
+      },
+      "cooldown": 0,
+      "tool": 0,
+      "foldTime": 0,
+      "commandRevision": 1,
+      "retreatSuppressed": false,
+      "combatGroup": "combat-1",
+      "combatDeployment": {
+        "targetId": "b65",
+        "group": "combat-1",
+        "angle": -1.5797019437698623,
+        "index": 29,
+        "slot": {
+          "x": 79.47716255779822,
+          "y": 121.50836319409993
+        },
+        "anchor": {
+          "x": 0,
+          "y": 140
+        },
+        "resume": {
+          "type": "attack",
+          "targetId": "b65",
+          "x": 0,
+          "y": 140,
+          "workOffset": -153
+        },
+        "retryAt": 0.1,
+        "status": "moving",
+        "goal": {
+          "x": 79.47716255779822,
+          "y": 121.50836319409993
+        }
+      },
+      "navigation": {
+        "state": "YIELDING",
+        "reason": "junction-reservation",
+        "since": 8.199999999999987,
+        "stoppedSince": 8.199999999999987,
+        "control": "YIELDING",
+        "controlReason": "junction-reservation",
+        "blockerId": "u53",
+        "nextAction": "break-wait-cycle",
+        "desiredSpeed": 30,
+        "speed": 0,
+        "waitSeconds": 1.7999999999999936,
+        "attempt": 0,
+        "potentialDefect": true,
+        "reported": false
+      },
+      "previousHeading": 1.475534714909928,
+      "previousWheelDistance": 82.83667304234174,
+      "previousSteering": 7.859984412374383e-8,
+      "reverseDebt": 0,
+      "driveSpeed": 0,
+      "reversing": false,
+      "steering": 5.3447894004145805e-8,
+      "wheelDistance": 82.83667304234174,
+      "driveWatch": {
+        "x": -80,
+        "y": -32,
+        "distance": 22.925595729532628,
+        "elapsed": 0,
+        "blocked": 0,
+        "origin": {
+          "x": 17.498185934862196,
+          "y": -54.7800099725356
+        },
+        "attempts": 0,
+        "queued": true
+      }
+    },
+    {
+      "id": "u53",
+      "kind": "bukhanka",
+      "owner": "rai",
+      "x": -51.82753955115792,
+      "y": -66.3436455038351,
+      "previousX": -51.82753955115792,
+      "previousY": -66.3436455038351,
+      "hp": 320,
+      "maxHp": 320,
+      "heading": 0.5868250734892528,
+      "path": [
+        {
+          "x": -80,
+          "y": -24
+        },
+        {
+          "x": -94.16212473302424,
+          "y": 77.34934744344329
+        }
+      ],
+      "task": {
+        "type": "combat-position",
+        "x": -94.16212473302424,
+        "y": 77.34934744344329
+      },
+      "cooldown": 0,
+      "tool": 0,
+      "foldTime": 0,
+      "commandRevision": 1,
+      "retreatSuppressed": false,
+      "combatGroup": "combat-1",
+      "combatDeployment": {
+        "targetId": "b65",
+        "group": "combat-1",
+        "angle": -1.5797019437698623,
+        "index": 6,
+        "slot": {
+          "x": -94.16212473302424,
+          "y": 77.34934744344329
+        },
+        "anchor": {
+          "x": 0,
+          "y": 140
+        },
+        "resume": {
+          "type": "attack",
+          "targetId": "b65",
+          "x": 0,
+          "y": 140,
+          "workOffset": -27
+        },
+        "retryAt": 0.1,
+        "status": "moving",
+        "goal": {
+          "x": -94.16212473302424,
+          "y": 77.34934744344329
+        }
+      },
+      "navigation": {
+        "state": "YIELDING",
+        "reason": "headway",
+        "since": 9.399999999999983,
+        "stoppedSince": 9.399999999999983,
+        "control": "YIELDING",
+        "controlReason": "headway",
+        "blockerId": "u56",
+        "nextAction": "break-wait-cycle",
+        "desiredSpeed": 30,
+        "speed": 0,
+        "waitSeconds": 0.5999999999999979,
+        "attempt": 0,
+        "potentialDefect": true,
+        "reported": false
+      },
+      "previousHeading": 0.5868250734892528,
+      "previousWheelDistance": 68.42399413857936,
+      "previousSteering": 0.00003847555476528282,
+      "driveSpeed": 0,
+      "steering": 0.00002616337724039232,
+      "reverseDebt": 0,
+      "reversing": false,
+      "wheelDistance": 68.42399413857936,
+      "driveWatch": {
+        "x": -80,
+        "y": -24,
+        "distance": 50.85933387585828,
+        "elapsed": 0,
+        "blocked": 0,
+        "origin": {
+          "x": -50.71589763421171,
+          "y": -68.01550384964997
+        },
+        "attempts": 0,
+        "queued": true
+      }
+    },
+    {
+      "id": "u56",
+      "kind": "bukhanka",
+      "owner": "rai",
+      "x": -72.17653336585434,
+      "y": -51.98083485693508,
+      "previousX": -72.17653336585434,
+      "previousY": -51.98083485693508,
+      "hp": 320,
+      "maxHp": 320,
+      "heading": 0.17631832180510792,
+      "path": [
+        {
+          "x": -80,
+          "y": -8
+        },
+        {
+          "x": -109.6271198692547,
+          "y": 167.81195047406896
+        }
+      ],
+      "task": {
+        "type": "combat-position",
+        "x": -109.6271198692547,
+        "y": 167.81195047406896
+      },
+      "cooldown": 0,
+      "tool": 0,
+      "foldTime": 0,
+      "commandRevision": 1,
+      "navigation": {
+        "state": "YIELDING",
+        "reason": "junction-reservation",
+        "since": 9.199999999999983,
+        "stoppedSince": 9.199999999999983,
+        "control": "YIELDING",
+        "controlReason": "junction-reservation",
+        "blockerId": "u46",
+        "nextAction": "break-wait-cycle",
+        "desiredSpeed": 30,
+        "speed": 0,
+        "waitSeconds": 0.7999999999999972,
+        "attempt": 0,
+        "potentialDefect": true,
+        "reported": false
+      },
+      "previousHeading": 0.17631832180510792,
+      "previousWheelDistance": 109.85547223995894,
+      "previousSteering": -0.000019577326244455614,
+      "driveSpeed": 0,
+      "retreatSuppressed": false,
+      "combatGroup": "combat-1",
+      "combatContactAt": 4.150000000000002,
+      "attackRouteTarget": {
+        "x": 0,
+        "y": 140
+      },
+      "reversing": false,
+      "steering": -0.000013312581846229818,
+      "wheelDistance": 109.85547223995894,
+      "combatDeployment": {
+        "targetId": "b65",
+        "group": "combat-1",
+        "angle": -1.5797019437698623,
+        "index": 12,
+        "slot": {
+          "x": -109.6271198692547,
+          "y": 167.81195047406896
+        },
+        "anchor": {
+          "x": 0,
+          "y": 140
+        },
+        "resume": {
+          "type": "attack",
+          "targetId": "b65",
+          "x": 0,
+          "y": 140,
+          "workOffset": 81
+        },
+        "retryAt": 4.100000000000001,
+        "status": "moving",
+        "goal": {
+          "x": -109.6271198692547,
+          "y": 167.81195047406896
+        }
+      },
+      "reverseDebt": 0,
+      "driveWatch": {
+        "x": -80,
+        "y": -8,
+        "distance": 44.67124875004712,
+        "elapsed": 0,
+        "blocked": 0,
+        "origin": {
+          "x": -66.44744768490744,
+          "y": -83.42905379545384
+        },
+        "attempts": 0,
+        "queued": true
+      }
+    }
+  ],
+  "traffic": {
+    "groups": 4,
+    "largestGroup": 7,
+    "controlled": 20,
+    "pairs": 49,
+    "conflicts": 9,
+    "yielding": 8,
+    "cyclesPrevented": 0,
+    "withdrawn": [],
+    "transferred": [],
+    "occupiedCycles": 1,
+    "cpuMs": 0.09890000000001464
+  },
+  "state": {
+    "version": 1,
+    "mission": "alpha-m01",
+    "time": 9.99999999999998,
+    "status": "running",
+    "energy": 760,
+    "energyRate": 0,
+    "powered": false,
+    "oilLinked": 0,
+    "units": [
+      {
+        "id": "u44",
+        "kind": "bukhanka",
+        "owner": "rai",
+        "x": -110.97497970586396,
+        "y": 125.80211617600216,
+        "previousX": -110.97497970586396,
+        "previousY": 125.80211617600216,
+        "hp": 320,
+        "maxHp": 320,
+        "heading": 0.18974521932781527,
+        "path": [],
+        "task": {
+          "type": "combat-position",
+          "x": -113.04890346267064,
+          "y": 136.60067273011595
+        },
+        "cooldown": 0.3500000000000001,
+        "tool": 0,
+        "foldTime": 0,
+        "commandRevision": 1,
+        "retreatSuppressed": false,
+        "combatGroup": "combat-1",
+        "navigation": {
+          "state": "ARRIVED",
+          "reason": "firing-position",
+          "since": 7.699999999999989,
+          "stoppedSince": null,
+          "control": "ARRIVED",
+          "controlReason": "firing-position",
+          "blockerId": null,
+          "nextAction": "engage-target",
+          "desiredSpeed": null,
+          "speed": 0,
+          "waitSeconds": 0,
+          "attempt": 0,
+          "potentialDefect": false,
+          "reported": false
+        },
+        "previousHeading": 0.18974521932781527,
+        "previousWheelDistance": 195.47271602743803,
+        "previousSteering": -1.588602999147426e-10,
+        "combatContactAt": 0.35,
+        "combatDeployment": {
+          "targetId": "b65",
+          "group": "combat-1",
+          "angle": -1.5797019437698623,
+          "index": 10,
+          "slot": {
+            "x": -113.04890346267064,
+            "y": 136.60067273011595
+          },
+          "anchor": {
+            "x": 0,
+            "y": 140
+          },
+          "resume": {
+            "type": "attack",
+            "targetId": "b65",
+            "x": 0,
+            "y": 140,
+            "workOffset": -135
+          },
+          "retryAt": 0.1,
+          "status": "arrived",
+          "goal": {
+            "x": -110.97497970586396,
+            "y": 125.80211617600216
+          }
+        },
+        "driveSpeed": 0,
+        "reversing": false,
+        "steering": -1.588602999147426e-10,
+        "wheelDistance": 195.47271602743803,
+        "aimTarget": {
+          "x": -24.57,
+          "y": 136.8565706749375,
+          "z": 6.048
+        }
+      },
+      {
+        "id": "u45",
+        "kind": "bukhanka",
+        "owner": "rai",
+        "x": -85.66088699964263,
+        "y": 58.41936683880866,
+        "previousX": -85.8269200206778,
+        "previousY": 55.42396811755183,
+        "hp": 320,
+        "maxHp": 320,
+        "heading": -0.05537294651293522,
+        "path": [
+          {
+            "x": -80.35025015073572,
+            "y": 154.22664052804444
+          }
+        ],
+        "task": {
+          "type": "combat-position",
+          "x": -80.35025015073572,
+          "y": 154.22664052804444
+        },
+        "cooldown": 0.3500000000000001,
+        "tool": 0,
+        "foldTime": 0,
+        "commandRevision": 1,
+        "retreatSuppressed": false,
+        "combatGroup": "combat-1",
+        "combatDeployment": {
+          "targetId": "b65",
+          "group": "combat-1",
+          "angle": -1.5797019437698623,
+          "index": 30,
+          "slot": {
+            "x": -80.35025015073572,
+            "y": 154.22664052804444
+          },
+          "anchor": {
+            "x": 0,
+            "y": 140
+          },
+          "resume": {
+            "type": "attack",
+            "targetId": "b65",
+            "x": 0,
+            "y": 140,
+            "workOffset": -171
+          },
+          "retryAt": 0.1,
+          "status": "moving",
+          "goal": {
+            "x": -80.35025015073572,
+            "y": 154.22664052804444
+          }
+        },
+        "navigation": {
+          "state": "MOVING",
+          "reason": "following-route",
+          "since": 5.999999999999995,
+          "stoppedSince": null,
+          "control": null,
+          "controlReason": null,
+          "blockerId": null,
+          "nextAction": null,
+          "desiredSpeed": 30,
+          "speed": 29.999967438950893,
+          "waitSeconds": 0,
+          "attempt": 0,
+          "potentialDefect": false,
+          "reported": false
+        },
+        "previousHeading": -0.055372439025493145,
+        "previousWheelDistance": 161.9472085830112,
+        "previousSteering": -0.000003157342783380661,
+        "reverseDebt": 0,
+        "driveSpeed": 29.999967438950893,
+        "reversing": false,
+        "steering": -0.0000019792031722847688,
+        "wheelDistance": 164.94720532690627,
+        "driveWatch": {
+          "x": -80.35025015073572,
+          "y": 154.22664052804444,
+          "distance": 158.84207445962733,
+          "elapsed": 2.0000000000000004,
+          "blocked": 0,
+          "origin": {
+            "x": -77.50329020768068,
+            "y": -32.31452149211361
+          },
+          "attempts": 0,
+          "queued": false
+        },
+        "aimTarget": {
+          "x": -20.03501982106679,
+          "y": 118.94,
+          "z": 6.048
+        }
+      },
+      {
+        "id": "u46",
+        "kind": "bukhanka",
+        "owner": "rai",
+        "x": -57.178235604964,
+        "y": -34.17945164007642,
+        "previousX": -57.178235604964,
+        "previousY": -34.17945164007642,
+        "hp": 320,
+        "maxHp": 320,
+        "heading": 1.475534714909928,
+        "path": [
+          {
+            "x": -80,
+            "y": -32
+          },
+          {
+            "x": -80,
+            "y": 152
+          },
+          {
+            "x": -40,
+            "y": 184
+          },
+          {
+            "x": 48,
+            "y": 184
+          },
+          {
+            "x": 79.47716255779822,
+            "y": 121.50836319409993
+          }
+        ],
+        "task": {
+          "type": "combat-position",
+          "x": 79.47716255779822,
+          "y": 121.50836319409993
+        },
+        "cooldown": 0,
+        "tool": 0,
+        "foldTime": 0,
+        "commandRevision": 1,
+        "retreatSuppressed": false,
+        "combatGroup": "combat-1",
+        "combatDeployment": {
+          "targetId": "b65",
+          "group": "combat-1",
+          "angle": -1.5797019437698623,
+          "index": 29,
+          "slot": {
+            "x": 79.47716255779822,
+            "y": 121.50836319409993
+          },
+          "anchor": {
+            "x": 0,
+            "y": 140
+          },
+          "resume": {
+            "type": "attack",
+            "targetId": "b65",
+            "x": 0,
+            "y": 140,
+            "workOffset": -153
+          },
+          "retryAt": 0.1,
+          "status": "moving",
+          "goal": {
+            "x": 79.47716255779822,
+            "y": 121.50836319409993
+          }
+        },
+        "navigation": {
+          "state": "YIELDING",
+          "reason": "junction-reservation",
+          "since": 8.199999999999987,
+          "stoppedSince": 8.199999999999987,
+          "control": "YIELDING",
+          "controlReason": "junction-reservation",
+          "blockerId": "u53",
+          "nextAction": "break-wait-cycle",
+          "desiredSpeed": 30,
+          "speed": 0,
+          "waitSeconds": 1.7999999999999936,
+          "attempt": 0,
+          "potentialDefect": true,
+          "reported": false
+        },
+        "previousHeading": 1.475534714909928,
+        "previousWheelDistance": 82.83667304234174,
+        "previousSteering": 7.859984412374383e-8,
+        "reverseDebt": 0,
+        "driveSpeed": 0,
+        "reversing": false,
+        "steering": 5.3447894004145805e-8,
+        "wheelDistance": 82.83667304234174,
+        "driveWatch": {
+          "x": -80,
+          "y": -32,
+          "distance": 22.925595729532628,
+          "elapsed": 0,
+          "blocked": 0,
+          "origin": {
+            "x": 17.498185934862196,
+            "y": -54.7800099725356
+          },
+          "attempts": 0,
+          "queued": true
+        }
+      },
+      {
+        "id": "u47",
+        "kind": "bukhanka",
+        "owner": "rai",
+        "x": 111.17212673114459,
+        "y": 125.32040006040943,
+        "previousX": 111.17212673114459,
+        "previousY": 125.32040006040943,
+        "hp": 320,
+        "maxHp": 320,
+        "heading": -0.19166455622011855,
+        "path": [],
+        "task": {
+          "type": "combat-position",
+          "x": 112.97042910451098,
+          "y": 134.58777791081528
+        },
+        "cooldown": 0.3500000000000001,
+        "tool": 0,
+        "foldTime": 0,
+        "commandRevision": 1,
+        "retreatSuppressed": false,
+        "combatGroup": "combat-1",
+        "combatDeployment": {
+          "targetId": "b65",
+          "group": "combat-1",
+          "angle": -1.5797019437698623,
+          "index": 11,
+          "slot": {
+            "x": 112.97042910451098,
+            "y": 134.58777791081528
+          },
+          "anchor": {
+            "x": 0,
+            "y": 140
+          },
+          "resume": {
+            "type": "attack",
+            "targetId": "b65",
+            "x": 0,
+            "y": 140,
+            "workOffset": -117
+          },
+          "retryAt": 0.1,
+          "status": "arrived",
+          "goal": {
+            "x": 111.17212673114459,
+            "y": 125.32040006040943
+          }
+        },
+        "navigation": {
+          "state": "ARRIVED",
+          "reason": "firing-position",
+          "since": 7.699999999999989,
+          "stoppedSince": null,
+          "control": "ARRIVED",
+          "controlReason": "firing-position",
+          "blockerId": null,
+          "nextAction": "engage-target",
+          "desiredSpeed": null,
+          "speed": 0,
+          "waitSeconds": 0,
+          "attempt": 0,
+          "potentialDefect": false,
+          "reported": false
+        },
+        "previousHeading": -0.19166455622011855,
+        "previousWheelDistance": 195.04017540382907,
+        "previousSteering": 1.9471115136893146e-10,
+        "driveSpeed": 0,
+        "reversing": false,
+        "steering": 1.9471115136893146e-10,
+        "wheelDistance": 195.04017540382907,
+        "aimTarget": {
+          "x": 24.57,
+          "y": 136.75568165221853,
+          "z": 6.048
+        }
+      },
+      {
+        "id": "u48",
+        "kind": "bukhanka",
+        "owner": "rai",
+        "x": -128.86950221065328,
+        "y": 97.06544328535276,
+        "previousX": -128.86950221065328,
+        "previousY": 97.06544328535276,
+        "hp": 320,
+        "maxHp": 320,
+        "heading": 0.40082988741690595,
+        "path": [],
+        "task": {
+          "type": "combat-position",
+          "x": -132.50798085773528,
+          "y": 105.65138195699913
+        },
+        "cooldown": 0.3500000000000001,
+        "tool": 0,
+        "foldTime": 0,
+        "commandRevision": 1,
+        "retreatSuppressed": false,
+        "combatGroup": "combat-1",
+        "combatDeployment": {
+          "targetId": "b65",
+          "group": "combat-1",
+          "angle": -1.5797019437698623,
+          "index": 8,
+          "slot": {
+            "x": -107.75798085773526,
+            "y": 105.65138195699913
+          },
+          "anchor": {
+            "x": 0,
+            "y": 140
+          },
+          "resume": {
+            "type": "attack",
+            "targetId": "b65",
+            "x": 0,
+            "y": 140,
+            "workOffset": -63
+          },
+          "retryAt": 0.1,
+          "status": "arrived",
+          "goal": {
+            "x": -128.86950221065328,
+            "y": 97.06544328535276
+          }
+        },
+        "navigation": {
+          "state": "ARRIVED",
+          "reason": "firing-position",
+          "since": 8.299999999999986,
+          "stoppedSince": null,
+          "control": "ARRIVED",
+          "controlReason": "firing-position",
+          "blockerId": null,
+          "nextAction": "engage-target",
+          "desiredSpeed": null,
+          "speed": 0,
+          "waitSeconds": 0,
+          "attempt": 0,
+          "potentialDefect": false,
+          "reported": false
+        },
+        "previousHeading": 0.40082988741690595,
+        "previousWheelDistance": 202.30538725101977,
+        "previousSteering": 1.534133931002657e-13,
+        "driveSpeed": 0,
+        "reversing": false,
+        "steering": 1.534133931002657e-13,
+        "wheelDistance": 202.30538725101977,
+        "aimTarget": {
+          "x": -24.57,
+          "y": 131.81418380312735,
+          "z": 6.048
+        }
+      },
+      {
+        "id": "u49",
+        "kind": "bukhanka",
+        "owner": "rai",
+        "x": -45.31629087386715,
+        "y": -54.321117081362935,
+        "previousX": -45.31629087386715,
+        "previousY": -54.321117081362935,
+        "hp": 320,
+        "maxHp": 320,
+        "heading": 0.6194453858514423,
+        "path": [
+          {
+            "x": -80,
+            "y": -32
+          },
+          {
+            "x": -79.7938976766087,
+            "y": 98.1768077508949
+          }
+        ],
+        "task": {
+          "type": "combat-position",
+          "x": -79.7938976766087,
+          "y": 98.1768077508949
+        },
+        "cooldown": 0,
+        "tool": 0,
+        "foldTime": 0,
+        "commandRevision": 1,
+        "retreatSuppressed": false,
+        "combatGroup": "combat-1",
+        "combatDeployment": {
+          "targetId": "b65",
+          "group": "combat-1",
+          "angle": -1.5797019437698623,
+          "index": 28,
+          "slot": {
+            "x": -79.7938976766087,
+            "y": 122.9268077508949
+          },
+          "anchor": {
+            "x": 0,
+            "y": 140
+          },
+          "resume": {
+            "type": "attack",
+            "targetId": "b65",
+            "x": 0,
+            "y": 140,
+            "workOffset": -99
+          },
+          "retryAt": 6.399999999999993,
+          "status": "moving",
+          "goal": {
+            "x": -79.7938976766087,
+            "y": 98.1768077508949
+          },
+          "relocateAt": 10.299999999999994,
+          "rejectedSlots": [],
+          "conditions": "-44.246768427237825,-56.056264425180686,0.47873659602697965|3|u44:moving:-113.04890346267064,136.60067273011595:|u45:moving:-80.35025015073572,154.22664052804444:|u46:moving:79.47716255779822,121.50836319409993:|u47:moving:112.97042910451098,134.58777791081528:|u48:moving:-132.50798085773528,105.65138195699913:|u49:-44.246768427237825,-56.056264425180686,0.47873659602697965:|u50:moving:110.53225553329504,58.181337036527026:|u51:moving:107.12912981083959,103.73762906300416:|u52:moving:-97.75634776258305,196.87975450123645:|u53:moving:-94.16212473302424,77.34934744344329:|u54:moving:81.25299427295599,212.63055618536254:|u55:moving:48.816656996008156,205.38726175436688:|u56:moving:-109.6271198692547,167.81195047406896:|u58:moving:-47.64434766157852,206.2463292258721:|u59:moving:110.10507023750154,165.85504801764742:|u62:moving:80.59088595398059,152.79332252202278:"
+        },
+        "navigation": {
+          "state": "YIELDING",
+          "reason": "junction-reservation",
+          "since": 7.999999999999988,
+          "stoppedSince": 7.999999999999988,
+          "control": "YIELDING",
+          "controlReason": "junction-reservation",
+          "blockerId": "u56",
+          "nextAction": "resume-when-clear",
+          "desiredSpeed": 30,
+          "speed": 0,
+          "waitSeconds": 1.999999999999993,
+          "attempt": 0,
+          "potentialDefect": false,
+          "reported": false
+        },
+        "previousHeading": 0.6194453858514423,
+        "previousWheelDistance": 46.15040364860664,
+        "previousSteering": 0.0002704967883501686,
+        "driveSpeed": 0,
+        "reversing": false,
+        "steering": 0.00018393781607811468,
+        "wheelDistance": 46.15040364860664,
+        "reverseDebt": 0,
+        "driveWatch": {
+          "x": -80,
+          "y": -32,
+          "distance": 41.245508197937184,
+          "elapsed": 0,
+          "blocked": 0,
+          "origin": {
+            "x": -44.349718755305545,
+            "y": -55.861841862274886
+          },
+          "attempts": 0,
+          "queued": true
+        }
+      },
+      {
+        "id": "u50",
+        "kind": "bukhanka",
+        "owner": "rai",
+        "x": 107.59235538017728,
+        "y": 49.69883648489493,
+        "previousX": 107.59235538017728,
+        "previousY": 49.69883648489493,
+        "hp": 320,
+        "maxHp": 320,
+        "heading": -0.3336308580174016,
+        "path": [],
+        "task": {
+          "type": "combat-position",
+          "x": 110.53225553329504,
+          "y": 58.181337036527026
+        },
+        "cooldown": 0.55,
+        "tool": 0,
+        "foldTime": 0,
+        "commandRevision": 1,
+        "retreatSuppressed": false,
+        "combatGroup": "combat-1",
+        "combatDeployment": {
+          "targetId": "b65",
+          "group": "combat-1",
+          "angle": -1.5797019437698623,
+          "index": 7,
+          "slot": {
+            "x": 93.03136269892799,
+            "y": 75.68222987089408
+          },
+          "anchor": {
+            "x": 0,
+            "y": 140
+          },
+          "resume": {
+            "type": "attack",
+            "targetId": "b65",
+            "x": 0,
+            "y": 140,
+            "workOffset": -81
+          },
+          "retryAt": 0.1,
+          "status": "arrived",
+          "goal": {
+            "x": 107.59235538017728,
+            "y": 49.69883648489493
+          }
+        },
+        "navigation": {
+          "state": "ARRIVED",
+          "reason": "firing-position",
+          "since": 9.199999999999983,
+          "stoppedSince": null,
+          "control": "ARRIVED",
+          "controlReason": "firing-position",
+          "blockerId": null,
+          "nextAction": "engage-target",
+          "desiredSpeed": null,
+          "speed": 0,
+          "waitSeconds": 0,
+          "attempt": 0,
+          "potentialDefect": false,
+          "reported": false
+        },
+        "previousHeading": -0.3336308580174016,
+        "previousWheelDistance": 173.05143290690057,
+        "previousSteering": 0.0000040085182442306525,
+        "driveSpeed": 0,
+        "reversing": false,
+        "steering": 0.0000040085182442306525,
+        "wheelDistance": 173.05143290690057,
+        "aimTarget": {
+          "x": 24.57,
+          "y": 119.37865027932177,
+          "z": 6.048
+        }
+      },
+      {
+        "id": "u51",
+        "kind": "bukhanka",
+        "owner": "rai",
+        "x": 105.00459872777152,
+        "y": 93.86031467158881,
+        "previousX": 105.00459872777152,
+        "previousY": 93.86031467158881,
+        "hp": 320,
+        "maxHp": 320,
+        "heading": -0.2118640746189251,
+        "path": [],
+        "task": {
+          "type": "combat-position",
+          "x": 107.12912981083959,
+          "y": 103.73762906300416
+        },
+        "cooldown": 0.45000000000000007,
+        "tool": 0,
+        "foldTime": 0,
+        "commandRevision": 1,
+        "retreatSuppressed": false,
+        "combatGroup": "combat-1",
+        "combatDeployment": {
+          "targetId": "b65",
+          "group": "combat-1",
+          "angle": -1.5797019437698623,
+          "index": 9,
+          "slot": {
+            "x": 107.12912981083959,
+            "y": 103.73762906300416
+          },
+          "anchor": {
+            "x": 0,
+            "y": 140
+          },
+          "resume": {
+            "type": "attack",
+            "targetId": "b65",
+            "x": 0,
+            "y": 140,
+            "workOffset": -45
+          },
+          "retryAt": 0.1,
+          "status": "arrived",
+          "goal": {
+            "x": 105.00459872777152,
+            "y": 93.86031467158881
+          }
+        },
+        "navigation": {
+          "state": "ARRIVED",
+          "reason": "firing-position",
+          "since": 7.999999999999988,
+          "stoppedSince": null,
+          "control": "ARRIVED",
+          "controlReason": "firing-position",
+          "blockerId": null,
+          "nextAction": "engage-target",
+          "desiredSpeed": null,
+          "speed": 0,
+          "waitSeconds": 0,
+          "attempt": 0,
+          "potentialDefect": false,
+          "reported": false
+        },
+        "previousHeading": -0.2118640746189251,
+        "previousWheelDistance": 192.13997611177902,
+        "previousSteering": 4.734710949694243e-9,
+        "driveSpeed": 0,
+        "reversing": false,
+        "steering": 4.734710949694243e-9,
+        "wheelDistance": 192.13997611177902,
+        "aimTarget": {
+          "x": 24.57,
+          "y": 129.20378647931315,
+          "z": 6.048
+        }
+      },
+      {
+        "id": "u52",
+        "kind": "bukhanka",
+        "owner": "rai",
+        "x": -81.55835374492413,
+        "y": 17.405577087153727,
+        "previousX": -81.2881723767587,
+        "previousY": 14.418371918316664,
+        "hp": 320,
+        "maxHp": 320,
+        "heading": 0.0901539186543598,
+        "path": [
+          {
+            "x": -97.75634776258305,
+            "y": 196.87975450123645
+          }
+        ],
+        "task": {
+          "type": "combat-position",
+          "x": -97.75634776258305,
+          "y": 196.87975450123645
+        },
+        "cooldown": 0,
+        "tool": 0,
+        "foldTime": 0,
+        "commandRevision": 1,
+        "navigation": {
+          "state": "MOVING",
+          "reason": "following-route",
+          "since": 9.199999999999983,
+          "stoppedSince": null,
+          "control": null,
+          "controlReason": null,
+          "blockerId": null,
+          "nextAction": null,
+          "desiredSpeed": 30,
+          "speed": 29.99398721815859,
+          "waitSeconds": 0,
+          "attempt": 0,
+          "potentialDefect": false,
+          "reported": false
+        },
+        "previousHeading": 0.09024763203050093,
+        "previousWheelDistance": 143.01913113805892,
+        "previousSteering": -0.0005936158732191332,
+        "driveSpeed": 29.993987229134127,
+        "retreatSuppressed": false,
+        "combatGroup": "combat-1",
+        "combatContactAt": 4.350000000000001,
+        "attackRouteTarget": {
+          "x": 0,
+          "y": 140
+        },
+        "reversing": false,
+        "steering": -0.00036555541736933223,
+        "wheelDistance": 146.01852986097234,
+        "combatDeployment": {
+          "targetId": "b65",
+          "group": "combat-1",
+          "angle": -1.5797019437698623,
+          "index": 14,
+          "slot": {
+            "x": -97.75634776258305,
+            "y": 196.87975450123645
+          },
+          "anchor": {
+            "x": 0,
+            "y": 140
+          },
+          "resume": {
+            "type": "attack",
+            "targetId": "b65",
+            "x": 0,
+            "y": 140,
+            "workOffset": 9
+          },
+          "retryAt": 4.100000000000001,
+          "status": "moving",
+          "goal": {
+            "x": -97.75634776258305,
+            "y": 196.87975450123645
+          }
+        },
+        "reverseDebt": 0,
+        "driveWatch": {
+          "x": -97.75634776258305,
+          "y": 196.87975450123645,
+          "distance": 206.2713986465119,
+          "elapsed": 0.8999999999999999,
+          "blocked": 0,
+          "origin": {
+            "x": -79.39612606160561,
+            "y": -6.088129513865726
+          },
+          "attempts": 0,
+          "queued": false
+        }
+      },
+      {
+        "id": "u53",
+        "kind": "bukhanka",
+        "owner": "rai",
+        "x": -51.82753955115792,
+        "y": -66.3436455038351,
+        "previousX": -51.82753955115792,
+        "previousY": -66.3436455038351,
+        "hp": 320,
+        "maxHp": 320,
+        "heading": 0.5868250734892528,
+        "path": [
+          {
+            "x": -80,
+            "y": -24
+          },
+          {
+            "x": -94.16212473302424,
+            "y": 77.34934744344329
+          }
+        ],
+        "task": {
+          "type": "combat-position",
+          "x": -94.16212473302424,
+          "y": 77.34934744344329
+        },
+        "cooldown": 0,
+        "tool": 0,
+        "foldTime": 0,
+        "commandRevision": 1,
+        "retreatSuppressed": false,
+        "combatGroup": "combat-1",
+        "combatDeployment": {
+          "targetId": "b65",
+          "group": "combat-1",
+          "angle": -1.5797019437698623,
+          "index": 6,
+          "slot": {
+            "x": -94.16212473302424,
+            "y": 77.34934744344329
+          },
+          "anchor": {
+            "x": 0,
+            "y": 140
+          },
+          "resume": {
+            "type": "attack",
+            "targetId": "b65",
+            "x": 0,
+            "y": 140,
+            "workOffset": -27
+          },
+          "retryAt": 0.1,
+          "status": "moving",
+          "goal": {
+            "x": -94.16212473302424,
+            "y": 77.34934744344329
+          }
+        },
+        "navigation": {
+          "state": "YIELDING",
+          "reason": "headway",
+          "since": 9.399999999999983,
+          "stoppedSince": 9.399999999999983,
+          "control": "YIELDING",
+          "controlReason": "headway",
+          "blockerId": "u56",
+          "nextAction": "break-wait-cycle",
+          "desiredSpeed": 30,
+          "speed": 0,
+          "waitSeconds": 0.5999999999999979,
+          "attempt": 0,
+          "potentialDefect": true,
+          "reported": false
+        },
+        "previousHeading": 0.5868250734892528,
+        "previousWheelDistance": 68.42399413857936,
+        "previousSteering": 0.00003847555476528282,
+        "driveSpeed": 0,
+        "steering": 0.00002616337724039232,
+        "reverseDebt": 0,
+        "reversing": false,
+        "wheelDistance": 68.42399413857936,
+        "driveWatch": {
+          "x": -80,
+          "y": -24,
+          "distance": 50.85933387585828,
+          "elapsed": 0,
+          "blocked": 0,
+          "origin": {
+            "x": -50.71589763421171,
+            "y": -68.01550384964997
+          },
+          "attempts": 0,
+          "queued": true
+        }
+      },
+      {
+        "id": "u54",
+        "kind": "bukhanka",
+        "owner": "rai",
+        "x": 80.43195336429356,
+        "y": 38.77570267391442,
+        "previousX": 80.41775271644445,
+        "previousY": 35.775770982447824,
+        "hp": 320,
+        "maxHp": 320,
+        "heading": -0.004730917726156438,
+        "path": [
+          {
+            "x": 81.25299427295599,
+            "y": 212.63055618536254
+          }
+        ],
+        "task": {
+          "type": "combat-position",
+          "x": 81.25299427295599,
+          "y": 212.63055618536254
+        },
+        "cooldown": 0.0500000000000001,
+        "tool": 0,
+        "foldTime": 0,
+        "commandRevision": 1,
+        "navigation": {
+          "state": "MOVING",
+          "reason": "following-route",
+          "since": 7.699999999999989,
+          "stoppedSince": null,
+          "control": null,
+          "controlReason": null,
+          "blockerId": null,
+          "nextAction": null,
+          "desiredSpeed": 30,
+          "speed": 29.999653017768296,
+          "waitSeconds": 0,
+          "attempt": 0,
+          "potentialDefect": false,
+          "reported": false
+        },
+        "previousHeading": -0.004736325694005094,
+        "previousWheelDistance": 178.57025678475733,
+        "previousSteering": 0.0000342300723920773,
+        "driveSpeed": 29.999653017804864,
+        "retreatSuppressed": false,
+        "combatGroup": "combat-1",
+        "combatContactAt": 4.0500000000000025,
+        "attackRouteTarget": {
+          "x": 0,
+          "y": 140
+        },
+        "reversing": false,
+        "steering": 0.000021091318550368502,
+        "wheelDistance": 181.57022208653783,
+        "combatDeployment": {
+          "targetId": "b65",
+          "group": "combat-1",
+          "angle": -1.5797019437698623,
+          "index": 15,
+          "slot": {
+            "x": 98.75388710732304,
+            "y": 195.1296633509955
+          },
+          "anchor": {
+            "x": 0,
+            "y": 140
+          },
+          "resume": {
+            "type": "attack",
+            "targetId": "b65",
+            "x": 0,
+            "y": 140,
+            "workOffset": -9
+          },
+          "retryAt": 4.100000000000001,
+          "status": "moving",
+          "goal": {
+            "x": 81.25299427295599,
+            "y": 212.63055618536254
+          }
+        },
+        "reverseDebt": 0,
+        "driveWatch": {
+          "x": 81.25299427295599,
+          "y": 212.63055618536254,
+          "distance": 185.85646128985883,
+          "elapsed": 0.30000000000000004,
+          "blocked": 0,
+          "origin": {
+            "x": 77.5754160432823,
+            "y": -27.37033552806725
+          },
+          "attempts": 0,
+          "queued": false
+        },
+        "aimTarget": {
+          "x": 14.192606759382981,
+          "y": 118.94,
+          "z": 6.048
+        }
+      },
+      {
+        "id": "u55",
+        "kind": "bukhanka",
+        "owner": "rai",
+        "x": 57.70997341147913,
+        "y": -42.20897790458987,
+        "previousX": 57.70997341147913,
+        "previousY": -42.20897790458987,
+        "hp": 320,
+        "maxHp": 320,
+        "heading": -0.8855574257708964,
+        "path": [
+          {
+            "x": 80,
+            "y": -24
+          },
+          {
+            "x": 80,
+            "y": 112
+          },
+          {
+            "x": 48.816656996008156,
+            "y": 205.38726175436688
+          }
+        ],
+        "task": {
+          "type": "combat-position",
+          "x": 48.816656996008156,
+          "y": 205.38726175436688
+        },
+        "cooldown": 0,
+        "tool": 0,
+        "foldTime": 0,
+        "commandRevision": 1,
+        "navigation": {
+          "state": "YIELDING",
+          "reason": "junction-reservation",
+          "since": 9.399999999999983,
+          "stoppedSince": 9.399999999999983,
+          "control": "YIELDING",
+          "controlReason": "junction-reservation",
+          "blockerId": "u59",
+          "nextAction": "resume-when-clear",
+          "desiredSpeed": 30,
+          "speed": 0,
+          "waitSeconds": 0.5999999999999979,
+          "attempt": 0,
+          "potentialDefect": false,
+          "reported": false
+        },
+        "previousHeading": -0.8855574257708964,
+        "previousWheelDistance": 118.24231069005886,
+        "previousSteering": -0.000041509791122878015,
+        "driveSpeed": 0,
+        "retreatSuppressed": false,
+        "combatGroup": "combat-1",
+        "combatContactAt": 4.0500000000000025,
+        "attackRouteTarget": {
+          "x": 0,
+          "y": 140
+        },
+        "reversing": false,
+        "steering": -0.00002822665796355705,
+        "wheelDistance": 118.24231069005886,
+        "combatDeployment": {
+          "targetId": "b65",
+          "group": "combat-1",
+          "angle": -1.5797019437698623,
+          "index": 35,
+          "slot": {
+            "x": 48.816656996008156,
+            "y": 205.38726175436688
+          },
+          "anchor": {
+            "x": 0,
+            "y": 140
+          },
+          "resume": {
+            "type": "attack",
+            "targetId": "b65",
+            "x": 0,
+            "y": 140,
+            "workOffset": 27
+          },
+          "retryAt": 4.100000000000001,
+          "status": "moving",
+          "goal": {
+            "x": 48.816656996008156,
+            "y": 205.38726175436688
+          }
+        },
+        "reverseDebt": 0,
+        "driveWatch": {
+          "x": 80,
+          "y": -24,
+          "distance": 28.782150052537933,
+          "elapsed": 0,
+          "blocked": 0,
+          "origin": {
+            "x": 20.00019930312694,
+            "y": -94.88131937657049
+          },
+          "attempts": 0,
+          "queued": true
+        }
+      },
+      {
+        "id": "u56",
+        "kind": "bukhanka",
+        "owner": "rai",
+        "x": -72.17653336585434,
+        "y": -51.98083485693508,
+        "previousX": -72.17653336585434,
+        "previousY": -51.98083485693508,
+        "hp": 320,
+        "maxHp": 320,
+        "heading": 0.17631832180510792,
+        "path": [
+          {
+            "x": -80,
+            "y": -8
+          },
+          {
+            "x": -109.6271198692547,
+            "y": 167.81195047406896
+          }
+        ],
+        "task": {
+          "type": "combat-position",
+          "x": -109.6271198692547,
+          "y": 167.81195047406896
+        },
+        "cooldown": 0,
+        "tool": 0,
+        "foldTime": 0,
+        "commandRevision": 1,
+        "navigation": {
+          "state": "YIELDING",
+          "reason": "junction-reservation",
+          "since": 9.199999999999983,
+          "stoppedSince": 9.199999999999983,
+          "control": "YIELDING",
+          "controlReason": "junction-reservation",
+          "blockerId": "u46",
+          "nextAction": "break-wait-cycle",
+          "desiredSpeed": 30,
+          "speed": 0,
+          "waitSeconds": 0.7999999999999972,
+          "attempt": 0,
+          "potentialDefect": true,
+          "reported": false
+        },
+        "previousHeading": 0.17631832180510792,
+        "previousWheelDistance": 109.85547223995894,
+        "previousSteering": -0.000019577326244455614,
+        "driveSpeed": 0,
+        "retreatSuppressed": false,
+        "combatGroup": "combat-1",
+        "combatContactAt": 4.150000000000002,
+        "attackRouteTarget": {
+          "x": 0,
+          "y": 140
+        },
+        "reversing": false,
+        "steering": -0.000013312581846229818,
+        "wheelDistance": 109.85547223995894,
+        "combatDeployment": {
+          "targetId": "b65",
+          "group": "combat-1",
+          "angle": -1.5797019437698623,
+          "index": 12,
+          "slot": {
+            "x": -109.6271198692547,
+            "y": 167.81195047406896
+          },
+          "anchor": {
+            "x": 0,
+            "y": 140
+          },
+          "resume": {
+            "type": "attack",
+            "targetId": "b65",
+            "x": 0,
+            "y": 140,
+            "workOffset": 81
+          },
+          "retryAt": 4.100000000000001,
+          "status": "moving",
+          "goal": {
+            "x": -109.6271198692547,
+            "y": 167.81195047406896
+          }
+        },
+        "reverseDebt": 0,
+        "driveWatch": {
+          "x": -80,
+          "y": -8,
+          "distance": 44.67124875004712,
+          "elapsed": 0,
+          "blocked": 0,
+          "origin": {
+            "x": -66.44744768490744,
+            "y": -83.42905379545384
+          },
+          "attempts": 0,
+          "queued": true
+        }
+      },
+      {
+        "id": "u57",
+        "kind": "bukhanka",
+        "owner": "rai",
+        "x": -50.57781047461937,
+        "y": -104.98673461260643,
+        "previousX": -50.82292234485328,
+        "previousY": -105.35213873282189,
+        "hp": 320,
+        "maxHp": 320,
+        "heading": 2.5507362584667916,
+        "path": [
+          {
+            "x": -48,
+            "y": -120
+          },
+          {
+            "x": -72,
+            "y": -128
+          },
+          {
+            "x": -88,
+            "y": -112
+          },
+          {
+            "x": -80,
+            "y": 168
+          },
+          {
+            "x": -69.08086761425875,
+            "y": 183.43263438546248
+          }
+        ],
+        "task": {
+          "type": "combat-position",
+          "x": -69.08086761425875,
+          "y": 183.43263438546248
+        },
+        "cooldown": 0,
+        "tool": 0,
+        "foldTime": 0,
+        "commandRevision": 1,
+        "navigation": {
+          "state": "MANEUVERING",
+          "reason": "checked-manoeuvre",
+          "since": 8.199999999999987,
+          "stoppedSince": null,
+          "control": null,
+          "controlReason": null,
+          "blockerId": null,
+          "nextAction": null,
+          "desiredSpeed": null,
+          "speed": 4.4,
+          "waitSeconds": 0,
+          "attempt": 1,
+          "potentialDefect": false,
+          "reported": false
+        },
+        "previousHeading": 2.5507362584667916,
+        "previousWheelDistance": 70.24827426167504,
+        "previousSteering": 0,
+        "driveSpeed": 4.4,
+        "retreatSuppressed": false,
+        "combatGroup": "combat-1",
+        "combatContactAt": 4.0500000000000025,
+        "attackRouteTarget": {
+          "x": 0,
+          "y": 140
+        },
+        "reversing": true,
+        "steering": 0,
+        "wheelDistance": 69.80827426167504,
+        "combatDeployment": {
+          "targetId": "b65",
+          "group": "combat-1",
+          "angle": -1.5797019437698623,
+          "index": 32,
+          "slot": {
+            "x": -69.08086761425875,
+            "y": 183.43263438546248
+          },
+          "anchor": {
+            "x": 0,
+            "y": 140
+          },
+          "resume": {
+            "type": "attack",
+            "targetId": "b65",
+            "x": 0,
+            "y": 140,
+            "workOffset": 45
+          },
+          "retryAt": 4.100000000000001,
+          "status": "moving",
+          "goal": {
+            "x": -69.08086761425875,
+            "y": 183.43263438546248
+          }
+        },
+        "reverseDebt": 4.277376562465891,
+        "driveWatch": {
+          "x": -48,
+          "y": -120,
+          "distance": 16.7302165969564,
+          "elapsed": 0,
+          "blocked": 0,
+          "origin": {
+            "x": -49.17147245801945,
+            "y": -103.55007212184051
+          },
+          "attempts": 1,
+          "queued": false
+        },
+        "detour": {
+          "legs": [
+            {
+              "direction": -1,
+              "curve": 0,
+              "remaining": 4.739999999999999
+            }
+          ],
+          "parking": false,
+          "blocked": 0
+        }
+      },
+      {
+        "id": "u58",
+        "kind": "bukhanka",
+        "owner": "rai",
+        "x": -35.86966819891718,
+        "y": -82.38532455734486,
+        "previousX": -35.86966819891718,
+        "previousY": -82.38532455734486,
+        "hp": 320,
+        "maxHp": 320,
+        "heading": 0.6472316229900368,
+        "path": [
+          {
+            "x": -80,
+            "y": -24
+          },
+          {
+            "x": -80,
+            "y": 112
+          },
+          {
+            "x": -47.64434766157852,
+            "y": 206.2463292258721
+          }
+        ],
+        "task": {
+          "type": "combat-position",
+          "x": -47.64434766157852,
+          "y": 206.2463292258721
+        },
+        "cooldown": 0,
+        "tool": 0,
+        "foldTime": 0,
+        "commandRevision": 1,
+        "navigation": {
+          "state": "YIELDING",
+          "reason": "junction-reservation",
+          "since": 9.599999999999982,
+          "stoppedSince": 9.599999999999982,
+          "control": "YIELDING",
+          "controlReason": "junction-reservation",
+          "blockerId": "u46",
+          "nextAction": "resume-when-clear",
+          "desiredSpeed": 30,
+          "speed": 0,
+          "waitSeconds": 0.3999999999999986,
+          "attempt": 0,
+          "potentialDefect": false,
+          "reported": false
+        },
+        "previousHeading": 0.6472316229900368,
+        "previousWheelDistance": 94.80571655617099,
+        "previousSteering": 2.1227142274779828e-7,
+        "driveSpeed": 0,
+        "retreatSuppressed": false,
+        "combatGroup": "combat-1",
+        "combatContactAt": 4.150000000000002,
+        "attackRouteTarget": {
+          "x": 0,
+          "y": 140
+        },
+        "steering": 1.4434456746850285e-7,
+        "reversing": false,
+        "wheelDistance": 94.80571655617099,
+        "combatDeployment": {
+          "targetId": "b65",
+          "group": "combat-1",
+          "angle": -1.5797019437698623,
+          "index": 34,
+          "slot": {
+            "x": -47.64434766157852,
+            "y": 206.2463292258721
+          },
+          "anchor": {
+            "x": 0,
+            "y": 140
+          },
+          "resume": {
+            "type": "attack",
+            "targetId": "b65",
+            "x": 0,
+            "y": 140,
+            "workOffset": 63
+          },
+          "retryAt": 4.100000000000001,
+          "status": "moving",
+          "goal": {
+            "x": -47.64434766157852,
+            "y": 206.2463292258721
+          }
+        },
+        "reverseDebt": 0,
+        "driveWatch": {
+          "x": -80,
+          "y": -24,
+          "distance": 73.18696816059645,
+          "elapsed": 0,
+          "blocked": 0,
+          "origin": {
+            "x": -20.97171748793934,
+            "y": -102.09580664703759
+          },
+          "attempts": 0,
+          "queued": true
+        }
+      },
+      {
+        "id": "u59",
+        "kind": "bukhanka",
+        "owner": "rai",
+        "x": 82.65477805093796,
+        "y": -0.38548157583046416,
+        "previousX": 82.1914369207216,
+        "previousY": -3.1915017678143722,
+        "hp": 320,
+        "maxHp": 320,
+        "heading": -0.16364727831536846,
+        "path": [
+          {
+            "x": 110.10507023750154,
+            "y": 165.85504801764742
+          }
+        ],
+        "task": {
+          "type": "combat-position",
+          "x": 110.10507023750154,
+          "y": 165.85504801764742
+        },
+        "cooldown": 0,
+        "tool": 0,
+        "foldTime": 0,
+        "commandRevision": 1,
+        "navigation": {
+          "state": "MOVING",
+          "reason": "following-route",
+          "since": 6.499999999999993,
+          "stoppedSince": null,
+          "control": null,
+          "controlReason": null,
+          "blockerId": null,
+          "nextAction": null,
+          "desiredSpeed": 30,
+          "speed": 28.44017285596483,
+          "waitSeconds": 0,
+          "attempt": 0,
+          "potentialDefect": false,
+          "reported": false
+        },
+        "previousHeading": -0.16364727899963702,
+        "previousWheelDistance": 159.76949440085636,
+        "previousSteering": 4.411590379116426e-9,
+        "driveSpeed": 28.44017285596483,
+        "retreatSuppressed": false,
+        "combatGroup": "combat-1",
+        "combatContactAt": 4.150000000000002,
+        "attackRouteTarget": {
+          "x": 0,
+          "y": 140
+        },
+        "reversing": false,
+        "steering": 2.815011819479185e-9,
+        "wheelDistance": 162.61351168645285,
+        "combatDeployment": {
+          "targetId": "b65",
+          "group": "combat-1",
+          "angle": -1.5797019437698623,
+          "index": 13,
+          "slot": {
+            "x": 110.10507023750154,
+            "y": 165.85504801764742
+          },
+          "anchor": {
+            "x": 0,
+            "y": 140
+          },
+          "resume": {
+            "type": "attack",
+            "targetId": "b65",
+            "x": 0,
+            "y": 140,
+            "workOffset": 99
+          },
+          "retryAt": 4.100000000000001,
+          "status": "moving",
+          "goal": {
+            "x": 110.10507023750154,
+            "y": 165.85504801764742
+          }
+        },
+        "reverseDebt": 0,
+        "driveWatch": {
+          "x": 110.10507023750154,
+          "y": 165.85504801764742,
+          "distance": 217.95478853179236,
+          "elapsed": 1.8000000000000005,
+          "blocked": 0,
+          "origin": {
+            "x": 63.23152744649682,
+            "y": -115.19610364506805
+          },
+          "attempts": 0,
+          "queued": false
+        }
+      },
+      {
+        "id": "u60",
+        "kind": "bukhanka",
+        "owner": "rai",
+        "x": -72.5363705962948,
+        "y": -74.5933437945429,
+        "previousX": -72.5363705962948,
+        "previousY": -74.5933437945429,
+        "hp": 320,
+        "maxHp": 320,
+        "heading": 0.19292916295332727,
+        "path": [
+          {
+            "x": -107.75798085773526,
+            "y": 105.65138195699913
+          }
+        ],
+        "task": {
+          "type": "combat-position",
+          "x": -107.75798085773526,
+          "y": 105.65138195699913
+        },
+        "cooldown": 0,
+        "tool": 0,
+        "foldTime": 0,
+        "commandRevision": 1,
+        "navigation": {
+          "state": "YIELDING",
+          "reason": "junction-reservation",
+          "since": 9.599999999999982,
+          "stoppedSince": 9.599999999999982,
+          "control": "YIELDING",
+          "controlReason": "junction-reservation",
+          "blockerId": "u49",
+          "nextAction": "resume-when-clear",
+          "desiredSpeed": 30,
+          "speed": 0,
+          "waitSeconds": 0.3999999999999986,
+          "attempt": 0,
+          "potentialDefect": false,
+          "reported": false
+        },
+        "previousHeading": 0.19292916295332727,
+        "previousWheelDistance": 122.12444092500714,
+        "previousSteering": 0.00001643217962661842,
+        "driveSpeed": 0,
+        "retreatSuppressed": false,
+        "combatGroup": "combat-1",
+        "combatContactAt": 4.250000000000002,
+        "attackRouteTarget": {
+          "x": 0,
+          "y": 140
+        },
+        "reversing": false,
+        "steering": 0.000011173882146100528,
+        "wheelDistance": 122.12444092500714,
+        "combatDeployment": {
+          "targetId": "b65",
+          "group": "combat-1",
+          "angle": -1.5797019437698623,
+          "index": 8,
+          "slot": {
+            "x": -107.75798085773526,
+            "y": 105.65138195699913
+          },
+          "anchor": {
+            "x": 0,
+            "y": 140
+          },
+          "resume": {
+            "type": "attack",
+            "targetId": "b65",
+            "x": 0,
+            "y": 140,
+            "workOffset": 153
+          },
+          "retryAt": 4.100000000000001,
+          "status": "moving",
+          "goal": {
+            "x": -107.75798085773526,
+            "y": 105.65138195699913
+          }
+        },
+        "reverseDebt": 0,
+        "driveWatch": {
+          "x": -107.75798085773526,
+          "y": 105.65138195699913,
+          "distance": 183.6538128944167,
+          "elapsed": 0,
+          "blocked": 0,
+          "origin": {
+            "x": -64.56325341337535,
+            "y": -116.07376414046522
+          },
+          "attempts": 0,
+          "queued": true
+        }
+      },
+      {
+        "id": "u61",
+        "kind": "bukhanka",
+        "owner": "rai",
+        "x": 50.765755486931894,
+        "y": -65.92930199381195,
+        "previousX": 50.765755486931894,
+        "previousY": -65.92930199381195,
+        "hp": 320,
+        "maxHp": 320,
+        "heading": -0.48513412458899985,
+        "path": [
+          {
+            "x": 56,
+            "y": -56
+          },
+          {
+            "x": 80,
+            "y": -24
+          },
+          {
+            "x": 80,
+            "y": 176
+          },
+          {
+            "x": 69.84345820534784,
+            "y": 182.19539484253977
+          }
+        ],
+        "task": {
+          "type": "combat-position",
+          "x": 69.84345820534784,
+          "y": 182.19539484253977
+        },
+        "cooldown": 0,
+        "tool": 0,
+        "foldTime": 0,
+        "commandRevision": 1,
+        "navigation": {
+          "state": "YIELDING",
+          "reason": "junction-reservation",
+          "since": 9.99999999999998,
+          "stoppedSince": 9.99999999999998,
+          "control": "YIELDING",
+          "controlReason": "junction-reservation",
+          "blockerId": "u55",
+          "nextAction": "resume-when-clear",
+          "desiredSpeed": 30,
+          "speed": 0,
+          "waitSeconds": 0,
+          "attempt": 0,
+          "potentialDefect": false,
+          "reported": false
+        },
+        "previousHeading": -0.48513412458899985,
+        "previousWheelDistance": 146.3862450119622,
+        "previousSteering": 0.00000335685665890928,
+        "driveSpeed": 0,
+        "retreatSuppressed": false,
+        "combatGroup": "combat-1",
+        "combatContactAt": 4.150000000000002,
+        "attackRouteTarget": {
+          "x": 0,
+          "y": 140
+        },
+        "steering": 0.0000022826625280583104,
+        "reversing": false,
+        "wheelDistance": 146.3862450119622,
+        "combatDeployment": {
+          "targetId": "b65",
+          "group": "combat-1",
+          "angle": -1.5797019437698623,
+          "index": 33,
+          "slot": {
+            "x": 69.84345820534784,
+            "y": 182.19539484253977
+          },
+          "anchor": {
+            "x": 0,
+            "y": 140
+          },
+          "resume": {
+            "type": "attack",
+            "targetId": "b65",
+            "x": 0,
+            "y": 140,
+            "workOffset": 117
+          },
+          "retryAt": 4.100000000000001,
+          "status": "moving",
+          "goal": {
+            "x": 69.84345820534784,
+            "y": 182.19539484253977
+          }
+        },
+        "reverseDebt": 0,
+        "driveWatch": {
+          "x": 56,
+          "y": -56,
+          "distance": 11.224453381207544,
+          "elapsed": 0,
+          "blocked": 0,
+          "origin": {
+            "x": 13.782467764916783,
+            "y": -135.53610237952194
+          },
+          "attempts": 0,
+          "queued": true
+        }
+      },
+      {
+        "id": "u62",
+        "kind": "bukhanka",
+        "owner": "rai",
+        "x": 61.31572523441995,
+        "y": -73.0320032100105,
+        "previousX": 61.29914947247731,
+        "previousY": -73.07550197179938,
+        "hp": 320,
+        "maxHp": 320,
+        "heading": -0.3640754180431645,
+        "path": [
+          {
+            "x": 80,
+            "y": -24
+          },
+          {
+            "x": 80.59088595398059,
+            "y": 152.79332252202278
+          }
+        ],
+        "task": {
+          "type": "combat-position",
+          "x": 80.59088595398059,
+          "y": 152.79332252202278
+        },
+        "cooldown": 0,
+        "tool": 0,
+        "foldTime": 0,
+        "commandRevision": 1,
+        "navigation": {
+          "state": "MOVING",
+          "reason": "following-route",
+          "since": 1.3,
+          "stoppedSince": null,
+          "control": null,
+          "controlReason": null,
+          "blockerId": null,
+          "nextAction": null,
+          "desiredSpeed": 30,
+          "speed": 0.46549953395733884,
+          "waitSeconds": 0,
+          "attempt": 0,
+          "potentialDefect": false,
+          "reported": false
+        },
+        "previousHeading": -0.36407541803191446,
+        "previousWheelDistance": 129.75771031901652,
+        "previousSteering": -2.9298598130944598e-9,
+        "driveSpeed": 0.4654995339573196,
+        "retreatSuppressed": false,
+        "combatGroup": "combat-1",
+        "combatContactAt": 4.250000000000002,
+        "attackRouteTarget": {
+          "x": 0,
+          "y": 140
+        },
+        "steering": -2.827628586832276e-9,
+        "reversing": false,
+        "wheelDistance": 129.80426027241225,
+        "combatDeployment": {
+          "targetId": "b65",
+          "group": "combat-1",
+          "angle": -1.5797019437698623,
+          "index": 31,
+          "slot": {
+            "x": 80.59088595398059,
+            "y": 152.79332252202278
+          },
+          "anchor": {
+            "x": 0,
+            "y": 140
+          },
+          "resume": {
+            "type": "attack",
+            "targetId": "b65",
+            "x": 0,
+            "y": 140,
+            "workOffset": 135
+          },
+          "retryAt": 4.100000000000001,
+          "status": "moving",
+          "goal": {
+            "x": 80.59088595398059,
+            "y": 152.79332252202278
+          }
+        },
+        "reverseDebt": 0,
+        "driveWatch": {
+          "x": 80,
+          "y": -24,
+          "distance": 52.51787033226719,
+          "elapsed": 0,
+          "blocked": 0,
+          "origin": {
+            "x": 37.63752981867161,
+            "y": -135.16961031010916
+          },
+          "attempts": 0,
+          "queued": true
+        }
+      },
+      {
+        "id": "u63",
+        "kind": "bukhanka",
+        "owner": "rai",
+        "x": 66.77762915275072,
+        "y": -98.29531652483433,
+        "previousX": 66.728206310312,
+        "previousY": -98.62280797368463,
+        "hp": 320,
+        "maxHp": 320,
+        "heading": -0.14978288447043167,
+        "path": [
+          {
+            "x": 93.03136269892799,
+            "y": 75.68222987089408
+          }
+        ],
+        "task": {
+          "type": "combat-position",
+          "x": 93.03136269892799,
+          "y": 75.68222987089408
+        },
+        "cooldown": 0,
+        "tool": 0,
+        "foldTime": 0,
+        "commandRevision": 1,
+        "navigation": {
+          "state": "MOVING",
+          "reason": "following-route",
+          "since": 7.699999999999989,
+          "stoppedSince": null,
+          "control": null,
+          "controlReason": null,
+          "blockerId": null,
+          "nextAction": null,
+          "desiredSpeed": 30,
+          "speed": 3.311997379600232,
+          "waitSeconds": 0,
+          "attempt": 0,
+          "potentialDefect": false,
+          "reported": false
+        },
+        "previousHeading": -0.14978333906899718,
+        "previousWheelDistance": 97.45854698513133,
+        "previousSteering": 0.000016288963789855284,
+        "driveSpeed": 3.311997379600207,
+        "retreatSuppressed": false,
+        "combatGroup": "combat-1",
+        "combatContactAt": 4.250000000000002,
+        "attackRouteTarget": {
+          "x": 0,
+          "y": 140
+        },
+        "reversing": false,
+        "steering": 0.00001605920116102555,
+        "wheelDistance": 97.78974672309135,
+        "combatDeployment": {
+          "targetId": "b65",
+          "group": "combat-1",
+          "angle": -1.5797019437698623,
+          "index": 7,
+          "slot": {
+            "x": 93.03136269892799,
+            "y": 75.68222987089408
+          },
+          "anchor": {
+            "x": 0,
+            "y": 140
+          },
+          "resume": {
+            "type": "attack",
+            "targetId": "b65",
+            "x": 0,
+            "y": 140,
+            "workOffset": 171
+          },
+          "retryAt": 4.100000000000001,
+          "status": "moving",
+          "goal": {
+            "x": 93.03136269892799,
+            "y": 75.68222987089408
+          }
+        },
+        "reverseDebt": 0,
+        "driveWatch": {
+          "x": 93.03136269892799,
+          "y": 75.68222987089408,
+          "distance": 176.278479270738,
+          "elapsed": 0,
+          "blocked": 0,
+          "origin": {
+            "x": 59.300901121916745,
+            "y": -147.31632245298863
+          },
+          "attempts": 0,
+          "queued": false
+        }
+      }
+    ],
+    "buildings": [
+      {
+        "id": "b64",
+        "kind": "factory",
+        "owner": "rai",
+        "x": 0,
+        "y": 40,
+        "rotation": 0,
+        "hp": 1400,
+        "maxHp": 1400,
+        "halfWidth": 63,
+        "halfDepth": 54,
+        "progress": 1,
+        "completed": true,
+        "queue": [],
+        "research": null,
+        "cooldown": 0
+      },
+      {
+        "id": "b65",
+        "kind": "camp-core",
+        "owner": "scavs",
+        "x": 0,
+        "y": 140,
+        "rotation": 0,
+        "hp": 99631,
+        "maxHp": 100000,
+        "halfWidth": 31.5,
+        "halfDepth": 27,
+        "progress": 1,
+        "completed": true,
+        "queue": [],
+        "research": null,
+        "cooldown": 0,
+        "damage": {
+          "version": 3,
+          "revision": 41,
+          "hits": 41,
+          "total": 369,
+          "burn": 0,
+          "wreck": false,
+          "cage": null,
+          "parts": {
+            "0": {
+              "damage": 1.4192307692307702,
+              "detached": false
+            }
+          },
+          "marks": [
+            {
+              "point": [
+                -3.9043508909158575,
+                -4.680000000000001,
+                1.344
+              ],
+              "normal": [
+                -0.6406056046504179,
+                -0.7678700796947829,
+                0
+              ],
+              "radius": 0.14,
+              "part": 0,
+              "kind": 0,
+              "material": 1
+            },
+            {
+              "point": [
+                3.9078178192380943,
+                -4.680000000000001,
+                1.344
+              ],
+              "normal": [
+                0.640940820751455,
+                -0.7675902971601785,
+                0
+              ],
+              "radius": 0.14,
+              "part": 0,
+              "kind": 0,
+              "material": 1
+            },
+            {
+              "point": [
+                -4.816238229207914,
+                -4.680000000000001,
+                1.344
+              ],
+              "normal": [
+                -0.7171775197754464,
+                -0.6968905259283836,
+                0
+              ],
+              "radius": 0.1484,
+              "part": 0,
+              "kind": 0,
+              "material": 1
+            },
+            {
+              "point": [
+                4.821574131039404,
+                -4.680000000000001,
+                1.344
+              ],
+              "normal": [
+                0.717563073140741,
+                -0.6964935290904113,
+                0
+              ],
+              "radius": 0.1484,
+              "part": 0,
+              "kind": 0,
+              "material": 1
+            },
+            {
+              "point": [
+                -5.46,
+                -4.151203378194863,
+                1.344
+              ],
+              "normal": [
+                -0.7960495643243626,
+                -0.6052314360135241,
+                0
+              ],
+              "radius": 0.1484,
+              "part": 0,
+              "kind": 0,
+              "material": 1
+            },
+            {
+              "point": [
+                5.46,
+                -4.14597785023738,
+                1.344
+              ],
+              "normal": [
+                0.7964166488844294,
+                -0.6047483124240158,
+                0
+              ],
+              "radius": 0.14,
+              "part": 0,
+              "kind": 0,
+              "material": 1
+            },
+            {
+              "point": [
+                3.81092665302549,
+                -4.680000000000001,
+                1.344
+              ],
+              "normal": [
+                0.6314332684585652,
+                -0.7754302208991685,
+                0
+              ],
+              "radius": 0.14,
+              "part": 0,
+              "kind": 0,
+              "material": 1
+            },
+            {
+              "point": [
+                -5.46,
+                -3.0732406912411565,
+                1.344
+              ],
+              "normal": [
+                -0.8714397407722403,
+                -0.49050257716225165,
+                0
+              ],
+              "radius": 0.1484,
+              "part": 0,
+              "kind": 0,
+              "material": 1
+            },
+            {
+              "point": [
+                5.46,
+                -3.0692334225684714,
+                1.344
+              ],
+              "normal": [
+                0.8717130742905319,
+                -0.49001664880996587,
+                0
+              ],
+              "radius": 0.1484,
+              "part": 0,
+              "kind": 0,
+              "material": 1
+            },
+            {
+              "point": [
+                4.712333004831285,
+                -4.680000000000001,
+                1.344
+              ],
+              "normal": [
+                0.7095367843838337,
+                -0.7046683983309092,
+                0
+              ],
+              "radius": 0.14,
+              "part": 0,
+              "kind": 0,
+              "material": 1
+            },
+            {
+              "point": [
+                -5.46,
+                -2.064324778218242,
+                1.344
+              ],
+              "normal": [
+                -0.935378151814548,
+                -0.35364913842394724,
+                0
+              ],
+              "radius": 0.14,
+              "part": 0,
+              "kind": 0,
+              "material": 1
+            },
+            {
+              "point": [
+                5.46,
+                -2.0619954256746635,
+                1.344
+              ],
+              "normal": [
+                0.9355101100281988,
+                -0.3532999207968032,
+                0
+              ],
+              "radius": 0.14,
+              "part": 0,
+              "kind": 0,
+              "material": 1
+            },
+            {
+              "point": [
+                5.46,
+                -4.238521696085034,
+                1.344
+              ],
+              "normal": [
+                0.7899229320397362,
+                -0.6132061329094373,
+                0
+              ],
+              "radius": 0.14,
+              "part": 0,
+              "kind": 0,
+              "material": 1
+            },
+            {
+              "point": [
+                -5.46,
+                -1.1180275606200465,
+                1.344
+              ],
+              "normal": [
+                -0.9796723071776008,
+                -0.20060451278402638,
+                0
+              ],
+              "radius": 0.14,
+              "part": 0,
+              "kind": 0,
+              "material": 1
+            },
+            {
+              "point": [
+                5.46,
+                -1.117744117690001,
+                1.344
+              ],
+              "normal": [
+                0.9796823008921152,
+                -0.20055570128702763,
+                0
+              ],
+              "radius": 0.14,
+              "part": 0,
+              "kind": 0,
+              "material": 1
+            },
+            {
+              "point": [
+                -5.46,
+                -0.6985398500138886,
+                1.344
+              ],
+              "normal": [
+                -0.991915088697311,
+                -0.1269033364991079,
+                0
+              ],
+              "radius": 0.16519999999999999,
+              "part": 0,
+              "kind": 0,
+              "material": 1
+            },
+            {
+              "point": [
+                5.46,
+                -0.7209596328403273,
+                1.344
+              ],
+              "normal": [
+                0.991394574121366,
+                -0.13090759490081227,
+                0
+              ],
+              "radius": 0.16519999999999999,
+              "part": 0,
+              "kind": 0,
+              "material": 1
+            },
+            {
+              "point": [
+                -5.46,
+                -2.178105452728895,
+                1.344
+              ],
+              "normal": [
+                -0.9288220624822576,
+                -0.3705260803859898,
+                0
+              ],
+              "radius": 0.14,
+              "part": 0,
+              "kind": 0,
+              "material": 1
+            },
+            {
+              "point": [
+                5.46,
+                -2.399158560152633,
+                1.344
+              ],
+              "normal": [
+                0.915515276278126,
+                -0.4022832073320817,
+                0
+              ],
+              "radius": 0.16519999999999999,
+              "part": 0,
+              "kind": 0,
+              "material": 1
+            },
+            {
+              "point": [
+                -5.46,
+                -1.8190702659717002,
+                1.344
+              ],
+              "normal": [
+                -0.9487317521941494,
+                -0.3160823664468152,
+                0
+              ],
+              "radius": 0.1568,
+              "part": 0,
+              "kind": 0,
+              "material": 1
+            },
+            {
+              "point": [
+                -3.7579574420091166,
+                -4.680000000000001,
+                1.344
+              ],
+              "normal": [
+                -0.6261119716019785,
+                -0.779733158854158,
+                0
+              ],
+              "radius": 0.14,
+              "part": 0,
+              "kind": 0,
+              "material": 1
+            },
+            {
+              "point": [
+                5.46,
+                -4.582522160150717,
+                1.344
+              ],
+              "normal": [
+                0.7659727229816616,
+                -0.6428730727352475,
+                0
+              ],
+              "radius": 0.1484,
+              "part": 0,
+              "kind": 0,
+              "material": 1
+            },
+            {
+              "point": [
+                3.153912613196218,
+                -4.680000000000001,
+                1.344
+              ],
+              "normal": [
+                0.5588534096411205,
+                -0.8292664629252133,
+                0
+              ],
+              "radius": 0.14,
+              "part": 0,
+              "kind": 0,
+              "material": 1
+            },
+            {
+              "point": [
+                -4.452226626903731,
+                -4.680000000000001,
+                1.344
+              ],
+              "normal": [
+                -0.6892559710234992,
+                -0.7245179131039157,
+                0
+              ],
+              "radius": 0.14,
+              "part": 0,
+              "kind": 0,
+              "material": 1
+            }
+          ],
+          "lastImpact": {
+            "direction": [
+              -0.7659727229816615,
+              0.6428730727352474,
+              0
+            ],
+            "power": 9,
+            "partId": 0
+          }
+        }
+      }
+    ],
+    "camps": [],
+    "artifacts": [],
+    "research": {},
+    "artifactKeys": [],
+    "seenCinematics": [],
+    "pendingCinematics": [],
+    "flags": {},
+    "statistics": {
+      "produced": 0,
+      "buildingsCompleted": 0,
+      "enemiesDestroyed": 0
+    },
+    "bounds": [
+      0,
+      0,
+      127,
+      127
+    ],
+    "salvage": {
+      "enabled": true,
+      "recipes": [
+        "hood-guard",
+        "window-grille"
+      ],
+      "wanted": [
+        "hood-guard",
+        "window-grille"
+      ],
+      "items": [],
+      "serial": 0,
+      "preferenceVersion": 1
+    },
+    "designs": [
+      {
+        "id": "bukhanka",
+        "name": "Пулемёт",
+        "components": [
+          "C01",
+          "B01",
+          "U01"
+        ]
+      },
+      {
+        "id": "builder",
+        "name": "Строитель",
+        "components": [
+          "C01",
+          "B01",
+          "U25"
+        ]
+      }
+    ],
+    "scavRosterVersion": 1,
+    "projectiles": [],
+    "raidReserve": [
+      "u30",
+      "u31",
+      "u32",
+      "u33"
+    ],
+    "commandOrders": [
+      {
+        "revision": 1,
+        "key": "u44,u45,u46,u47,u48,u49,u50,u51,u52,u53,u54,u55,u56,u57,u58,u59,u60,u61,u62,u63|",
+        "ids": [
+          "u44",
+          "u45",
+          "u46",
+          "u47",
+          "u48",
+          "u49",
+          "u50",
+          "u51",
+          "u52",
+          "u53",
+          "u54",
+          "u55",
+          "u56",
+          "u57",
+          "u58",
+          "u59",
+          "u60",
+          "u61",
+          "u62",
+          "u63"
+        ],
+        "action": "attack",
+        "target": {
+          "x": 0,
+          "y": 140,
+          "id": "b65"
+        },
+        "queuedAt": 0,
+        "status": "complete",
+        "assigned": [
+          "u45",
+          "u46",
+          "u44",
+          "u47",
+          "u49",
+          "u50",
+          "u48",
+          "u51",
+          "u53",
+          "u54",
+          "u52",
+          "u55",
+          "u57",
+          "u58",
+          "u56",
+          "u59",
+          "u61",
+          "u62",
+          "u60",
+          "u63"
+        ],
+        "priority": 0,
+        "cohorts": [],
+        "atomic": false,
+        "failures": {},
+        "result": {
+          "ok": true,
+          "assigned": 20,
+          "unassigned": []
+        },
+        "signature": "3|0|0|127|127"
+      }
+    ],
+    "commandRevision": 1,
+    "combatOrderSerial": 1,
+    "trafficControl": {
+      "version": 1,
+      "leases": [
+        {
+          "key": "u46|u53",
+          "a": "u46",
+          "b": "u53",
+          "winner": "u53",
+          "expires": 5.3,
+          "grantedAt": 1.3,
+          "zone": {
+            "x": -74.28129039576513,
+            "y": -32.683252665171125,
+            "nx": -0.11863299571855462,
+            "ny": -0.9929381714522014,
+            "width": 10.226549588750236,
+            "exitSign": -1,
+            "ux": -0.5500221025749241,
+            "uy": 0.8351500982931508,
+            "ownerWidth": 5.972559239787414,
+            "goalX": -94.16212473302424,
+            "goalY": 77.34934744344329,
+            "waypointX": -80,
+            "waypointY": -24
+          }
+        },
+        {
+          "key": "u46|u56",
+          "a": "u46",
+          "b": "u56",
+          "winner": "u46",
+          "expires": 6.800000000000001,
+          "grantedAt": 2.800000000000001,
+          "zone": {
+            "x": -76.72238067113997,
+            "y": -32.3144370022878,
+            "nx": -0.9804100543123317,
+            "ny": -0.1969673206480982,
+            "width": 7.323947583731883,
+            "exitSign": 1,
+            "ux": -0.995429801185306,
+            "uy": 0.09549613035187487,
+            "ownerWidth": 5.323777351025235,
+            "goalX": 79.47716255779822,
+            "goalY": 121.50836319409993,
+            "waypointX": -80,
+            "waypointY": -32
+          }
+        },
+        {
+          "key": "u46|u58",
+          "a": "u46",
+          "b": "u58",
+          "winner": "u46",
+          "expires": 6.900000000000001,
+          "grantedAt": 2.9000000000000012,
+          "zone": {
+            "x": -73.4814057716264,
+            "y": -32.625006058585114,
+            "nx": -0.797781764284297,
+            "ny": -0.6029463131784074,
+            "width": 7.329828025663357,
+            "exitSign": 1,
+            "ux": -0.9954349164316328,
+            "uy": 0.09544279516416061,
+            "ownerWidth": 5.3196814215153205,
+            "goalX": 79.47716255779822,
+            "goalY": 121.50836319409993,
+            "waypointX": -80,
+            "waypointY": -32
+          }
+        },
+        {
+          "key": "u46|u60",
+          "a": "u46",
+          "b": "u60",
+          "winner": "u46",
+          "expires": 8.200000000000001,
+          "grantedAt": 4.200000000000001,
+          "zone": {
+            "x": -80.95973606303113,
+            "y": -31.908109532215818,
+            "nx": -0.9815477265273787,
+            "ny": -0.19121731236719705,
+            "width": 7.521886580527825,
+            "exitSign": 1,
+            "ux": -0.9954476691094809,
+            "uy": 0.09530969554301065,
+            "ownerWidth": 5.310424450434779,
+            "goalX": 79.47716255779822,
+            "goalY": 121.50836319409993,
+            "waypointX": -80,
+            "waypointY": -32
+          }
+        },
+        {
+          "key": "u55|u59",
+          "a": "u55",
+          "b": "u59",
+          "winner": "u59",
+          "expires": 9.199999999999998,
+          "grantedAt": 5.1999999999999975,
+          "zone": {
+            "x": 78.54177527408388,
+            "y": -25.27178188466393,
+            "nx": -0.6572846662150595,
+            "ny": 0.7536424003189827,
+            "width": 10.88368763186035,
+            "exitSign": 1,
+            "ux": 0.1629363164994982,
+            "uy": 0.9866365879925473,
+            "ownerWidth": 5.303842203918035,
+            "goalX": 110.10507023750154,
+            "goalY": 165.85504801764742,
+            "waypointX": 110.10507023750154,
+            "waypointY": 165.85504801764742
+          }
+        },
+        {
+          "key": "u49|u56",
+          "a": "u49",
+          "b": "u56",
+          "winner": "u56",
+          "expires": 10.499999999999993,
+          "grantedAt": 6.499999999999993,
+          "zone": {
+            "x": -75.13513153513343,
+            "y": -35.2562077474968,
+            "nx": -0.5562321719322614,
+            "ny": -0.8310269375342288,
+            "width": 11.786564467829868,
+            "exitSign": -1,
+            "ux": -0.17570973122860323,
+            "uy": 0.9844420198018631,
+            "ownerWidth": 5.347161758257167,
+            "goalX": -109.6271198692547,
+            "goalY": 167.81195047406896,
+            "waypointX": -80,
+            "waypointY": -8
+          }
+        },
+        {
+          "key": "u49|u60",
+          "a": "u49",
+          "b": "u60",
+          "winner": "u49",
+          "expires": 10.499999999999993,
+          "grantedAt": 6.499999999999993,
+          "zone": {
+            "x": -80.99515319855524,
+            "y": -31.33391301769334,
+            "nx": -0.981444790230568,
+            "ny": -0.19174494446862614,
+            "width": 7.3333728527613005,
+            "exitSign": 1,
+            "ux": -0.8310269375342288,
+            "uy": 0.5562321719322614,
+            "ownerWidth": 9.761564467829867,
+            "goalX": -79.7938976766087,
+            "goalY": 98.1768077508949,
+            "waypointX": -80,
+            "waypointY": -32
+          }
+        },
+        {
+          "key": "u55|u61",
+          "a": "u55",
+          "b": "u61",
+          "winner": "u55",
+          "expires": 10.499999999999993
+        },
+        {
+          "key": "u46|u49",
+          "a": "u46",
+          "b": "u49",
+          "winner": "u46",
+          "expires": 10.599999999999993
+        },
+        {
+          "key": "u49|u58",
+          "a": "u49",
+          "b": "u58",
+          "winner": "u49",
+          "expires": 11.19999999999999
+        },
+        {
+          "key": "u61|u62",
+          "a": "u61",
+          "b": "u62",
+          "winner": "u61",
+          "expires": 11.39999999999999
+        },
+        {
+          "key": "u62|u63",
+          "a": "u62",
+          "b": "u63",
+          "winner": "u62",
+          "expires": 12.399999999999986
+        }
+      ],
+      "waiting": {
+        "u46": 5.599999999999996,
+        "u56": 8.099999999999987,
+        "u55": 7.599999999999989,
+        "u61": 9.99999999999998,
+        "u62": 9.99999999999998
+      },
+      "passages": []
+    }
+  }
+}

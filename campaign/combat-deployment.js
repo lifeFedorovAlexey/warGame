@@ -3,6 +3,7 @@ import {assignFormation,assignFormationSteps} from './formation-assignment.js';
 import {checkManeuver} from './vehicle-motion.js';
 import {navigationDecision} from './navigation-state.js';
 import {movementCombatTarget} from './combat-orders.js';
+import {checkedCycleActive} from './traffic-cycle.js';
 
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const combatTask=task=>['attack','attack-move'].includes(task?.type);
@@ -66,6 +67,7 @@ function slotCost(unit,point,scale){
 function* beginDeployment(mission,unit,target){
   const members=mission.state.units.filter(other=>other.owner===unit.owner&&other.hp>0
     &&other.combatGroup===unit.combatGroup&&combatTask(other.task)&&!other.pendingOrder&&!other.combatRetreat&&!other.combatDeployment
+    &&!checkedCycleActive(mission,other)
     &&(other.task.type==='attack'||combatPolicy(other).response!=='ignore')
     &&(other.task.type==='attack'||!other.combatDisengage?.includes(target.id))
     &&distance(other,unit)<mission.unitSpec(unit).vision*3)
@@ -139,6 +141,10 @@ function resumeMarch(mission,unit,all){
 }
 export function* updateCombatDeployment(mission,unit,spec,dt){
   if(unit.owner!=='rai'||!unit.combatGroup)return false;
+  if(checkedCycleActive(mission,unit)){
+    const enemy=automaticCombatTarget(mission,unit,spec);if(enemy)mission.attack(unit,enemy,spec);
+    yield* mission.moveSteps(unit,dt);return true;
+  }
   if(unit.combatResume){
     const resume=unit.combatResume,task=unit.task;
     const enemy=automaticCombatTarget(mission,unit,spec);if(enemy)mission.attack(unit,enemy,spec);
@@ -269,6 +275,10 @@ export function* updateCombatDeployment(mission,unit,spec,dt){
 export function* updateCombatParking(mission,unit){
   const scale=mission.config.worldScale,now=mission.state.time;
   if(!unit.combatGroup||unit.task?.type!=='attack-move'||unit.passage||unit.combatResume||unit.combatDeployment)return;
+  // A fresh player order already owns a feasible arrival slot. Use ordinary
+  // exact-goal recovery for it, instead of creating an adaptive combat slot
+  // merely because the order is named attack-move.
+  if(unit.routeOrder&&!unit.combatParking)return;
   // Older saves and a march without a preceding encounter use the same
   // arrival contract once they enter the destination area.
   const parking=unit.combatParking??={anchor:{x:unit.task.x,y:unit.task.y},goal:{x:unit.task.x,y:unit.task.y},

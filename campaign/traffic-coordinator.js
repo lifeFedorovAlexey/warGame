@@ -135,7 +135,7 @@ export class TrafficCoordinator{
   }
   const plans=new Map();
   for(const u of living){
-   if(!u.path?.length||u.builderWorking||u.detour||u.trafficHold)continue;
+   if(!u.path?.length||u.builderWorking||u.detour||u.trafficHold||u.traffic?.cycle&&u.traffic.phase==='parked')continue;
    const target=u.path[0],d=distance(target,u);if(d<.1)continue;
    const direct={x:(target.x-u.x)/d,y:(target.y-u.y)/d};
    const intent=mission.drivingIntent(u,target,direct,scale),course=intent.course;this.intents.set(u.id,intent);

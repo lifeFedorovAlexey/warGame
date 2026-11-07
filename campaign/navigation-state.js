@@ -53,28 +53,40 @@ export function navigationSnapshot(mission,unit){
   reservation:passage&&unit.passage?.throat?{...passage,throat:unit.passage.throat}:null};
 }
 
-export function auditNavigationWaits(mission){
- const waiting=mission.state.units.filter(u=>u.hp>0&&(u.navigation?.waitSeconds??0)>.50001);
- const diagnostics=mission.navigationDiagnostics??={cycles:[],unexplained:[],reportedCycles:new Set()};
- diagnostics.unexplained=waiting.filter(u=>u.navigation.reason==='unclassified-stop').map(u=>u.id);
- diagnostics.cycles=[];
- if(!waiting.length){diagnostics.reportedCycles.clear();return;}
- const byId=new Map(waiting.map(u=>[u.id,u])),done=new Set(),present=new Set();
- for(const unit of waiting){
+function dependencyCycles(units){
+ const byId=new Map(units.map(u=>[u.id,u])),done=new Set(),cycles=[];
+ for(const unit of units){
   if(done.has(unit.id))continue;
   const path=[],indices=new Map();let current=unit;
   while(current&&!done.has(current.id)){
    if(indices.has(current.id)){
-    const cycle=path.slice(indices.get(current.id)),key=cycle.map(u=>u.id).sort().join('|');present.add(key);
-    diagnostics.cycles.push(cycle.map(u=>u.id));
-    for(const member of cycle){member.navigation.potentialDefect=true;member.navigation.nextAction='break-wait-cycle';}
-    if(!diagnostics.reportedCycles.has(key))mission.emit('navigation-wait-cycle',{units:cycle.map(u=>u.id)});
-    break;
+    cycles.push(path.slice(indices.get(current.id)));break;
    }
    indices.set(current.id,path.length);path.push(current);
    current=byId.get(current.navigation.blockerId);
   }
   for(const member of path)done.add(member.id);
+ }
+ return cycles;
+}
+export function auditNavigationWaits(mission){
+ const waiting=mission.state.units.filter(u=>u.hp>0&&(u.navigation?.waitSeconds??0)>.50001);
+ const diagnostics=mission.navigationDiagnostics??={cycles:[],unexplained:[],reportedCycles:new Set()};
+ diagnostics.unexplained=waiting.filter(u=>u.navigation.reason==='unclassified-stop').map(u=>u.id);
+ diagnostics.cycles=[];
+ // Recovery reacts to the actual dependency event. The original half-second
+ // diagnostic graph is kept separate and includes idle yield/return bodies.
+ const dependent=mission.state.units.filter(u=>u.hp>0&&u.path.length&&u.navigation?.blockerId
+  &&(u.navigation.speed??0)<.01);
+ diagnostics.recoveryCycles=dependencyCycles(dependent).map(cycle=>cycle.map(u=>u.id));
+ const cycleIds=new Set(diagnostics.recoveryCycles.flat());
+ diagnostics.recoveryRoutes=new Map(dependent.filter(u=>cycleIds.has(u.id)).map(u=>[u.id,JSON.stringify([u.task,u.path,u.commandRevision])]));
+ const present=new Set();
+ for(const cycle of dependencyCycles(waiting)){
+  const key=cycle.map(u=>u.id).sort().join('|');present.add(key);
+  diagnostics.cycles.push(cycle.map(u=>u.id));
+  for(const member of cycle){member.navigation.potentialDefect=true;member.navigation.nextAction='break-wait-cycle';}
+  if(!diagnostics.reportedCycles.has(key))mission.emit('navigation-wait-cycle',{units:cycle.map(u=>u.id)});
  }
  diagnostics.reportedCycles=present;
 }
