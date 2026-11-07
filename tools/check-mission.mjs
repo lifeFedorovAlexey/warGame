@@ -66,6 +66,21 @@ assert(traffic.order([climbingVan.id],'move',newGoal).ok,'A van on a steep cell 
 for(let step=0;step<120;step++)traffic.advance(.1);
 assert(Math.hypot(climbingVan.x-slopeStart.x,climbingVan.y-slopeStart.y)>60
  &&traffic.nav.allowed(...traffic.nav.grid(climbingVan.x,climbingVan.y)),'The van must drive off the slope onto its new route');
+const turningStart={x:-808.7961,y:460.1537,heading:slopeStart.heading};
+const emptyPass=new Mission(config,field);
+emptyPass.state.units=emptyPass.state.units.filter(u=>u.owner==='rai'&&u.kind==='builder');
+emptyPass.state.buildings=emptyPass.state.buildings.filter(b=>b.campId==='west-south');
+emptyPass.state.bounds=config.finalMapBounds.slice();
+emptyPass.rebuildNavigation();
+const turningVan=emptyPass.addUnit('bukhanka','rai',turningStart,{heading:turningStart.heading});
+assert(!emptyPass.vehiclePath(turningVan,newGoal),'Fixture needs a slope with no straight entry to the route grid');
+assert(emptyPass.order([turningVan.id],'move',newGoal).ok&&turningVan.detour,'The replacement order needs a checked exit arc');
+for(let step=0;step<140;step++){
+ emptyPass.advance(.1);
+ assert(Math.hypot(turningVan.x-turningVan.previousX,turningVan.y-turningVan.previousY)<8,'The slope escape must be driven');
+}
+assert(Math.hypot(turningVan.x-turningStart.x,turningVan.y-turningStart.y)>60
+ &&emptyPass.nav.allowed(...emptyPass.nav.grid(turningVan.x,turningVan.y)),`The arc must reach the route (${turningVan.x}, ${turningVan.y})`);
 function dismiss(){for(const key of [...mission.state.pendingCinematics]){seen.push({key,time:mission.state.time});mission.finishCinematic(key);}}
 const mechanics={workSteps:0,constructionGated:true,repairGated:true,interruptProjection:false,movingRepair:false,builderHandoff:false};
 function step(){

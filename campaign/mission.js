@@ -419,7 +419,31 @@ export class Mission{
     }
    }
    if(egress&&!viaPassage)continue;
-   const path=action==='attack'?this.attackPath(unit,target,reserved):['build','repair'].includes(action)?this.workPath(unit,target,workOffset):roadPath??viaPassage??this.movePath(unit,formation,reserved,parkingRadius)??this.movePath(unit,goal,reserved,parkingRadius);
+   let path=action==='attack'?this.attackPath(unit,target,reserved):['build','repair'].includes(action)?this.workPath(unit,target,workOffset):roadPath??viaPassage??this.movePath(unit,formation,reserved,parkingRadius)??this.movePath(unit,goal,reserved,parkingRadius);
+   let remainingEscape=null;
+   if(!path&&travel){
+    const [startCol,startRow]=this.nav.grid(unit.x,unit.y);
+    if(this.nav.walkable[startRow*this.nav.size+startCol])continue;
+    // A checked exit and turn can reach the grid even if no straight entry does.
+    const scale=this.config.worldScale,allowed=(from,to)=>this.vehicleMotionClear(unit,from,to,.60);
+    const starts=[];
+    if(unit.detour?.rough&&!unit.detour.parking)starts.push(unit.detour.legs);
+    const limit=Math.tan(.67),curves=[0,-limit/2,limit/2,-limit,limit];
+    for(const length of [2,3,5,7])for(const curve of curves)starts.push([{direction:1,curve,remaining:scale*length}]);
+    const reverse=Math.min(scale*2,Math.max(0,scale*4-(unit.reverseDebt??0)));
+    if(reverse>=scale)for(const curve of curves)starts.push([{direction:-1,curve,remaining:reverse}]);
+    for(const legs of starts){
+     const exit=checkManeuver(unit,legs,scale,allowed);
+     if(!exit)continue;
+     const onwardPath=this.movePath(exit,formation,reserved,parkingRadius)??this.movePath(exit,goal,reserved,parkingRadius);
+     if(!onwardPath?.length)continue;
+     const turn=planManeuver(exit,onwardPath[0],{scale,allowed,attempts:2,reverseBudget:0,maximumLegs:5});
+     if(!turn)continue;
+     path=onwardPath;
+     remainingEscape={legs:[...legs,...turn],parking:false,rough:true,blocked:0};
+     break;
+    }
+   }
    if(!path)continue;
    const destination=travel?path.at(-1)??goal:goal;
    if(travel||action==='attack')reserved.push(path.at(-1)??unit);
@@ -442,6 +466,7 @@ export class Mission{
    }
    else delete unit.routeOrder;
    unit.path=path;unit.task={type:action,targetId,x:destination.x,y:destination.y,workOffset};
+   if(remainingEscape)unit.detour=remainingEscape;
    if(action==='build')unit.resumeConstructionId=target.id;
    assigned.add(unit.id);
   }
