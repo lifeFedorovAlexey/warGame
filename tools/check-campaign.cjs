@@ -42,6 +42,20 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   catch(error){throw new Error(errors.join('\n')||JSON.stringify(await page.evaluate(()=>({hidden:document.querySelector('#build-palette').hidden,imgs:[...document.querySelectorAll('#build-cards img')].map(i=>i.naturalWidth),selection:window.campaign.selected}))),{cause:error});}
   fs.mkdirSync('campaign/previews',{recursive:true});
   await page.screenshot({path:'campaign/previews/field-building-cards.png'});
+  const viewport=page.viewportSize();
+  await page.setViewportSize({width:800,height:600});
+  const buildLayout=await page.evaluate(()=>{
+   const tray=document.querySelector('#build-palette');
+   const commands=document.querySelector('#commands').getBoundingClientRect();
+   const orders=document.querySelector('.order-bar').getBoundingClientRect();
+   const x=(commands.right+orders.right)/2,y=(orders.top+orders.bottom)/2;
+   const rows=new Set([...tray.querySelectorAll('#build-cards button')].map(card=>card.getBoundingClientRect().top));
+   return {rows:rows.size,scroll:tray.scrollHeight>tray.clientHeight,
+    mapClick:x>orders.right&&document.elementFromPoint(x,y)===document.querySelector('#world canvas')};
+  });
+  assert.deepEqual(buildLayout,{rows:1,scroll:false,mapClick:true},
+   'The compact build tray leaves the empty part of the dock clickable on the map');
+  await page.setViewportSize(viewport);
   await page.getByRole('button',{name:/^Генератор/}).click();
   await page.locator('#suggest-site').click();
   const position=await page.evaluate(()=>{const w=window.campaign.world;return w.screen(w.controls.target,0);});
