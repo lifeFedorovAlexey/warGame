@@ -3,6 +3,7 @@ import {sweepAvoidsFootprint, vehicleSweep} from './vehicle-collision.js';
 import {buildTerrainPassability} from './terrain-passability.js';
 
 const climbableGrade = .52;
+const edgeCheckTimes=[0,1,.25,.75];
 const completeSteps=iterator=>{let step;do{step=iterator.next();}while(!step.done);return step.value;};
 
 // A* on a cached terrain grid. Dynamic building footprints are rasterized once
@@ -155,7 +156,30 @@ export class TerrainNavigator{
   return best;
  }
  nearest(x,y,maxRadius=12){const [cx,cy]=this.grid(x,y);for(let r=0;r<=maxRadius;r++){let best=null,distance=Infinity;for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(r&&Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const col=cx+dx,row=cy+dy;if(!this.allowed(col,row))continue;const p=this.position(col,row),d=Math.hypot(p.x-x,p.y-y);if(d<distance){distance=d;best={...p,col,row};}}if(best)return best;}return null;}
+ terrainGridEdgeClear(a,b,maximumGrade){
+  const field=this.field,half=field.half,cell=this.cell,dx=b.x-a.x,dy=b.y-a.y;
+  // On matching triangle/grid vertices, all eight neighbouring edges split
+  // only at t=.5. Retain exactly the old endpoint and interval-midpoint tests.
+  for(const t of edgeCheckTimes){
+   const x=a.x+dx*t,y=a.y+dy*t;
+   if(!this.terrainAllowed(x,y))return false;
+   const col=Math.round((x+half)/cell),row=Math.round((half-y)/cell);
+   if(!this.walkable[row*this.size+col])return false;
+  }
+  const length=Math.max(1e-7,Math.hypot(dx,dy)/2),first=field.heightAt(a.x,a.y),middle=field.heightAt(a.x+dx*.5,a.y+dy*.5);
+  if(Math.abs(middle-first)/length>maximumGrade+.00001)return false;
+  return !(Math.abs(field.heightAt(b.x,b.y)-middle)/length>maximumGrade+.00001);
+ }
  lineClear(a,b,terrainOnly=false,leaveGridEdge=false,maximumGrade=climbableGrade,physical=false,checkOccupancy=false,terrainEscape=null){
+  if(terrainOnly&&!leaveGridEdge&&!physical&&!checkOccupancy&&!terrainEscape&&this.field.renderCell===this.cell
+   &&this.field.renderSize===this.size&&this.field.extent===(this.size-1)*this.cell&&this.field.half===this.field.extent/2){
+   const half=this.field.half,cell=this.cell,ac=(a.x+half)/cell,ar=(half-a.y)/cell,bc=(b.x+half)/cell,br=(half-b.y)/cell;
+   if(Number.isInteger(ac)&&Number.isInteger(ar)&&Number.isInteger(bc)&&Number.isInteger(br)
+    &&ac>=0&&ar>=0&&bc>=0&&br>=0&&ac<this.size&&ar<this.size&&bc<this.size&&br<this.size
+    &&Math.max(Math.abs(ac-bc),Math.abs(ar-br))===1
+    &&a.x===ac*cell-half&&a.y===half-ar*cell&&b.x===bc*cell-half&&b.y===half-br*cell)
+    return this.terrainGridEdgeClear(a,b,maximumGrade);
+  }
   const length=Math.hypot(b.x-a.x,b.y-a.y),times=[0,1],half=this.field.half,cell=this.field.renderCell??this.cell;
   if([a,b].some(point=>Math.abs(point.x)>half||Math.abs(point.y)>half))return false;
   // Height is affine within each heightfield triangle. Split exactly at its X,
