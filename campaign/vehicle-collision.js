@@ -121,7 +121,8 @@ export function clearOfVehicles(unit, next, units, scale, strict = false, previo
           && final > initial + .000001) continue;
       // A legacy save may contain two parallel, interpenetrating vans. A
       // straight exit can keep their side gap constant before the ends clear.
-      const straightTolerance = initial < 0 ? .00018 : .000001;
+      // Ground-following pitch and roll can vary the projected gap slightly.
+      const straightTolerance = initial < 0 ? .0005 : .000001;
       if (initial < minimum + sweep.padding && middle >= initial - straightTolerance
           && final >= initial - straightTolerance
           && Math.abs(sweep.start.c * end.s - sweep.start.s * end.c) < .000001) continue;

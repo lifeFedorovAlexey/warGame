@@ -134,22 +134,25 @@ assert(touching.min>0);
 assert.equal(oldSave.complete,2);
 assert(oldSave.min>=oldSave.initial-.00001);
 
-function boxed({builders=false,overlap=false}={}){
- const m=session({...field,roadNetwork:null,roadBlendAt:null});
- const centreId=m.addUnit('bukhanka','rai',{x:0,y:0}).id,others=[];
+function boxed({builders=false,overlap=false,terrain,origin={x:0,y:0}}={}){
+ const m=terrain?session(terrain,alphaConfig):session({...field,roadNetwork:null,roadBlendAt:null});
+ const centreId=m.addUnit('bukhanka','rai',origin).id,others=[];
  for(let x=-1;x<=1;x++)for(let y=-1;y<=1;y++){
   if(!x&&!y)continue;
-  const point={x:x*(overlap?10.3:10.95),y:y*(overlap?21.3:22.15)};
+  const point={x:origin.x+x*(overlap?10.3:10.95),y:origin.y+y*(overlap?21.3:22.15)};
   others.push({point,id:m.addUnit(builders&&x===0?'builder':'bukhanka','rai',point).id});
  }
  if(overlap)m.load(m.save());
  const centre=m.entity(centreId),parked=others.map(({id})=>m.entity(id));
  const units=[centre,...parked];
- const initial=Math.min(...parked.map(unit=>vehicleClearance(centre,unit,scale,m.field)));
- assert(m.order([centre.id],builders?'attack-move':'move',{x:135,y:0}).ok);
+ let initial=Infinity;
+ for(let i=0;i<units.length;i++)for(let j=0;j<i;j++)
+  initial=Math.min(initial,vehicleClearance(units[i],units[j],scale,m.field));
+ const goal={x:origin.x+135,y:origin.y};
+ assert(m.order([centre.id],builders?'attack-move':'move',goal).ok);
  const out=sample(m,units,40);
  assert.equal(out.complete,9);
- assert(Math.hypot(centre.x-135,centre.y)<3,'The boxed vehicle reaches its original order');
+ assert(Math.hypot(centre.x-goal.x,centre.y-goal.y)<3,'The boxed vehicle reaches its original order');
  assert(overlap?out.gap>=initial-.00001:out.gap>0,'Recovery does not introduce deeper vehicle overlap');
  const yielded=others.filter(({point},i)=>Math.hypot(parked[i].x-point.x,parked[i].y-point.y)>1).length;
  assert.equal(yielded,1,'One parked ally opens the aisle even after loading an overlapping formation');
@@ -163,6 +166,7 @@ const source=createHeightfield(json('assets/maps/alpha/heightfield.json'));
 shapeMesaRims(source);
 const alpha=refineRoadHeightfield(source);
 applyRoadGrades(alpha,roads);
+const boxedSlope=boxed({overlap:true,terrain:alpha,origin:{x:-1640,y:410}});
 
 const row=new Mission(alphaConfig,alpha);
 for(const [kind,x,y] of [['generator',-1648,248],['derrick',-1696,368]]){
@@ -393,7 +397,7 @@ console.log(JSON.stringify({
  tripCost:total,directCost:nav.travelCost(from,to),asphaltPeak:result.peak,
  opposite:{gap:result.gap,complete:result.complete},
  merge:{leftAhead:leftAhead.leader,rightAhead:rightAhead.leader,tied:tied.leader},touching,oldSave,
- boxed:{clear:boxedClear,builders:boxedBuilders,legacy:boxedLegacy},
+ boxed:{clear:boxedClear,builders:boxedBuilders,legacy:boxedLegacy,slope:boxedSlope},
  alpha:{parkedRowGap:parkedRow.gap,bendGap:actualBend.gap,roadConvoy:{completed:roadConvoy.complete,gap:roadConvoy.gap}},
  singleFile,wideFunnel,mixedExit:{completed:group.length,seconds:Math.round(mixedExit.seconds*10)/10,gap:mixedExit.gap},
  closedGateRejected:true,factoryExit,attackMove:{bothArrived:true,twoContacts:true,saveRoundTrip:true}
