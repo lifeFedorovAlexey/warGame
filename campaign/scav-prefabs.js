@@ -166,6 +166,13 @@ export function createScavPrefab(T, kind, site) {
     beam([-4.28,-3.38,.24],[-4.28,-3.66,2.14],.19,mats.dark);
     beam([-1.65,-2.87,.22],[-1.65,-3.15,1.89],.18,mats.dark);
     for(const z of [.58,1.21])beam([-4.22,-3.40,z],[-1.74,-2.93,z],.11,mats.rust);
+    // Reinforced opening between the salvaged walls of the workshop.
+    for (const [x,foot] of [[-1.93,.35],[1.93,1.13]]) {
+      beam([x,-4.23,foot],[x,-4.23,3.82],.18,mats.dark);
+      beam([x,-4.23,2.7],[x*1.48,-4.22,3.70],.11,mats.rust);
+    }
+    beam([-2.12,-4.23,3.82],[2.12,-4.23,3.82],.18,mats.rust);
+    box([.72,.13,.28],[1.24,-4.34,3.64],mats.tin);
   } else if (site === 'nw-west') {
     shed(0,1.1,9.9,4.1,3.05,mats.tin,true);
     box([8.9,1.55,.53],[0,-1.72,.265],mats.wood);
@@ -181,6 +188,14 @@ export function createScavPrefab(T, kind, site) {
         for(const offset of [-.33,.33])box([.09,.03,.73],[x+offset,y-.48,z],mats.dark);
       }
     }
+    for(const side of [-1,1]){
+      const x=side*3.66;
+      box([2.61,.22,1.05],[x,-4.10,.72],mats.rust,[.11,0,side*.16]);
+      for(const offset of [-.91,.89])beam([x+offset,-4.03,.08],[x+offset,-4.04,1.38],.15,mats.dark);
+      beam([x-side*.94,-4.08,.29],[x+side*.94,-4.01,1.11],.12,mats.wood);
+    }
+    box([1.57,.91,.18],[-2.38,1.70,3.40],mats.dark,[.12,0,0]);
+    for(const x of [-2.92,-2.65,-2.38,-2.11,-1.84])box([.085,.83,.073],[x,1.70,3.53],mats.tin,[.12,0,0]);
   } else if (site === 'nw-east') {
     box([5.85,4.25,.52],[1.31,.27,-.10],mats.dark);
     box([5.65,.15,2.3],[1.31,2.32,1.27],mats.rust);
@@ -218,6 +233,13 @@ export function createScavPrefab(T, kind, site) {
     beam([-4.43,-2.13,.13],[-4.43,-2.13,.73],.15,mats.dark);
     drum(.34,.91,[3.53,-2.77,.24],mats.rust);
     drum(.355,.07,[3.53,-2.77,.35],mats.dark);
+    for(const x of [-4.83,-2.71]){
+      beam([x,1.91,-.20],[x,1.91,1.66],.12,mats.dark);
+      box([.64,.34,.22],[x,1.91,-.07],mats.wood);
+    }
+    for(const z of [.75,1.56])beam([-4.83,1.91,z],[-2.71,1.91,z],.10,mats.rust);
+    box([.82,.48,.36],[2.90,-1.64,2.10],mats.dark);
+    pipe([[3.05,-1.67,2.08],[3.05,-1.67,1.16],[2.66,-1.71,1.16]],.065,mats.tin);
   } else {
     box([11.1,7.2,.60],[0,0,.12],mats.wood);
     box([3.32,4.75,2.91],[-3.64,.85,1.66],mats.rust);
@@ -232,6 +254,25 @@ export function createScavPrefab(T, kind, site) {
       box([3.78,.56,1.28],[x,-3.16,.89],mats.dark,[.16,0,side*.17]);
       box([.53,1.41,1.54],[x-side*1.48,-2.45,.98],mats.tin,[0,0,side*.24]);
       box([.84,.19,1.65],[x+side*1.2,-1.68,1.12],mats.tin,[.13,0,0]);
+    }
+    // A low command post with a radio mast and recessed front fighting ports.
+    const mastX=-3.62,mastY=1.34;
+    for(const dx of [-.32,.32])for(const dy of [-.30,.30])
+      beam([mastX+dx,mastY+dy,3.52],[mastX,mastY,5.91],.10,mats.dark);
+    beam([mastX-1.15,mastY,5.57],[mastX+1.15,mastY,5.57],.09,mats.tin);
+    beam([mastX,mastY,5.73],[mastX,mastY,6.35],.085,mats.rust);
+    beam([mastX,mastY,4.93],[-.66,.12,3.57],.040,mats.dark);
+    for(const x of [-4.81,-3.62,-2.41,-1.23,-.02,1.16,2.35,3.55,4.72])
+      box([.064,5.15,.055],[x,.79,3.55],mats.dark);
+    box([1.96,1.42,.065],[-2.1,-.43,3.57],mats.rust,[0,0,-.05]);
+    for(const x of [-3.68,2.83]){
+      box([1.98,.19,.46],[x,-1.62,2.36],mats.tin);
+      box([1.64,.10,.19],[x,-1.74,2.39],mats.dark);
+      box([2.14,.38,.13],[x,-1.72,2.60],mats.rust);
+    }
+    for(const x of [-4.58,-2.82,2.46,4.53]){
+      beam([x,3.35,.14],[x,3.35,1.48],.17,mats.dark);
+      box([1.52,.19,.74],[x,3.37,.91],mats.rust,[.13,0,0]);
     }
   }
   if (kind !== 'mg-tower' && site !== 'nw-east') {
