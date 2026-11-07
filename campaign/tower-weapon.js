@@ -1,3 +1,5 @@
+import {mgRecoil} from './mg-burst.js';
+
 const rigs = new WeakMap();
 
 function rigOf(root) {
@@ -28,8 +30,7 @@ export function aimTowerWeapon(root, building, field, scale, target = building.a
     const targetHeight = target.z ?? field.heightAt(target.x, target.y);
     pitch.rotation.x = Math.atan2(height - targetHeight, reach + pitch.position.y * scale);
   }
-  const recovery = Math.max(0, 1 - shotAge / .22);
-  recoil.position.y = shotAge >= 0 ? .12 * recovery ** 2 : 0;
+  recoil.position.y = .12 * mgRecoil(shotAge);
   return muzzle;
 }
 

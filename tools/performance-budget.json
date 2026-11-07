@@ -1,0 +1,12 @@
+{
+  "vehicles": 500,
+  "viewport": {"width": 1920, "height": 1080},
+  "minimumFps": 80,
+  "frameBudgetMs": 12.5,
+  "frameP95BudgetMs": 12.5,
+  "cpuP95BudgetMs": 12.5,
+  "gpuP95BudgetMs": 12.5,
+  "referenceGpu": "NVIDIA GeForce RTX 4070",
+  "referenceCpu": "AMD Ryzen 9 7900X",
+  "requiredPhases": ["settled", "impacts", "simulation"]
+}

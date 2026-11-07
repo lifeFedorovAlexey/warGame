@@ -1,0 +1,113 @@
+.game-icon { display: block; width: var(--icon-size, 36px); height: var(--icon-size, 36px); flex: 0 0 auto; pointer-events: none; }
+.atlas-icon { position: relative; }
+.atlas-cell { position: absolute; left: 50%; top: 50%; width: 100%; height: 100%; display: block; transform: translate(-50%, -50%); background-repeat: no-repeat; }
+/* Buttons are bare illustrations. A glow and a small amber marker convey state. */
+button.icon-button, summary.icon-button {
+  position: relative; display: inline-flex; align-items: center; justify-content: center;
+  width: var(--button-size, 48px); height: var(--button-size, 48px); min-width: var(--button-size, 48px);
+  padding: 4px; margin: 0; border: 0; border-radius: 0; background: transparent;
+  box-shadow: none; color: #d9c69b; text-decoration: none; vertical-align: middle;
+  cursor: pointer; touch-action: manipulation; line-height: 1;
+}
+button.icon-button:hover:enabled, summary.icon-button:hover,
+button.icon-button.primary, button.icon-button.active, button.icon-button[aria-pressed=true] { border: 0; background: transparent; box-shadow: none; }
+.icon-button .game-icon { transition: filter 120ms ease; margin: 0; }
+button.icon-button:hover:enabled .game-icon, summary.icon-button:hover .game-icon { filter: brightness(1.18) drop-shadow(0 2px 5px #e99d3544); }
+button.icon-button:disabled { opacity: .35; cursor: default; filter: saturate(.45); }
+button.icon-button.active::after, button.icon-button[aria-pressed=true]::after, summary.icon-button[aria-expanded=true]::after {
+  content: ''; position: absolute; bottom: 1px; left: calc(50% - 3px); width: 6px; height: 3px; background: #f39a29;
+}
+button.icon-button:focus-visible, summary.icon-button:focus-visible { outline: none; }
+.icon-button:focus-visible .game-icon { filter: brightness(1.3) drop-shadow(0 0 5px #ffad4b); }
+.icon-button:focus-visible::before { content: ''; position: absolute; bottom: 0; left: 38%; width: 24%; height: 3px; background: #ffad4b; }
+summary.icon-button { list-style: none; }
+summary.icon-button::-webkit-details-marker { display: none; }
+@media (prefers-reduced-motion: reduce) { .icon-button .game-icon { transition: none; } }
+
+/* Menus have no enclosing frames, cards, separators, or rectangular HUD plates. */
+:is(.panel, .top, #radio, #toast, #queue, #designer, .designer-heading,
+    .designer-stats, .design-salvage, .modes, .minimap, .readout, .tag,
+    .selection, #live, #parts .part) {
+  border: 0; border-radius: 0; box-shadow: none; outline: none;
+}
+#mission-hud .panel, #mission-hud #queue, #toast, .corner-card.panel,
+.modes, .minimap, .readout, #live { background: transparent; }
+#mission-hud .panel, #queue, #toast, .corner-card.panel { text-shadow: 0 1px 3px #111a10, 0 2px 9px #111a10; }
+.top { background: linear-gradient(#111a16ed, #111a16ba 70%, #111a1600); }
+#designer { box-shadow: none; }
+.designer-heading { background: transparent; }
+.design-salvage { padding: 8px 0; }
+.design-salvage legend { padding: 0; }
+#designer input:not([type=checkbox]) { border: 0; border-radius: 0; }
+.minimap select, .selection select { border: 0; border-radius: 0; }
+body:has(#viewport) aside, body:has(#parts) aside,
+body:has(#viewport) :is(.assembly, .part, .note) { border: 0; }
+
+/* Campaign: generous silhouettes without frames or permanent captions. */
+.top { min-height: 54px; gap: 8px; }
+.top .icon-button { --button-size: 40px; --icon-size: 30px; }
+.mission-tasks { top: 64px; }
+#radio { top: 64px; }
+#toast { top: 64px; }
+.settings > div { top: 46px; grid-template-columns: repeat(5, 1fr); justify-items: center; width: 280px; padding: 12px; gap: 4px; }
+#story-voice-toggle { grid-column: auto; }
+.settings p { margin-top: 10px; }
+.settings .icon-button { --button-size: 46px; --icon-size: 38px; }
+.tactical-dock { gap: 18px; }
+#roster { grid-template-columns: repeat(var(--roster-cols,5), minmax(0,48px)); gap: 3px; max-width: min(56vw,460px); }
+#roster button.icon-button { --button-size: 48px; --icon-size: 44px; height: 48px; padding: 2px; background: transparent; }
+#roster button.icon-button:hover, #roster button.icon-button.active { background: transparent; }
+#roster button.active .game-icon { filter: brightness(1.2) drop-shadow(0 0 4px #f2c86c55); }
+#roster i { bottom: 2px; left: 8px; right: 8px; }
+#roster button.active::after { bottom: 6px; }
+#roster .stack-count { font-size: 9px; right: 0; top: 0; }
+.order-bar { grid-template-columns: repeat(4,52px); gap: 6px; }
+.order-bar button.icon-button { --button-size: 52px; --icon-size: 46px; padding: 3px; background: transparent; }
+#build-toggle.icon-button { background: transparent; }
+.order-bar button.icon-button .game-icon { width: var(--icon-size); height: var(--icon-size); }
+#build-palette { width: min(464px, calc(100vw - var(--map-size) - 3 * var(--edge))); padding: 8px 10px; }
+#build-cards { gap: 5px; }
+#build-cards button.icon-button { --icon-size: clamp(40px, 6.2vw, 72px); width: 100%; min-width: 0; height: auto; aspect-ratio: 1; padding: 0; align-items: center; }
+.tray-heading button.icon-button, .radio-head button.icon-button { --button-size: 30px; --icon-size: 23px; padding: 3px; }
+#actions button.icon-button { --button-size: 64px; --icon-size: 58px; text-align: center; }
+#actions { gap: 8px; }
+#placement > div { flex: 1; }
+#placement .icon-button { --button-size: 40px; --icon-size: 32px; }
+#objective-focus.icon-button, #select-blocked.icon-button { --button-size: 46px; --icon-size: 40px; padding: 3px; }
+.radio-actions { align-items: center; gap: 8px; }
+.radio-actions .icon-button { --button-size: 38px; --icon-size: 32px; }
+#minimap-panel button.icon-button { --button-size: 40px; --icon-size: 34px; width: 100%; padding: 2px; }
+.corner-card .icon-button { --button-size: 58px; --icon-size: 46px; margin-right: 10px; }
+
+/* The selected assembly remains named on the stage and in the name field. */
+.designer-tabs { gap: 10px; justify-items: center; }
+.designer-tabs button.icon-button { --icon-size: 66px; width: 100%; height: 74px; padding: 0; }
+.designer-tabs button.icon-button[aria-pressed=true], .design-part.icon-button[aria-pressed=true],
+.designer-filters button.icon-button[aria-pressed=true] { background: transparent; }
+.designer-tabs .game-icon { display: block; }
+.designer-filters, .designer-cards { justify-content: safe center; align-items: center; }
+.designer-heading button.icon-button { --button-size: 36px; --icon-size: 26px; }
+.designer-filters button.icon-button { --button-size: 38px; --icon-size: 32px; padding: 2px; }
+.design-part.icon-button { --button-size: 78px; --icon-size: 70px; flex: 0 0 78px; display: inline-flex; align-items: center; justify-content: center; padding: 3px; }
+.design-part.icon-button .game-icon { width: var(--icon-size); height: var(--icon-size); }
+.garage-view-controls button.icon-button { --button-size: 42px; --icon-size: 34px; padding: 3px; }
+.designer-name button.icon-button { --button-size: 36px; --icon-size: 28px; }
+.designer-footer button.icon-button { --button-size: 48px; --icon-size: 38px; }
+
+@media (max-width: 850px) {
+  .top { gap: 4px; }
+  .tactical-dock { gap: 10px; }
+  #roster { grid-template-columns: repeat(var(--roster-cols,5), minmax(0,40px)); }
+  #roster button.icon-button { --button-size: 40px; --icon-size: 38px; height: 42px; }
+  .order-bar { grid-template-columns: repeat(4,42px); gap: 2px; }
+  .order-bar button.icon-button { --button-size: 42px; --icon-size: 38px; }
+}
+@media (max-width: 530px) {
+  .top { min-height: 48px; gap: 2px; }
+  .top .icon-button { --button-size: 32px; --icon-size: 25px; }
+  .mission-tasks, #radio { top: 57px; }
+  .settings > div { top: 38px; }
+  .tactical-dock { gap: 5px; }
+  #build-cards { grid-template-columns: repeat(3,minmax(0,1fr)); }
+  #build-cards button.icon-button { --icon-size: 54px; max-height: 60px; }
+}

@@ -1,4 +1,5 @@
 import {vehiclePose} from './builder-kinematics.js';
+import {SCAV_PROFILES} from './scav-unit-profiles.js';
 
 const modular = [
   [1.177, -.008, 2.417, .75, .75],
@@ -7,7 +8,10 @@ const modular = [
 const fieldCar = [[1.03, -.075, 2.18, .43, .47], [.96, -.06, 2.10, 1.48, .78]];
 const cached = new WeakMap();
 const skin = .055;
-export const vehicleLocalBoxes = kind => kind === 'command' || kind === 'raider' ? fieldCar : modular;
+export const vehicleLocalBoxes = kind => SCAV_PROFILES[kind]?.boxes ?? (kind === 'command' || kind === 'raider' ? fieldCar : modular);
+// A retained wreck still occupies space. Only removed/cancelled objects cease
+// to collide; HP alone is no longer a proxy for existence in the world.
+export const vehicleObstacle = unit => unit.hp > 0 || !!unit.damage?.wreck;
 
 // Local dimensions follow the C01/B01 GLB bounds. Project both the lower
 // running gear and the higher body onto the ground using the render pose.
@@ -106,7 +110,7 @@ export function clearOfVehicles(unit, next, units, scale, strict = false, previo
   let sweep = prepared, end;
   let clear = true;
   for (const other of units) {
-    if (other === unit || other.hp <= 0 || Math.abs(next.x - other.x) > 7 * scale
+    if (other === unit || !vehicleObstacle(other) || Math.abs(next.x - other.x) > 7 * scale
         || Math.abs(next.y - other.y) > 7 * scale) continue;
     const obstacle = vehicleEnvelope(other, scale, field);
     end ??= sweep?.end ?? vehicleEnvelope(current, scale, field);

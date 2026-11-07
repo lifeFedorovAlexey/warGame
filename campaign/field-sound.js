@@ -1,3 +1,4 @@
+import {setButtonIcon} from '../assets/ui/icons.js';
 const clampLevel = value => Number.isFinite(value) ? Math.max(0, Math.min(1, value)) : 0;
 
 const driveFiles = {
@@ -42,6 +43,7 @@ export class FieldSound {
       this.refresh();
       if (this.enabled) this.unlock();
       else {
+        this.music?.pause();
         this.stopStory();
         this.pendingVoice = null;
         this.voiceSource?.stop();
@@ -59,9 +61,9 @@ export class FieldSound {
   }
 
   refresh() {
-    this.toggle.textContent = this.enabled ? 'Звук: вкл.' : 'Звук: выкл.';
+    setButtonIcon(this.toggle, this.enabled ? 'sound' : 'muted', this.enabled ? 'Звук: вкл.' : 'Звук: выкл.');
     this.toggle.setAttribute('aria-pressed', String(this.enabled));
-    this.storyToggle.textContent = this.storyEnabled ? 'Голос радио: вкл.' : 'Голос радио: выкл.';
+    setButtonIcon(this.storyToggle, this.storyEnabled ? 'voice' : 'voice-off', this.storyEnabled ? 'Голос радио: вкл.' : 'Голос радио: выкл.');
     this.storyToggle.setAttribute('aria-pressed', String(this.storyEnabled));
     if (this.output) this.output.gain.setTargetAtTime(this.enabled ? .62 : 0, this.context.currentTime, .018);
   }
@@ -70,6 +72,7 @@ export class FieldSound {
     if (!this.enabled) return;
     try {
       if (!this.context) this.setup();
+      this.playMusic();
       await this.context.resume();
       this.playPendingVoice();
       this.playPendingStory();
@@ -87,6 +90,14 @@ export class FieldSound {
     this.effectsOutput.connect(this.output);
     this.commandOutput = ctx.createGain();
     this.commandOutput.connect(this.output);
+    // Stream the full soundtrack; only short effects are decoded into buffers.
+    this.music = new Audio(new URL('../assets/music/abandoned-technology.mp3', import.meta.url).href);
+    this.music.loop = true;
+    this.music.preload = 'metadata';
+    this.musicOutput = ctx.createGain();
+    this.musicOutput.gain.value = 0;
+    this.musicSource = ctx.createMediaElementSource(this.music);
+    this.musicSource.connect(this.musicOutput).connect(this.output);
     this.noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
     const samples = this.noise.getChannelData(0);
     let low = 0;
@@ -110,6 +121,23 @@ export class FieldSound {
     this.loadClip(ambienceBase, 'anomaly-pulse.ogg')
       .then(buffer => { this.anomalyClip = buffer; })
       .catch(error => console.warn('Сигнал аномалии недоступен:', error.message));
+  }
+
+  playMusic() {
+    if (!this.enabled || !this.music.paused) return;
+    const now = this.context.currentTime;
+    this.musicOutput.gain.cancelScheduledValues(now);
+    this.musicOutput.gain.setValueAtTime(0, now);
+    this.updateMusicMix(.8);
+    this.music.play().catch(error => {
+      if (error.name !== 'AbortError') console.warn('Фоновая музыка недоступна:', error.message);
+    });
+  }
+
+  updateMusicMix(transition = .7) {
+    const story = this.storyPlayback;
+    const level = story ? (story.urgent ? .035 : .055) : this.voiceSource ? .09 : .2;
+    this.musicOutput.gain.setTargetAtTime(level, this.context.currentTime, transition);
   }
 
   async loadClip(base, file) {
@@ -228,6 +256,7 @@ export class FieldSound {
     this.effectsOutput.gain.setTargetAtTime(urgent ? .46 : story ? .67 : 1, now, story ? .045 : .16);
     this.commandOutput.gain.setTargetAtTime(urgent ? .54 : 1, now, urgent ? .035 : .12);
     story?.gain.gain.setTargetAtTime(urgent ? .94 : this.voiceSource ? .51 : .88, now, .035);
+    this.updateMusicMix(story || this.voiceSource ? .08 : .7);
   }
 
   stopStory() {
@@ -345,10 +374,11 @@ export class FieldSound {
   }
 
   shot(weapon, level, pan) {
+    if(weapon==='grenade')return;
     const kind = weapon === 'flame' ? 'flame' : 'mg';
     const volume = clampLevel(level);
     if (volume < .012 || !this.limit('shot-' + kind, .044)) return;
-    this.playCombat(kind, volume * (kind === 'flame' ? .61 : .92), pan);
+    this.playCombat(kind, volume * (kind === 'flame' ? .61 : weapon==='rifle'?.40:.92), pan);
   }
 
   impact(level, pan, surface = 'armor') {

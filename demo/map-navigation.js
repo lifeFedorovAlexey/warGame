@@ -1,3 +1,4 @@
+import {setButtonIcon, speedIcon} from '../assets/ui/icons.js';
 export function createMapNavigation(T,{terrain,vehicle,camera,controls,state,jump}){
  const route=terrain.route,mini=document.getElementById('minimap'),canvas=document.getElementById('minimap-canvas'),context=canvas.getContext('2d'),marker=document.getElementById('minimap-vehicle');
  const button=document.getElementById('map-camera'),tempo=document.getElementById('tempo'),select=document.getElementById('checkpoint-select'),next=document.getElementById('checkpoint');
@@ -11,10 +12,10 @@ export function createMapNavigation(T,{terrain,vehicle,camera,controls,state,jum
  };
  const pinCanvas=document.createElement('canvas');pinCanvas.width=pinCanvas.height=64;const c=pinCanvas.getContext('2d');c.strokeStyle='#fff0b0';c.lineWidth=5;c.beginPath();c.arc(32,32,21,0,Math.PI*2);c.stroke();c.fillStyle='#fff0b0';c.beginPath();c.moveTo(32,6);c.lineTo(22,24);c.lineTo(42,24);c.closePath();c.fill();
  const pin=new T.Sprite(new T.SpriteMaterial({map:new T.CanvasTexture(pinCanvas),depthTest:false,transparent:true}));pin.scale.set(76,76,1);pin.renderOrder=5;terrain.root.add(pin);
- function rate(value){state.timeScale=value;tempo.textContent='Проездка: ×'+value;}
+ function rate(value){state.timeScale=value;setButtonIcon(tempo,speedIcon(value),'Проездка: ×'+value);}
  function setCamera(value){
   state.cameraPoseRevision=(state.cameraPoseRevision??0)+1;
-  state.cameraMode=value;button.textContent=value==='overview'?'За машиной':'Вся карта';
+  state.cameraMode=value;setButtonIcon(button,value==='overview'?'front':'map',value==='overview'?'За машиной':'Вся карта');
   if(value==='overview'){
    const fit=Math.max(1,1/camera.aspect);controls.target.set(0,0,25);camera.position.set(0,-5500*fit,4800*fit);
   }else{

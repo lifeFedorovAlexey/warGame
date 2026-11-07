@@ -9,7 +9,7 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   page.on('pageerror',e=>errors.push(e.message));
   page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
   page.on('response',r=>{if(r.status()>=400)errors.push(r.status()+' '+r.url());});
-  await page.goto('http://127.0.0.1:8766/campaign/');
+  await page.goto((process.env.WARGAME_URL??'http://127.0.0.1:8766')+'/campaign/');
   try{await page.waitForFunction(()=>window.campaign?.ready||document.querySelector('#loading-status').textContent.startsWith('Ошибка'),{},{timeout:90000});}
   catch(error){throw new Error(errors.join('\n')||await page.locator('#loading-status').textContent(),{cause:error});}
   assert(await page.evaluate(()=>window.campaign?.ready),errors.join('\n')||await page.locator('#loading-status').textContent());
@@ -48,7 +48,8 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
    return audio.playing&&audio.chapter==='first-contact'&&audio.urgent;
   });
   const minimapWithRadio=await page.locator('#minimap').boundingBox();
-  await page.locator('[data-skip-all]').click();
+  await page.locator('.settings summary').click();
+  await page.locator('#radio-toggle').click();
   assert.equal(await page.evaluate(()=>localStorage.getItem('warGame.fieldRadio')),'off');
   assert.equal(await page.evaluate(()=>window.campaign.world.storySignals.current),null);
   assert.equal(await page.evaluate(()=>window.campaign.storyAudio.playing),false);
@@ -73,8 +74,9 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   assert.equal(idleShadows,0,'Simulation ticks with identical casters reuse the shadow map');
   await page.getByRole('button',{name:'Строитель 2',exact:true}).click({modifiers:['Shift']});
   await page.locator('#build-toggle').click();
-  try{await page.waitForFunction(()=>[...document.querySelectorAll('#build-cards img')].length===5&&[...document.querySelectorAll('#build-cards img')].every(img=>img.naturalWidth===192),{},{timeout:10000});}
-  catch(error){throw new Error(errors.join('\n')||JSON.stringify(await page.evaluate(()=>({hidden:document.querySelector('#build-palette').hidden,imgs:[...document.querySelectorAll('#build-cards img')].map(i=>i.naturalWidth),selection:window.campaign.selected}))),{cause:error});}
+  try{await page.waitForFunction(()=>document.querySelectorAll('#build-cards .atlas-icon').length===5,{},{timeout:10000});
+   await page.evaluate(()=>Promise.all([...new Set([...document.querySelectorAll('#build-cards .atlas-cell')].map(icon=>getComputedStyle(icon).backgroundImage.slice(5,-2)))].map(src=>{const img=new Image();img.src=src;return img.decode();})));}
+  catch(error){throw new Error(errors.join('\n')||JSON.stringify(await page.evaluate(()=>({hidden:document.querySelector('#build-palette').hidden,icons:document.querySelectorAll('#build-cards .atlas-icon').length,selection:window.campaign.selected}))),{cause:error});}
   fs.mkdirSync('campaign/previews',{recursive:true});
   await page.screenshot({path:'campaign/previews/field-building-cards.png'});
   const viewport=page.viewportSize();
@@ -100,7 +102,6 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   await page.waitForFunction(()=>window.campaign.mission.state.buildings.some(b=>b.owner==='rai'&&b.kind==='generator'));
   await page.getByRole('button',{name:'К нефти',exact:true}).click();
   assert.equal(await page.locator('.settings').getAttribute('open'),null,'Oil focus is available with the operation menu closed');
-
   const oil=await page.evaluate(()=>{
    const {world,storyAudio}=window.campaign,p=world.storySignals.current;
    return {position:world.screen(p,2),target:{x:world.controls.target.x,y:world.controls.target.y},signal:p,playing:storyAudio.playing};

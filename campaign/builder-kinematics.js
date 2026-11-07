@@ -1,3 +1,4 @@
+import {SCAV_PROFILES} from './scav-unit-profiles.js';
 // Metres and radians. Shared by the authoritative simulation and the renderer.
 const rad=degrees=>degrees*Math.PI/180;
 export const BUILDER={
@@ -18,8 +19,10 @@ export function forwardBuilder(q){
  return Object.fromEntries(Object.entries({shoulder,elbow,boomEnd,wrist,tip}).map(([key,p])=>[key,rz(p,q.yaw)]));
 }
 export function vehiclePose(unit,field,scale=4.5){
+ const custom=SCAV_PROFILES[unit.kind];
+ if(custom?.infantry)return{position:[unit.x,unit.y,field.heightAt(unit.x,unit.y)],heading:unit.heading,pitch:0,roll:0,scale};
  const c=Math.cos(unit.heading),s=Math.sin(unit.heading),fieldCar=unit.kind==='command'||unit.kind==='raider';
- const width=fieldCar?.79:.70,rear=fieldCar?-1.29:-1.30,front=fieldCar?1.21:1.30;
+ const width=custom?.track??(fieldCar?.79:.70),rear=custom?.rear??(fieldCar?-1.29:-1.30),front=custom?.front??(fieldCar?1.21:1.30);
  const height=(x,y)=>field.heightAt(unit.x+(x*c-y*s)*scale,unit.y+(x*s+y*c)*scale);
  const lf=height(-width,front),rf=height(width,front),lr=height(-width,rear),rr=height(width,rear);
  return{position:[unit.x,unit.y,(lf+rf+lr+rr)/4],heading:unit.heading,pitch:Math.atan((lf+rf-lr-rr)/(2*(front-rear)*scale)),roll:-Math.atan((rf+rr-lf-lr)/(4*width*scale)),scale};

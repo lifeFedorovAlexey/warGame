@@ -4,12 +4,14 @@ import {generatorLayout} from './generator-layout.js';
 export function buildIndustrialStructure(T, kind, size, kit) {
   const [w,d,h]=size;
   const {box,cylinder,rod,mesh}=kit;
+  const part=kit.part??((name,profile,build)=>build());
   const material=(color,metalness,roughness)=>new T.MeshStandardMaterial({color,metalness,roughness});
   const concrete=material('#b4a690',.03,.93), trim=material('#81796d',.12,.85);
   const stripe=material('#a35c3e',.22,.78), roof=material('#666158',.30,.85);
   const steel=material('#494b43',.68,.60), pipe=material('#9a9584',.68,.59);
   const glass=material('#46565b',.32,.31), dark=material('#262b28',.32,.88);
   const caution=material('#c89b46',.45,.68), porcelain=material('#c6b69b',.11,.47);
+  for(const [name,mat] of Object.entries({concrete,trim,stripe,roof,steel,pipe,glass,dark,caution,porcelain}))mat.name=name==='glass'?'building_window':'industrial_'+name;
 
   function windows(x,y,z,width,panes,height=.48,facing=-1){
     box([width+.13,.09,height+.13],[x,y,z],steel);
@@ -28,11 +30,14 @@ export function buildIndustrialStructure(T, kind, size, kit) {
     }
   }
   function vent(x,y,z,size){
+    return part('vent_'+[x,y,z].join('_'),{material:'equipment',detachable:true},()=>{
     box([size,size*.72,.43],[x,y,z+.22],trim);
     box([size*1.04,size*.78,.10],[x,y,z+.46],steel);
     for(let i=0;i<4;i++)box([size*.79,.035,.05],[x,y-size*.22+i*size*.14,z+.526],dark);
+    });
   }
   function stack(x,y,bottom,top,radius){
+    return part('stack_'+[x,y].join('_'),{material:'concrete',detachable:true,strength:420},()=>{
     cylinder(radius*1.12,.29,[x,y,bottom+.145],steel);
     const sections=6,len=(top-bottom-.29)/sections;
     for(let i=0;i<sections;i++){
@@ -44,6 +49,7 @@ export function buildIndustrialStructure(T, kind, size, kit) {
     const rim=new T.TorusGeometry(radius*.79,.055,7,16);
     mesh(rim,pipe,[x,y,top-.03]);
     cylinder(radius*.76,.075,[x,y,top-.22],dark);
+    });
   }
 
   if(kind==='factory'){
@@ -114,9 +120,11 @@ export function buildIndustrialStructure(T, kind, size, kit) {
       const y=pipeStart+i*braceStep;
       rod([pipeX,y,i%2?2.80:2.58],[pipeX,y+braceStep,i%2?2.58:2.80],.054,steel);
     }
-    rod([pipeX,pipeStart,pipeZ],[pipeX,pipeEnd,pipeZ],.18,pipe);
-    rod([wallX,pipeEnd,pipeZ],[pipeX,pipeEnd,pipeZ],.18,pipe);
-    for(const y of [-d*.255,-d*.073,d*.106])rod([pipeX,y,pipeZ],[sx-.96,y,pipeZ],.14,pipe);
+    part('external_pipework',{material:'equipment',detachable:true,strength:140},()=>{
+      rod([pipeX,pipeStart,pipeZ],[pipeX,pipeEnd,pipeZ],.18,pipe);
+      rod([wallX,pipeEnd,pipeZ],[pipeX,pipeEnd,pipeZ],.18,pipe);
+      for(const y of [-d*.255,-d*.073,d*.106])rod([pipeX,y,pipeZ],[sx-.96,y,pipeZ],.14,pipe);
+    });
     for(const y of [-4.9,-2.6,1.5,4.1])box([.4,.085,.4],[pipeX,y,pipeZ],steel);
     return;
   }
@@ -165,13 +173,14 @@ export function buildIndustrialStructure(T, kind, size, kit) {
     const dishProfile=[[0,0],[.41,.055],[.72,.16],[.99,.31],[1.15,.45],[1.15,.51],[.98,.36],[.69,.22],[.39,.116],[0,.064]];
     const dish=new T.LatheGeometry(dishProfile.map(([r,z])=>new T.Vector2(r,z)),22);
     dish.rotateX(Math.PI/2);
-    const mount=[sideX,.77,top+.78], tilt=[.93,-.30,.12];
-    cylinder(.39,.48,[sideX,.77,top+.46],steel);
-    box([.60,.49,.31],[sideX,.77,top+.67],steel);
-    mesh(dish,porcelain,mount,tilt);
+    // The tilted lower rim needs clearance above the roof, not just its centre.
+    const mount=[sideX,.77,top+1.08], tilt=[.93,-.30,.12];
+    cylinder(.39,.78,[sideX,.77,top+.61],steel);
+    box([.60,.49,.31],[sideX,.77,top+.97],steel);
+    part('radar_dish',{material:'equipment',detachable:true,strength:95},()=>mesh(dish,porcelain,mount,tilt));
     const lip=new T.TorusGeometry(1.145,.033,6,22);
     lip.translate(0,0,.487);
-    mesh(lip,pipe,mount,tilt);
+    part('radar_dish',{material:'equipment',detachable:true,strength:95},()=>mesh(lip,pipe,mount,tilt));
     const rotation=new T.Euler(...tilt);
     const dishPoint=(x,y,z)=>new T.Vector3(x,y,z).applyEuler(rotation).add(new T.Vector3(...mount)).toArray();
     for(const x of [-.61,.61])rod(dishPoint(x,.62,.27),dishPoint(0,0,.86),.032,steel);
@@ -205,13 +214,16 @@ export function buildIndustrialStructure(T, kind, size, kit) {
       rod(bottom,next,.067,steel);
       rod(upper,next,.065,steel);
     }
-    rod([x+width*.47,sy,1.22],[sx-1.45,sy,1.22],.15,stripe);
-    rod([sx-1.48,sy,1.18],[sx-1.48,sy,.68],.15,stripe);
+    part('cooling_pipe_'+sy,{material:'equipment',detachable:true,strength:150},()=>{
+      rod([x+width*.47,sy,1.22],[sx-1.45,sy,1.22],.15,stripe);
+      rod([sx-1.48,sy,1.18],[sx-1.48,sy,.68],.15,stripe);
+    });
     for(const dx of [-1.49,-2.42])box([.19,.38,.38],[sx+dx,sy,1.22],steel);
   }
   const yardY=-d*.390;
   box([4.89,1.43,.09],[x+.01,yardY,.395],trim);
   for(const tx of [x-1.65,x,x+1.65]){
+    part('transformer_'+tx,{material:'equipment',detachable:true,strength:200},()=>{
     box([1.34,1.02,.74],[tx,yardY,.79],steel);
     box([1.41,1.12,.13],[tx,yardY,1.19],roof);
     for(let i=0;i<5;i++)box([.11,.12,.64],[tx-.48+i*.24,yardY-.54,.81],pipe);
@@ -219,6 +231,7 @@ export function buildIndustrialStructure(T, kind, size, kit) {
       cylinder(.063,.61,[tx+dx,yardY,1.54],stripe);
       for(const z of [1.36,1.50,1.64,1.78])cylinder(.119,.059,[tx+dx,yardY,z],porcelain);
     }
+    });
   }
   const mastX=-w*.453,mastY=-d*.30;
   for(const side of [-1,1]){

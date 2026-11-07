@@ -1,0 +1,36 @@
+#combat-menu {
+  position: fixed; z-index: 8; display: flex; flex-direction: column; gap: 12px;
+  width: max-content; padding: 0; border: 0; border-radius: 0; background: none;
+  box-shadow: none; pointer-events: none;
+}
+#combat-menu[hidden] { display: none; }
+.combat-options { display: flex; gap: 6px; padding: 0; pointer-events: none; }
+#combat-menu button.icon-button {
+  --button-size: 44px; --icon-size: 36px; padding: 3px; pointer-events: auto;
+  border: 0; border-radius: 0; background: none; box-shadow: none;
+}
+#combat-hint {
+  position: fixed; z-index: 9; width: 252px; max-width: calc(100vw - 16px);
+  padding: 0; border: 0; background: none; pointer-events: none;
+  color: #eee4c5; text-shadow: 0 1px 2px #111a10, 0 2px 5px #111a10;
+  font: 11px/1.5 Arial, sans-serif;
+}
+#combat-hint[hidden] { display: none; }
+#combat-hint strong, #combat-hint span { display: block; }
+#combat-hint strong { color: #f3cf8c; font-size: 12px; margin-bottom: 3px; }
+#combat-menu [aria-checked=true]::after {
+  content: ''; position: absolute; bottom: 0; left: 14px; right: 14px; height: 3px; background: #f39a29;
+}
+#combat-menu .mixed::after {
+  content: ''; position: absolute; bottom: 0; left: 12px; width: 5px; height: 3px; background: #d9c69b; box-shadow: 13px 0 #d9c69b;
+}
+#combat-menu [aria-checked=true] .game-icon { filter: brightness(1.15); }
+#attack-order[aria-expanded=true]::before {
+  content: ''; position: absolute; top: -4px; left: calc(50% - 4px); width: 8px; height: 4px;
+  background: #f39a29; clip-path: polygon(50% 0,100% 100%,0 100%);
+}
+@media (max-width: 530px), (max-height: 480px) {
+  #combat-menu { gap: 10px; }
+  .combat-options { gap: 4px; }
+  #combat-menu button.icon-button { --button-size: 40px; --icon-size: 34px; }
+}

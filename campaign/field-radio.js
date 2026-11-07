@@ -1,3 +1,4 @@
+import {setButtonIcon} from '../assets/ui/icons.js';
 import {raidApproachSignal, waterTowerSignal} from './threat-guidance.js';
 
 const messages = {
@@ -71,13 +72,12 @@ export class FieldRadio {
     catch { this.enabled = true; }
     this.refreshToggle();
     panel.querySelector('[data-dismiss]').onclick = () => this.dismiss();
-    panel.querySelector('[data-skip-all]').onclick = () => this.setEnabled(false);
     toggle.onclick = () => this.setEnabled(!this.enabled);
   }
 
   refreshToggle() {
     this.toggle.setAttribute('aria-pressed', String(this.enabled));
-    this.toggle.textContent = this.enabled ? 'Радио: вкл.' : 'Радио: выкл.';
+    setButtonIcon(this.toggle, this.enabled ? 'radio' : 'radio-off', this.enabled ? 'Радио: вкл.' : 'Радио: выкл.');
   }
 
   setEnabled(enabled) {
@@ -126,7 +126,7 @@ export class FieldRadio {
     const { chapter, station, text, priority } = entry;
     this.current = missionSignal(chapter, mission);
     this.focus.hidden = !this.current;
-    if (this.current) this.focus.textContent = this.current.label;
+    if (this.current) setButtonIcon(this.focus, this.current.kind === 'guidance' ? 'derrick' : 'focus', this.current.label);
     this.panel.querySelector('strong').textContent = station;
     this.panel.querySelector('p').textContent = text;
     this.panel.hidden = false;

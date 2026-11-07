@@ -9,10 +9,10 @@ const steeringLimit = .67;
 const maximumCurve = Math.tan(steeringLimit);
 
 // X is right, Y is forward. Sweep the whole Ackermann arc, including the rotating footprint.
-function traceArc(start, direction, curve, length, scale, allowed) {
+function traceArc(start, direction, curve, length, scale, allowed,blocked) {
   if (length <= 1e-8) return start;
   const curvature = curve / (2.6 * scale);
-  let previous = start;
+  let previous = start,previousArc=0;
   const first = Math.min(.14, length), steps = Math.ceil((length - first) / 1.25);
   for (let index = 0; index <= steps; index++) {
     const arc = steps ? first + (length - first) * index / steps : first;
@@ -23,8 +23,9 @@ function traceArc(start, direction, curve, length, scale, allowed) {
       y: start.y + Math.cos(middle) * chord * direction,
       heading: wrap(start.heading + turn), kind: start.kind
     };
-    if (!allowed(previous, pose)) return null;
+    if (!allowed(previous, pose)){if(blocked)Object.assign(blocked,{from:previous,to:pose,travelled:previousArc});return null;}
     previous = pose;
+    previousArc=arc;
   }
   return previous;
 }
@@ -53,7 +54,8 @@ export function driveStep(unit, point, dt, {speed, grade, scale, tolerance, reve
   const travel = Math.min(distance, Math.max(0, nextSpeed * dt));
   if (travel < .001) return null;
   const curve = Math.tan(clamp(angle * 1.55, -steeringLimit, steeringLimit));
-  const pose = traceArc(unit, direction, curve, travel, scale, allowed);
+  const blocked=lastSpeed>1.8*scale?{}:null;
+  const pose = traceArc(unit, direction, curve, travel, scale, allowed,blocked);
   if (pose) return vehiclePose(unit, pose, direction, curve, travel, dt);
   const fallbackTravel = travel * .70;
   for (const alternative of [maximumCurve, -maximumCurve, 0]) {
@@ -61,6 +63,10 @@ export function driveStep(unit, point, dt, {speed, grade, scale, tolerance, reve
     if (next && lengthBetween(point, next) < distance - fallbackTravel * .15) {
       return vehiclePose(unit, next, direction, alternative, fallbackTravel, dt);
     }
+  }
+  if(blocked?.from){
+    const {x,y,heading,kind}=blocked.from;
+    return {...vehiclePose(unit,{x,y,heading,kind},direction,curve,blocked.travelled,dt),driveSpeed:0,impactSpeed:lastSpeed*direction};
   }
   return null;
 }

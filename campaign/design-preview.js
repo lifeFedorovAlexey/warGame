@@ -1,5 +1,6 @@
 import * as T from 'three';
 import {OrbitControls} from '../demo/vendor/OrbitControls.js';
+import {createFieldModification} from './field-modification-models.js';
 
 const viewDirection = new T.Vector3(.63, .88, .47).normalize();
 const vertical = new T.Vector3(0, 0, 1);
@@ -82,11 +83,19 @@ export class DesignPreview {
     this.requestRender();
   }
 
-  setModel({root, chassis, body, upper}) {
+  setModel({root, chassis, body, upper}, modifications = []) {
     const initial = !this.model;
     const interrupted = !!this.motion;
     this.motion = null;
     if (this.model) this.scene.remove(this.model);
+    this.disposeModifications();
+    this.modifications=modifications.map(id=>{
+      const module=createFieldModification(T,id);
+      root.add(module);
+      root.updateMatrixWorld(true);
+      body.attach(module);
+      return module;
+    });
     this.model = root;
     this.parts = [chassis, body, upper].map(node => ({node, base:node.position.clone()}));
     root.traverse(node => {
@@ -107,6 +116,7 @@ export class DesignPreview {
     if (this.model) this.scene.remove(this.model);
     this.model = null;
     this.motion = null;
+    this.disposeModifications();
     this.requestRender();
   }
 
@@ -169,6 +179,7 @@ export class DesignPreview {
     cancelAnimationFrame(this.frame);
     this.resizer.disconnect();
     this.controls.dispose();
+    this.disposeModifications();
     for (const item of this.floor) {
       item.geometry.dispose();
       item.material.dispose();
@@ -177,5 +188,12 @@ export class DesignPreview {
     this.renderer.dispose();
     this.renderer.forceContextLoss();
     this.renderer.domElement.remove();
+  }
+
+  disposeModifications() {
+    for(const root of this.modifications??[])root.traverse(node=>{
+      if(node.isMesh){node.geometry.dispose();node.material.dispose();}
+    });
+    this.modifications=[];
   }
 }

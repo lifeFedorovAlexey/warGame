@@ -1,3 +1,4 @@
+import {setButtonIcon} from '../assets/ui/icons.js';
 import * as T from 'three';
 import {OrbitControls} from '../demo/vendor/OrbitControls.js';
 import {GLTFLoader} from '../demo/vendor/loaders/GLTFLoader.js';
@@ -48,7 +49,7 @@ function audit(){
  return{sourceAxes:'X right,Y forward,Z up',size:'S',ring:.9,phase:rigState.phase,ready:rigState.ready,blocked:rigState.blocked,bodyJoinErrorMm:Math.abs(body.position.z-1.05-explosion*1.7)*1000,upperJoinErrorMm:Math.abs(rig.root.position.z-1.65-explosion*1.7)*1000,boundsMin:bounds.min.toArray(),boundsMax:bounds.max.toArray(),tip:tip.toArray(),target:contact,contactErrorMm:contact?tip.distanceTo(new T.Vector3(...contact))*1000:null,q:{...rigState.q},joints:Object.fromEntries(Object.entries(rig.joints).map(([id,g])=>[id,{position:g.position.toArray(),rotation:g.rotation.toArray().slice(0,3)}]))};
 }
 $('deploy').onclick=()=>requested=true;$('fold').onclick=()=>requested=false;
-$('explode').onclick=()=>{requested=false;explodeTarget=1-explodeTarget;$('explode').textContent=explodeTarget?'Собрать':'Разобрать';};
+$('explode').onclick=()=>{requested=false;explodeTarget=1-explodeTarget;setButtonIcon($('explode'),explodeTarget?'assemble':'explode',explodeTarget?'Собрать':'Разобрать');};
 $('fixture').onchange=()=>changeCase({kind:$('fixture').value,distance:$('fixture').value==='repair'?6.5:9.5});
 $('distance').oninput=()=>changeCase({distance:Number($('distance').value)});
 $('construction').oninput=()=>{caseData.progress=Number($('construction').value);fixtureData.progress=caseData.progress;fixtureData.completed=caseData.progress>=1;fixture.getObjectByName('building_structure')?.scale.set(1,1,.1+.9*caseData.progress);};

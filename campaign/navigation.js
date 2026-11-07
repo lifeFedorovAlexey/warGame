@@ -2,11 +2,13 @@ import {RoadTraffic, asphaltBonus, gradeSpeed, surfaceTravelCost} from './road-t
 import {sweepAvoidsFootprint, vehicleSweep} from './vehicle-collision.js';
 
 const climbableGrade = .52;
+const completeSteps=iterator=>{let step;do{step=iterator.next();}while(!step.done);return step.value;};
 
 // A* on a cached terrain grid. Dynamic building footprints are rasterized once
 // per structural change; movement never falls back to teleporting.
 export class TerrainNavigator{
- constructor(field,{cell=8,bounds=[0,0,127,127]}={}){
+ constructor(field,{cell=8,bounds=[0,0,127,127],vehicleScale=4.5}={}){
+  this.vehicleScale=vehicleScale;
   this.field=field;this.cell=cell;this.clearance=11+cell/2;this.size=Math.round(field.extent/cell)+1;this.bounds=bounds;const count=this.size*this.size;this.heights=new Float32Array(count);this.walkable=new Uint8Array(count);this.occupied=new Uint8Array(count);this.edgeCache=new Uint8Array(count*8);this.searchId=0;this.closed=new Uint32Array(count);this.visited=new Uint32Array(count);this.cost=new Float32Array(count);this.parent=new Int32Array(count);
   this.roads=new RoadTraffic(field);this.surfaceCosts=new Float32Array(count);this.pavedTripCosts=new Float32Array(count);this.slopes=new Float32Array(count);this.solids=[];
   for(let row=0;row<this.size;row++)for(let col=0;col<this.size;col++){const p=this.position(col,row),id=row*this.size+col,g=field.gradientAt(p.x,p.y);this.heights[id]=field.heightAt(p.x,p.y);this.slopes[id]=Math.hypot(g.x,g.y);this.walkable[id]=this.slopes[id]<.55?1:0;}
@@ -14,7 +16,7 @@ export class TerrainNavigator{
  position(col,row){return{x:col*this.cell-this.field.half,y:this.field.half-row*this.cell};}
  grid(x,y){return [Math.max(0,Math.min(this.size-1,Math.round((x+this.field.half)/this.cell))),Math.max(0,Math.min(this.size-1,Math.round((this.field.half-y)/this.cell)))];}
  allowed(col,row){const gx=col*this.cell/32,gy=row*this.cell/32,b=this.bounds;return col>=0&&row>=0&&col<this.size&&row<this.size&&gx>=b[0]&&gy>=b[1]&&gx<=b[2]&&gy<=b[3]&&this.walkable[row*this.size+col]&&!this.occupied[row*this.size+col];}
- rebuild(structures){this.occupied.fill(0);this.solids=structures.filter(item=>item.hp>0);for(const item of this.solids){const [cx,cy]=this.grid(item.x,item.y),rx=Math.ceil((item.halfWidth+this.clearance)/this.cell),ry=Math.ceil((item.halfDepth+this.clearance)/this.cell);for(let row=cy-ry;row<=cy+ry;row++)for(let col=cx-rx;col<=cx+rx;col++){if(row<0||col<0||row>=this.size||col>=this.size)continue;const p=this.position(col,row);if(Math.abs(p.x-item.x)<item.halfWidth+this.clearance&&Math.abs(p.y-item.y)<item.halfDepth+this.clearance)this.occupied[row*this.size+col]=1;}}}
+ rebuild(structures){this.pathCache?.clear();this.occupied.fill(0);this.solids=structures.filter(item=>item.hp>0||item.damage?.wreck);for(const item of this.solids){const [cx,cy]=this.grid(item.x,item.y),rx=Math.ceil((item.halfWidth+this.clearance)/this.cell),ry=Math.ceil((item.halfDepth+this.clearance)/this.cell);for(let row=cy-ry;row<=cy+ry;row++)for(let col=cx-rx;col<=cx+rx;col++){if(row<0||col<0||row>=this.size||col>=this.size)continue;const p=this.position(col,row);if(Math.abs(p.x-item.x)<item.halfWidth+this.clearance&&Math.abs(p.y-item.y)<item.halfDepth+this.clearance)this.occupied[row*this.size+col]=1;}}}
  nearbySolids(point,radius){
   return this.solids.filter(item=>Math.abs(point.x-item.x)<item.halfWidth+radius&&Math.abs(point.y-item.y)<item.halfDepth+radius);
  }
@@ -107,7 +109,18 @@ export class TerrainNavigator{
   }
   return total;
  }
- findPath(from,to,{maxGoalDistance=Infinity,escapeSteepStart=false}={}){
+ findPath(...args){this.beforeSynchronousSearch?.();return completeSteps(this.findPathSteps(...args));}
+ *findPathSteps(from,to,{maxGoalDistance=Infinity,escapeSteepStart=false,occupancyKey=''}={}){
+  // Exact requests only: no quantisation of start, goal or dynamic obstacles.
+  // Callers receive their own waypoint array because driving consumes it.
+  const cache=this.pathCache??=new Map(),key=[from.x,from.y,from.heading??0,from.kind??'',this.vehicleScale,to.x,to.y,maxGoalDistance,escapeSteepStart,...this.bounds].join('|')+'|'+occupancyKey;
+  if(cache.has(key)){const path=cache.get(key);cache.delete(key);cache.set(key,path);return path?.map(p=>({...p}))??null;}
+  const path=yield* this.computePathSteps(from,to,{maxGoalDistance,escapeSteepStart});
+  cache.set(key,path?.map(p=>({...p}))??null);if(cache.size>256)cache.delete(cache.keys().next().value);
+  return path;
+ }
+ computePath(...args){this.beforeSynchronousSearch?.();return completeSteps(this.computePathSteps(...args));}
+ *computePathSteps(from,to,{maxGoalDistance=Infinity,escapeSteepStart=false}={}){
   const gx=(to.x+this.field.half)/32,gy=(this.field.half-to.y)/32,bounds=this.bounds;if(gx<bounds[0]||gy<bounds[1]||gx>bounds[2]||gy>bounds[3])return null;
   const end=this.nearest(to.x,to.y);if(!end)return null;
   const direct=this.lineClear(from,to,false,true)?[{x:to.x,y:to.y}]:null;
@@ -127,15 +140,31 @@ export class TerrainNavigator{
   if(escapeSteepStart&&!starts.length&&!this.walkable[startId]&&!this.occupied[startId]){
    starts=entries.filter(point=>this.lineClear(from,point,false,true,climbableGrade,true,true));
   }
+  if(!starts.length&&this.occupied[startId]){
+   // Building clearance is a planning margin, not a wall. A car parked in
+   // that margin must be able to leave through a physically clear corridor.
+   const heading=from.heading??0,start={...from,heading};
+   starts=entries.filter(point=>this.lineClear(from,point,false,true,climbableGrade,true)
+    &&this.clearSolidSweep(vehicleSweep(start,{...point,heading,kind:from.kind},this.vehicleScale,this.field),this.nearbySolids(point,40)));
+  }
   if(!starts.length)return direct;
-  const n=this.size,endIds=new Set(),maxEndDistance=Math.min(maxGoalDistance,Math.hypot(end.x-to.x,end.y-to.y)+this.cell*1.5);for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){const col=end.col+dx,row=end.row+dy,p=this.position(col,row);if(this.allowed(col,row)&&Math.hypot(p.x-to.x,p.y-to.y)<=maxEndDistance)endIds.add(row*n+col);}if(!endIds.size)return direct;
-  const stamp=++this.searchId,heap=[];let destination=null;
-  const push=(id,priority)=>{let i=heap.length;heap.push({id,priority});while(i){const p=(i-1)>>1;if(heap[p].priority<=priority)break;heap[i]=heap[p];i=p;}heap[i]={id,priority};};
-  const pop=()=>{const first=heap[0],last=heap.pop();if(heap.length){let i=0;while(i*2+1<heap.length){let child=i*2+1;if(child+1<heap.length&&heap[child+1].priority<heap[child].priority)child++;if(heap[child].priority>=last.priority)break;heap[i]=heap[child];i=child;}heap[i]=last;}return first.id;};
+  const n=this.size,endIds=new Set(),exact=maxGoalDistance<=.01,maxEndDistance=exact?this.cell*1.5:Math.min(maxGoalDistance,Math.hypot(end.x-to.x,end.y-to.y)+this.cell*1.5);
+  for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){
+   const col=end.col+dx,row=end.row+dy,p=this.position(col,row);
+   if(this.allowed(col,row)&&Math.hypot(p.x-to.x,p.y-to.y)<=maxEndDistance&&(!exact||this.lineClear(p,to)))endIds.add(row*n+col);
+  }
+  if(!endIds.size)return direct;
+  const stamp=++this.searchId;let destination=null,heapLength=0;
+  let ids=this.heapIds??=new Int32Array(4096),priorities=this.heapPriorities??=new Float64Array(4096);
+  const push=(id,priority)=>{
+   if(heapLength===ids.length){const nextIds=new Int32Array(ids.length*2),nextPriorities=new Float64Array(ids.length*2);nextIds.set(ids);nextPriorities.set(priorities);ids=this.heapIds=nextIds;priorities=this.heapPriorities=nextPriorities;}
+   let i=heapLength++;while(i){const p=(i-1)>>1;if(priorities[p]<=priority)break;ids[i]=ids[p];priorities[i]=priorities[p];i=p;}ids[i]=id;priorities[i]=priority;
+  };
+  const pop=()=>{const first=ids[0],last=ids[--heapLength],priority=priorities[heapLength];if(heapLength){let i=0;while(i*2+1<heapLength){let child=i*2+1;if(child+1<heapLength&&priorities[child+1]<priorities[child])child++;if(priorities[child]>=priority)break;ids[i]=ids[child];priorities[i]=priorities[child];i=child;}ids[i]=last;priorities[i]=priority;}return first;};
   const bestSpeed=roads?(1+asphaltBonus)*1.18:1;
   const heuristic=(col,row)=>Math.max(0,(Math.hypot(col-end.col,row-end.row)*this.cell-maxEndDistance)/bestSpeed);
   for(const start of starts){const source=start.row*n+start.col,cost=roads?this.travelCost(from,start,pavedTrip):Math.hypot(start.x-from.x,start.y-from.y);this.cost[source]=cost;this.parent[source]=-1;this.visited[source]=stamp;push(source,cost+heuristic(start.col,start.row));}let expanded=0,found=false;
-  while(heap.length&&expanded++<100000){const id=pop();if(this.closed[id]===stamp)continue;this.closed[id]=stamp;if(endIds.has(id)){destination=id;found=true;break;}const col=id%n,row=Math.floor(id/n);
+  while(heapLength&&expanded++<100000){if(expanded%32===0&&performance.now()>=(this.workDeadline??Infinity))yield;const id=pop();if(this.closed[id]===stamp)continue;this.closed[id]=stamp;if(endIds.has(id)){destination=id;found=true;break;}const col=id%n,row=Math.floor(id/n);
    for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
     if(!dx&&!dy)continue;
     const x=col+dx,y=row+dy,next=y*n+x;
@@ -160,8 +189,10 @@ export class TerrainNavigator{
   const simplified=[];
   let anchor=from,index=0,total=0;
   while(index<path.length){
+   if(performance.now()>=(this.workDeadline??Infinity))yield;
    let next=index,cost=roads?this.travelCost(anchor,path[index],pavedTrip):0;
    while(next+1<path.length&&this.lineClear(anchor,path[next+1])){
+    if(performance.now()>=(this.workDeadline??Infinity))yield;
     const travel=roads?this.travelCost(anchor,path[next+1],pavedTrip):0;
     if(roads&&travel>cost+this.travelCost(path[next],path[next+1],pavedTrip)+.04*this.cell)break;
     next++;cost=travel;

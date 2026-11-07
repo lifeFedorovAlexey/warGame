@@ -6,10 +6,13 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
 
 (async()=>{
   const config = JSON.parse(fs.readFileSync('assets/campaign/alpha/mission01/gameplay.json','utf8'));
+  const requested=process.argv.slice(2);
+  for(const kind of requested)assert(config.buildings[kind],'Unknown building: '+kind);
+  const selected=requested.length?Object.fromEntries(requested.map(kind=>[kind,config.buildings[kind]])):config.buildings;
   const browser = await chromium.launch({executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true,args:['--enable-unsafe-swiftshader','--use-angle=swiftshader']});
   try {
     const page = await browser.newPage();
-    await page.goto('http://127.0.0.1:8766/campaign/builder.html');
+    await page.goto((process.env.WARGAME_URL??'http://127.0.0.1:8766')+'/campaign/builder.html');
     await page.waitForFunction(()=>window.builderPreview?.ready);
     const modules = await page.evaluate(async config => {
       const T = await import('three');
@@ -25,8 +28,8 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
         result.push({kind,bounds:{min:bounds.min.toArray(),max:bounds.max.toArray()},anchors,exported,art:root.userData.artStatus});
       }
       return result;
-    },config);
-    const manifest={status:'campaign-models',units:'metres',axes:'X right, Y forward, Z up',source:'assets/campaign/alpha/mission01/gameplay.json',buildings:[]};
+    },{...config,buildings:selected});
+    const manifest=requested.length?JSON.parse(fs.readFileSync('assets/blueprints/buildings/manifest.json','utf8')):{status:'campaign-models',units:'metres',axes:'X right, Y forward, Z up',source:'assets/campaign/alpha/mission01/gameplay.json',buildings:[]};
     for(const model of modules){
       const spec=config.buildings[model.kind],directory=path.join('assets/blueprints/buildings',model.kind);
       for(let axis=0;axis<2;axis++){
@@ -60,9 +63,12 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
         spec.exitAnchor?'Зона выезда и точка сбора связаны с exit_anchor.':'',
         model.kind==='derrick'?'Балансир, кривошип, шатун и шток анимирует campaign/oil-pump.js.':'',
         model.kind==='bunker'?'Низкий бетонный каземат с утопленной амбразурой. Трассер и вспышка начинаются в точке muzzle.':'',
+        model.kind==='mg-tower'?'Стальная башня с раскосами, лестницей и площадкой обслуживания. Пулемёт Корд использует геометрию техники; tower_yaw, tower_pitch и tower_recoil отвечают за наведение и отдачу.':'',
       ].filter(Boolean);
       fs.writeFileSync(path.join(directory,'README.md'),notes.join('\n\n')+'\n');
-      manifest.buildings.push({id:model.kind,path:model.kind+'/prototype.glb',spec:model.kind+'/module.json',triangles:data.geometry.triangles,bytes:bytes.length});
+      const entry={id:model.kind,path:model.kind+'/prototype.glb',spec:model.kind+'/module.json',triangles:data.geometry.triangles,bytes:bytes.length};
+      const index=manifest.buildings.findIndex(b=>b.id===model.kind);
+      if(index<0)manifest.buildings.push(entry);else manifest.buildings[index]=entry;
     }
     fs.writeFileSync('assets/blueprints/buildings/manifest.json',JSON.stringify(manifest,null,2)+'\n');
     console.log(JSON.stringify(manifest));

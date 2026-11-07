@@ -1,6 +1,5 @@
 const colors = {guidance:'#dfce91',threat:'#dc9373',intel:'#d7b775',anomaly:'#afcbea'};
 const duration = 7;
-const samePoint = (a,b) => a && b && a.x===b.x && a.y===b.y;
 
 function ionTrail(T) {
   const canvas=document.createElement('canvas');
@@ -35,19 +34,16 @@ export function createStorySignals(T, scene, field) {
   const ring=new T.Mesh(ringGeometry,new T.MeshBasicMaterial({
     transparent:true,depthWrite:false,side:T.DoubleSide,
   }));
-  const threatRing=new T.Mesh(ringGeometry.clone(),ring.material.clone());
-  threatRing.material.opacity=.62;
   const column=new T.Mesh(new T.PlaneGeometry(110,204),new T.MeshBasicMaterial({
     map:ionTrail(T),transparent:true,depthWrite:false,side:T.DoubleSide,
     blending:T.AdditiveBlending,forceSinglePass:true,toneMapped:false,
   }));
   column.geometry.rotateX(Math.PI/2);
   ring.name='field_signal_ring';column.name='southern_energy_trace';
-  threatRing.name='field_threat_ring';
-  ring.visible=column.visible=threatRing.visible=false;
-  scene.add(ring,column,threatRing);
+  ring.visible=column.visible=false;
+  scene.add(ring,column);
   const spill={value:new T.Vector3()},observer={value:new T.Vector2()};
-  let current=null,threat=null,born=0;
+  let current=null,born=0;
 
   function placeRing(mesh,{x,y,kind},scale) {
     mesh.position.set(x,y,0);
@@ -61,19 +57,12 @@ export function createStorySignals(T, scene, field) {
     mesh.geometry.computeBoundingSphere();
   }
 
-  function setThreat(signal) {
-    if(samePoint(threat,signal))return;
-    threat=signal;
-    if(signal)placeRing(threatRing,signal,1.45);
-    else threatRing.visible=false;
-  }
-
   function show(signal, now=performance.now()/1000) {
     current=signal;
     born=now;
     ring.visible=column.visible=false;
     spill.value.z=0;
-    if(!signal)return;
+    if(!signal||signal.kind==='threat')return;
     const {x,y,kind}=signal,height=field.heightAt(x,y);
     if(kind==='anomaly'){
       column.position.set(x,y,height+93);
@@ -86,7 +75,6 @@ export function createStorySignals(T, scene, field) {
   function update(mission, camera, now) {
     const age=now-born;
     if(current&&age>=duration)show(null,now);
-    threatRing.visible=!!threat&&!samePoint(current,threat)&&mission.exploredAt(threat.x,threat.y);
     if(!current)return;
     if(current.kind==='anomaly'){
       column.visible=true;
@@ -97,7 +85,7 @@ export function createStorySignals(T, scene, field) {
       column.material.opacity=Math.min(1,burst*.48+fade*(.37+.09*Math.sin(age*15)));
       spill.value.z=Math.min(.86,burst*.46+fade*.36);
     }else{
-      ring.visible=mission.exploredAt(current.x,current.y);
+      ring.visible=current.kind!=='threat'&&mission.exploredAt(current.x,current.y);
       ring.material.opacity=.60+.24*Math.sin(age*4.8);
     }
   }
@@ -105,8 +93,8 @@ export function createStorySignals(T, scene, field) {
   function drawMap(ctx,size) {
     ctx.save();
     ctx.lineWidth=1.2;
-    for(const signal of [current,samePoint(current,threat)?null:threat]){
-      if(!signal)continue;
+    for(const signal of [current]){
+      if(!signal||signal.kind==='threat')continue;
       const [x,y]=field.worldToGrid(signal.x,signal.y);
       ctx.strokeStyle=colors[signal.kind];
       ctx.beginPath();ctx.arc(x*size/127,y*size/127,4.5,0,2*Math.PI);ctx.stroke();
@@ -114,5 +102,5 @@ export function createStorySignals(T, scene, field) {
     ctx.restore();
   }
 
-  return {show,setThreat,update,drawMap,spill,observer,get current(){return current;}};
+  return {show,update,drawMap,spill,observer,get current(){return current;}};
 }
