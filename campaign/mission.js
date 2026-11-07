@@ -759,7 +759,7 @@ export class Mission{
   }
   return null;
  }
- recoverTrafficCluster(unit,includeParked=false,blockers){
+ recoverTrafficCluster(unit,includeParked=false,blockers,{aisleOnly=false}={}){
   const scale=this.config.worldScale;
   const idle=other=>!other.path.length&&!other.task&&!other.builderWorking&&!other.tool&&!other.foldTime;
   const neighbours=this.state.units.filter(other=>other.owner===unit.owner&&other.hp>0
@@ -782,8 +782,9 @@ export class Mission{
    return true;
   };
   if(includeParked&&cluster.length>=4
-   &&cluster.every(other=>other===unit||vehicleClearance(unit,other,scale,this.field)>=0)
+   &&(aisleOnly||cluster.every(other=>other===unit||vehicleClearance(unit,other,scale,this.field)>=0))
    &&this.clearParkedAisle(unit,neighbours.filter(idle),yieldSpace))return true;
+  if(aisleOnly)return false;
   const centre=cluster.reduce((sum,other)=>({x:sum.x+other.x/cluster.length,y:sum.y+other.y/cluster.length}),{x:0,y:0});
   const outer=cluster.slice().sort((a,b)=>distance(b,centre)-distance(a,centre)||Number(b.id.slice(1))-Number(a.id.slice(1)));
   for(const vehicle of outer){
@@ -1071,6 +1072,11 @@ export class Mission{
    watch.trafficWaitAt??=this.state.time;
    if(this.state.time-watch.trafficWaitAt<4)return !!pose;
   }else delete watch.trafficWaitAt;
+  // With legacy overlaps, small side nudges can create new obstructions
+  // along the one straight aisle that still permits a checked exit.
+  if(travel&&!pose&&watch.attempts<=2&&unit.owner==='rai'&&[...blockers].some(other=>
+   other.owner===unit.owner&&other.hp>0&&!other.path.length&&vehicleClearance(unit,other,scale,this.field)<0)
+   &&this.recoverTrafficCluster(unit,true,blockers,{aisleOnly:true}))return !!pose;
   if(this.requestPassage(unit,blockers))return !!pose;
   const destination=travel||unit.task?.type==='clear-site'?unit.task:unit.path.at(-1);
   const stalledNearParked=travel&&[...blockers].some(other=>!other.path.length);

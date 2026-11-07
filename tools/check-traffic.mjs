@@ -136,21 +136,24 @@ assert(oldSave.min>=oldSave.initial-.00001);
 
 function boxed({builders=false,overlap=false}={}){
  const m=session({...field,roadNetwork:null,roadBlendAt:null});
- const centre=m.addUnit('bukhanka','rai',{x:0,y:0}),others=[];
+ const centreId=m.addUnit('bukhanka','rai',{x:0,y:0}).id,others=[];
  for(let x=-1;x<=1;x++)for(let y=-1;y<=1;y++){
   if(!x&&!y)continue;
   const point={x:x*(overlap?10.3:10.95),y:y*(overlap?21.3:22.15)};
-  others.push({point,unit:m.addUnit(builders&&x===0?'builder':'bukhanka','rai',point)});
+  others.push({point,id:m.addUnit(builders&&x===0?'builder':'bukhanka','rai',point).id});
  }
- const units=[centre,...others.map(({unit})=>unit)];
- const initial=Math.min(...others.map(({unit})=>vehicleClearance(centre,unit,scale,m.field)));
+ if(overlap)m.load(m.save());
+ const centre=m.entity(centreId),parked=others.map(({id})=>m.entity(id));
+ const units=[centre,...parked];
+ const initial=Math.min(...parked.map(unit=>vehicleClearance(centre,unit,scale,m.field)));
  assert(m.order([centre.id],builders?'attack-move':'move',{x:135,y:0}).ok);
  const out=sample(m,units,40);
  assert.equal(out.complete,9);
  assert(Math.hypot(centre.x-135,centre.y)<3,'The boxed vehicle reaches its original order');
  assert(overlap?out.gap>=initial-.00001:out.gap>0,'Recovery does not introduce deeper vehicle overlap');
- const yielded=others.filter(({point,unit})=>Math.hypot(unit.x-point.x,unit.y-point.y)>1).length;
- assert(overlap?yielded>0:yielded===1,'One parked ally opens the aisle when the group starts clear');
+ const yielded=others.filter(({point},i)=>Math.hypot(parked[i].x-point.x,parked[i].y-point.y)>1).length;
+ assert.equal(yielded,1,'One parked ally opens the aisle even after loading an overlapping formation');
+ if(overlap)assert(out.seconds<=25,'Legacy overlap must clear without several rounds of shuffling');
  return {seconds:Math.round(out.seconds*10)/10,gap:out.gap,yielded};
 }
 const boxedClear=boxed(),boxedBuilders=boxed({builders:true}),boxedLegacy=boxed({overlap:true});
