@@ -477,7 +477,7 @@ export class Mission{
    if(travel||action==='attack')reserved.push(path.at(-1)??unit);
    const targetId=travel?null:target.id??null;
    if(unit.task?.type!==action||unit.task?.targetId!==targetId||travel&&(unit.routeOrder?.revision!==routeOrderRevision||distance(unit.task,destination)>5)){
-    delete unit.detour;delete unit.traffic;delete unit.trafficHold;delete unit.driveWatch;delete unit.reverseDebt;delete unit.failedArcs;
+    delete unit.detour;delete unit.traffic;delete unit.trafficHold;delete unit.driveWatch;delete unit.reverseDebt;delete unit.failedArcs;delete unit.workEscapeRetryAt;
    }
    delete unit.passage;
    if(viaPassage){
@@ -598,11 +598,11 @@ export class Mission{
  nearestEnemy(item,range,canTarget=null){let nearest=null,best=range;for(const target of [...this.state.units,...this.state.buildings]){if(!this.enemyOf(item,target))continue;const d=distance(item,target);if(d<best&&(item.owner!=='rai'||this.visibleAt(target.x,target.y))&&(!canTarget||canTarget(target))){best=d;nearest=target;}}return nearest;}
  requestPassage(unit,blockers){
   if(unit.task?.type==='clear-site'||unit.detour||unit.traffic||unit.trafficHold)return false;
-  const scale=this.config.worldScale;
+  const scale=this.config.worldScale,workOrder=['build','repair'].includes(unit.task?.type);
   for(const other of blockers){
    if(other.hp<=0||other.owner!==unit.owner||other.path.length||other.task||other.detour||this.unitSpec(other).role==='builder'
     ||other.trafficRest>this.state.time||distance(unit,other)>scale*6)continue;
-   if(!other.routeOrder&&(!['move','attack-move'].includes(unit.task?.type)||this.unitSpec(unit).role==='builder'))continue;
+   if(!other.routeOrder&&!workOrder&&(!['move','attack-move'].includes(unit.task?.type)||this.unitSpec(unit).role==='builder'))continue;
    other.trafficRest=this.state.time+5;
    const park=this.parkingManeuver(other,unit,(from,to)=>this.vehicleMotionClear(other,from,to));
    if(!park)continue;
@@ -630,6 +630,25 @@ export class Mission{
   follower.traffic={leader:leader.id,since:this.state.time,phase:'move',forward:park.forward};
   leader.trafficHold=follower.id;
   return true;
+ }
+ workRouteExit(unit,goal){
+  const scale=this.config.worldScale;
+  const allowed=(from,to)=>this.vehicleMotionClear(unit,from,to);
+  const ignoreUnits=new Set([unit]);
+  const curve=Math.tan(.67);
+  // Check both the backing arc and the turn onto the new route before moving.
+  for(const length of [1.5,2.5,3.5]){
+   for(const steering of [0,curve/2,-curve/2,curve,-curve]){
+    const first={direction:-1,curve:steering,remaining:length*scale};
+    const exit=checkManeuver(unit,[first],scale,allowed);
+    if(!exit)continue;
+    const path=this.vehiclePath(exit,goal,{ignoreUnits,avoidMoving:true,fallback:false,maxGoalDistance:.01});
+    if(!path?.length)continue;
+    const onward=planManeuver(exit,path[0],{scale,allowed,attempts:2,reverseBudget:0,maximumLegs:5});
+    if(onward)return {path,legs:[first,...onward]};
+   }
+  }
+  return null;
  }
  vehicleMotionClear(unit,from,to,grade=.52,blockers,obstacles=this.state.units){
   const field=this.field,scale=this.config.worldScale;
@@ -1122,6 +1141,15 @@ export class Mission{
   const legs=planManeuver(unit,point,{...maneuverOptions,reverseBudget:0})
    ??(reverseBudget>=scale*.6?planManeuver(unit,point,{...maneuverOptions,reverseBudget}):null);
   if(legs){unit.detour={legs,parking:false,blocked:0};return !!pose;}
+  if(target&&['build','repair'].includes(unit.task.type)&&watch.attempts>=2&&this.state.time>=(unit.workEscapeRetryAt??0)){
+   unit.workEscapeRetryAt=this.state.time+4;
+   const escape=this.workRouteExit(unit,destination);
+   if(escape){
+    unit.path=escape.path;
+    unit.detour={legs:escape.legs,parking:false,blocked:0};
+    return !!pose;
+   }
+  }
   if(blockers.size&&(watch.attempts>=2||travel&&stoppedPair())&&unit.task?.type!=='clear-site'){
    if(this.recoverTrafficCluster(unit,false,slopeBlockers)
     ||travel&&unit.owner==='rai'&&this.recoverTrafficCluster(unit,true,slopeBlockers))return !!pose;
