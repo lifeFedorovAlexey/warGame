@@ -206,9 +206,10 @@ export class FieldSound {
     if (performance.now() - request.time >= storyMaxAge) return;
     const ctx = this.context, now = ctx.currentTime, source = ctx.createBufferSource(), gain = ctx.createGain();
     source.buffer = request.buffer;
-    gain.gain.value = .88;
+    gain.gain.value = 0;
     source.connect(gain).connect(this.output);
     const playback = this.storyPlayback = {source, gain};
+    this.updateStoryGain();
     this.effectsOutput.gain.setTargetAtTime(.67, now, .045);
     source.onended = () => {
       source.disconnect();
@@ -219,6 +220,10 @@ export class FieldSound {
     };
     source.start(now);
     request.keepCaptionUntil(performance.now() + (request.buffer.duration + .18) * 1000);
+  }
+
+  updateStoryGain() {
+    this.storyPlayback?.gain.gain.setTargetAtTime(this.voiceSource ? .51 : .88, this.context.currentTime, .035);
   }
 
   stopStory() {
@@ -253,6 +258,7 @@ export class FieldSound {
     for (const [played, at] of this.lastVoice) if (now - at >= voiceCooldown) this.lastVoice.delete(played);
     const source = this.context.createBufferSource();
     this.voiceSource = source;
+    this.updateStoryGain();
     source.buffer = this.voices[kind];
     source.connect(this.output);
     source.onended = () => {
@@ -260,6 +266,7 @@ export class FieldSound {
       if (this.voiceSource !== source) return;
       this.voiceSource = null;
       this.playPendingVoice();
+      this.updateStoryGain();
     };
     source.start();
     this.lastVoice.set(key, now);
