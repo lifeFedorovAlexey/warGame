@@ -1,5 +1,5 @@
 import {setCharacterPortrait} from './character-portraits.js';
-import {raidApproachSignal, visibleRaidContact, waterTowerSignal} from './threat-guidance.js';
+import {raidApproachSignal, southernApproachSignal, visibleRaidContact, waterTowerSignal} from './threat-guidance.js';
 
 const messages = {
   intro: { station: 'Командир', speaker:'commander', portrait:'radio', text: 'Вас понял. На месте.' },
@@ -52,9 +52,7 @@ export function missionSignal(chapter, mission) {
     return waterTowerSignal(mission);
   }
   if (chapter === 'last-camp') {
-    const approach = config.camps[3].approachGrid;
-    return approach ? mark(field.gridToWorld(approach), 'К подходу', 'intel', 530) :
-      mark(state.camps[3].gate, 'К въезду', 'intel', 530);
+    return southernApproachSignal(mission);
   }
   if (chapter === 'outro') {
     const [x] = config.startGrid;

@@ -30,7 +30,7 @@ function firstPowerSites(){
 function knownArtifact(mission){
   return mission.state.artifacts.find(item=>!item.collected&&mission.exploredAt(item.x,item.y));
 }
-function nextObjectiveHint(state,{plant,well},tasks,artifact,contact){
+function nextObjectiveHint(state,{plant,well},tasks,artifact,contact,southernApproach){
   if(state.status!=='running')return '';
   if(state.flags.contact&&!state.flags.raidWon)return contact ? 'Отразите рейд на базу.' : 'Прикройте въезд к базе.';
   if(artifact)return 'Подберите артефакт.';
@@ -54,11 +54,18 @@ function nextObjectiveHint(state,{plant,well},tasks,artifact,contact){
   if(!tasks.find(task=>task.id==='research').done){
     const hasSample=state.artifactKeys.some(key=>!state.research[key]&&!owned.some(b=>b.research?.key===key));
     if(hasSample)return 'Изучите артефакты в НИИ.';
-    if(!owned.some(b=>b.research))return 'Ищите артефакты в лагерях.';
+    if(!state.flags.lastRevealed&&!owned.some(b=>b.research))return 'Ищите артефакты в лагерях.';
+  }
+  const headquarters=state.camps[3];
+  if(state.flags.lastRevealed&&!headquarters.cleared){
+    if(southernApproach?.kind!=='intel')return 'Разведайте южное шоссе до западного изгиба.';
+    if(state.buildings.some(b=>b.campId===headquarters.id&&b.kind==='mg-tower'&&b.hp>0))
+      return 'Соберите группу перед изгибом. Бейте башни по одной.';
+    return 'Зачистите штаб Петровича.';
   }
   return state.camps.some(camp=>!camp.cleared) ? 'Зачистите лагеря Отбросов.' : 'Завершите исследования в НИИ.';
 }
-function tacticalFocus(contact,{well,threat=staticThreat(contact),artifact=knownArtifact(mission)}=firstPowerSites()){
+function tacticalFocus(contact,{well,threat=staticThreat(contact),artifact=knownArtifact(mission),southernApproach=missionSignal('last-camp',mission)}=firstPowerSites()){
   if(mission.state.status!=='running')return null;
   if(contact)return {x:contact.x,y:contact.y,kind:'threat',label:'К контакту',distance:420};
   if(threat)return threat;
@@ -67,7 +74,7 @@ function tacticalFocus(contact,{well,threat=staticThreat(contact),artifact=known
     const departure=missionSignal('raid-won',mission);
     if(departure)return departure;
   }
-  if(mission.state.flags.lastRevealed&&!mission.state.camps[3].cleared)return missionSignal('last-camp',mission);
+  if(southernApproach)return southernApproach;
   if(!well&&radio.current?.kind!=='guidance')return missionSignal('intro',mission);
   return null;
 }
@@ -649,8 +656,9 @@ function updateUi() {
   }
   const contact=visibleRaidContact(mission),threat=staticThreat(contact);
   world.storySignals.setThreat(threat);
-  const sites=firstPowerSites(),artifact=knownArtifact(mission),marker=tacticalFocus(contact,{...sites,threat,artifact});
-  const objectiveHint = $('objective-hint'), hint = nextObjectiveHint(s,sites,tasks,artifact,contact);
+  const sites=firstPowerSites(),artifact=knownArtifact(mission),southernApproach=missionSignal('last-camp',mission);
+  const marker=tacticalFocus(contact,{...sites,threat,artifact,southernApproach});
+  const objectiveHint = $('objective-hint'), hint = nextObjectiveHint(s,sites,tasks,artifact,contact,southernApproach);
   if(objectiveHint.textContent!==hint)objectiveHint.textContent=hint;
   objectiveHint.hidden=!hint;
   const signal=world.storySignals.current;

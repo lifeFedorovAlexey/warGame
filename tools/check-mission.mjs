@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
 import {Mission} from '../campaign/mission.js';
-import {raidApproachSignal, waterTower, waterTowerSignal} from '../campaign/threat-guidance.js';
+import {raidApproachSignal, southernApproachSignal, waterTower, waterTowerSignal} from '../campaign/threat-guidance.js';
 import {vehicleClearance} from '../campaign/vehicle-motion.js';
 import {createHeightfield} from '../demo/map-route.js';
 import {shapeMesaRims} from '../demo/mesa-shaping.js';
@@ -34,6 +34,35 @@ reveal(approach);
 assert.deepEqual([raidApproachSignal(scout).x,raidApproachSignal(scout).y],[approach.x,approach.y]);
 scout.state.flags.raidWon=true;
 assert.equal(raidApproachSignal(scout),null,'Clear the warning once the raid is over');
+assert.equal(southernApproachSignal(scout),null,'Keep the southern approach locked');
+scout.state.flags.lastRevealed=true;
+scout.state.bounds=config.finalMapBounds.slice();
+const finalCamp=config.camps[3],southRally=field.gridToWorld(finalCamp.approachGrid);
+const approachRoad=field.roadNetwork.paths.find(road=>road.to===finalCamp.id);
+const roadEntry=approachRoad.points[0];
+scout.explored.fill(0);
+assert.equal(southernApproachSignal(scout),null,'Do not focus the camera on a fully uncharted road');
+reveal(roadEntry);
+const knownRoad=southernApproachSignal(scout);
+assert.equal(knownRoad.kind,'recon');
+assert(scout.exploredAt(knownRoad.x,knownRoad.y));
+assert(scout.nav.roads.coverage(knownRoad.x,knownRoad.y)>.9);
+assert(scout.nav.roads.coverage(southRally.x,southRally.y)>.9,'The rally lies on the actual highway');
+const southernTowers=scout.state.buildings.filter(b=>b.campId===finalCamp.id&&b.kind==='mg-tower');
+for(const arrival of [roadEntry,scout.state.camps[3].gate]){
+ const formation=scout.nav.roads.formation(southRally,arrival,12,config.worldScale);
+ assert(formation?.slots.length>=12,'The highway fits a whole column from either direction');
+ for(const slot of formation.slots.slice(0,12)){
+  assert(scout.inBounds(slot.x,slot.y)&&scout.nav.roads.coverage(slot.x,slot.y)>.58);
+  assert(southernTowers.every(b=>Math.hypot(slot.x-b.x,slot.y-b.y)>scout.buildingSpec(b).range+12));
+ }
+}
+reveal(southRally);
+const rallySignal=southernApproachSignal(scout);
+assert.equal(rallySignal.kind,'intel');
+assert.deepEqual([rallySignal.x,rallySignal.y],[southRally.x,southRally.y]);
+scout.state.camps[3].cleared=true;
+assert.equal(southernApproachSignal(scout),null,'Remove the approach after clearing the headquarters');
 const oilFirst=new Mission(config,field);
 oilFirst.advance(2.7);
 const oilPoint=field.gridToWorld(config.oilFields[0]);
