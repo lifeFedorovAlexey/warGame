@@ -128,6 +128,7 @@ function commandFeedback(){
  feedback.hidden=!blocked.length;$('select-blocked').hidden=!blocked.length;
 }
 function cancelMode({keepAttack=false}={}) {
+  cancelMapGesture();
   combatMenu?.close();
   buildKind = null;
   buildOpen = false;
@@ -135,6 +136,13 @@ function cancelMode({keepAttack=false}={}) {
   site = placing = null;
   world.setGhost(null);
   updateUi();
+}
+function cancelMapGesture() {
+  const pointerId=drag?.pointerId;
+  drag=null;
+  $('drag-box').hidden=true;
+  const canvas=world?.renderer.domElement;
+  if(pointerId!==undefined&&canvas?.hasPointerCapture(pointerId))canvas.releasePointerCapture(pointerId);
 }
 function toggleDesigner() {
   if (designer.visible) return designer.close();
@@ -409,7 +417,7 @@ function installInput() {
     }
     if (event.button === 0) {
       canvas.setPointerCapture(event.pointerId);
-      drag = {x: event.clientX, y: event.clientY, append: event.shiftKey};
+      drag = {x: event.clientX, y: event.clientY, append: event.shiftKey, pointerId:event.pointerId};
     }
   });
   canvas.addEventListener('pointermove', event => {
@@ -431,13 +439,17 @@ function installInput() {
     box.style.height = Math.abs(pointer.y - drag.y) + 'px';
   });
   canvas.addEventListener('pointerup', event => {
-    if (!drag || event.button !== 0) return;
+    if (!drag || event.button !== 0 || event.pointerId!==drag.pointerId) return;
     const origin = drag;
     const previousClick=lastSelectionClick;
     lastSelectionClick=null;
     drag = null;
     $('drag-box').hidden = true;
     const x = event.clientX, y = event.clientY;
+    // Pointer capture targets the canvas even when the pointer is over a HUD
+    // control. Such a release must never command the ground behind that control
+    // or clear the current selection. Empty HUD gaps still hit the map.
+    if (!active || mission.state.status!=='running' || document.elementFromPoint(x,y)!==canvas) return;
     if (buildKind) {
       pointer = {x,y};
       site = null;
@@ -485,7 +497,10 @@ function installInput() {
     select(ids,event.shiftKey);
     event.preventDefault();
   });
-  canvas.addEventListener('pointercancel', () => { drag = null; lastSelectionClick=null; $('drag-box').hidden = true; });
+  canvas.addEventListener('pointercancel', () => { cancelMapGesture(); lastSelectionClick=null; });
+  canvas.addEventListener('lostpointercapture', event => {
+    if(drag?.pointerId===event.pointerId){cancelMapGesture();lastSelectionClick=null;}
+  });
   document.addEventListener('keydown', event => {
     if (!active || designer.visible || event.target.matches('input, select, textarea')) return;
     const {code} = event;
@@ -544,7 +559,7 @@ function installInput() {
     }
   });
   document.addEventListener('keyup', event => world.keys.delete(event.code));
-  window.addEventListener('blur', () => world.keys.clear());
+  window.addEventListener('blur', () => { world.keys.clear(); cancelMapGesture(); lastSelectionClick=null; });
   $('minimap').addEventListener('pointerdown', event => {
     const rect = $('minimap').getBoundingClientRect();
     const point = world.field.gridToWorld([(event.clientX-rect.left)/rect.width*127, (event.clientY-rect.top)/rect.height*127]);
