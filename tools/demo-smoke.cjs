@@ -3,11 +3,14 @@ const fs = require('node:fs');
 const path = require('node:path');
 (async()=>{
  const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true,args:['--enable-unsafe-swiftshader','--use-angle=swiftshader']});
+ try{
  const page=await browser.newPage({viewport:{width:1440,height:960}});
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});fs.mkdirSync(path.resolve('demo/previews'),{recursive:true});
  await page.goto('http://127.0.0.1:8766/demo/',{waitUntil:'networkidle'});
  await page.waitForFunction(()=>window.demoState?.productionReady);
- await page.evaluate(()=>{window.demoActions.setCheckpoint(0);window.demoActions.follow();});await page.waitForTimeout(6500);
+ await page.evaluate(()=>{window.demoActions.setCheckpoint(0);window.demoActions.follow();});
+ // Wait for actual aiming and simulation, not a few slow software-rendered frames.
+ await page.waitForFunction(()=>window.demoState.shots>0&&window.demoState.routeDistance>1,{},{timeout:120000});
  const state=await page.evaluate(()=>({...window.demoState}));
  const audit=await page.evaluate(()=>window.demoActions.audit());
  if(state.modelClearances.rearDoorGuardMm<70||state.modelClearances.glassOffsetMm>6.1)throw new Error('Body surface seating or rear door clearance failed: '+JSON.stringify(state.modelClearances));
@@ -15,7 +18,7 @@ const path = require('node:path');
  if(!state.shots||!state.angle)throw new Error('Driving or firing is inactive: '+JSON.stringify(state));
  await page.screenshot({path:path.resolve('demo/previews/arena.png')});
  await page.getByRole('button',{name:'Разобрать',exact:true}).click();
- await page.waitForTimeout(1200);
+ await page.waitForFunction(()=>window.demoState.explosion>.95,{},{timeout:60000});
  await page.screenshot({path:path.resolve('demo/previews/assembly.png')});
  const exploded=await page.evaluate(()=>window.demoState.explosion);
  if(exploded<.95)throw new Error('Exploded assembly did not open');
@@ -36,5 +39,5 @@ const path = require('node:path');
  await page.screenshot({path:path.resolve('demo/previews/mobile.png')});
  if(errors.length)throw new Error(errors.join('\n'));
  const report={arena:state,audit,exploded,controls:true,pageErrors:errors};fs.mkdirSync(path.resolve('demo/reports'),{recursive:true});fs.writeFileSync(path.resolve('demo/reports/arena.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report));
- await browser.close();
+ }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exit(1)});

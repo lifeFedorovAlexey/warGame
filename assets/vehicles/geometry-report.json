@@ -25,17 +25,17 @@
   {
     "id": "B01",
     "lod": 0,
-    "triangles": 13494,
-    "vertices": 17184,
+    "triangles": 14898,
+    "vertices": 18377,
     "primitives": 11,
     "materials": 11,
     "removedDegenerate": 0,
-    "inputTriangles": 13494,
-    "bytes": 645356,
+    "inputTriangles": 14898,
+    "bytes": 691972,
     "boundsMm": {
       "min": [
         -1161,
-        -2070,
+        -2059,
         0
       ],
       "max": [
@@ -71,17 +71,17 @@
   {
     "id": "B01",
     "lod": 1,
-    "triangles": 6856,
-    "vertices": 8710,
+    "triangles": 7292,
+    "vertices": 9228,
     "primitives": 11,
     "materials": 11,
     "removedDegenerate": 0,
-    "inputTriangles": 6856,
-    "bytes": 334324,
+    "inputTriangles": 7292,
+    "bytes": 353532,
     "boundsMm": {
       "min": [
         -1161,
-        -2070,
+        -2059,
         0
       ],
       "max": [
@@ -100,7 +100,7 @@
     "materials": 5,
     "removedDegenerate": 0,
     "inputTriangles": 2792,
-    "bytes": 146060,
+    "bytes": 146064,
     "boundsMm": {
       "min": [
         -1065,
@@ -117,17 +117,17 @@
   {
     "id": "B01",
     "lod": 2,
-    "triangles": 3422,
-    "vertices": 4219,
+    "triangles": 3634,
+    "vertices": 4530,
     "primitives": 9,
     "materials": 9,
     "removedDegenerate": 0,
-    "inputTriangles": 3422,
-    "bytes": 167584,
+    "inputTriangles": 3634,
+    "bytes": 178844,
     "boundsMm": {
       "min": [
         -1156,
-        -2070,
+        -2056,
         0
       ],
       "max": [

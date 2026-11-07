@@ -34,8 +34,8 @@
     },
     {
       "file": "B01/B01-lod0.glb",
-      "triangles": 13494,
-      "vertices": 17184,
+      "triangles": 14898,
+      "vertices": 18377,
       "primitives": 11,
       "errors": 0,
       "warnings": 0,
@@ -96,8 +96,8 @@
     },
     {
       "file": "B01/B01-lod1.glb",
-      "triangles": 6856,
-      "vertices": 8710,
+      "triangles": 7292,
+      "vertices": 9228,
       "primitives": 11,
       "errors": 0,
       "warnings": 0,
@@ -158,8 +158,8 @@
     },
     {
       "file": "B01/B01-lod2.glb",
-      "triangles": 3422,
-      "vertices": 4219,
+      "triangles": 3634,
+      "vertices": 4530,
       "primitives": 9,
       "errors": 0,
       "warnings": 0,
