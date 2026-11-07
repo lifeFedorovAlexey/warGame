@@ -73,7 +73,8 @@ for(const count of counts){
   ...snapshot,
   computes,aStarSearches:planner.nav.searchId,reachabilityRejects:planner.nav.reachabilityRejects??0,corridorHits:planner.nav.corridorHits??0,
   sharedTrees:[...(planner.nav.sharedRouteTrees?.values()??[])].map(t=>({queries:t.queries,expanded:t.expanded,typedArrayBytes:t.bytes,
-   exactCostCacheEntries:t.segmentCosts.size,exactCostCacheHits:t.costCacheHits,mapOverheadBytes:null})),frameCpuMs:distribution(frames),plannerCpuMs:distribution(planning),
+   exactCostCacheEntries:t.segmentCosts.size,exactCostCacheHits:t.costCacheHits,
+   clearanceCacheEntries:t.segmentClearance.size,clearanceCacheHits:t.clearanceCacheHits,mapOverheadBytes:null})),frameCpuMs:distribution(frames),plannerCpuMs:distribution(planning),
   heapDeltaBytes:process.memoryUsage().heapUsed-beforeHeap,contacts,terrainStops,damage:units.reduce((sum,u,i)=>sum+Math.max(0,starts[i].hp-u.hp),0),profile,
   ...(process.argv.includes('--diagnose')?{searches,activeUnit:planner.active?.runtime.currentUnit,active:units.filter(u=>u.pendingOrder).slice(0,5).map(u=>({id:u.id,x:u.x,y:u.y,pending:structuredClone(u.pendingOrder)}))}:{} )};
  const before=computes,repeatedAt=performance.now(),repeat=m.submitOrder(ids,'move',goal),repeatMs=performance.now()-repeatedAt;

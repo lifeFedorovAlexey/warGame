@@ -79,6 +79,15 @@ function settle(m,max=2000){
  results.push({case:'50 incremental starts',submitMs,firstMotion,pendingAtFirst,planner:m.commandPlanner.stats});
 }
 {
+ const m=fixture(),units=cars(m,500);m.submitOrder(units.map(u=>u.id),'move',{x:0,y:700});
+ for(let step=0;step<4000&&(m.state.commandOrders[0].assigned.length<250);step++)m.commandPlanner.advance(0);
+ assert(m.commandPlanner.active&&m.state.commandOrders[0].assigned.length>=250,'The large job is halfway through its real unit assignments');
+ const lookup=m.entity;let calls=0;m.entity=function(id){calls++;return lookup.call(this,id);};
+ m.commandPlanner.advance(0);m.entity=lookup;
+ assert(calls<10,'Resuming a partial 500-car job must not look up every already assigned ID in the whole world');
+ results.push({case:'partial large-job liveness guard avoids repeated whole-world lookups',entityCalls:calls});
+}
+{
  const m=fixture(),units=cars(m,20),ids=units.map(u=>u.id);
  const first=m.submitOrder(ids,'move',{x:0,y:500});m.stop(ids);
  const second=m.submitOrder(ids,'move',{x:0,y:500});assert.notEqual(second.revision,first.revision);

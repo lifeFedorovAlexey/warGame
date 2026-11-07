@@ -81,8 +81,9 @@ try{
    if(await page.evaluate(()=>campaign.state.paused))await page.locator('#pause').click();
    const result=await page.evaluate(async({phase,seconds})=>{
     const c=campaign,m=c.mission,w=c.world,b=c.navigationBench,gl=w.renderer.getContext(),ext=gl.getExtension('EXT_disjoint_timer_query_webgl2');
-    let order=null,submitMs=null;if(phase==='move-order'){const start=performance.now();order=m.submitOrder(b.ids,'move',b.goal);submitMs=performance.now()-start;}
+    let order=null,submitMs=null,orderedAt=null;if(phase==='move-order'){orderedAt=performance.now();order=m.submitOrder(b.ids,'move',b.goal);submitMs=performance.now()-orderedAt;}
     const queries=[],gpu=[],frames=[],cpu=[],simulation=[],navigation=[],planner=[],draw=[],visible=[],moving=[],pending=[];
+    const firstResponse=b.ids.map(()=>null),firstHalfWorld=b.ids.map(()=>null),firstReady=b.ids.map(()=>null);
     let start=null,last=null,disjoint=false,maxBacklog=0,firstMotion=null;const simulationStart=m.state.time,contactsBefore=b.contacts,terrainBefore=b.terrainStops,contactLogStart=b.contactLog.length;
     const advance=m.advance,update=w.update;let lastSimulationCpu=0;
     m.advance=function(...args){
@@ -104,9 +105,21 @@ try{
     while(true){
      const now=await new Promise(requestAnimationFrame);if(start===null)start=last=now;const dt=(now-last)/1000;
      if(now-start>=seconds*1000)break;if(dt>0)frames.push(now-last);last=now;
-     const units=m.state.units,active=units.filter((u,i)=>Math.hypot(u.x-b.starts[i].x,u.y-b.starts[i].y)>.5).length;
+     const units=m.state.units;let active=0,movingCount=0,pendingCount=0;
+     for(let i=0;i<units.length;i++){
+      const unit=units[i],displacement=Math.hypot(unit.x-b.starts[i].x,unit.y-b.starts[i].y);
+      if(displacement>.5)active++;
+      if((unit.navigation?.speed??0)>.1)movingCount++;
+      if(unit.pendingOrder?.status==='planning')pendingCount++;
+      if(orderedAt!==null){
+       if(firstReady[i]===null&&!unit.pendingOrder&&unit.commandRevision===order.revision&&unit.routeOrder)
+        firstReady[i]={wallSeconds:(now-orderedAt)/1000,simSeconds:m.state.time-simulationStart};
+       if(displacement>.01&&firstResponse[i]===null)firstResponse[i]={wallSeconds:(now-orderedAt)/1000,simSeconds:m.state.time-simulationStart};
+       if(displacement>.5&&firstHalfWorld[i]===null)firstHalfWorld[i]={wallSeconds:(now-orderedAt)/1000,simSeconds:m.state.time-simulationStart};
+      }
+     }
      if(active&&firstMotion===null)firstMotion=(now-start)/1000;
-     moving.push(units.filter(u=>(u.navigation?.speed??0)>.1).length);pending.push(units.filter(u=>u.pendingOrder?.status==='planning').length);
+     moving.push(movingCount);pending.push(pendingCount);
      maxBacklog=Math.max(maxBacklog,m.accumulator+(m.pendingTick?m.config.simulationStep:0));
      if(ext){disjoint||=gl.getParameter(ext.GPU_DISJOINT_EXT);while(queries.length&&gl.getQueryParameter(queries[0],gl.QUERY_RESULT_AVAILABLE)){const q=queries.shift();gpu.push(gl.getQueryParameter(q,gl.QUERY_RESULT)/1e6);gl.deleteQuery(q);}}
     }
@@ -118,7 +131,14 @@ try{
     for(const q of queries)gl.deleteQuery(q);
     const stats=a=>{const sorted=a.slice().sort((a,b)=>a-b),at=p=>sorted[Math.min(sorted.length-1,Math.floor(sorted.length*p))]??null;return {p50:at(.5),p95:at(.95),p99:at(.99),max:sorted.at(-1)??null,mean:a.reduce((s,x)=>s+x,0)/Math.max(1,a.length)};};
     const units=m.state.units,physical=w.damage.statistics;
+    const responseDistribution=times=>({thresholdWorld:times===firstResponse ? .01 : .5,responded:times.filter(Boolean).length,
+     wallSeconds:stats(times.filter(Boolean).map(t=>t.wallSeconds)),simSeconds:stats(times.filter(Boolean).map(t=>t.simSeconds)),
+     overHalfSecondIds:b.ids.filter((id,i)=>times[i]?.wallSeconds>.5),unrespondedIds:b.ids.filter((id,i)=>times[i]===null),
+     units:b.ids.map((id,i)=>({id,...(times[i]??{wallSeconds:null,simSeconds:null}),readyWallSeconds:firstReady[i]?.wallSeconds??null,
+      responseAfterReadySeconds:times[i]&&firstReady[i]?times[i].wallSeconds-firstReady[i].wallSeconds:null,
+      lastNavigationReason:units[i].navigation?.reason??null,pendingStatus:units[i].pendingOrder?.status??null}))});
     return {phase,order,submitMs,firstMotion,frames:frames.length,fps:1000/stats(frames).mean,frameMs:stats(frames),cpuFrameMs:stats(cpu),simulationCpuMs:stats(simulation),
+     ...(orderedAt!==null?{firstResponse:responseDistribution(firstResponse),firstHalfWorld:responseDistribution(firstHalfWorld)}:{}),
      navigationCpuMs:stats(navigation),navigationScope:'Command planner + TrafficCoordinator + actual moveSteps generator slices; excludes combat logic and renderer.',plannerCpuMs:stats(planner),
      gpuFrameMs:ext&&!disjoint&&gpu.length?stats(gpu):null,gpuReason:!ext?'EXT_disjoint_timer_query_webgl2 unavailable':disjoint?'disjoint timer':gpu.length?null:'no completed queries',
      drawCalls:stats(draw),visibleMin:Math.min(...visible),movingMax:Math.max(...moving),pendingMax:Math.max(...pending),pendingEnd:units.filter(u=>u.pendingOrder?.status==='planning').length,
@@ -136,7 +156,9 @@ try{
    const processes=await session.send('SystemInfo.getProcessInfo');let processMemory;
    try{processMemory=JSON.parse(execFileSync('powershell.exe',['-NoProfile','-ExecutionPolicy','Bypass','-File','tools/damage-process-metrics.ps1','-ProcessIds',processes.processInfo.map(p=>p.id).join(',')],{encoding:'utf8',windowsHide:true}));}catch(error){processMemory={unavailable:error.message};}
    report.results.push({count,setup,...result,processMemory});fs.mkdirSync('campaign/reports',{recursive:true});fs.writeFileSync('campaign/reports/navigation-browser-'+fixtureMode+'.json',JSON.stringify(report,null,2));
-   console.log(JSON.stringify({count,phase,fps:result.fps,navP95:result.navigationCpuMs.p95,simP95:result.simulationCpuMs.p95,firstMotion:result.firstMotion,started:result.started,pending:result.pendingEnd,blocked:result.blockedEnd,contacts:result.contacts,gpuP95:result.gpuFrameMs?.p95}));
+   console.log(JSON.stringify({count,phase,fps:result.fps,navP95:result.navigationCpuMs.p95,simP95:result.simulationCpuMs.p95,firstMotion:result.firstMotion,
+    responseP95:result.firstResponse?.wallSeconds.p95,responseMax:result.firstResponse?.wallSeconds.max,unresponded:result.firstResponse?.unrespondedIds.length,
+    halfWorldP95:result.firstHalfWorld?.wallSeconds.p95,started:result.started,pending:result.pendingEnd,blocked:result.blockedEnd,contacts:result.contacts,gpuP95:result.gpuFrameMs?.p95}));
   }
  }
 }finally{await browser.close();}

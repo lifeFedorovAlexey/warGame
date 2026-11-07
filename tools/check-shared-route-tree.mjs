@@ -16,8 +16,9 @@ const results=[];
  const cost=(start,path)=>{let value=0;for(const end of path){assert(nav.lineClear(start,end));value+=nav.travelCost(start,end,true);start=end;}return value;};
  const uphill=cost(to,up),downhill=cost(other,down);assert(uphill>downhill,'Reverse branch costs use the actual travel direction');
  assert(tree.travelCost(to,other)>tree.travelCost(other,to),'Exact-segment cost cache preserves direction');
- const hits=tree.costCacheHits;finish(tree.between(from,to));assert(tree.costCacheHits>hits,'Repeated branch smoothing reuses exact directed segment costs');
- assert(tree.segmentCosts.size<=8192);
+ const hits=tree.costCacheHits,clearHits=tree.clearanceCacheHits;finish(tree.between(from,to));assert(tree.costCacheHits>hits,'Repeated branch smoothing reuses exact directed segment costs');
+ assert(tree.clearanceCacheHits>clearHits,'Repeated branch smoothing reuses exact checked grid chords');
+ assert(tree.segmentCosts.size<=8192&&tree.segmentClearance.size<=8192);
  for(let x=-256;x<256;x+=8){const a={x,y:0},b={x:x+8,y:0};assert.equal(nav.lineClear(a,b),nav.lineClear(b,a),'Absolute-grade edge passability is symmetric');}
  const original=nav.lineClear;nav.lineClear=function(a,b,...args){return b.x<a.x?false:original.call(this,a,b,...args);};
  assert.equal(finish(tree.between(other,to)),null,'An invalid reverse-direction connector/edge cannot escape validation');
@@ -39,6 +40,16 @@ for(const slope of [.15,-.15]){
  let previous=from;for(const point of path){assert(nav.lineClear(previous,point,false,true),'Both shared branches and exact connectors avoid the wall');previous=point;}
  assert.equal(new Set(path.map(p=>p.x+','+p.y)).size,path.length);
  results.push({case:'two-branch wall route / exact continuous connectors',waypoints:path.length});
+}
+{
+ const nav=new TerrainNavigator(field(),{bounds:[0,0,32,32]}),goal={x:256,y:0},tree=sharedRouteTree(nav,goal,true);
+ const a={x:-450,y:450},b={x:450,y:450};
+ assert(tree.clearSegment(a,b));assert(tree.clearSegment(a,b));assert.equal(tree.clearanceCacheHits,0,'Off-grid chords never use the exact cache');
+ const c={x:-448,y:448},d={x:448,y:448};assert(tree.clearSegment(c,d));assert(tree.clearSegment(c,d));assert.equal(tree.clearanceCacheHits,1);
+ nav.rebuild([{id:'chord-obstacle',hp:1,x:0,y:448,halfWidth:20,halfDepth:20}]);
+ const replacement=sharedRouteTree(nav,goal,true);assert.notEqual(replacement,tree,'A changed region on a cached chord invalidates the tree even outside its searched branch');
+ assert.equal(replacement.clearSegment(c,d),false);
+ results.push({case:'checked chord cache / exact coordinates / regional dependency',passed:true});
 }
 {
  const nav=new TerrainNavigator(field(),{bounds:[0,0,32,32]}),goal={x:256,y:0},from={x:-256,y:0,kind:'bukhanka',heading:-Math.PI/2};

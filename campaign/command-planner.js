@@ -166,7 +166,9 @@ export class CommandPlanner{
   do{
    if(this.active){
     const {record}=this.active;
-    if(record.status==='cancelled'||!record.ids.some(id=>m.entity(id)?.pendingOrder?.revision===record.revision)
+    // A revision uniquely owns its pending members. Looking up every selected
+    // ID through entity() here copied/scanned the whole world on EVERY yield.
+    if(record.status==='cancelled'||!m.state.units.some(unit=>unit.hp>0&&unit.pendingOrder?.revision===record.revision)
      &&!record.ids.every(id=>record.assigned.includes(id))){
      this.active.iterator.return();record.status='cancelled';this.active=null;
     }else if(this.active.topology!==m.nav.topologyRevision||this.active.bounds!==m.nav.bounds.join(','))this.restartActive();

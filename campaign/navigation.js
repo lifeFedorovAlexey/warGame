@@ -93,10 +93,13 @@ export class TerrainNavigator{
    // every retained segment against this request's current occupancy/terrain.
    for(let entry=0;entry<Math.min(4,corridor.path.length);entry++){
     if(!this.lineClear(from,corridor.path[entry],false,true))continue;
-    let previous=from,valid=true;const path=[];
+    let previous=from;const path=[];
     for(let i=entry;i<corridor.path.length;i++){
      const point=corridor.path[i];
-     if((previous===from||!unchanged)&&!this.lineClear(previous,point,false,previous===from)){valid=false;break;}
+     // The exact entry connector was checked immediately above. Only changed
+     // interior segments need another check; rechecking the connector doubled
+     // work for every member using the same validated corridor.
+     if(i>entry&&!unchanged&&!this.lineClear(previous,point))break;
      path.push({...point});previous=point;
      if(i>=corridor.path.length-3&&this.lineClear(previous,to)){
       if(Math.hypot(previous.x-to.x,previous.y-to.y)>.01)path.push({x:to.x,y:to.y});
@@ -104,7 +107,7 @@ export class TerrainNavigator{
      }
      if(performance.now()>=(this.workDeadline??Infinity))yield;
     }
-    if(valid&&this.lineClear(previous,to)){path.push({x:to.x,y:to.y});this.corridorHits=(this.corridorHits??0)+1;return path;}
+    // The final iteration already checked the exact exit connector.
    }
    if(performance.now()>=(this.workDeadline??Infinity))yield;
   }
@@ -235,12 +238,13 @@ export class TerrainNavigator{
   const path=reused??(yield* this.computePathSteps(from,to,options));
   if(!path)this.lastExhaustedReachability=this.exhaustedReachability?.get(reachabilityKey)??this.lastExhaustedReachability;
   cache.set(key,path?.map(p=>({...p}))??null);this.pathCachePoints=(this.pathCachePoints??0)+(path?.length??0);
-  metadata.set(key,{revision:this.topologyRevision,regions:path?this.pathRegions(from,path):null,unreachableProof:path?null:this.lastExhaustedReachability});
+  const regions=path?this.pathRegions(from,path):null;
+  metadata.set(key,{revision:this.topologyRevision,regions,unreachableProof:path?null:this.lastExhaustedReachability});
   while(cache.size>1024||this.pathCachePoints>16384){const first=cache.keys().next().value;this.pathCachePoints-=cache.get(first)?.length??0;cache.delete(first);metadata.delete(first);}
   if(this.sharedCorridors&&!reused&&path?.length>1&&!terrainEscape){
    const corridors=this.corridors??=[];
    corridors.unshift({from:{x:from.x,y:from.y},to:{x:to.x,y:to.y},kind:from.kind??'',scale:this.vehicleScale,bounds:this.bounds.join(','),
-    topologyRevision:this.topologyRevision,regions:this.pathRegions(from,path),occupancyKey,path:path.map(p=>({...p}))});
+    topologyRevision:this.topologyRevision,regions,occupancyKey,path:path.map(p=>({...p}))});
    if(corridors.length>64)corridors.pop();
   }
   return path;

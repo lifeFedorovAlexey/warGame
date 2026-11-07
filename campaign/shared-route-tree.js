@@ -10,6 +10,7 @@ export class SharedRouteTree{
   this.ids=new Int32Array(4096);this.priorities=new Float64Array(4096);this.length=0;
   this.regions=new Map();this.expanded=0;this.queries=0;this.proof=null;
   this.segmentCosts=new Map();this.costCacheHits=0;
+  this.segmentClearance=new Map();this.clearanceCacheHits=0;
   const [col,row]=nav.grid(goal.x,goal.y);this.root=row*nav.size+col;
   this.state[this.root]=1;this.next[this.root]=-1;this.mark(col,row);this.push(this.root,0);
  }
@@ -84,17 +85,31 @@ export class SharedRouteTree{
   return path;
  }
  position(id){return this.nav.position(id%this.nav.size,Math.floor(id/this.nav.size));}
- travelCost(from,to){
+ segmentKey(from,to){
   const nav=this.nav,n=nav.size,ax=(from.x+nav.field.half)/nav.cell,ay=(nav.field.half-from.y)/nav.cell,
    bx=(to.x+nav.field.half)/nav.cell,by=(nav.field.half-to.y)/nav.cell;
+  return Number.isInteger(ax)&&Number.isInteger(ay)&&Number.isInteger(bx)&&Number.isInteger(by)?(ay*n+ax)*n*n+by*n+bx:null;
+ }
+ travelCost(from,to){
+  const nav=this.nav,key=this.segmentKey(from,to);
   // Shared branches repeatedly smooth the same grid segments. Cache exact
   // directed costs only; continuous endpoint connectors are always recomputed.
-  if(![ax,ay,bx,by].every(Number.isInteger))return nav.travelCost(from,to,this.pavedTrip);
-  const key=(ay*n+ax)*n*n+by*n+bx;
+  if(key===null)return nav.travelCost(from,to,this.pavedTrip);
   if(this.segmentCosts.has(key)){this.costCacheHits++;return this.segmentCosts.get(key);}
   const cost=nav.travelCost(from,to,this.pavedTrip);this.segmentCosts.set(key,cost);
   if(this.segmentCosts.size>8192)this.segmentCosts.delete(this.segmentCosts.keys().next().value);
   return cost;
+ }
+ clearSegment(from,to){
+  const key=this.segmentKey(from,to);if(key===null)return this.nav.lineClear(from,to);
+  if(this.segmentClearance.has(key)){this.clearanceCacheHits++;return this.segmentClearance.get(key);}
+  const clear=this.nav.lineClear(from,to);
+  // A smoothing chord can cross a region outside its grid branch. Both
+  // successful and rejected cached chords depend on EVERY crossed region.
+  for(const [region,version] of this.nav.pathRegions(from,[to]))if(!this.regions.has(region))this.regions.set(region,version);
+  this.segmentClearance.set(key,clear);
+  if(this.segmentClearance.size>8192)this.segmentClearance.delete(this.segmentClearance.keys().next().value);
+  return clear;
  }
  *route(from){
   const branch=yield* this.branch(from);if(!branch)return null;
@@ -130,7 +145,7 @@ export class SharedRouteTree{
   while(index<path.length){
    if(performance.now()>=(nav.workDeadline??Infinity))yield;
    let next=index,cost=roads?this.travelCost(anchor,path[index]):0;
-   while(next+1<path.length&&nav.lineClear(anchor,path[next+1])){
+   while(next+1<path.length&&this.clearSegment(anchor,path[next+1])){
     if(performance.now()>=(nav.workDeadline??Infinity))yield;
     const travel=roads?this.travelCost(anchor,path[next+1]):0;
     if(roads&&travel>cost+this.travelCost(path[next],path[next+1])+.04*nav.cell)break;
