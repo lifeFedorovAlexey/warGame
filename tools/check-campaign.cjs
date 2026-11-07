@@ -199,6 +199,38 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
    });
   });
   assert(approach.length===3&&approach.every(b=>b.asphalt<.2&&b.airGap<.1),JSON.stringify(approach));
+  const towerShots=await page.evaluate(async ()=>{
+   const T=await import('three'),{mission,world}=window.campaign,{field}=world;
+   const tower=mission.state.buildings.find(b=>b.kind==='mg-tower'&&b.campId==='west-south');
+   const [col,row]=field.worldToGrid(tower.x,tower.y).map(Math.round);
+   mission.visible[row*128+col]=mission.explored[row*128+col]=1;
+   const result=[];
+   for(const [dx,dy] of [[90,30],[-76,65]]){
+    const x=tower.x+dx,y=tower.y+dy,to={x,y,z:field.heightAt(x,y)+9};
+    tower.aimTarget=to;
+    mission.effects.push({type:'shot',from:tower.id,to,weapon:'mg'});
+    world.update(mission,new Set(),0);
+    const muzzle=world.buildingObjects.get(tower.id).getObjectByName('muzzle');
+    const tip=muzzle.getWorldPosition(new T.Vector3()),forward=new T.Vector3(0,-1,0).transformDirection(muzzle.matrixWorld);
+    const alignment=forward.dot(new T.Vector3(to.x,to.y,to.z).sub(tip).normalize());
+    const flash=world.scene.getObjectByName('field_muzzle_flash'),matrix=new T.Matrix4();
+    const expected=tip.clone().addScaledVector(forward,.10*mission.config.worldScale);
+    let flashDistance=Infinity;
+    for(let i=0;i<flash.count;i++){
+     flash.getMatrixAt(i,matrix);
+     flashDistance=Math.min(flashDistance,new T.Vector3().setFromMatrixPosition(matrix).distanceTo(expected));
+    }
+    let part;
+    if(world.damage){
+     const origin=muzzle.localToWorld(new T.Vector3(.4,.23,0));
+     const direction=new T.Vector3(-1,0,0).transformDirection(muzzle.matrixWorld);
+     part=world.damage.trace(tower,origin.toArray(),direction.toArray())?.partId??null;
+    }
+    result.push({alignment,flashDistance,part});
+   }
+   return result;
+  });
+  assert(towerShots.every(shot=>shot.alignment>.9999&&shot.flashDistance<.005&&[undefined,9].includes(shot.part)),JSON.stringify(towerShots));
   const finalView=await page.evaluate(()=>{
    // Present the debrief from an isolated UI fixture after the real base/drive checks.
    const c=window.campaign,m=c.mission,{target}=c.world.controls;
@@ -220,7 +252,7 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   assert.equal(signal.time,finalView.time);
   assert.equal(signal.explored,finalView.explored);
   await page.screenshot({path:'campaign/previews/field-southern-signal.png'});
-  const report={base,light,driven,pausedBetweenCommands:true,layeredConstruction:construction,oilDirectClick:true,radioSkipPersisted:true,optionalRadioFocus:true,oilFocusWithoutRadio:true,approach,signal,artifactModels:models,animatedPump:true,oilPowerLoss:powered.stopped,resumedPump:powered.resumed,errors};
+  const report={base,light,driven,pausedBetweenCommands:true,layeredConstruction:construction,oilDirectClick:true,radioSkipPersisted:true,optionalRadioFocus:true,oilFocusWithoutRadio:true,approach,towerShots,signal,artifactModels:models,animatedPump:true,oilPowerLoss:powered.stopped,resumedPump:powered.resumed,errors};
   assert.deepEqual(errors,[]);
   fs.mkdirSync('campaign/reports',{recursive:true});
   fs.writeFileSync('campaign/reports/campaign-browser.json',JSON.stringify(report,null,2));

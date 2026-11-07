@@ -16,7 +16,8 @@ export function createScavPrefab(T, kind, site) {
     wood: new T.MeshStandardMaterial({color:stronghold ? '#716c58' : '#79634d', roughness:1}),
     tarp: new T.MeshStandardMaterial({color:stronghold ? '#5c6153' : '#796447', roughness:1}),
   };
-  const batches = new Map();
+  const batches = new Map(), surfaces = [[structure,batches]];
+  let activeBatches = batches;
   function shape(geometry, material, position, rotation = [0,0,0]) {
     const object = new T.Object3D();
     object.position.set(...position);
@@ -25,8 +26,8 @@ export function createScavPrefab(T, kind, site) {
     geometry.applyMatrix4(object.matrix);
     const flat = geometry.index ? geometry.toNonIndexed() : geometry;
     if (flat !== geometry) geometry.dispose();
-    if (!batches.has(material)) batches.set(material, []);
-    batches.get(material).push(flat);
+    if (!activeBatches.has(material)) activeBatches.set(material, []);
+    activeBatches.get(material).push(flat);
   }
   const box = (size, position, mat, rotation) => shape(new T.BoxGeometry(...size), mat, position, rotation);
   const drum = (radius, height, position, mat, segments = 9, topRadius = radius) => {
@@ -71,6 +72,11 @@ export function createScavPrefab(T, kind, site) {
       for(const z of [2.4,5.5,8.2])box([.34,.15,.13],[1.48,-.81,z],mats.tin);
       for(const x of [-.44,.44])box([.38,.15,.61],[x,-1.56,10.62],mats.dark);
     } else {
+      const yaw = new T.Group();
+      yaw.name = 'tower_yaw';
+      structure.add(yaw);
+      activeBatches = new Map();
+      surfaces.push([yaw,activeBatches]);
       box([3.28,.20,1.02],[0,-1.55,9.82],mats.rust);
       box([3.28,3.1,.12],[0,.08,11.03],mats.tarp,[.08,0,0]);
       for (const x of [-1.48,1.48]) beam([x,1.38,9.22],[x,1.38,11.02],.16,mats.wood);
@@ -80,13 +86,27 @@ export function createScavPrefab(T, kind, site) {
           box([.21,2.25,.79],[side*1.57,-.18,9.96],mats.rust);
         }
       }
+      const pitch = new T.Group(), recoil = new T.Group(), muzzle = new T.Object3D();
+      pitch.name = 'tower_pitch';
+      pitch.position.set(0,-1.41,10.80);
+      recoil.name = 'tower_recoil';
+      muzzle.name = 'muzzle';
+      muzzle.position.y = -1.49;
+      yaw.add(pitch);pitch.add(recoil);recoil.add(muzzle);
+      activeBatches = new Map();
+      surfaces.push([recoil,activeBatches]);
+      box([.42,.66,.34],[0,0,-.02],mats.dark);
+      beam([0,-.14,0],[0,-1.49,0],.095,mats.dark);
+      activeBatches = batches;
     }
-    box([.42,.66,.34],[0,-1.41,10.78],mats.dark);
-    beam([0,-1.55,10.80],[0,-2.9,10.80],.095,mats.dark);
-    const muzzle = new T.Object3D();
-    muzzle.name = 'muzzle';
-    muzzle.position.set(0,-2.9,10.80);
-    root.add(muzzle);
+    if (waterTower) {
+      box([.42,.66,.34],[0,-1.41,10.78],mats.dark);
+      beam([0,-1.55,10.80],[0,-2.9,10.80],.095,mats.dark);
+      const muzzle = new T.Object3D();
+      muzzle.name = 'muzzle';
+      muzzle.position.set(0,-2.9,10.80);
+      root.add(muzzle);
+    }
   } else if (site === 'nw-pocket') {
     shed(-2.6,.40,4.2,4.3,2.65,mats.rust);
     shed(3.25,1.55,3.1,2.45,1.95,mats.wood);
@@ -146,11 +166,11 @@ export function createScavPrefab(T, kind, site) {
     box([.82,.10,.58],[4.5,-3.15,1.53],mats.rust,[0,0,.12]);
     beam([4.5,-3.15,0],[4.5,-3.15,1.8],.13,mats.dark);
   }
-  for (const [mat, geometries] of batches) {
+  for (const [parent,grouped] of surfaces) for (const [mat, geometries] of grouped) {
     const geometry = mergeGeometries(geometries);
     const mesh = new T.Mesh(geometry, mat);
     mesh.castShadow = mesh.receiveShadow = true;
-    structure.add(mesh);
+    parent.add(mesh);
     for (const item of geometries) item.dispose();
   }
   return root;

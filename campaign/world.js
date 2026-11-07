@@ -5,6 +5,7 @@ import {createDesertSky} from '../demo/sky.js';
 import {createVehicleLayer} from './vehicle-layer.js';
 import {createBuildingPrefab} from './prefabs.js';
 import {createScavPrefab} from './scav-prefabs.js';
+import {aimTowerWeapon} from './tower-weapon.js';
 import {createGroundEffects} from './ground-effects.js';
 import {updateOilPump} from './oil-pump.js';
 import {createHeadlightPair,setHeadlightPower} from '../demo/vehicle-effects.js';
@@ -234,6 +235,7 @@ export async function createCampaignWorld(host,config,sound){
   });
   const buildingIds=new Set(mission.state.buildings.map(b=>b.id));for(const [id,object] of buildings)if(!buildingIds.has(id)){construction.release(object);buildingRoot.remove(object);buildings.delete(id);}
   for(const b of mission.state.buildings){let object=buildings.get(b.id);if(object&&(object.userData.kind!==b.kind||object.userData.owner!==b.owner)){construction.release(object);buildingRoot.remove(object);buildings.delete(b.id);object=null;}if(!object){object=getPrefab(b.kind,b.owner,b.campId).clone(true);object.userData.entity=b.id;buildingRoot.add(object);buildings.set(b.id,object);}object.visible=b.hp>0&&(b.owner==='rai'||mission.exploredAt(b.x,b.y));if(!object.visible)continue;object.position.set(b.x,b.y,b.groundHeight??field.heightAt(b.x,b.y));object.rotation.z=b.rotation;object.scale.setScalar(config.worldScale);
+   if(b.campId==='west-south'&&b.kind==='mg-tower')aimTowerWeapon(object,b,field,config.worldScale,b.aimTarget,now-(shotTimes.get(b.id)??-Infinity));
    if(b.owner==='rai')construction.building(object,b,config.buildings[b.kind]);
    if(b.kind==='derrick'&&b.completed){
     const phase=(b.pumpTime??0)+(b.powered&&mission.state.status==='running'?Math.max(0,mission.accumulator):0);
@@ -248,9 +250,12 @@ export async function createCampaignWorld(host,config,sound){
     if(mission.visibleAt(end.x,end.y))combat.hit(end,event,now,camera);
     continue;
    }
-   const building=buildings.get(from.id),mount=building?.getObjectByName('muzzle');
+   const building=buildings.get(from.id);
+   const aimed=building&&aimTowerWeapon(building,from,field,config.worldScale,event.to,0);
+   const mount=aimed??building?.getObjectByName('muzzle');
    const start=vehicles.muzzles.get(from.id)??(mount?mount.getWorldPosition(new T.Vector3()):new T.Vector3(from.x,from.y,(from.groundHeight??field.heightAt(from.x,from.y))+(from.kind==='mg-tower'?10.8:1.5)*config.worldScale));
    combat.spawn(start,end,event.weapon,now,camera,event);
+   if(aimed&&from.aimTarget!==event.to)aimTowerWeapon(building,from,field,config.worldScale);
   }
   combat.update(now,camera,renderer.domElement.height,shot=>{
    const target=mission.entity(shot.targetId);
