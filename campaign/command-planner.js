@@ -1,5 +1,6 @@
 import {pickupTarget} from './pickup-orders.js';
 import {isInfantry} from './scav-unit-profiles.js';
+import {movementEngaged} from './combat-orders.js';
 
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const travel=new Set(['move','attack-move','attack']);
@@ -73,7 +74,7 @@ export class CommandPlanner{
   const profile=(m.state.commandGroups??[]).filter(g=>groups.has(g.id)).map(g=>g.id+':'+g.formation).sort().join(',');
   const key=units.map(u=>u.id).sort().join(',')+'|'+profile,records=m.state.commandOrders;
   const previous=records.findLast(r=>r.key===key&&r.action===action&&(action!=='attack'||r.target.id===target.id)&&distance(r.target,target)<3);
-  if(previous&&units.every(u=>u.commandRevision===previous.revision)
+  if(previous&&!(action==='attack-move'&&units.some(movementEngaged))&&units.every(u=>u.commandRevision===previous.revision)
    &&(['queued','planning'].includes(previous.status)&&units.some(u=>u.pendingOrder?.revision===previous.revision)
     ||previous.status==='complete'&&previous.signature===this.signature(previous))){
    this.stats.reused++;return {ok:true,assigned:units.length,pending:units.filter(u=>u.pendingOrder?.revision===previous.revision).length,revision:previous.revision,reused:true};

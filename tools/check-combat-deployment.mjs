@@ -60,9 +60,11 @@ for(const action of ['attack-move','attack']){
  const m=fixture(),units=Array.from({length:6},(_,i)=>m.addUnit('bukhanka','rai',{x:0,y:-i*30}));
  const target=m.addStructure('generator','scavs',{x:0,y:190},{hp:100000,completed:true,progress:1});m.rebuildNavigation();
  const goal={x:0,y:350};m.order(units.map(u=>u.id),'attack-move',goal);m.advance(.1);m.finishPendingStep();
- const deployment=structuredClone(units[0].combatDeployment),path=structuredClone(units[0].path);
- m.order(units.map(u=>u.id),'attack-move',goal);assert.deepEqual(units[0].combatDeployment,deployment,'Repeated order preserves deployment');assert.deepEqual(units[0].path,path);
+ const deployment=structuredClone(units[0].combatDeployment);
  const copy=fixture();copy.load(m.save());assert.deepEqual(copy.entity(units[0].id).combatDeployment,deployment,'Deployment survives save/load');
+ copy.state.bounds=m.state.bounds.slice();copy.rebuildNavigation();
+ assert(copy.order(units.map(u=>u.id),'attack-move',goal).ok);
+ assert(!copy.entity(units[0].id).combatDeployment&&copy.entity(units[0].id).combatDisengage.includes(target.id),'A fresh ground order must release the old engagement, even at the same destination');
  m.stop([units[1].id]);m.advance(.1);assert(!units[1].combatDeployment&&!units[1].task,'Stop cancels deployment');
  assert(m.order([units[2].id],'move',{x:-150,y:-150}).ok);assert(!units[2].combatDeployment&&units[2].task.type==='move','New move overrides combat position');
  m.damage(target,100001,units[0]);m.advance(.1);assert(!units[0].combatDeployment&&units[0].task.type==='attack-move','Destroyed contact resumes original march');

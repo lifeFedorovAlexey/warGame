@@ -28,8 +28,8 @@ try{
   const units=m.state.units.filter(u=>u.owner==='rai'),origins=Object.fromEntries(units.map(u=>[u.id,{x:u.x,y:u.y,heading:u.heading}]));
   const samples=[],contacts=[],orders=[];const build=m.build.bind(m),advance=m.advance.bind(m),collision=m.vehicleCollision.bind(m);
   m.build=(ids,...args)=>{const at=performance.now(),result=build(ids,...args);orders.push({ids:[...ids],kind:args[0],time:m.state.time,wall:at,result});return result;};
-  m.vehicleCollision=(unit,speed,obstacles)=>{if(unit.owner==='rai')contacts.push({time:m.state.time,unit:unit.id,speed,blockers:[...obstacles].map(b=>b.id)});return collision(unit,speed,obstacles);};
-  m.advance=(...args)=>{const result=advance(...args);if(samples.at(-1)?.time!==m.state.time)samples.push({time:m.state.time,wall:performance.now(),units:units.map(u=>({id:u.id,x:u.x,y:u.y,hp:u.hp,task:u.task?{...u.task}:null,working:!!u.builderWorking,reason:u.navigation?.reason,wait:u.navigation?.waitSeconds,detour:!!u.detour,yield:!!u.yieldReturn})),buildings:orders.map(o=>m.entity(o.result.id)).filter(Boolean).map(b=>({id:b.id,progress:b.progress,completed:b.completed,clearing:b.clearing}))});return result;};
+  m.vehicleCollision=(unit,speed,obstacles)=>{if(unit.owner==='rai'&&obstacles.size)contacts.push({time:m.state.time,unit:unit.id,speed,blockers:[...obstacles].map(b=>b.id)});return collision(unit,speed,obstacles);};
+  m.advance=(...args)=>{const result=advance(...args);if(samples.at(-1)?.time!==m.state.time)samples.push({time:m.state.time,wall:performance.now(),units:units.map(u=>({id:u.id,x:u.x,y:u.y,hp:u.hp,task:u.task?{...u.task}:null,working:!!u.builderWorking,projector:{...u.projector},reason:u.navigation?.reason,defect:!!u.navigation?.potentialDefect,wait:u.navigation?.waitSeconds,detour:!!u.detour,yield:!!u.yieldReturn})),buildings:orders.map(o=>m.entity(o.result.id)).filter(Boolean).map(b=>({id:b.id,progress:b.progress,completed:b.completed,clearing:b.clearing}))});return result;};
   c.builderCheck={units,origins,orders,contacts,samples};
   w.controls.enableDamping=false;w.centre({x:(generator.x+oil.x+p.x)/3,y:(generator.y+oil.y+p.y)/3},490);c.advance(0);
   return {builders:builders.map(u=>u.id),generator:{x:generator.x,y:generator.y},oil:{x:oil.x,y:oil.y},origins};
@@ -53,12 +53,14 @@ try{
   const c=campaign,m=c.mission,t=c.builderCheck;
   return {...t,units:t.units.map(u=>({id:u.id,kind:u.kind,x:u.x,y:u.y,hp:u.hp,task:u.task,navigation:u.navigation})),seconds:m.state.time,
    completed:t.orders.map(o=>!!m.entity(o.result.id)?.completed),
-   firstMotion:t.orders.map(o=>{const id=o.ids[0],start=t.origins[id],sample=t.samples.find(s=>s.time>=o.time&&s.units.some(u=>u.id===id&&(u.working||Math.hypot(u.x-start.x,u.y-start.y)>.01)));return sample?{id,simulation:sample.time-o.time,wallAfterResume:(sample.wall-t.resumedAt)/1000}:null;}),
-   firstHalfWorld:t.orders.map(o=>{const id=o.ids[0],start=t.origins[id],sample=t.samples.find(s=>s.time>=o.time&&s.units.some(u=>u.id===id&&(u.working||Math.hypot(u.x-start.x,u.y-start.y)>.5)));return sample?{id,simulation:sample.time-o.time}:null;})};
+   unexplained:[...new Set(t.samples.flatMap(s=>s.units.filter(u=>u.defect).map(u=>u.id)))],
+   firstActivity:t.orders.map(o=>{const id=o.ids[0],start=t.origins[id],sample=t.samples.find(s=>s.time>o.time&&s.units.some(u=>u.id===id&&(u.working||u.reason==='preparing-projector'||Math.hypot(u.x-start.x,u.y-start.y)>.01)));return sample?{id,simulation:sample.time-o.time,wallAfterResume:(sample.wall-t.resumedAt)/1000}:null;}),
+   firstMotion:t.orders.map(o=>{const id=o.ids[0],start=t.origins[id],sample=t.samples.find(s=>s.time>o.time&&s.units.some(u=>u.id===id&&Math.hypot(u.x-start.x,u.y-start.y)>.01));return sample?{id,simulation:sample.time-o.time,wallAfterResume:(sample.wall-t.resumedAt)/1000}:null;}),
+   firstWorking:t.orders.map(o=>{const sample=t.samples.find(s=>s.time>o.time&&s.units.some(u=>u.id===o.ids[0]&&u.working));return sample?{id:o.ids[0],simulation:sample.time-o.time}:null;})};
  });
  report={...report,...result,errors};
  await page.screenshot({path:folder+'/result.png'});
- report.passed=result.completed.every(Boolean)&&!errors.length&&!result.contacts.length&&result.orders.every((o,i)=>o.ids.length===1&&o.ids[0]===setup.builders[i]);
+ report.passed=result.completed.every(Boolean)&&!errors.length&&!result.contacts.length&&!result.unexplained.length&&result.firstActivity.every(t=>t&&t.simulation<=.50001&&t.wallAfterResume<=.5)&&result.orders.every((o,i)=>o.ids.length===1&&o.ids[0]===setup.builders[i]);
  report.failures=[];if(!result.completed.every(Boolean))report.failures.push('Both independent constructions must actually finish');if(result.contacts.length)report.failures.push('Physical contact during construction approach');if(errors.length)report.failures.push('Browser error');
 }catch(error){report={...report,passed:false,failure:error.stack,errors};await page.screenshot({path:folder+'/failure.png'}).catch(()=>{});}
 finally{

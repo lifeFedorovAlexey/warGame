@@ -516,7 +516,7 @@ export class Mission{
    const order=unit.routeOrder;
    const deployment=unit.combatDeployment;
    if(deployment&&(action==='attack'&&deployment.resume.targetId===target.id
-     ||action==='attack-move'&&order?.type===action&&order.revision===routeOrderRevision&&distance(order.request,target)<3)){
+     ||action==='attack-move'&&!disengage.length&&order?.type===action&&order.revision===routeOrderRevision&&distance(order.request,target)<3)){
     repeat.set(unit.id,deployment.goal??unit);continue;
    }
    if(travel&&order?.revision===routeOrderRevision&&(order.formation??'auto')===formationMode&&(order.type??'move')===action&&distance(order.request,target)<3){
@@ -537,6 +537,7 @@ export class Mission{
     // pending guard freezes a route which this very command accepted.
     delete unit.pendingOrder;job.assigned.push(unit.id);
    }
+   if(disengage.length)unit.combatDisengage=[...disengage];
    assigned.add(unit.id);if(job)yield;
   };
   if(repeat.size===units.length){

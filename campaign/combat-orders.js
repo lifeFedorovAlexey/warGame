@@ -1,5 +1,8 @@
 import {automaticCombatTarget} from './combat-policy.js';
 
+export const movementEngaged=unit=>!!unit.combatDeployment||unit.task?.type==='attack-move'
+ &&['engaging-visible-target','firing-position'].includes(unit.navigation?.reason);
+
 // A fresh ground attack order during an engagement is a position change.
 // Keep firing at the old contacts, but do not let them immediately cancel
 // that move by reserving the exact firing positions the player just left.

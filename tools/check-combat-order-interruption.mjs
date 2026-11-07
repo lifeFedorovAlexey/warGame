@@ -66,5 +66,21 @@ for(const [count,action] of [[1,'attack-move'],[3,'attack-move'],[6,'attack-move
  assert.equal(u.task,task);assert.deepEqual(u.path,path);assert.equal(dist(u,pose),0);assert(!u.combatDeployment);
  results.push({case:'suspended firing-position search cannot overwrite a newer move or move the body',passed:true});
 }
+for(const count of [1,3]){
+ const m=fixture(),units=Array.from({length:count},(_,i)=>m.addUnit('bukhanka','rai',{x:(i-(count-1)/2)*30,y:0},{heading:0}));
+ const target=m.addStructure('camp-core','scavs',{x:0,y:300},{completed:true,hp:100000,maxHp:100000}),goal={x:0,y:500},ids=units.map(u=>u.id);
+ m.rebuildNavigation();m.visible.fill(1);m.explored.fill(1);m.submitOrder(ids,'attack-move',goal);
+ const held=u=>u.navigation?.reason==='engaging-visible-target'||u.combatDeployment?.status==='arrived';
+ for(let frame=0;frame<3200&&!units.every(held);frame++)m.advance(1/80,{budgetMs:6});
+ assert(units.every(held),'First attack-move must genuinely stop and engage a contact acquired on the march');
+ const response=m.submitOrder(ids,'attack-move',goal),origins=units.map(u=>({x:u.x,y:u.y})),first=units.map(()=>null),at=m.state.time;
+ assert(!response.reused,'A repeated click while held by combat must express a fresh intent');
+ for(let frame=0;frame<240;frame++){
+  m.advance(1/80,{budgetMs:6});
+  for(const [i,u] of units.entries())if(first[i]===null&&dist(u,origins[i])>.01)first[i]=m.state.time-at;
+ }
+ const passed=first.every(t=>t!==null&&t<=.50001)&&units.every(u=>!u.pendingOrder&&!u.combatDeployment&&u.combatDisengage?.includes(target.id));
+ results.push({case:`${count} vehicles reissued the same attack-move after contact`,passed,firstMotionSeconds:first});
+}
 fs.mkdirSync('campaign/reports',{recursive:true});fs.writeFileSync('campaign/reports/combat-order-interruption.json',JSON.stringify({sources,results},null,2));
 console.log(JSON.stringify({results},null,2));assert(results.every(r=>r.passed));

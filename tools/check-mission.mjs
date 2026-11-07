@@ -129,6 +129,16 @@ assert(Math.hypot(turningVan.x-turningStart.x,turningVan.y-turningStart.y)>60
  &&emptyPass.nav.allowed(...emptyPass.nav.grid(turningVan.x,turningVan.y)),`The arc must reach the route (${turningVan.x}, ${turningVan.y})`);
 function dismiss(){for(const key of [...mission.state.pendingCinematics]){seen.push({key,time:mission.state.time});mission.finishCinematic(key);}}
 const mechanics={workSteps:0,constructionGated:true,repairGated:true,interruptProjection:false,movingRepair:false,builderHandoff:false};
+// Combat casualties are not a deterministic repair fixture: a successful
+// playthrough may muster only fresh vehicles. Exercise the moving-target
+// invariant separately without changing the campaign playthrough's HP.
+{
+ const repair=new Mission(config,field),worker=repair.state.units.find(u=>u.kind==='builder'),target=repair.state.units.find(u=>u.kind==='bukhanka');
+ repair.damage(target,80,null);assert(repair.order([worker.id],'repair',target).ok);
+ for(let tick=0;tick<300&&!worker.builderWorking;tick++)repair.advance(.1);
+ assert(worker.builderWorking&&target.hp<target.maxHp-4,'Dedicated fixture must actually weld a damaged vehicle');
+ testMovingRepair(worker,repair);mechanics.movingRepairFixture='isolated-damaged-vehicle';
+}
 function step(){
  const progress=new Map(mission.state.buildings.map(b=>[b.id,b.progress])),hp=new Map(mission.state.units.map(u=>[u.id,u.hp])),armor=new Map(mission.state.units.map(u=>[u.id,u.fieldHpBonus??0]));
  dismiss();mission.advance(.1);events.push(...mission.drainEvents());mission.drainEffects();
@@ -148,9 +158,9 @@ function step(){
  if(!mechanics.movingRepair){const worker=workers.find(u=>u.builderWorking&&u.task?.type==='repair'&&mission.entity(u.task.targetId)?.hp<mission.entity(u.task.targetId)?.maxHp-4);if(worker)testMovingRepair(worker);}
 }
 function orderNearby(m,unit){for(const [dx,dy] of [[64,0],[-64,0],[0,64],[0,-64],[48,48],[-48,-48]]){const p=m.nav.nearest(unit.x+dx,unit.y+dy,3);if(p&&Math.hypot(p.x-unit.x,p.y-unit.y)>30&&m.order([unit.id],'move',p).ok)return true;}return false;}
-function testMovingRepair(worker){
+function testMovingRepair(worker,source=mission){
  // Isolated save clone: array order must not permit healing before target movement.
- const m=new Mission(config,field);m.load(mission.save());for(const id of [...m.state.pendingCinematics])m.finishCinematic(id);
+ const m=new Mission(config,field);m.load(source.save());for(const id of [...m.state.pendingCinematics])m.finishCinematic(id);
  const target=m.entity(worker.task.targetId);m.state.units.sort((a,b)=>(a.id===target.id?1:0)-(b.id===target.id?1:0));assert(orderNearby(m,target),'Moving repair fixture needs an accessible destination');
  // Parked neighbours may need a short manoeuvre to let the target leave.
  let moved=false;for(let i=0;i<60&&!moved;i++){const before=target.hp;m.advance(.1);moved=Math.hypot(target.x-target.previousX,target.y-target.previousY)>.05;if(moved){assert(target.hp<=before,'Moving target healed');assert(m.state.units.filter(u=>u.task?.type==='repair'&&u.task.targetId===target.id).every(u=>!u.builderWorking),'Moving target still welds');}}
