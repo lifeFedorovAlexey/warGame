@@ -830,17 +830,22 @@ export class Mission{
    &&this.clearParkedAisle(unit,neighbours.filter(idle),yieldSpace))return true;
   if(aisleOnly)return false;
   const centre=cluster.reduce((sum,other)=>({x:sum.x+other.x/cluster.length,y:sum.y+other.y/cluster.length}),{x:0,y:0});
-  const outer=cluster.slice().sort((a,b)=>distance(b,centre)-distance(a,centre)||Number(b.id.slice(1))-Number(a.id.slice(1)));
+  // A van on a forbidden slope needs to gain ground along its route as it separates.
+  const onBlockedSlope=unit.terrainEscape&&this.nav.terrainAllowed?.(unit.x,unit.y)===false;
+  const escapePoint=!includeParked&&cluster.length===2&&onBlockedSlope?unit.path[0]:null;
+  const outer=escapePoint?cluster:cluster.slice().sort((a,b)=>distance(b,centre)-distance(a,centre)||Number(b.id.slice(1))-Number(a.id.slice(1)));
   for(const vehicle of outer){
    if(includeParked&&!idle(vehicle))continue;
    if(vehicle.traffic||vehicle.trafficRest>this.state.time)continue;
    const offset={x:vehicle.x-centre.x,y:vehicle.y-centre.y};
    const radius=Math.max(1,distance(vehicle,centre));
-   const goal={x:vehicle.x+offset.x/radius*scale*4.5,y:vehicle.y+offset.y/radius*scale*4.5};
+   const escaping=vehicle===unit&&!!escapePoint;
+   const goal=escaping?escapePoint:{x:vehicle.x+offset.x/radius*scale*4.5,y:vehicle.y+offset.y/radius*scale*4.5};
    const others=cluster.filter(other=>other!==vehicle);
    const allowed=(from,to)=>this.vehicleMotionClear(vehicle,from,to,.60);
-   const legs=planManeuver(vehicle,goal,{scale,allowed,attempts:2,maximumLegs:6,
-    accept:pose=>distance(vehicle,pose)>scale*2.5&&distance(pose,centre)>radius+scale*1.3
+   const legs=planManeuver(vehicle,goal,{scale,allowed,attempts:2,maximumLegs:escaping?10:6,
+    accept:pose=>(!escaping||distance(pose,goal)<distance(vehicle,goal)-scale)
+     &&distance(vehicle,pose)>scale*2.5&&distance(pose,centre)>radius+scale*1.3
      &&others.every(other=>vehicleClearance(pose,other,scale,this.field)>scale*.4)});
    if(!legs){
     if(includeParked)vehicle.trafficRest=this.state.time+4;
