@@ -3,26 +3,27 @@
 export async function loadTerrainPbr(T,loader,base){
  const ids=['gravelly_sand','sandy_gravel','asphalt_03','quarry_wall_02'],size=512,stride=size*size*4;
  const maps=await Promise.all(ids.map(id=>Promise.all(['albedo','normal','orm'].map(channel=>loader.loadAsync(base+'materials/pbr/'+id+'/'+channel+'.jpg')))));
- const canvas=document.createElement('canvas');canvas.width=canvas.height=size;const context=canvas.getContext('2d',{willReadFrequently:true}),colors=new Uint8Array(stride*ids.length),details=new Uint8Array(stride*ids.length),means=[];
+ const canvas=document.createElement('canvas');canvas.width=canvas.height=size;const context=canvas.getContext('2d',{willReadFrequently:true}),colors=new Uint8Array(stride*ids.length),details=new Uint8Array(stride*ids.length),means=[],meanColors=[];
  maps.forEach((images,layer)=>{
-  const channels=images.map(image=>{context.setTransform(1,0,0,-1,0,size);context.clearRect(0,0,size,size);context.drawImage(image.image,0,0,size,size);const data=context.getImageData(0,0,size,size).data.slice();image.dispose();return data;});let luminance=0;
-  for(let i=0;i<stride;i+=4){const [albedo,normal,orm]=channels;colors.set([albedo[i],albedo[i+1],albedo[i+2],orm[i]],layer*stride+i);details.set([normal[i],normal[i+1],normal[i+2],orm[i+1]],layer*stride+i);luminance+=(Math.pow(albedo[i]/255,2.2)*.3+Math.pow(albedo[i+1]/255,2.2)*.59+Math.pow(albedo[i+2]/255,2.2)*.11);}
-  means.push(luminance/(size*size));
+  const channels=images.map(image=>{context.setTransform(1,0,0,-1,0,size);context.clearRect(0,0,size,size);context.drawImage(image.image,0,0,size,size);const data=context.getImageData(0,0,size,size).data.slice();image.dispose();return data;});let luminance=0;const mean=[0,0,0];
+  for(let i=0;i<stride;i+=4){const [albedo,normal,orm]=channels;colors.set([albedo[i],albedo[i+1],albedo[i+2],orm[i]],layer*stride+i);details.set([normal[i],normal[i+1],normal[i+2],orm[i+1]],layer*stride+i);luminance+=(Math.pow(albedo[i]/255,2.2)*.3+Math.pow(albedo[i+1]/255,2.2)*.59+Math.pow(albedo[i+2]/255,2.2)*.11);for(let k=0;k<3;k++)mean[k]+=Math.pow(albedo[i+k]/255,2.2);}
+  means.push(luminance/(size*size));meanColors.push(new T.Vector3(...mean.map(value=>value/(size*size))));
  });
  function array(bytes,srgb){const texture=new T.DataArrayTexture(bytes,size,size,ids.length);if(srgb)texture.colorSpace=T.SRGBColorSpace;texture.wrapS=texture.wrapT=T.RepeatWrapping;texture.minFilter=T.LinearMipmapLinearFilter;texture.magFilter=T.LinearFilter;texture.generateMipmaps=true;texture.anisotropy=4;texture.needsUpdate=true;return texture;}
- return {albedo:array(colors,true),detail:array(details,false),means,statistics:{sets:ids,resolution:size,channels:'albedo/AO + OpenGL normal/roughness',gpuBytesBeforeMipmaps:colors.length+details.length,license:'CC0-1.0'}};
+ return {albedo:array(colors,true),detail:array(details,false),means,meanColors,statistics:{sets:ids,resolution:size,channels:'albedo/AO + OpenGL normal/roughness',gpuBytesBeforeMipmaps:colors.length+details.length,license:'CC0-1.0'}};
 }
 
 export const terrainPbrDeclarations=`
-uniform highp sampler2DArray pbrAlbedo;uniform highp sampler2DArray pbrDetail;uniform float pbrMean[4];
-float pbrKind(float layer){if(layer==6.)return 2.;if(layer==4.||layer==9.)return 3.;if(layer==3.||layer==10.||layer==7.||layer==11.)return 1.;return 0.;}
-float pbrScale(float kind){return kind==2.?18.:(kind==3.?13.:10.);}
+uniform highp sampler2DArray pbrAlbedo;uniform highp sampler2DArray pbrDetail;uniform float pbrMean[4];uniform vec3 pbrMeanColor[4];
+float pbrKind(float layer){if(layer==6.)return 2.;if(layer==4.||layer==9.)return 3.;if(layer==0.||layer==1.||layer==8.||layer==11.)return 1.;return 0.;}
+float pbrScale(float kind){return kind==2.?18.:(kind==3.?13.:(kind==1.?6.:10.));}
 `;
 
 export const terrainPbrSurface=`
-if(pavementCoverage>.5){pbrKinds=vec2(2.,0.);pbrMix=pavementSand;}
+if(pavementCoverage>.5){pbrKinds=vec2(2.,1.);pbrMix=pavementSand;}
 vec2 surfacePbrUv=vTerrainPosition.xy;vec3 surfacePbrNormal=vec3(0.,0.,1.);
 if(pbrFade>.002){
+if(pavementCoverage<.5&&max(pbrKinds.x,pbrKinds.y)<1.5){pbrKinds=vec2(1.,0.);pbrMix=smoothstep(.34,.72,tnoise(vTerrainPosition.xy/37.+vec2(tnoise(vTerrainPosition.xy/93.),0.)))*.85;diffuseColor.rgb*=mix(vec3(1.),vec3(.88,.92,.96),pbrMix*pbrFade);}
 if(abs(vTerrainNormal.z)<.55||(pbrKinds.x==3.&&pbrMix<.6)||(pbrKinds.y==3.&&pbrMix>.4))surfacePbrUv=abs(vTerrainNormal.x)>abs(vTerrainNormal.y)?vTerrainPosition.yz:vTerrainPosition.xz;
 bool layeredRock=(pbrKinds.x==3.&&pbrMix<.6)||(pbrKinds.y==3.&&pbrMix>.4);
 surfacePbrUv.x+=(tnoise(surfacePbrUv/19.)-.5)*3.2;
@@ -32,13 +33,13 @@ if(!layeredRock)surfacePbrUv.y+=(tnoise(surfacePbrUv.yx/23.+17.)-.5)*3.2;
  vec4 ca=texture(pbrAlbedo,uvA),na=texture(pbrDetail,uvA),cb=ca,nb=na;
  if(pbrKinds.x!=pbrKinds.y&&pbrMix>.005){cb=texture(pbrAlbedo,uvB);nb=texture(pbrDetail,uvB);}
  vec4 color=mix(ca,cb,pbrMix),detail=mix(na,nb,pbrMix);
- float reference=mix(pbrMean[int(pbrKinds.x)],pbrMean[int(pbrKinds.y)],pbrMix),grain=clamp(dot(color.rgb,vec3(.3,.59,.11))/max(.02,reference),.48,1.65);
- diffuseColor.rgb*=mix(1.,grain,.58*pbrFade)*mix(1.,.78+.22*color.a,pbrFade);
+ vec3 meanColor=mix(pbrMeanColor[int(pbrKinds.x)],pbrMeanColor[int(pbrKinds.y)],pbrMix),grain=clamp(color.rgb/max(vec3(.015),meanColor),vec3(.40),vec3(1.9));
+ diffuseColor.rgb*=mix(vec3(1.),grain,.78*pbrFade)*mix(1.,.78+.22*color.a,pbrFade);
  if(pavementCoverage>.5)diffuseColor.rgb=mix(diffuseColor.rgb,harmonize(color.rgb,.15)*vec3(1.05,1.07,1.09),pavementClean*.3*pbrFade);
- surfacePbrNormal=normalize(detail.rgb*2.-1.);surfacePbrNormal.xy*=pbrKinds.x==3.?.6:.42;
+ surfacePbrNormal=normalize(detail.rgb*2.-1.);surfacePbrNormal.xy*=pbrKinds.x==3.?.6:.62;
  terrainRoughness=mix(terrainRoughness,clamp(detail.a,.64,.99),pbrFade);
 }
-diffuseColor.rgb*=mix(vec3(1.14,.99,.83),vec3(1.),pavementCoverage);
+diffuseColor.rgb*=mix(vec3(1.04,1.,.95),vec3(1.),pavementCoverage);
 `;
 
 export const terrainPbrNormals=`
@@ -47,7 +48,7 @@ if(pbrFade>.002){
  vec3 dpX=dFdx(-vViewPosition),dpY=dFdy(-vViewPosition),perpY=cross(dpY,normal),perpX=cross(normal,dpX);vec2 uvX=dFdx(surfacePbrUv),uvY=dFdy(surfacePbrUv);
  vec3 tangent=perpY*uvX.x+perpX*uvY.x,bitangent=perpY*uvX.y+perpX*uvY.y;float invScale=inversesqrt(max(.000000000001,max(dot(tangent,tangent),dot(bitangent,bitangent))));
  vec3 mapped=normalize(mat3(tangent*invScale,bitangent*invScale,normal)*normalize(surfacePbrNormal));normal=normalize(mix(normal,mapped,pbrFade));
- float ripple=sin(dot(vTerrainPosition.xy,vec2(.94,.34))*9.+tnoise(vTerrainPosition.xy/3.)*2.);float sandHeight=.10*pavementSand*(.82+.18*ripple);
+ float sandHeight=.12*pavementSand*(.96+.04*tnoise(vTerrainPosition.xy*2.6));
  vec3 rx=cross(dpY,normal),ry=cross(normal,dpX);float determinant=dot(dpX,rx);vec3 gradient=sign(determinant)*(dFdx(sandHeight)*rx+dFdy(sandHeight)*ry);gradient*=min(1.,abs(determinant)*.16/max(.00000001,length(gradient)));if(abs(determinant)>.00000001)normal=normalize(abs(determinant)*normal-gradient*pbrFade);
 }
 `;

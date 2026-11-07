@@ -30,15 +30,15 @@ export async function createTerrainMaterials(T,extent){
  vec3 roadSurface(vec3 ground,vec2 coverage){
   vec2 p=vTerrainPosition.xy;
   float inward=(coverage.g-.5)*24.;
-  float sand=roadSandAmount(p,inward);pavementSand=sand;
+  float sand=roadSandAmount(p,inward);
   vec3 asphalt=agedAsphalt(p);
   // Dust has the local ground colour, so shoulders inherit each valley's sand.
-  vec3 dust=mix(ground,terrainSample(8.,p/24.),.35);
-  asphalt=mix(asphalt,dust,clamp(sand,0.,.94));
+  vec3 dust=ground*mix(1.02,1.06,tnoise(p/12.));
+  asphalt=mix(asphalt,dust,clamp(sand,0.,1.));
   float crumble=.12+(tnoise(p/2.7)-.5)*.18+(tnoise(p*1.4)-.5)*.05;
   float edgeAA=max(.06,fwidth(inward)*.65);
   float mask=smoothstep(crumble-edgeAA,crumble+edgeAA,inward);
-  pavementCoverage=mask;pavementClean=mask*(1.-clamp(sand,0.,1.));
+  pavementCoverage=mask;pavementSand=sand*mask;pavementClean=mask*(1.-clamp(sand,0.,1.));
   return mix(ground,asphalt,mask*.97);
  }
 
@@ -78,7 +78,7 @@ export async function createTerrainMaterials(T,extent){
  terrainRelief=mix(terrainRelief,pavementRelief,pavementCoverage);terrainRoughness=mix(terrainRoughness,.79,pavementCoverage);
  ${terrainPbrSurface}
  `;
- function configure(material,key,fast){material.onBeforeCompile=shader=>{shader.uniforms.terrainLayers={value:layers};shader.uniforms.sourceMean={value:sourceMeans};shader.uniforms.pbrAlbedo={value:pbr.albedo};shader.uniforms.pbrDetail={value:pbr.detail};shader.uniforms.pbrMean={value:pbr.means};shader.uniforms.roadDetail={value:roadDetail};shader.uniforms.macroAlbedo={value:macro};shader.uniforms.detailSelection={value:selection};shader.uniforms.fastTerrain={value:fast?1:0};for(let i=0;i<4;i++)shader.uniforms['control'+i]={value:controls[i]};shader.vertexShader='varying vec3 vTerrainPosition;\nvarying vec3 vTerrainNormal;\n'+shader.vertexShader;shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvTerrainPosition=(modelMatrix*vec4(position,1.0)).xyz;\nvTerrainNormal=normalize(mat3(modelMatrix)*normal);');shader.fragmentShader=declarations+shader.fragmentShader;shader.fragmentShader=shader.fragmentShader.replace('#include <map_fragment>',splat).replace('#include <normal_fragment_maps>',terrainPbrNormals).replace('#include <roughnessmap_fragment>','#include <roughnessmap_fragment>\nroughnessFactor=terrainRoughness;');};material.customProgramCacheKey=()=>key;return material;}
+ function configure(material,key,fast){material.onBeforeCompile=shader=>{shader.uniforms.terrainLayers={value:layers};shader.uniforms.sourceMean={value:sourceMeans};shader.uniforms.pbrAlbedo={value:pbr.albedo};shader.uniforms.pbrDetail={value:pbr.detail};shader.uniforms.pbrMean={value:pbr.means};shader.uniforms.pbrMeanColor={value:pbr.meanColors};shader.uniforms.roadDetail={value:roadDetail};shader.uniforms.macroAlbedo={value:macro};shader.uniforms.detailSelection={value:selection};shader.uniforms.fastTerrain={value:fast?1:0};for(let i=0;i<4;i++)shader.uniforms['control'+i]={value:controls[i]};shader.vertexShader='varying vec3 vTerrainPosition;\nvarying vec3 vTerrainNormal;\n'+shader.vertexShader;shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvTerrainPosition=(modelMatrix*vec4(position,1.0)).xyz;\nvTerrainNormal=normalize(mat3(modelMatrix)*normal);');shader.fragmentShader=declarations+shader.fragmentShader;shader.fragmentShader=shader.fragmentShader.replace('#include <map_fragment>',splat).replace('#include <normal_fragment_maps>',terrainPbrNormals).replace('#include <roughnessmap_fragment>','#include <roughnessmap_fragment>\nroughnessFactor=terrainRoughness;');};material.customProgramCacheKey=()=>key;return material;}
  const markings=new T.MeshLambertMaterial({color:'#d1c8ad',transparent:true,opacity:.38,depthWrite:false,side:T.DoubleSide});markings.onBeforeCompile=shader=>{shader.uniforms.roadMask={value:roadDetail};shader.vertexShader='varying vec3 vMarkWorld;\n'+shader.vertexShader;shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvMarkWorld=(modelMatrix*vec4(position,1.)).xyz;');shader.fragmentShader='varying vec3 vMarkWorld;uniform sampler2D roadMask;\n'+terrainNoiseGLSL+roadSandGLSL+shader.fragmentShader;shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
  vec2 roadUv=(vMarkWorld.xy+${(extent/2).toFixed(1)})/${extent.toFixed(1)};float inward=(texture2D(roadMask,roadUv).g-.5)*24.;diffuseColor.a*=1.-roadSandAmount(vMarkWorld.xy,inward);`);};markings.customProgramCacheKey=()=> 'buried_road_paint_v1';
  // The distant continuation uses two regular samples, without the layer shader.

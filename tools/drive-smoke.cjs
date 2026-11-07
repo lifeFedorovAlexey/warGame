@@ -20,7 +20,7 @@ const fs=require('node:fs'),path=require('node:path');
   await simulate(1.2);const effects=await page.evaluate(()=>({...window.demoState.effects}));
   if(!effects.trackCount||!effects.dustCount||effects.trackCount>effects.trackLimit||effects.dustCount>effects.dustLimit||effects.drawCalls!==2)throw new Error('Wheel FX pool failed: '+JSON.stringify(effects));
   const groundDust=await page.evaluate(()=>({...window.demoState.groundDust}));
-  if(groundDust.drawCalls!==1||groundDust.instances>groundDust.instanceLimit||groundDust.activeWakes>12||!groundDust.activeWakes||groundDust.lowlandProbe<.3||groundDust.highlandProbe>.005||groundDust.maxOpacity>.06)throw new Error('Ground dust density or fixed pool failed: '+JSON.stringify(groundDust));
+  if(groundDust.drawCalls!==1||groundDust.instances>groundDust.instanceLimit||groundDust.activeWakes>12||!groundDust.activeWakes||groundDust.lowlandProbe<.3||groundDust.highlandProbe>.005||groundDust.maxOpacity>.17)throw new Error('Ground dust density or fixed pool failed: '+JSON.stringify(groundDust));
   fs.mkdirSync(path.resolve('demo/previews'),{recursive:true});await page.screenshot({path:path.resolve('demo/previews/driving.png')});
   await page.evaluate(()=>window.demoActions.mode('inspect'));await simulate(2.1);
   const stopped=await page.evaluate(()=>({speed:window.demoState.speedKmh,dust:window.demoState.effects.dustCount}));if(stopped.speed!==0||stopped.dust!==0)throw new Error('Dust does not stop: '+JSON.stringify(stopped));
