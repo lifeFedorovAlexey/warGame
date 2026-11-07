@@ -1,0 +1,50 @@
+{
+  "intro": {
+    "file": "intro.ogg",
+    "duration": 6.56
+  },
+  "first-contact": {
+    "file": "first-contact.ogg",
+    "duration": 4.08
+  },
+  "raid-won": {
+    "file": "raid-won.ogg",
+    "duration": 6.0
+  },
+  "artifact-flamethrower": {
+    "file": "artifact-flamethrower.ogg",
+    "duration": 5.36
+  },
+  "research-flamethrower": {
+    "file": "research-flamethrower.ogg",
+    "duration": 4.0
+  },
+  "artifact-mg-ammo-1": {
+    "file": "artifact-mg-ammo-1.ogg",
+    "duration": 4.0
+  },
+  "research-mg-ammo-1": {
+    "file": "research-mg-ammo-1.ogg",
+    "duration": 6.48
+  },
+  "camp3-sighted": {
+    "file": "camp3-sighted.ogg",
+    "duration": 3.92
+  },
+  "research-mg-tower": {
+    "file": "research-mg-tower.ogg",
+    "duration": 4.64
+  },
+  "last-camp": {
+    "file": "last-camp.ogg",
+    "duration": 4.88
+  },
+  "victory": {
+    "file": "victory.ogg",
+    "duration": 3.2
+  },
+  "outro": {
+    "file": "outro.ogg",
+    "duration": 6.8
+  }
+}

@@ -702,7 +702,7 @@ try {
   const response = await fetch(dataUrl);
   if (!response.ok) throw new Error('Конфигурация миссии ' + response.status);
   config = await response.json();
-  sound = new FieldSound($('sound-toggle'));
+  sound = new FieldSound($('sound-toggle'), $('story-voice-toggle'));
   world = await createCampaignWorld($('world'), config, sound);
   mission = new Mission(config, world.field);
   designer = new VehicleDesigner($('designer'), $('design-toggle'), mission, {
@@ -711,6 +711,7 @@ try {
       if (open) {
         pausedBeforeDesigner = paused;
         paused = true;
+        sound.stopStory();
         sound.update({engine:0,rolling:0,slip:0,welding:0});
       } else paused = pausedBeforeDesigner;
       updateUi();
@@ -722,8 +723,9 @@ try {
     },
   });
   radio = new FieldRadio($('radio'), $('radio-toggle'), {
-    onSignal(signal,radioStarted) {
-      if(radioStarted&&signal?.kind!=='anomaly')sound.signal('radio');
+    onSignal(signal,chapter,keepCaptionUntil) {
+      if(chapter&&signal?.kind!=='anomaly')sound.signal('radio');
+      sound.playStory(chapter,keepCaptionUntil);
       presentSignal(signal);
     },
     onFocus:focusSignal,
@@ -731,6 +733,7 @@ try {
   window.campaign = {
     ready: true, mission, world, select, radio,
     get drivingAudio() { return {running:sound.ready(), recordings:!!sound.recordings}; },
+    get storyAudio() { return {playing:!!sound.storyPlayback, enabled:sound.storyEnabled}; },
     get selected() { return [...selected]; },
     get state() { return {active, paused, speed, buildKind, orderMode}; },
     advance(seconds) { mission.advance(seconds); events(); radio.consume(mission, performance.now()); updateUi(); return mission.state; },

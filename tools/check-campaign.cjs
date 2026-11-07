@@ -16,6 +16,7 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   await page.locator('#begin').click();
   await page.waitForFunction(()=>window.campaign.drivingAudio.running&&window.campaign.drivingAudio.recordings);
   await page.waitForFunction(()=>window.campaign.mission.state.time>.2&&!document.querySelector('#radio').hidden);
+  await page.waitForFunction(()=>window.campaign.storyAudio.playing);
   assert.equal(await page.evaluate(()=>window.campaign.mission.state.units.filter(u=>u.owner==='rai').length),5);
   const briefing=await page.evaluate(()=>{
    const c=window.campaign,{field,controls,storySignals}=c.world;
@@ -32,6 +33,7 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   await page.locator('[data-skip-all]').click();
   assert.equal(await page.evaluate(()=>localStorage.getItem('warGame.fieldRadio')),'off');
   assert.equal(await page.evaluate(()=>window.campaign.world.storySignals.current),null);
+  assert.equal(await page.evaluate(()=>window.campaign.storyAudio.playing),false);
   await page.locator('#home').click();
   await page.locator('#pause').click();
   await page.getByRole('button',{name:'Строитель 2',exact:true}).click({modifiers:['Shift']});

@@ -78,8 +78,9 @@ export class FieldRadio {
     if (this.panel.hidden) return false;
     this.panel.hidden = true;
     this.until = 0;
+    this.entry = null;
     this.current = null;
-    this.onSignal(null, false);
+    this.onSignal(null, null);
     return true;
   }
 
@@ -90,7 +91,8 @@ export class FieldRadio {
     }
     if (now >= this.until) this.dismiss();
     if (!this.enabled || !this.panel.hidden || !this.queue.length) return;
-    const { chapter, station, text } = this.queue.shift();
+    const entry = this.entry = this.queue.shift();
+    const { chapter, station, text } = entry;
     this.current = missionSignal(chapter, mission);
     this.focus.hidden = !this.current;
     if (this.current) this.focus.textContent = this.current.label;
@@ -98,6 +100,8 @@ export class FieldRadio {
     this.panel.querySelector('p').textContent = text;
     this.panel.hidden = false;
     this.until = now + Math.min(6700, 3000 + text.length * 28);
-    this.onSignal(this.current, true);
+    this.onSignal(this.current, chapter, until => {
+      if (this.entry === entry) this.until = Math.max(this.until, until);
+    });
   }
 }

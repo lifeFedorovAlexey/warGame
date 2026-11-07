@@ -6,6 +6,7 @@ const driveFiles = {
 };
 const driveBase = '../assets/campaign/alpha/mission01/vehicle-sfx/';
 const radioBase = '../assets/campaign/alpha/mission01/unit-radio/';
+const storyBase = '../assets/campaign/alpha/mission01/field-radio/';
 const ambienceBase = '../assets/campaign/alpha/mission01/field-ambience/';
 const combatBase = '../assets/campaign/alpha/mission01/combat-sfx/';
 const combatFiles = {
@@ -16,19 +17,24 @@ const combatVoiceLimit = 10;
 const voiceKinds = ['select', 'move', 'attack', 'build', 'stop'];
 const voiceCooldown = 1250;
 const voiceMaxAge = 1300;
+const storyMaxAge = 1500;
 
 export class FieldSound {
-  constructor(toggle) {
+  constructor(toggle, storyToggle) {
     this.toggle = toggle;
+    this.storyToggle = storyToggle;
     this.last = new Map();
     this.lastVoice = new Map();
     this.combatClips = new Map();
     this.combatVoices = new Set();
+    this.storyClips = new Map();
     this.drivingUpdated = -Infinity;
     this.previousRolling = 0;
     this.slipping = false;
     try { this.enabled = localStorage.getItem('warGame.fieldSound') !== 'off'; }
     catch { this.enabled = true; }
+    try { this.storyEnabled = localStorage.getItem('warGame.fieldStoryVoice') !== 'off'; }
+    catch { this.storyEnabled = true; }
     this.refresh();
     toggle.onclick = () => {
       this.enabled = !this.enabled;
@@ -36,6 +42,7 @@ export class FieldSound {
       this.refresh();
       if (this.enabled) this.unlock();
       else {
+        this.stopStory();
         this.pendingVoice = null;
         this.voiceSource?.stop();
         this.voiceSource = null;
@@ -43,11 +50,19 @@ export class FieldSound {
         for (const source of this.combatVoices) source.stop();
       }
     };
+    storyToggle.onclick = () => {
+      this.storyEnabled = !this.storyEnabled;
+      try { localStorage.setItem('warGame.fieldStoryVoice', this.storyEnabled ? 'on' : 'off'); } catch {}
+      if (!this.storyEnabled) this.stopStory();
+      this.refresh();
+    };
   }
 
   refresh() {
     this.toggle.textContent = this.enabled ? 'Звук: вкл.' : 'Звук: выкл.';
     this.toggle.setAttribute('aria-pressed', String(this.enabled));
+    this.storyToggle.textContent = this.storyEnabled ? 'Голос радио: вкл.' : 'Голос радио: выкл.';
+    this.storyToggle.setAttribute('aria-pressed', String(this.storyEnabled));
     if (this.output) this.output.gain.setTargetAtTime(this.enabled ? .62 : 0, this.context.currentTime, .018);
   }
 
@@ -57,6 +72,7 @@ export class FieldSound {
       if (!this.context) this.setup();
       await this.context.resume();
       this.playPendingVoice();
+      this.playPendingStory();
     } catch (error) { console.warn('Игровой звук недоступен:', error.message); }
   }
 
@@ -67,6 +83,8 @@ export class FieldSound {
     const limiter = ctx.createDynamicsCompressor();
     limiter.threshold.value = -15;
     this.output.connect(limiter).connect(ctx.destination);
+    this.effectsOutput = ctx.createGain();
+    this.effectsOutput.connect(this.output);
     this.noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
     const samples = this.noise.getChannelData(0);
     let low = 0;
@@ -77,6 +95,7 @@ export class FieldSound {
     }
     this.loadRecordings();
     this.loadVoices();
+    if (this.storyEnabled) this.storyClip('intro');
     this.loadProjector();
     for (const [kind, file] of Object.entries(combatFiles)) {
       this.loadClip(combatBase, file)
@@ -102,7 +121,7 @@ export class FieldSound {
     source.buffer = buffer;
     source.loop = true;
     gain.gain.value = 0;
-    source.connect(gain).connect(this.output);
+    source.connect(gain).connect(this.effectsOutput);
     source.start();
     return {source, gain};
   }
@@ -140,6 +159,77 @@ export class FieldSound {
       this.pendingVoice = null;
       console.warn('Реплики техники недоступны:', error.message);
     }
+  }
+
+  storyClip(chapter) {
+    this.storyManifest ??= fetch(storyBase + 'manifest.json').then(response => {
+      if (!response.ok) throw new Error('manifest.json · ' + response.status);
+      return response.json();
+    }).catch(error => {
+      console.warn('Голос радио недоступен:', error.message);
+      return {};
+    });
+    if (!this.storyClips.has(chapter)) {
+      const clip = this.storyManifest.then(manifest => {
+        const file = manifest[chapter]?.file;
+        return file ? this.loadClip(storyBase, file) : null;
+      }).catch(error => {
+        this.storyClips.delete(chapter);
+        console.warn('Реплика радио недоступна:', error.message);
+        return null;
+      });
+      this.storyClips.set(chapter, clip);
+    }
+    return this.storyClips.get(chapter);
+  }
+
+  playStory(chapter, keepCaptionUntil) {
+    this.stopStory();
+    if (!chapter || !this.enabled || !this.storyEnabled || !this.context) return;
+    const request = {keepCaptionUntil, time:performance.now()};
+    this.pendingStory = request;
+    this.storyClip(chapter).then(buffer => {
+      if (this.pendingStory !== request) return;
+      if (!buffer) {
+        this.pendingStory = null;
+        return;
+      }
+      request.buffer = buffer;
+      this.playPendingStory();
+    });
+  }
+
+  playPendingStory() {
+    const request = this.pendingStory;
+    if (!request?.buffer || !this.ready()) return;
+    this.pendingStory = null;
+    if (performance.now() - request.time >= storyMaxAge) return;
+    const ctx = this.context, now = ctx.currentTime, source = ctx.createBufferSource(), gain = ctx.createGain();
+    source.buffer = request.buffer;
+    gain.gain.value = .88;
+    source.connect(gain).connect(this.output);
+    const playback = this.storyPlayback = {source, gain};
+    this.effectsOutput.gain.setTargetAtTime(.67, now, .045);
+    source.onended = () => {
+      source.disconnect();
+      gain.disconnect();
+      if (this.storyPlayback !== playback) return;
+      this.storyPlayback = null;
+      this.effectsOutput.gain.setTargetAtTime(1, ctx.currentTime, .16);
+    };
+    source.start(now);
+    request.keepCaptionUntil(performance.now() + (request.buffer.duration + .18) * 1000);
+  }
+
+  stopStory() {
+    this.pendingStory = null;
+    const playback = this.storyPlayback;
+    if (!playback) return;
+    this.storyPlayback = null;
+    const now = this.context.currentTime;
+    playback.gain.gain.setTargetAtTime(0, now, .012);
+    playback.source.stop(now + .065);
+    this.effectsOutput.gain.setTargetAtTime(1, now, .16);
   }
 
   acknowledge(kind, ids) {
@@ -183,7 +273,7 @@ export class FieldSound {
     filter.type='lowpass';
     filter.frequency.value=1050+1250*road;
     gain.gain.value=level*(.48+.17*road);
-    source.connect(filter).connect(gain).connect(this.output);
+    source.connect(filter).connect(gain).connect(this.effectsOutput);
     source.start();
   }
 
@@ -217,7 +307,7 @@ export class FieldSound {
     envelope.gain.exponentialRampToValueAtTime(level, now + .008);
     if (hold > 0) envelope.gain.setValueAtTime(level, now + .008 + hold);
     envelope.gain.exponentialRampToValueAtTime(.0001, now + duration);
-    source.connect(filter).connect(envelope).connect(stereo).connect(this.output);
+    source.connect(filter).connect(envelope).connect(stereo).connect(this.effectsOutput);
     if (tone) source.start(now);
     else source.start(now, Math.random() * .55);
     source.stop(now + duration + .01);
@@ -232,7 +322,7 @@ export class FieldSound {
     source.playbackRate.value = .96 + Math.random() * .08;
     gain.gain.value = level;
     stereo.pan.value = Number.isFinite(pan) ? Math.max(-1, Math.min(1, pan)) : 0;
-    source.connect(gain).connect(stereo).connect(this.output);
+    source.connect(gain).connect(stereo).connect(this.effectsOutput);
     this.combatVoices.add(source);
     source.onended = () => {
       this.combatVoices.delete(source);
@@ -300,7 +390,7 @@ export class FieldSound {
     const ctx = this.context, source = ctx.createBufferSource(), gain = ctx.createGain();
     source.buffer = this.anomalyClip;
     gain.gain.value = .7;
-    source.connect(gain).connect(this.output);
+    source.connect(gain).connect(this.effectsOutput);
     source.onended = () => {
       source.disconnect();
       gain.disconnect();
