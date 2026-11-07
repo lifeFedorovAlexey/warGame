@@ -1,4 +1,5 @@
 import {TerrainNavigator} from './navigation.js';
+import {waterTower} from './threat-guidance.js';
 import {driveStep,clearOfVehicles,vehicleClearance,planManeuver,maneuverStep,checkManeuver} from './vehicle-motion.js';
 import {footprintSupport,vehicleEnvelope,vehicleSweep,vehicleGroundSafe} from './vehicle-collision.js';
 import {passageStillOpen,preparePassageEgress} from './passage-egress.js';
@@ -1288,7 +1289,10 @@ export class Mission{
   if(!s.flags.contact&&(enemyVisible||(has('factory')&&has('lab')&&s.statistics.produced>0))){s.flags.contact=true;this.cinematic('first-contact');s.flags.raidAt=s.time+12;}
   if(s.flags.contact&&!s.flags.raidStarted&&s.time>=s.flags.raidAt)this.launchRaid();
   if(s.flags.raidStarted&&!s.flags.raidWon&&s.flags.raidIds.every(id=>!this.entity(id))){s.flags.raidWon=true;this.cinematic('raid-won');}
-  const third=s.camps[2];if(!s.flags.thirdSighted&&this.visibleAt(third.x,third.y)){s.flags.thirdSighted=true;this.cinematic('camp3-sighted');}
+  if(!s.flags.thirdSighted){
+   const tower=waterTower(this);
+   if(tower&&this.visibleAt(tower.x,tower.y)){s.flags.thirdSighted=true;this.cinematic('camp3-sighted');}
+  }
   if(!s.flags.lastRevealed&&s.camps.filter(c=>c.cleared).length>=3){s.flags.lastRevealed=true;s.bounds=this.config.finalMapBounds.slice();this.rebuildNavigation();this.cinematic('last-camp');this.emit('map-expanded',{bounds:s.bounds});}
   if(s.camps.every(c=>c.cleared)&&has('generator')&&has('derrick')&&has('factory')&&has('lab')&&(has('bunker')||has('mg-tower'))&&s.statistics.produced>0&&Object.keys(this.config.research).every(key=>s.research[key])&&s.flags.raidWon){s.status='victory';this.cinematic('victory');this.cinematic('outro');this.emit('victory');}
   if(!s.units.some(u=>u.owner==='rai'&&u.hp>0&&this.unitSpec(u).role==='builder')&&!s.buildings.some(b=>b.owner==='rai'&&b.hp>0&&b.completed&&b.kind==='factory')){s.status='defeat';this.emit('defeat',{reason:'Утрачены строители и производство'});}

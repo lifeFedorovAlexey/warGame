@@ -1,6 +1,7 @@
 import {createCampaignWorld} from './world.js';
 import {Mission} from './mission.js';
 import {FieldRadio, missionSignal} from './field-radio.js';
+import {raidApproachSignal, visibleRaidContact, waterTowerSignal} from './threat-guidance.js';
 import {FieldSound} from './field-sound.js';
 import {buildLayerHeight} from './builder-optics.js';
 import {VehicleDesigner} from './designer.js';
@@ -22,21 +23,20 @@ let blockedOrders = new Set(), blockedUntil = 0;
 const vehicles = () => mission.state.units.filter(unit => unit.owner === 'rai' && unit.hp > 0);
 const builders = () => vehicles().filter(unit => config.units[unit.kind].role === 'builder');
 const selection = () => [...selected].map(id => mission.entity(id)).filter(Boolean);
-function visibleRaidContact(){
-  const {flags,units}=mission.state;
-  if(!flags.raidStarted||flags.raidWon)return null;
-  return units.find(unit=>flags.raidIds?.includes(unit.id)&&unit.hp>0&&mission.visibleAt(unit.x,unit.y));
-}
 function firstPowerSites(){
   const owned=mission.state.buildings.filter(b=>b.owner==='rai'&&b.hp>0);
   return {plant:owned.find(b=>b.kind==='generator'),well:owned.find(b=>b.kind==='derrick')};
 }
-function tacticalFocus(contact,{well}=firstPowerSites()){
+function tacticalFocus(contact,{well}=firstPowerSites(),threat=staticThreat(contact)){
   if(mission.state.status!=='running')return null;
   if(contact)return {x:contact.x,y:contact.y,kind:'threat',label:'К контакту',distance:420};
+  if(threat)return threat;
   if(mission.state.flags.lastRevealed&&!mission.state.camps[3].cleared)return missionSignal('last-camp',mission);
   if(!well&&radio.current?.kind!=='guidance')return missionSignal('intro',mission);
   return null;
+}
+function staticThreat(contact){
+  return mission.state.status==='running'&&!contact ? raidApproachSignal(mission)??waterTowerSignal(mission) : null;
 }
 function powerHint({plant,well},oilFound){
   const oilHint=oilFound?'ЛКМ по нефтяной точке — вышка.':'Разведайте нефтяную точку.';
@@ -152,6 +152,7 @@ function start(restore = false) {
   resultShown = false;
   radio.reset();
   world.storySignals.show(null);
+  world.storySignals.setThreat(null);
   blockedOrders.clear();
   $('order-feedback').hidden=true;
   $('welcome').hidden = true;
@@ -587,8 +588,9 @@ function updateUi() {
       return row;
     }));
   }
-  const contact=visibleRaidContact();
-  const sites=firstPowerSites(),marker=tacticalFocus(contact,sites);
+  const contact=visibleRaidContact(mission),threat=staticThreat(contact);
+  world.storySignals.setThreat(threat);
+  const sites=firstPowerSites(),marker=tacticalFocus(contact,sites,threat);
   const signal=world.storySignals.current;
   if(signal?.kind==='guidance'&&sites.well?.x===signal.x&&sites.well.y===signal.y)presentSignal(null);
   const focus=$('objective-focus');
@@ -597,7 +599,7 @@ function updateUi() {
     focus.textContent=marker.label;
     focus.classList.toggle('threat',marker.kind==='threat');
   }
-  const raidHint=contact?'Рейдеры в зоне обзора.':s.flags.raidStarted?'Рейдеры в пути.':'Прикройте базу. Ожидается рейд.';
+  const raidHint=contact?'Рейдеры в зоне обзора.':s.flags.raidStarted?'Рейдеры в пути. Прикройте въезд.':'Готовится рейд. Прикройте въезд.';
   const repair=mobile.some(u=>u.kind==='builder')&&vehicles().some(u=>u.hp<u.maxHp);
   const oilFound=marker?.kind==='guidance'||radio.current?.kind==='guidance';
   $('hint').textContent = s.status !== 'running' ? '' : s.flags.contact && !s.flags.raidWon ? raidHint : repair ? 'ПКМ по повреждённой машине — ремонт.' : !s.powered ? powerHint(sites,oilFound) : !tasks[0].done ? 'Завод, НИИ и ДОТ.' : s.flags.lastRevealed ? 'Четвёртый лагерь открыт на юге.' : 'Разведайте лагеря и доставьте артефакты.';
@@ -625,7 +627,7 @@ function minimap(){const canvas=$('minimap'),ctx=canvas.getContext('2d'),size=ca
  for(const grid of config.oilFields){const p=field.gridToWorld(grid);if(!mission.exploredAt(p.x,p.y))continue;ctx.fillStyle='#d5b869';ctx.fillRect(grid[0]/127*size-2,grid[1]/127*size-2,4,4);}
  for(const e of [...mission.state.units,...mission.state.buildings]){if(e.hp<=0||e.owner!=='rai'&&!mission.visibleAt(e.x,e.y))continue;const [x,y]=field.worldToGrid(e.x,e.y);ctx.fillStyle=selected.has(e.id)?'#eff2c3':e.owner==='rai'?'#a8c28a':'#d77e60';ctx.fillRect(x/127*size-2,y/127*size-2,e.path?3:5,e.path?3:5);}for(const a of mission.state.artifacts)if(!a.collected&&mission.exploredAt(a.x,a.y)){const [x,y]=field.worldToGrid(a.x,a.y);ctx.fillStyle='#e8d891';ctx.fillRect(x/127*size-3,y/127*size-3,6,6);}if(mission.state.flags.lastRevealed&&!mission.state.camps[3].cleared){const camp=mission.state.camps[3],x=camp.grid[0]/127*size,y=camp.grid[1]/127*size;ctx.strokeStyle='#df997b';ctx.strokeRect(x-5,y-5,10,10);ctx.fillStyle='#edc6a2';ctx.font='10px Arial';ctx.fillText('4',x+7,y+3);}const [cx,cy]=field.worldToGrid(world.controls.target.x,world.controls.target.y);ctx.strokeStyle='#e3d4a3';ctx.lineWidth=1;ctx.strokeRect(cx/127*size-9,cy/127*size-7,18,14);
  world.storySignals.drawMap(ctx,size);
- const contact=visibleRaidContact();
+ const contact=visibleRaidContact(mission);
  if(contact){
   const [x,y]=field.worldToGrid(contact.x,contact.y);
   ctx.strokeStyle='#ffd0af';ctx.lineWidth=1.2;ctx.strokeRect(x/127*size-5,y/127*size-5,10,10);
@@ -784,7 +786,7 @@ try {
   $('attack-order').onclick = () => beginOrder('attack');
   $('home').onclick = () => world.centre(world.field.gridToWorld(config.startGrid), 360);
   $('objective-focus').onclick = () => {
-    const signal=tacticalFocus(visibleRaidContact());
+    const signal=tacticalFocus(visibleRaidContact(mission));
     if(!signal)return;
     presentSignal(signal);
     focusSignal(signal);

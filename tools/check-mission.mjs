@@ -1,12 +1,38 @@
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
 import {Mission} from '../campaign/mission.js';
+import {raidApproachSignal, waterTower, waterTowerSignal} from '../campaign/threat-guidance.js';
 import {createHeightfield} from '../demo/map-route.js';
 import {shapeMesaRims} from '../demo/mesa-shaping.js';
 import {refineRoadHeightfield} from '../demo/road-heightfield.js';
 import {applyRoadGrades} from '../demo/road-grading.js';
 const json=path=>JSON.parse(fs.readFileSync(path,'utf8')),config=json('assets/campaign/alpha/mission01/gameplay.json'),original=createHeightfield(json('assets/maps/alpha/heightfield.json'));shapeMesaRims(original);const field=refineRoadHeightfield(original);applyRoadGrades(field,json('assets/maps/alpha/roads.json'));
 const mission=new Mission(config,field),seen=[],events=[],start=field.gridToWorld(config.startGrid),builders=()=>mission.state.units.filter(u=>u.owner==='rai'&&u.hp>0&&u.kind==='builder').map(u=>u.id);
+const scout=new Mission(config,field);
+const tower=waterTower(scout),camp=scout.state.camps[2];
+const reveal=(point,value=1)=>{
+ const [x,y]=field.worldToGrid(point.x,point.y),cell=Math.round(y)*128+Math.round(x);
+ scout.visible[cell]=scout.explored[cell]=value;
+};
+reveal(camp);
+scout.updateMission();
+assert(!scout.state.flags.thirdSighted,'Seeing the camp is different from spotting the gun');
+assert.equal(waterTowerSignal(scout),null);
+reveal(tower);
+scout.updateMission();
+assert(scout.state.pendingCinematics.includes('camp3-sighted'));
+assert.deepEqual([waterTowerSignal(scout).x,waterTowerSignal(scout).y],[tower.x,tower.y]);
+tower.hp=0;
+assert.equal(waterTowerSignal(scout),null,'A destroyed tower leaves no threat marker');
+assert.equal(raidApproachSignal(scout),null,'The approach is quiet before first contact');
+scout.state.flags.contact=true;
+const approach=field.gridToWorld(config.raidApproachGrid);
+reveal(approach,0);
+assert.equal(raidApproachSignal(scout),null,'Keep the approach marker out of unexplored terrain');
+reveal(approach);
+assert.deepEqual([raidApproachSignal(scout).x,raidApproachSignal(scout).y],[approach.x,approach.y]);
+scout.state.flags.raidWon=true;
+assert.equal(raidApproachSignal(scout),null,'Clear the warning once the raid is over');
 function dismiss(){for(const key of [...mission.state.pendingCinematics]){seen.push({key,time:mission.state.time});mission.finishCinematic(key);}}
 const mechanics={workSteps:0,constructionGated:true,repairGated:true,interruptProjection:false,movingRepair:false,builderHandoff:false};
 function step(){

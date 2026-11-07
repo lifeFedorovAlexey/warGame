@@ -1,3 +1,5 @@
+import {raidApproachSignal, waterTowerSignal} from './threat-guidance.js';
+
 const messages = {
   intro: { station: 'Штаб', text: 'Альфа, ставьте атомную станцию. Вышку — на нефтяной точке.' },
   'first-contact': { station: 'Разведка', text: 'Отбросы в ущелье. Прикройте въезд!' },
@@ -17,11 +19,12 @@ const tacticalPriority = 2, endingPriority = 4;
 const priorities = { 'last-camp':1, 'camp3-sighted':tacticalPriority, 'first-contact':3, victory:endingPriority, outro:endingPriority };
 const routineLifetime = 10000;
 
-function relevant(entry, state, now) {
+function relevant(entry, mission, now) {
+  const {state} = mission;
   const {chapter, priority, queuedAt} = entry;
   if (state.status !== 'running') return state.status === 'victory' && priority === endingPriority;
   if (chapter === 'first-contact') return !state.flags.raidWon;
-  if (chapter === 'camp3-sighted') return !state.camps[2].cleared;
+  if (chapter === 'camp3-sighted') return !!waterTowerSignal(mission);
   if (chapter === 'last-camp') return !state.camps[3].cleared;
   if (chapter.startsWith('artifact-') && state.research[chapter.slice(9)]) return false;
   return priority > 0 || now - queuedAt < routineLifetime;
@@ -37,13 +40,11 @@ export function missionSignal(chapter, mission) {
   }
   if (chapter === 'first-contact') {
     const contact = state.units.find(unit => unit.owner === 'scavs' && unit.hp > 0 && mission.visibleAt(unit.x, unit.y));
-    return contact ? mark(contact, 'К контакту', 'threat', 400) :
-      mark(field.gridToWorld(config.startGrid), 'К базе', 'threat', 380);
+    return raidApproachSignal(mission) ?? (contact ? mark(contact, 'К контакту', 'threat', 400) :
+      mark(field.gridToWorld(config.startGrid), 'К базе', 'threat', 380));
   }
   if (chapter === 'camp3-sighted') {
-    const camp=state.camps[2];
-    const tower=state.buildings.find(b=>b.campId===camp.id&&b.kind==='mg-tower'&&b.hp>0&&mission.exploredAt(b.x,b.y));
-    return mark(tower??camp, 'К башне', 'threat', 440);
+    return waterTowerSignal(mission);
   }
   if (chapter === 'last-camp') {
     return mark(state.camps[3].gate, 'К въезду', 'intel', 530);
@@ -110,7 +111,7 @@ export class FieldRadio {
     }
     if (!this.enabled) return;
     if (queued) this.queue.sort((a,b) => b.priority - a.priority);
-    while (this.queue.length && !relevant(this.queue[0], mission.state, now)) this.queue.shift();
+    while (this.queue.length && !relevant(this.queue[0], mission, now)) this.queue.shift();
     if (this.entry && (now >= this.until || mission.state.status === 'defeat')) this.dismiss();
     const next = this.queue[0];
     if (!next || (this.entry && next.priority <= this.entry.priority)) return;
