@@ -50,7 +50,7 @@
       <h2>Задачи <span id="objective-count"></span></h2>
       <ol id="objectives"></ol>
       <p id="hint"></p>
-      <button id="raid-focus" class="quiet" hidden>К месту контакта</button>
+      <button id="raid-focus" class="quiet" hidden>К контакту</button>
     </aside>
 
     <aside id="radio" class="panel" aria-live="polite" hidden>
@@ -69,7 +69,7 @@
 
     <section id="commands" aria-label="Приказы">
       <div id="build-palette" class="panel" hidden>
-        <div class="tray-heading"><strong>Строительство</strong><button id="close-build" aria-label="Закрыть строительство">×</button></div>
+        <div class="tray-heading"><strong>Стройка</strong><button id="close-build" aria-label="Закрыть стройку">×</button></div>
         <div id="build-cards"></div>
       </div>
       <div id="placement" class="panel" hidden>
@@ -99,7 +99,7 @@
 
   <dialog id="designer" aria-labelledby="designer-title">
     <header class="designer-heading">
-      <div><p>РЕМОНТНО-СБОРОЧНЫЙ ЦЕХ · АЛЬФА</p><h2 id="designer-title">Конструктор техники</h2></div>
+      <div><p>ЦЕХ · АЛЬФА</p><h2 id="designer-title">Конструктор</h2></div>
       <button type="button" data-close-designer aria-label="Закрыть конструктор">×</button>
     </header>
     <div class="garage-layout">
@@ -108,12 +108,12 @@
         <p class="garage-stage-status" data-design-stage-status role="status"></p>
         <div class="garage-view-controls">
           <small>Перетащите для вращения · колесо для масштаба</small>
-          <div><button type="button" data-design-explode aria-pressed="false">Разобрать</button><button type="button" data-design-reset>Сбросить вид</button></div>
+          <div><button type="button" data-design-explode aria-pressed="false">Разобрать</button><button type="button" data-design-reset aria-label="Сбросить вид">Сброс</button></div>
         </div>
       </section>
       <form id="design-form">
         <div class="garage-config">
-          <p class="garage-caption">СОСТАВ МАШИНЫ</p>
+          <p class="garage-caption">УЗЛЫ</p>
           <div class="designer-tabs" role="group" aria-label="Узлы машины">
             <button type="button" data-design-slot="chassis"><span>01 · Ходовая</span><strong></strong></button>
             <button type="button" data-design-slot="body"><span>02 · Корпус</span><strong></strong></button>
@@ -128,20 +128,20 @@
           <div><dt>Дальность</dt><dd data-design-range></dd></div>
           <div><dt>Обзор</dt><dd data-design-vision></dd></div>
           <div><dt>Энергия</dt><dd data-design-cost></dd></div>
-          <div><dt>На заводе</dt><dd data-design-time></dd></div>
-          <div><dt>Масса (оценка)</dt><dd data-design-mass></dd></div>
+          <div><dt>Сборка</dt><dd data-design-time></dd></div>
+          <div><dt title="Оценка по модулям">Масса</dt><dd data-design-mass></dd></div>
           <div><dt>Броня</dt><dd data-design-armor></dd></div>
         </dl>
         <div class="designer-name">
-          <label for="project-name">Название проекта</label>
+          <label for="project-name">Название</label>
           <div>
-            <input id="project-name" name="projectName" maxlength="36" autocomplete="off" placeholder="Автоматическое обозначение">
+            <input id="project-name" name="projectName" maxlength="36" autocomplete="off" placeholder="Авто">
             <button type="button" data-design-auto-name title="Восстановить автоматическое обозначение">Авто</button>
           </div>
         </div>
         <div class="designer-footer">
           <p data-design-status role="status"></p>
-          <button type="submit" class="primary">Сохранить проект</button>
+          <button type="submit" class="primary">Сохранить</button>
         </div>
       </form>
     </div>
@@ -151,15 +151,15 @@
     <p class="eyebrow">ОПЕРАЦИЯ «РАЙ» / АЛЬФА</p>
     <h1>Освоение целины</h1>
     <p id="loading-status">Подготовка карты…</p>
-    <button id="begin" class="primary" disabled>Начать операцию</button>
+    <button id="begin" class="primary" disabled>Начать</button>
     <button id="resume-save" hidden>Продолжить</button>
   </section>
   <section id="result" class="corner-card panel" hidden>
     <h1 id="result-title"></h1>
     <p id="result-message"></p>
-    <button id="result-close">Осмотреть карту</button>
-    <button id="result-signal" hidden>Показать сигнал на юге</button>
-    <button id="restart">Новая операция</button>
+    <button id="result-close">Карта</button>
+    <button id="result-signal" hidden>К сигналу</button>
+    <button id="restart">Заново</button>
   </section>
 </main>
 <script type="module" src="main.js"></script>

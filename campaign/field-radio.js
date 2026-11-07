@@ -18,20 +18,20 @@ export function missionSignal(chapter, mission) {
   const mark = (point, label, kind, distance) => point && {x:point.x,y:point.y,label,kind,distance};
   if (chapter === 'intro') {
     const well = config.oilFields.map(field.gridToWorld).find(point => mission.exploredAt(point.x, point.y));
-    return mark(well, 'К нефтяной точке', 'guidance', 320);
+    return mark(well, 'К нефти', 'guidance', 320);
   }
   if (chapter === 'first-contact') {
     const contact = state.units.find(unit => unit.owner === 'scavs' && unit.hp > 0 && mission.visibleAt(unit.x, unit.y));
-    return contact ? mark(contact, 'К месту контакта', 'threat', 400) :
+    return contact ? mark(contact, 'К контакту', 'threat', 400) :
       mark(field.gridToWorld(config.startGrid), 'К базе', 'threat', 380);
   }
   if (chapter === 'camp3-sighted') {
     const camp=state.camps[2];
     const tower=state.buildings.find(b=>b.campId===camp.id&&b.kind==='mg-tower'&&b.hp>0&&mission.exploredAt(b.x,b.y));
-    return mark(tower??camp, 'К водонапорной башне', 'threat', 440);
+    return mark(tower??camp, 'К башне', 'threat', 440);
   }
   if (chapter === 'last-camp') {
-    return mark(state.camps[3].gate, 'К подходу на юге', 'intel', 530);
+    return mark(state.camps[3].gate, 'К въезду', 'intel', 530);
   }
   if (chapter === 'outro') {
     const [x] = config.startGrid;

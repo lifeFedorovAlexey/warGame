@@ -28,15 +28,15 @@ function visibleRaidContact(){
   return units.find(unit=>flags.raidIds?.includes(unit.id)&&unit.hp>0&&mission.visibleAt(unit.x,unit.y));
 }
 function tacticalFocus(contact){
-  if(contact)return {x:contact.x,y:contact.y,kind:'threat',label:'К месту контакта',distance:420};
+  if(contact)return {x:contact.x,y:contact.y,kind:'threat',label:'К контакту',distance:420};
   if(mission.state.status==='running'&&mission.state.flags.lastRevealed&&!mission.state.camps[3].cleared)return missionSignal('last-camp',mission);
   return null;
 }
 const isMobile = entity => entity?.owner === 'rai' && !!config.units[entity.kind];
-const names = {bukhanka:'Пулемёт', builder:'Строитель', command:'Связь', flamer:'Огнемёт'};
-const taskNames = {base:'Передовая база', power:'Энергоснабжение', production:'Производство', research:'Исследования', security:'Лагеря отбросов'};
+const taskNames = {base:'База', power:'Питание', production:'Производство', research:'Исследования', security:'Лагеря'};
 const hpColor = fraction => fraction > .58 ? '#9cdd69' : fraction > .28 ? '#f1cc58' : '#ed6a4d';
-const sampleNames = {'flamethrower':'Неизвестное устройство №001','mg-ammo-1':'Образец со склада','mg-tower':'Узел водонапорной башни'};
+const sampleNames = {'flamethrower':'Устройство №001','mg-ammo-1':'Образец со склада','mg-tower':'Узел башни'};
+const projectLabel = (kind, id, name) => (id && id === kind ? config.units[kind]?.name : name) ?? config.units[kind]?.name;
 
 function toast(message, milliseconds = 2600) {
   $('toast').textContent = message;
@@ -417,7 +417,8 @@ function updateRoster() {
     const blocked=blockedOrders.has(unit.id),separate=blocked&&blockedOrders.size<=4;
     const key=stack&&!separate?(blocked?'blocked:':'')+(unit.designId??unit.kind):unit.id;
     if(!groups.has(key)){
-      const label=unit.designName??(names[unit.kind]??config.units[unit.kind].name)+(stack&&!separate?'':' '+counts[unit.kind]);
+      const customName=unit.projectId===unit.kind?null:unit.designName;
+      const label=customName??config.units[unit.kind].name+(stack&&!separate?'':' '+counts[unit.kind]);
       groups.set(key,{label,kind:unit.kind,units:[]});
     }
     groups.get(key).units.push(unit);
@@ -477,12 +478,13 @@ function updateContext(first) {
     const add = (label, detail, action, disabled) => items.push(button(label, detail, () => {report(action()); updateUi();}, disabled));
     if (factory) {
       items.push(button('Конструктор', 'Новый проект', toggleDesigner));
-      for (const {id, name, spec} of mission.factoryProjects()) {
-        add(name, spec.cost + ' ⚡ · ' + spec.seconds + ' с', () => {
+      for (const {id, kind, name, spec} of mission.factoryProjects()) {
+        const label=projectLabel(kind,id,name);
+        add(label, spec.cost + ' ⚡ · ' + spec.seconds + ' с', () => {
           const result=mission.produce(first.id,id);
           if(result.ok){
             const count=mission.entity(first.id).queue.length;
-            toast(name+' добавлен в очередь · '+count);
+            toast('В очереди · '+label+' · '+count);
             sound.signal('order');
           }
           return result;
@@ -496,7 +498,7 @@ function updateContext(first) {
         const label=done?spec.completedName??spec.name:sampleNames[id]??'Неизвестный образец';
         add(label, done ? 'Готово' : spec.cost + ' ⚡ · ' + spec.seconds + ' с', () => mission.research(first.id,id), done || !!first.research || energy < spec.cost);
       }
-      if(!items.length){const hint=document.createElement('span');hint.textContent='Нет образцов для анализа';items.push(hint);}
+      if(!items.length){const hint=document.createElement('span');hint.textContent='Нет образцов';items.push(hint);}
     }
     if (first?.owner === 'rai' && first.completed === false) {
       add('Достроить', 'Отправить строителей', () => {
@@ -505,7 +507,7 @@ function updateContext(first) {
         if (result.ok) sound.acknowledge('build', ids);
         return result;
       }, first.clearing||!builders().length);
-      add('Отменить стройку', 'Вернуть остаток энергии', () => mission.cancelBuilding(first.id));
+      add('Отменить', 'Вернуть остаток энергии', () => mission.cancelBuilding(first.id));
     }
     $('actions').replaceChildren(...items);
     $('actions').classList.toggle('factory-actions', !!factory);
@@ -514,13 +516,13 @@ function updateContext(first) {
   const queue=$('queue'), jobs=first?.queue??[], job=jobs[0]??first?.research;
   queue.hidden = !job;
   if (job) {
-    const label=entry=>entry.name??config.units[entry.kind]?.name??sampleNames[entry.key]??'Анализ образца';
+    const label=entry=>projectLabel(entry.kind,entry.projectId,entry.name)??sampleNames[entry.key]??'Образец';
     const blocked=jobs.length&&first.exitBlocked===true;
     const nextKey=[first.id,s.powered,blocked,...(jobs.length?jobs:[job]).map(label)].join('|');
     if(nextKey!==queueKey){
       queueKey=nextKey;
       const running=document.createElement('div'),progress=document.createElement('progress');
-      running.textContent=(s.powered?'':'Нет питания · ')+(blocked?'Ожидает выезда · ':jobs.length?'Выпуск · ':'Исследование · ')+label(job);
+      running.textContent=(s.powered?'':'Нет питания · ')+(blocked?'Ждёт выезда · ':jobs.length?'Выпуск · ':'Анализ · ')+label(job);
       progress.max=1;running.append(progress);
       queue.replaceChildren(running);
       if(jobs.length>1){
@@ -576,7 +578,9 @@ function updateUi() {
   const raidHint=contact?'Рейдеры в зоне обзора.':s.flags.raidStarted?'Рейдеры в пути.':'Прикройте базу. Ожидается рейд.';
   const repair=mobile.some(u=>u.kind==='builder')&&vehicles().some(u=>u.hp<u.maxHp);
   $('hint').textContent = s.status !== 'running' ? '' : s.flags.contact && !s.flags.raidWon ? raidHint : repair ? 'ПКМ по повреждённой машине — ремонт.' : !s.powered ? 'Генератор через «Строить». Вышка по клику на нефтяную точку.' : !tasks[0].done ? 'Завод, НИИ и ДОТ.' : s.flags.lastRevealed ? 'Четвёртый лагерь открыт на юге.' : 'Разведайте лагеря и доставьте артефакты.';
-  $('selection').textContent = group.length > 1 ? 'Группа · ' + group.length : first?.designName ?? (config.units[first?.kind] ?? config.buildings[first?.kind])?.name ?? (first ? 'Лагерь отбросов' : 'Нет выделения');
+  const entityName = first && (projectLabel(first.kind,first.projectId,first.designName)
+    ?? config.buildings[first.kind]?.name ?? config.camps.find(camp=>camp.id===first.campId)?.name ?? 'Лагерь');
+  $('selection').textContent = group.length > 1 ? 'Группа · ' + group.length : entityName ?? 'Нет выделения';
   const hp = group.reduce((sum,entity)=>sum+entity.hp,0), maxHp = group.reduce((sum,entity)=>sum+entity.maxHp,0);
   const wellStatus=group.length===1&&first?.kind==='derrick'&&first.completed?(first.powered?' · Качает':' · Нет питания'):'';
   $('details').textContent = orderMode ? (orderMode === 'attack' ? 'ЛКМ по врагу или по земле' : 'ЛКМ — выбрать точку') : first?.clearing ? 'Освобождение площадки' : first?.awaitingWorkers ? 'В очереди строителей' : first ? Math.ceil(hp) + '/' + maxHp + (first.completed === false ? ' · ' + Math.floor(first.progress*100) + '%' : ' HP')+wellStatus : 'Выберите машину';

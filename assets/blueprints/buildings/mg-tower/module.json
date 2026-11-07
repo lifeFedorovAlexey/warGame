@@ -1,6 +1,6 @@
 {
   "id": "mg-tower",
-  "name": "Оборонительная башня",
+  "name": "Башня",
   "status": "game-prefab",
   "units": "metres",
   "axes": "X right,Y forward,Z up",

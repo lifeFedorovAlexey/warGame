@@ -1,6 +1,6 @@
 {
   "id": "derrick",
-  "name": "Нефтяная вышка",
+  "name": "Вышка",
   "status": "game-prefab",
   "units": "metres",
   "axes": "X right,Y forward,Z up",
