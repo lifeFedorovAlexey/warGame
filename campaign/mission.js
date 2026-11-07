@@ -129,6 +129,7 @@ export class Mission{
  }
  movePath(unit,goal,reserved=[],parkingRadius=0,roadOnly=false,parkingAllowed=()=>true){
   const spacing=this.config.worldScale*4.55;
+  const escapeSteepStart=unit.owner==='rai'&&unit.path?.length===0;
   const occupied=point=>reserved.some(other=>distance(point,other)<spacing)
    ||this.state.units.some(other=>other!==unit&&other.hp>0&&!other.path.length
     &&(other.owner===unit.owner||this.visibleAt(other.x,other.y))&&distance(point,other)<spacing);
@@ -143,7 +144,7 @@ export class Mission{
   }
   for(const candidate of candidates){
    if(!parkingAllowed(candidate)||occupied(candidate)||roadOnly&&this.nav.roads.coverage(candidate.x,candidate.y)<.58)continue;
-   const path=this.vehiclePath(unit,candidate,{maxGoalDistance:16});
+   const path=this.vehiclePath(unit,candidate,{maxGoalDistance:16,escapeSteepStart});
    const end=path?.at(-1);
    if(end&&parkingAllowed(end)&&!occupied(end)&&(!roadOnly||this.nav.roads.coverage(end.x,end.y)>=.58))return path;
   }

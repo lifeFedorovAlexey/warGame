@@ -2,6 +2,7 @@ import {RoadTraffic, asphaltBonus, gradeSpeed, surfaceTravelCost} from './road-t
 import {sweepAvoidsFootprint, vehicleSweep} from './vehicle-collision.js';
 
 const climbableGrade = .52;
+const gridEdgeGrade = Math.max(.60,climbableGrade*1.32);
 
 // A* on a cached terrain grid. Dynamic building footprints are rasterized once
 // per structural change; movement never falls back to teleporting.
@@ -53,7 +54,7 @@ export class TerrainNavigator{
   return best;
  }
  nearest(x,y,maxRadius=12){const [cx,cy]=this.grid(x,y);for(let r=0;r<=maxRadius;r++){let best=null,distance=Infinity;for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(r&&Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const col=cx+dx,row=cy+dy;if(!this.allowed(col,row))continue;const p=this.position(col,row),d=Math.hypot(p.x-x,p.y-y);if(d<distance){distance=d;best={...p,col,row};}}if(best)return best;}return null;}
- lineClear(a,b,terrainOnly=false,leaveGridEdge=false,maximumGrade=climbableGrade,physical=false){
+ lineClear(a,b,terrainOnly=false,leaveGridEdge=false,maximumGrade=climbableGrade,physical=false,checkOccupancy=false){
   const length=Math.hypot(b.x-a.x,b.y-a.y),times=[0,1],half=this.field.half,cell=this.field.renderCell??this.cell;
   if([a,b].some(point=>Math.abs(point.x)>half||Math.abs(point.y)>half))return false;
   // Height is affine within each heightfield triangle. Split exactly at its X,
@@ -68,6 +69,7 @@ export class TerrainNavigator{
    const x=a.x+(b.x-a.x)*t,y=a.y+(b.y-a.y)*t,[col,row]=this.grid(x,y);
    if(terrainOnly)return this.walkable[row*this.size+col];
    if(physical){
+    if(checkOccupancy&&this.occupied[row*this.size+col])return false;
     const xg=(x+half)/32,yg=(half-y)/32;
     if(xg<bounds[0]||xg>bounds[2]||yg<bounds[1]||yg>bounds[3])return false;
     const gradient=this.field.gradientAt(x,y);
@@ -106,7 +108,7 @@ export class TerrainNavigator{
   }
   return total;
  }
- findPath(from,to,{maxGoalDistance=Infinity}={}){
+ findPath(from,to,{maxGoalDistance=Infinity,escapeSteepStart=false}={}){
   const gx=(to.x+this.field.half)/32,gy=(this.field.half-to.y)/32,bounds=this.bounds;if(gx<bounds[0]||gy<bounds[1]||gx>bounds[2]||gy>bounds[3])return null;
   const end=this.nearest(to.x,to.y);if(!end)return null;
   const direct=this.lineClear(from,to,false,true)?[{x:to.x,y:to.y}]:null;
@@ -114,7 +116,22 @@ export class TerrainNavigator{
   const pavedTrip=roads&&this.roads.nearPavement(from)&&this.roads.nearPavement(to);
   const directCost=roads&&direct?this.travelCost(from,to,pavedTrip):Infinity;
   if(direct&&(!roads||!this.roads.worthChecking(from,to,directCost,pavedTrip)))return direct;
-  const [cx,cy]=this.grid(from.x,from.y),starts=[];for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){const col=cx+dx,row=cy+dy;if(!this.allowed(col,row))continue;const p=this.position(col,row);if(this.lineClear(from,p,false,true))starts.push({...p,col,row});}if(!starts.length)return direct;
+  const [cx,cy]=this.grid(from.x,from.y),entries=[];
+  for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){
+   const col=cx+dx,row=cy+dy;
+   if(this.allowed(col,row))entries.push({...this.position(col,row),col,row});
+  }
+  let starts=entries.filter(point=>this.lineClear(from,point,false,true));
+  const startId=cy*this.size+cx;
+  // A vehicle can have wheel support even when its centre is on a steep cell.
+  // Let it reach the nearby grid using the same grade limits as vehicle motion.
+  if(escapeSteepStart&&!starts.length&&!this.walkable[startId]&&!this.occupied[startId]){
+   const gradient=this.field.gradientAt(from.x,from.y);
+   if(Math.hypot(gradient.x,gradient.y)>=gridEdgeGrade){
+    starts=entries.filter(point=>this.lineClear(from,point,false,true,climbableGrade,true,true));
+   }
+  }
+  if(!starts.length)return direct;
   const n=this.size,endIds=new Set(),maxEndDistance=Math.min(maxGoalDistance,Math.hypot(end.x-to.x,end.y-to.y)+this.cell*1.5);for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){const col=end.col+dx,row=end.row+dy,p=this.position(col,row);if(this.allowed(col,row)&&Math.hypot(p.x-to.x,p.y-to.y)<=maxEndDistance)endIds.add(row*n+col);}if(!endIds.size)return direct;
   const stamp=++this.searchId,heap=[];let destination=null;
   const push=(id,priority)=>{let i=heap.length;heap.push({id,priority});while(i){const p=(i-1)>>1;if(heap[p].priority<=priority)break;heap[i]=heap[p];i=p;}heap[i]={id,priority};};

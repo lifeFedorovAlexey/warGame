@@ -198,6 +198,15 @@ assert(junctionSamples.filter(p=>junction.nav.roads.coverage(p.x,p.y)>=.4).lengt
 assert(junctionSamples.every(p=>{const g=alpha.gradientAt(p.x,p.y);return Math.hypot(g.x,g.y)<.15;}),
  'The convoy does not cut across the steep hillside');
 
+const hillside=session(alpha,{...alphaConfig,initialUnits:[],initialMapBounds:alphaConfig.finalMapBounds});
+const stranded=hillside.addUnit('bukhanka','rai',{x:-836.6658,y:535.1983},{heading:1.43003});
+assert(!hillside.nav.allowed(...hillside.nav.grid(stranded.x,stranded.y)));
+assert(vehicleGroundSafe(vehicleEnvelope(stranded,scale,alpha),.52),'The saved vehicle has wheel support');
+const southGate=alpha.gridToWorld(alphaConfig.camps.at(-1).gateGrid);
+assert(hillside.order([stranded.id],'attack-move',southGate).ok);
+assert.equal(sample(hillside,[stranded],95).complete,1);
+assert(Math.hypot(stranded.x-southGate.x,stranded.y-southGate.y)<4,'The vehicle drives out under its own power');
+
 function gateFixture(opening,count,setup=()=>{}){
  const terrain={...field,roadNetwork:null,roadBlendAt:null};
  const m=session(terrain);
