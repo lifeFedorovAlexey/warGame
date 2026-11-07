@@ -1,5 +1,5 @@
 export function createFlameEffects(T,scene,scale) {
-  const pulses=[],scorches=[],pulseLimit=14,scorchLimit=16,segments=6;
+  const pulses=[],scorches=[],dustHits=[],pulseLimit=14,scorchLimit=16,dustLimit=12,segments=6;
   const vertexShader=`
     attribute float diameter; attribute float opacity; attribute vec3 shade;
     uniform float viewportHeight; varying float vOpacity; varying vec3 vShade;
@@ -44,7 +44,7 @@ export function createFlameEffects(T,scene,scale) {
     };
   }
   const flame=batch('red_flame_particles',pulseLimit*32,false);
-  const smoke=batch('black_flame_smoke',pulseLimit*20+scorchLimit*6,true);
+  const smoke=batch('black_flame_smoke',pulseLimit*20+scorchLimit*6+dustLimit*3,true);
   const jetGeometry=new T.BufferGeometry(),jetCapacity=pulseLimit*segments*12;
   const jetPosition=new T.Float32BufferAttribute(new Float32Array(jetCapacity*3),3).setUsage(T.DynamicDrawUsage);
   const jetShape=new T.Float32BufferAttribute(new Float32Array(jetCapacity*3),3).setUsage(T.DynamicDrawUsage);
@@ -83,7 +83,11 @@ export function createFlameEffects(T,scene,scale) {
       scorches.push({point,born:now,destroyed,seed:++serial});
       if(scorches.length>scorchLimit)scorches.shift();
     },
-    reset(){pulses.length=scorches.length=0;},
+    dustImpact(point,now){
+      dustHits.push({point:point.clone(),born:now,seed:++serial});
+      if(dustHits.length>dustLimit)dustHits.shift();
+    },
+    reset(){pulses.length=scorches.length=dustHits.length=0;},
     update(now,viewportHeight){
       flame.start(viewportHeight);smoke.start(viewportHeight);
       jet.material.uniforms.clock.value=now;
@@ -139,6 +143,17 @@ export function createFlameEffects(T,scene,scale) {
           const size=(.54+t*(destroyed?2.55:1.7))*scale;
           smoke.add(point.x+Math.cos(angle)*spread+t*2,point.y+Math.sin(angle)*spread,
             point.z+(t*(2.4+random(seed,j))+.17)*scale,size,Math.sin(Math.PI*t)**.65*.68,.020,.014,.012);
+        }
+      }
+      for(let i=dustHits.length-1;i>=0;i--){
+        const {point,born,seed}=dustHits[i],age=now-born;
+        if(age>.47){dustHits.splice(i,1);continue;}
+        for(let j=0;j<3;j++){
+          const t=(age-j*.027)/.40;
+          if(t<0||t>1)continue;
+          const angle=j*2.4+seed,spread=(.08+.52*t)*scale;
+          smoke.add(point.x+Math.cos(angle)*spread,point.y+Math.sin(angle)*spread,
+            point.z+(.14+.57*t)*scale,(.78+.76*t)*scale,Math.min(1,t*11)*(1-t)*.72,.42,.30,.16);
         }
       }
       jetGeometry.setDrawRange(0,vertices);

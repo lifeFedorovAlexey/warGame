@@ -33,6 +33,10 @@ export function createCombatEffects(T,scene,scale,sound) {
     return {gain:Math.max(0,1-relative.length()/1050),pan:T.MathUtils.clamp(relative.dot(right)/370,-.8,.8)};
   }
   function hit(end,details,now,camera,audible=true) {
+    if(details.surface==='infantry'&&details.weapon!=='flame'){
+      if(audible)flame.dustImpact(end,now);
+      return;
+    }
     const destroyed=audible&&details.destroyed;
     impacts.push({end,born:now,weapon:details.weapon,surface:details.surface,destroyed});
     if(impacts.length>impactLimit)impacts.shift();

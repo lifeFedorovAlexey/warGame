@@ -85,6 +85,8 @@ export class FieldSound {
     this.output.connect(limiter).connect(ctx.destination);
     this.effectsOutput = ctx.createGain();
     this.effectsOutput.connect(this.output);
+    this.combatOutput = ctx.createGain();
+    this.combatOutput.connect(this.output);
     this.commandOutput = ctx.createGain();
     this.commandOutput.connect(this.output);
     this.noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
@@ -226,6 +228,7 @@ export class FieldSound {
   updateDialogueMix() {
     const now = this.context.currentTime, story = this.storyPlayback, urgent = story?.urgent;
     this.effectsOutput.gain.setTargetAtTime(urgent ? .46 : story ? .67 : 1, now, story ? .045 : .16);
+    this.combatOutput.gain.setTargetAtTime(urgent ? .82 : 1, now, urgent ? .045 : .16);
     this.commandOutput.gain.setTargetAtTime(urgent ? .54 : 1, now, urgent ? .035 : .12);
     story?.gain.gain.setTargetAtTime(urgent ? .94 : this.voiceSource ? .51 : .88, now, .035);
   }
@@ -333,7 +336,7 @@ export class FieldSound {
     source.playbackRate.value = .96 + Math.random() * .08;
     gain.gain.value = level;
     stereo.pan.value = Number.isFinite(pan) ? Math.max(-1, Math.min(1, pan)) : 0;
-    source.connect(gain).connect(stereo).connect(this.effectsOutput);
+    source.connect(gain).connect(stereo).connect(this.combatOutput);
     this.combatVoices.add(source);
     source.onended = () => {
       this.combatVoices.delete(source);
