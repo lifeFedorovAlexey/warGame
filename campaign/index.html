@@ -99,28 +99,34 @@
 
   <dialog id="designer" aria-labelledby="designer-title">
     <header class="designer-heading">
-      <div><p>ЦЕХ · АЛЬФА</p><h2 id="designer-title">Конструктор</h2></div>
-      <button type="button" data-close-designer aria-label="Закрыть конструктор">×</button>
+      <h2 id="designer-title">Конструктор</h2>
+      <div class="designer-header-actions">
+        <button type="button" data-close-designer aria-label="Закрыть конструктор">×</button>
+      </div>
     </header>
     <div class="garage-layout">
       <section class="garage-stage" data-design-viewport aria-label="Сборочный стенд">
-        <div class="garage-stage-title"><small>СБОРОЧНЫЙ СТЕНД</small><strong data-design-model-name></strong></div>
+        <div class="garage-stage-title"><strong data-design-model-name></strong></div>
         <p class="garage-stage-status" data-design-stage-status role="status"></p>
         <div class="garage-view-controls">
-          <small>Перетащите для вращения · колесо для масштаба</small>
+          <small>Вращение перетаскиванием</small>
           <div><button type="button" data-design-explode aria-pressed="false">Разобрать</button><button type="button" data-design-reset aria-label="Сбросить вид">Сброс</button></div>
         </div>
       </section>
       <form id="design-form">
         <div class="garage-config">
-          <p class="garage-caption">УЗЛЫ</p>
           <div class="designer-tabs" role="group" aria-label="Узлы машины">
-            <button type="button" data-design-slot="chassis"><span>01 · Ходовая</span><strong></strong></button>
-            <button type="button" data-design-slot="body"><span>02 · Корпус</span><strong></strong></button>
-            <button type="button" data-design-slot="upper"><span>03 · Модуль</span><strong></strong></button>
+            <button type="button" data-design-slot="chassis"><span class="designer-slot-copy"><small>Ходовая</small><strong></strong></span></button>
+            <button type="button" data-design-slot="body"><span class="designer-slot-copy"><small>Корпус</small><strong></strong></span></button>
+            <button type="button" data-design-slot="upper"><span class="designer-slot-copy"><small>Модуль</small><strong></strong></span></button>
           </div>
           <div class="designer-filters" data-design-filters role="group" aria-label="Назначение деталей" hidden></div>
           <div class="designer-cards" data-design-cards role="group" aria-label="Доступные детали"></div>
+          <div class="designer-pagination" data-design-pages hidden>
+            <button type="button" data-design-prev aria-label="Предыдущая страница деталей">‹</button>
+            <output data-design-page aria-label="Страница деталей" aria-live="polite"></output>
+            <button type="button" data-design-next aria-label="Следующая страница деталей">›</button>
+          </div>
         </div>
         <dl class="designer-stats">
           <div><dt>Прочность</dt><dd data-design-hp></dd></div>
@@ -132,16 +138,16 @@
           <div><dt title="Оценка по модулям">Масса</dt><dd data-design-mass></dd></div>
           <div><dt>Броня</dt><dd data-design-armor></dd></div>
         </dl>
-        <div class="designer-name">
-          <label for="project-name">Название</label>
-          <div>
-            <input id="project-name" name="projectName" maxlength="36" autocomplete="off" placeholder="Авто">
-            <button type="button" data-design-auto-name title="Восстановить автоматическое обозначение">Авто</button>
-          </div>
-        </div>
         <div class="designer-footer">
-          <p data-design-status role="status"></p>
+          <div class="designer-name">
+            <label for="project-name">Проект</label>
+            <div>
+              <input id="project-name" name="projectName" maxlength="36" autocomplete="off" placeholder="Авто">
+              <button type="button" data-design-auto-name aria-label="Автоматическое имя">Авто</button>
+            </div>
+          </div>
           <button type="submit" class="primary">Сохранить</button>
+          <p data-design-status role="status"></p>
         </div>
       </form>
     </div>

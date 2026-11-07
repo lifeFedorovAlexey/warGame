@@ -12,6 +12,7 @@ const catalogue = {
 const roleNames = {combat:'Боевые', builder:'Инженерные', support:'Поддержка', recon:'Разведка', wheeled:'Колёсные', tracked:'Гусеничные', light:'Лёгкие', heavy:'Тяжёлые', other:'Прочие'};
 const svgNS = 'http://www.w3.org/2000/svg';
 const tons = new Intl.NumberFormat('ru-RU', {maximumFractionDigits:2});
+const partsPerPage = 4;
 
 export class VehicleDesigner {
   constructor(panel, toggle, mission, {makeModel, onSave, onActiveChange}) {
@@ -24,6 +25,10 @@ export class VehicleDesigner {
     this.tabs = [...panel.querySelectorAll('[data-design-slot]')];
     this.cards = panel.querySelector('[data-design-cards]');
     this.filters = panel.querySelector('[data-design-filters]');
+    this.pages = panel.querySelector('[data-design-pages]');
+    this.pageNumber = this.pages.querySelector('output');
+    this.previousPage = this.pages.querySelector('[data-design-prev]');
+    this.nextPage = this.pages.querySelector('[data-design-next]');
     this.stage = panel.querySelector('[data-design-viewport]');
     this.stageStatus = panel.querySelector('[data-design-stage-status]');
     this.modelName = panel.querySelector('[data-design-model-name]');
@@ -36,14 +41,18 @@ export class VehicleDesigner {
     this.resetButton = panel.querySelector('[data-design-reset]');
     this.activeSlot = 2;
     this.activeRole = '';
+    this.choicePage = null;
     this.manualName = false;
     this.components = [];
     this.recipes = [];
     for (const [index, tab] of this.tabs.entries()) tab.onclick = () => {
       this.activeSlot = index;
       this.activeRole = '';
+      this.choicePage = null;
       this.paintChoices();
     };
+    this.previousPage.onclick = () => { this.choicePage--; this.paintChoices(); };
+    this.nextPage.onclick = () => { this.choicePage++; this.paintChoices(); };
     this.name.addEventListener('input', () => {
       this.manualName = true;
       this.autoName.disabled = false;
@@ -130,14 +139,24 @@ export class VehicleDesigner {
     });
     const groups = new Map();
     for (const {info} of choices) groups.set(info.role, info.roleLabel ?? roleNames[info.role] ?? roleNames.other);
-    if (!groups.has(this.activeRole)) this.activeRole = '';
-    this.paintFilters(groups);
-    this.cards.replaceChildren(...choices.filter(({info}) => !this.activeRole || info.role === this.activeRole)
+    if (!groups.has(this.activeRole) || choices.length <= partsPerPage) this.activeRole = '';
+    this.paintFilters(groups, choices.length);
+    const visible = choices.filter(({info}) => !this.activeRole || info.role === this.activeRole);
+    const pageCount = Math.max(1, Math.ceil(visible.length / partsPerPage));
+    const selectedIndex = visible.findIndex(({id}) => id === this.components[index]);
+    const page = this.choicePage ?? Math.floor(Math.max(0, selectedIndex) / partsPerPage);
+    this.choicePage = Math.min(pageCount - 1, Math.max(0, page));
+    const start = this.choicePage * partsPerPage;
+    this.pages.hidden = pageCount === 1;
+    this.pageNumber.value = (this.choicePage + 1) + ' / ' + pageCount;
+    this.previousPage.disabled = this.choicePage === 0;
+    this.nextPage.disabled = this.choicePage === pageCount - 1;
+    this.cards.replaceChildren(...visible.slice(start, start + partsPerPage)
       .map(({id,info}) => this.partCard(id, info, candidates)));
   }
 
-  paintFilters(groups) {
-    this.filters.hidden = groups.size < 2;
+  paintFilters(groups, choiceCount) {
+    this.filters.hidden = groups.size < 2 || choiceCount <= partsPerPage;
     if (this.filters.hidden) return;
     this.filters.replaceChildren(...[['', 'Все'], ...groups].map(([role, label]) => {
       const button = document.createElement('button');
@@ -146,6 +165,7 @@ export class VehicleDesigner {
       button.setAttribute('aria-pressed', String(role === this.activeRole));
       button.onclick = () => {
         this.activeRole = role;
+        this.choicePage = 0;
         this.paintChoices();
         this.filters.querySelector('[aria-pressed=true]')?.focus({preventScroll:true});
       };
@@ -155,9 +175,10 @@ export class VehicleDesigner {
 
   partCard(id, info, candidates) {
     const button = document.createElement('button');
-    const code = document.createElement('small');
+    const copy = document.createElement('span');
+    copy.className = 'design-part-copy';
     const name = document.createElement('strong');
-    const detail = document.createElement('span');
+    const detail = document.createElement('small');
     const icon = document.createElementNS(svgNS, 'svg');
     const use = document.createElementNS(svgNS, 'use');
     button.type = 'button';
@@ -165,13 +186,13 @@ export class VehicleDesigner {
     button.dataset.designComponent = id;
     button.setAttribute('aria-pressed', String(this.components[this.activeSlot] === id));
     if (Number.isFinite(info.massKg)) button.title = 'Расчётная масса · ' + info.massKg + ' кг';
-    code.textContent = info.tag ?? id;
     name.textContent = info.name;
-    detail.textContent = info.detail;
+    detail.textContent = info.detail || id;
     icon.setAttribute('aria-hidden', 'true');
     use.setAttribute('href', 'hud-icons.svg#' + info.icon);
     icon.append(use);
-    button.append(code, icon, name, detail);
+    copy.append(name, detail);
+    button.append(icon, copy);
     button.onclick = () => this.choosePart(id, candidates);
     return button;
   }

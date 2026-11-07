@@ -71,8 +71,14 @@ export class DesignPreview {
     const width = this.host.clientWidth, height = this.host.clientHeight;
     if (!width || !height) return;
     this.renderer.setSize(width, height, false);
-    this.camera.aspect = width / height;
+    const aspect = width / height;
+    if (this.model && aspect !== this.camera.aspect) {
+      const ratio = Math.max(1, 1 / aspect) / Math.max(1, 1 / this.camera.aspect);
+      this.camera.position.sub(this.controls.target).multiplyScalar(ratio).add(this.controls.target);
+    }
+    this.camera.aspect = aspect;
     this.camera.updateProjectionMatrix();
+    this.controls.update();
     this.requestRender();
   }
 
