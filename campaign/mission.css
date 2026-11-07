@@ -147,12 +147,17 @@ button.active { border-color: #e5db9d; box-shadow: inset 0 -2px #e5db9d; }
   right: auto; left: max(12px, var(--edge)); max-width: min(390px, calc(100vw - 24px));
 }
 .radio-copy { min-width: 0; }
+.radio-portrait { width: 84px; height: auto; aspect-ratio: 276 / 290; flex: 0 0 84px; border: 0; border-radius: 0; box-shadow: none; pointer-events: none; }
+.radio-portrait[hidden] { display: none; }
 .radio-copy strong { color: var(--accent); font-size: 11px; }
 #radio p { margin: 2px 0 0; color: #f0eee2; font-size: 13px; line-height: 1.4; }
 .radio-actions { display: flex; align-items: center; flex: 0 0 auto; gap: 2px; }
 #radio button { pointer-events: auto; }
 #radio [data-dismiss]:not(.icon-button) { width: 30px; height: 30px; padding: 0; border: 0; background: none; color: var(--accent); font-size: 22px; }
 .radio-actions button.icon-button { --button-size: 30px; --icon-size: 23px; padding: 2px; }
+@media (max-width: 700px) {
+  .radio-portrait { width: 64px; flex-basis: 64px; }
+}
 @media (max-width: 620px) {
   :root { --operation-menu-width: 208px; }
   #mission-hud:has(.settings[open]) > #radio {

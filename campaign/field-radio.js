@@ -1,9 +1,10 @@
+import {setCharacterPortrait} from './character-portraits.js';
 import {raidApproachSignal, waterTowerSignal} from './threat-guidance.js';
 
 const messages = {
-  intro: { station: 'Штаб', text: 'Альфа, ставьте атомную станцию. Вышку — на нефтяной точке.' },
+  intro: { station: 'Командир', speaker:'commander', portrait:'radio', text: 'Вас понял. На месте.' },
   'first-contact': { station: 'Разведка', text: 'Отбросы в ущелье. Прикройте въезд!' },
-  'raid-won': { station: 'Командир', text: 'Атаку отбили. Проверьте машины и выдвигайтесь к лагерям.' },
+  'raid-won': { station: 'Командир', speaker:'commander', portrait:'radio', text: 'Сектор зачищен. Проверьте машины. Продолжаем операцию.' },
   'artifact-flamethrower': { station: 'Лаборатория', text: 'Нашли модуль с синей лентой. Изучите в лаборатории.' },
   'research-flamethrower': { station: 'Лаборатория', text: 'Огнемёт готов. Ищите модуль в конструкторе.' },
   'artifact-mg-ammo-1': { station: 'Лаборатория', text: 'На складе нашли новые боеприпасы. Образцы в лаборатории.' },
@@ -11,7 +12,7 @@ const messages = {
   'camp3-sighted': { station: 'Разведка', text: 'На башне пулемёт. Ищите укрытие!' },
   'research-mg-tower': { station: 'Лаборатория', text: 'Чертёж башни готов. Можно строить.' },
   'last-camp': { station: 'Разведка', text: 'Штаб Петровича на юге. Заходите по западной дороге.' },
-  victory: { station: 'Командир', text: 'База действует. Все четыре лагеря зачищены.' },
+  victory: { station: 'Командир', speaker:'commander', portrait:'neutral', text: 'База действует. Все четыре лагеря зачищены.' },
   outro: { station: 'Штаб', text: 'Сильный сигнал на юге. Нужна разведка.' },
 };
 
@@ -65,6 +66,11 @@ export class FieldRadio {
     this.onSignal = onSignal;
     this.queue = [];
     this.until = 0;
+    this.portrait = document.createElement('canvas');
+    this.portrait.className = 'radio-portrait';
+    this.portrait.hidden = true;
+    this.portrait.setAttribute('aria-hidden', 'true');
+    panel.prepend(this.portrait);
     this.focus = panel.querySelector('[data-focus]');
     this.focus.onclick = () => { if (this.current) onFocus(this.current); };
     try { this.enabled = localStorage.getItem('warGame.fieldRadio') !== 'off'; }
@@ -93,6 +99,7 @@ export class FieldRadio {
   }
 
   dismiss() {
+    setCharacterPortrait(this.portrait, null);
     if (this.panel.hidden) return false;
     this.panel.hidden = true;
     this.until = 0;
@@ -123,6 +130,7 @@ export class FieldRadio {
 
   present(entry, mission, now) {
     this.entry = entry;
+    setCharacterPortrait(this.portrait, entry.speaker, entry.portrait);
     const { chapter, station, text, priority } = entry;
     this.current = missionSignal(chapter, mission);
     this.focus.hidden = !this.current;

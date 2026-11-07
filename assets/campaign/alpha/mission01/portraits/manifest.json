@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "characters": {
+    "commander": {
+      "name": "Командир",
+      "file": "commander-atlas.png",
+      "width": 988,
+      "height": 326,
+      "source": "User-provided commander triptych, 2026-11-07",
+      "sha256": "0233bef0a08763d4eaef1232248b65e87cfe4bc80e723148aca2fa5d161045cd",
+      "defaultState": "neutral",
+      "states": {
+        "neutral": {
+          "crop": [
+            30,
+            13,
+            276,
+            290
+          ],
+          "description": "Спокойный, слушает или отдаёт приказ"
+        },
+        "radio": {
+          "crop": [
+            358,
+            13,
+            276,
+            290
+          ],
+          "description": "Передаёт сообщение по рации"
+        },
+        "relaxed": {
+          "crop": [
+            687,
+            13,
+            276,
+            290
+          ],
+          "description": "Отдыхает, вечерние разговоры после боя"
+        }
+      },
+      "sceneStates": {
+        "m01-s02": "neutral",
+        "m01-s05": "neutral",
+        "m01-s06": "radio",
+        "m01-s07": "radio",
+        "m01-s08": "radio",
+        "m01-s09": "radio",
+        "m01-s10": "radio",
+        "m01-s11": "radio",
+        "m01-s12": "radio",
+        "m01-s13": "relaxed",
+        "m01-s14": "neutral"
+      }
+    }
+  }
+}

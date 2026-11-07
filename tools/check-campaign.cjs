@@ -1,5 +1,6 @@
 const fs = require('node:fs');
 const assert = require('node:assert/strict');
+const {createHash} = require('node:crypto');
 const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
 
 (async () => {
@@ -13,10 +14,17 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   try{await page.waitForFunction(()=>window.campaign?.ready||document.querySelector('#loading-status').textContent.startsWith('Ошибка'),{},{timeout:90000});}
   catch(error){throw new Error(errors.join('\n')||await page.locator('#loading-status').textContent(),{cause:error});}
   assert(await page.evaluate(()=>window.campaign?.ready),errors.join('\n')||await page.locator('#loading-status').textContent());
+  const fieldRadioDir='assets/campaign/alpha/mission01/field-radio/';
+  const intro=JSON.parse(fs.readFileSync(fieldRadioDir+'manifest.json')).intro;
+  assert.equal(createHash('sha256').update(fs.readFileSync(fieldRadioDir+intro.file)).digest('hex'),intro.sha256);
+  const introUrl=new URL('../'+fieldRadioDir+intro.file,page.url()).href;
+  const introResponse=page.waitForResponse(response=>response.url()===introUrl&&response.ok());
   await page.locator('#begin').click();
+  await introResponse;
   await page.waitForFunction(()=>window.campaign.drivingAudio.running&&window.campaign.drivingAudio.recordings);
   await page.waitForFunction(()=>window.campaign.mission.state.time>.2&&!document.querySelector('#radio').hidden);
-  await page.waitForFunction(()=>window.campaign.storyAudio.playing);
+  await page.waitForFunction(()=>window.campaign.storyAudio.playing&&window.campaign.storyAudio.chapter==='intro');
+  assert.equal(await page.locator('#radio p').textContent(),intro.text);
   assert.equal(await page.evaluate(()=>window.campaign.mission.state.units.filter(u=>u.owner==='rai').length),5);
   const briefing=await page.evaluate(()=>{
    const c=window.campaign,{field,controls,storySignals}=c.world;

@@ -1,15 +1,27 @@
 {
   "intro": {
-    "file": "intro.ogg",
-    "duration": 3.84
+    "file": "../recordings/commander/m01-s06-l002.mp3",
+    "duration": 3.0040833333333334,
+    "speaker": "commander",
+    "sha256": "9d286f8f53b8b2ebdbab0baf4dae1cd52ef8d0568678bb931958faafc47d9302",
+    "bytes": 65002,
+    "origin": "user-recording",
+    "sourceName": "m01-s06-l002.mp3.mp3",
+    "text": "Вас понял. На месте."
   },
   "first-contact": {
     "file": "first-contact.ogg",
     "duration": 2.56
   },
   "raid-won": {
-    "file": "raid-won.ogg",
-    "duration": 4.64
+    "file": "raid-won.mp3",
+    "duration": 4.3624583333333335,
+    "speaker": "commander",
+    "sha256": "0fd6f7d4bfd07211c9a571d39aa866a481d524ac922af9886c8dce8d95142fc7",
+    "bytes": 86736,
+    "origin": "user-recording",
+    "sourceName": "raid-won.mp3.mp3",
+    "text": "Сектор зачищен. Проверьте машины. Продолжаем операцию."
   },
   "artifact-flamethrower": {
     "file": "artifact-flamethrower.ogg",
@@ -40,8 +52,14 @@
     "duration": 4.0
   },
   "victory": {
-    "file": "victory.ogg",
-    "duration": 3.2
+    "file": "victory.mp3",
+    "duration": 3.78775,
+    "speaker": "commander",
+    "sha256": "dcba50b5246926398e3763a1ac1aa04a05d596be13f09ed3386b5469f2e9a557",
+    "bytes": 77541,
+    "origin": "user-recording",
+    "sourceName": "victory.mp3.mp3",
+    "text": "База действует. Все четыре лагеря зачищены."
   },
   "outro": {
     "file": "outro.ogg",
