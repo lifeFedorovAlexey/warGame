@@ -9,6 +9,36 @@ const unit=(m,kind='bukhanka',owner='rai',x=0,y=0)=>m.addUnit(kind,owner,{x,y});
 const tick=(m,u)=>{m.state.time+=.1;m.updateUnit(u,.1);};
 const checks=[];
 {
+ const m=fixture(),u=unit(m),enemy=unit(m,'raider','scavs',0,65),weak=unit(m,'raider','scavs',55,45);weak.hp=20;
+ assert(m.order([u.id],'attack',enemy).ok);tick(m,u);assert(enemy.hp<enemy.maxHp);
+ m.setCombatPolicy([u.id],{response:'ignore'});u.cooldown=0;const held=enemy.hp;tick(m,u);
+ assert.equal(enemy.hp,held,'Changing to hold fire must stop an already-issued attack');
+ assert(m.order([u.id],'attack',enemy).ok);u.cooldown=0;tick(m,u);assert(enemy.hp<held,'A new explicit order may override hold fire');
+ m.setCombatPolicy([u.id],{response:'ignore'});u.cooldown=0;const reaffirmed=enemy.hp;tick(m,u);
+ assert.equal(enemy.hp,reaffirmed,'Clicking the already-selected hold-fire rule still cancels a newer attack');
+ m.setCombatPolicy([u.id],{response:'free'});assert(m.order([u.id],'attack',enemy).ok);
+ m.setCombatPolicy([u.id],{priority:'weakest'});u.cooldown=0;const old=enemy.hp;tick(m,u);
+ assert.equal(enemy.hp,old,'The old explicit target must not mask a changed priority');assert(weak.hp<20);
+ checks.push('live policy changes override an older explicit target; a new attack remains explicit');
+}
+{
+ const m=fixture(),leader=unit(m),member=unit(m,'bukhanka','rai',50,0),other=unit(m,'bukhanka','rai',100,0);
+ m.configureGroup([leader.id,member.id],{leaderId:leader.id});
+ assert.equal(m.setCombatPolicy([leader.id],{response:'ignore'}).changed,2,'Leader settings affect the same members as leader attack orders');
+ assert.equal(combatPolicy(member).response,'ignore');assert.equal(combatPolicy(other).response,'free');
+ assert.equal(m.setCombatPolicy([member.id],{response:'return'}).changed,1,'Selecting a non-leader only changes that member');
+ assert.equal(combatPolicy(leader).response,'ignore');
+ checks.push('commander selection applies policies to its live group only');
+}
+{
+ const m=fixture(),u=unit(m),enemy=unit(m,'raider','scavs',0,65);
+ assert(m.submitOrder([u.id],'attack',enemy).ok);assert(u.pendingOrder);
+ m.setCombatPolicy([u.id],{response:'ignore'});
+ for(let i=0;i<10;i++)m.advance(.1);
+ assert(!u.pendingOrder&&!u.task,'A queued attack cannot return after changing the firing rule');assert.equal(enemy.hp,enemy.maxHp);
+ checks.push('policy changes cancel pending explicit attack planning');
+}
+{
  const m=fixture(),u=unit(m),near=unit(m,'raider','scavs',0,48),weak=unit(m,'raider','scavs',-48,80),danger=unit(m,'flamer','scavs',65,70);
  const strong=m.addStructure('generator','scavs',{x:110,y:0});weak.hp=15;
  const expected={nearest:near,strongest:strong,weakest:weak,dangerous:danger};

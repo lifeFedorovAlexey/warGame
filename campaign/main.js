@@ -12,6 +12,7 @@ import {VehicleDesigner} from './designer.js';
 import {SCAV_PROFILES} from './scav-unit-profiles.js';
 import {CombatMenu} from './combat-menu.js';
 import {pickupTarget} from './pickup-orders.js';
+import {expandCommandIds} from './group-command.js';
 
 const $ = id => document.getElementById(id);
 const saveKey = 'warGame.alpha.mission01.v1';
@@ -38,6 +39,7 @@ async function toggleNavigationDebug(force){
 const vehicles = () => mission.state.units.filter(unit => unit.owner === 'rai' && unit.hp > 0);
 const builders = () => vehicles().filter(unit => config.units[unit.kind].role === 'builder');
 const selection = () => [...selected].map(id => mission.entity(id)).filter(Boolean);
+const commandSelection = () => expandCommandIds(mission,[...selected]).map(id=>mission.entity(id)).filter(Boolean);
 const unitType = unit => [unit.kind,...(unit.components??config.units[unit.kind].components??[]),unit.engineUpgradeLevel??0].join('/');
 function firstPowerSites(){
   const owned=mission.state.buildings.filter(b=>b.owner==='rai'&&b.hp>0);
@@ -196,7 +198,7 @@ function beginPlacement(kind) {
   updateUi();
 }
 function beginOrder(mode) {
-  if (!selection().some(unit=>isMobile(unit)&&(mode!=='attack'||config.units[unit.kind].damage>0))) {
+  if (!(mode==='attack'?commandSelection():selection()).some(unit=>liveMobile(unit)&&(mode!=='attack'||config.units[unit.kind].damage>0))) {
     const unit = vehicles().find(unit => config.units[unit.kind].damage > 0) ?? (mode!=='attack'&&vehicles()[0]);
     if (!unit) return;
     select([unit.id], false, false);
@@ -286,7 +288,7 @@ function ordersAt(point, target, mode) {
   lastCommandRevision=result.revision??null;lastCommandFeedback='';
   const combatOrder=action==='attack'||action==='attack-move';
   world.commandMarker(destination,combatOrder);
-  const eligible = chosen.filter(entity => liveMobile(entity) && (!combatOrder || config.units[entity.kind].damage) && (!['build', 'repair'].includes(action) || entity.kind === 'builder'));
+  const eligible = (combatOrder?commandSelection():chosen).filter(entity => liveMobile(entity) && (!combatOrder || config.units[entity.kind].damage) && (!['build', 'repair'].includes(action) || entity.kind === 'builder'));
   blockedOrders=new Set(result.unassigned);
   blockedUntil=performance.now()+7500;
   const feedback=$('order-feedback');
@@ -825,7 +827,7 @@ function updateUi() {
   $('attack-order').classList.toggle('active', orderMode === 'attack');
   $('attack-order').setAttribute('aria-pressed',String(orderMode==='attack'));
   $('move-order').disabled = !vehicles().length;
-  $('attack-order').disabled = orderMode!=='attack'&&!mobile.some(unit => config.units[unit.kind].damage > 0);
+  $('attack-order').disabled = orderMode!=='attack'&&!commandSelection().some(unit => liveMobile(unit)&&config.units[unit.kind].damage > 0);
   $('stop').disabled = !mobile.length;
   $('placement').hidden = !buildKind;
   if (buildKind) $('placement-name').textContent = config.buildings[buildKind].name;
@@ -1030,7 +1032,7 @@ try {
   $('close-build').onclick = $('cancel-order').onclick = cancelMode;
   $('suggest-site').onclick = suggestSite;
   $('move-order').onclick = () => beginOrder('move');
-  combatMenu=new CombatMenu({button:$('attack-order'),mission,selection,isActive:()=>orderMode==='attack',onOpen:()=>beginOrder('attack'),onDeactivate:()=>cancelMode(),onChange:result=>{if(report(result))sound.signal('order');updateUi();}});
+  combatMenu=new CombatMenu({button:$('attack-order'),mission,selection,onToggle:toggleAttackOrder,onChange:result=>{if(report(result))sound.signal('order');updateUi();}});
   $('home').onclick = () => {
     document.querySelector('.settings').open = false;
     world.centre(world.field.gridToWorld(config.startGrid), 360);

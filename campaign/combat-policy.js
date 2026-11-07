@@ -1,3 +1,5 @@
+import {expandCommandIds} from './group-command.js';
+
 // Per-unit, serializable rules. Defaults preserve the existing aggressive AI.
 export const DEFAULT_COMBAT_POLICY = Object.freeze({retreat:'never', response:'free', priority:'nearest'});
 export const COMBAT_OPTIONS = Object.freeze({
@@ -31,10 +33,16 @@ export function normalizeCombatPolicy(value) {
 export function configureCombat(mission, ids, changes) {
   const keys=Object.keys(changes??{});
   if(!keys.length||keys.some(key=>!COMBAT_OPTIONS[key]?.some(o=>o.value===changes[key])))return mission.fail('Недопустимая настройка атаки');
-  const selected=new Set(ids),urgent=[];let changed=0;
+  const selected=new Set(expandCommandIds(mission,ids)),urgent=[];let changed=0;
   for(const unit of mission.state.units) {
     if(!selected.has(unit.id)||unit.hp<=0||unit.owner!=='rai'||!mission.unitSpec(unit).damage)continue;
-    unit.combatPolicy={...combatPolicy(unit),...changes};
+    const previous=combatPolicy(unit);
+    unit.combatPolicy={...previous,...changes};
+    // A newer rule must take effect during an explicit attack too. Release
+    // its old target; a subsequent direct attack remains a deliberate override.
+    const changedFireRule=keys.some(key=>key==='response'||key==='priority');
+    const explicit=unit.pendingOrder?.type==='attack'||unit.task?.type==='attack'||unit.combatDeployment?.resume.type==='attack';
+    if(changedFireRule&&explicit){urgent.push(unit.id);clearMotion(unit);unit.driveSpeed=0;}
     if(changes.retreat==='never'&&unit.combatRetreat&&!unit.combatRetreat.forced){clearMotion(unit);cancelCombatRetreat(unit);unit.driveSpeed=0;}
     if(changes.retreat)unit.retreatSuppressed=false;
     if(changes.retreat&&unit.pendingOrder&&shouldAutoRetreat(unit,mission.unitSpec(unit)))urgent.push(unit.id);
