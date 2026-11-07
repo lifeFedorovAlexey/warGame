@@ -212,7 +212,7 @@ export async function createCampaignWorld(host,config,sound){
   let next=ratio;
   if(elapsed>2.5&&frameAverage>(software?.064:.042)&&ratio>floor){
    next=Math.max(floor,ratio*.86);
-  }else if(software&&elapsed>7&&frameAverage<.038&&ratio<renderScaleCeiling()){
+  }else if(elapsed>7&&frameAverage<(software?.038:.025)&&ratio<renderScaleCeiling()){
    next=Math.min(renderScaleCeiling(),ratio+.06);
   }
   if(next!==ratio){renderer.setPixelRatio(next);lastScaleAt=now;}
