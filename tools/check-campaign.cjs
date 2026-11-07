@@ -105,6 +105,31 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
    const c=window.campaign,b=c.mission.state.buildings.find(e=>e.owner==='rai'&&e.kind==='generator'),mesh=c.world.buildingObjects.get(b.id)?.getObjectByName('building_structure');
    return c.world.statistics.projectors>0&&mesh?.visible&&mesh.children.some(o=>o.material.clippingPlanes?.length);
   });
+  const projection=await page.evaluate(async ()=>{
+   const T=await import('three'),{mission,world}=window.campaign,beams=world.vehicles.workBeams;
+   const geometry=world.scene.getObjectByName('construction_projection').geometry,positions=geometry.getAttribute('position');
+   const error=(a,b,point)=>Math.hypot(
+    (positions.getX(a)+positions.getX(b))/2-point.x,
+    (positions.getY(a)+positions.getY(b))/2-point.y,
+    (positions.getZ(a)+positions.getZ(b))/2-point.z);
+   let endpointError=0;
+   for(const [i,{from,to}] of beams.entries())for(const side of [0,6]){
+    const first=i*12+side;
+    endpointError=Math.max(endpointError,error(first,first+1,from),error(first+2,first+4,to));
+   }
+   const surfaceErrors=[];
+   for(const {from,to,targetId} of beams){
+    if(mission.entity(targetId)?.kind!=='generator')continue;
+    const body=world.buildingObjects.get(targetId).getObjectByName('building_structure');
+    const direction=to.clone().sub(from),length=direction.length();
+    const ray=new T.Raycaster(from,direction.normalize(),0,length+.4);
+    const hits=ray.intersectObject(body,true).filter(hit=>hit.point.z<=to.z+.13);
+    surfaceErrors.push(Math.min(...hits.map(hit=>Math.abs(hit.distance-length))));
+   }
+   return {beams:beams.length,vertices:geometry.drawRange.count,endpointError,surfaceErrors};
+  });
+  assert(projection.beams>=2&&projection.vertices===projection.beams*12&&projection.endpointError<.002,JSON.stringify(projection));
+  assert(projection.surfaceErrors.length>=2&&projection.surfaceErrors.every(error=>error<.35),JSON.stringify(projection));
   await page.screenshot({path:'campaign/previews/field-layer-construction.png'});
   await page.evaluate(()=>window.campaign.advance(135));
   const base=await page.evaluate(()=>{

@@ -1,5 +1,8 @@
+import {generatorLayout} from './generator-layout.js';
+
 // Silhouettes and details follow references/buildings/industrial-atlas.png.
-export function buildIndustrialStructure(T, kind, [w,d,h], kit) {
+export function buildIndustrialStructure(T, kind, size, kit) {
+  const [w,d,h]=size;
   const {box,cylinder,rod,mesh}=kit;
   const material=(color,metalness,roughness)=>new T.MeshStandardMaterial({color,metalness,roughness});
   const concrete=material('#b4a690',.03,.93), trim=material('#81796d',.12,.85);
@@ -176,9 +179,10 @@ export function buildIndustrialStructure(T, kind, [w,d,h], kit) {
     return;
   }
 
-  const x=-w*.223,width=w*.46,depth=d*.59,fy=-depth/2+.68,top=h*.671;
-  box([width,depth,top-.35],[x,.68,(top+.35)/2],concrete);
-  box([width+.15,depth+.15,.17],[x,.68,top+.055],roof);
+  const {hall,towers}=generatorLayout(size);
+  const {x,y,width,depth,bottom,top}=hall,fy=-depth/2+y;
+  box([width,depth,top-bottom],[x,y,(top+bottom)/2],concrete);
+  box([width+.15,depth+.15,.17],[x,y,top+.055],roof);
   box([width,.10,.49],[x,fy-.045,1.81],stripe);
   windows(x,fy-.08,2.44,width*.87,6,.45);
   sideWindows(x-width/2-.055,.68,2.38,depth*.82,5,-1,.42);
@@ -188,12 +192,8 @@ export function buildIndustrialStructure(T, kind, [w,d,h], kit) {
     box([1.05,.10,.13],[x+dx,fy-.10,1.57],trim);
   }
   for(const y of [fy+.17,fy+depth-.17])box([.28,.33,top-.35],[x-width/2,y,(top+.35)/2],trim);
-  const sx=w*.289;
-  for(const sy of [-d*.245,d*.245]){
-    const lift=sy>0?1:.9;
-    const rings=[[1.60,.96],[1.44,1.24],[1.23,1.74],[1.04,2.61],[.96,3.41],[1.01,4.13],[1.14,4.81],[1.055,4.81],[.93,4.13],[.87,3.41],[.95,2.61],[1.14,1.74],[1.35,1.24],[1.50,.96],[1.60,.96]]
-      .map(([radius,z])=>new T.Vector2(radius,.96+(z-.96)*lift));
-    const g=new T.LatheGeometry(rings,24);
+  for(const {x:sx,y:sy,lift,rings} of towers){
+    const g=new T.LatheGeometry(rings.map(([radius,z])=>new T.Vector2(radius,z)),24);
     g.rotateX(Math.PI/2);mesh(g,concrete,[sx,sy,0]);
     const band=new T.LatheGeometry([new T.Vector2(1.048,.96+3.30*lift),new T.Vector2(1.109,.96+3.59*lift)],24);
     band.rotateX(Math.PI/2);mesh(band,stripe,[sx,sy,0]);
