@@ -1,6 +1,7 @@
-import {vehicleEnvelope,footprintSupport} from './vehicle-collision.js';
+import {vehicleEnvelope,footprintSupport,vehicleSweep} from './vehicle-collision.js';
 import {updatePassageReservations} from './passage-reservations.js';
 import {vehicleDynamics} from './vehicle-dynamics.js';
+import {checkManeuver} from './vehicle-motion.js';
 
 export const TRAFFIC_LIMITS={groupSize:100,zoneSize:256,horizon:3,leases:1024};
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
@@ -32,6 +33,52 @@ function grantCrossing(lease,winner,other,along,scale,now){
   width:footprintSupport(other.shape,nx,ny)+scale*.45,exitSign:Math.sign(winner.course.x*nx+winner.course.y*ny),
   ux:winner.course.x,uy:winner.course.y,ownerWidth:footprintSupport(winner.shape,-winner.course.y,winner.course.x),
   goalX:goal.x,goalY:goal.y,waypointX:waypoint.x,waypointY:waypoint.y};
+}
+
+// A changed physical queue may invalidate a future crossing promise. It can
+// be renegotiated only after both participants stop and its owner is outside.
+// An empty intersection may be released; an intersection occupied solely by
+// the waiting participant may be handed to it to finish clearing. A third
+// body's footprint/stopping sweep forbids either operation. Occupied owner
+// rights never expire, including when that owner has received Stop.
+function crossingReschedule(lease,mission,byId,scale){
+ const z=lease.zone,a=byId.get(lease.a),b=byId.get(lease.b);
+ if(!z||z.ux===undefined||!a||!b||(a.driveSpeed??0)>.001||(b.driveSpeed??0)>.001)return null;
+ const loser=lease.winner===lease.a?lease.b:lease.a;let occupant=null;
+ const ownX=-z.uy,ownY=z.ux,width=z.ownerWidth+scale*.45;
+ const intersects=(shape,padding=0)=>Math.abs((shape.x-z.x)*z.nx+(shape.y-z.y)*z.ny)<=z.width+footprintSupport(shape,z.nx,z.ny)+padding
+  &&Math.abs((shape.x-z.x)*ownX+(shape.y-z.y)*ownY)<=width+footprintSupport(shape,ownX,ownY)+padding;
+ const radius=(z.width+width)/Math.max(.01,Math.abs(z.nx*ownY-z.ny*ownX));
+ for(const unit of byId.values()){
+  const dynamics=vehicleDynamics(unit),speed=unit.driveSpeed??0,dt=mission.config.simulationStep??.1;
+  const stopping=speed*dt+speed*speed/(2*dynamics.braking),shape=vehicleEnvelope(unit,scale,mission.field);
+  if(Math.hypot(shape.x-z.x,shape.y-z.y)>radius+Math.hypot(shape.width,shape.depth)+stopping)continue;
+  if(intersects(shape)){
+   // An already-entered loser must be allowed to clear ahead of a stopped
+   // owner outside. This is an occupancy-preserving transfer, not an empty
+   // zone. A stopped owner or any third body forbids renegotiation.
+   if(unit.id!==loser)return null;
+   occupant=loser;continue;
+  }
+  if(stopping>.001){
+   const direction=unit.reversing?-1:1,curve=Math.tan(unit.steering??0)*direction;
+   const clear=checkManeuver(unit,[{direction,curve,remaining:stopping}],scale,(from,to)=>{
+    const sweep=vehicleSweep(from,to,scale,mission.field);
+    const poses=[sweep.start,sweep.middle,sweep.end];
+    // Test the union of support intervals over the complete small sweep.
+    // Three isolated OBB tests could miss a short corner crossing between
+    // samples; this conservative swept projection cannot declare it empty.
+    const overlaps=(x,y,half)=>{
+     const low=Math.min(...poses.map(p=>(p.x-z.x)*x+(p.y-z.y)*y-footprintSupport(p,x,y)))-sweep.padding;
+     const high=Math.max(...poses.map(p=>(p.x-z.x)*x+(p.y-z.y)*y+footprintSupport(p,x,y)))+sweep.padding;
+     return low<=half&&high>=-half;
+    };
+    return !(overlaps(z.nx,z.ny,z.width)&&overlaps(ownX,ownY,width));
+   });
+   if(!clear)return null;
+  }
+ }
+ return {occupant};
 }
 
 // Nearly parallel routes can converge laterally. Following distance alone
@@ -164,9 +211,34 @@ export class TrafficCoordinator{
    return false;
   };
   const before=(leader,follower)=>{if(!successors.has(leader))successors.set(leader,new Set());successors.get(leader).add(follower);};
-  for(const lease of [...leases.values()].filter(l=>l.zone).sort((a,b)=>a.grantedAt-b.grantedAt||a.key.localeCompare(b.key)))
-   before(lease.winner,lease.winner===lease.a?lease.b:lease.a);
-  for(const [leader,tail] of followers)for(const follower of tail)if(!precedes(follower,leader))before(leader,follower);
+  // A body ahead of a convoy is a mandatory dependency, even if a previous
+  // promise would form a cycle with it. Dropping that edge only concealed
+  // the real deadlock from the graph while headway still stopped the tail.
+  for(const [leader,tail] of followers)for(const follower of tail)before(leader,follower);
+  const withdrawn=[],transferred=[];let occupiedCycles=0;
+  for(const lease of [...leases.values()].filter(l=>l.zone).sort((a,b)=>a.grantedAt-b.grantedAt||a.key.localeCompare(b.key))){
+   const loser=lease.winner===lease.a?lease.b:lease.a;
+   if(precedes(loser,lease.winner)){
+    const proof=crossingReschedule(lease,mission,byId,scale);
+    if(proof){
+     if(!proof.occupant){
+      withdrawn.push({key:lease.key,winner:lease.winner,reason:'unoccupied-physical-cycle'});
+      delete lease.zone;delete lease.grantedAt;lease.expires=now;
+      continue;
+     }
+     const pair=crossings.find(c=>c.lease===lease&&!c.merge);
+     if(pair){
+      const winner=proof.occupant===pair.a.unit.id?pair.a:pair.b,other=winner===pair.a?pair.b:pair.a;
+      transferred.push({key:lease.key,from:lease.winner,to:winner.unit.id,reason:'physical-occupant-clearing'});
+      lease.winner=winner.unit.id;lease.grantedAt=now;
+      grantCrossing(lease,winner,other,winner===pair.a?pair.da:pair.db,scale,now);
+      before(winner.unit.id,other.unit.id);continue;
+     }
+    }
+    occupiedCycles++;
+   }
+   before(lease.winner,loser);
+  }
   let cyclesPrevented=0;
   for(const {a,b,da,db,ca,cb,lease,merge} of crossings){
    let winner=lease.winner,loserId=winner===a.unit.id?b.unit.id:a.unit.id;
@@ -188,6 +260,6 @@ export class TrafficCoordinator{
   const waiting={};
   for(const [id,d] of this.decisions)if(d.limit<config.units[byId.get(id).kind].speed*.65)waiting[id]=saved.waiting[id]??now;
   saved.waiting=waiting;saved.leases=[...leases.values()].slice(-TRAFFIC_LIMITS.leases);
-  this.statistics={groups:this.groups.length,largestGroup:Math.max(0,...this.groups.map(g=>g.units.length)),controlled:living.length,pairs,conflicts,yielding:this.decisions.size,cyclesPrevented,cpuMs:performance.now()-started};
+  this.statistics={groups:this.groups.length,largestGroup:Math.max(0,...this.groups.map(g=>g.units.length)),controlled:living.length,pairs,conflicts,yielding:this.decisions.size,cyclesPrevented,withdrawn,transferred,occupiedCycles,cpuMs:performance.now()-started};
  }
 }
