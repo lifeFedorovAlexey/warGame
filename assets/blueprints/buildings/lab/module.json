@@ -1,7 +1,8 @@
 {
   "id": "lab",
   "name": "Исследовательский центр",
-  "status": "engineering-prototype-awaiting-art-reference",
+  "status": "industrial-atlas",
+  "reference": "references/buildings/industrial-atlas.png",
   "units": "metres",
   "axes": "X right,Y forward,Z up",
   "nominalEnvelope": [
@@ -22,7 +23,7 @@
     "max": [
       8,
       7,
-      7
+      6.933620929718018
     ]
   },
   "anchors": {
@@ -38,15 +39,10 @@
     ]
   },
   "construction": {
-    "staticGroup": "building_foundation",
-    "growingGroup": "building_structure",
-    "scaleZ": "0.1 + 0.9 × progress",
-    "workSurface": "steel foundation rail",
-    "contactNormal": [
-      0,
-      -1,
-      0
-    ]
+    "base": "building_foundation",
+    "body": "building_structure",
+    "mode": "horizontal-reveal",
+    "layerMetres": 0.24
   },
   "collision": {
     "type": "box",
@@ -61,13 +57,13 @@
   "geometry": {
     "id": "lab",
     "lod": 0,
-    "triangles": 192,
-    "vertices": 340,
-    "primitives": 6,
-    "materials": 4,
-    "removedDegenerate": 0,
-    "inputTriangles": 192,
-    "bytes": 18796,
+    "triangles": 3488,
+    "vertices": 4531,
+    "primitives": 12,
+    "materials": 12,
+    "removedDegenerate": 44,
+    "inputTriangles": 3532,
+    "bytes": 179664,
     "boundsMm": {
       "min": [
         -8000,
@@ -77,7 +73,7 @@
       "max": [
         8000,
         7000,
-        7000
+        6934
       ]
     }
   }

@@ -1,0 +1,191 @@
+{
+  "schemaVersion": 1,
+  "id": "command-uaz",
+  "name": "Командирский УАЗ",
+  "role": "independent-review-vehicle",
+  "source": "campaign/field-vehicles.js",
+  "units": "metres",
+  "sourceAxes": "X right, Y forward, Z up",
+  "gltfAxes": "Y up, wrapped source axes",
+  "runningGearInterface": {
+    "class": "S",
+    "mountMm": [
+      0,
+      0,
+      1050
+    ],
+    "contactSizeMm": [
+      180,
+      180
+    ],
+    "padsMm": {
+      "FL": [
+        -650,
+        1450,
+        1050
+      ],
+      "FR": [
+        650,
+        1450,
+        1050
+      ],
+      "RL": [
+        -650,
+        -1450,
+        1050
+      ],
+      "RR": [
+        650,
+        -1450,
+        1050
+      ]
+    }
+  },
+  "radioInterface": {
+    "id": "CMD-RF-100",
+    "bodyMountMm": [
+      -720,
+      -1760,
+      1120
+    ],
+    "radioMountMm": [
+      0,
+      0,
+      0
+    ],
+    "footDiameterMm": 100,
+    "seatDiameterMm": 114
+  },
+  "components": [
+    {
+      "id": "C-CMD",
+      "lod": 0,
+      "triangles": 1020,
+      "vertices": 1360,
+      "primitives": 14,
+      "materials": 3,
+      "removedDegenerate": 0,
+      "inputTriangles": 1020,
+      "bytes": 64532,
+      "boundsMm": {
+        "min": [
+          -929,
+          -1840,
+          0
+        ],
+        "max": [
+          929,
+          1800,
+          1050
+        ]
+      },
+      "label": "Ходовая",
+      "validation": {
+        "errors": 0,
+        "warnings": 0
+      },
+      "file": "C-CMD/C-CMD-lod0.glb"
+    },
+    {
+      "id": "B-CMD",
+      "lod": 0,
+      "triangles": 856,
+      "vertices": 1337,
+      "primitives": 9,
+      "materials": 8,
+      "removedDegenerate": 0,
+      "inputTriangles": 856,
+      "bytes": 59036,
+      "boundsMm": {
+        "min": [
+          -940,
+          -2256,
+          -275
+        ],
+        "max": [
+          940,
+          2109,
+          1120
+        ]
+      },
+      "label": "Кузов",
+      "validation": {
+        "errors": 0,
+        "warnings": 0
+      },
+      "file": "B-CMD/B-CMD-lod0.glb"
+    },
+    {
+      "id": "R-CMD",
+      "lod": 0,
+      "triangles": 164,
+      "vertices": 200,
+      "primitives": 4,
+      "materials": 3,
+      "removedDegenerate": 0,
+      "inputTriangles": 164,
+      "bytes": 12288,
+      "boundsMm": {
+        "min": [
+          -50,
+          -212,
+          0
+        ],
+        "max": [
+          50,
+          50,
+          1491
+        ]
+      },
+      "label": "Радиоблок",
+      "validation": {
+        "errors": 0,
+        "warnings": 0
+      },
+      "file": "R-CMD/R-CMD-lod0.glb"
+    }
+  ],
+  "qa": {
+    "anchors": {
+      "body_mount": {
+        "errorMm": 0,
+        "angleRadians": 0
+      },
+      "pad_FL": {
+        "errorMm": 0,
+        "angleRadians": 0
+      },
+      "pad_FR": {
+        "errorMm": 0,
+        "angleRadians": 0
+      },
+      "pad_RL": {
+        "errorMm": 0,
+        "angleRadians": 0
+      },
+      "pad_RR": {
+        "errorMm": 0,
+        "angleRadians": 0
+      },
+      "radio_mount": {
+        "errorMm": 0,
+        "angleRadians": 0
+      }
+    },
+    "independent": true,
+    "contactSamples": 25,
+    "maxSurfaceErrorMm": 0.00004768371586472142,
+    "assembledBoundsMm": {
+      "min": [
+        -940,
+        -2256,
+        0
+      ],
+      "max": [
+        940,
+        2109,
+        3661
+      ]
+    }
+  }
+}

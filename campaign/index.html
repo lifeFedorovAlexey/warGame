@@ -1,12 +1,158 @@
 <!doctype html>
-<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="data:,"><title>Операция «Рай» · Первая миссия</title><link rel="stylesheet" href="mission.css"><script type="importmap">{"imports":{"three":"../demo/vendor/three.module.js"}}</script></head>
-<body><main id="game"><div id="world" aria-label="Карта операции"></div><canvas id="labels" aria-hidden="true"></canvas><div id="drag-box" hidden></div>
-<header class="top"><a href="../demo/" title="Вернуться к осмотру машины">РАЙ <span>/ АЛЬФА</span></a><div class="mission-name"><b>Освоение целины</b><small>ЗАПАДНОЕ НАПРАВЛЕНИЕ</small></div><div class="resources"><span>Энергия <b id="energy">760</b><small id="income">+0/с</small></span><span>Техника <b id="population">6 / 48</b></span><span id="power">Нет питания</span></div><nav><button id="pause">Пауза</button><button id="tempo">×1</button><button id="save">Сохранить</button><button id="load">Загрузить</button></nav></header>
-<aside class="objectives panel"><h2>Задачи операции</h2><ol id="objectives"></ol><p id="hint">Начни с генератора и нефтяной вышки. Затем построй завод и лабораторию.</p></aside>
-<aside id="minimap-panel" class="panel"><canvas id="minimap" width="256" height="256" aria-label="Миникарта: нажать для перемещения камеры"></canvas><div><span>РАЗВЕДКА</span><button id="home" title="Вернуться к конвою">К базе</button></div></aside>
-<section id="commands" class="panel"><div class="selection-title"><div><small>ВЫБРАНО</small><h2 id="selection">Нет выделения</h2><p id="details">ЛКМ — выделить · ПКМ — приказ · колесо — масштаб · средняя кнопка — поворот · WASD — камера</p></div><button id="stop" disabled>Стоп</button></div><div id="actions"></div><div id="queue"></div></section>
-<div id="toast" role="status" hidden></div><div id="radio" aria-live="polite" hidden></div><p class="art-note">Технический прототип миссии · модели зданий будут заменены по референсам</p>
-<section id="welcome" class="modal"><div class="welcome-card"><p class="eyebrow">ОПЕРАЦИЯ «РАЙ»</p><h1>Освоение целины</h1><p>Разверни базу, восстанови энергоснабжение и исследуй четыре лагеря. В распоряжении группы — три боевые машины, два строителя и машина связи.</p><p id="loading-status">Подготовка карты и модулей…</p><button id="begin" disabled>Начать операцию</button><button id="resume-save" hidden>Продолжить сохранение</button><a href="cinematics.html">Отдельный просмотр заставок</a></div></section>
-<section id="cinematic" class="modal" hidden><div class="film-wrap"><canvas id="film" width="1600" height="900"></canvas><p id="film-status" role="status"></p><div class="film-controls"><button id="film-pause">Пауза</button><button id="film-motion">Движение кадра</button><button id="film-skip">Пропустить сцену</button></div></div></section>
-<section id="result" class="modal" hidden><div class="welcome-card"><p class="eyebrow">ГРУППА «АЛЬФА»</p><h1 id="result-title"></h1><p id="result-message"></p><button id="result-close">Осмотреть карту</button><button id="restart">Новая операция</button></div></section>
-<noscript>Для запуска миссии требуется JavaScript.</noscript></main><script type="module" src="main.js"></script></body></html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>Операция «Рай» · Освоение целины</title>
+  <link rel="stylesheet" href="mission.css">
+  <link rel="stylesheet" href="designer.css">
+  <script type="importmap">{"imports":{"three":"../demo/vendor/three.module.js"}}</script>
+</head>
+<body>
+<main id="game">
+  <div id="world" aria-label="Карта операции"></div>
+  <canvas id="labels" aria-hidden="true"></canvas>
+  <div id="drag-box" hidden></div>
+
+  <div id="mission-hud" hidden>
+    <header class="top">
+      <a href="../demo/" title="Вернуться к осмотру машины">РАЙ <span>/ АЛЬФА</span></a>
+      <b class="mission-name">Освоение целины</b>
+      <div class="resources">
+        <div class="resource resource-energy">
+          <span><span class="resource-icon" aria-hidden="true">⚡</span><b id="energy">760</b><small id="income"></small></span>
+          <meter id="energy-meter" aria-label="Запас энергии" min="0" max="2400" value="760"></meter>
+        </div>
+        <div class="resource resource-fleet">
+          <span><svg class="resource-icon" aria-hidden="true"><use href="hud-icons.svg#bukhanka"/></svg><b id="population">5 / 48</b></span>
+          <meter id="fleet-meter" aria-label="Лимит техники" min="0" max="48" value="5"></meter>
+        </div>
+        <span id="power" title="Питание от генераторов"></span>
+      </div>
+      <button id="pause" title="Пауза · Пробел">Пауза</button>
+      <button id="tempo" title="Скорость симуляции">×1</button>
+      <button id="design-toggle" aria-controls="designer" aria-expanded="false">Конструктор</button>
+      <details class="settings">
+        <summary aria-label="Меню операции">Меню</summary>
+        <div class="panel">
+          <button id="save">Сохранить</button>
+          <button id="load">Загрузить</button>
+          <button id="radio-toggle"></button>
+          <button id="sound-toggle">Звук: вкл.</button>
+          <p>ЛКМ — выбор, ПКМ — приказ.<br>Колесо — масштаб, средняя кнопка — поворот.<br>WASD — камера, B — стройка, M — движение, T — атака.</p>
+        </div>
+      </details>
+    </header>
+
+    <aside class="mission-tasks">
+      <h2>Задачи <span id="objective-count"></span></h2>
+      <ol id="objectives"></ol>
+      <p id="hint"></p>
+    </aside>
+
+    <aside id="radio" class="panel" aria-live="polite" hidden>
+      <div class="radio-head"><strong></strong><button data-dismiss title="Пропустить реплику · Esc" aria-label="Пропустить реплику">×</button></div>
+      <p></p>
+      <button class="quiet" data-skip-all>Пропустить все реплики</button>
+    </aside>
+
+    <aside id="minimap-panel" class="panel">
+      <canvas id="minimap" width="224" height="224" aria-label="Миникарта. Нажмите для перемещения камеры"></canvas>
+      <button id="home" title="К начальной базе · Home">К базе</button>
+    </aside>
+
+    <section id="commands" aria-label="Приказы">
+      <div id="build-palette" class="panel" hidden>
+        <div class="tray-heading"><strong>Строительство</strong><button id="close-build" aria-label="Закрыть строительство">×</button></div>
+        <div id="build-cards"></div>
+      </div>
+      <div id="placement" class="panel" hidden>
+        <div><strong id="placement-name"></strong><p id="placement-status"></p></div>
+        <button id="suggest-site">К площадке</button>
+        <button id="cancel-order" aria-label="Отменить размещение">×</button>
+      </div>
+      <div id="actions" class="panel" hidden></div>
+      <div id="queue" hidden></div>
+      <div class="tactical-dock">
+        <div class="squad">
+          <div class="selection-title"><strong id="selection">Техника</strong><small id="details"></small></div>
+          <div id="roster" aria-label="Своя техника"></div>
+        </div>
+        <div class="order-bar" aria-label="Действия">
+          <button id="build-toggle" title="Строительство · B" aria-expanded="false"><svg aria-hidden="true"><use href="hud-icons.svg#build"/></svg><span>Строить</span><kbd>B</kbd></button>
+          <button id="move-order" title="Движение · M"><svg aria-hidden="true"><use href="hud-icons.svg#move"/></svg><span>Маршрут</span><kbd>M</kbd></button>
+          <button id="attack-order" title="Атака · T"><svg aria-hidden="true"><use href="hud-icons.svg#attack"/></svg><span>Атака</span><kbd>T</kbd></button>
+          <button id="stop"><svg aria-hidden="true"><use href="hud-icons.svg#stop"/></svg><span>Стоп</span></button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <dialog id="designer" aria-labelledby="designer-title">
+    <header class="designer-heading">
+      <div><p>РЕМОНТНО-СБОРОЧНЫЙ ЦЕХ · АЛЬФА</p><h2 id="designer-title">Конструктор техники</h2></div>
+      <button type="button" data-close-designer aria-label="Закрыть конструктор">×</button>
+    </header>
+    <div class="garage-layout">
+      <section class="garage-stage" data-design-viewport aria-label="Сборочный стенд">
+        <div class="garage-stage-title"><small>СБОРОЧНЫЙ СТЕНД</small><strong data-design-model-name></strong></div>
+        <p class="garage-stage-status" data-design-stage-status role="status"></p>
+        <div class="garage-view-controls">
+          <small>Перетащите для вращения · колесо для масштаба</small>
+          <div><button type="button" data-design-explode aria-pressed="false">Разобрать</button><button type="button" data-design-reset>Сбросить вид</button></div>
+        </div>
+      </section>
+      <form id="design-form">
+        <div class="garage-config">
+          <p class="garage-caption">СОСТАВ МАШИНЫ</p>
+          <div class="designer-tabs" role="group" aria-label="Узлы машины">
+            <button type="button" data-design-slot="chassis"><span>01 · Ходовая</span><strong></strong></button>
+            <button type="button" data-design-slot="body"><span>02 · Корпус</span><strong></strong></button>
+            <button type="button" data-design-slot="upper"><span>03 · Модуль</span><strong></strong></button>
+          </div>
+          <div class="designer-filters" data-design-filters role="group" aria-label="Назначение деталей" hidden></div>
+          <div class="designer-cards" data-design-cards role="group" aria-label="Доступные детали"></div>
+        </div>
+        <dl class="designer-stats">
+          <div><dt>Прочность</dt><dd data-design-hp></dd></div>
+          <div><dt>Скорость</dt><dd data-design-speed></dd></div>
+          <div><dt>Дальность</dt><dd data-design-range></dd></div>
+          <div><dt>Обзор</dt><dd data-design-vision></dd></div>
+          <div><dt>Энергия</dt><dd data-design-cost></dd></div>
+          <div><dt>На заводе</dt><dd data-design-time></dd></div>
+          <div><dt>Масса (оценка)</dt><dd data-design-mass></dd></div>
+          <div><dt>Броня</dt><dd data-design-armor></dd></div>
+        </dl>
+        <div class="designer-name">
+          <label for="project-name">Название проекта</label>
+          <div>
+            <input id="project-name" name="projectName" maxlength="36" autocomplete="off" placeholder="Автоматическое обозначение">
+            <button type="button" data-design-auto-name title="Восстановить автоматическое обозначение">Авто</button>
+          </div>
+        </div>
+        <div class="designer-footer">
+          <p data-design-status role="status"></p>
+          <button type="submit" class="primary">Сохранить проект</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+  <div id="toast" role="status" hidden></div>
+  <section id="welcome" class="corner-card panel">
+    <p class="eyebrow">ОПЕРАЦИЯ «РАЙ» / АЛЬФА</p>
+    <h1>Освоение целины</h1>
+    <p id="loading-status">Подготовка карты…</p>
+    <button id="begin" class="primary" disabled>Начать операцию</button>
+    <button id="resume-save" hidden>Продолжить</button>
+  </section>
+  <section id="result" class="corner-card panel" hidden>
+    <h1 id="result-title"></h1>
+    <p id="result-message"></p>
+    <button id="result-close">Осмотреть карту</button>
+    <button id="restart">Новая операция</button>
+  </section>
+</main>
+<script type="module" src="main.js"></script>
+</body>
+</html>

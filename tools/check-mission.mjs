@@ -5,20 +5,20 @@ import {createHeightfield} from '../demo/map-route.js';
 import {shapeMesaRims} from '../demo/mesa-shaping.js';
 import {refineRoadHeightfield} from '../demo/road-heightfield.js';
 import {applyRoadGrades} from '../demo/road-grading.js';
-import {BUILDER,forwardBuilder,vehiclePose,vehicleToWorld} from '../campaign/builder-kinematics.js';
 const json=path=>JSON.parse(fs.readFileSync(path,'utf8')),config=json('assets/campaign/alpha/mission01/gameplay.json'),original=createHeightfield(json('assets/maps/alpha/heightfield.json'));shapeMesaRims(original);const field=refineRoadHeightfield(original);applyRoadGrades(field,json('assets/maps/alpha/roads.json'));
 const mission=new Mission(config,field),seen=[],events=[],start=field.gridToWorld(config.startGrid),builders=()=>mission.state.units.filter(u=>u.owner==='rai'&&u.hp>0&&u.kind==='builder').map(u=>u.id);
 function dismiss(){for(const key of [...mission.state.pendingCinematics]){seen.push({key,time:mission.state.time});mission.finishCinematic(key);}}
-const mechanics={workSteps:0,foldLockedSteps:0,constructionGated:true,repairGated:true,interruptFold:false,movingRepair:false};
+const mechanics={workSteps:0,constructionGated:true,repairGated:true,interruptProjection:false,movingRepair:false,builderHandoff:false};
 function step(){
  const progress=new Map(mission.state.buildings.map(b=>[b.id,b.progress])),hp=new Map(mission.state.units.map(u=>[u.id,u.hp]));
  dismiss();mission.advance(.1);events.push(...mission.drainEvents());mission.drainEffects();
  const workers=mission.state.units.filter(u=>u.hp>0&&u.kind==='builder');
  for(const unit of workers){
-  if(unit.rig&&unit.rig.phase!=='stowed'){assert(Math.hypot(unit.x-unit.previousX,unit.y-unit.previousY)<1e-8,'Deployed builder moved');if(unit.rig.phase.startsWith('fold-'))mechanics.foldLockedSteps++;}
-  if(!unit.builderWorking)continue;mechanics.workSteps++;assert(unit.rig.ready,'Work before deployment');
-  const p=forwardBuilder(unit.rig.q).tip,tip=vehicleToWorld(p.map((v,i)=>v+BUILDER.mount[i]),vehiclePose(unit,field,config.worldScale));
-  assert(Math.hypot(...tip.map((v,i)=>v-unit.builderContact[i]))<=.002*config.worldScale+1e-6,'Work without rendered contact');
+  if(!unit.builderWorking)continue;
+  mechanics.workSteps++;
+  assert(Math.hypot(unit.x-unit.previousX,unit.y-unit.previousY)<1e-8,'Projection during movement');
+  assert(unit.builderContact?.every(Number.isFinite),'Projection must have a world target');
+
  }
  for(const b of mission.state.buildings)if(b.progress>(progress.get(b.id)??b.progress))assert(workers.some(u=>u.builderWorking&&u.task?.type==='build'&&u.task.targetId===b.id),'Construction progresses without contact');
  for(const u of mission.state.units)if(u.hp>(hp.get(u.id)??u.hp))assert(workers.some(w=>w.builderWorking&&w.task?.type==='repair'&&w.task.targetId===u.id),'Healing without contact');
@@ -32,22 +32,55 @@ function testMovingRepair(worker){
  let moved=false;for(let i=0;i<20&&!moved;i++){const before=target.hp;m.advance(.1);moved=Math.hypot(target.x-target.previousX,target.y-target.previousY)>.05;if(moved){assert(target.hp<=before,'Moving target healed');assert(m.state.units.filter(u=>u.task?.type==='repair'&&u.task.targetId===target.id).every(u=>!u.builderWorking),'Moving target still welds');}}
  assert(moved,'Repair target did not move');mechanics.movingRepair=true;
 }
-function testInterruptFold(){
- const m=new Mission(config,field);m.load(mission.save());for(const id of [...m.state.pendingCinematics])m.finishCinematic(id);const worker=m.state.units.find(u=>u.kind==='builder'&&u.rig?.ready);assert(worker,'Interrupt fixture needs deployed builder');assert(orderNearby(m,worker));let waited=0,moved=false;
- for(let i=0;i<600&&!moved;i++){m.advance(.1);moved=Math.hypot(worker.x-worker.previousX,worker.y-worker.previousY)>.0001;if(moved)assert.equal(worker.rig.phase,'stowed','Movement started before folding');else if(worker.rig.phase!=='stowed')waited++;}
- assert(waited>0&&moved,'Builder must fold and then move');mechanics.interruptFold=true;
+function testInterruptProjection(){
+ const m=new Mission(config,field);m.load(mission.save());
+ const worker=m.state.units.find(u=>u.kind==='builder'&&u.builderWorking);
+ assert(worker,'Interrupt fixture needs an active projector');assert(orderNearby(m,worker));
+ let moved=false;
+ for(let i=0;i<100&&!moved;i++){
+  m.advance(.1);
+  moved=Math.hypot(worker.x-worker.previousX,worker.y-worker.previousY)>.0001;
+  assert(!worker.builderWorking,'Projector stays on after move order');
+ }
+ assert(moved,'Builder must leave when ordered');
+ mechanics.interruptProjection=true;
+}
+function testBuilderHandoff(point){
+ const m=new Mission(config,field);
+ const [first,second]=m.state.units.filter(u=>u.kind==='builder');
+ const result=m.build([first.id],'generator',point.x,point.y);
+ assert(result.ok,result.reason);
+ const building=m.entity(result.id),afterPurchase=m.state.energy;
+ for(let i=0;i<500&&!first.builderWorking;i++)m.advance(.1);
+ assert(first.builderWorking,'First builder reaches the unfinished structure');
+ assert(orderNearby(m,first),'First builder can leave its work position');
+ assert(m.order([second.id],'build',building).ok,'Second builder can take over unfinished construction');
+ for(let i=0;i<800&&!building.completed;i++)m.advance(.1);
+ assert(building.completed,'Second builder finishes the same structure');
+ assert.equal(m.state.energy,afterPurchase,'Taking over does not charge for the structure again');
+ mechanics.builderHandoff=true;
 }
 function until(predicate,seconds,label){let ticks=0;while(!predicate()&&ticks++<seconds*10)step();if(!predicate()){fs.mkdirSync('campaign/reports',{recursive:true});fs.writeFileSync('campaign/reports/mission-failure.json',mission.save());}assert(predicate(),label+' timed out: '+JSON.stringify({time:mission.state.time,status:mission.state.status,flags:mission.state.flags,energy:mission.state.energy}));}
 function site(kind){const points=[];for(let x=start.x-256;x<=start.x+256;x+=8)for(let y=start.y-240;y<=start.y+256;y+=8){const result=mission.placement(kind,x,y);if(result.ok)points.push(result);}points.sort((a,b)=>Math.hypot(a.x-start.x,a.y-start.y)-Math.hypot(b.x-start.x,b.y-start.y));return points[0];}
 function construct(kind,point=site(kind)){assert(point,'No buildable site: '+kind);const cost=config.buildings[kind].cost,energy=mission.state.energy,result=mission.build(builders(),kind,point.x,point.y);assert(result.ok,kind+': '+result.reason);assert.equal(mission.state.energy,energy-cost);until(()=>mission.entity(result.id)?.completed,180,'Build '+kind);console.log('built',kind,mission.state.time.toFixed(1),point.x,point.y);return mission.entity(result.id);}
-assert.equal(mission.advance(5),50);assert.equal(mission.state.time,0,'Cinematic freezes simulation');dismiss();
+assert.equal(mission.advance(.1),1);assert.equal(mission.state.time,.1,'Field radio must leave simulation running');dismiss();
 const reservation=field.gridToWorld(config.oilFields[0]);assert(!mission.placement('generator',reservation.x,reservation.y).ok,'Oil reservation');
-const generator=construct('generator');testInterruptFold();const oil=config.oilFields.map(g=>field.gridToWorld(g)).map(p=>mission.placement('derrick',p.x,p.y)).find(p=>p.ok);assert(oil,'No initial oil point');const derrick=construct('derrick',oil);assert(mission.state.powered,'Energy pair online');
+const generatorSite=site('generator');
+testBuilderHandoff(generatorSite);
+const generator=construct('generator',generatorSite);testInterruptProjection();const oil=config.oilFields.map(g=>field.gridToWorld(g)).map(p=>mission.placement('derrick',p.x,p.y)).find(p=>p.ok);assert(oil,'No initial oil point');const derrick=construct('derrick',oil);assert(mission.state.powered,'Energy pair online');
 const cancelSite=site('bunker'),before=mission.state.energy,cancelled=mission.build(builders(),'bunker',cancelSite.x,cancelSite.y);assert(cancelled.ok);assert(mission.cancelBuilding(cancelled.id).ok);assert.equal(mission.state.energy,before,'Unused construction refunded exactly');assert(!mission.cancelBuilding(cancelled.id).ok,'No duplicate refund');
 const factory=construct('factory'),lab=construct('lab'),bunker=construct('bunker');
 until(()=>mission.canSpend(130),100,'Funds for production');assert(mission.produce(factory.id,'bukhanka').ok);until(()=>mission.state.statistics.produced===1,100,'Factory output');assert(!mission.produce(factory.id,'flamer').ok,'Locked weapon cannot be produced');
 const save=mission.save(),loaded=new Mission(config,field);loaded.load(save);assert.equal(loaded.save(),save,'Save round trip exact');
-const result={realTerrain:true,baseBuildings:mission.state.buildings.filter(b=>b.owner==='rai'&&b.completed).map(b=>b.kind),oilLinked:mission.state.oilLinked,produced:mission.state.statistics.produced,seconds:mission.state.time,cancelRefund:true,saveRoundTrip:true,cinematics:seen,events:events.map(e=>e.type),status:mission.state.status};
+const legacy=JSON.parse(save);
+legacy.state.flags.lastRevealed=true;
+legacy.state.bounds=[0,0,53,80];
+loaded.load(legacy);
+const southernRoad=field.roadNetwork.paths.find(path=>path.to==='west-south');
+const bend=southernRoad.points.reduce((south,point)=>point.y<south.y?point:south);
+assert(loaded.inBounds(bend.x,bend.y-bend.width/2),'Expanded sector includes the outside of the western bend in old saves');
+assert(loaded.nav.findPath(southernRoad.points[0],bend)&&loaded.nav.findPath(bend,southernRoad.points.at(-1)),'Both sides of the western bend are reachable');
+const result={realTerrain:true,baseBuildings:mission.state.buildings.filter(b=>b.owner==='rai'&&b.completed).map(b=>b.kind),oilLinked:mission.state.oilLinked,produced:mission.state.statistics.produced,seconds:mission.state.time,cancelRefund:true,saveRoundTrip:true,legacySectorExpanded:true,builderHandoff:mechanics.builderHandoff,cinematics:seen,events:events.map(e=>e.type),status:mission.state.status};
 fs.mkdirSync('campaign/reports',{recursive:true});fs.writeFileSync('campaign/reports/mission-base.json',JSON.stringify(result,null,2));console.log(JSON.stringify(result));
 
 if(process.argv.includes('--full')){

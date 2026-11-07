@@ -1,5 +1,6 @@
 // Narrow cut/fill around surveyed road centre lines. Mesa interiors stay unchanged.
 export function applyRoadGrades(field,roads){
+ field.roadNetwork=roads;
  if(!roads.grading?.enabled)return {changedVertices:0,maxChangeMetres:0};
  const original=field.renderSamples.slice(),bins=new Map(),bucket=64,maxChange=roads.grading.maxChangeMetres??4;
  for(const path of roads.paths)for(let i=0;i<path.points.length-1;i++){

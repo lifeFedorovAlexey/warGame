@@ -1,5 +1,5 @@
 {
-  "status": "engineering-prototypes",
+  "status": "campaign-models",
   "units": "metres",
   "axes": "X right, Y forward, Z up",
   "source": "assets/campaign/alpha/mission01/gameplay.json",
@@ -8,43 +8,43 @@
       "id": "generator",
       "path": "generator/prototype.glb",
       "spec": "generator/module.json",
-      "triangles": 432,
-      "bytes": 29132
+      "triangles": 3808,
+      "bytes": 162684
     },
     {
       "id": "derrick",
       "path": "derrick/prototype.glb",
       "spec": "derrick/module.json",
-      "triangles": 768,
-      "bytes": 37676
+      "triangles": 2972,
+      "bytes": 165652
     },
     {
       "id": "factory",
       "path": "factory/prototype.glb",
       "spec": "factory/module.json",
-      "triangles": 252,
-      "bytes": 24928
+      "triangles": 3488,
+      "bytes": 188076
     },
     {
       "id": "lab",
       "path": "lab/prototype.glb",
       "spec": "lab/module.json",
-      "triangles": 192,
-      "bytes": 18796
+      "triangles": 3488,
+      "bytes": 179664
     },
     {
       "id": "bunker",
       "path": "bunker/prototype.glb",
       "spec": "bunker/module.json",
       "triangles": 92,
-      "bytes": 11284
+      "bytes": 11272
     },
     {
       "id": "mg-tower",
       "path": "mg-tower/prototype.glb",
       "spec": "mg-tower/module.json",
       "triangles": 348,
-      "bytes": 22324
+      "bytes": 22312
     }
   ]
 }

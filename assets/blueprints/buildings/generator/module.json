@@ -1,7 +1,8 @@
 {
   "id": "generator",
   "name": "Генератор",
-  "status": "engineering-prototype-awaiting-art-reference",
+  "status": "industrial-atlas",
+  "reference": "references/buildings/industrial-atlas.png",
   "units": "metres",
   "axes": "X right,Y forward,Z up",
   "nominalEnvelope": [
@@ -22,7 +23,7 @@
     "max": [
       6,
       5,
-      5
+      4.78000020980835
     ]
   },
   "anchors": {
@@ -38,15 +39,10 @@
     ]
   },
   "construction": {
-    "staticGroup": "building_foundation",
-    "growingGroup": "building_structure",
-    "scaleZ": "0.1 + 0.9 × progress",
-    "workSurface": "steel foundation rail",
-    "contactNormal": [
-      0,
-      -1,
-      0
-    ]
+    "base": "building_foundation",
+    "body": "building_structure",
+    "mode": "horizontal-reveal",
+    "layerMetres": 0.24
   },
   "collision": {
     "type": "box",
@@ -61,13 +57,13 @@
   "geometry": {
     "id": "generator",
     "lod": 0,
-    "triangles": 432,
-    "vertices": 644,
-    "primitives": 5,
-    "materials": 4,
+    "triangles": 3808,
+    "vertices": 3974,
+    "primitives": 11,
+    "materials": 11,
     "removedDegenerate": 0,
-    "inputTriangles": 432,
-    "bytes": 29132,
+    "inputTriangles": 3808,
+    "bytes": 162684,
     "boundsMm": {
       "min": [
         -6000,
@@ -77,7 +73,7 @@
       "max": [
         6000,
         5000,
-        5000
+        4780
       ]
     }
   }

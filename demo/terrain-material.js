@@ -85,5 +85,17 @@ export async function createTerrainMaterials(T,extent){
  const farTile=images[8];farTile.colorSpace=T.SRGBColorSpace;farTile.wrapS=farTile.wrapT=T.MirroredRepeatWrapping;farTile.repeat.set(extent/35,extent/35);
  const surround=new T.MeshLambertMaterial({map:farTile,vertexColors:true});surround.onBeforeCompile=shader=>{shader.uniforms.macroAlbedo={value:macro};shader.vertexShader='varying vec3 vSurroundPosition;\n'+shader.vertexShader;shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvSurroundPosition=(modelMatrix*vec4(position,1.)).xyz;');shader.fragmentShader='varying vec3 vSurroundPosition;\nuniform sampler2D macroAlbedo;\n'+shader.fragmentShader;shader.fragmentShader=shader.fragmentShader.replace('#include <map_fragment>',`#include <map_fragment>
  vec2 mapUv=(vSurroundPosition.xy+${(extent/2).toFixed(1)})/${extent.toFixed(1)};float outside=max(max(abs(vSurroundPosition.x),abs(vSurroundPosition.y))-${(extent/2).toFixed(1)},0.);vec3 borderColor=texture2D(macroAlbedo,mapUv).rgb;float grain=clamp(dot(diffuseColor.rgb,vec3(.3,.59,.11))/.24,.94,1.06);diffuseColor.rgb=mix(borderColor*grain,diffuseColor.rgb*vec3(1.02,.74,.45),smoothstep(0.,220.,outside))*(.97+sin(vSurroundPosition.x/750.)*sin(vSurroundPosition.y/1000.)*.04);`);};surround.customProgramCacheKey=()=> 'desert_surround_v2';
- return {overview:configure(new T.MeshLambertMaterial({map:controls[0],vertexColors:true}),'mesa_array_v7',true),close:configure(new T.MeshStandardMaterial({map:controls[0],roughness:.96,metalness:0,vertexColors:true}),'mesa_array_pbr_v7',false),surround,markings,statistics:{style:'ochre desert terrain, layered rock and broken asphalt',albedoTiles:12,tileResolution:resolution,controlMaps:4,maskResolution:1024,blending:'height + smoothed slope + organic deposition + stochastic UVs + scanned PBR surfaces',pbr:pbr.statistics,normalDetail:'scanned OpenGL normal maps; fades from 220m to 800m',roughnessByMaterial:true,distantShaderSamples:2,textureArray:true,sourceSheetAsAlbedo:false}};
+ let roadPixels;
+ function roadBlendAt(x,y){
+  const size=512;
+  if(!roadPixels){
+   canvas.width=canvas.height=size;
+   context.drawImage(roadDetail.image,0,0,size,size);
+   roadPixels=context.getImageData(0,0,size,size).data;
+  }
+  const u=Math.max(0,Math.min(size-1,Math.round((.5+x/extent)*(size-1))));
+  const v=Math.max(0,Math.min(size-1,Math.round((.5-y/extent)*(size-1))));
+  return roadPixels[(v*size+u)*4]/255;
+ }
+ return {roadBlendAt,overview:configure(new T.MeshLambertMaterial({map:controls[0],vertexColors:true}),'mesa_array_v7',true),close:configure(new T.MeshStandardMaterial({map:controls[0],roughness:.96,metalness:0,vertexColors:true}),'mesa_array_pbr_v7',false),surround,markings,statistics:{style:'ochre desert terrain, layered rock and broken asphalt',albedoTiles:12,tileResolution:resolution,controlMaps:4,maskResolution:1024,blending:'height + smoothed slope + organic deposition + stochastic UVs + scanned PBR surfaces',pbr:pbr.statistics,normalDetail:'scanned OpenGL normal maps; fades from 220m to 800m',roughnessByMaterial:true,distantShaderSamples:2,textureArray:true,sourceSheetAsAlbedo:false}};
 }

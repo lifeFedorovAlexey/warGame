@@ -4,53 +4,206 @@ import {createAlphaMap} from '../demo/alpha-map.js';
 import {createDesertSky} from '../demo/sky.js';
 import {createVehicleLayer} from './vehicle-layer.js';
 import {createBuildingPrefab} from './prefabs.js';
+import {createScavPrefab} from './scav-prefabs.js';
+import {createGroundEffects} from './ground-effects.js';
+import {updateOilPump} from './oil-pump.js';
+import {createHeadlightPair,setHeadlightPower} from '../demo/vehicle-effects.js';
+import {createCombatEffects} from './combat-effects.js';
+import {createConstructionEffects} from './construction-effects.js';
+import {createFogMask} from './fog-mask.js';
 
-export async function createCampaignWorld(host,config){
- const renderer=new T.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.25));renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;host.append(renderer.domElement);
+export async function createCampaignWorld(host,config,sound){
+ const renderer=new T.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
+ const gl=renderer.getContext(),debug=gl.getExtension('WEBGL_debug_renderer_info');
+ const software=debug&&/swiftshader|llvmpipe|software/i.test(gl.getParameter(debug.UNMASKED_RENDERER_WEBGL));
+ renderer.setPixelRatio(Math.min(devicePixelRatio,software?.77:1.15));renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;renderer.shadowMap.enabled=true;renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.localClippingEnabled=true;host.append(renderer.domElement);
  const scene=new T.Scene();scene.background=new T.Color('#8a826d');scene.fog=new T.Fog('#9c8d70',3500,11000);const camera=new T.PerspectiveCamera(43,1,1,22000);camera.up.set(0,0,1);
  scene.add(new T.HemisphereLight('#c4d8e0','#79664d',2.3));const sun=new T.DirectionalLight('#ffdfb7',2.5);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-400,right:400,top:400,bottom:-400,near:1,far:1600});sun.shadow.bias=-.0001;sun.shadow.normalBias=.08;scene.add(sun,sun.target);const fill=new T.DirectionalLight('#a5b6c3',1);fill.position.set(100,-200,800);scene.add(fill);
  const [terrain,sky]=await Promise.all([createAlphaMap(T),createDesertSky(T,renderer,scene)]);scene.add(terrain.root);terrain.baseOutline.visible=false;terrain.path.visible=false;terrain.setViewMode('close');const field=terrain.field,start=field.gridToWorld(config.startGrid);
  const controls=new OrbitControls(camera,renderer.domElement);controls.target.set(start.x,start.y,field.heightAt(start.x,start.y));camera.position.set(start.x+100,start.y-360,controls.target.z+360);controls.enableDamping=true;controls.minDistance=110;controls.maxDistance=5300;controls.minPolarAngle=.06;controls.maxPolarAngle=Math.PI*.42;controls.mouseButtons={LEFT:-1,MIDDLE:T.MOUSE.ROTATE,RIGHT:-1};controls.enablePan=false;
- const fogBytes=new Uint8Array(128*128*4),fog=new T.DataTexture(fogBytes,128,128);fog.minFilter=fog.magFilter=T.LinearFilter;fog.needsUpdate=true;
- const foggedMaterials=new Set();function addFog(material){if(!material||foggedMaterials.has(material))return;foggedMaterials.add(material);const before=material.onBeforeCompile,cache=material.customProgramCacheKey.bind(material);material.onBeforeCompile=shader=>{before.call(material,shader);shader.uniforms.missionFog={value:fog};shader.vertexShader='varying vec2 vMissionXY;\n'+shader.vertexShader;shader.vertexShader=shader.vertexShader.replace('#include <worldpos_vertex>','#include <worldpos_vertex>\nvMissionXY=(modelMatrix*vec4(transformed,1.)).xy;');shader.fragmentShader='uniform sampler2D missionFog;varying vec2 vMissionXY;\n'+shader.fragmentShader;shader.fragmentShader=shader.fragmentShader.replace('#include <dithering_fragment>',`#include <dithering_fragment>
- vec2 missionUv=vec2((vMissionXY.x+2032.)/4064.,(2032.-vMissionXY.y)/4064.);
+ const fog=createFogMask(T);
+ const foggedMaterials=new Set();function addFog(material){if(!material||foggedMaterials.has(material))return;foggedMaterials.add(material);const before=material.onBeforeCompile,cache=material.customProgramCacheKey.bind(material);material.onBeforeCompile=shader=>{before.call(material,shader);shader.uniforms.missionFog={value:fog.texture};shader.uniforms.missionExtent={value:field.extent};shader.vertexShader='varying vec2 vMissionXY;\n'+shader.vertexShader;shader.vertexShader=shader.vertexShader.replace('#include <worldpos_vertex>','#include <worldpos_vertex>\nvMissionXY=(modelMatrix*vec4(transformed,1.)).xy;');shader.fragmentShader='uniform sampler2D missionFog;uniform float missionExtent;varying vec2 vMissionXY;\n'+shader.fragmentShader;shader.fragmentShader=shader.fragmentShader.replace('#include <dithering_fragment>',`#include <dithering_fragment>
+ vec2 missionUv=vec2(vMissionXY.x,-vMissionXY.y)/missionExtent+.5;
  vec2 visibility=texture2D(missionFog,clamp(missionUv,vec2(0.),vec2(1.))).rg;
  float inside=step(0.,missionUv.x)*step(missionUv.x,1.)*step(0.,missionUv.y)*step(missionUv.y,1.);
  vec3 hidden=vec3(.023,.029,.031);gl_FragColor.rgb=mix(hidden,gl_FragColor.rgb,(visibility.g*.30+visibility.r*.70)*inside);
- `);};material.customProgramCacheKey=()=>cache()+'_mission_fog_v1';material.needsUpdate=true;}
- terrain.root.traverse(o=>{if(o.isMesh)addFog(o.material);});
+ `);};material.customProgramCacheKey=()=>cache()+'_mission_fog_v2';material.needsUpdate=true;}
+ for(const material of terrain.terrainMaterials) addFog(material);
  const vehicles=await createVehicleLayer(T,scene,field,config),buildingRoot=new T.Group();scene.add(buildingRoot);const buildings=new Map(),prefabs=new Map(),selectionRoot=new T.Group();scene.add(selectionRoot);
+ const groundEffects=createGroundEffects(T,scene,field,config.worldScale),shotTimes=new Map();
+ if(software)sun.shadow.mapSize.set(512,512);
+ sun.shadow.camera.up.set(0,0,1);
+ let lastWorldTime=-1,lastScaleAt=0,frameAverage=.023,terrainMode='',lastShadowPhase=-1,lastShadowLod=-1;
+ const shadowCentre=new T.Vector3(Infinity,Infinity,Infinity);
+ const lightOffset=new T.Vector3(-450,200,800),lightDirection=lightOffset.clone().normalize();
+ const lightRight=new T.Vector3().crossVectors(lightDirection,new T.Vector3(0,0,1)).normalize();
+ const lightUp=new T.Vector3().crossVectors(lightRight,lightDirection).normalize(),stableTarget=new T.Vector3();
  const oilMarkers=config.oilFields.map(grid=>{const p=field.gridToWorld(grid),root=new T.Group();root.position.set(p.x,p.y,field.heightAt(p.x,p.y)+.25);const ring=new T.Mesh(new T.RingGeometry(10,11.5,24),new T.MeshBasicMaterial({color:'#baac72',transparent:true,opacity:.65,side:T.DoubleSide,depthWrite:false}));root.add(ring);const pipe=new T.Mesh(new T.CylinderGeometry(1.7,2,3,10),new T.MeshStandardMaterial({color:'#44463b',metalness:.6,roughness:.8}));pipe.rotation.x=Math.PI/2;pipe.position.z=1.5;root.add(pipe);scene.add(root);return{root,...p};});
  const artifactObjects=new Map();
  const ringGeometry=new T.RingGeometry(1,1.08,40),selectedMaterial=new T.MeshBasicMaterial({color:'#c0ce93',transparent:true,opacity:.85,depthWrite:false,side:T.DoubleSide}),selectionRings=[];
  for(let i=0;i<48;i++){const ring=new T.Mesh(ringGeometry,selectedMaterial);ring.visible=false;selectionRoot.add(ring);selectionRings.push(ring);}
  const marker=new T.Mesh(new T.RingGeometry(6,7,32),new T.MeshBasicMaterial({color:'#cfb473',transparent:true,opacity:.7,depthWrite:false,side:T.DoubleSide}));marker.visible=false;scene.add(marker);let markerUntil=0;
- let ghost=null,ghostKind=null,ghostMaterial=new T.MeshBasicMaterial({color:'#a7c899',transparent:true,opacity:.35,depthWrite:false,side:T.DoubleSide});
- const shotPositions=new Float32Array(128*6),shotGeometry=new T.BufferGeometry();shotGeometry.setAttribute('position',new T.BufferAttribute(shotPositions,3));shotGeometry.setDrawRange(0,0);const shots=new T.LineSegments(shotGeometry,new T.LineBasicMaterial({color:'#ffe2a7',transparent:true,opacity:.85,depthWrite:false}));shots.frustumCulled=false;scene.add(shots);const activeShots=[];
- const weldPositions=new Float32Array(256*3),weldGeometry=new T.BufferGeometry();weldGeometry.setAttribute('position',new T.BufferAttribute(weldPositions,3));weldGeometry.setDrawRange(0,0);const weld=new T.Points(weldGeometry,new T.PointsMaterial({color:'#ffe7b1',size:.8,transparent:true,opacity:.9,depthWrite:false}));weld.frustumCulled=false;scene.add(weld);
- const dustCanvas=document.createElement('canvas');dustCanvas.width=dustCanvas.height=64;const dc=dustCanvas.getContext('2d'),gradient=dc.createRadialGradient(32,32,0,32,32,30);gradient.addColorStop(0,'rgba(255,255,255,.7)');gradient.addColorStop(1,'rgba(255,255,255,0)');dc.fillStyle=gradient;dc.fillRect(0,0,64,64);const dustPositions=new Float32Array(256*3),dustGeometry=new T.BufferGeometry();dustGeometry.setAttribute('position',new T.BufferAttribute(dustPositions,3));dustGeometry.setDrawRange(0,0);const dust=new T.Points(dustGeometry,new T.PointsMaterial({map:new T.CanvasTexture(dustCanvas),color:'#b5a180',size:8,transparent:true,opacity:.13,depthWrite:false}));dust.frustumCulled=false;scene.add(dust);const particles=[];let dustTime=0,lastFog=-1;
+ let ghost=null,ghostKind=null,ghostMaterial=new T.MeshBasicMaterial({color:'#a7c899',transparent:true,opacity:.29,depthWrite:false,side:T.DoubleSide});
+ const footprint = new T.LineLoop(new T.BufferGeometry(), new T.LineBasicMaterial({color:'#d4edaa', depthTest:false}));
+ footprint.geometry.setAttribute('position',new T.Float32BufferAttribute(new Float32Array(12),3));
+ footprint.frustumCulled = false;
+ footprint.visible = false;
+ footprint.renderOrder = 8;
+ scene.add(footprint);
+ const combat=createCombatEffects(T,scene,config.worldScale,sound),lightLift=new T.Matrix4().makeTranslation(0,0,1.05);
+ const headlights=Array.from({length:software?1:2},()=>{
+  const root=new T.Group();root.name='bukhanka_headlights';root.matrixAutoUpdate=false;
+  const spots=createHeadlightPair(T,root);scene.add(root);
+  setHeadlightPower(spots,config.worldScale,false,false);
+  return {root,spots};
+ });
+ let headlightCount=0;
+ const construction=createConstructionEffects(T,scene,config.worldScale);
+ const dustCanvas=document.createElement('canvas');dustCanvas.width=dustCanvas.height=64;const dc=dustCanvas.getContext('2d'),gradient=dc.createRadialGradient(32,32,0,32,32,30);gradient.addColorStop(0,'rgba(255,255,255,.7)');gradient.addColorStop(1,'rgba(255,255,255,0)');dc.fillStyle=gradient;dc.fillRect(0,0,64,64);const dustPositions=new Float32Array(256*3),dustGeometry=new T.BufferGeometry();dustGeometry.setAttribute('position',new T.BufferAttribute(dustPositions,3));dustGeometry.setDrawRange(0,0);const dust=new T.Points(dustGeometry,new T.PointsMaterial({map:new T.CanvasTexture(dustCanvas),color:'#b5a180',size:8,transparent:true,opacity:.13,depthWrite:false}));dust.frustumCulled=false;scene.add(dust);const particles=[];let dustTime=0;
  const ray=new T.Raycaster(),ndc=new T.Vector2(),vector=new T.Vector3();const keys=new Set();
  const resize=()=>{renderer.setSize(host.clientWidth,host.clientHeight,false);camera.aspect=host.clientWidth/host.clientHeight;camera.updateProjectionMatrix();};new ResizeObserver(resize).observe(host);resize();
  function ground(clientX,clientY){const rect=renderer.domElement.getBoundingClientRect();ndc.set((clientX-rect.left)/rect.width*2-1,-(clientY-rect.top)/rect.height*2+1);ray.setFromCamera(ndc,camera);let lo=0,hi=20000;for(let i=0;i<28;i++){const middle=(lo+hi)/2,p=ray.ray.at(middle,vector);if(p.z>field.heightAt(p.x,p.y))lo=middle;else hi=middle;}const point=ray.ray.at((lo+hi)/2,new T.Vector3());return Math.abs(point.x)<=field.half&&Math.abs(point.y)<=field.half?{x:point.x,y:point.y,z:point.z}:null;}
- function screen(entity,height=8){const point=new T.Vector3(entity.x,entity.y,field.heightAt(entity.x,entity.y)+height).project(camera),rect=renderer.domElement.getBoundingClientRect();return{x:(point.x+1)*rect.width/2+rect.left,y:(1-point.y)*rect.height/2+rect.top,visible:point.z>-1&&point.z<1};}
+ function screen(entity,height=8){const pose=entity.id&&vehicles.transforms.get(entity.id);const point=(pose?pose.position.clone():new T.Vector3(entity.x,entity.y,field.heightAt(entity.x,entity.y)));point.z+=height;point.project(camera);const rect=renderer.domElement.getBoundingClientRect();return{x:(point.x+1)*rect.width/2+rect.left,y:(1-point.y)*rect.height/2+rect.top,visible:point.z>-1&&point.z<1};}
  function centre(entity,distance){const offset=camera.position.clone().sub(controls.target);controls.target.set(entity.x,entity.y,field.heightAt(entity.x,entity.y));if(distance)offset.setLength(distance);camera.position.copy(controls.target).add(offset);controls.update();}
- function getPrefab(kind){if(!prefabs.has(kind))prefabs.set(kind,createBuildingPrefab(T,kind,config.buildings[kind]??{realSizeMetres:[12,10,5],footprintMetres:[14,12]}));return prefabs.get(kind);}
- function setGhost(kind,placement){if(kind!==ghostKind){if(ghost)scene.remove(ghost);ghostKind=kind;ghost=kind?getPrefab(kind).clone(true):null;if(ghost){ghost.traverse(o=>{if(o.isMesh){o.material=ghostMaterial;o.castShadow=false;}});scene.add(ghost);}}if(ghost&&placement){ghost.visible=true;ghost.position.set(placement.x,placement.y,placement.height??field.heightAt(placement.x,placement.y));ghost.rotation.z=placement.rotation??0;ghost.scale.setScalar(config.worldScale);ghostMaterial.color.set(placement.ok?'#a7c899':'#c97257');}else if(ghost)ghost.visible=false;}
- function commandMarker(point){marker.position.set(point.x,point.y,field.heightAt(point.x,point.y)+.4);marker.visible=true;markerUntil=performance.now()+1000;}
+ function getPrefab(kind,owner='rai',camp=''){
+  const key = owner + ':' + kind + ':' + camp;
+  if (!prefabs.has(key)) {
+   const prefab = owner === 'scavs' ? createScavPrefab(T,kind,camp) : createBuildingPrefab(T,kind,config.buildings[kind]);
+   prefab.userData.kind = kind;
+   prefab.userData.owner = owner;
+   prefabs.set(key,prefab);
+  }
+  return prefabs.get(key);
+ }
+ function buildingCards(){
+  const stage = new T.Scene(), camera = new T.OrthographicCamera(-1,1,1,-1,.1,80);
+  stage.background = new T.Color('#464a3f');
+  stage.add(new T.HemisphereLight('#e7edf2','#938c71',2.3));
+  const key = new T.DirectionalLight('#ffdfb4',3);
+  key.position.set(-5,-8,12);
+  stage.add(key);
+  camera.up.set(0,0,1);
+  const size = renderer.getSize(new T.Vector2()), ratio = renderer.getPixelRatio(), shadow = renderer.shadowMap.enabled;
+  const result = {};
+  try {
+   renderer.shadowMap.enabled = false;
+   renderer.setPixelRatio(1);
+   renderer.setSize(192,116,false);
+   for (const [kind,spec] of Object.entries(config.buildings)) {
+    const mesh = getPrefab(kind).clone(true), centre = new T.Vector3(0,0,spec.realSizeMetres[2]*.43);
+    const radius = Math.hypot(...spec.realSizeMetres)*.42;
+    camera.left=-radius*192/116;camera.right=-camera.left;camera.top=radius;camera.bottom=-radius;
+    camera.position.copy(centre).add(new T.Vector3(-22,-29,20));
+    camera.lookAt(centre);
+    camera.updateProjectionMatrix();
+    stage.add(mesh);
+    renderer.render(stage,camera);
+    result[kind] = renderer.domElement.toDataURL('image/webp',.88);
+    stage.remove(mesh);
+   }
+  } finally {
+   renderer.setPixelRatio(ratio);
+   renderer.setSize(size.x,size.y,false);
+   renderer.shadowMap.enabled = shadow;
+   renderer.shadowMap.needsUpdate = true;
+  }
+  return result;
+ }
+ function setGhost(kind,placement){
+  if(kind!==ghostKind){if(ghost)scene.remove(ghost);ghostKind=kind;ghost=kind?getPrefab(kind).clone(true):null;if(ghost){ghost.traverse(o=>{if(o.isMesh){o.material=ghostMaterial;o.castShadow=false;}});scene.add(ghost);}}
+  footprint.visible = !!(ghost && placement);
+  if(!footprint.visible){if(ghost)ghost.visible=false;return;}
+  const {x,y,ok,rotation=0} = placement;
+  const z = placement.height ?? field.heightAt(x,y);
+  ghost.visible=true;ghost.position.set(x,y,z);ghost.rotation.z=rotation;ghost.scale.setScalar(config.worldScale);
+  ghostMaterial.color.set(ok?'#b8d488':'#ed806b');
+  footprint.material.color.set(ok?'#e0f7b7':'#ff9c80');
+  const [w,d]=config.buildings[kind].footprintMetres.map(value=>value*config.worldScale/2),c=Math.cos(rotation),s=Math.sin(rotation);
+  const position=footprint.geometry.attributes.position;
+  for(const [i,[a,b]] of [[-w,-d],[w,-d],[w,d],[-w,d]].entries()){
+   const px=x+a*c-b*s,py=y+a*s+b*c;
+   position.setXYZ(i,px,py,field.heightAt(px,py)+.8);
+  }
+  position.needsUpdate=true;
+ }
+ function commandMarker(point,hostile=false){marker.position.set(point.x,point.y,field.heightAt(point.x,point.y)+.4);marker.material.color.set(hostile?'#f4a081':'#cfb473');marker.visible=true;markerUntil=performance.now()+1000;}
  function update(mission,selected,dt){
-  if(lastFog!==mission.state.time){for(let i=0;i<16384;i++){fogBytes[i*4]=mission.visible[i];fogBytes[i*4+1]=mission.explored[i];fogBytes[i*4+3]=255;}fog.needsUpdate=true;lastFog=mission.state.time;}
+  const time=mission.state.time,now=performance.now()/1000,shotsThisFrame=mission.drainEffects();
+  if(time<lastWorldTime){groundEffects.reset();shotTimes.clear();combat.reset();dustTime=0;particles.length=0;}
+  for(const event of shotsThisFrame)shotTimes.set(event.from,now);
+  for(const [id,when] of shotTimes)if(now-when>.4)shotTimes.delete(id);
+  fog.update(mission);
+  frameAverage=frameAverage*.93+Math.min(dt,.65)*.07;
+  if(now-lastScaleAt>2.5&&frameAverage>.042&&renderer.getPixelRatio()>.67){
+   lastScaleAt=now;
+   renderer.setPixelRatio(Math.max(.67,renderer.getPixelRatio()*.86));
+   renderer.setSize(host.clientWidth,host.clientHeight,false);
+  }
   const distance=camera.position.distanceTo(controls.target),pan=distance*dt*.7;let dx=(keys.has('KeyD')?1:0)-(keys.has('KeyA')?1:0),dy=(keys.has('KeyW')?1:0)-(keys.has('KeyS')?1:0);if(dx||dy){const right=new T.Vector3().setFromMatrixColumn(camera.matrixWorld,0);right.z=0;right.normalize();const forward=new T.Vector3(-right.y,right.x,0);const offset=right.multiplyScalar(dx*pan).addScaledVector(forward,dy*pan);camera.position.add(offset);controls.target.add(offset);}
-  controls.target.x=T.MathUtils.clamp(controls.target.x,-field.half,field.half);controls.target.y=T.MathUtils.clamp(controls.target.y,-field.half,field.half);controls.update();camera.position.z=Math.max(camera.position.z,field.heightAt(camera.position.x,camera.position.y)+40);sun.position.set(controls.target.x-450,controls.target.y+200,controls.target.z+800);sun.target.position.copy(controls.target);sky.update(camera,false);terrain.setViewMode(distance>1200?'overview':'close');vehicles.update(mission,selected,distance);
-  const buildingIds=new Set(mission.state.buildings.map(b=>b.id));for(const [id,object] of buildings)if(!buildingIds.has(id)){buildingRoot.remove(object);buildings.delete(id);}
-  for(const b of mission.state.buildings){let object=buildings.get(b.id);if(object&&object.userData.kind!==b.kind){buildingRoot.remove(object);buildings.delete(b.id);object=null;}if(!object){object=getPrefab(b.kind).clone(true);object.userData.entity=b.id;buildingRoot.add(object);buildings.set(b.id,object);}object.visible=b.hp>0&&(b.owner==='rai'||mission.exploredAt(b.x,b.y));if(!object.visible)continue;object.position.set(b.x,b.y,b.groundHeight??field.heightAt(b.x,b.y));object.rotation.z=b.rotation;object.scale.setScalar(config.worldScale);object.getObjectByName('building_structure').scale.z=b.completed?1:.10+.90*b.progress;}
-  let index=0;for(const id of selected){const entity=mission.entity(id);if(!entity||index>=selectionRings.length)continue;const ring=selectionRings[index++];ring.visible=true;ring.position.set(entity.x,entity.y,field.heightAt(entity.x,entity.y)+.35);ring.scale.setScalar(entity.path?8:Math.max(entity.halfWidth,entity.halfDepth)*1.1);}for(;index<selectionRings.length;index++)selectionRings[index].visible=false;
-  const time=mission.state.time;for(const event of mission.drainEffects()){const from=mission.entity(event.from);if(!from)continue;activeShots.push({start:{x:from.x,y:from.y,z:field.heightAt(from.x,from.y)+3*config.worldScale},end:{...event.to,z:field.heightAt(event.to.x,event.to.y)+5},until:time+.16});}while(activeShots.length>128)activeShots.shift();for(let i=activeShots.length-1;i>=0;i--)if(activeShots[i].until<time)activeShots.splice(i,1);activeShots.forEach((shot,i)=>shotPositions.set([shot.start.x,shot.start.y,shot.start.z,shot.end.x,shot.end.y,shot.end.z],i*6));shotGeometry.attributes.position.needsUpdate=true;shotGeometry.setDrawRange(0,activeShots.length*2);
-  let weldCount=0;for(const tip of vehicles.weldTips){for(let i=0;i<12&&weldCount<256;i++){const life=(time*3+i*.083)%1,angle=i*2.399;weldPositions.set([tip.x+Math.cos(angle)*life*.6,tip.y+Math.sin(angle)*life*.6,tip.z+.2*life-1.4*life*life],weldCount++*3);}}weldGeometry.attributes.position.needsUpdate=true;weldGeometry.setDrawRange(0,weldCount);
+  controls.target.x=T.MathUtils.clamp(controls.target.x,-field.half,field.half);controls.target.y=T.MathUtils.clamp(controls.target.y,-field.half,field.half);controls.update();camera.position.z=Math.max(camera.position.z,field.heightAt(camera.position.x,camera.position.y)+40);
+  sky.update(camera,false);
+  const threshold=software?240:800;
+  const mode=distance>(terrainMode==='close'?threshold+22:threshold-22)?'overview':'close';
+  if(mode!==terrainMode){terrain.setViewMode(mode);terrainMode=mode;}
+  vehicles.update(mission,distance,shotTimes,now);
+  construction.update(vehicles.workBeams,time);
+  const texel=800/sun.shadow.mapSize.x,shadowX=controls.target.dot(lightRight),shadowY=controls.target.dot(lightUp);
+  stableTarget.copy(controls.target).addScaledVector(lightRight,Math.round(shadowX/texel)*texel-shadowX).addScaledVector(lightUp,Math.round(shadowY/texel)*texel-shadowY);
+  const targetMoved=shadowCentre.distanceToSquared(stableTarget)>.03;
+  if(targetMoved||time!==lastWorldTime||mission.accumulator!==lastShadowPhase||vehicles.lod!==lastShadowLod){
+   shadowCentre.copy(stableTarget);sun.position.copy(stableTarget).add(lightOffset);sun.target.position.copy(stableTarget);
+   lastShadowPhase=mission.accumulator;lastShadowLod=vehicles.lod;renderer.shadowMap.needsUpdate=true;
+  }
+  groundEffects.update(dt,vehicles.visible,distance);
+  const near=distance<680?vehicles.visible.filter(unit=>unit.owner==='rai'&&unit.kind!=='command').sort((a,b)=>{
+   const priority=Number(selected.has(b.id))-Number(selected.has(a.id));
+   return priority||Math.hypot(a.x-controls.target.x,a.y-controls.target.y)-Math.hypot(b.x-controls.target.x,b.y-controls.target.y);
+  }):[];
+  headlightCount=0;
+  headlights.forEach(({root,spots},i)=>{
+   const pose=vehicles.transforms.get(near[i]?.id);
+   setHeadlightPower(spots,config.worldScale,false,!!pose);
+   if(pose){root.matrix.copy(pose.matrix).multiply(lightLift);root.matrixWorldNeedsUpdate=true;headlightCount+=2;}
+  });
+  const buildingIds=new Set(mission.state.buildings.map(b=>b.id));for(const [id,object] of buildings)if(!buildingIds.has(id)){construction.release(object);buildingRoot.remove(object);buildings.delete(id);}
+  for(const b of mission.state.buildings){let object=buildings.get(b.id);if(object&&(object.userData.kind!==b.kind||object.userData.owner!==b.owner)){construction.release(object);buildingRoot.remove(object);buildings.delete(b.id);object=null;}if(!object){object=getPrefab(b.kind,b.owner,b.campId).clone(true);object.userData.entity=b.id;buildingRoot.add(object);buildings.set(b.id,object);}object.visible=b.hp>0&&(b.owner==='rai'||mission.exploredAt(b.x,b.y));if(!object.visible)continue;object.position.set(b.x,b.y,b.groundHeight??field.heightAt(b.x,b.y));object.rotation.z=b.rotation;object.scale.setScalar(config.worldScale);
+   if(b.owner==='rai')construction.building(object,b,config.buildings[b.kind]);
+   if(b.kind==='derrick'&&b.completed){
+    const phase=(b.pumpTime??0)+(b.powered&&mission.state.status==='running'?Math.max(0,mission.accumulator):0);
+    if(object.userData.pumpPhase!==phase){updateOilPump(object,phase);object.userData.pumpPhase=phase;}
+   }
+  }
+  let index=0;for(const id of selected){const entity=mission.entity(id);if(!entity||index>=selectionRings.length)continue;const ring=selectionRings[index++],pose=vehicles.transforms.get(id)?.position;ring.visible=true;ring.position.set(pose?.x??entity.x,pose?.y??entity.y,(pose?.z??field.heightAt(entity.x,entity.y))+.35);ring.scale.setScalar(entity.path?8:Math.max(entity.halfWidth,entity.halfDepth)*1.1);}for(;index<selectionRings.length;index++)selectionRings[index].visible=false;
+  for(const event of shotsThisFrame){
+   const from=mission.entity(event.from);
+   if(!from||from.owner!=='rai'&&!mission.visibleAt(from.x,from.y))continue;
+   const building=buildings.get(from.id),mount=building?.getObjectByName('muzzle');
+   const start=vehicles.muzzles.get(from.id)??(mount?mount.getWorldPosition(new T.Vector3()):new T.Vector3(from.x,from.y,(from.groundHeight??field.heightAt(from.x,from.y))+(from.kind==='mg-tower'?10.8:1.5)*config.worldScale));
+   const end=new T.Vector3(event.to.x,event.to.y,field.heightAt(event.to.x,event.to.y)+5);
+   combat.spawn(start,end,event.weapon,now,camera);
+  }
+  combat.update(now,camera,renderer.domElement.height);
   for(const oil of oilMarkers)oil.root.visible=mission.exploredAt(oil.x,oil.y)&&!mission.state.buildings.some(b=>b.kind==='derrick'&&b.hp>0&&Math.hypot(b.x-oil.x,b.y-oil.y)<5);
   const artifactIds=new Set(mission.state.artifacts.map(a=>a.id));for(const [id,object] of artifactObjects)if(!artifactIds.has(id)){scene.remove(object);artifactObjects.delete(id);object.traverse(part=>{if(part.isMesh){part.geometry.dispose();part.material.dispose();}});}
   for(const artifact of mission.state.artifacts){let object=artifactObjects.get(artifact.id);if(!object){object=new T.Group();const crate=new T.Mesh(new T.BoxGeometry(5,6,3),new T.MeshStandardMaterial({color:'#69715a',metalness:.5,roughness:.6}));crate.position.z=1.5;object.add(crate);const beacon=new T.Mesh(new T.OctahedronGeometry(2),new T.MeshBasicMaterial({color:'#e5cd82'}));beacon.position.z=10;object.add(beacon);scene.add(object);artifactObjects.set(artifact.id,object);}object.position.set(artifact.x,artifact.y,field.heightAt(artifact.x,artifact.y));object.visible=!artifact.collected&&mission.exploredAt(artifact.x,artifact.y);object.children[1].rotation.z=time*.8;}
   if(time-dustTime>.16){dustTime=time;for(const unit of mission.state.units){if(unit.hp<=0||unit.owner!=='rai'&&!mission.visibleAt(unit.x,unit.y)||Math.hypot(unit.x-unit.previousX,unit.y-unit.previousY)<.15)continue;particles.push({x:unit.x+Math.sin(unit.heading)*9,y:unit.y-Math.cos(unit.heading)*9,z:field.heightAt(unit.x,unit.y)+1,born:time});}}while(particles.length>256)particles.shift();for(let i=particles.length-1;i>=0;i--)if(time-particles[i].born>2.5)particles.splice(i,1);particles.forEach((p,i)=>dustPositions.set([p.x+(time-p.born)*1.8,p.y,p.z+(time-p.born)*1.2],i*3));dustGeometry.attributes.position.needsUpdate=true;dustGeometry.setDrawRange(0,particles.length);marker.visible=performance.now()<markerUntil;
+  let engine=0,rolling=0,slip=0,road=0;
+  for(const unit of vehicles.visible){
+   const distance=Math.hypot(unit.x-controls.target.x,unit.y-controls.target.y),volume=Math.max(0,1-distance/380);
+   const speed=unit.speed/30;
+   engine=Math.max(engine,volume*(.26+.74*speed));
+   rolling=Math.max(rolling,volume*speed);
+   const slope=field.gradientAt(unit.x,unit.y);
+   slip=Math.max(slip,volume*speed*Math.min(1,Math.abs(unit.steering??0)*.65+Math.hypot(slope.x,slope.y)*1.7));
+   if(terrain.field.roadBlendAt)road=Math.max(road,terrain.field.roadBlendAt(unit.x,unit.y)*volume);
+  }
+  const projection=vehicles.workBeams.reduce((level,{from})=>{
+   const distance=Math.hypot(from.x-controls.target.x,from.y-controls.target.y);
+   return level+.55*Math.max(0,1-distance/360);
+  },0);
+  sound?.update({engine:Math.min(1,engine),rolling:Math.min(1,rolling),slip:Math.min(1,slip),road:Math.min(1,road),welding:Math.min(1,projection)});
   renderer.render(scene,camera);
+  lastWorldTime=time;
  }
- return{renderer,scene,camera,controls,terrain,field,vehicles,ground,screen,centre,setGhost,commandMarker,update,keys,buildingObjects:buildings,get statistics(){return{drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,vehicleDrawCalls:vehicles.drawCalls,vehicleLod:vehicles.lod,dustParticles:particles.length,dustLimit:256,shots:activeShots.length,shotLimit:128};}};
+ return{renderer,scene,camera,controls,terrain,field,vehicles,ground,screen,centre,setGhost,commandMarker,buildingCards,drawMinimapFog:fog.drawMinimap,update,keys,buildingObjects:buildings,get statistics(){return{drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,vehicleDrawCalls:vehicles.drawCalls,vehicleLod:vehicles.lod,dustParticles:particles.length,dustLimit:256,...combat.statistics,...groundEffects.statistics,headlightBeams:headlightCount,projectors:construction.active,frameMs:frameAverage*1000,renderScale:renderer.getPixelRatio(),terrainMode};}};
 }

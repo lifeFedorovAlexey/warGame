@@ -1,7 +1,7 @@
 {
   "id": "derrick",
   "name": "Нефтяная вышка",
-  "status": "engineering-prototype-awaiting-art-reference",
+  "status": "game-prefab",
   "units": "metres",
   "axes": "X right,Y forward,Z up",
   "nominalEnvelope": [
@@ -22,7 +22,7 @@
     "max": [
       4,
       4,
-      13.359999656677246
+      12.996571596812123
     ]
   },
   "anchors": {
@@ -38,15 +38,10 @@
     ]
   },
   "construction": {
-    "staticGroup": "building_foundation",
-    "growingGroup": "building_structure",
-    "scaleZ": "0.1 + 0.9 × progress",
-    "workSurface": "steel foundation rail",
-    "contactNormal": [
-      0,
-      -1,
-      0
-    ]
+    "base": "building_foundation",
+    "body": "building_structure",
+    "mode": "horizontal-reveal",
+    "layerMetres": 0.24
   },
   "collision": {
     "type": "box",
@@ -61,13 +56,13 @@
   "geometry": {
     "id": "derrick",
     "lod": 0,
-    "triangles": 768,
-    "vertices": 880,
-    "primitives": 4,
-    "materials": 3,
+    "triangles": 2972,
+    "vertices": 3907,
+    "primitives": 21,
+    "materials": 7,
     "removedDegenerate": 0,
-    "inputTriangles": 768,
-    "bytes": 37676,
+    "inputTriangles": 2972,
+    "bytes": 165652,
     "boundsMm": {
       "min": [
         -4000,
@@ -77,7 +72,7 @@
       "max": [
         4000,
         4000,
-        13360
+        12997
       ]
     }
   }

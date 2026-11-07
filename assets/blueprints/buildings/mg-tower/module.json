@@ -1,7 +1,7 @@
 {
   "id": "mg-tower",
   "name": "Оборонительная башня",
-  "status": "engineering-prototype-awaiting-art-reference",
+  "status": "game-prefab",
   "units": "metres",
   "axes": "X right,Y forward,Z up",
   "nominalEnvelope": [
@@ -38,15 +38,10 @@
     ]
   },
   "construction": {
-    "staticGroup": "building_foundation",
-    "growingGroup": "building_structure",
-    "scaleZ": "0.1 + 0.9 × progress",
-    "workSurface": "steel foundation rail",
-    "contactNormal": [
-      0,
-      -1,
-      0
-    ]
+    "base": "building_foundation",
+    "body": "building_structure",
+    "mode": "horizontal-reveal",
+    "layerMetres": 0.24
   },
   "collision": {
     "type": "box",
@@ -67,7 +62,7 @@
     "materials": 4,
     "removedDegenerate": 0,
     "inputTriangles": 348,
-    "bytes": 22324,
+    "bytes": 22312,
     "boundsMm": {
       "min": [
         -3500,

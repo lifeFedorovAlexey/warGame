@@ -1,24 +1,124 @@
-const fs=require('node:fs'),assert=require('node:assert/strict');
-const {chromium}=require('C:/Users/Алексей/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
-(async()=>{const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true,args:['--enable-unsafe-swiftshader','--use-angle=swiftshader']});try{
- const page=await browser.newPage({viewport:{width:1600,height:1000}}),errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error'&&!m.text().startsWith('Failed to load resource'))errors.push(m.text());});page.on('response',r=>{if(r.status()>=400)errors.push(r.status()+' '+r.url());});await page.goto('http://127.0.0.1:8766/campaign/');await page.waitForFunction(()=>window.campaign?.ready,{},{timeout:120000});await page.locator('#begin').click();
- const frozen=await page.evaluate(()=>{const m=window.campaign.mission,before=m.state.time;m.advance(3);return m.state.time===before;});assert(frozen,'Cutscene must freeze simulation');
- for(let i=0;i<3;i++){await page.waitForFunction(()=>window.campaign.player.playing);await page.locator('#film-skip').click();}await page.waitForFunction(()=>!window.campaign.state.currentMedia);await page.locator('#pause').click();
- const builder=await page.evaluate(()=>{const c=window.campaign,u=c.mission.state.units.find(u=>u.kind==='builder');return c.world.screen(u);});await page.mouse.click(builder.x,builder.y);await page.waitForFunction(()=>window.campaign.selected.some(id=>window.campaign.mission.entity(id)?.kind==='builder'));
- async function pointFor(kind){return page.evaluate(kind=>{const c=window.campaign,m=c.mission,start=c.world.field.gridToWorld(m.config.startGrid),points=[];if(kind==='derrick'){for(const g of m.config.oilFields){const p=c.world.field.gridToWorld(g),result=m.placement(kind,p.x,p.y);if(result.ok)points.push(result);}}else for(let x=start.x-220;x<=start.x+220;x+=8)for(let y=start.y-200;y<=start.y+220;y+=8){const result=m.placement(kind,x,y);if(result.ok)points.push(result);}points.sort((a,b)=>Math.hypot(a.x-start.x,a.y-start.y)-Math.hypot(b.x-start.x,b.y-start.y));return points[0]??null;},kind);}
- const generatorPoint=await pointFor('generator');assert(generatorPoint);await page.getByRole('button',{name:/^Генератор/}).click();const pixel=await page.evaluate(p=>window.campaign.world.screen(p,0),generatorPoint);await page.mouse.move(pixel.x,pixel.y);await page.mouse.click(pixel.x,pixel.y);
- await page.waitForFunction(()=>window.campaign.mission.state.buildings.some(b=>b.owner==='rai'&&b.kind==='generator'));assert.equal(await page.evaluate(()=>window.campaign.mission.state.energy),620,'UI reserves construction cost once');
- await page.evaluate(()=>{const c=window.campaign;for(let i=0;i<180&&!c.mission.state.units.some(u=>u.builderWorking);i++)c.advance(.5);});
- await page.waitForFunction(()=>{let separate=false;window.campaign.world.vehicles.root.traverse(o=>{if(o.isMesh&&o.material.name==='builder_work_lamp'){const values=Array.from(o.geometry.getAttribute('instanceEmission').array.slice(0,o.count));separate=values.includes(0)&&values.includes(1);}});return separate;});
- const independentLamps=await page.evaluate(()=>{const c=window.campaign,worker=c.mission.state.units.find(u=>u.builderWorking),tip=c.world.vehicles.weldTips[0];if(!worker||!tip||Math.hypot(...tip.toArray().map((v,i)=>v-worker.builderContact[i]))>.01)throw new Error('Instanced welding effect misses contact');return true;});
- await page.screenshot({path:'campaign/previews/mission-builder-working.png'});await page.evaluate(()=>window.campaign.advance(90));assert(await page.evaluate(()=>window.campaign.mission.state.buildings.some(b=>b.kind==='generator'&&b.owner==='rai'&&b.completed)),'Builder must travel, deploy and finish');
- const completed=[];for(const kind of ['derrick','factory','lab','bunker']){const point=await pointFor(kind);assert(point,'Buildable '+kind);const result=await page.evaluate(({kind,point})=>{const c=window.campaign,ids=c.mission.state.units.filter(u=>u.kind==='builder'&&u.hp>0).map(u=>u.id);return c.mission.build(ids,kind,point.x,point.y);},{kind,point});assert(result.ok,kind+': '+result.reason);await page.evaluate(()=>window.campaign.advance(130));assert(await page.evaluate(id=>window.campaign.mission.entity(id)?.completed,result.id),kind+' completes');completed.push(kind);}
- const factory=await page.evaluate(()=>{const c=window.campaign,b=c.mission.state.buildings.find(b=>b.owner==='rai'&&b.kind==='factory');c.select([b.id]);c.world.centre(b,600);return b.id;});await page.getByRole('button',{name:/^Буханка · пулемёт/}).click();await page.evaluate(()=>window.campaign.advance(30));assert.equal(await page.evaluate(()=>window.campaign.mission.state.statistics.produced),1);
- await page.waitForFunction(()=>window.campaign.state.currentMedia==='first-contact');await page.waitForFunction(()=>window.campaign.player.playing);const chapter=await page.evaluate(()=>window.campaign.player.timeline.segments.flatMap(s=>s.lines.map(c=>c.phase)));assert(chapter.every(phase=>phase==='before'),'Post-raid dialogue must wait for actual raid');await page.locator('#film-skip').click();await page.waitForFunction(()=>!window.campaign.state.currentMedia);
- await page.locator('#save').click();const saved=await page.evaluate(()=>localStorage.getItem('warGame.alpha.mission01.v1'));assert(saved&&JSON.parse(saved).state.statistics.produced===1);await page.screenshot({path:'campaign/previews/mission-base.png'});
- const metrics=await page.evaluate(()=>window.campaign.world.statistics);assert(metrics.vehicleDrawCalls<100,'Vehicle draws must stay bounded');assert(metrics.dustParticles<=metrics.dustLimit);assert(metrics.shots<=metrics.shotLimit);
- await page.locator('#load').click();await page.waitForFunction(()=>window.campaign.mission.state.statistics.produced===1);const loadTime=await page.evaluate(()=>window.campaign.mission.state.time);assert(Math.abs(loadTime-JSON.parse(saved).state.time)<1,'Load restores game time');
- const liveModels=await page.evaluate(()=>{const c=window.campaign;return [...c.world.buildingObjects].filter(([id])=>!c.mission.state.buildings.some(b=>b.id===id)).length;});assert.equal(liveModels,0,'Load must remove stale models');
- let victoryUi=false;if(fs.existsSync('campaign/reports/mission-completed-save.json')){await page.evaluate(save=>localStorage.setItem('warGame.alpha.mission01.v1',save),fs.readFileSync('campaign/reports/mission-completed-save.json','utf8'));await page.locator('#load').click();await page.waitForFunction(()=>!document.getElementById('result').hidden&&document.getElementById('result-title').textContent==='Миссия завершена');assert.equal(await page.evaluate(()=>window.campaign.mission.objectives().filter(o=>o.done).length),5);await page.screenshot({path:'campaign/previews/mission-victory.png'});victoryUi=true;}
- const report={realTerrain:true,interactiveSelection:true,interactiveBuild:true,independentLamps,instancedWeldContact:true,baseBuildings:['generator',...completed],producedViaUi:1,cutscenesFreeze:true,firstContactBeforeRaid:true,saved:true,loaded:true,staleModelsRemoved:true,victoryUi,metrics,errors};assert.deepEqual(errors,[]);fs.mkdirSync('campaign/reports',{recursive:true});fs.writeFileSync('campaign/reports/campaign-browser.json',JSON.stringify(report,null,2));console.log(JSON.stringify(report));
-}finally{await browser.close();}})().catch(error=>{console.error(error);process.exit(1);});
+const fs = require('node:fs');
+const assert = require('node:assert/strict');
+const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+
+(async () => {
+ const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true,args:['--enable-unsafe-swiftshader','--use-angle=swiftshader']});
+ try{
+  const page=await browser.newPage({viewport:{width:1120,height:630},deviceScaleFactor:2}),errors=[];
+  page.on('pageerror',e=>errors.push(e.message));
+  page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
+  page.on('response',r=>{if(r.status()>=400)errors.push(r.status()+' '+r.url());});
+  await page.goto('http://127.0.0.1:8766/campaign/');
+  await page.waitForFunction(()=>window.campaign?.ready||document.querySelector('#loading-status').textContent.startsWith('Ошибка'),{},{timeout:90000});
+  assert(await page.evaluate(()=>window.campaign?.ready),errors.join('\n')||await page.locator('#loading-status').textContent());
+  await page.locator('#begin').click();
+  await page.waitForFunction(()=>window.campaign.drivingAudio.running&&window.campaign.drivingAudio.recordings);
+  await page.waitForFunction(()=>window.campaign.mission.state.time>.2&&!document.querySelector('#radio').hidden);
+  assert.equal(await page.evaluate(()=>window.campaign.mission.state.units.filter(u=>u.owner==='rai').length),5);
+  await page.locator('[data-skip-all]').click();
+  assert.equal(await page.evaluate(()=>localStorage.getItem('warGame.fieldRadio')),'off');
+  await page.locator('#pause').click();
+  await page.getByRole('button',{name:'Строитель 2',exact:true}).click({modifiers:['Shift']});
+  await page.locator('#build-toggle').click();
+  try{await page.waitForFunction(()=>[...document.querySelectorAll('#build-cards img')].length===5&&[...document.querySelectorAll('#build-cards img')].every(img=>img.naturalWidth===192),{},{timeout:10000});}
+  catch(error){throw new Error(errors.join('\n')||JSON.stringify(await page.evaluate(()=>({hidden:document.querySelector('#build-palette').hidden,imgs:[...document.querySelectorAll('#build-cards img')].map(i=>i.naturalWidth),selection:window.campaign.selected}))),{cause:error});}
+  fs.mkdirSync('campaign/previews',{recursive:true});
+  await page.screenshot({path:'campaign/previews/field-building-cards.png'});
+  await page.getByRole('button',{name:/^Генератор/}).click();
+  await page.locator('#suggest-site').click();
+  const position=await page.evaluate(()=>{const w=window.campaign.world;return w.screen(w.controls.target,0);});
+  await page.mouse.click(position.x,position.y);
+  await page.waitForFunction(()=>window.campaign.mission.state.buildings.some(b=>b.owner==='rai'&&b.kind==='generator'));
+  const oil=await page.evaluate(()=>{const c=window.campaign,p=c.world.field.gridToWorld(c.mission.config.oilFields[0]);c.world.centre(p,310);return c.world.screen(p,2);});
+  await page.mouse.click(oil.x,oil.y);
+  await page.waitForFunction(()=>window.campaign.mission.state.buildings.some(b=>b.owner==='rai'&&b.kind==='derrick'));
+  assert.equal(await page.evaluate(()=>window.campaign.mission.state.energy),530);
+  await page.evaluate(()=>{const c=window.campaign;for(let i=0;i<180;i++){c.advance(.3);const b=c.mission.state.buildings.find(e=>e.owner==='rai'&&e.kind==='generator');if(b.progress>.32&&b.progress<.8){c.world.centre(b,170);break;}}});
+  await page.waitForFunction(()=>{
+   const c=window.campaign,b=c.mission.state.buildings.find(e=>e.owner==='rai'&&e.kind==='generator'),mesh=c.world.buildingObjects.get(b.id)?.getObjectByName('building_structure');
+   return c.world.statistics.projectors>0&&mesh?.visible&&mesh.children.some(o=>o.material.clippingPlanes?.length);
+  });
+  await page.screenshot({path:'campaign/previews/field-layer-construction.png'});
+  await page.evaluate(()=>window.campaign.advance(135));
+  const base=await page.evaluate(()=>{
+   const c=window.campaign,m=c.mission,b=m.state.buildings.find(b=>b.kind==='derrick'&&b.owner==='rai');
+   c.world.centre(b,165);
+   return{power:m.state.powered,complete:b.completed,progress:m.state.buildings.filter(b=>b.owner==='rai').map(b=>b.progress)};
+  });
+  assert.deepEqual(base,{power:true,complete:true,progress:[1,1]});
+  await page.waitForFunction(()=>{const c=window.campaign,b=c.mission.state.buildings.find(b=>b.kind==='derrick');return !!c.world.buildingObjects.get(b.id)?.getObjectByName('oil_beam');});
+  const getBeam=()=>page.evaluate(()=>{const c=window.campaign,b=c.mission.state.buildings.find(b=>b.kind==='derrick');return c.world.buildingObjects.get(b.id).getObjectByName('oil_beam').rotation.y;});
+  const angles=[await getBeam()];
+  for(let i=0;i<4;i++){
+   await page.evaluate(()=>{window.campaign.advance(1.3);return new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));});
+   angles.push(await getBeam());
+  }
+  assert(Math.max(...angles)-Math.min(...angles)>.12,'Oil beam must rock over a full cycle');
+  await page.screenshot({path:'campaign/previews/field-oil-pump.png'});
+  const powered=await page.evaluate(async ()=>{
+   const c=window.campaign,m=c.mission,gen=m.state.buildings.find(b=>b.kind==='generator'&&b.owner==='rai');
+   const hp=gen.hp,energy=m.state.energy,well=m.state.buildings.find(b=>b.kind==='derrick'),previous=well.pumpTime;
+   gen.hp=0;c.advance(2);
+   await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+   const stopped={energy:m.state.energy===energy,pump:well.pumpTime===previous,power:well.powered,caption:document.querySelector('#details').textContent};
+   gen.hp=hp;c.advance(.3);
+   return {stopped,resumed:well.powered&&well.pumpTime>previous,meter:document.querySelector('#energy-meter').value,fleet:document.querySelector('#fleet-meter').value,energy:m.state.energy};
+  });
+  assert.deepEqual(powered.stopped,{energy:true,pump:true,power:false,caption:'650/650 HP · Нет питания'});
+  assert(powered.resumed);
+  assert.equal(powered.meter,powered.energy);
+  assert.equal(powered.fleet,5);
+  await page.evaluate(()=>{const c=window.campaign,p=c.world.field.gridToWorld(c.mission.config.startGrid);c.world.centre(p,920);return new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));});
+  assert.equal(await page.evaluate(()=>window.campaign.world.statistics.terrainMode),'overview');
+  await page.screenshot({path:'campaign/previews/field-soft-fog.png'});
+  await page.evaluate(()=>{const c=window.campaign,b=c.mission.state.buildings.find(b=>b.kind==='derrick');c.world.centre(b,165);return new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));});
+  const light=await page.evaluate(()=>{
+   const c=window.campaign,lit=c.world.scene.getObjectsByProperty('type','SpotLight').filter(l=>l.intensity>0),canvas=document.querySelector('#labels');
+   return{realSpotlights:lit.length,range:lit[0]?.distance,labelRect:canvas.getBoundingClientRect().width,labelBacking:canvas.width,frame:c.world.statistics};
+  });
+  assert(light.realSpotlights>=2);
+  assert.equal(light.range,81);
+  assert.equal(light.labelRect,1120);
+  assert.equal(light.labelBacking,1680);
+  await page.getByRole('button',{name:'Пулемёт 1',exact:true}).dblclick();
+  const destination=await page.evaluate(()=>{
+   const c=window.campaign,u=c.mission.entity(c.selected[0]);
+   for(const [dx,dy] of [[64,0],[-64,0],[0,64],[0,-64],[46,46],[-46,-46]]){
+    const p={x:u.x+dx,y:u.y+dy};
+    if(c.mission.nav.lineClear(u,p))return c.world.screen(p,0);
+   }
+  });
+  assert(destination);
+  await page.locator('#move-order').click();
+  await page.mouse.click(destination.x,destination.y);
+  assert.equal(await page.evaluate(()=>{const c=window.campaign;return c.mission.entity(c.selected[0])?.task?.type;}),'move','Click in the scene must issue a move order');
+  const workStart=await page.evaluate(()=>{const c=window.campaign,u=c.mission.entity(c.selected[0]);return{x:u.x,y:u.y};});
+  for(let i=0;i<52;i++){
+   const arrived=await page.evaluate(()=>{
+    const c=window.campaign,u=c.mission.entity(c.selected[0]);
+    c.advance(.5);
+    return !u.path.length && !u.task;
+   });
+   await page.waitForTimeout(60);
+   if(arrived)break;
+  }
+  await page.waitForFunction(()=>window.campaign.world.statistics.tireMarks>0);
+  const drive=await page.evaluate(p=>{
+   const c=window.campaign,u=c.mission.entity(c.selected[0]);
+   return {distance:Math.hypot(u.x-p.x,u.y-p.y),unit:u,nearby:c.mission.state.units.filter(other=>other!==u&&Math.hypot(u.x-other.x,u.y-other.y)<55).map(({id,x,y,heading})=>({id,x,y,heading}))};
+  },workStart);
+  const driven=drive.distance;
+  if(driven<=12||drive.unit.task){
+   fs.mkdirSync('campaign/reports',{recursive:true});
+   fs.writeFileSync('campaign/reports/field-move-failure.json',await page.evaluate(()=>window.campaign.mission.save()));
+  }
+  assert(driven>12&&!drive.unit.task,JSON.stringify(drive));
+  await page.screenshot({path:'campaign/previews/field-headlights-tracks.png'});
+  const report={base,light,driven,pausedBetweenCommands:true,layeredConstruction:true,oilDirectClick:true,radioSkipPersisted:true,animatedPump:true,oilPowerLoss:powered.stopped,resumedPump:powered.resumed,errors};
+  assert.deepEqual(errors,[]);
+  fs.mkdirSync('campaign/reports',{recursive:true});
+  fs.writeFileSync('campaign/reports/campaign-browser.json',JSON.stringify(report,null,2));
+  console.log(JSON.stringify(report));
+ }finally{await browser.close();}
+})().catch(error=>{console.error(error);process.exit(1);});

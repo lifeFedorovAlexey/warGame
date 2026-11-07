@@ -6,9 +6,9 @@
   "initialEnergy": 760,
   "energyCapacity": 2400,
   "startGrid": [14.5, 53.5],
-  "initialUnits": ["bukhanka", "bukhanka", "bukhanka", "builder", "builder", "command"],
-  "initialMapBounds": [0, 0, 53, 64],
-  "finalMapBounds": [0, 0, 53, 80],
+  "initialUnits": ["bukhanka", "bukhanka", "bukhanka", "builder", "builder"],
+  "initialMapBounds": [0, 0, 53, 66],
+  "finalMapBounds": [0, 0, 53, 83],
   "buildingGridMetres": 8,
   "maxBuildingGrade": 0.12,
   "builderRangeMetres": 16,
@@ -20,11 +20,11 @@
     {"id": "west-south", "name": "Опорный пункт Петровича", "grid": [12, 72], "gateGrid": [14.5, 67.5], "requiresCamps": 3, "chapter": "last-camp", "units": 6, "strength": 1.7}
   ],
   "units": {
-    "bukhanka": {"name": "Буханка · пулемёт", "components": ["C01", "B01", "U01"], "cost": 130, "seconds": 18, "hp": 320, "speed": 11, "range": 145, "damage": 9, "cooldown": 0.55, "vision": 210, "role": "combat"},
-    "builder": {"name": "Строитель", "components": ["C01", "B01", "U25"], "cost": 160, "seconds": 22, "hp": 280, "speed": 10, "range": 0, "damage": 0, "cooldown": 1, "vision": 180, "role": "builder"},
-    "command": {"name": "Командирский УАЗ", "components": ["C01", "B01", "U21"], "cost": 0, "seconds": 0, "hp": 420, "speed": 12, "range": 0, "damage": 0, "cooldown": 1, "vision": 280, "role": "command"},
-    "flamer": {"name": "Буханка · огнемёт", "components": ["C01", "B01", "mission-flamer"], "artStatus": "temporary gameplay representation", "requires": "flamethrower", "cost": 180, "seconds": 24, "hp": 350, "speed": 10, "range": 80, "damage": 24, "cooldown": 0.65, "vision": 190, "role": "combat"},
-    "raider": {"name": "Машина отбросов", "cost": 0, "seconds": 0, "hp": 170, "speed": 10, "range": 115, "damage": 6, "cooldown": 0.8, "vision": 180, "role": "combat"}
+    "bukhanka": {"name": "Буханка · пулемёт", "components": ["C01", "B01", "U01"], "cost": 130, "seconds": 18, "hp": 320, "speed": 30, "range": 145, "damage": 9, "cooldown": 0.55, "vision": 210, "role": "combat"},
+    "builder": {"name": "Строитель", "components": ["C01", "B01", "U25"], "cost": 160, "seconds": 22, "hp": 280, "speed": 24, "range": 0, "damage": 0, "cooldown": 1, "vision": 180, "role": "builder"},
+    "command": {"name": "Командирский УАЗ", "components": ["C01", "B01", "U21"], "cost": 0, "seconds": 0, "hp": 420, "speed": 34, "range": 0, "damage": 0, "cooldown": 1, "vision": 280, "role": "command"},
+    "flamer": {"name": "Буханка · огнемёт", "components": ["C01", "B01", "mission-flamer"], "artStatus": "temporary gameplay representation", "requires": "flamethrower", "cost": 180, "seconds": 24, "hp": 350, "speed": 27, "range": 80, "damage": 24, "cooldown": 0.65, "vision": 190, "role": "combat"},
+    "raider": {"name": "Машина отбросов", "cost": 0, "seconds": 0, "hp": 170, "speed": 23, "range": 115, "damage": 6, "cooldown": 0.8, "vision": 180, "role": "combat"}
   },
   "buildings": {
     "generator": {"name": "Генератор", "realSizeMetres": [12, 10, 5], "footprintMetres": [14, 12], "cost": 140, "seconds": 20, "hp": 950, "vision": 130, "power": 0, "oilSlots": 4, "workAnchor": [0, -8, 0]},

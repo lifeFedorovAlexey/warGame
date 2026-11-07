@@ -1,67 +1,700 @@
 import {createCampaignWorld} from './world.js';
 import {Mission} from './mission.js';
-import {CinematicPlayer} from './cinematics.js';
-import {MissionSound} from './speech.js';
+import {FieldRadio} from './field-radio.js';
+import {FieldSound} from './field-sound.js';
+import {buildLayerHeight} from './builder-optics.js';
+import {VehicleDesigner} from './designer.js';
 
-const $=id=>document.getElementById(id),base='../assets/campaign/alpha/mission01/',saveKey='warGame.alpha.mission01.v1',get=async file=>{const r=await fetch(base+file);if(!r.ok)throw new Error(file+': '+r.status);return r.json();};
-let world,mission,config,story,audio,player,sound,active=false,paused=false,speed=1,currentMedia=null,resultShown=false,last=performance.now(),lastUi=0,lastMini=0,buildKind=null,buildRotation=0,mouse=null,drag=null,toastUntil=0,actionKey='',selected=new Set(),saved=null,miniBackground=new Image(),lastSelection='',lastSelectionAt=-10000,lastIdle=0;
-function toast(message){$('toast').textContent=message;$('toast').hidden=false;toastUntil=performance.now()+4000;}
-function bark(event,options){sound?.say(story.barks.find(cue=>cue.event===event)?.id,options);}
-function report(result){if(!result?.ok){toast(result?.reason??'Приказ не выполнен');if(result?.reason==='Недостаточно энергии')bark('Энергии недостаточно');}return result;}
-function clearBuild(){buildKind=null;world?.setGhost(null);actionKey='';}
-function selectionEntities(){return [...selected].map(id=>mission.entity(id)).filter(Boolean);}
-function select(ids,append=false){if(!append)selected.clear();ids.forEach(id=>{if(mission.entity(id))selected.add(id);});clearBuild();actionKey='';updateUi();const first=selectionEntities()[0],key=[...selected].join(','),repeat=key===lastSelection&&performance.now()-lastSelectionAt<10000;lastSelection=key;lastSelectionAt=performance.now();if(first?.owner==='rai'&&first.path){if(first.kind==='builder')bark(repeat?'builder-select-repeat':'builder-select');else if(first.kind!=='command')bark(repeat?'Повторный выбор':'Выбор «Буханки»');}}
-function saveGame(notify=true){try{localStorage.setItem(saveKey,mission.save());if(notify)toast('Операция сохранена');}catch(error){if(notify)toast('Не удалось сохранить: '+error.message);}}
-async function resumeGame(){try{const data=localStorage.getItem(saveKey);if(!data)throw new Error('Сохранения ещё нет');mission.load(data);selected.clear();clearBuild();resultShown=false;paused=false;active=true;$('welcome').hidden=true;$('result').hidden=true;world.centre(mission.state.units.find(u=>u.owner==='rai'&&u.hp>0)??world.field.gridToWorld(config.startGrid));await sound.unlock();toast('Операция загружена');}catch(error){toast('Не удалось загрузить: '+error.message);}}
-function startNextMedia(){
- const chapter=mission.state.pendingCinematics[0];if(!chapter||currentMedia||!active)return;const entries=story.gameplayCinematics[chapter];currentMedia=chapter;$('cinematic').hidden=false;$('film-status').textContent='Подготовка связи…';sound.enabled=false;sound.stop();world.keys.clear();world.controls.enabled=false;
- if(!entries){$('film-status').textContent='Не найдена сюжетная вставка: '+chapter;return;}
- player.load(entries).then(()=>player.play()).catch(error=>{$('film-status').textContent='Ошибка заставки: '+error.message;});
+const $ = id => document.getElementById(id);
+const saveKey = 'warGame.alpha.mission01.v1';
+const dataUrl = '../assets/campaign/alpha/mission01/gameplay.json';
+const selected = new Set();
+const miniBackground = new Image();
+let world, mission, config, radio, sound, designer;
+let active = false, paused = false, speed = 1, resultShown = false;
+let pausedBeforeDesigner = false;
+let buildOpen = false, buildKind = null, rotation = 0, orderMode = null;
+let pointer = null, drag = null, site = null, placing = null;
+let last = performance.now(), lastUi = 0, lastMini = 0, toastUntil = 0;
+let actionKey = '', rosterKey = '', paletteKey = '', taskKey = '', queueKey = '', cards;
+
+const vehicles = () => mission.state.units.filter(unit => unit.owner === 'rai' && unit.hp > 0);
+const builders = () => vehicles().filter(unit => config.units[unit.kind].role === 'builder');
+const selection = () => [...selected].map(id => mission.entity(id)).filter(Boolean);
+const isMobile = entity => entity?.owner === 'rai' && !!config.units[entity.kind];
+const names = {bukhanka:'Пулемёт', builder:'Строитель', command:'Связь', flamer:'Огнемёт'};
+const taskNames = {base:'Передовая база', power:'Энергоснабжение', production:'Производство', research:'Исследования', security:'Лагеря отбросов'};
+const hpColor = fraction => fraction > .58 ? '#9cdd69' : fraction > .28 ? '#f1cc58' : '#ed6a4d';
+const sampleNames = {'flamethrower':'Неизвестное устройство №001','mg-ammo-1':'Образец со склада','mg-tower':'Узел водонапорной башни'};
+
+function toast(message, milliseconds = 2600) {
+  $('toast').textContent = message;
+  $('toast').hidden = false;
+  toastUntil = performance.now() + milliseconds;
 }
-function finishMedia(){if(!currentMedia)return;const chapter=currentMedia;mission.finishCinematic(chapter);currentMedia=null;$('cinematic').hidden=true;sound.enabled=true;world.controls.enabled=true;actionKey='';saveGame(false);if(chapter==='first-contact')bark('Обнаружены отбросы');}
-function ordersAt(point,target){
- const ids=[...selected],builders=selectionEntities().some(e=>e.owner==='rai'&&config.units[e.kind]?.role==='builder');if(!ids.length){toast('Сначала выдели технику');return;}
- const factory=selectionEntities().find(e=>e.owner==='rai'&&e.kind==='factory'&&e.completed);if(ids.length===1&&factory&&point){if(report(mission.setRally(factory.id,point)).ok){world.commandMarker(point);toast('Точка сбора завода установлена');}return;}
- let result;if(target?.owner==='scavs')result=mission.order(ids,'attack',target);else if(target?.owner==='rai'&&builders&&(target.completed===false||target.hp<target.maxHp))result=mission.order(ids,target.completed===false?'build':'repair',target);else if(point)result=mission.order(ids,'move',point);
- if(result&&report(result).ok){if(point)world.commandMarker(point);if(target?.owner==='scavs')bark('Приказ атаковать');else if(target?.owner==='rai'&&target.hp<target.maxHp)bark('Ремонт');}
+function report(result) {
+  if (!result?.ok) toast(result?.reason ?? 'Приказ не выполнен');
+  return result?.ok;
 }
-function hitEntity(clientX,clientY){let nearest=null,best=26;for(const e of [...mission.state.units,...mission.state.buildings]){if(e.hp<=0||e.owner!=='rai'&&!mission.visibleAt(e.x,e.y))continue;const p=world.screen(e),d=Math.hypot(p.x-clientX,p.y-clientY);if(p.visible&&d<best){best=d;nearest=e;}}if(!nearest){const point=world.ground(clientX,clientY);if(point)nearest=mission.state.buildings.find(b=>b.hp>0&&(b.owner==='rai'||mission.visibleAt(b.x,b.y))&&Math.abs(point.x-b.x)<b.halfWidth&&Math.abs(point.y-b.y)<b.halfDepth);}return nearest;}
-function placementAtMouse(){if(!buildKind||!mouse)return null;const p=world.ground(mouse.x,mouse.y);if(!p)return null;const place=mission.placement(buildKind,p.x,p.y,buildRotation);return{...p,rotation:buildRotation,height:p.z,...place};}
-function installInput(){
- const canvas=world.renderer.domElement;canvas.addEventListener('contextmenu',event=>event.preventDefault());
- canvas.addEventListener('pointerdown',event=>{if(!active||currentMedia||mission.state.status!=='running')return;if(event.button===2){event.preventDefault();if(buildKind){clearBuild();return;}ordersAt(world.ground(event.clientX,event.clientY),hitEntity(event.clientX,event.clientY));return;}if(event.button===0){canvas.setPointerCapture(event.pointerId);drag={x:event.clientX,y:event.clientY,append:event.shiftKey};}});
- canvas.addEventListener('pointermove',event=>{mouse={x:event.clientX,y:event.clientY};if(drag&&!buildKind){const box=$('drag-box');box.hidden=Math.hypot(mouse.x-drag.x,mouse.y-drag.y)<6;Object.assign(box.style,{left:Math.min(mouse.x,drag.x)+'px',top:Math.min(mouse.y,drag.y)+'px',width:Math.abs(mouse.x-drag.x)+'px',height:Math.abs(mouse.y-drag.y)+'px'});}if(buildKind)world.setGhost(buildKind,placementAtMouse());});
- canvas.addEventListener('pointerup',event=>{if(!drag||event.button!==0)return;const origin=drag;drag=null;$('drag-box').hidden=true;if(buildKind){const place=placementAtMouse();if(!place)return;if(!place.ok){toast(place.reason);return;}const result=report(mission.build([...selected],buildKind,place.x,place.y,buildRotation));if(result.ok&&!event.shiftKey)clearBuild();return;}
-  if(Math.hypot(event.clientX-origin.x,event.clientY-origin.y)>6){const ids=mission.state.units.filter(u=>u.hp>0&&u.owner==='rai').filter(u=>{const p=world.screen(u);return p.visible&&p.x>=Math.min(origin.x,event.clientX)&&p.x<=Math.max(origin.x,event.clientX)&&p.y>=Math.min(origin.y,event.clientY)&&p.y<=Math.max(origin.y,event.clientY);}).map(u=>u.id);select(ids,origin.append);}else{const target=hitEntity(event.clientX,event.clientY);select(target?[target.id]:[],origin.append);}});
- canvas.addEventListener('pointercancel',()=>{drag=null;$('drag-box').hidden=true;});
- document.addEventListener('keydown',event=>{if(event.target.matches('input,select,textarea')||!active)return;if(currentMedia){if(event.code==='Escape')player.skip();return;}if(event.code==='Escape'){clearBuild();return;}if(event.code==='Space'){event.preventDefault();$('pause').click();return;}if(event.code==='KeyR'&&buildKind){buildRotation+=Math.PI/2;event.preventDefault();return;}if(event.code==='Home')$('home').click();if(['KeyW','KeyA','KeyS','KeyD'].includes(event.code)){event.preventDefault();world.keys.add(event.code);}});document.addEventListener('keyup',event=>world.keys.delete(event.code));window.addEventListener('blur',()=>{world.keys.clear();if(active&&!paused&&!currentMedia){paused=true;updateUi();}});
- $('minimap').addEventListener('pointerdown',event=>{if(!active||currentMedia)return;const rect=$('minimap').getBoundingClientRect(),p=world.field.gridToWorld([(event.clientX-rect.left)/rect.width*127,(event.clientY-rect.top)/rect.height*127]);world.centre(p);});
+function cancelMode() {
+  buildKind = null;
+  buildOpen = false;
+  orderMode = null;
+  site = placing = null;
+  world.setGhost(null);
+  updateUi();
 }
-function actionButton(label,detail,callback,{disabled=false,title='',active:chosen=false}={}){const button=document.createElement('button');button.textContent=label;const small=document.createElement('small');small.textContent=detail;button.append(small);button.disabled=disabled;button.title=title;button.classList.toggle('active',chosen);button.onclick=callback;$('actions').append(button);}
-function updateUi(){if(!mission)return;const s=mission.state,entities=selectionEntities(),first=entities[0],friendly=entities.filter(e=>e.owner==='rai'),builders=friendly.filter(e=>config.units[e.kind]?.role==='builder');for(const id of [...selected])if(!mission.entity(id))selected.delete(id);
- $('energy').textContent=Math.floor(s.energy);$('income').textContent=(s.energyRate>=0?'+':'')+s.energyRate.toFixed(1)+'/с';$('population').textContent=s.units.filter(u=>u.owner==='rai'&&u.hp>0).length+' / 48';$('power').textContent=s.powered?'Питание: '+s.oilLinked+' нефт.':'Нет питания';$('pause').textContent=paused?'Продолжить':'Пауза';$('tempo').textContent='×'+speed;
- $('objectives').replaceChildren(...mission.objectives().map(item=>{const li=document.createElement('li');li.className=item.done?'done':'';li.textContent=item.name+(item.progress?' · '+item.progress:'');return li;}));
- $('hint').textContent=!s.powered?'Начни с генератора и нефтяной вышки. Нефтяные точки отмечены на местности.':!mission.objectives()[0].done?'Построй завод, лабораторию и оборонительное укрытие.':s.flags.contact&&!s.flags.raidWon?'Отрази первый рейд. Для завода можно задать точку сбора правой кнопкой мыши.':s.flags.lastRevealed?'Южный сектор открыт. Четвёртый лагерь отмечен на миникарте.':s.artifactKeys.length?'Доставленные артефакты открывают исследования в лаборатории. Продолжай разведку.':'Разведай западный сектор и зачисти лагеря. Береги строителей для полевого ремонта.';
- $('selection').textContent=first?(entities.length>1?'Группа · '+entities.length:(config.units[first.kind]??config.buildings[first.kind])?.name??'Лагерь отбросов'):'Нет выделения';$('details').textContent=buildKind?'Размести здание · R — повернуть · Shift — продолжить застройку · Esc — отменить':first?(first.owner==='scavs'?'Вражеский объект · ':'')+Math.ceil(first.hp)+' / '+first.maxHp+' прочности'+(first.completed===false?' · строительство '+Math.floor(first.progress*100)+'%':''):'ЛКМ — выделить · ПКМ — приказ · колесо — масштаб · средняя кнопка — поворот · WASD — камера';$('stop').disabled=!friendly.some(e=>e.path);
- const key=[...selected].join(',')+'|'+buildKind+'|'+Object.keys(s.research).join(',')+'|'+s.artifactKeys.join(',')+'|'+Math.floor(s.energy/5)+'|'+first?.completed+'|'+!!first?.research;
- if(key!==actionKey){actionKey=key;$('actions').replaceChildren();if(builders.length){for(const [kind,spec] of Object.entries(config.buildings)){const locked=spec.requires&&!s.research[spec.requires];actionButton(spec.name,spec.cost+' энергии · '+spec.seconds+' с',()=>{buildKind=kind;actionKey='';toast('Выбери площадку. R — поворот, Esc — отмена.');updateUi();},{disabled:!!locked||s.energy<spec.cost,active:buildKind===kind,title:locked?'Нужно исследование оборонительной башни':''});}}
-  if(first?.owner==='rai'&&first.completed&&first.kind==='factory'){for(const kind of config.buildings.factory.production){const spec=config.units[kind],locked=spec.requires&&!s.research[spec.requires];actionButton(spec.name,spec.cost+' энергии · '+spec.seconds+' с',()=>{report(mission.produce(first.id,kind));actionKey='';updateUi();},{disabled:!!locked||s.energy<spec.cost,title:locked?'Нужен артефакт и исследование':''});}}
-  if(first?.owner==='rai'&&first.completed&&first.kind==='lab'){for(const [key,spec] of Object.entries(config.research)){const done=s.research[key],available=s.artifactKeys.includes(key);actionButton(spec.completedName??spec.name,done?'Исследовано':!available?'Артефакт не найден':spec.cost+' энергии · '+spec.seconds+' с',()=>{report(mission.research(first.id,key));actionKey='';updateUi();},{disabled:!!done||!available||!!first.research||s.energy<spec.cost});}}
-  if(first?.owner==='rai'&&first.completed===false)actionButton('Отменить стройку','Вернуть неиспользованные материалы',()=>{report(mission.cancelBuilding(first.id));select([]);});
- }
- const queue=$('queue');queue.replaceChildren();if(first?.queue?.length){queue.textContent=(s.powered?'Производство: ':'Приостановлено: нет питания · ')+first.queue.map(item=>config.units[item.kind].name).join(' → ');const progress=document.createElement('progress');progress.max=1;progress.value=first.queue[0].progress;queue.append(progress);}else if(first?.research){queue.textContent=(s.powered?'Исследование: ':'Приостановлено: нет питания · ')+(config.research[first.research.key].completedName??config.research[first.research.key].name);const progress=document.createElement('progress');progress.max=1;progress.value=first.research.progress;queue.append(progress);}else if(!first&&!builders.length)queue.textContent='Выдели строителей, чтобы развернуть базу. Нефтяные точки отмечены на местности.';
+function toggleDesigner() {
+  if (designer.visible) return designer.close();
+  cancelMode();
+  world.keys.clear();
+  designer.open();
 }
-function minimap(){const canvas=$('minimap'),ctx=canvas.getContext('2d'),size=canvas.width,field=world.field;ctx.fillStyle='#171e1c';ctx.fillRect(0,0,size,size);if(miniBackground.complete&&miniBackground.naturalWidth)ctx.drawImage(miniBackground,0,0,size,size);const cell=size/128;for(let row=0;row<128;row++)for(let col=0;col<128;col++){const i=row*128+col;if(mission.visible[i])continue;ctx.fillStyle=mission.explored[i]?'rgba(12,19,18,.66)':'#151e1c';ctx.fillRect(col*cell,row*cell,cell+.2,cell+.2);}
+function liveMobile(entity) {
+  return isMobile(entity) && entity.hp > 0;
+}
+function select(ids, append = false, speak = true) {
+  if (!append) selected.clear();
+  for (const id of ids) if (mission.entity(id)) selected.add(id);
+  cancelMode();
+  if (speak && active && ids.some(id => liveMobile(mission.entity(id)))) {
+    sound.acknowledge('select', selection().filter(liveMobile).map(unit => unit.id));
+  }
+}
+function focusUnit(unit) {
+  select([unit.id]);
+  world.centre(unit, 320);
+}
+function chooseBuilder(kind) {
+  const current = selection().filter(entity => isMobile(entity) && entity.kind === 'builder');
+  const live = builders();
+  const pending = mission.state.buildings.filter(b=>b.hp>0&&(b.clearing||b.awaitingWorkers));
+  const idle = unit => (!unit.task || unit.task.type === 'move') && !pending.some(b=>b.builderIds?.includes(unit.id));
+  const selectedIdle=current.filter(idle), free=live.filter(idle);
+  if(kind&&selectedIdle.length)return selectedIdle;
+  if(kind&&free.length)return free;
+  return current.length?current:live;
+}
+function toggleBuild() {
+  if (buildOpen || buildKind) return cancelMode();
+  if (!builders().length) return toast('Нет строителей. Закажите машину на заводе.');
+  orderMode = null;
+  buildOpen = true;
+  updateUi();
+}
+function beginPlacement(kind) {
+  const available = chooseBuilder(kind);
+  if (!available.length) return;
+  select(available.map(unit => unit.id), false, false);
+  buildKind = kind;
+  rotation = 0;
+  $('toast').hidden = true;
+  updatePlacement();
+  updateUi();
+}
+function beginOrder(mode) {
+  if (!selection().some(isMobile)) {
+    const unit = vehicles().find(unit => config.units[unit.kind].damage > 0) ?? vehicles()[0];
+    if (!unit) return;
+    select([unit.id], false, false);
+  }
+  cancelMode();
+  orderMode = mode;
+  updateUi();
+}
+function saveGame(notify = true) {
+  try {
+    localStorage.setItem(saveKey, mission.save());
+    if (notify) toast('Операция сохранена');
+  } catch {
+    if (notify) toast('Сохранение недоступно');
+  }
+}
+function start(restore = false) {
+  if (restore) {
+    try {
+      const data = localStorage.getItem(saveKey);
+      if (!data) return toast('Сохранения ещё нет');
+      mission.load(data);
+    } catch (error) {
+      return toast('Сохранение не открывается. ' + error.message);
+    }
+  }
+  designer.close(false);
+  active = true;
+  paused = false;
+  resultShown = false;
+  radio.reset();
+  $('welcome').hidden = true;
+  $('result').hidden = true;
+  $('mission-hud').hidden = false;
+  const worker = builders()[0];
+  const centre = restore ? vehicles()[0] : world.field.gridToWorld(config.startGrid);
+  if (centre) world.centre(centre, 360);
+  select(worker ? [worker.id] : [], false, false);
+  sound.unlock();
+  radio.consume(mission, performance.now());
+  if (restore) toast('Операция загружена');
+}
+function ordersAt(point, target, mode) {
+  const chosen = selection();
+  const factory = chosen.length === 1 && chosen[0]?.owner === 'rai' && chosen[0]?.kind === 'factory' && chosen[0]?.completed ? chosen[0] : null;
+  if (factory && point && !mode) {
+    if (report(mission.setRally(factory.id, point))) {
+      world.commandMarker(point);
+      toast('Точка сбора завода установлена');
+    }
+    return;
+  }
+  if (!chosen.some(isMobile)) return toast('Выберите машину на карте или в списке');
+  let action = 'move';
+  let destination = point;
+  if (mode === 'attack' || (!mode && target?.owner === 'scavs')) {
+    if (target?.owner !== 'scavs') return toast('Укажите видимого противника');
+    action = 'attack';
+    destination = target;
+  } else if (!mode && target?.owner === 'rai' && chosen.some(entity => entity.kind === 'builder')) {
+    if (target.completed === false) action = 'build';
+    else if (isMobile(target) && target.hp < target.maxHp) action = 'repair';
+    if (action !== 'move') destination = target;
+  }
+  if (!destination) return toast('Укажите точку на карте');
+  if (action === 'move') {
+    const artifact=mission.state.artifacts.find(item=>!item.collected&&mission.exploredAt(item.x,item.y)&&Math.hypot(item.x-destination.x,item.y-destination.y)<18);
+    if(artifact)destination=artifact;
+  }
+  const result = mission.order([...selected], action, destination);
+  if (!report(result)) return;
+  world.commandMarker(destination, action === 'attack');
+  const eligible = chosen.filter(entity => liveMobile(entity) && (action !== 'attack' || config.units[entity.kind].damage) && (!['build', 'repair'].includes(action) || entity.kind === 'builder'));
+  if (result.assigned < eligible.length) toast('Приказ приняли ' + result.assigned + ' из ' + eligible.length + '. Остальным недоступен маршрут.');
+  sound.acknowledge(action === 'repair' ? 'build' : action, eligible.map(unit => unit.id));
+  orderMode = null;
+  updateUi();
+}
+function hitEntity(x, y) {
+  let nearest = null, best = 24;
+  for (const entity of [...mission.state.units, ...mission.state.buildings]) {
+    if (entity.hp <= 0 || entity.owner !== 'rai' && !mission.visibleAt(entity.x, entity.y)) continue;
+    const p = world.screen(entity);
+    const distance = Math.hypot(p.x - x, p.y - y);
+    if (p.visible && distance < best) {
+      best = distance;
+      nearest = entity;
+    }
+  }
+  if (nearest) return nearest;
+  const point = world.ground(x, y);
+  return point && mission.state.buildings.find(b => b.hp > 0 && (b.owner === 'rai' || mission.visibleAt(b.x, b.y)) && Math.abs(point.x - b.x) < b.halfWidth && Math.abs(point.y - b.y) < b.halfDepth);
+}
+function oilAt(x,y) {
+  let best = null, radius = 17;
+  for (const grid of config.oilFields) {
+    const point = world.field.gridToWorld(grid);
+    if (!mission.exploredAt(point.x,point.y)) continue;
+    if (mission.state.buildings.some(b => b.hp > 0 && b.kind === 'derrick' && Math.hypot(b.x-point.x,b.y-point.y) < 4)) continue;
+    const p = world.screen(point,2), d = Math.hypot(x-p.x,y-p.y);
+    if (p.visible && d < radius) { best = point; radius = d; }
+  }
+  return best;
+}
+function orderDerrick(point) {
+  const assigned = chooseBuilder('derrick');
+  if (!assigned.length) return toast('Нужен строитель');
+  const result = mission.build(assigned.map(unit => unit.id),'derrick',point.x,point.y);
+  if (!report(result)) return;
+  select([result.id]);
+  world.commandMarker(point);
+  sound.acknowledge('build', assigned.map(unit => unit.id));
+  toast(result.clearing ? 'Техника освобождает нефтяную точку' : result.waiting ? 'Вышка в очереди строителей' : 'Строитель выезжает к нефтяной точке');
+}
+function updatePlacement() {
+  if (!buildKind) return;
+  const point = site ?? (pointer && world.ground(pointer.x, pointer.y));
+  const check = point && mission.placement(buildKind, point.x, point.y, rotation);
+  placing = point ? {...point, ...check, rotation: check?.rotation ?? rotation} : null;
+  world.setGhost(buildKind, placing);
+  const label = $('placement-status');
+  label.textContent = !point ? 'Наведите курсор на карту' : check.ok ? (check.blockers.length ? 'ЛКМ — поставить. Машины освободят площадку.' : 'ЛКМ — поставить · R — повернуть · Esc — отменить') : check.reason;
+  label.classList.toggle('invalid', !!check && !check.ok);
+}
+function suggestSite() {
+  if (!buildKind) return;
+  const origin = selection().find(isMobile) ?? world.controls.target;
+  const found = [];
+  const add = point => {
+    const place = mission.placement(buildKind, point.x, point.y, rotation);
+    if (place.ok) found.push(place);
+  };
+  if (config.buildings[buildKind].requiresOil) {
+    for (const grid of config.oilFields) add(world.field.gridToWorld(grid));
+  } else {
+    const step = config.buildingGridMetres;
+    const x = Math.round(origin.x / step) * step, y = Math.round(origin.y / step) * step;
+    for (let radius = 2; radius <= 25 && !found.some(place=>!place.blockers.length); radius++) {
+      for (let dy = -radius; dy <= radius; dy++) for (let dx = -radius; dx <= radius; dx++) {
+        if (Math.max(Math.abs(dx), Math.abs(dy)) === radius) add({x: x + dx * step, y: y + dy * step});
+      }
+    }
+  }
+  found.sort((a,b) => a.blockers.length-b.blockers.length || Math.hypot(a.x-origin.x,a.y-origin.y) - Math.hypot(b.x-origin.x,b.y-origin.y));
+  if (!found.length) return toast('Рядом нет свободной разведанной площадки');
+  site = found[0];
+  world.centre(site, 320);
+  updatePlacement();
+}
+function installInput() {
+  const canvas = world.renderer.domElement;
+  canvas.addEventListener('contextmenu', event => event.preventDefault());
+  canvas.addEventListener('pointerdown', event => {
+    if (!active || mission.state.status !== 'running') return;
+    if (event.button === 2) {
+      event.preventDefault();
+      if (buildKind) return cancelMode();
+      ordersAt(world.ground(event.clientX, event.clientY), hitEntity(event.clientX, event.clientY), orderMode);
+    }
+    if (event.button === 0) {
+      canvas.setPointerCapture(event.pointerId);
+      drag = {x: event.clientX, y: event.clientY, append: event.shiftKey};
+    }
+  });
+  canvas.addEventListener('pointermove', event => {
+    pointer = {x: event.clientX, y: event.clientY};
+    site = null;
+    if (buildKind) {
+      updatePlacement();
+      return;
+    }
+    canvas.style.cursor = orderMode ? 'crosshair' : oilAt(pointer.x,pointer.y) ? 'pointer' : '';
+    if (!drag || orderMode) return;
+    const box = $('drag-box');
+    box.hidden = Math.hypot(pointer.x - drag.x, pointer.y - drag.y) < 6;
+    box.style.left = Math.min(pointer.x, drag.x) + 'px';
+    box.style.top = Math.min(pointer.y, drag.y) + 'px';
+    box.style.width = Math.abs(pointer.x - drag.x) + 'px';
+    box.style.height = Math.abs(pointer.y - drag.y) + 'px';
+  });
+  canvas.addEventListener('pointerup', event => {
+    if (!drag || event.button !== 0) return;
+    const origin = drag;
+    drag = null;
+    $('drag-box').hidden = true;
+    const x = event.clientX, y = event.clientY;
+    if (buildKind) {
+      pointer = {x,y};
+      site = null;
+      updatePlacement();
+      if (!placing?.ok) return;
+      const result = mission.build([...selected], buildKind, placing.x, placing.y, rotation);
+      if (report(result)) {
+        world.commandMarker(placing);
+        sound.acknowledge('build', selection().filter(unit => liveMobile(unit) && unit.kind === 'builder').map(unit => unit.id));
+        if (result.clearing) toast('Техника освобождает площадку');
+        else if(result.waiting)toast('Здание в очереди строителей');
+        if (!event.shiftKey) cancelMode();
+        else updatePlacement();
+      }
+      return;
+    }
+    if (orderMode) return ordersAt(world.ground(x,y), hitEntity(x,y), orderMode);
+    if (Math.hypot(x - origin.x, y - origin.y) > 6) {
+      const ids = vehicles().filter(unit => {
+        const p = world.screen(unit);
+        return p.visible && p.x >= Math.min(x,origin.x) && p.x <= Math.max(x,origin.x)
+          && p.y >= Math.min(y,origin.y) && p.y <= Math.max(y,origin.y);
+      }).map(unit => unit.id);
+      select(ids, origin.append);
+    } else {
+      const oil = !event.shiftKey && oilAt(x,y);
+      if (oil) return orderDerrick(oil);
+      const target = hitEntity(x,y);
+      select(target ? [target.id] : [], origin.append);
+    }
+  });
+  canvas.addEventListener('pointercancel', () => { drag = null; $('drag-box').hidden = true; });
+  document.addEventListener('keydown', event => {
+    if (!active || designer.visible || event.target.matches('input, select, textarea') || event.ctrlKey || event.metaKey || event.altKey) return;
+    const {code} = event;
+    if (code === 'Escape') {
+      if (buildKind || buildOpen || orderMode) cancelMode();
+      else radio.dismiss();
+    } else if (code === 'Space' && !event.target.closest('button, summary')) {
+      event.preventDefault();
+      $('pause').click();
+    } else if (code === 'KeyB' && !event.repeat) toggleBuild();
+    else if (code === 'KeyM' && !event.repeat) beginOrder('move');
+    else if (code === 'KeyT' && !event.repeat) beginOrder('attack');
+    else if (code === 'KeyR' && buildKind) {
+      rotation = (rotation + Math.PI / 2) % (2 * Math.PI);
+      updatePlacement();
+    } else if (code === 'Home') $('home').click();
+    else if (['KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(code)) {
+      event.preventDefault();
+      world.keys.add(code);
+    }
+  });
+  document.addEventListener('keyup', event => world.keys.delete(event.code));
+  window.addEventListener('blur', () => world.keys.clear());
+  $('minimap').addEventListener('pointerdown', event => {
+    const rect = $('minimap').getBoundingClientRect();
+    const point = world.field.gridToWorld([(event.clientX-rect.left)/rect.width*127, (event.clientY-rect.top)/rect.height*127]);
+    world.centre(point);
+  });
+}
+function button(label, detail, callback, disabled) {
+  const item = document.createElement('button');
+  item.textContent = label;
+  const sub = document.createElement('small');
+  sub.textContent = detail;
+  item.append(sub);
+  item.disabled = !!disabled;
+  item.onclick = callback;
+  return item;
+}
+function updatePalette() {
+  $('build-palette').hidden = !buildOpen;
+  $('build-toggle').setAttribute('aria-expanded', String(buildOpen));
+  $('build-toggle').disabled = !builders().length;
+  $('build-toggle').classList.toggle('active', buildOpen || !!buildKind);
+  if (!buildOpen) return;
+  const s = mission.state, entries = Object.entries(config.buildings).filter(([,spec])=>!spec.requires||s.research[spec.requires]);
+  const available = ([kind,spec]) => (!spec.requires || s.research[spec.requires]) && mission.canSpend(spec.cost);
+  const key = entries.map(entry => Number(available(entry))).join('') + Object.keys(s.research).join(',');
+  if (key === paletteKey) return;
+  paletteKey = key;
+  cards ??= world.buildingCards();
+  $('build-cards').replaceChildren(...entries.map(([kind,spec]) => {
+    const locked = spec.requires && !s.research[spec.requires];
+    const b = button(spec.name, locked ? 'Нужно исследование' : spec.cost + ' ⚡ · ' + spec.seconds + ' с', () => beginPlacement(kind), !available([kind,spec]));
+    const image = document.createElement('img');
+    image.src = cards[kind];
+    image.alt = '';
+    b.prepend(image);
+    return b;
+  }));
+}
+function updateRoster() {
+  const units=vehicles(),roster=$('roster');
+  const columns=Math.max(4,Math.min(9,Math.floor(Math.min(innerWidth*.56,336)/37)));
+  const groups=new Map();
+  const stack=units.length>columns;
+  const counts={};
+  for(const unit of units){
+    counts[unit.kind]=(counts[unit.kind]??0)+1;
+    const key=stack?(unit.designId??unit.kind):unit.id;
+    if(!groups.has(key)){
+      const label=unit.designName??(names[unit.kind]??config.units[unit.kind].name)+(stack?'':' '+counts[unit.kind]);
+      groups.set(key,{label,kind:unit.kind,units:[]});
+    }
+    groups.get(key).units.push(unit);
+  }
+  const tiles=[...groups.values()];
+  const visibleColumns=Math.min(tiles.length,Math.max(columns,Math.ceil(tiles.length/3)));
+  roster.style.setProperty('--roster-cols',Math.max(1,visibleColumns));
+  const key=tiles.map(tile=>tile.units.map(unit=>unit.id+(selected.has(unit.id)?'+':'-')).join('/')).join(',');
+  if(key!==rosterKey){
+    rosterKey=key;
+    const svgNS='http://www.w3.org/2000/svg';
+    roster.replaceChildren(...tiles.map(tile=>{
+      const b=document.createElement('button'),icon=document.createElementNS(svgNS,'svg'),use=document.createElementNS(svgNS,'use');
+      use.setAttribute('href','hud-icons.svg#'+tile.kind);
+      icon.setAttribute('aria-hidden','true');icon.append(use);
+      b.append(icon,document.createElement('i'));
+      const ids=tile.units.map(unit=>unit.id),active=ids.filter(id=>selected.has(id)).length;
+      b.classList.toggle('active',active===ids.length);
+      b.classList.toggle('partial',active>0&&active<ids.length);
+      b.setAttribute('aria-label',ids.length>1?tile.label+' · '+ids.length+' машин':tile.label);
+      if(ids.length>1){
+        const amount=document.createElement('span');
+        amount.className='stack-count';amount.textContent='×'+ids.length;b.append(amount);
+      }
+      b.onclick=event=>select(ids,event.shiftKey);
+      b.ondblclick=()=>{
+        const live=ids.map(id=>mission.entity(id)).filter(Boolean);
+        if(live.length===1)focusUnit(live[0]);
+        else if(live.length){
+          select(ids);
+          world.centre({x:live.reduce((sum,unit)=>sum+unit.x,0)/live.length,y:live.reduce((sum,unit)=>sum+unit.y,0)/live.length},360);
+        }
+      };
+      return b;
+    }));
+  }
+  for(let i=0;i<tiles.length;i++){
+    const {units,label}=tiles[i],b=roster.children[i];
+    const lowest=units.reduce((min,unit)=>unit.hp/unit.maxHp<min.hp/min.maxHp?unit:min);
+    b.style.setProperty('--hp',100*lowest.hp/lowest.maxHp+'%');
+    b.style.setProperty('--hp-color',hpColor(lowest.hp/lowest.maxHp));
+    b.title=label+(units.length>1?' ×'+units.length+' · минимум ':' · ')+Math.ceil(lowest.hp)+'/'+lowest.maxHp+' HP';
+  }
+}
+function updateContext(first) {
+  const s = mission.state;
+  const energy = s.energy;
+  const thresholds = [...Object.values(config.units), ...Object.values(config.research)].map(spec => Number(energy >= spec.cost)).join('');
+  const factory = first?.owner === 'rai' && first.completed && first.kind === 'factory';
+  const designs = factory ? s.designs.map(project => project.id + ':' + project.name).join(',') : '';
+  const key = [first?.id, first?.completed, first?.clearing, first?.research?.key, s.artifactKeys.join(), Object.keys(s.research).join(), thresholds, designs, builders().length].join('|');
+  if (key !== actionKey) {
+    actionKey = key;
+    const items = [];
+    const add = (label, detail, action, disabled) => items.push(button(label, detail, () => {report(action()); updateUi();}, disabled));
+    if (factory) {
+      items.push(button('Конструктор', 'Новый проект', toggleDesigner));
+      for (const {id, name, spec} of mission.factoryProjects()) {
+        add(name, spec.cost + ' ⚡ · ' + spec.seconds + ' с', () => {
+          const result=mission.produce(first.id,id);
+          if(result.ok){
+            const count=mission.entity(first.id).queue.length;
+            toast(name+' добавлен в очередь · '+count);
+            sound.signal('order');
+          }
+          return result;
+        }, !mission.canSpend(spec.cost));
+      }
+    }
+    if (first?.owner === 'rai' && first.completed && first.kind === 'lab') {
+      for (const [id,spec] of Object.entries(config.research)) {
+        const done = s.research[id], known = s.artifactKeys.includes(id);
+        if(!done&&!known)continue;
+        const label=done?spec.completedName??spec.name:sampleNames[id]??'Неизвестный образец';
+        add(label, done ? 'Готово' : spec.cost + ' ⚡ · ' + spec.seconds + ' с', () => mission.research(first.id,id), done || !!first.research || energy < spec.cost);
+      }
+      if(!items.length){const hint=document.createElement('span');hint.textContent='Нет образцов для анализа';items.push(hint);}
+    }
+    if (first?.owner === 'rai' && first.completed === false) {
+      add('Достроить', 'Отправить строителей', () => {
+        const ids = chooseBuilder(first.kind).map(unit => unit.id);
+        const result = mission.order(ids, 'build', first);
+        if (result.ok) sound.acknowledge('build', ids);
+        return result;
+      }, first.clearing||!builders().length);
+      add('Отменить стройку', 'Вернуть остаток энергии', () => mission.cancelBuilding(first.id));
+    }
+    $('actions').replaceChildren(...items);
+    $('actions').classList.toggle('factory-actions', !!factory);
+    $('actions').hidden = !items.length;
+  }
+  const queue=$('queue'), jobs=first?.queue??[], job=jobs[0]??first?.research;
+  queue.hidden = !job;
+  if (job) {
+    const label=entry=>entry.name??config.units[entry.kind]?.name??sampleNames[entry.key]??'Анализ образца';
+    const nextKey=[first.id,s.powered,...(jobs.length?jobs:[job]).map(label)].join('|');
+    if(nextKey!==queueKey){
+      queueKey=nextKey;
+      const running=document.createElement('div'),progress=document.createElement('progress');
+      running.textContent=(s.powered?'':'Нет питания · ')+(jobs.length?'Выпуск · ':'Исследование · ')+label(job);
+      progress.max=1;running.append(progress);
+      queue.replaceChildren(running);
+      if(jobs.length>1){
+        const waiting=document.createElement('div'),batches=[];
+        for(const entry of jobs.slice(1)){
+          const name=label(entry),last=batches.at(-1);
+          if(last?.name===name)last.count++;
+          else batches.push({name,count:1});
+        }
+        waiting.textContent='Далее · '+batches.slice(0,4).map(({name,count})=>name+(count>1?' ×'+count:'')).join(' → ')+(batches.length>4?' → ещё '+batches.slice(4).reduce((sum,item)=>sum+item.count,0):'');
+        queue.append(waiting);
+      }
+    }
+    queue.querySelector('progress').value=job.progress;
+  }
+}
+function updateUi() {
+  if (!active) return;
+  const s = mission.state;
+  for (const id of selected) if (!mission.entity(id)) selected.delete(id);
+  const group = selection(), first = group[0], mobile = group.filter(isMobile);
+  $('energy').textContent = Math.floor(s.energy);
+  $('income').textContent = (s.energyRate >= 0 ? '+' : '') + s.energyRate.toFixed(1) + '/с';
+  $('income').classList.toggle('deficit',s.energyRate<0);
+  const population=vehicles().length;
+  $('population').textContent = population + ' / 48';
+  $('energy-meter').max=config.energyCapacity;
+  $('energy-meter').value=s.energy;
+  $('fleet-meter').value=population;
+  $('power').textContent = s.powered ? 'Сеть онлайн' : 'Нет питания';
+  $('power').classList.toggle('online',s.powered);
+  $('pause').textContent = paused ? 'Продолжить' : 'Пауза';
+  $('tempo').textContent = '×' + speed;
+  const tasks = mission.objectives();
+  $('objective-count').textContent = tasks.filter(task => task.done).length + '/' + tasks.length;
+  const nextTasks = tasks.map(task=>task.id+task.done+(task.progress??'')).join(',');
+  if (nextTasks !== taskKey) {
+    taskKey = nextTasks;
+    $('objectives').replaceChildren(...tasks.map(task => {
+      const row = document.createElement('li'), name = document.createElement('span'), amount = document.createElement('small');
+      row.classList.toggle('done', task.done);
+      name.textContent = taskNames[task.id];
+      amount.textContent = task.progress ?? '';
+      row.append(name,amount);
+      return row;
+    }));
+  }
+  $('hint').textContent = s.status !== 'running' ? '' : s.flags.contact && !s.flags.raidWon ? 'Прикройте базу. Ожидается рейд.' : !s.powered ? 'Генератор через «Строить». Вышка по клику на нефтяную точку.' : !tasks[0].done ? 'Завод, лаборатория и укрытие.' : s.flags.lastRevealed ? 'Четвёртый лагерь открыт на юге.' : 'Разведайте лагеря и доставьте артефакты.';
+  $('selection').textContent = group.length > 1 ? 'Группа · ' + group.length : first?.designName ?? (config.units[first?.kind] ?? config.buildings[first?.kind])?.name ?? (first ? 'Лагерь отбросов' : 'Нет выделения');
+  const hp = group.reduce((sum,entity)=>sum+entity.hp,0), maxHp = group.reduce((sum,entity)=>sum+entity.maxHp,0);
+  const wellStatus=group.length===1&&first?.kind==='derrick'&&first.completed?(first.powered?' · Качает':' · Нет питания'):'';
+  $('details').textContent = orderMode ? (orderMode === 'attack' ? 'ЛКМ — выбрать врага' : 'ЛКМ — выбрать точку') : first?.clearing ? 'Освобождение площадки' : first?.awaitingWorkers ? 'В очереди строителей' : first ? Math.ceil(hp) + '/' + maxHp + (first.completed === false ? ' · ' + Math.floor(first.progress*100) + '%' : ' HP')+wellStatus : 'Выберите машину';
+  $('move-order').classList.toggle('active', orderMode === 'move');
+  $('attack-order').classList.toggle('active', orderMode === 'attack');
+  $('move-order').disabled = !vehicles().length;
+  $('attack-order').disabled = !mobile.some(unit => config.units[unit.kind].damage > 0);
+  $('stop').disabled = !mobile.length;
+  $('placement').hidden = !buildKind;
+  if (buildKind) $('placement-name').textContent = config.buildings[buildKind].name;
+  updateRoster();
+  updatePalette();
+  updateContext(first);
+  designer.refresh();
+}
+function minimap(){const canvas=$('minimap'),ctx=canvas.getContext('2d'),size=canvas.width,field=world.field;ctx.fillStyle='#171e1c';ctx.fillRect(0,0,size,size);if(miniBackground.complete&&miniBackground.naturalWidth)ctx.drawImage(miniBackground,0,0,size,size);
+ world.drawMinimapFog(ctx,size);
  for(const grid of config.oilFields){const p=field.gridToWorld(grid);if(!mission.exploredAt(p.x,p.y))continue;ctx.fillStyle='#d5b869';ctx.fillRect(grid[0]/127*size-2,grid[1]/127*size-2,4,4);}
  for(const e of [...mission.state.units,...mission.state.buildings]){if(e.hp<=0||e.owner!=='rai'&&!mission.visibleAt(e.x,e.y))continue;const [x,y]=field.worldToGrid(e.x,e.y);ctx.fillStyle=selected.has(e.id)?'#eff2c3':e.owner==='rai'?'#a8c28a':'#d77e60';ctx.fillRect(x/127*size-2,y/127*size-2,e.path?3:5,e.path?3:5);}for(const a of mission.state.artifacts)if(!a.collected&&mission.exploredAt(a.x,a.y)){const [x,y]=field.worldToGrid(a.x,a.y);ctx.fillStyle='#e8d891';ctx.fillRect(x/127*size-3,y/127*size-3,6,6);}if(mission.state.flags.lastRevealed&&!mission.state.camps[3].cleared){const camp=mission.state.camps[3],x=camp.grid[0]/127*size,y=camp.grid[1]/127*size;ctx.strokeStyle='#df997b';ctx.strokeRect(x-5,y-5,10,10);ctx.fillStyle='#edc6a2';ctx.font='10px Arial';ctx.fillText('4',x+7,y+3);}const [cx,cy]=field.worldToGrid(world.controls.target.x,world.controls.target.y);ctx.strokeStyle='#e3d4a3';ctx.lineWidth=1;ctx.strokeRect(cx/127*size-9,cy/127*size-7,18,14);
 }
-function labels(){const canvas=$('labels'),dpr=Math.min(devicePixelRatio,1.5);if(canvas.width!==Math.round(innerWidth*dpr)||canvas.height!==Math.round(innerHeight*dpr)){canvas.width=Math.round(innerWidth*dpr);canvas.height=Math.round(innerHeight*dpr);}const ctx=canvas.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,innerWidth,innerHeight);for(const e of [...mission.state.units,...mission.state.buildings]){if(e.hp<=0||e.owner!=='rai'&&!mission.visibleAt(e.x,e.y)||e.hp===e.maxHp&&!selected.has(e.id)&&e.completed!==false)continue;const p=world.screen(e);if(!p.visible)continue;const y=p.y-20;ctx.fillStyle='#111b16dd';ctx.fillRect(p.x-20,y,40,4);ctx.fillStyle=e.owner==='rai'?'#b8ca96':'#cf8267';ctx.fillRect(p.x-20,y,40*e.hp/e.maxHp,4);if(e.completed===false){ctx.fillStyle='#d4bd88';ctx.fillRect(p.x-20,y+6,40*e.progress,3);}}}
-function events(){for(const e of mission.drainEvents()){if(e.type==='construction-start')bark('construction-start',{important:true});if(e.type==='construction-complete'){toast(config.buildings[e.kind].name+': строительство завершено');bark(e.kind==='generator'?'generator-complete':e.kind==='factory'?'factory-complete':'Строительство завершено',{important:true});saveGame(false);}if(e.type==='unit-produced'){toast(config.units[e.kind].name+': готово');bark(e.first?'first-unit-produced':'Построена новая техника',{important:true});}if(e.type==='unit-damaged')bark('Повреждение машины');if(e.type==='artifact-collected')toast('Артефакт доставлен. Доступно исследование.');if(e.type==='research-start')bark('Исследование начато');if(e.type==='research-complete')bark('Исследование завершено',{important:true});if(e.type==='destroyed'&&e.owner==='scavs')bark('Уничтожение врага');if(e.type==='destroyed'&&e.kind==='command'&&e.owner==='rai')bark('Подбит командирский УАЗ',{important:true});if(e.type==='camp-cleared')toast('Лагерь зачищен');if(e.type==='map-expanded')toast('Разведка открыла южный сектор. Четвёртый лагерь отмечен на карте.');}if(active&&!currentMedia&&mission.state.time-lastIdle>90&&mission.state.units.filter(u=>u.owner==='rai'&&u.hp>0).every(u=>!u.task)){lastIdle=mission.state.time;bark('Отсутствие приказов');}}
-function frame(now){requestAnimationFrame(frame);const dt=Math.min(.2,(now-last)/1000);last=now;if(!world||!mission)return;if(active&&!paused&&!currentMedia)mission.advance(dt*speed);events();if(active)startNextMedia();if(!currentMedia){world.update(mission,selected,dt);labels();if(now-lastMini>220){lastMini=now;minimap();}if(buildKind)world.setGhost(buildKind,placementAtMouse());}if(now-lastUi>250){lastUi=now;updateUi();}if(now>toastUntil)$('toast').hidden=true;if(active&&mission.state.status!=='running'&&!mission.state.pendingCinematics.length&&!currentMedia&&!resultShown){resultShown=true;$('result-title').textContent=mission.state.status==='victory'?'Миссия завершена':'Операция прервана';$('result-message').textContent=mission.state.status==='victory'?'Передовая база действует. Следующая задача — «Энергетический всплеск».':'Утрачены строители и производство. Загрузи сохранение или начни заново.';$('result').hidden=false;}}
+function labels() {
+  const canvas = $('labels'), dpr = Math.min(devicePixelRatio, 1.5);
+  const width = Math.round(innerWidth*dpr), height = Math.round(innerHeight*dpr);
+  if (canvas.width !== width || canvas.height !== height) {
+    canvas.width = width;
+    canvas.height = height;
+  }
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,innerWidth,innerHeight);
+  for (const entity of [...mission.state.units, ...mission.state.buildings]) {
+    if (entity.hp <= 0 || entity.owner !== 'rai' && !mission.visibleAt(entity.x,entity.y)) continue;
+    if (entity.hp === entity.maxHp && !selected.has(entity.id) && entity.completed !== false) continue;
+    const unit = config.units[entity.kind];
+    const spec = config.buildings[entity.kind];
+    const top = entity.completed===false&&spec
+      ? buildLayerHeight(entity,spec,config.worldScale)-world.field.heightAt(entity.x,entity.y)
+      : (unit ? (entity.kind === 'builder' ? 3.65 : 3.2) : (spec?.realSizeMetres[2] ?? 4)) * config.worldScale;
+    const p = world.screen(entity,top), ground = world.screen(entity,0);
+    const visibleHeight = Math.hypot(p.x-ground.x,p.y-ground.y);
+    if (!p.visible || visibleHeight < 6 || p.x < 0 || p.x > innerWidth || p.y < 45 || p.y > innerHeight) continue;
+    const w=Math.round(Math.max(27,Math.min(53,visibleHeight*1.75))),h=visibleHeight>16?7:6;
+    const x=Math.round(p.x-w/2),y=Math.round(p.y-h-3),fraction=entity.hp/entity.maxHp,inside=w-2;
+    ctx.fillStyle='#151a16';ctx.fillRect(x,y,w,h);
+    ctx.fillStyle='#46372c';ctx.fillRect(x+1,y+1,inside,h-2);
+    ctx.fillStyle=hpColor(fraction);ctx.fillRect(x+1,y+1,Math.max(1,inside*fraction),h-2);
+    const step=inside*100/entity.maxHp>=2.3?50:100;
+    for(let hp=step;hp<entity.maxHp;hp+=step){
+      const marker=Math.round(x+1+inside*hp/entity.maxHp),major=hp%100===0;
+      ctx.fillStyle=major?'#161b16e8':'#1d241d99';
+      ctx.fillRect(marker,y+(major?1:3),major?1.25:1,h-(major?2:4));
+    }
+    if(entity.owner!=='rai'){ctx.fillStyle='#e9856a';ctx.fillRect(x,y+h,w,1);}
+    if (entity.completed === false) {
+      ctx.fillStyle = '#d4bd88';
+      ctx.fillRect(x,y+h+2,w*entity.progress,2);
+    }
+  }
+}
+
+function events() {
+  for (const event of mission.drainEvents()) {
+    if (event.type === 'construction-complete') {
+      toast(config.buildings[event.kind].name + ' готов');
+      sound.signal('complete');
+      saveGame(false);
+    }
+    if (event.type === 'unit-produced') toast((event.name ?? config.units[event.kind].name) + ' · готово к выезду');
+    if (event.type === 'construction-refused') toast(event.reason);
+    if (event.type === 'artifact-collected') toast('Артефакт доставлен в лабораторию');
+    if (event.type === 'camp-cleared') toast('Лагерь зачищен');
+  }
+}
+function frame(now) {
+  requestAnimationFrame(frame);
+  const dt = Math.min(.65, (now - last) / 1000);
+  last = now;
+  if (!world || !mission) return;
+  if (designer?.visible) {
+    sound.update();
+    return;
+  }
+  if (active) {
+    if (!paused) mission.advance(dt * speed);
+    events();
+    radio.consume(mission, now);
+  }
+  world.update(mission, selected, dt);
+  if (active) {
+    labels();
+    if (now - lastMini > 200) { lastMini = now; minimap(); }
+    if (now - lastUi > 220) {
+      lastUi = now;
+      if (buildKind) updatePlacement();
+      updateUi();
+    }
+    if (mission.state.status !== 'running' && !resultShown) {
+      resultShown = true;
+      $('result-title').textContent = mission.state.status === 'victory' ? 'Миссия завершена' : 'Операция прервана';
+      $('result-message').textContent = mission.state.status === 'victory' ? 'Передовая база действует. Следующая задача — «Энергетический всплеск».' : 'Утрачены строители и производство.';
+      $('result').hidden = false;
+    }
+  }
+  if (now >= toastUntil) $('toast').hidden = true;
+}
 requestAnimationFrame(frame);
-try{
- [config,story,audio]=await Promise.all(['gameplay.json','story.json','audio.json'].map(get));world=await createCampaignWorld($('world'),config);mission=new Mission(config,world.field);sound=new MissionSound(story,audio,base,text=>{$('radio').textContent=text;$('radio').hidden=!text;});player=new CinematicPlayer({canvas:$('film'),story,audio,base,onState:s=>{$('film-status').textContent=s.error??(s.loading?'Подготовка сцены…':'');$('film-pause').textContent=s.playing?'Пауза':'Продолжить';},onFinish:finishMedia});
- window.campaign={ready:true,mission,world,player,sound,select,get selected(){return [...selected];},get state(){return{active,paused,speed,currentMedia,buildKind};},advance(seconds){mission.advance(seconds);events();updateUi();return mission.state;}};
- miniBackground.src='../assets/maps/alpha/macro-albedo.jpg';installInput();$('loading-status').textContent='Карта и конвой готовы.';$('begin').disabled=false;try{saved=localStorage.getItem(saveKey);$('resume-save').hidden=!saved;}catch{}
- $('begin').onclick=async()=>{active=true;$('welcome').hidden=true;await sound.unlock();startNextMedia();};$('resume-save').onclick=resumeGame;$('save').onclick=()=>saveGame();$('load').onclick=resumeGame;$('pause').onclick=()=>{paused=!paused;world.keys.clear();updateUi();};$('tempo').onclick=()=>{speed=speed===1?2:speed===2?4:1;updateUi();};$('home').onclick=()=>world.centre(world.field.gridToWorld(config.startGrid),520);$('stop').onclick=()=>report(mission.stop([...selected]));$('film-pause').onclick=()=>player.playing?player.pause():player.play().catch(error=>toast(error.message));$('film-motion').onclick=()=>{player.motion=!player.motion;player.draw(player.clock());};$('film-skip').onclick=()=>player.skip();$('result-close').onclick=()=>$('result').hidden=true;$('restart').onclick=()=>location.reload();updateUi();
-}catch(error){console.error(error);$('loading-status').textContent='Ошибка запуска: '+error.message;}
+try {
+  const response = await fetch(dataUrl);
+  if (!response.ok) throw new Error('Конфигурация миссии ' + response.status);
+  config = await response.json();
+  sound = new FieldSound($('sound-toggle'));
+  world = await createCampaignWorld($('world'), config, sound);
+  mission = new Mission(config, world.field);
+  designer = new VehicleDesigner($('designer'), $('design-toggle'), mission, {
+    makeModel: components => world.vehicles.makeDesignModel(components),
+    onActiveChange(open) {
+      if (open) {
+        pausedBeforeDesigner = paused;
+        paused = true;
+        sound.update({engine:0,rolling:0,slip:0,welding:0});
+      } else paused = pausedBeforeDesigner;
+      updateUi();
+    },
+    onSave(project) {
+      saveGame(false);
+      updateUi();
+      toast('Проект «' + project.name + '» доступен на заводе');
+    },
+  });
+  radio = new FieldRadio($('radio'), $('radio-toggle'), () => sound.signal('radio'));
+  window.campaign = {
+    ready: true, mission, world, select, radio,
+    get drivingAudio() { return {running:sound.ready(), recordings:!!sound.recordings}; },
+    get selected() { return [...selected]; },
+    get state() { return {active, paused, speed, buildKind, orderMode}; },
+    advance(seconds) { mission.advance(seconds); events(); radio.consume(mission, performance.now()); updateUi(); return mission.state; },
+  };
+  miniBackground.src = '../assets/maps/alpha/macro-albedo.jpg';
+  installInput();
+  $('loading-status').textContent = 'Карта готова. Первый приказ — развернуть базу.';
+  $('begin').disabled = false;
+  try { $('resume-save').hidden = !localStorage.getItem(saveKey); } catch {}
+  $('begin').onclick = () => start();
+  $('resume-save').onclick = $('load').onclick = () => start(true);
+  $('save').onclick = () => saveGame();
+  $('pause').onclick = () => { paused = !paused; world.keys.clear(); updateUi(); };
+  $('tempo').onclick = () => { speed = speed === 1 ? 2 : speed === 2 ? 4 : 1; updateUi(); };
+  $('design-toggle').onclick = toggleDesigner;
+  $('build-toggle').onclick = toggleBuild;
+  $('close-build').onclick = $('cancel-order').onclick = cancelMode;
+  $('suggest-site').onclick = suggestSite;
+  $('move-order').onclick = () => beginOrder('move');
+  $('attack-order').onclick = () => beginOrder('attack');
+  $('home').onclick = () => world.centre(world.field.gridToWorld(config.startGrid), 360);
+  $('stop').onclick = () => {
+    const ids = selection().filter(liveMobile).map(unit => unit.id);
+    if (report(mission.stop(ids))) sound.acknowledge('stop', ids);
+    cancelMode();
+  };
+  $('result-close').onclick = () => { $('result').hidden = true; };
+  $('restart').onclick = () => location.reload();
+} catch (error) {
+  console.error(error);
+  $('loading-status').textContent = 'Ошибка запуска. ' + error.message;
+}
