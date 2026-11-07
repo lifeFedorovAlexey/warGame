@@ -6,6 +6,7 @@ const driveFiles = {
 };
 const driveBase = '../assets/campaign/alpha/mission01/vehicle-sfx/';
 const radioBase = '../assets/campaign/alpha/mission01/unit-radio/';
+const ambienceBase = '../assets/campaign/alpha/mission01/field-ambience/';
 const voiceKinds = ['select', 'move', 'attack', 'build', 'stop'];
 const voiceCooldown = 1250;
 const voiceMaxAge = 1300;
@@ -30,6 +31,7 @@ export class FieldSound {
         this.pendingVoice = null;
         this.voiceSource?.stop();
         this.voiceSource = null;
+        this.anomalySource?.stop();
       }
     };
   }
@@ -67,6 +69,12 @@ export class FieldSound {
     this.loadRecordings();
     this.loadVoices();
     this.loadProjector();
+    this.loadClip(ambienceBase, 'desert-wind.ogg')
+      .then(buffer => { this.wind = this.startLoop(buffer); })
+      .catch(error => console.warn('Запись ветра недоступна:', error.message));
+    this.loadClip(ambienceBase, 'anomaly-pulse.ogg')
+      .then(buffer => { this.anomalyClip = buffer; })
+      .catch(error => console.warn('Сигнал аномалии недоступен:', error.message));
   }
 
   async loadClip(base, file) {
@@ -215,7 +223,7 @@ export class FieldSound {
     if (level > .04 && this.limit('impact', .085)) this.transient({duration:.12, frequency:910, end:310, level:.17*level, pan});
   }
 
-  update({engine = 0, rolling = 0, slip = 0, road = 0, welding = 0} = {}) {
+  update({engine = 0, rolling = 0, slip = 0, road = 0, welding = 0, field = false} = {}) {
     if (!this.ready()) return;
     const now = this.context.currentTime;
     if (now - this.drivingUpdated < 1 / 30) return;
@@ -247,6 +255,22 @@ export class FieldSound {
       this.playSkid(slip,road);
     }
     this.projector?.gain.gain.setTargetAtTime(.56*welding, now, .12);
+    this.wind?.gain.gain.setTargetAtTime(field ? .16 * (1 - .5*engine) : 0, now, .28);
+  }
+
+  anomaly() {
+    if (!this.anomalyClip || !this.limit('anomaly', 3)) return;
+    const ctx = this.context, source = ctx.createBufferSource(), gain = ctx.createGain();
+    source.buffer = this.anomalyClip;
+    gain.gain.value = .7;
+    source.connect(gain).connect(this.output);
+    source.onended = () => {
+      source.disconnect();
+      gain.disconnect();
+      if (this.anomalySource === source) this.anomalySource = null;
+    };
+    this.anomalySource = source;
+    source.start();
   }
 
   signal(kind) {

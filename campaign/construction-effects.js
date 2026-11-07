@@ -27,8 +27,8 @@ export function createConstructionEffects(T,scene,scale) {
       void main(){
         float edge=1.-abs(beamUV.x*2.-1.)/max(.001,beamUV.y);
         float pulse=.92+.08*sin(beamUV.y*22.-beamTime*8.);
-        float alpha=pow(max(edge,0.),1.4)*(.29+.19*beamUV.y)*pulse;
-        vec3 light=mix(vec3(.13,.55,.74),vec3(.70,.98,1.),max(edge,0.));
+        float alpha=pow(max(edge,0.),1.4)*(.19+.15*beamUV.y)*pulse;
+        vec3 light=mix(vec3(.13,.55,.74),vec3(.52,.90,1.),max(edge,0.));
         gl_FragColor=vec4(light,alpha);
         #include <colorspace_fragment>
       }

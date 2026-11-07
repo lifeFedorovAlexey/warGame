@@ -99,7 +99,7 @@ export function planManeuver(unit, goal, {scale, allowed, accept, tolerance = 2,
           const legs = [...entry.legs, leg];
           const distance = lengthBetween(pose, goal);
           const toGoal = Math.abs(wrap(headingTo(pose, goal) - pose.heading));
-          const facingGoal = distance < initialDistance + 6 && toGoal < .65
+          const facingGoal = !accept && distance < initialDistance + 6 && toGoal < .65
             && traceArc(pose, 1, Math.tan(clamp(wrap(headingTo(pose, goal) - pose.heading), -steeringLimit, steeringLimit)),
               Math.min(distance, 2.5 * scale), scale, allowed);
           if (accept ? accept(pose) : distance <= tolerance || depth > 0 && facingGoal) return legs;
@@ -120,10 +120,19 @@ export function planManeuver(unit, goal, {scale, allowed, accept, tolerance = 2,
   return null;
 }
 
-export function maneuverStep(unit, leg, dt, {scale, allowed, crawl = false}) {
-  const maximumSpeed = crawl ? 7 : leg.direction > 0 ? 13 : 9;
+export function checkManeuver(unit, legs, scale, allowed) {
+  let pose = unit;
+  for (const leg of legs) {
+    pose = traceArc(pose, leg.direction, leg.curve, leg.remaining, scale, allowed);
+    if (!pose) return null;
+  }
+  return pose;
+}
+
+export function maneuverStep(unit, leg, dt, {scale, allowed, crawl = false, throughSpeed = 0, forwardSpeed = 13}) {
+  const maximumSpeed = crawl ? 7 : leg.direction > 0 ? forwardSpeed : 9;
   const lastSpeed = unit.reversing === (leg.direction < 0) ? unit.driveSpeed ?? 0 : 0;
-  const speed = Math.min(maximumSpeed, Math.sqrt(38 * leg.remaining), lastSpeed + 14 * dt);
+  const speed = Math.min(maximumSpeed, Math.sqrt(38 * leg.remaining + throughSpeed * throughSpeed), lastSpeed + 14 * dt);
   const length = Math.min(leg.remaining, speed * dt);
   const pose = traceArc(unit, leg.direction, leg.curve, length, scale, allowed);
   if (!pose) return null;

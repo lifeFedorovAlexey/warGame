@@ -7,6 +7,7 @@ const modular = [
 const fieldCar = [[1.03, -.075, 2.18, .43, .47], [.96, -.06, 2.10, 1.48, .78]];
 const cached = new WeakMap();
 const skin = .055;
+export const vehicleLocalBoxes = kind => kind === 'command' || kind === 'raider' ? fieldCar : modular;
 
 // Local dimensions follow the C01/B01 GLB bounds. Project both the lower
 // running gear and the higher body onto the ground using the render pose.
@@ -18,8 +19,7 @@ export function vehicleEnvelope(unit, scale, field) {
   const pose = field ? vehiclePose({...unit, heading}, field, scale) : {pitch: 0, roll: 0};
   const cp = Math.cos(pose.pitch), sp = Math.sin(pose.pitch), cr = Math.cos(pose.roll), sr = Math.sin(pose.roll);
   let xmin = Infinity, xmax = -Infinity, ymin = Infinity, ymax = -Infinity;
-  const isField = kind === 'command' || kind === 'raider';
-  for (const [hx, y, hy, z, hz] of isField ? fieldCar : modular) {
+  for (const [hx, y, hy, z, hz] of vehicleLocalBoxes(kind)) {
     const x = z * sr, forward = y * cp - z * sp * cr;
     const wx = hx * Math.abs(cr) + hz * Math.abs(sr);
     const wy = hx * Math.abs(sp * sr) + hy * Math.abs(cp) + hz * Math.abs(sp * cr);

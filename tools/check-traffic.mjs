@@ -47,7 +47,7 @@ function create(m,x,y,h,goal){
  const order=m.order([unit.id],'move',goal);
  assert(order.ok);return unit;
 }
-function sample(m,units,secs,walls=[]){
+function sample(m,units,secs,walls=[],releaseArrivals=false){
  let gap=Infinity,peak=0,wallContacts=0;
  const history=[];
  for(let i=0;i<secs*10;i++){
@@ -55,6 +55,7 @@ function sample(m,units,secs,walls=[]){
   for(const u of units){
    const from={x:u.x,y:u.y,heading:u.heading,kind:u.kind};
    m.move(u,.1);peak=Math.max(peak,u.driveSpeed);
+   if(releaseArrivals&&u.task?.type==='move'&&!u.path.length)u.task=null;
    if(walls.length&&(from.x!==u.x||from.y!==u.y)){
     const sweep=vehicleSweep(from,u,scale,m.field);
     wallContacts+=walls.filter(wall=>!sweepAvoidsFootprint(sweep,wall,0)).length;
@@ -168,13 +169,19 @@ assert(roadConvoy.gap>0);
 assert(roadConvoy.history.every(frame=>frame.every(p=>convoy.nav.roads.coverage(p.x,p.y)>=.4)),
  'Convoy follows the asphalt around the mesa');
 
-function funnel(opening, count){
- const m=session();
+function gateFixture(opening,count,setup=()=>{}){
+ const terrain={...field,roadNetwork:null,roadBlendAt:null};
+ const m=session(terrain);
  const walls=[-1,1].map(side=>m.addStructure('factory','rai',
   {x:0,y:side*(512+opening/2)/2},{halfWidth:56,halfDepth:(512-opening/2)/2}));
+ setup(m,walls);
  const fleet=Array.from({length:count},(_,index)=>m.addUnit('bukhanka','rai',
   {x:-105-Math.floor(index/3)*24,y:(index%3-1)*21},{heading:-Math.PI/2}));
  m.rebuildNavigation();
+ return {m,walls,fleet};
+}
+function funnel(opening, count){
+ const {m,walls,fleet}=gateFixture(opening,count);
  assert.equal(m.order(fleet.map(u=>u.id),'move',{x:180,y:0}).assigned,count);
  const out=sample(m,fleet,150,walls);
  assert.equal(out.complete,count);
@@ -184,11 +191,94 @@ function funnel(opening, count){
  return {completed:out.complete,seconds:Math.round(out.seconds*10)/10,gap:out.gap};
 }
 const singleFile=funnel(24,12),wideFunnel=funnel(34,18);
+const mixed=gateFixture(34,15,(m,walls)=>{
+ walls.push(m.addStructure('factory','rai',{x:158,y:63},{halfWidth:28,halfDepth:38}));
+ walls.push(m.addStructure('factory','rai',{x:100,y:-62},{halfWidth:19,halfDepth:33}));
+ m.addUnit('raider','scavs',{x:103,y:2},{heading:0});
+ m.addUnit('bukhanka','rai',{x:130,y:-4},{heading:0});
+ m.addUnit('bukhanka','rai',{x:190,y:-17},{heading:0});
+ m.visible.fill(1);
+});
+const group=mixed.fleet.map(u=>u.id),gateGoal={x:180,y:0};
+assert.equal(mixed.m.order(group,'move',gateGoal).assigned,group.length);
+const queuedSave=mixed.m.save();
+const loadedGate=session(mixed.m.field);
+loadedGate.load(queuedSave);
+assert.equal(loadedGate.save(),queuedSave);
+const lateBlocker=loadedGate.addUnit('raider','scavs',{x:35,y:0},{heading:0});
+sample(loadedGate,loadedGate.state.units,6,loadedGate.state.buildings,true);
+assert(loadedGate.state.units.filter(u=>group.includes(u.id)).every(u=>u.x<-56&&u.path.length),
+ 'A stationary blocker that appears after the order holds the convoy outside the corridor');
+lateBlocker.hp=0;
+const mixedExit=sample(loadedGate,loadedGate.state.units.filter(u=>u.hp>0),150,loadedGate.state.buildings,true);
+assert(loadedGate.state.units.filter(u=>group.includes(u.id)).every(u=>u.x>85&&!u.path.length));
+assert.equal(mixedExit.wallContacts,0);
+assert(mixedExit.gap>0);
+
+let barrier;
+const closed=gateFixture(24,6,m=>{
+ barrier=m.addUnit('bukhanka','rai',{x:50,y:0},{heading:0});
+});
+const closedGroup=closed.fleet.map(u=>u.id);
+assert.equal(closed.m.order(closedGroup,'move',gateGoal).ok,false);
+assert(closed.fleet.every(u=>!u.path.length));
+barrier.hp=0;
+assert.equal(closed.m.order(closedGroup,'move',gateGoal).assigned,closedGroup.length);
+
+function factoryApron(blockerKind){
+ const m=session(alpha,alphaConfig);
+ const make=(kind,x,y,owner='rai',extra={})=>m.addStructure(kind,owner,{x,y},{completed:true,progress:1,...extra});
+ make('generator',-1688,272);
+ make('derrick',-1696,368);
+ const factory=make('factory',-1592,368);
+ make('lab',-1480,288);
+ const blocker=blockerKind==='wall'
+  ?make('bunker',-1592,288,'scavs',{halfWidth:5,halfDepth:5})
+  :m.addUnit(blockerKind==='enemy'?'raider':'bukhanka',blockerKind==='enemy'?'scavs':'rai',{x:-1596,y:275},{heading:0});
+ m.addUnit('bukhanka','rai',{x:-1568,y:275},{heading:0});
+ m.addUnit('bukhanka','rai',{x:-1540,y:275},{heading:0});
+ m.rebuildNavigation();
+ assert(m.produce(factory.id,'bukhanka').ok);
+ const paid=factory.queue[0],balance=m.state.energy;
+ assert.equal(balance,alphaConfig.initialEnergy-paid.cost);
+ paid.progress=1;
+ let energy=balance;
+ const step=()=>{
+  m.state.time+=.1;
+  for(const unit of m.state.units)if(unit.owner==='rai'&&unit.hp>0)m.move(unit,.1);
+  m.updateEconomy(.1);
+  energy+=m.state.energyRate*.1;
+ };
+ step();
+ assert.equal(factory.exitBlocked,true);
+ assert.equal(factory.queue[0],paid);
+ if(blockerKind!=='ally'){
+  const position={x:blocker.x,y:blocker.y};
+  for(let tick=0;tick<30;tick++)step();
+  assert.equal(m.state.statistics.produced,0);
+  assert.deepEqual({x:blocker.x,y:blocker.y},position);
+  assert.equal(factory.queue[0],paid);
+  blocker.hp=0;
+  m.rebuildNavigation();
+ }
+ for(let tick=0;tick<150&&!m.state.statistics.produced;tick++)step();
+ assert.equal(m.state.statistics.produced,1);
+ assert.equal(factory.queue.length,0);
+ assert.equal(factory.exitBlocked,undefined);
+ assert(Math.abs(m.state.energy-energy)<1e-7,'A blocked, paid job never charges twice');
+ const released=m.state.units.at(-1);
+ assert(released.path.length&&m.state.units.every(other=>other===released||other.hp<=0
+  ||vehicleClearance(released,other,scale,alpha)>0));
+ if(blockerKind==='ally')assert(Math.hypot(blocker.x+1596,blocker.y-275)>10);
+ return Math.round(m.state.time*10)/10;
+}
+const factoryExit={idleAlly:factoryApron('ally'),enemyRemoved:factoryApron('enemy'),wallRemoved:factoryApron('wall')};
 
 console.log(JSON.stringify({
  tripCost:total,directCost:nav.travelCost(from,to),asphaltPeak:result.peak,
  opposite:{gap:result.gap,complete:result.complete},
  merge:{leftAhead:leftAhead.leader,rightAhead:rightAhead.leader,tied:tied.leader},touching,oldSave,
  alpha:{parkedRowGap:parkedRow.gap,bendGap:actualBend.gap,roadConvoy:{completed:roadConvoy.complete,gap:roadConvoy.gap}},
- singleFile,wideFunnel
+ singleFile,wideFunnel,mixedExit:{completed:group.length,seconds:Math.round(mixedExit.seconds*10)/10,gap:mixedExit.gap},
+ closedGateRejected:true,factoryExit
 },null,2));

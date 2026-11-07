@@ -1,9 +1,10 @@
 import {TerrainNavigator} from './navigation.js';
-import {driveStep,clearOfVehicles,vehicleClearance,planManeuver,maneuverStep} from './vehicle-motion.js';
+import {driveStep,clearOfVehicles,vehicleClearance,planManeuver,maneuverStep,checkManeuver} from './vehicle-motion.js';
 import {footprintSupport,vehicleEnvelope,vehicleSweep,vehicleGroundSafe} from './vehicle-collision.js';
+import {passageStillOpen,preparePassageEgress} from './passage-egress.js';
 import {vehicleRecipes,starterProjects,matchingRecipe,projectDesignation,designNameKey,projectAssemblyKey,latestVehicleProjects} from './vehicle-designs.js';
 import {angleDelta} from './builder-kinematics.js';
-import {workProjection} from './builder-optics.js';
+import {workProjection,projectorHasSight} from './builder-optics.js';
 
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 
@@ -101,10 +102,10 @@ export class Mission{
   const contains=point=>point.x>left&&point.x<right&&point.y>bottom&&point.y<top;
   return this.state.units.filter(unit=>unit.hp>0&&(contains(unit)||contains(this.nav.position(...this.nav.grid(unit.x,unit.y)))));
  }
- vehiclePath(unit,goal,{avoidMoving=false,avoidPoint=null,fallback=true,...options}={}){
+ vehiclePath(unit,goal,{avoidMoving=false,avoidPoint=null,fallback=true,ignoreUnits=null,...options}={}){
   const occupied=this.nav.occupied,changed=[],radius=this.config.worldScale*(avoidMoving?3.1:2.18);
   for(const other of this.state.units){
-   if(other===unit||other.hp<=0||other.owner!==unit.owner&&!this.visibleAt(other.x,other.y))continue;
+   if(other===unit||ignoreUnits?.has(other)||other.hp<=0||other.owner!==unit.owner&&!this.visibleAt(other.x,other.y))continue;
    if(other.path.length&&(!avoidMoving||distance(unit,other)>56))continue;
    const [col,row]=this.nav.grid(other.x,other.y),r=Math.ceil(radius/this.nav.cell),size=this.nav.size;
    for(let y=Math.max(0,row-r);y<=Math.min(size-1,row+r);y++)for(let x=Math.max(0,col-r);x<=Math.min(size-1,col+r);x++){
@@ -277,7 +278,8 @@ export class Mission{
    const p=this.nav.position(x,y),parked={...p,heading:Math.atan2(unit.x-p.x,p.y-unit.y)};
    if(!clearOfVehicles(unit,parked,this.state.units,scale,true)||!clearOfVehicles(unit,parked,reservations,scale,true))return;
    const at={...unit,...parked};
-   if(!workProjection(at,target,this.config,this.field))return;
+   const aim=this.projectorAim(at,target);
+   if(!aim||!projectorHasSight(aim,at,target,reservations,this.field,scale))return;
    if(!repair&&!workProjection(at,{...target,progress:1},this.config,this.field))return;
    candidates.push(p);
   };
@@ -331,7 +333,7 @@ export class Mission{
   if(action==='attack'&&(target.owner==='rai'||!this.entity(target.id)||!this.visibleAt(target.x,target.y)))return this.fail('Цель не обнаружена');
   if(action==='build'&&target.clearing)return this.fail('Техника освобождает площадку');
   if(['build','repair'].includes(action)&&(target.owner!=='rai'||!this.entity(target.id)))return this.fail('Нужна своя техника или постройка');
-  const units=this.state.units.filter(u=>ids.includes(u.id)&&u.owner==='rai'&&u.hp>0&&(!['build','repair'].includes(action)||this.unitSpec(u).role==='builder')&&(action!=='attack'||this.unitSpec(u).damage));if(!units.length)return this.fail('Не выбрана подходящая техника');let assigned=0;
+  const units=this.state.units.filter(u=>ids.includes(u.id)&&u.owner==='rai'&&u.hp>0&&(!['build','repair'].includes(action)||this.unitSpec(u).role==='builder')&&(action!=='attack'||this.unitSpec(u).damage));if(!units.length)return this.fail('Не выбрана подходящая техника');const assigned=new Set();
   const repeat=new Map();
   for(const unit of units){
    const order=unit.routeOrder;
@@ -355,12 +357,17 @@ export class Mission{
   let nextRoadSlot=0;
   const passage=action==='move'&&!roadFormation&&units.length>=3
    ?this.nav.passageBetween(groupCentre,target,this.config.worldScale):null;
+  const egress=passage?preparePassageEgress(this,passage,units,target):null;
+  if(egress?.blocked)return this.fail('Не удалось проложить безопасный выезд из прохода');
+  const departure=egress?.end??passage?.exit;
+  const convoy=egress?new Set(units):null;
   let preceding=null;
   const direction=Math.atan2(groupCentre.x-target.x,target.y-groupCentre.y);
   const forward={x:-Math.sin(direction),y:Math.cos(direction)},right={x:forward.y,y:-forward.x};
-  const beyondPassage=point=>!passage||(point[passage.along]-passage.exit[passage.along])*passage.direction>=this.config.worldScale*3.6;
+  const parkingClearance=egress?.parkingClearance??this.config.worldScale*3.6;
+  const beyondPassage=point=>!passage||(point[passage.along]-departure[passage.along])*passage.direction>=parkingClearance;
   const tail=passage?Math.floor((units.length-1)/3)*24*Math.abs(forward[passage.along])+24*Math.abs(right[passage.along]):0;
-  const passageShift=passage?Math.max(0,tail+this.config.worldScale*3.6-(target[passage.along]-passage.exit[passage.along])*passage.direction):0;
+  const passageShift=passage?Math.max(0,tail+parkingClearance-(target[passage.along]-departure[passage.along])*passage.direction):0;
   if(roadFormation){
    units.sort((a,b)=>(progress.get(b)??-Infinity)-(progress.get(a)??-Infinity)||distance(a,target)-distance(b,target));
   }else if(passage){
@@ -373,7 +380,7 @@ export class Mission{
    }
   }
   for(let index=0;index<units.length;index++){const unit=units[index],workOffset=(index-(units.length-1)/2)*18,goal=action==='build'||action==='repair'?this.workPoint(target,workOffset):target,columns=Math.min(3,units.length);
-   if(repeat.has(unit.id)){assigned++;if(unit.passage)preceding=unit.id;continue;}
+   if(repeat.has(unit.id)){assigned.add(unit.id);if(unit.passage)preceding=unit.id;continue;}
    const side=(index%columns-(columns-1)/2)*24, row=Math.floor(index/columns)*24;
    const formation={x:goal.x+right.x*side-forward.x*row,y:goal.y+right.y*side-forward.y*row};
    if(passage)formation[passage.along]+=passageShift*passage.direction;
@@ -385,12 +392,15 @@ export class Mission{
    }
    let viaPassage=null;
    if(passage){
-    const approach=this.vehiclePath(unit,passage.entrance,{maxGoalDistance:10});
-    const far=this.movePath(passage.exit,formation,reserved,parkingRadius,false,beyondPassage)??this.movePath(passage.exit,goal,reserved,parkingRadius,false,beyondPassage);
+    const approach=this.vehiclePath(unit,passage.entrance,{maxGoalDistance:10,ignoreUnits:convoy});
+    const departureRadius=egress?this.config.worldScale*18:parkingRadius;
+    const far=this.movePath(departure,formation,reserved,departureRadius,false,beyondPassage)
+     ??this.movePath(departure,goal,reserved,departureRadius,false,beyondPassage);
     if(approach?.length&&far?.length&&distance(approach.at(-1),passage.entrance)<.1){
-     viaPassage=[...approach,passage.exit,...far];
+     viaPassage=[...approach,egress?.start??passage.exit,...far];
     }
    }
+   if(egress&&!viaPassage)continue;
    const path=action==='attack'?this.attackPath(unit,target,reserved):['build','repair'].includes(action)?this.workPath(unit,target,workOffset):roadPath??viaPassage??this.movePath(unit,formation,reserved,parkingRadius)??this.movePath(unit,goal,reserved,parkingRadius);
    if(!path)continue;
    const destination=action==='move'?path.at(-1)??goal:goal;
@@ -402,13 +412,17 @@ export class Mission{
    delete unit.passage;
    if(viaPassage){
     unit.passage={preceding,along:passage.along,direction:passage.direction,admit:passage.admit};
+    if(egress){
+     unit.passage.egress={...egress,leader:preceding,phase:'approach'};
+     unit.passage.parkingEdge=departure[passage.along]+passage.direction*parkingClearance;
+    }
     preceding=unit.id;
    }
    if(action==='move')unit.routeOrder={request:{x:target.x,y:target.y},destination};
    else delete unit.routeOrder;
    unit.path=path;unit.task={type:action,targetId,x:destination.x,y:destination.y,workOffset};
    if(action==='build')unit.resumeConstructionId=target.id;
-   assigned++;
+   assigned.add(unit.id);
   }
   if(action==='move'&&target.id&&this.state.artifacts.some(artifact=>artifact.id===target.id&&!artifact.collected)
    &&!units.some(unit=>distance(unit.path.at(-1)??unit,target)<22)){
@@ -420,12 +434,13 @@ export class Mission{
     unit.path=path;unit.task={type:'move',x:end.x,y:end.y};
     unit.routeOrder={request:{x:target.x,y:target.y},destination:end};
     delete unit.passage;delete unit.detour;delete unit.traffic;delete unit.trafficHold;delete unit.driveWatch;delete unit.failedArcs;
-    if(!original)assigned++;
+    assigned.add(unit.id);
     break;
    }
   }
-  if(action==='build'&&assigned){target.awaitingWorkers=false;delete target.builderIds;}
-  return assigned?{ok:true,assigned}:this.fail('Нет доступного пути или подходящего строителя');
+  if(action==='build'&&assigned.size){target.awaitingWorkers=false;delete target.builderIds;}
+  return assigned.size?{ok:true,assigned:assigned.size,unassigned:units.filter(unit=>!assigned.has(unit.id)).map(unit=>unit.id)}:
+   this.fail('Нет доступного пути или подходящего строителя');
  }
  build(ids,kind,x,y,rotation=0){
   const builders=this.state.units.filter(u=>ids.includes(u.id)&&u.owner==='rai'&&u.hp>0&&this.unitSpec(u).role==='builder');if(!builders.length)return this.fail('Выберите строителя');const place=this.placement(kind,x,y,rotation);if(!place.ok)return place;
@@ -523,7 +538,7 @@ export class Mission{
   if(follower.traffic||follower.trafficRest>this.state.time)return;
   follower.traffic={leader:leader.id,since:this.state.time,phase:'seek'};
  }
- vehicleMotionClear(unit,from,to,grade=.52,blockers){
+ vehicleMotionClear(unit,from,to,grade=.52,blockers,obstacles=this.state.units){
   const field=this.field,scale=this.config.worldScale;
   if(!this.nav.lineClear(from,to,false,true,grade,true))return false;
   const envelope=vehicleEnvelope(to,scale,field);
@@ -535,7 +550,7 @@ export class Mission{
   const solids=this.nav.nearbySolids(to,scale*4.8);
   const sweep=solids.length?vehicleSweep(from,to,scale,field):null;
   return (!sweep||this.nav.clearSolidSweep(sweep,solids))
-   &&clearOfVehicles(unit,to,this.state.units,scale,false,from,field,blockers,sweep);
+   &&clearOfVehicles(unit,to,obstacles,scale,false,from,field,blockers,sweep);
  }
  passingLane(unit,point,course,scale){
   const look=22,range=112;
@@ -716,10 +731,18 @@ export class Mission{
    if(this.entity(unit.trafficHold)?.detour?.parking){stop();return false;}
    delete unit.trafficHold;
   }
+  const egress=gate?.egress;
+  const scale=this.config.worldScale;
+  if(egress?.phase==='approach'&&!egress.admitted&&distance(unit,egress.entry)<scale*7){
+   if(egress.admitAfter>this.state.time){stop();return false;}
+   if(!passageStillOpen(this,egress)){egress.admitAfter=this.state.time+1.2;stop();return false;}
+   egress.admitted=true;
+  }
   const point=unit.path[0]??unit, next=unit.path[1], d=distance(unit,point);
+  const atPivot=egress?.phase==='approach'&&point.x===egress.start.x&&point.y===egress.start.y;
   const precise=!next&&['build','repair'].includes(unit.task?.type);
-  const tolerance=precise?.65:2;
-  const scale=this.config.worldScale,blockers=new Set();
+  const tolerance=atPivot?.45:precise?.65:2;
+  const blockers=new Set();
   const applyPose=pose=>{
    const travelled=distance(unit,pose),debt=unit.reverseDebt??0;
    unit.reverseDebt=Math.max(0,debt+(pose.reversing?travelled:-travelled*.33));
@@ -729,6 +752,33 @@ export class Mission{
   const canRoll=(from,to,grade)=>this.vehicleMotionClear(unit,from,to,grade,blockers);
   const allowed=(from,to)=>canRoll(from,to);
   const roughAllowed=(from,to)=>canRoll(from,to,.60);
+
+  const advancingThroughExit=other=>{
+   const otherExit=other?.passage?.egress;
+   return egress&&other?.hp>0&&other.path.length&&otherExit?.phase==='turning'
+    &&otherExit.start.x===egress.start.x&&otherExit.start.y===egress.start.y;
+  };
+  if(egress?.phase==='waiting'||atPivot&&d<tolerance){
+   if(atPivot){unit.path.shift();egress.phase='waiting';}
+   const leader=this.entity(egress.leader);
+   const awaitingLeader=leader?.hp>0&&leader.path.length&&leader.passage?.egress
+    &&(!advancingThroughExit(leader)||distance(unit,leader)<scale*8);
+   if(awaitingLeader||egress.retryAt>this.state.time){
+    stop();return false;
+   }
+   // Moving vehicles ahead can clear the planned arc before this unit gets
+   // there. The actual step still sweeps against every vehicle.
+   const obstacles=this.state.units.filter(other=>!advancingThroughExit(other));
+   const exitClear=(from,to)=>this.vehicleMotionClear(unit,from,to,.52,undefined,obstacles);
+   const end=checkManeuver(unit,egress.legs,scale,exitClear);
+   const legs=end&&distance(end,egress.end)<scale*1.4?egress.legs:
+    planManeuver(unit,egress.end,{scale,allowed:exitClear,attempts:3,maximumLegs:25,reverseBudget:0,
+     accept:pose=>distance(pose,egress.end)<scale*.65&&Math.cos(pose.heading-egress.end.heading)>.94
+      &&this.nav.lineClear(pose,egress.end,false,true)});
+   if(!legs){egress.retryAt=this.state.time+1.8;stop();return false;}
+   unit.detour={legs:legs.map(leg=>({...leg})),passageExit:true,blocked:0};
+   egress.phase='turning';
+  }
 
   const traffic=unit.traffic;
   if(traffic){
@@ -751,7 +801,9 @@ export class Mission{
   }
   if(unit.detour){
    const plan=unit.detour,leg=plan.legs[0];
-   const step=maneuverStep(unit,leg,dt,{scale,allowed:plan.rough?roughAllowed:allowed,crawl:!!plan.rough});
+   const throughSpeed=plan.passageExit&&plan.legs[1]?.direction===leg.direction?16:0;
+   const step=maneuverStep(unit,leg,dt,{scale,allowed:plan.rough?roughAllowed:allowed,crawl:!!plan.rough,
+    throughSpeed,forwardSpeed:plan.passageExit?18:13});
    if(step){
     applyPose(step.pose);
     leg.remaining-=step.length;
@@ -762,13 +814,20 @@ export class Mission{
     }
     if(!plan.legs.length){
      if(plan.parking&&unit.traffic)unit.traffic.phase='parked';
+     if(plan.passageExit&&gate)delete gate.egress;
      delete unit.detour;delete unit.driveWatch;
     }
     return true;
    }
    stop();
+   if(plan.passageExit&&[...blockers].some(advancingThroughExit))return false;
    plan.blocked+=dt;
    if(plan.blocked<1)return false;
+   if(plan.passageExit&&egress){
+    egress.phase='waiting';egress.retryAt=this.state.time+.8;
+    delete unit.detour;
+    return false;
+   }
    if(!blockers.size&&!plan.parking&&!plan.rough){
     const failed=unit.failedArcs??={origin:{x:unit.x,y:unit.y},legs:[]};
     failed.legs.push({direction:leg.direction,curve:leg.curve});
@@ -782,7 +841,7 @@ export class Mission{
   const workTarget=repair||precise&&d<4?this.entity(unit.task.targetId):null;
   const targetStopped=!repair||workTarget&&Math.hypot(workTarget.x-workTarget.previousX,workTarget.y-workTarget.previousY)<.05;
   const atWork=workTarget&&targetStopped&&this.canWorkHere(unit,workTarget);
-  const canRoundCorner=next&&d<Math.max(5,Math.min(10,(unit.driveSpeed??0)*.42))
+  const canRoundCorner=!atPivot&&next&&d<Math.max(5,Math.min(10,(unit.driveSpeed??0)*.42))
    &&this.nav.lineClear(unit,next,false,true);
   if(atWork&&repair){
    unit.path.length=0;
@@ -828,6 +887,12 @@ export class Mission{
   watch.distance=d;watch.elapsed=0;watch.blocked=0;
   if(!jammed){watch.attempts=0;return !!pose;}
   watch.attempts=(watch.attempts??0)+1;
+  if(egress?.phase==='approach'){
+   if(blockers.size||trafficLimit<speed*.4)return !!pose;
+   const local=planManeuver(unit,point,{scale,allowed,tolerance,attempts:2,reverseBudget:scale*2,maximumLegs:5});
+   if(local)unit.detour={legs:local,parking:false,blocked:0};
+   return !!pose;
+  }
   this.requestPassage(unit,blockers);
 
   const target=unit.task?.targetId?this.entity(unit.task.targetId):null;
@@ -867,8 +932,9 @@ export class Mission{
   if(target&&['build','repair'].includes(unit.task.type))unit.path=this.workPath(unit,target)??unit.path;
   else if(target&&unit.task.type==='attack')unit.path=this.attackPath(unit,target)??unit.path;
   else if(unit.task?.type==='move'&&watch.attempts>=3&&distance(unit,destination)<scale*12){
+   const parkingAllowed=point=>gate?.parkingEdge===undefined||(point[gate.along]-gate.parkingEdge)*gate.direction>=0;
    if(!next&&d<scale*5.5&&watch.attempts%5===3){
-    const parking=this.nearbyParking(unit,destination,allowed,reverseBudget);
+    const parking=this.nearbyParking(unit,destination,allowed,reverseBudget,parkingAllowed);
     if(parking){
      unit.path=[parking.point];
      Object.assign(unit.task,parking.point);
@@ -877,7 +943,7 @@ export class Mission{
      return !!pose;
     }
    }
-   const parking=this.movePath(unit,destination,[],scale*14);
+   const parking=this.movePath(unit,destination,[],scale*14,false,parkingAllowed);
    if(parking?.length&&distance(parking.at(-1),destination)>2){
     unit.path=parking;
     Object.assign(unit.task,parking.at(-1));
@@ -886,13 +952,14 @@ export class Mission{
   }else unit.path=this.vehiclePath(unit,destination,{avoidMoving:true,maxGoalDistance:precise?.01:16})??unit.path;
   return !!pose;
  }
- nearbyParking(unit,goal,allowed,reverseBudget){
+ nearbyParking(unit,goal,allowed,reverseBudget,parkingAllowed){
   const scale=this.config.worldScale;
   const initialDistance=distance(unit,goal),candidates=[];
   for(const radius of [scale*1.5,scale*2.6,scale*3.7]){
    for(let index=0;index<8;index++){
     const angle=index*Math.PI/4;
     const point={x:goal.x+Math.cos(angle)*radius,y:goal.y+Math.sin(angle)*radius};
+    if(!parkingAllowed(point))continue;
     const travel=distance(unit,point);
     if(travel<scale*.45||travel>Math.min(initialDistance+4,scale*4.7))continue;
     const heading=Math.atan2(unit.x-point.x,point.y-unit.y);
@@ -910,9 +977,13 @@ export class Mission{
   }
   return null;
  }
+ projectorAim(unit,target){
+  const aim=workProjection(unit,target,this.config,this.field);
+  return aim&&projectorHasSight(aim,unit,target,this.state.units,this.field,this.config.worldScale)?aim:null;
+ }
  canWorkHere(unit,target){
   if(!target||!clearOfVehicles(unit,unit,this.state.units,this.config.worldScale,true))return false;
-  if(!workProjection(unit,target,this.config,this.field))return false;
+  if(!this.projectorAim(unit,target))return false;
   return !!this.config.units[target.kind]||!!workProjection(unit,{...target,progress:1},this.config,this.field);
  }
  updateBuilder(unit,dt){
@@ -927,7 +998,7 @@ export class Mission{
   const working=target&&['build','repair'].includes(job)&&!target.clearing;
   const parked=working&&!unit.path.length&&this.canWorkHere(unit,target);
   const moving=working&&this.config.units[target.kind]&&Math.hypot(target.x-target.previousX,target.y-target.previousY)>.05;
-  const aim=parked&&!moving?workProjection(unit,target,this.config,this.field):null;
+  const aim=parked&&!moving?this.projectorAim(unit,target):null;
   const requested=aim??{yaw:0,pitch:0};
   const yawError=angleDelta(requested.yaw,unit.projector.yaw), pitchError=requested.pitch-unit.projector.pitch;
   unit.projector.yaw=angleDelta(unit.projector.yaw+clamp(yawError,-2*dt,2*dt),0);
@@ -958,7 +1029,7 @@ export class Mission{
    if(unit.hp<=0||!unit.builderWorking)continue;
    const target=this.entity(unit.task?.targetId);
    const moving=target&&this.config.units[target.kind]&&Math.hypot(target.x-target.previousX,target.y-target.previousY)>.05;
-   if(!target||moving){unit.builderWorking=false;unit.builderContact=null;continue;}
+   if(!target||moving||!this.projectorAim(unit,target)){unit.builderWorking=false;unit.builderContact=null;continue;}
    if(unit.task.type==='build'&&!target.completed){
     target.progress=Math.min(1,target.progress+dt/this.buildingSpec(target).seconds);
     if(target.progress>=1){target.completed=true;this.state.statistics.buildingsCompleted++;this.emit('construction-complete',{kind:target.kind,building:target.id});}
@@ -986,15 +1057,51 @@ export class Mission{
    if((unit.task.type==='build'&&target.completed)||(unit.task.type==='repair'&&target.hp>=target.maxHp)){unit.task=null;unit.foldTime=2.6;}
   }else{if(unit.tool>0){unit.foldTime=2.6;return;}if(target&&['build','repair'].includes(unit.task?.type)&&!unit.path.length&&this.state.time-(unit.lastRepath??-10)>1){unit.path=this.workPath(unit,target);unit.lastRepath=this.state.time;}if(unit.task?.type==='move'&&!unit.path.length){if(distance(unit,unit.task)<24)unit.task=null;else if(this.state.time-(unit.lastRepath??-10)>1){unit.path=this.nav.findPath(unit,unit.task)??[];unit.lastRepath=this.state.time;}}this.move(unit,dt);}
  }
+ clearFactoryApron(building,departure,blockers){
+  const idle=other=>other.owner===building.owner&&!other.task&&!other.path.length&&!other.detour
+   &&this.unitSpec(other).role!=='builder';
+  if(![...blockers].every(idle))return;
+  const scale=this.config.worldScale;
+  const leader={...departure,path:[{
+   x:departure.x-Math.sin(departure.heading)*scale*9,
+   y:departure.y+Math.cos(departure.heading)*scale*9
+  }]};
+  for(const other of blockers){
+   if(other.trafficRest>this.state.time)continue;
+   other.trafficRest=this.state.time+4;
+   const parking=this.parkingManeuver(other,leader,(from,to)=>this.vehicleMotionClear(other,from,to));
+   if(!parking)continue;
+   other.detour={legs:parking.legs,parking:true,idleYield:true,blocked:0,factoryExit:building.id};
+   building.exitYield=other.id;
+   return;
+  }
+ }
  spawnProducedVehicle(building,item,spec){
+  if(building.exitYield){
+   const yielding=this.entity(building.exitYield);
+   if(yielding?.hp>0&&yielding.detour?.factoryExit===building.id)return false;
+   delete building.exitYield;
+  }
   const [x,y]=spec.exitAnchor,c=Math.cos(building.rotation),s=Math.sin(building.rotation),scale=this.config.worldScale;
   const point={x:building.x+(x*c-y*s)*scale,y:building.y+(x*s+y*c)*scale};
-  const exit=this.nav.nearest(point.x,point.y,5);
+  const exit=this.nav.nearest(point.x,point.y,2);
   if(!exit)return false;
   const heading=angleDelta(building.rotation+Math.PI,0);
   const departure={...exit,heading,owner:'rai',kind:item.kind};
-  if(!clearOfVehicles(null,departure,this.state.units,scale,true,null,this.field)
-   ||!this.nav.clearSolidSweep(vehicleSweep(departure,departure,scale,this.field),this.nav.nearbySolids(departure,scale*4)))return false;
+  const door={...departure,...point};
+  const solids=this.nav.nearbySolids(door,scale*4.8+distance(door,departure));
+  const apron=vehicleSweep(door,departure,scale,this.field);
+  if(!this.nav.lineClear(door,departure,false,true,.52,true)
+   ||!vehicleGroundSafe(apron.end,.52)
+   ||!this.nav.clearSolidSweep(vehicleSweep(door,door,scale,this.field),solids)
+   ||!this.nav.clearSolidSweep(apron,solids))return false;
+  const blockers=new Set();
+  const doorClear=clearOfVehicles(null,door,this.state.units,scale,true,null,this.field,blockers);
+  const apronClear=clearOfVehicles(null,departure,this.state.units,scale,false,door,this.field,blockers,apron);
+  if(!doorClear||!apronClear){
+   this.clearFactoryApron(building,door,blockers);
+   return false;
+  }
 
   const slot=building.producedCount??0;
   const side=(slot%3-1)*24,forward=-42-Math.floor(slot/3)%3*24;
@@ -1043,7 +1150,15 @@ export class Mission{
    if(building.queue.length){
     const item=building.queue[0],unitSpec=this.config.units[item.kind];
     item.progress=Math.min(1,item.progress+dt/unitSpec.seconds);
-    if(item.progress>=1)this.spawnProducedVehicle(building,item,spec);
+    if(item.progress>=1&&!(building.exitRetryAt>this.state.time)){
+     if(this.spawnProducedVehicle(building,item,spec)){
+      delete building.exitBlocked;
+      delete building.exitRetryAt;
+     }else{
+      building.exitBlocked=true;
+      building.exitRetryAt=this.state.time+.8;
+     }
+    }
    }
    if(building.research){const task=building.research;task.progress=Math.min(1,task.progress+dt/this.config.research[task.key].seconds);if(task.progress>=1){this.state.research[task.key]=true;this.emit('research-complete',{key:task.key});this.cinematic('research-'+task.key);building.research=null;}}
   }

@@ -11,6 +11,8 @@ import {createHeadlightPair,setHeadlightPower} from '../demo/vehicle-effects.js'
 import {createCombatEffects} from './combat-effects.js';
 import {createConstructionEffects} from './construction-effects.js';
 import {createFogMask} from './fog-mask.js';
+import {createStorySignals} from './story-signals.js';
+import {createFieldArtifact} from './field-artifacts.js';
 
 export async function createCampaignWorld(host,config,sound){
  const renderer=new T.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
@@ -20,14 +22,23 @@ export async function createCampaignWorld(host,config,sound){
  const scene=new T.Scene();scene.background=new T.Color('#8a826d');scene.fog=new T.Fog('#9c8d70',3500,11000);const camera=new T.PerspectiveCamera(43,1,1,22000);camera.up.set(0,0,1);
  scene.add(new T.HemisphereLight('#c4d8e0','#79664d',2.3));const sun=new T.DirectionalLight('#ffdfb7',2.5);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-400,right:400,top:400,bottom:-400,near:1,far:1600});sun.shadow.bias=-.0001;sun.shadow.normalBias=.08;scene.add(sun,sun.target);const fill=new T.DirectionalLight('#a5b6c3',1);fill.position.set(100,-200,800);scene.add(fill);
  const [terrain,sky]=await Promise.all([createAlphaMap(T),createDesertSky(T,renderer,scene)]);scene.add(terrain.root);terrain.baseOutline.visible=false;terrain.path.visible=false;terrain.setViewMode('close');const field=terrain.field,start=field.gridToWorld(config.startGrid);
- const controls=new OrbitControls(camera,renderer.domElement);controls.target.set(start.x,start.y,field.heightAt(start.x,start.y));camera.position.set(start.x+100,start.y-360,controls.target.z+360);controls.enableDamping=true;controls.minDistance=110;controls.maxDistance=5300;controls.minPolarAngle=.06;controls.maxPolarAngle=Math.PI*.42;controls.mouseButtons={LEFT:-1,MIDDLE:T.MOUSE.ROTATE,RIGHT:-1};controls.enablePan=false;
+ const normalCameraLimit=Math.PI*.42;
+ const controls=new OrbitControls(camera,renderer.domElement);controls.target.set(start.x,start.y,field.heightAt(start.x,start.y));camera.position.set(start.x+100,start.y-360,controls.target.z+360);controls.enableDamping=true;controls.minDistance=110;controls.maxDistance=5300;controls.minPolarAngle=.06;controls.maxPolarAngle=normalCameraLimit;controls.mouseButtons={LEFT:-1,MIDDLE:T.MOUSE.ROTATE,RIGHT:-1};controls.enablePan=false;
+ controls.addEventListener('start',()=>{controls.maxPolarAngle=normalCameraLimit;});
  const fog=createFogMask(T);
- const foggedMaterials=new Set();function addFog(material){if(!material||foggedMaterials.has(material))return;foggedMaterials.add(material);const before=material.onBeforeCompile,cache=material.customProgramCacheKey.bind(material);material.onBeforeCompile=shader=>{before.call(material,shader);shader.uniforms.missionFog={value:fog.texture};shader.uniforms.missionExtent={value:field.extent};shader.vertexShader='varying vec2 vMissionXY;\n'+shader.vertexShader;shader.vertexShader=shader.vertexShader.replace('#include <worldpos_vertex>','#include <worldpos_vertex>\nvMissionXY=(modelMatrix*vec4(transformed,1.)).xy;');shader.fragmentShader='uniform sampler2D missionFog;uniform float missionExtent;varying vec2 vMissionXY;\n'+shader.fragmentShader;shader.fragmentShader=shader.fragmentShader.replace('#include <dithering_fragment>',`#include <dithering_fragment>
+ const storySignals=createStorySignals(T,scene,field);
+ const foggedMaterials=new Set();function addFog(material){if(!material||foggedMaterials.has(material))return;foggedMaterials.add(material);const before=material.onBeforeCompile,cache=material.customProgramCacheKey.bind(material);material.onBeforeCompile=shader=>{before.call(material,shader);shader.uniforms.missionFog={value:fog.texture};shader.uniforms.missionExtent={value:field.extent};shader.uniforms.storySpill=storySignals.spill;shader.vertexShader='varying vec2 vMissionXY;\n'+shader.vertexShader;shader.vertexShader=shader.vertexShader.replace('#include <worldpos_vertex>','#include <worldpos_vertex>\nvMissionXY=(modelMatrix*vec4(transformed,1.)).xy;');shader.fragmentShader='uniform sampler2D missionFog;uniform float missionExtent;uniform vec3 storySpill;varying vec2 vMissionXY;\n'+shader.fragmentShader;shader.fragmentShader=shader.fragmentShader.replace('#include <dithering_fragment>',`#include <dithering_fragment>
  vec2 missionUv=vec2(vMissionXY.x,-vMissionXY.y)/missionExtent+.5;
  vec2 visibility=texture2D(missionFog,clamp(missionUv,vec2(0.),vec2(1.))).rg;
  float inside=step(0.,missionUv.x)*step(missionUv.x,1.)*step(0.,missionUv.y)*step(missionUv.y,1.);
- vec3 hidden=vec3(.023,.029,.031);gl_FragColor.rgb=mix(hidden,gl_FragColor.rgb,(visibility.g*.30+visibility.r*.70)*inside);
- `);};material.customProgramCacheKey=()=>cache()+'_mission_fog_v2';material.needsUpdate=true;}
+ vec3 hidden=vec3(.023,.029,.031);
+ if(storySpill.z>0.){
+   float halo=1.-smoothstep(24.,460.,length(vMissionXY-storySpill.xy));
+   float surface=dot(gl_FragColor.rgb,vec3(.299,.587,.114));
+   hidden+=vec3(.19,.24,.35)*halo*storySpill.z*(.3+.7*surface);
+ }
+ gl_FragColor.rgb=mix(hidden,gl_FragColor.rgb,(visibility.g*.30+visibility.r*.70)*inside);
+ `);};material.customProgramCacheKey=()=>cache()+'_mission_fog_v3';material.needsUpdate=true;}
  for(const material of terrain.terrainMaterials) addFog(material);
  const vehicles=await createVehicleLayer(T,scene,field,config),buildingRoot=new T.Group();scene.add(buildingRoot);const buildings=new Map(),prefabs=new Map(),selectionRoot=new T.Group();scene.add(selectionRoot);
  const groundEffects=createGroundEffects(T,scene,field,config.worldScale),shotTimes=new Map();
@@ -64,7 +75,16 @@ export async function createCampaignWorld(host,config,sound){
  const resize=()=>{renderer.setSize(host.clientWidth,host.clientHeight,false);camera.aspect=host.clientWidth/host.clientHeight;camera.updateProjectionMatrix();};new ResizeObserver(resize).observe(host);resize();
  function ground(clientX,clientY){const rect=renderer.domElement.getBoundingClientRect();ndc.set((clientX-rect.left)/rect.width*2-1,-(clientY-rect.top)/rect.height*2+1);ray.setFromCamera(ndc,camera);let lo=0,hi=20000;for(let i=0;i<28;i++){const middle=(lo+hi)/2,p=ray.ray.at(middle,vector);if(p.z>field.heightAt(p.x,p.y))lo=middle;else hi=middle;}const point=ray.ray.at((lo+hi)/2,new T.Vector3());return Math.abs(point.x)<=field.half&&Math.abs(point.y)<=field.half?{x:point.x,y:point.y,z:point.z}:null;}
  function screen(entity,height=8){const pose=entity.id&&vehicles.transforms.get(entity.id);const point=(pose?pose.position.clone():new T.Vector3(entity.x,entity.y,field.heightAt(entity.x,entity.y)));point.z+=height;point.project(camera);const rect=renderer.domElement.getBoundingClientRect();return{x:(point.x+1)*rect.width/2+rect.left,y:(1-point.y)*rect.height/2+rect.top,visible:point.z>-1&&point.z<1};}
- function centre(entity,distance){const offset=camera.position.clone().sub(controls.target);controls.target.set(entity.x,entity.y,field.heightAt(entity.x,entity.y));if(distance)offset.setLength(distance);camera.position.copy(controls.target).add(offset);controls.update();}
+ function centre(entity,distance){const offset=camera.position.clone().sub(controls.target);controls.maxPolarAngle=normalCameraLimit;controls.target.set(entity.x,entity.y,field.heightAt(entity.x,entity.y));if(distance)offset.setLength(distance);camera.position.copy(controls.target).add(offset);controls.update();}
+ function focusStorySignal(signal,foreground){
+  if(signal.kind!=='anomaly'){centre(signal,signal.distance);return;}
+  const approach=new T.Vector2(signal.x-foreground.x,signal.y-foreground.y).normalize();
+  const x=foreground.x-approach.x*350,y=foreground.y-approach.y*350;
+  controls.maxPolarAngle=Math.PI*.48;
+  controls.target.set(signal.x,signal.y,field.heightAt(signal.x,signal.y)+62);
+  camera.position.set(x,y,field.heightAt(x,y)+120);
+  controls.update();
+ }
  function getPrefab(kind,owner='rai',camp=''){
   const key = owner + ':' + kind + ':' + camp;
   if (!prefabs.has(key)) {
@@ -127,7 +147,7 @@ export async function createCampaignWorld(host,config,sound){
   position.needsUpdate=true;
  }
  function commandMarker(point,hostile=false){marker.position.set(point.x,point.y,field.heightAt(point.x,point.y)+.4);marker.material.color.set(hostile?'#f4a081':'#cfb473');marker.visible=true;markerUntil=performance.now()+1000;}
- function update(mission,selected,dt){
+ function update(mission,selected,dt,live=false){
   const time=mission.state.time,now=performance.now()/1000,shotsThisFrame=mission.drainEffects();
   if(time<lastWorldTime){groundEffects.reset();shotTimes.clear();combat.reset();dustTime=0;particles.length=0;}
   for(const event of shotsThisFrame)shotTimes.set(event.from,now);
@@ -142,6 +162,7 @@ export async function createCampaignWorld(host,config,sound){
   const distance=camera.position.distanceTo(controls.target),pan=distance*dt*.7;let dx=(keys.has('KeyD')?1:0)-(keys.has('KeyA')?1:0),dy=(keys.has('KeyW')?1:0)-(keys.has('KeyS')?1:0);if(dx||dy){const right=new T.Vector3().setFromMatrixColumn(camera.matrixWorld,0);right.z=0;right.normalize();const forward=new T.Vector3(-right.y,right.x,0);const offset=right.multiplyScalar(dx*pan).addScaledVector(forward,dy*pan);camera.position.add(offset);controls.target.add(offset);}
   controls.target.x=T.MathUtils.clamp(controls.target.x,-field.half,field.half);controls.target.y=T.MathUtils.clamp(controls.target.y,-field.half,field.half);controls.update();camera.position.z=Math.max(camera.position.z,field.heightAt(camera.position.x,camera.position.y)+40);
   sky.update(camera,false);
+  storySignals.update(mission,camera,now);
   const threshold=software?240:800;
   const mode=distance>(terrainMode==='close'?threshold+22:threshold-22)?'overview':'close';
   if(mode!==terrainMode){terrain.setViewMode(mode);terrainMode=mode;}
@@ -184,8 +205,24 @@ export async function createCampaignWorld(host,config,sound){
   }
   combat.update(now,camera,renderer.domElement.height);
   for(const oil of oilMarkers)oil.root.visible=mission.exploredAt(oil.x,oil.y)&&!mission.state.buildings.some(b=>b.kind==='derrick'&&b.hp>0&&Math.hypot(b.x-oil.x,b.y-oil.y)<5);
-  const artifactIds=new Set(mission.state.artifacts.map(a=>a.id));for(const [id,object] of artifactObjects)if(!artifactIds.has(id)){scene.remove(object);artifactObjects.delete(id);object.traverse(part=>{if(part.isMesh){part.geometry.dispose();part.material.dispose();}});}
-  for(const artifact of mission.state.artifacts){let object=artifactObjects.get(artifact.id);if(!object){object=new T.Group();const crate=new T.Mesh(new T.BoxGeometry(5,6,3),new T.MeshStandardMaterial({color:'#69715a',metalness:.5,roughness:.6}));crate.position.z=1.5;object.add(crate);const beacon=new T.Mesh(new T.OctahedronGeometry(2),new T.MeshBasicMaterial({color:'#e5cd82'}));beacon.position.z=10;object.add(beacon);scene.add(object);artifactObjects.set(artifact.id,object);}object.position.set(artifact.x,artifact.y,field.heightAt(artifact.x,artifact.y));object.visible=!artifact.collected&&mission.exploredAt(artifact.x,artifact.y);object.children[1].rotation.z=time*.8;}
+  const knownArtifacts=mission.state.artifacts.filter(a=>!a.collected&&mission.exploredAt(a.x,a.y));
+  const artifactIds=new Set(knownArtifacts.map(a=>a.id));
+  for(const [id,{root}] of artifactObjects)if(!artifactIds.has(id)){
+   scene.remove(root);artifactObjects.delete(id);
+   const materials=new Set();
+   for(const mesh of root.children){mesh.geometry.dispose();materials.add(mesh.material);}
+   for(const material of materials)material.dispose();
+  }
+  for(const artifact of knownArtifacts){
+   let model=artifactObjects.get(artifact.id);
+   if(!model){
+    const root=createFieldArtifact(T,artifact.key);
+    root.position.set(artifact.x,artifact.y,field.heightAt(artifact.x,artifact.y));
+    model={root,beacon:root.getObjectByName('salvage_beacon')};
+    scene.add(root);artifactObjects.set(artifact.id,model);
+   }
+   model.beacon.rotation.z=time*.8;
+  }
   if(time-dustTime>.16){dustTime=time;for(const unit of mission.state.units){if(unit.hp<=0||unit.owner!=='rai'&&!mission.visibleAt(unit.x,unit.y)||Math.hypot(unit.x-unit.previousX,unit.y-unit.previousY)<.15)continue;particles.push({x:unit.x+Math.sin(unit.heading)*9,y:unit.y-Math.cos(unit.heading)*9,z:field.heightAt(unit.x,unit.y)+1,born:time});}}while(particles.length>256)particles.shift();for(let i=particles.length-1;i>=0;i--)if(time-particles[i].born>2.5)particles.splice(i,1);particles.forEach((p,i)=>dustPositions.set([p.x+(time-p.born)*1.8,p.y,p.z+(time-p.born)*1.2],i*3));dustGeometry.attributes.position.needsUpdate=true;dustGeometry.setDrawRange(0,particles.length);marker.visible=performance.now()<markerUntil;
   let engine=0,rolling=0,slip=0,road=0;
   for(const unit of vehicles.visible){
@@ -201,9 +238,9 @@ export async function createCampaignWorld(host,config,sound){
    const distance=Math.hypot(from.x-controls.target.x,from.y-controls.target.y);
    return level+.55*Math.max(0,1-distance/360);
   },0);
-  sound?.update({engine:Math.min(1,engine),rolling:Math.min(1,rolling),slip:Math.min(1,slip),road:Math.min(1,road),welding:Math.min(1,projection)});
+  sound?.update({field:live,engine:Math.min(1,engine),rolling:Math.min(1,rolling),slip:Math.min(1,slip),road:Math.min(1,road),welding:Math.min(1,projection)});
   renderer.render(scene,camera);
   lastWorldTime=time;
  }
- return{renderer,scene,camera,controls,terrain,field,vehicles,ground,screen,centre,setGhost,commandMarker,buildingCards,drawMinimapFog:fog.drawMinimap,update,keys,buildingObjects:buildings,get statistics(){return{drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,vehicleDrawCalls:vehicles.drawCalls,vehicleLod:vehicles.lod,dustParticles:particles.length,dustLimit:256,...combat.statistics,...groundEffects.statistics,headlightBeams:headlightCount,projectors:construction.active,frameMs:frameAverage*1000,renderScale:renderer.getPixelRatio(),terrainMode};}};
+ return{renderer,scene,camera,controls,terrain,field,vehicles,ground,screen,centre,focusStorySignal,setGhost,commandMarker,buildingCards,drawMinimapFog:fog.drawMinimap,storySignals,update,keys,buildingObjects:buildings,get statistics(){return{drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,vehicleDrawCalls:vehicles.drawCalls,vehicleLod:vehicles.lod,dustParticles:particles.length,dustLimit:256,...combat.statistics,...groundEffects.statistics,headlightBeams:headlightCount,projectors:construction.active,frameMs:frameAverage*1000,renderScale:renderer.getPixelRatio(),terrainMode};}};
 }

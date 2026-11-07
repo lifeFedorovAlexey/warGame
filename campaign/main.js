@@ -1,6 +1,6 @@
 import {createCampaignWorld} from './world.js';
 import {Mission} from './mission.js';
-import {FieldRadio} from './field-radio.js';
+import {FieldRadio, missionSignal} from './field-radio.js';
 import {FieldSound} from './field-sound.js';
 import {buildLayerHeight} from './builder-optics.js';
 import {VehicleDesigner} from './designer.js';
@@ -17,10 +17,16 @@ let buildOpen = false, buildKind = null, rotation = 0, orderMode = null;
 let pointer = null, drag = null, site = null, placing = null;
 let last = performance.now(), lastUi = 0, lastMini = 0, toastUntil = 0;
 let actionKey = '', rosterKey = '', paletteKey = '', taskKey = '', queueKey = '', cards;
+let blockedOrders = new Set(), blockedUntil = 0;
 
 const vehicles = () => mission.state.units.filter(unit => unit.owner === 'rai' && unit.hp > 0);
 const builders = () => vehicles().filter(unit => config.units[unit.kind].role === 'builder');
 const selection = () => [...selected].map(id => mission.entity(id)).filter(Boolean);
+function visibleRaidContact(){
+  const {flags,units}=mission.state;
+  if(!flags.raidStarted||flags.raidWon)return null;
+  return units.find(unit=>flags.raidIds?.includes(unit.id)&&unit.hp>0&&mission.visibleAt(unit.x,unit.y));
+}
 const isMobile = entity => entity?.owner === 'rai' && !!config.units[entity.kind];
 const names = {bukhanka:'Пулемёт', builder:'Строитель', command:'Связь', flamer:'Огнемёт'};
 const taskNames = {base:'Передовая база', power:'Энергоснабжение', production:'Производство', research:'Исследования', security:'Лагеря отбросов'};
@@ -125,6 +131,8 @@ function start(restore = false) {
   paused = false;
   resultShown = false;
   radio.reset();
+  world.storySignals.show(null);
+  blockedOrders.clear();
   $('welcome').hidden = true;
   $('result').hidden = true;
   $('mission-hud').hidden = false;
@@ -167,8 +175,10 @@ function ordersAt(point, target, mode) {
   if (!report(result)) return;
   world.commandMarker(destination, action === 'attack');
   const eligible = chosen.filter(entity => liveMobile(entity) && (action !== 'attack' || config.units[entity.kind].damage) && (!['build', 'repair'].includes(action) || entity.kind === 'builder'));
-  if (result.assigned < eligible.length) toast('Приказ приняли ' + result.assigned + ' из ' + eligible.length + '. Остальным недоступен маршрут.');
-  sound.acknowledge(action === 'repair' ? 'build' : action, eligible.map(unit => unit.id));
+  blockedOrders=new Set(result.unassigned);
+  blockedUntil=performance.now()+4800;
+  if(blockedOrders.size)toast('Приказ приняли '+result.assigned+' из '+eligible.length+'. Машины без маршрута отмечены в списке.',4800);
+  sound.acknowledge(action === 'repair' ? 'build' : action, eligible.filter(unit=>!blockedOrders.has(unit.id)).map(unit => unit.id));
   orderMode = null;
   updateUi();
 }
@@ -221,23 +231,32 @@ function updatePlacement() {
 function suggestSite() {
   if (!buildKind) return;
   const origin = selection().find(isMobile) ?? world.controls.target;
+  const keepRoadClear=['factory','lab'].includes(buildKind);
   const found = [];
   const add = point => {
     const place = mission.placement(buildKind, point.x, point.y, rotation);
-    if (place.ok) found.push(place);
+    if (!place.ok) return;
+    let asphalt=0;
+    if(keepRoadClear){
+      for(const u of [-.9,-.45,0,.45,.9])for(const v of [-.9,-.45,0,.45,.9]){
+        asphalt+=world.field.roadBlendAt(place.x+u*place.halfWidth,place.y+v*place.halfDepth);
+      }
+    }
+    found.push({...place,asphalt:asphalt/25});
   };
   if (config.buildings[buildKind].requiresOil) {
     for (const grid of config.oilFields) add(world.field.gridToWorld(grid));
   } else {
     const step = config.buildingGridMetres;
     const x = Math.round(origin.x / step) * step, y = Math.round(origin.y / step) * step;
-    for (let radius = 2; radius <= 25 && !found.some(place=>!place.blockers.length); radius++) {
+    for (let radius = 2; radius <= 25 && !found.some(place=>!place.blockers.length&&place.asphalt<.02); radius++) {
       for (let dy = -radius; dy <= radius; dy++) for (let dx = -radius; dx <= radius; dx++) {
         if (Math.max(Math.abs(dx), Math.abs(dy)) === radius) add({x: x + dx * step, y: y + dy * step});
       }
     }
   }
-  found.sort((a,b) => a.blockers.length-b.blockers.length || Math.hypot(a.x-origin.x,a.y-origin.y) - Math.hypot(b.x-origin.x,b.y-origin.y));
+  const score=place=>Math.hypot(place.x-origin.x,place.y-origin.y)+place.asphalt*200;
+  found.sort((a,b) => a.blockers.length-b.blockers.length || score(a)-score(b));
   if (!found.length) return toast('Рядом нет свободной разведанной площадки');
   site = found[0];
   world.centre(site, 320);
@@ -363,9 +382,9 @@ function updatePalette() {
   if (key === paletteKey) return;
   paletteKey = key;
   cards ??= world.buildingCards();
+  $('build-cards').style.setProperty('--build-columns',entries.length);
   $('build-cards').replaceChildren(...entries.map(([kind,spec]) => {
-    const locked = spec.requires && !s.research[spec.requires];
-    const b = button(spec.name, locked ? 'Нужно исследование' : spec.cost + ' ⚡ · ' + spec.seconds + ' с', () => beginPlacement(kind), !available([kind,spec]));
+    const b = button(spec.name, spec.cost + ' ⚡ · ' + spec.seconds + ' с', () => beginPlacement(kind), !available([kind,spec]));
     const image = document.createElement('img');
     image.src = cards[kind];
     image.alt = '';
@@ -425,7 +444,9 @@ function updateRoster() {
     const lowest=units.reduce((min,unit)=>unit.hp/unit.maxHp<min.hp/min.maxHp?unit:min);
     b.style.setProperty('--hp',100*lowest.hp/lowest.maxHp+'%');
     b.style.setProperty('--hp-color',hpColor(lowest.hp/lowest.maxHp));
-    b.title=label+(units.length>1?' ×'+units.length+' · минимум ':' · ')+Math.ceil(lowest.hp)+'/'+lowest.maxHp+' HP';
+    const blocked=units.filter(unit=>blockedOrders.has(unit.id)).length;
+    b.classList.toggle('order-blocked',blocked>0);
+    b.title=label+(units.length>1?' ×'+units.length+' · минимум ':' · ')+Math.ceil(lowest.hp)+'/'+lowest.maxHp+' HP'+(blocked?' · Без маршрута'+(blocked>1?' ×'+blocked:''):'');
   }
 }
 function updateContext(first) {
@@ -479,11 +500,12 @@ function updateContext(first) {
   queue.hidden = !job;
   if (job) {
     const label=entry=>entry.name??config.units[entry.kind]?.name??sampleNames[entry.key]??'Анализ образца';
-    const nextKey=[first.id,s.powered,...(jobs.length?jobs:[job]).map(label)].join('|');
+    const blocked=jobs.length&&first.exitBlocked===true;
+    const nextKey=[first.id,s.powered,blocked,...(jobs.length?jobs:[job]).map(label)].join('|');
     if(nextKey!==queueKey){
       queueKey=nextKey;
       const running=document.createElement('div'),progress=document.createElement('progress');
-      running.textContent=(s.powered?'':'Нет питания · ')+(jobs.length?'Выпуск · ':'Исследование · ')+label(job);
+      running.textContent=(s.powered?'':'Нет питания · ')+(blocked?'Ожидает выезда · ':jobs.length?'Выпуск · ':'Исследование · ')+label(job);
       progress.max=1;running.append(progress);
       queue.replaceChildren(running);
       if(jobs.length>1){
@@ -502,6 +524,7 @@ function updateContext(first) {
 }
 function updateUi() {
   if (!active) return;
+  if(blockedOrders.size&&performance.now()>=blockedUntil)blockedOrders.clear();
   const s = mission.state;
   for (const id of selected) if (!mission.entity(id)) selected.delete(id);
   const group = selection(), first = group[0], mobile = group.filter(isMobile);
@@ -531,7 +554,10 @@ function updateUi() {
       return row;
     }));
   }
-  $('hint').textContent = s.status !== 'running' ? '' : s.flags.contact && !s.flags.raidWon ? 'Прикройте базу. Ожидается рейд.' : !s.powered ? 'Генератор через «Строить». Вышка по клику на нефтяную точку.' : !tasks[0].done ? 'Завод, лаборатория и укрытие.' : s.flags.lastRevealed ? 'Четвёртый лагерь открыт на юге.' : 'Разведайте лагеря и доставьте артефакты.';
+  const contact=visibleRaidContact();
+  $('raid-focus').hidden=!contact;
+  const raidHint=contact?'Рейдеры в зоне обзора.':s.flags.raidStarted?'Рейдеры в пути.':'Прикройте базу. Ожидается рейд.';
+  $('hint').textContent = s.status !== 'running' ? '' : s.flags.contact && !s.flags.raidWon ? raidHint : !s.powered ? 'Генератор через «Строить». Вышка по клику на нефтяную точку.' : !tasks[0].done ? 'Завод, лаборатория и укрытие.' : s.flags.lastRevealed ? 'Четвёртый лагерь открыт на юге.' : 'Разведайте лагеря и доставьте артефакты.';
   $('selection').textContent = group.length > 1 ? 'Группа · ' + group.length : first?.designName ?? (config.units[first?.kind] ?? config.buildings[first?.kind])?.name ?? (first ? 'Лагерь отбросов' : 'Нет выделения');
   const hp = group.reduce((sum,entity)=>sum+entity.hp,0), maxHp = group.reduce((sum,entity)=>sum+entity.maxHp,0);
   const wellStatus=group.length===1&&first?.kind==='derrick'&&first.completed?(first.powered?' · Качает':' · Нет питания'):'';
@@ -552,6 +578,12 @@ function minimap(){const canvas=$('minimap'),ctx=canvas.getContext('2d'),size=ca
  world.drawMinimapFog(ctx,size);
  for(const grid of config.oilFields){const p=field.gridToWorld(grid);if(!mission.exploredAt(p.x,p.y))continue;ctx.fillStyle='#d5b869';ctx.fillRect(grid[0]/127*size-2,grid[1]/127*size-2,4,4);}
  for(const e of [...mission.state.units,...mission.state.buildings]){if(e.hp<=0||e.owner!=='rai'&&!mission.visibleAt(e.x,e.y))continue;const [x,y]=field.worldToGrid(e.x,e.y);ctx.fillStyle=selected.has(e.id)?'#eff2c3':e.owner==='rai'?'#a8c28a':'#d77e60';ctx.fillRect(x/127*size-2,y/127*size-2,e.path?3:5,e.path?3:5);}for(const a of mission.state.artifacts)if(!a.collected&&mission.exploredAt(a.x,a.y)){const [x,y]=field.worldToGrid(a.x,a.y);ctx.fillStyle='#e8d891';ctx.fillRect(x/127*size-3,y/127*size-3,6,6);}if(mission.state.flags.lastRevealed&&!mission.state.camps[3].cleared){const camp=mission.state.camps[3],x=camp.grid[0]/127*size,y=camp.grid[1]/127*size;ctx.strokeStyle='#df997b';ctx.strokeRect(x-5,y-5,10,10);ctx.fillStyle='#edc6a2';ctx.font='10px Arial';ctx.fillText('4',x+7,y+3);}const [cx,cy]=field.worldToGrid(world.controls.target.x,world.controls.target.y);ctx.strokeStyle='#e3d4a3';ctx.lineWidth=1;ctx.strokeRect(cx/127*size-9,cy/127*size-7,18,14);
+ world.storySignals.drawMap(ctx,size);
+ const contact=visibleRaidContact();
+ if(contact){
+  const [x,y]=field.worldToGrid(contact.x,contact.y);
+  ctx.strokeStyle='#ffd0af';ctx.lineWidth=1.2;ctx.strokeRect(x/127*size-5,y/127*size-5,10,10);
+ }
 }
 function labels() {
   const canvas = $('labels'), dpr = Math.min(devicePixelRatio, 1.5);
@@ -596,7 +628,7 @@ function labels() {
 function events() {
   for (const event of mission.drainEvents()) {
     if (event.type === 'construction-complete') {
-      toast(config.buildings[event.kind].name + ' готов');
+      toast('Построено · ' + config.buildings[event.kind].name);
       sound.signal('complete');
       saveGame(false);
     }
@@ -605,6 +637,13 @@ function events() {
     if (event.type === 'artifact-collected') toast('Артефакт доставлен в лабораторию');
     if (event.type === 'camp-cleared') toast('Лагерь зачищен');
   }
+}
+function presentSignal(signal) {
+  world.storySignals.show(signal);
+  if(signal?.kind==='anomaly')sound.anomaly?.();
+}
+function focusSignal(signal) {
+  world.focusStorySignal(signal,mission.state.camps[3]);
 }
 function frame(now) {
   requestAnimationFrame(frame);
@@ -620,7 +659,7 @@ function frame(now) {
     events();
     radio.consume(mission, now);
   }
-  world.update(mission, selected, dt);
+  world.update(mission, selected, dt, active && !paused && mission.state.status==='running');
   if (active) {
     labels();
     if (now - lastMini > 200) { lastMini = now; minimap(); }
@@ -631,8 +670,10 @@ function frame(now) {
     }
     if (mission.state.status !== 'running' && !resultShown) {
       resultShown = true;
-      $('result-title').textContent = mission.state.status === 'victory' ? 'Миссия завершена' : 'Операция прервана';
-      $('result-message').textContent = mission.state.status === 'victory' ? 'Передовая база действует. Следующая задача — «Энергетический всплеск».' : 'Утрачены строители и производство.';
+      const victory=mission.state.status==='victory';
+      $('result-title').textContent = victory ? 'Миссия завершена' : 'Операция прервана';
+      $('result-message').textContent = victory ? 'Передовая база действует. К югу зафиксирован энергетический всплеск.' : 'Утрачены строители и производство.';
+      $('result-signal').hidden=!victory;
       $('result').hidden = false;
     }
   }
@@ -662,7 +703,13 @@ try {
       toast('Проект «' + project.name + '» доступен на заводе');
     },
   });
-  radio = new FieldRadio($('radio'), $('radio-toggle'), () => sound.signal('radio'));
+  radio = new FieldRadio($('radio'), $('radio-toggle'), {
+    onSignal(signal,radioStarted) {
+      if(radioStarted&&signal?.kind!=='anomaly')sound.signal('radio');
+      presentSignal(signal);
+    },
+    onFocus:focusSignal,
+  });
   window.campaign = {
     ready: true, mission, world, select, radio,
     get drivingAudio() { return {running:sound.ready(), recordings:!!sound.recordings}; },
@@ -687,12 +734,25 @@ try {
   $('move-order').onclick = () => beginOrder('move');
   $('attack-order').onclick = () => beginOrder('attack');
   $('home').onclick = () => world.centre(world.field.gridToWorld(config.startGrid), 360);
+  $('raid-focus').onclick = () => {
+    const contact=visibleRaidContact();
+    if(!contact)return;
+    presentSignal({x:contact.x,y:contact.y,kind:'threat'});
+    world.centre(contact,420);
+  };
   $('stop').onclick = () => {
     const ids = selection().filter(liveMobile).map(unit => unit.id);
     if (report(mission.stop(ids))) sound.acknowledge('stop', ids);
     cancelMode();
   };
   $('result-close').onclick = () => { $('result').hidden = true; };
+  $('result-signal').onclick = () => {
+    const signal=missionSignal('outro',mission);
+    $('result').hidden = true;
+    radio.dismiss();
+    presentSignal(signal);
+    focusSignal(signal);
+  };
   $('restart').onclick = () => location.reload();
 } catch (error) {
   console.error(error);

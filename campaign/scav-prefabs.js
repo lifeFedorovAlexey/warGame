@@ -73,6 +73,12 @@ export function createScavPrefab(T, kind, site) {
     shed(3.25,1.55,3.1,2.45,1.95,mats.wood);
     box([4.25,2.4,.08],[2.1,-1.25,2.18],mats.tarp,[.12,0,-.12]);
     for (const x of [.22,4.1]) beam([x,-2.5,0],[x,-2.5,2.05],.14,mats.wood);
+    for (const side of [-1,1]) {
+      const x=side*3.55;
+      box([3.75,.58,.50],[x,-4.21,.25],mats.dark);
+      box([3.69,.17,.77],[x,-4.30,.73],side<0?mats.rust:mats.tin,[.13,0,0]);
+      for (const offset of [-1.64,1.64]) box([.16,.23,1.23],[x+offset,-4.16,.615],mats.wood);
+    }
   } else if (site === 'nw-west') {
     shed(0,1.1,9.9,4.1,3.05,mats.tin);
     for (const x of [-4.15,-2.5,.2,2.1,3.75]) box([1.04,.9,.78],[x,-2.45,.39],mats.wood,[0,0,x*.08]);

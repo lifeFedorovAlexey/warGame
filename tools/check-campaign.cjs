@@ -10,14 +10,29 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
   page.on('response',r=>{if(r.status()>=400)errors.push(r.status()+' '+r.url());});
   await page.goto('http://127.0.0.1:8766/campaign/');
-  await page.waitForFunction(()=>window.campaign?.ready||document.querySelector('#loading-status').textContent.startsWith('Ошибка'),{},{timeout:90000});
+  try{await page.waitForFunction(()=>window.campaign?.ready||document.querySelector('#loading-status').textContent.startsWith('Ошибка'),{},{timeout:90000});}
+  catch(error){throw new Error(errors.join('\n')||await page.locator('#loading-status').textContent(),{cause:error});}
   assert(await page.evaluate(()=>window.campaign?.ready),errors.join('\n')||await page.locator('#loading-status').textContent());
   await page.locator('#begin').click();
   await page.waitForFunction(()=>window.campaign.drivingAudio.running&&window.campaign.drivingAudio.recordings);
   await page.waitForFunction(()=>window.campaign.mission.state.time>.2&&!document.querySelector('#radio').hidden);
   assert.equal(await page.evaluate(()=>window.campaign.mission.state.units.filter(u=>u.owner==='rai').length),5);
+  const briefing=await page.evaluate(()=>{
+   const c=window.campaign,{field,controls,storySignals}=c.world;
+   const start=field.gridToWorld(c.mission.config.startGrid);
+   return {target:{x:controls.target.x,y:controls.target.y},start,signal:storySignals.current};
+  });
+  assert.deepEqual(briefing.target,briefing.start,'Briefing leaves the camera under player control');
+  assert.equal(briefing.signal.kind,'guidance');
+  await page.locator('[data-focus]').click();
+  assert(await page.evaluate(p=>{
+   const {target}=window.campaign.world.controls;
+   return Math.hypot(target.x-p.x,target.y-p.y)<.01;
+  },briefing.signal),'Optional radio focus goes to the marked oil point');
   await page.locator('[data-skip-all]').click();
   assert.equal(await page.evaluate(()=>localStorage.getItem('warGame.fieldRadio')),'off');
+  assert.equal(await page.evaluate(()=>window.campaign.world.storySignals.current),null);
+  await page.locator('#home').click();
   await page.locator('#pause').click();
   await page.getByRole('button',{name:'Строитель 2',exact:true}).click({modifiers:['Shift']});
   await page.locator('#build-toggle').click();
@@ -34,7 +49,23 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   await page.mouse.click(oil.x,oil.y);
   await page.waitForFunction(()=>window.campaign.mission.state.buildings.some(b=>b.owner==='rai'&&b.kind==='derrick'));
   assert.equal(await page.evaluate(()=>window.campaign.mission.state.energy),530);
-  await page.evaluate(()=>{const c=window.campaign;for(let i=0;i<180;i++){c.advance(.3);const b=c.mission.state.buildings.find(e=>e.owner==='rai'&&e.kind==='generator');if(b.progress>.32&&b.progress<.8){c.world.centre(b,170);break;}}});
+  const construction=await page.evaluate(async ()=>{
+   const c=window.campaign,m=c.mission,b=m.state.buildings.find(e=>e.owner==='rai'&&e.kind==='generator');
+   const {workProjection,projectorHasSight}=await import('/campaign/builder-optics.js');
+   let simultaneous=0;
+   for(let i=0;i<180;i++){
+    c.advance(.3);
+    const active=m.state.units.filter(u=>u.builderWorking&&u.task?.targetId===b.id);
+    simultaneous=Math.max(simultaneous,active.length);
+    for(const worker of active){
+     const aim=workProjection(worker,b,m.config,m.field);
+     if(!aim||!projectorHasSight(aim,worker,b,m.state.units,m.field,m.config.worldScale))throw new Error('Projector overlaps another vehicle');
+    }
+    if(b.progress>.32&&b.progress<.8&&simultaneous===2){c.world.centre(b,170);break;}
+   }
+   return {simultaneous,progress:b.progress};
+  });
+  assert.equal(construction.simultaneous,2,JSON.stringify(construction));
   await page.waitForFunction(()=>{
    const c=window.campaign,b=c.mission.state.buildings.find(e=>e.owner==='rai'&&e.kind==='generator'),mesh=c.world.buildingObjects.get(b.id)?.getObjectByName('building_structure');
    return c.world.statistics.projectors>0&&mesh?.visible&&mesh.children.some(o=>o.material.clippingPlanes?.length);
@@ -115,7 +146,40 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   }
   assert(driven>12&&!drive.unit.task,JSON.stringify(drive));
   await page.screenshot({path:'campaign/previews/field-headlights-tracks.png'});
-  const report={base,light,driven,pausedBetweenCommands:true,layeredConstruction:true,oilDirectClick:true,radioSkipPersisted:true,animatedPump:true,oilPowerLoss:powered.stopped,resumedPump:powered.resumed,errors};
+  const models=await page.evaluate(async ()=>{
+   const c=window.campaign,m=c.mission;
+   const p=c.world.field.gridToWorld(m.config.startGrid);
+   const keys=['flamethrower','mg-ammo-1','mg-tower'];
+   keys.forEach((key,i)=>m.state.artifacts.push({id:'fixture-'+i,key,x:p.x+21*(i-1),y:p.y,collected:false}));
+   await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+   const parts=keys.map(key=>c.world.scene.getObjectByName('salvage_'+key)?.children.length);
+   m.state.artifacts[0].collected=true;
+   await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+   return {parts,collectedRemoved:!c.world.scene.getObjectByName('salvage_flamethrower')};
+  });
+  assert(models.parts.every(count=>count>4)&&models.collectedRemoved);
+  const finalView=await page.evaluate(()=>{
+   // Present the debrief from an isolated UI fixture after the real base/drive checks.
+   const c=window.campaign,m=c.mission,{target}=c.world.controls;
+   m.state.status='victory';
+   return {x:target.x,y:target.y,time:m.state.time,explored:m.explored.reduce((a,b)=>a+Number(!!b),0)};
+  });
+  await page.locator('#result-signal').waitFor();
+  assert(await page.evaluate(p=>{
+   const {target}=window.campaign.world.controls;
+   return Math.hypot(target.x-p.x,target.y-p.y)<.01;
+  },finalView),'Victory leaves camera in place');
+  await page.locator('#result-signal').click();
+  await page.waitForFunction(()=>window.campaign.world.scene.getObjectByName('southern_energy_trace').visible);
+  const signal=await page.evaluate(()=>{
+   const c=window.campaign,m=c.mission,{field,storySignals}=c.world,p=storySignals.current;
+   return {grid:field.worldToGrid(p.x,p.y),bounds:m.state.bounds,time:m.state.time,explored:m.explored.reduce((a,b)=>a+Number(!!b),0)};
+  });
+  assert(signal.grid[1]>signal.bounds[3],'Energy signal comes from south of the operation');
+  assert.equal(signal.time,finalView.time);
+  assert.equal(signal.explored,finalView.explored);
+  await page.screenshot({path:'campaign/previews/field-southern-signal.png'});
+  const report={base,light,driven,pausedBetweenCommands:true,layeredConstruction:construction,oilDirectClick:true,radioSkipPersisted:true,optionalRadioFocus:true,signal,artifactModels:models,animatedPump:true,oilPowerLoss:powered.stopped,resumedPump:powered.resumed,errors};
   assert.deepEqual(errors,[]);
   fs.mkdirSync('campaign/reports',{recursive:true});
   fs.writeFileSync('campaign/reports/campaign-browser.json',JSON.stringify(report,null,2));

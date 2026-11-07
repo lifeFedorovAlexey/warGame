@@ -72,6 +72,7 @@ button.active { border-color: #e5db9d; box-shadow: inset 0 -2px #e5db9d; }
 #objectives li.done::before { content: '✓'; color: #b8d88c; }
 #objectives small { font-size: 11px; color: #d6c994; font-variant-numeric: tabular-nums; }
 #hint { margin: 6px 0 0 15px; color: #d7d0a9; font-size: 11px; }
+#raid-focus { margin-left: 15px; pointer-events: auto; color: #ffd0af; text-shadow: 0 1px 3px #171511; }
 #minimap-panel { position: fixed; z-index: 3; right: var(--edge); bottom: var(--edge); overflow: hidden; }
 #minimap { display: block; width: var(--map-size); height: var(--map-size); cursor: crosshair; }
 #minimap-panel button { width: 100%; border: 0; border-radius: 0; font-size: 11px; padding: 3px; }
@@ -88,6 +89,7 @@ button.active { border-color: #e5db9d; box-shadow: inset 0 -2px #e5db9d; }
 #roster svg { width: 25px; height: 20px; margin-top: -4px; }
 #roster .stack-count { position: absolute; top: 1px; right: 2px; color: #f1eac9; font-size: 8px; line-height: 1; }
 #roster button.partial { box-shadow: inset 0 -2px #b4ad78; }
+#roster button.order-blocked::before { content: '!'; position: absolute; top: 1px; left: 3px; color: #ffac7e; font-size: 10px; font-weight: 800; line-height: 1; }
 #roster i { position: absolute; bottom: 3px; left: 3px; right: 3px; height: 2px; background: #182119; }
 #roster i::after { content: ''; display: block; width: var(--hp,100%); height: 100%; background: var(--hp-color,#9cdd69); }
 .order-bar { display: grid; grid-template-columns: repeat(4, 43px); gap: 3px; }
@@ -98,8 +100,8 @@ button.active { border-color: #e5db9d; box-shadow: inset 0 -2px #e5db9d; }
 #build-palette { margin-bottom: 5px; width: min(612px, calc(100vw - var(--map-size) - 3 * var(--edge))); padding: 6px; max-height: 44vh; overflow: auto; }
 .tray-heading { justify-content: space-between; padding-bottom: 4px; }
 .tray-heading button, .radio-head button { padding: 0 6px; }
-#build-cards { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; }
-#build-cards button { display: flex; flex-direction: column; align-items: stretch; gap: 2px; text-align: left; padding: 3px; font-size: 11px; line-height: 1.2; }
+#build-cards { display: grid; grid-template-columns: repeat(var(--build-columns,5), minmax(0, 1fr)); gap: 4px; }
+#build-cards button { display: flex; flex-direction: column; align-items: stretch; gap: 2px; text-align: left; padding: 3px; font-size: 11px; line-height: 1.2; overflow-wrap:anywhere; }
 #build-cards img { width: 100%; aspect-ratio: 1.65; object-fit: cover; background: #3d4236; border-radius: 2px; }
 #build-cards small, #actions small { color: var(--muted); font-size: 10px; }
 #placement { padding: 6px; margin-bottom: 4px; }
@@ -113,7 +115,9 @@ button.active { border-color: #e5db9d; box-shadow: inset 0 -2px #e5db9d; }
 #radio { position: fixed; z-index: 5; top: 53px; right: var(--edge); width: min(288px, 43vw); padding: 6px 9px; border-left: 2px solid #d6da9f; }
 .radio-head { justify-content: space-between; color: var(--accent); }
 #radio p { margin: 2px 0; font-size: 12px; }
+.radio-actions { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; }
 button.quiet { padding: 2px 0; border: 0; background: transparent; color: var(--muted); font-size: 10px; text-decoration: underline; }
+button.radio-focus { color: var(--accent); }
 #toast { position: fixed; z-index: 8; top: 52px; left: 50%; transform: translateX(-50%); max-width: min(52vw, 420px); background: #26302cf5; border: 1px solid var(--line); border-radius: 4px; padding: 6px 9px; pointer-events: none; }
 .corner-card { position: fixed; z-index: 9; left: var(--edge); bottom: var(--edge); width: min(390px, calc(100vw - 24px)); padding: 14px 16px; }
 .corner-card h1 { font-size: 24px; line-height: 1.1; margin: 5px 0 10px; }

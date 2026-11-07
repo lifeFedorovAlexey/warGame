@@ -1,4 +1,5 @@
 import {vehiclePose, vehicleToWorld, worldToVehicle} from './builder-kinematics.js';
+import {vehicleLocalBoxes} from './vehicle-collision.js';
 
 export function buildLayerHeight(building,spec,scale) {
   const h = spec.realSizeMetres[2];
@@ -36,4 +37,41 @@ export function workProjection(unit,target,config,field) {
     if(field.heightAt(tx,ty)+.06>tz)return null;
   }
   return {yaw,pitch,world,emitter};
+}
+
+const projector=[[-.52,.52],[-1.21,-.10],[2.68,3.85]];
+const asIntervals=([width,y,depth,z,height])=>[[-width,width],[y-depth,y+depth],[z-height,z+height]];
+const hull=vehicleLocalBoxes('bukhanka').map(asIntervals);
+const fieldHull=vehicleLocalBoxes('raider').map(asIntervals);
+
+function crossesBox(start,end,box) {
+  let near=0,far=1;
+  for(let axis=0;axis<3;axis++){
+    const delta=end[axis]-start[axis],[min,max]=box[axis];
+    if(Math.abs(delta)<1e-6){
+      if(start[axis]<min||start[axis]>max)return false;
+      continue;
+    }
+    const a=(min-start[axis])/delta,b=(max-start[axis])/delta;
+    near=Math.max(near,Math.min(a,b));
+    far=Math.min(far,Math.max(a,b));
+    if(near>far)return false;
+  }
+  return true;
+}
+
+export function projectorHasSight(aim,unit,target,vehicles,field,scale) {
+  const {emitter,world}=aim,margin=3*scale;
+  const minX=Math.min(emitter[0],world[0])-margin,maxX=Math.max(emitter[0],world[0])+margin;
+  const minY=Math.min(emitter[1],world[1])-margin,maxY=Math.max(emitter[1],world[1])+margin;
+  for(const other of vehicles){
+    if(other.id===unit.id||other.id===target.id||other.hp<=0||
+       other.x<minX||other.x>maxX||other.y<minY||other.y>maxY)continue;
+    const pose=vehiclePose(other,field,scale);
+    const start=worldToVehicle(emitter,pose),end=worldToVehicle(world,pose);
+    const compact=other.kind==='raider'||other.kind==='command';
+    if((compact?fieldHull:hull).some(box=>crossesBox(start,end,box))||
+       other.kind==='builder'&&crossesBox(start,end,projector))return false;
+  }
+  return true;
 }

@@ -49,12 +49,16 @@
       <h2>Задачи <span id="objective-count"></span></h2>
       <ol id="objectives"></ol>
       <p id="hint"></p>
+      <button id="raid-focus" class="quiet" hidden>К месту контакта</button>
     </aside>
 
     <aside id="radio" class="panel" aria-live="polite" hidden>
       <div class="radio-head"><strong></strong><button data-dismiss title="Пропустить реплику · Esc" aria-label="Пропустить реплику">×</button></div>
       <p></p>
-      <button class="quiet" data-skip-all>Пропустить все реплики</button>
+      <div class="radio-actions">
+        <button class="quiet radio-focus" data-focus hidden></button>
+        <button class="quiet" data-skip-all>Пропустить все реплики</button>
+      </div>
     </aside>
 
     <aside id="minimap-panel" class="panel">
@@ -150,6 +154,7 @@
     <h1 id="result-title"></h1>
     <p id="result-message"></p>
     <button id="result-close">Осмотреть карту</button>
+    <button id="result-signal" hidden>Показать сигнал на юге</button>
     <button id="restart">Новая операция</button>
   </section>
 </main>

@@ -46,7 +46,7 @@ export class TerrainNavigator{
     if(!this.lineClear(entrance,exit,false,true,climbableGrade,true))continue;
     const sweep=vehicleSweep({...entrance,heading},{...exit,heading},scale,this.field);
     if(!this.clearSolidSweep(sweep,this.solids))continue;
-    best={entrance,exit,along,direction,admit:(direction>0?low:high)+direction*scale*6};
+    best={entrance,exit,along,direction,heading,mouth:direction>0?high:low,admit:(direction>0?low:high)+direction*scale*6};
     bestLength=length;
    }
   }
