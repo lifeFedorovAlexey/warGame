@@ -2200,7 +2200,9 @@ export class Mission{
   for(const camp of s.camps){if(camp.cleared)continue;const hostile=[...s.units,...s.buildings].some(e=>e.campId===camp.id&&e.hp>0);if(!hostile){camp.cleared=true;this.emit('camp-cleared',{camp:camp.id});if(camp.artifact&&!camp.artifactSpawned){const point=this.nav.nearest(camp.x+35,camp.y,8)??camp;s.artifacts.push({id:this.id('a'),key:camp.artifact,x:point.x,y:point.y,collected:false});camp.artifactSpawned=true;}}}
   for(const artifact of s.artifacts)if(!artifact.collected&&s.units.some(u=>u.owner==='rai'&&u.hp>0&&distance(u,artifact)<24)){artifact.collected=true;if(!s.artifactKeys.includes(artifact.key))s.artifactKeys.push(artifact.key);this.emit('artifact-collected',{key:artifact.key});if(artifact.key!=='mg-tower')this.cinematic('artifact-'+artifact.key);}
   const enemyVisible=s.units.some(u=>u.owner==='scavs'&&u.hp>0&&this.visibleAt(u.x,u.y));const has=kind=>s.buildings.some(b=>b.owner==='rai'&&b.hp>0&&b.completed&&b.kind===kind);
-  this.updateRaid(enemyVisible||(has('factory')&&has('lab')&&s.statistics.produced>0));
+  this.updateRaid(s.storyConstruction?.enabled
+   ? s.powered&&has('factory')&&has('lab')&&s.statistics.produced>0
+   : enemyVisible||(has('factory')&&has('lab')&&s.statistics.produced>0));
   updateScavReinforcements(this);
   if(!s.flags.thirdSighted){
    const tower=waterTower(this);

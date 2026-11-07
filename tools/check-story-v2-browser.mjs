@@ -4,7 +4,7 @@ import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url);
 const {chromium}=require('C:/Users/Алексей/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
 const base='assets/campaign/alpha/mission01/',story=JSON.parse(fs.readFileSync(base+'story-v2.json'));
-const folder='campaign/previews/story-v4';fs.mkdirSync(folder,{recursive:true});
+const folder='campaign/previews/radio-v3';fs.mkdirSync(folder,{recursive:true});
 const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true,args:['--enable-unsafe-swiftshader','--use-angle=swiftshader']});
 try{
  const page=await browser.newPage({viewport:{width:1440,height:900}}),errors=[],pending=new Set();
@@ -49,57 +49,63 @@ try{
   mission.updateEconomy(0);mission.updateFog();campaign.advance(0);return e.id;
  },{kind,dx,dy});
  const unlocked=kind=>page.evaluate(k=>campaign.mission.constructionUnlocked(k),kind);
- await page.locator('#prologue').click();await waitCue('m01v2-p01-l001');assert.equal(await page.evaluate(()=>campaign.mission.state.time),0);
- await page.locator('#begin').click();await waitCue('m01v2-o01-l001');
- assert.equal(await page.evaluate(()=>campaign.state.paused),false);assert.equal(await page.locator('#field-tasks').isHidden(),true);
- await playScene('o01',{check:async i=>{if(i===0){await screenshot('coffee-desktop');await screenshot('coffee-narrow',true);}}});
+ await page.locator('#prologue').click();await waitCue('m01-s01-l003');
+ assert.equal(await page.evaluate(()=>campaign.mission.state.time),0);
+ await playScene('p01');await playScene('p02',{snap:'prologue-warrant'});await playScene('p03');await playScene('p04');
+ await page.locator('#begin').click();await waitCue('m01-v3-general-coffee');
+ assert.equal(await page.evaluate(()=>campaign.state.paused),false);
+ await playScene('r01',{check:async i=>{
+  if(i===1){await screenshot('original-commander-desktop');await screenshot('original-commander-narrow',true);}
+  if(i===2)assert.equal(await page.locator('#field-tasks').isHidden(),false);
+ }});
  await page.waitForFunction(()=>document.querySelector('#field-objectives').textContent.includes('Построить электростанцию'));
  await screenshot('power-task-narrow',true);await screenshot('power-task-desktop');
  await page.locator('#pause').click();await page.locator('#build-toggle').click();
- assert.equal(await page.locator('#build-cards button').count(),1);assert.match(await page.locator('#build-cards button').getAttribute('aria-label'),/АЭС/);
- assert.equal(await page.locator('#production-toggle').isHidden(),true);assert.equal(await unlocked('derrick'),false);
- assert.equal(await page.evaluate(()=>campaign.mission.placement('factory',0,0).reason),'Строительство ещё не открыто');
- await screenshot('first-construction-desktop');await page.locator('#build-toggle').click();
+ assert.equal(await page.locator('#build-cards button').count(),1);
+ assert.equal(await unlocked('factory'),false);await screenshot('first-construction-desktop');await page.locator('#build-toggle').click();
+ const prematureRaid=await page.evaluate(()=>{
+  const m=campaign.mission,p=m.field.gridToWorld(m.config.startGrid),e=m.addUnit('raider','scavs',{x:p.x+20,y:p.y});
+  m.updateFog();m.updateMission();const started=!!m.state.flags.raidStarted;
+  m.state.units=m.state.units.filter(u=>u.id!==e.id);m.updateFog();return started;
+ });
+ assert.equal(prematureRaid,false,'Early exploration does not launch the scripted raid before base development');
  await addBuilding('generator',140,100);
- await playScene('o02',{natural:true,check:async()=>assert.equal(await unlocked('factory'),false),snap:'power-complete-desktop'});
- await playScene('o03',{check:async()=>assert.equal(await unlocked('derrick'),false),snap:'oil-order-desktop'});
- assert.equal(await unlocked('derrick'),true);assert.equal(await unlocked('factory'),false);
+ await playScene('r02',{natural:true,check:async()=>{assert.equal(await unlocked('derrick'),true);assert.equal(await unlocked('factory'),false);},snap:'power-complete-desktop'});
+ if(await page.evaluate(()=>campaign.radio.entry?.storyScene==='r03'))await playScene('r03');
  await page.waitForFunction(()=>document.querySelector('#field-objectives').textContent.includes('нефтяную вышку'));
  await screenshot('oil-task-desktop');await screenshot('oil-task-narrow',true);await page.setViewportSize({width:1440,height:900});
- // Unit responses in a free channel are rate limited and yield to the next story line.
- const selected=await page.evaluate(()=>{const ids=campaign.mission.state.units.filter(e=>e.owner==='rai'&&e.kind==='bukhanka').map(e=>e.id);campaign.select(ids);return ids;});
- await page.waitForFunction(()=>campaign.unitVoice.playing);const bark=await page.evaluate(()=>campaign.unitVoice.cueId);
- await page.evaluate(ids=>{for(let n=0;n<15;n++)campaign.select(ids);},selected);assert.equal(await page.evaluate(()=>campaign.unitVoice.cueId),bark);
- await addBuilding('derrick',0,0);await playScene('o04');
- await playScene('o05',{check:async()=>assert.equal(await unlocked('factory'),false),snap:'factory-order-desktop'});
- assert.equal(await unlocked('factory'),true);assert.equal(await unlocked('lab'),false);
- await page.waitForFunction(()=>document.querySelector('#field-objectives').textContent.includes('Построить завод'));
- await screenshot('factory-task-desktop');
- await addBuilding('factory',-170,120);
- await playScene('o06',{check:async()=>assert.equal(await unlocked('lab'),false)});assert.equal(await unlocked('lab'),true);
+ await addBuilding('derrick',0,0);await playScene('r04');await playScene('r05',{check:async()=>assert.equal(await unlocked('factory'),true),snap:'factory-order-desktop'});
+ await addBuilding('factory',-170,120);await playScene('r08');await playScene('r06',{snap:'original-armour-dialogue'});
+ assert.equal(await unlocked('lab'),true);
+ await page.evaluate(()=>{const m=campaign.mission;m.state.statistics.produced++;campaign.radio.director.note({type:'unit-produced',kind:'bukhanka'},m);campaign.advance(0);});
+ await playScene('r09');
+ await page.evaluate(()=>{const d=campaign.radio.director.data;d.clock+=13000;campaign.advance(0);});await playScene('r10',{snap:'original-bukhanka-monologue'});
  const lab=await addBuilding('lab',40,160);
- const beforeResearch=await page.evaluate(id=>{campaign.mission.state.artifactKeys.push('flamethrower');return campaign.mission.research(id,'flamethrower');},lab);
- assert.equal(beforeResearch.ok,false);assert.match(beforeResearch.reason,/не принят/);
- await playScene('o07',{check:async()=>assert.equal(await page.evaluate(()=>campaign.mission.researchUnlocked()),false),snap:'lab-report-desktop'});
+ const raidDuringSpeech=await page.evaluate(()=>{const m=campaign.mission;m.updateMission();return{started:m.state.flags.raidStarted,scene:campaign.radio.entry.storyScene};});
+ assert.deepEqual(raidDuringSpeech,{started:true,scene:'r11'},'The raid starts from the base state while the NII exchange is still running');
+ await playScene('r11');await playScene('r13',{snap:'original-science-dialogue'});
  assert.equal(await page.evaluate(()=>campaign.mission.researchUnlocked()),true);
- // Actual economy/research code grants a technology before its result speech finishes.
- const result=await page.evaluate(id=>{const m=campaign.mission;m.state.energy=2400;const result=m.research(id,'flamethrower');m.entity(id).research.progress=.99999;m.updateEconomy(.2);campaign.advance(0);return{ok:result.ok,unlocked:m.state.research.flamethrower};},lab);
- assert.deepEqual(result,{ok:true,unlocked:true});await playScene('16-alt',{snap:'research-desktop'});
- // A visible raid is not falsely described as firing until a hostile shot is observed.
- const enemy=await page.evaluate(()=>{const m=campaign.mission,p=m.field.gridToWorld(m.config.startGrid),enemy=m.addUnit('raider','scavs',{x:p.x+25,y:p.y-40});m.state.flags.raidStarted=true;m.state.flags.raidIds=[enemy.id];m.updateFog();campaign.advance(0);return enemy.id;});
- assert.notEqual(await page.evaluate(()=>campaign.radio.entry?.storyScene),'o08');
+ const result=await page.evaluate(id=>{const m=campaign.mission;m.state.artifactKeys.push('flamethrower');m.state.energy=2400;const result=m.research(id,'flamethrower');m.entity(id).research.progress=.99999;m.updateEconomy(.2);campaign.advance(0);return{ok:result.ok,unlocked:m.state.research.flamethrower};},lab);
+ assert.deepEqual(result,{ok:true,unlocked:true});await playScene('r30-alt',{snap:'research-desktop'});
+ const enemy=await page.evaluate(()=>{const m=campaign.mission,p=m.field.gridToWorld(m.config.startGrid),enemy=m.addUnit('raider','scavs',{x:p.x+25,y:p.y-40});m.state.flags.raidStarted=true;m.state.flags.contact=true;m.state.flags.raidIds=[enemy.id];m.updateFog();campaign.advance(0);return enemy.id;});
+ await playScene('r14',{snap:'original-first-contact'});
+ await waitCue('m01-s07-l006');
  await page.evaluate(id=>{const m=campaign.mission,target=m.state.units.find(e=>e.owner==='rai'&&e.hp>0);m.effects.push({type:'shot',from:id,targetId:target.id,to:{x:target.x,y:target.y,z:m.field.heightAt(target.x,target.y)+1},weapon:'mg'});campaign.advance(0);},enemy);
- await playScene('o08',{snap:'attack-desktop'});
+ assert.equal(await page.evaluate(()=>campaign.radio.director.record('r16').status),'cancelled');
  await page.evaluate(id=>{const m=campaign.mission;m.damage(m.entity(id),99999);m.state.flags.raidWon=true;m.effects=[];campaign.radio.director.data.lastCombat=-30000;campaign.advance(0);},enemy);
- await playScene('o09');await playScene('o10',{check:async()=>assert.equal(await unlocked('bunker'),false),snap:'defense-order-desktop'});
- assert.equal(await unlocked('bunker'),true);
- await addBuilding('bunker',-100,-150);await playScene('o11');assert.notEqual(await page.evaluate(()=>campaign.radio.entry?.storyScene),'o12');
- await addBuilding('bunker',120,-150);await playScene('o12',{snap:'offensive-desktop'});
+ await playScene('r18',{check:async()=>assert.equal(await unlocked('bunker'),true)});
+ await page.evaluate(()=>{campaign.radio.director.data.clock+=11000;campaign.advance(0);});await playScene('r19');await playScene('r21',{snap:'defense-order-desktop'});
+ await addBuilding('bunker',-100,-150);await playScene('r22');await addBuilding('bunker',120,-150);await playScene('r23',{snap:'offensive-desktop'});
  await page.waitForFunction(()=>document.querySelector('#field-objectives').textContent.includes('четыре лагеря'));
  await screenshot('offensive-tasks-desktop');await screenshot('offensive-tasks-narrow',true);
  const saved=await page.evaluate(()=>campaign.mission.save());
  await page.evaluate(saved=>{campaign.radio.reset();campaign.mission.load(saved);campaign.advance(0);},saved);
- assert.equal(await page.evaluate(()=>campaign.mission.state.radioStory.scenes.o12.status),'done');assert.equal(await unlocked('bunker'),true);
+ assert.equal(await page.evaluate(()=>campaign.mission.state.radioStory.scenes.r23.status),'done');assert.equal(await unlocked('bunker'),true);
+ // Original stop recording in a free channel, including the shared 45-second limit.
+ const ids=await page.evaluate(()=>campaign.mission.state.units.filter(e=>e.owner==='rai').map(e=>e.id));
+ await page.evaluate(ids=>campaign.select(ids),ids);await page.locator('#stop').click();
+ await page.waitForFunction(()=>campaign.unitVoice.cueId==='warrant:stop');
+ await page.locator('#stop').click();assert.equal(await page.evaluate(()=>campaign.unitVoice.playing),false);
  // Decode every record and render every portrait, including optional later scenes.
  const verification=await page.evaluate(async()=>{
   const {loadMissionStory}=await import('./story-director.js'),script=await loadMissionStory(),context=new AudioContext(),clips=[];
@@ -114,5 +120,5 @@ try{
  assert(verification.portraits.every(([,ok])=>ok));assert.equal(verification.portraits.length,12);
  assert(verification.layout.left>=0&&verification.layout.right<=verification.layout.width);assert.equal(verification.layout.border,'0px');assert.equal(verification.layout.background,'rgba(0, 0, 0, 0)');
  assert.deepEqual(errors,[]);fs.writeFileSync(folder+'/verification.json',JSON.stringify({...verification,errors},null,2));
- console.log('PASS: all 12 opening scenes, exact subtitles/audio, progressive construction, research gate and rewards, raid, two bunkers, offensive quest, saves, portraits and desktop/narrow layouts');
+ console.log('PASS: radio v3 prologue, original recordings in game, full base progression, real combat interruption, saves, 184 decoded clips, desktop and narrow screenshots');
 }finally{await browser.close();}

@@ -6,9 +6,9 @@ const require = createRequire(import.meta.url);
 const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
 const actor = process.argv[2] ?? 'commander';
 const scenes = {
-  commander:{trigger:'o01',chapter:'intro',portrait:'radio',line:1},
-  warrant:{trigger:'o03',chapter:'story-o03',portrait:'neutral',line:1},
-  scout:{trigger:'o08',chapter:'first-contact',portrait:'radio',line:0},
+  commander:{trigger:'r01',chapter:'intro',portrait:'radio',line:1},
+  warrant:{trigger:'r03',chapter:'story-r03',portrait:'neutral',line:2},
+  scout:{trigger:'r14',chapter:'first-contact',portrait:'radio',line:0},
 };
 assert(actor in scenes);
 const scene = scenes[actor];

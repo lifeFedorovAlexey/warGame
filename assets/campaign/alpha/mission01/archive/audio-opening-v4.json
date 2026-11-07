@@ -1,0 +1,1420 @@
+{
+  "schemaVersion": 2,
+  "revision": 4,
+  "language": "ru-RU",
+  "source": {
+    "path": "docs/campaign/alpha/mission01-script-v4.md",
+    "sha256": "7b9683eca499252455a8e31ad733deae248ca4bc1686ae19d6ffeec866bd02a5"
+  },
+  "voices": {
+    "narrator": {
+      "name": "Диктор",
+      "voice": "dmitri",
+      "lengthScale": 1.08,
+      "pitchSemitones": -0.8,
+      "effect": "clean"
+    },
+    "commander": {
+      "name": "Командир",
+      "voice": "denis",
+      "lengthScale": 1.04,
+      "pitchSemitones": -1.0,
+      "effect": "clean"
+    },
+    "warrant": {
+      "name": "Прапорщик",
+      "voice": "dmitri",
+      "lengthScale": 1.12,
+      "pitchSemitones": -1.6,
+      "effect": "clean"
+    },
+    "general": {
+      "name": "Генерал",
+      "voice": "dmitri",
+      "lengthScale": 1.16,
+      "pitchSemitones": -0.5,
+      "effect": "clean"
+    },
+    "radio": {
+      "name": "Радист",
+      "voice": "denis",
+      "lengthScale": 0.97,
+      "pitchSemitones": 0.5,
+      "effect": "radio"
+    },
+    "scientist": {
+      "name": "Учёный",
+      "voice": "dmitri",
+      "lengthScale": 1.06,
+      "pitchSemitones": 0.8,
+      "effect": "clean"
+    },
+    "scout": {
+      "name": "Разведчик",
+      "voice": "denis",
+      "lengthScale": 1.0,
+      "pitchSemitones": 0.8,
+      "effect": "radio"
+    },
+    "raider": {
+      "name": "Отброс",
+      "voice": "dmitri",
+      "lengthScale": 0.98,
+      "pitchSemitones": -1.4,
+      "effect": "radio"
+    },
+    "chief": {
+      "name": "Петрович",
+      "voice": "dmitri",
+      "lengthScale": 1.05,
+      "pitchSemitones": -1.7,
+      "effect": "radio"
+    },
+    "past": {
+      "name": "Голос из прошлого",
+      "voice": "dmitri",
+      "lengthScale": 1.26,
+      "pitchSemitones": -2.0,
+      "effect": "dream"
+    },
+    "soldier": {
+      "name": "Солдат",
+      "voice": "denis",
+      "lengthScale": 0.98,
+      "pitchSemitones": 1.2,
+      "effect": "room"
+    },
+    "officer": {
+      "name": "Офицер",
+      "voice": "denis",
+      "lengthScale": 1.03,
+      "pitchSemitones": -0.2,
+      "effect": "room"
+    },
+    "builder": {
+      "name": "Строитель",
+      "voice": "denis",
+      "lengthScale": 1.06,
+      "pitchSemitones": -0.4,
+      "effect": "radio"
+    },
+    "driver": {
+      "name": "Водитель",
+      "voice": "denis",
+      "lengthScale": 1.05,
+      "pitchSemitones": -0.8,
+      "effect": "radio"
+    }
+  },
+  "clips": {
+    "m01v2-p02-l001": {
+      "file": "recordings/commander/m01-s02-l003.mp3",
+      "duration": 3.6310416666666665,
+      "speaker": "commander",
+      "sha256": "0ef4535fc76297db4a41b7ff5ed781ba747fe429fbd9b58ee0264bf910d734b9",
+      "bytes": 75033,
+      "origin": "user-recording",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-s02-l003"
+      },
+      "textMatch": "exact"
+    },
+    "m01v2-p02-l003": {
+      "file": "recordings/commander/m01-s02-l007.mp3",
+      "duration": 1.410625,
+      "speaker": "commander",
+      "sha256": "f4702a08562ef9c7482aaddecb62e4fc7085a76affe0f9e6c3d60caeb5e2e574",
+      "bytes": 39506,
+      "origin": "user-recording",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-s02-l007"
+      },
+      "textMatch": "exact"
+    },
+    "m01v2-p02-l004": {
+      "file": "recordings/commander/m01-s02-l013.mp3",
+      "duration": 3.5526666666666666,
+      "speaker": "commander",
+      "sha256": "910c09c6d036ed2cc374f08cf0ecced9e6a8a97356b81e5aafd7d72591bcd6d1",
+      "bytes": 73779,
+      "origin": "user-recording",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-s02-l013"
+      },
+      "textMatch": "exact"
+    },
+    "m01v2-o01-l002": {
+      "file": "audio-v2/m01v2-o01-l002.ogg",
+      "duration": 1.5080416666666667,
+      "speaker": "commander",
+      "sha256": "8e4c5ff263802fdf5c170ad346bdbdbb7e35078f34a0b79f7160da0a211af7ea",
+      "bytes": 7386,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-o02-l002": {
+      "file": "audio-v2/m01v2-o02-l002.ogg",
+      "duration": 2.309875,
+      "speaker": "commander",
+      "sha256": "c06df6376568d75500117de1cc117b0158b787297494c981103f7a35ab57b750",
+      "bytes": 11350,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-o03-l001": {
+      "file": "audio-v2/m01v2-o03-l001.ogg",
+      "duration": 1.288125,
+      "speaker": "commander",
+      "sha256": "4000ee250032076ff656d0ea7ab0efeac44cd9092398dccef629d85aa8f7a00d",
+      "bytes": 6172,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-o03-l003": {
+      "file": "audio-v2/m01v2-o03-l003.ogg",
+      "duration": 3.271541666666667,
+      "speaker": "commander",
+      "sha256": "cc17fabd54c6c527059523304564ef5ab502b3b58d570a6b3eed68757f27acbc",
+      "bytes": 15656,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-o04-l002": {
+      "file": "audio-v2/m01v2-o04-l002.ogg",
+      "duration": 0.9398333333333333,
+      "speaker": "commander",
+      "sha256": "90ad32762c715716c76936f830d65bb7e824592f20e968f678080fbb8a45ccf9",
+      "bytes": 4407,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-o05-l001": {
+      "file": "audio-v2/m01v2-o05-l001.ogg",
+      "duration": 1.7525833333333334,
+      "speaker": "commander",
+      "sha256": "e762a5fcf1b606954832f185dd34627fcafc012d9a4d863341fca44908dc0a56",
+      "bytes": 8640,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-o06-l001": {
+      "file": "audio-v2/m01v2-o06-l001.ogg",
+      "duration": 2.794791666666667,
+      "speaker": "commander",
+      "sha256": "ceae05a4fd8cbabe1f7e59dfd7d3bc7f5e80a609e925789c749d40ee46251dc5",
+      "bytes": 13525,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-o06-l003": {
+      "file": "audio-v2/m01v2-o06-l003.ogg",
+      "duration": 1.7867083333333333,
+      "speaker": "commander",
+      "sha256": "aa4546a706a0f9ae61ae6063a1f400fa2b4a2271409a23569143310fa4147715",
+      "bytes": 9401,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-o07-l002": {
+      "file": "audio-v2/m01v2-o07-l002.ogg",
+      "duration": 1.6596666666666666,
+      "speaker": "commander",
+      "sha256": "ffe1b0216b2e24dd77f51bc6709c0d8adbe632c96eeebb7e106f234fa39a2f1b",
+      "bytes": 8041,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-o08-l002": {
+      "file": "audio-v2/m01v2-o08-l002.ogg",
+      "duration": 1.4848333333333332,
+      "speaker": "commander",
+      "sha256": "d059e139b122534308fa166ff61915e6f5773f86d4c0012d78e84da63cced6c2",
+      "bytes": 7149,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-o09-l002": {
+      "file": "audio-v2/m01v2-o09-l002.ogg",
+      "duration": 1.3223333333333334,
+      "speaker": "commander",
+      "sha256": "b468c98c4021fd8ffccdcdcf7c909051389ce6f619ca29d772f540f4abadbd73",
+      "bytes": 6312,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-o10-l001": {
+      "file": "audio-v2/m01v2-o10-l001.ogg",
+      "duration": 3.305625,
+      "speaker": "commander",
+      "sha256": "092fb51198c04d60b9c1a11e95c60673f39c704a742ccca81dab968d7a6a3c00",
+      "bytes": 16143,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-o11-l002": {
+      "file": "audio-v2/m01v2-o11-l002.ogg",
+      "duration": 1.0791666666666666,
+      "speaker": "commander",
+      "sha256": "cef2ff8498e766ba906ad1b8f0987fe1efe829cf19c22b59c4bd298f010adae0",
+      "bytes": 5106,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-o12-l002": {
+      "file": "audio-v2/m01v2-o12-l002.ogg",
+      "duration": 1.6829166666666666,
+      "speaker": "commander",
+      "sha256": "bb4229051dd024112e59f5a36396df5e16f14a47f4834f8be0ac1fbc3f0a5346",
+      "bytes": 8254,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-14-l002": {
+      "file": "audio-v2/m01v2-14-l002.ogg",
+      "duration": 1.2990833333333334,
+      "speaker": "commander",
+      "sha256": "7baa4465d9c07973ded7c2572cb35fb5eb876c3dd04e6911e70a3051eb5cfbbc",
+      "bytes": 6224,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-15-l001": {
+      "file": "audio-v2/m01v2-15-l001.ogg",
+      "duration": 1.5080416666666667,
+      "speaker": "commander",
+      "sha256": "29428068817ba52469681d05ff89ce34dfc2a636094df94395e3f4dd87997a6a",
+      "bytes": 7241,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-15-l003": {
+      "file": "audio-v2/m01v2-15-l003.ogg",
+      "duration": 3.0502083333333334,
+      "speaker": "commander",
+      "sha256": "bff9697d3502867a59dac8df5b1b7cd823ba61f884663aef995636b28ca81c6e",
+      "bytes": 14539,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-16-l002": {
+      "file": "audio-v2/m01v2-16-l002.ogg",
+      "duration": 1.9615416666666667,
+      "speaker": "commander",
+      "sha256": "3211447813c33c904e5375882fab160a154d1542868cf2018c3290191ace5989",
+      "bytes": 9670,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-16-alt-l002": {
+      "file": "audio-v2/m01v2-16-alt-l002.ogg",
+      "duration": 1.6132083333333334,
+      "speaker": "commander",
+      "sha256": "297acc4ecd4b4896e6e4a7c11f3f3d77030563eb4a013353de44aaed63768ad0",
+      "bytes": 7788,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-17-l002": {
+      "file": "audio/m01-s09-l002.ogg",
+      "duration": 1.2417083333333334,
+      "speaker": "commander",
+      "sha256": "f498a60da21b1c216420a96e5b6370a4c7c20f093fed6b6da56a3446674d64b0",
+      "bytes": 5809,
+      "origin": "temporary-synthesis",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-s09-l002"
+      },
+      "textMatch": "exact"
+    },
+    "m01v2-18-l002": {
+      "file": "audio/m01-s09-l007.ogg",
+      "duration": 1.3113333333333332,
+      "speaker": "commander",
+      "sha256": "1d4d5586d11e6423cc4aed8d82f99235150507bf1db8cc8c1d0d0629ecffdc4a",
+      "bytes": 6236,
+      "origin": "temporary-synthesis",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-s09-l007"
+      },
+      "textMatch": "exact"
+    },
+    "m01v2-19-l002": {
+      "file": "audio/m01-s10-l008.ogg",
+      "duration": 0.974,
+      "speaker": "commander",
+      "sha256": "0d19dbc3741af53084024404235947e16324735cfccf0cf9f06109985ff30939",
+      "bytes": 4483,
+      "origin": "temporary-synthesis",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-s10-l008"
+      },
+      "textMatch": "exact"
+    },
+    "m01v2-20-l002": {
+      "file": "audio-v2/m01v2-20-l002.ogg",
+      "duration": 2.251125,
+      "speaker": "commander",
+      "sha256": "3e5014339c144214c3e45b646b8d11697f9251cf26d57bdebd8a1ab57a776e5e",
+      "bytes": 11140,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-21-l001": {
+      "file": "audio/m01-s10-l018.ogg",
+      "duration": 2.5297083333333332,
+      "speaker": "commander",
+      "sha256": "93910cba4431354fdd5a613a46f635a6472a9a560466babe977275412e4aeac4",
+      "bytes": 12639,
+      "origin": "temporary-synthesis",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-s10-l018"
+      },
+      "textMatch": "exact"
+    },
+    "m01v2-21-l003": {
+      "file": "audio/m01-s10-l020.ogg",
+      "duration": 1.438375,
+      "speaker": "commander",
+      "sha256": "4870d707816b03c1ebaab0d73a60be78e996e6735473e72ffdae8a43e98ad97c",
+      "bytes": 6894,
+      "origin": "temporary-synthesis",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-s10-l020"
+      },
+      "textMatch": "exact"
+    },
+    "m01v2-22-l002": {
+      "file": "audio-v2/m01v2-22-l002.ogg",
+      "duration": 2.32075,
+      "speaker": "commander",
+      "sha256": "89dcfc7723a7ee860ccc647a06a8453a12f87e6d35e58a32e978e6c29738f2f0",
+      "bytes": 11368,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-23-l001": {
+      "file": "audio/m01-s11-l008.ogg",
+      "duration": 1.7867083333333333,
+      "speaker": "commander",
+      "sha256": "33ff3f1493e5beb8a4a21bd5b83273d221fefde57dbbf35e9fc244b1dbd0d39d",
+      "bytes": 8708,
+      "origin": "temporary-synthesis",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-s11-l008"
+      },
+      "textMatch": "exact"
+    },
+    "m01v2-23-l003": {
+      "file": "audio-v2/m01v2-23-l003.ogg",
+      "duration": 3.8629166666666666,
+      "speaker": "commander",
+      "sha256": "20d2845fec06640373837989a2038bddaa26543a690b48ba86dc4db8c8a2a608",
+      "bytes": 18840,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-24-l002": {
+      "file": "audio/m01-s11-l014.ogg",
+      "duration": 2.4832916666666667,
+      "speaker": "commander",
+      "sha256": "14a0bdf3a537cd60c39e3de9a8fc666f770b9c9af69d85c8a382895169b8f5fb",
+      "bytes": 12391,
+      "origin": "temporary-synthesis",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-s11-l014"
+      },
+      "textMatch": "exact"
+    },
+    "m01v2-25-l002": {
+      "file": "field-radio/victory.mp3",
+      "duration": 3.78775,
+      "speaker": "commander",
+      "sha256": "dcba50b5246926398e3763a1ac1aa04a05d596be13f09ed3386b5469f2e9a557",
+      "bytes": 77541,
+      "origin": "user-recording",
+      "reusedFrom": {
+        "catalog": "field-radio/manifest.json",
+        "cueId": "victory"
+      },
+      "textMatch": "exact"
+    },
+    "m01v2-26-l002": {
+      "file": "audio-v2/m01v2-26-l002.ogg",
+      "duration": 3.4244583333333334,
+      "speaker": "commander",
+      "sha256": "22263fcb26ee3852fcc04417df7d6641fb8e3656a18833c66cc761901a25041e",
+      "bytes": 17142,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-27-l002": {
+      "file": "audio-v2/m01v2-27-l002.ogg",
+      "duration": 1.3223333333333334,
+      "speaker": "commander",
+      "sha256": "a0a690fb2afa40872de5a572adaeaa36f5be681454859b6b79b83c7ac47274a4",
+      "bytes": 6325,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-28-l001": {
+      "file": "audio-v2/m01v2-28-l001.ogg",
+      "duration": 2.1473333333333335,
+      "speaker": "commander",
+      "sha256": "7e7956cf48cf732a936697f4ed9f26ac118bd634cbc555242632663361da2dad",
+      "bytes": 10488,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-28-l003": {
+      "file": "audio/m01-s14-l010.ogg",
+      "duration": 1.6242083333333333,
+      "speaker": "commander",
+      "sha256": "96857d7239d6f4ab743b9347891a9491ba54154dd3c8859ed721b5da3a666554",
+      "bytes": 7997,
+      "origin": "temporary-synthesis",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-s14-l010"
+      },
+      "textMatch": "exact"
+    },
+    "m01v2-29-l002": {
+      "file": "audio-v2/m01v2-29-l002.ogg",
+      "duration": 2.390458333333333,
+      "speaker": "commander",
+      "sha256": "884500385336f6bfdf1ab5d6248a4051fd97524e99bd08eb84299964f927de8d",
+      "bytes": 12828,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-d01-l001": {
+      "file": "audio-v2/m01v2-d01-l001.ogg",
+      "duration": 1.5545,
+      "speaker": "commander",
+      "sha256": "35213fe10a63bea19d12df307c9da111c4c1cb0a7e9a903d24678201e8a59a2e",
+      "bytes": 7591,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-d01-l003": {
+      "file": "audio-v2/m01v2-d01-l003.ogg",
+      "duration": 1.7867083333333333,
+      "speaker": "commander",
+      "sha256": "879c1cbc5c3345c24f527082182c2e9b79f034e41d67cfd8b569fd3c2660fdb2",
+      "bytes": 8710,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-d02-l002": {
+      "file": "audio-v2/m01v2-d02-l002.ogg",
+      "duration": 1.57775,
+      "speaker": "commander",
+      "sha256": "d1ed03c683e487c0cd97cf5df4445ca88d24d6b5104f5cc6475b2589eb156a38",
+      "bytes": 7542,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-d04-l001": {
+      "file": "audio-v2/m01v2-d04-l001.ogg",
+      "duration": 2.96,
+      "speaker": "commander",
+      "sha256": "1a61fa86303f13e76c0041ea8706f2c4165a63f34113e81ed46ed485080ee0ea",
+      "bytes": 14743,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-b015": {
+      "file": "audio/m01-b018.ogg",
+      "duration": 1.5080416666666667,
+      "speaker": "commander",
+      "sha256": "ec789a56d98575f877bdd0d2f3321a0980f8b2f9402c93c8be3ce1d05ab78eaa",
+      "bytes": 7165,
+      "origin": "temporary-synthesis",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-b018"
+      },
+      "textMatch": "exact"
+    },
+    "m01v2-p02-l002": {
+      "file": "audio-v2/m01v2-p02-l002.ogg",
+      "duration": 2.1253333333333333,
+      "speaker": "warrant",
+      "sha256": "10146779ad4799c7b32c013ef33fe41f8de59849ef78b0c59950daca00678b3c",
+      "bytes": 10478,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "dmitri"
+    },
+    "m01v2-p03-l001": {
+      "file": "recordings/warrant/m01-s03-l001.mp3",
+      "duration": 1.5673333333333332,
+      "speaker": "warrant",
+      "sha256": "bd64fa8e549c91dffb9bfc35373ddc789e0b025ab75e7b5fb994e299dd64d5a6",
+      "bytes": 42014,
+      "origin": "user-recording",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-s03-l001"
+      },
+      "textMatch": "exact"
+    },
+    "m01v2-p03-l003": {
+      "file": "recordings/warrant/m01-s03-l003.mp3",
+      "duration": 1.410625,
+      "speaker": "warrant",
+      "sha256": "cba558655f22a008266c80c48e048ae6e6af7c8c232cb56a660705c7d46a3a73",
+      "bytes": 39506,
+      "origin": "user-recording",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-s03-l003"
+      },
+      "textMatch": "exact"
+    },
+    "m01v2-o03-l002": {
+      "file": "audio-v2/m01v2-o03-l002.ogg",
+      "duration": 0.9979583333333333,
+      "speaker": "warrant",
+      "sha256": "b0d4b05dbf64dfbf992e5ea124682fec45fa0a05c8ab77c10d2f9316892d7bda",
+      "bytes": 4806,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "dmitri"
+    },
+    "m01v2-o04-l003": {
+      "file": "audio-v2/m01v2-o04-l003.ogg",
+      "duration": 1.80025,
+      "speaker": "warrant",
+      "sha256": "47ba64732b3bd6fbe8d56120c5e2039f81ea75616b4434cc496faf45e5134ee0",
+      "bytes": 8601,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "dmitri"
+    },
+    "m01v2-o05-l002": {
+      "file": "audio-v2/m01v2-o05-l002.ogg",
+      "duration": 3.203375,
+      "speaker": "warrant",
+      "sha256": "93a93250190ff7861386f6ad16d2a66543a25e0c93c1c3b29774dc06aab6b270",
+      "bytes": 15686,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "dmitri"
+    },
+    "m01v2-o06-l002": {
+      "file": "audio-v2/m01v2-o06-l002.ogg",
+      "duration": 2.5073333333333334,
+      "speaker": "warrant",
+      "sha256": "213479c71f524b65c848bb9f3c726ada7fa0877cc21ea4954ff2c6fd16c23a7f",
+      "bytes": 12451,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "dmitri"
+    },
+    "m01v2-o09-l003": {
+      "file": "audio-v2/m01v2-o09-l003.ogg",
+      "duration": 3.1702083333333335,
+      "speaker": "warrant",
+      "sha256": "a8a6a517f9c4e39cfc106581111c1ca127deac9701b9a3b888d0eac697ea9da7",
+      "bytes": 15855,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "dmitri"
+    },
+    "m01v2-o10-l003": {
+      "file": "audio-v2/m01v2-o10-l003.ogg",
+      "duration": 2.669375,
+      "speaker": "warrant",
+      "sha256": "d9eb0082d348b8ac2167499596d4668b5704f5c5df4f1fac8b4988147ceebf7f",
+      "bytes": 12742,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "dmitri"
+    },
+    "m01v2-o12-l003": {
+      "file": "audio-v2/m01v2-o12-l003.ogg",
+      "duration": 3.458833333333333,
+      "speaker": "warrant",
+      "sha256": "c1a05d1ff7831b607b773ec51d4c3c45773a52331fb15ea2780e6976027bc285",
+      "bytes": 17309,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "dmitri"
+    },
+    "m01v2-24-l001": {
+      "file": "audio-v2/m01v2-24-l001.ogg",
+      "duration": 4.50375,
+      "speaker": "warrant",
+      "sha256": "efb8a146c0c20c28a9668f58563e711e0361a6e12dc7c4731be16e0d90d27f48",
+      "bytes": 21911,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "dmitri"
+    },
+    "m01v2-26-l001": {
+      "file": "audio-v2/m01v2-26-l001.ogg",
+      "duration": 2.855625,
+      "speaker": "warrant",
+      "sha256": "a40b0d3a8bcb70bc07e70c546634e4cbfea758a5438551ff0b56c2a25f40bb59",
+      "bytes": 14123,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "dmitri"
+    },
+    "m01v2-26-l003": {
+      "file": "audio-v2/m01v2-26-l003.ogg",
+      "duration": 2.60025,
+      "speaker": "warrant",
+      "sha256": "5e5259249049668a6a3f4dea5e601e5e2b5c243afcee59d450ffa08ab64bbf58",
+      "bytes": 13048,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "dmitri"
+    },
+    "m01v2-29-l001": {
+      "file": "audio-v2/m01v2-29-l001.ogg",
+      "duration": 2.2983333333333333,
+      "speaker": "warrant",
+      "sha256": "9819d8762ca81793cc7ef0cddf3a1e0d9672a7fd91a2fd953308bec4f73f235d",
+      "bytes": 11263,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "dmitri"
+    },
+    "m01v2-29-l003": {
+      "file": "recordings/warrant/m01-s14-l017.mp3",
+      "duration": 1.410625,
+      "speaker": "warrant",
+      "sha256": "dad219d72f4f2483a2ae7e64102835fc88683b25bcbd5fc8fb24ecf7cb9baebb",
+      "bytes": 39506,
+      "origin": "user-recording",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-s14-l017"
+      },
+      "textMatch": "exact"
+    },
+    "m01v2-d02-l003": {
+      "file": "audio-v2/m01v2-d02-l003.ogg",
+      "duration": 1.7875,
+      "speaker": "warrant",
+      "sha256": "7a1db67cfc8536750e299b0582bb5cefe1d34caf998ed19db03ce275c7bee599",
+      "bytes": 8897,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "dmitri"
+    },
+    "m01v2-d03-l002": {
+      "file": "audio-v2/m01v2-d03-l002.ogg",
+      "duration": 2.669875,
+      "speaker": "warrant",
+      "sha256": "2eb48adc5087f10665871851fc3de03b85ded55c97876064f57ee0ea64ccb787",
+      "bytes": 13617,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "dmitri"
+    },
+    "m01v2-d04-l002": {
+      "file": "audio-v2/m01v2-d04-l002.ogg",
+      "duration": 3.6445833333333333,
+      "speaker": "warrant",
+      "sha256": "a2231076ccc7fcfba73cdf3d1ff6efa35fe8e78cb410ca886361b177d0f9d3d8",
+      "bytes": 17758,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "dmitri"
+    },
+    "m01v2-b010": {
+      "file": "audio-v2/m01v2-b010.ogg",
+      "duration": 1.38225,
+      "speaker": "warrant",
+      "sha256": "1d3b1df84dfe62522227f848474a0fdc24b6cff9fa94c78aa75810c63e9c6dc5",
+      "bytes": 6737,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "dmitri"
+    },
+    "m01v2-b018": {
+      "file": "warrant-radio/stop.mp3",
+      "duration": 5.5640833333333335,
+      "speaker": "warrant",
+      "sha256": "1c49f25188fc7e2cdf8e5cbc1e3d1f87c4a88adffd872c4b31531602ae203cf0",
+      "bytes": 105962,
+      "origin": "user-recording",
+      "reusedFrom": {
+        "catalog": "warrant-radio/manifest.json",
+        "cueId": "stop"
+      },
+      "textMatch": "punctuation-only"
+    },
+    "m01v2-o01-l001": {
+      "file": "audio-v2/m01v2-o01-l001.ogg",
+      "duration": 1.2990833333333334,
+      "speaker": "general",
+      "sha256": "871070ea6220a26da64bf2ec43738007513685128db32bd0947f80286686bd95",
+      "bytes": 6340,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "dmitri"
+    },
+    "m01v2-o01-l003": {
+      "file": "audio-v2/m01v2-o01-l003.ogg",
+      "duration": 3.6649583333333333,
+      "speaker": "general",
+      "sha256": "b4f27fdb6a288c50d729b63e4875138d83fbd43feffd314024a4ee169434f486",
+      "bytes": 17741,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "dmitri"
+    },
+    "m01v2-o12-l001": {
+      "file": "audio-v2/m01v2-o12-l001.ogg",
+      "duration": 2.9684166666666667,
+      "speaker": "radio",
+      "sha256": "892a5d1df6ccb6891f6cc38c826fd96c71cb3bb15aefc3984d8615c919592d08",
+      "bytes": 14797,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-25-l001": {
+      "file": "audio/m01-s12-l001.ogg",
+      "duration": 1.9699583333333333,
+      "speaker": "radio",
+      "sha256": "744c9a879d3493ac8d5e49442b37595a0de12f582f4b7ed3f4ed8a112c581b34",
+      "bytes": 9653,
+      "origin": "temporary-synthesis",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-s12-l001"
+      },
+      "textMatch": "exact"
+    },
+    "m01v2-27-l001": {
+      "file": "audio-v2/m01v2-27-l001.ogg",
+      "duration": 4.06925,
+      "speaker": "radio",
+      "sha256": "157a2a6777035dd70d5302192eb078454a54ac9522a9073d350613b6c741a0f1",
+      "bytes": 19871,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-27-l003": {
+      "file": "audio-v2/m01v2-27-l003.ogg",
+      "duration": 2.794583333333333,
+      "speaker": "radio",
+      "sha256": "1f0a0cb7dee5472c122190a6b4e68e9c998eccb634a63e7188a879fcf66b231e",
+      "bytes": 13912,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-28-l002": {
+      "file": "audio-v2/m01v2-28-l002.ogg",
+      "duration": 4.728208333333333,
+      "speaker": "radio",
+      "sha256": "24cb838777345999a4724842f57eeadd3c1ab502dbaae5babaed297570b5d313",
+      "bytes": 22649,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-d02-l001": {
+      "file": "audio-v2/m01v2-d02-l001.ogg",
+      "duration": 2.178916666666667,
+      "speaker": "radio",
+      "sha256": "5bf20752491bda56e80f290433b6933724048d94c31833f3d0e10f5059ff201a",
+      "bytes": 10846,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-16-l001": {
+      "file": "audio-v2/m01v2-16-l001.ogg",
+      "duration": 2.3847916666666666,
+      "speaker": "scientist",
+      "sha256": "0da82c24236e69dc9804aba6bf2e0b716e42b164e72466878da0e63c30bcf9e9",
+      "bytes": 11264,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "dmitri"
+    },
+    "m01v2-16-l003": {
+      "file": "audio/m01-s08-l019.ogg",
+      "duration": 1.7027083333333333,
+      "speaker": "scientist",
+      "sha256": "2d573aafe06ccfb583994f2a7418954a1533e486f601ffcbdde4985f67005b1d",
+      "bytes": 8318,
+      "origin": "temporary-synthesis",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-s08-l019"
+      },
+      "textMatch": "exact"
+    },
+    "m01v2-16-alt-l001": {
+      "file": "audio-v2/m01v2-16-alt-l001.ogg",
+      "duration": 3.8364583333333333,
+      "speaker": "scientist",
+      "sha256": "ac74eae7c9a9a9765fba3c1e89a331b038e651dadddd4695561095e5fd766d3e",
+      "bytes": 18488,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "dmitri"
+    },
+    "m01v2-16-alt-l003": {
+      "file": "audio-v2/m01v2-16-alt-l003.ogg",
+      "duration": 3.674,
+      "speaker": "scientist",
+      "sha256": "3f196f4297bab47014e872a8c8f2b437326a8528c6bfd4a419e5d28745d81cf7",
+      "bytes": 17907,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "dmitri"
+    },
+    "m01v2-18-l001": {
+      "file": "audio-v2/m01v2-18-l001.ogg",
+      "duration": 2.0620833333333333,
+      "speaker": "scientist",
+      "sha256": "d8bb14f64b9d100b2988b57160992c2e706c21ff2bbcf2f559feb909a1188873",
+      "bytes": 10182,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "dmitri"
+    },
+    "m01v2-18-l003": {
+      "file": "audio-v2/m01v2-18-l003.ogg",
+      "duration": 2.1085416666666665,
+      "speaker": "scientist",
+      "sha256": "53e94f107976d933a69ed5610df56e8c27036142d9b2e1ccd1e81afd7cf3e919",
+      "bytes": 10441,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "dmitri"
+    },
+    "m01v2-20-l001": {
+      "file": "audio-v2/m01v2-20-l001.ogg",
+      "duration": 4.056583333333333,
+      "speaker": "scientist",
+      "sha256": "c103a0b0b2b0a14d1e38e10b8172ab7db08cf0452574b9f2744857340151efca",
+      "bytes": 19793,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "dmitri"
+    },
+    "m01v2-20-l003": {
+      "file": "audio-v2/m01v2-20-l003.ogg",
+      "duration": 2.6987083333333333,
+      "speaker": "scientist",
+      "sha256": "1de87c6fdcbec6ae243caf9e3073143b72424a3a000b3bc8a1d272a39095bf58",
+      "bytes": 12764,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "dmitri"
+    },
+    "m01v2-21-l002": {
+      "file": "audio/m01-s10-l019.ogg",
+      "duration": 1.4937083333333334,
+      "speaker": "scientist",
+      "sha256": "ca1d5f736cb211e3def88c9a4747005145965fb5cee13354cf0d6831a0893760",
+      "bytes": 7213,
+      "origin": "temporary-synthesis",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-s10-l019"
+      },
+      "textMatch": "exact"
+    },
+    "m01v2-d01-l002": {
+      "file": "audio-v2/m01v2-d01-l002.ogg",
+      "duration": 1.7810416666666666,
+      "speaker": "scientist",
+      "sha256": "c8ac0343d4e7772a93599edd5d6d7768952c824ae66cd4d9e7984aaf9e5b35af",
+      "bytes": 9105,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "dmitri"
+    },
+    "m01v2-b011": {
+      "file": "audio-v2/m01v2-b011.ogg",
+      "duration": 1.8995,
+      "speaker": "scientist",
+      "sha256": "41f595c0d636b21be712020860372a4938c101e641e6b7018aea71623d60720f",
+      "bytes": 9151,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "dmitri"
+    },
+    "m01v2-b012": {
+      "file": "audio/m01-b015.ogg",
+      "duration": 2.8844583333333333,
+      "speaker": "scientist",
+      "sha256": "2c7be4f90f9cd7ea3952031a05a02ceae1b08393152c09367f8d000fa7bcc32e",
+      "bytes": 13630,
+      "origin": "temporary-synthesis",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-b015"
+      },
+      "textMatch": "exact"
+    },
+    "m01v2-o08-l001": {
+      "file": "audio-v2/m01v2-o08-l001.ogg",
+      "duration": 3.406416666666667,
+      "speaker": "scout",
+      "sha256": "e08a2d532c102eff1e68014ff9ffeece99373925cc5ee072c3aac32d5c99a127",
+      "bytes": 16495,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-o08-l003": {
+      "file": "audio-v2/m01v2-o08-l003.ogg",
+      "duration": 2.1525833333333333,
+      "speaker": "scout",
+      "sha256": "21fd1f602499a441b3bca207e2653945c853cf41be81907c86a8c5a28fed5432",
+      "bytes": 9995,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-o09-l001": {
+      "file": "audio-v2/m01v2-o09-l001.ogg",
+      "duration": 1.5048333333333332,
+      "speaker": "scout",
+      "sha256": "09452aa2175fafb62548f1f3ff09e754c6e8d1fd7948b0beeb4baa2ef800aff9",
+      "bytes": 7298,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-14-l001": {
+      "file": "audio-v2/m01v2-14-l001.ogg",
+      "duration": 4.428083333333333,
+      "speaker": "scout",
+      "sha256": "4ec440359903efc8a49ca39f62f29888eb5f2279fe3b7873860961d6f1000db1",
+      "bytes": 21859,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-14-l003": {
+      "file": "audio-v2/m01v2-14-l003.ogg",
+      "duration": 2.605875,
+      "speaker": "scout",
+      "sha256": "40a6850419ed0569b763e8ae9a16132d9c6313360c0e61889ba8ccc7e1eb9362",
+      "bytes": 12407,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-15-l002": {
+      "file": "audio-v2/m01v2-15-l002.ogg",
+      "duration": 2.9077083333333333,
+      "speaker": "scout",
+      "sha256": "8c7d66f4825bc82492ecde86441ea34e22954f3ea2345f1d6b78d42eb52af02f",
+      "bytes": 13755,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-17-l001": {
+      "file": "audio-v2/m01v2-17-l001.ogg",
+      "duration": 3.942875,
+      "speaker": "scout",
+      "sha256": "d9491956784c0cf6b04ce957623200ad4046c4cdfe3319ea2f3f4ad4c0b29c3e",
+      "bytes": 19470,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-17-l003": {
+      "file": "audio-v2/m01v2-17-l003.ogg",
+      "duration": 3.0934583333333334,
+      "speaker": "scout",
+      "sha256": "0351550a6ac93c272b59c69de82e8bb0987773097f6e3dc94aef7eb7cef5240c",
+      "bytes": 14637,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-19-l001": {
+      "file": "audio-v2/m01v2-19-l001.ogg",
+      "duration": 4.117583333333333,
+      "speaker": "scout",
+      "sha256": "6154b2a2e2034217de5091e09d6e15550b549dd2213aa397554e81f3fc1d8525",
+      "bytes": 20464,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-19-l003": {
+      "file": "audio-v2/m01v2-19-l003.ogg",
+      "duration": 3.163125,
+      "speaker": "scout",
+      "sha256": "7fedfde3c84926eb21cb11175fd653f7a373ea39e7bb249ed04f6538b56422ff",
+      "bytes": 15390,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-b009": {
+      "file": "audio/m01-b010.ogg",
+      "duration": 3.034875,
+      "speaker": "scout",
+      "sha256": "6d9168b6e1ff1119fb0e57af0dfa7517e684416897bf76694436f51202985102",
+      "bytes": 14641,
+      "origin": "temporary-synthesis",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-b010"
+      },
+      "textMatch": "exact"
+    },
+    "m01v2-b017": {
+      "file": "audio/m01-b020.ogg",
+      "duration": 2.1439166666666667,
+      "speaker": "scout",
+      "sha256": "37b9b014f2cac768d1f3859c51af704b2fab225fd61b84a692b76c4bcde5a6d7",
+      "bytes": 10687,
+      "origin": "temporary-synthesis",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-b020"
+      },
+      "textMatch": "exact"
+    },
+    "m01v2-22-l001": {
+      "file": "audio-v2/m01v2-22-l001.ogg",
+      "duration": 2.553375,
+      "speaker": "chief",
+      "sha256": "2233be14e35c6d09663e5e1e484bfc6366ae4c75c6a2e5e91f7616f8aebe76e7",
+      "bytes": 12436,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "dmitri"
+    },
+    "m01v2-22-l003": {
+      "file": "audio-v2/m01v2-22-l003.ogg",
+      "duration": 2.1354166666666665,
+      "speaker": "chief",
+      "sha256": "24f3aa48c0918562f8bda15c31101e402d9ddca350d6ea5482a08e01f48830a8",
+      "bytes": 10166,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "dmitri"
+    },
+    "m01v2-23-l002": {
+      "file": "audio/m01-s11-l009.ogg",
+      "duration": 0.6625833333333333,
+      "speaker": "chief",
+      "sha256": "68ee8f8fda06113a032ffee1445f1edd26ffda27af98e22e163332d5261fd2ff",
+      "bytes": 3169,
+      "origin": "temporary-synthesis",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-s11-l009"
+      },
+      "textMatch": "exact"
+    },
+    "m01v2-p01-l001": {
+      "file": "audio/m01-s01-l003.ogg",
+      "duration": 2.8215833333333333,
+      "speaker": "past",
+      "sha256": "bb516c2e00ec725640d2d2995814ee33555ee21b508437666c43febc308bb8c8",
+      "bytes": 13698,
+      "origin": "temporary-synthesis",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-s01-l003"
+      },
+      "textMatch": "exact"
+    },
+    "m01v2-p01-l002": {
+      "file": "audio/m01-s01-l004.ogg",
+      "duration": 2.7417083333333334,
+      "speaker": "past",
+      "sha256": "51917871401a21ffd2da81eb11e39a6cdf81d39c984185b1d8889285f2d88810",
+      "bytes": 13304,
+      "origin": "temporary-synthesis",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-s01-l004"
+      },
+      "textMatch": "exact"
+    },
+    "m01v2-p03-l002": {
+      "file": "audio/m01-s03-l002.ogg",
+      "duration": 1.52475,
+      "speaker": "soldier",
+      "sha256": "975f8da97782092ef0a59b5e365d8f23c85f7a64f10bdcd6415b460fbf073421",
+      "bytes": 7158,
+      "origin": "temporary-synthesis",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-s03-l002"
+      },
+      "textMatch": "exact"
+    },
+    "m01v2-d03-l001": {
+      "file": "audio/m01-s14-l018.ogg",
+      "duration": 3.460375,
+      "speaker": "soldier",
+      "sha256": "8d087fff6d62c9f96c96e3ff6ea5da2cb6f826ffc00b667ccb6cbadbd271cbb0",
+      "bytes": 16233,
+      "origin": "temporary-synthesis",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-s14-l018"
+      },
+      "textMatch": "exact"
+    },
+    "m01v2-o02-l001": {
+      "file": "audio-v2/m01v2-o02-l001.ogg",
+      "duration": 1.8675,
+      "speaker": "builder",
+      "sha256": "9d481548a3c6ec596eb4ba8ba5f3ab59652b0b024a65493bb83b7222608b78e8",
+      "bytes": 9269,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-o02-l003": {
+      "file": "audio-v2/m01v2-o02-l003.ogg",
+      "duration": 3.1100833333333333,
+      "speaker": "builder",
+      "sha256": "ebe5696519dbec88a70282b5dd77f4b7c4f4c6666e2d9ff4641c3fba8a53aa71",
+      "bytes": 15408,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-o04-l001": {
+      "file": "audio-v2/m01v2-o04-l001.ogg",
+      "duration": 1.2637916666666666,
+      "speaker": "builder",
+      "sha256": "d708d1991ebcdf9ba6da23aa69f03a52307f6be33a3e135c7e2b7b5e8d9dad15",
+      "bytes": 6107,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-o07-l001": {
+      "file": "audio-v2/m01v2-o07-l001.ogg",
+      "duration": 1.1827916666666667,
+      "speaker": "builder",
+      "sha256": "285281db3ff73c15b3acadb3814644aef9c9f160679a8c8f31b8de4571a4bbfe",
+      "bytes": 5764,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-o07-l003": {
+      "file": "audio-v2/m01v2-o07-l003.ogg",
+      "duration": 3.943416666666667,
+      "speaker": "builder",
+      "sha256": "c2e189569521f3b07db64fa110d1891e6d3cb3f69d48ce667886f4e7ba62691d",
+      "bytes": 19187,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-o10-l002": {
+      "file": "audio-v2/m01v2-o10-l002.ogg",
+      "duration": 1.774625,
+      "speaker": "builder",
+      "sha256": "a24e5cfbd8467ee3c04a3a1d3b68d2b00ff9a67eeb2c322c76ef464a342cbf04",
+      "bytes": 8635,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-o11-l001": {
+      "file": "audio-v2/m01v2-o11-l001.ogg",
+      "duration": 1.298875,
+      "speaker": "builder",
+      "sha256": "0f7548087924be1081b1b72ebc565889285cd8f7c51a9d75c87647aa8aade6e5",
+      "bytes": 6324,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-o11-l003": {
+      "file": "audio-v2/m01v2-o11-l003.ogg",
+      "duration": 2.4945,
+      "speaker": "builder",
+      "sha256": "2deed2eb76ee4af23ce142d7b180c7a36fd2e51b3fb59c137c7cbf4af297b494",
+      "bytes": 12374,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-b001": {
+      "file": "audio/m01-b001.ogg",
+      "duration": 1.194125,
+      "speaker": "builder",
+      "sha256": "8bd1c42dc65026ee4a847bacce4b53d224fb2d1fcd1fc129b02019a4c05d17ff",
+      "bytes": 5801,
+      "origin": "temporary-synthesis",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-b001"
+      },
+      "textMatch": "exact"
+    },
+    "m01v2-b002": {
+      "file": "audio/m01-b002.ogg",
+      "duration": 2.0764583333333335,
+      "speaker": "builder",
+      "sha256": "111bf47ad85790e07115647a8b6f89ce57e64fc3f35f18af66e000706f6db717",
+      "bytes": 10191,
+      "origin": "temporary-synthesis",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-b002"
+      },
+      "textMatch": "exact"
+    },
+    "m01v2-b003": {
+      "file": "audio/m01-b003.ogg",
+      "duration": 3.351,
+      "speaker": "builder",
+      "sha256": "9d206e89bc78fc9ec03b7e552f74dd5055daa8a82b3452592b3d3e2fe71b8fb3",
+      "bytes": 16090,
+      "origin": "temporary-synthesis",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-b003"
+      },
+      "textMatch": "exact"
+    },
+    "m01v2-b004": {
+      "file": "audio/m01-b011.ogg",
+      "duration": 2.306125,
+      "speaker": "builder",
+      "sha256": "e9b9e6bc88cd459137bb8c564bac1676e3f23bcdc57301c0cbf14b83bb021c00",
+      "bytes": 10977,
+      "origin": "temporary-synthesis",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-b011"
+      },
+      "textMatch": "exact"
+    },
+    "m01v2-b005": {
+      "file": "audio/m01-b012.ogg",
+      "duration": 3.049166666666667,
+      "speaker": "builder",
+      "sha256": "c5575bce80641131fd395e427dbcc279af42929a9a36c88f079efdaa22ebb3fb",
+      "bytes": 14776,
+      "origin": "temporary-synthesis",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-b012"
+      },
+      "textMatch": "exact"
+    },
+    "m01v2-b006": {
+      "file": "audio-v2/m01v2-b006.ogg",
+      "duration": 2.4814583333333333,
+      "speaker": "driver",
+      "sha256": "193bd1253637af9e39bc98cd59d525a143d4abf8863815f220bc02ef8f3f50e9",
+      "bytes": 11930,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-b007": {
+      "file": "audio-v2/m01v2-b007.ogg",
+      "duration": 1.299875,
+      "speaker": "driver",
+      "sha256": "e37776d7328428e173e96a80c6e3609583ce57d47220f6f3b0d1ecef582cf50c",
+      "bytes": 6185,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-b008": {
+      "file": "audio-v2/m01v2-b008.ogg",
+      "duration": 2.3215416666666666,
+      "speaker": "driver",
+      "sha256": "4affcd602c7eb0c173eeb508422d07843956f6ff0f320d51c6bb970916fb42c5",
+      "bytes": 11568,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-b013": {
+      "file": "audio-v2/m01v2-b013.ogg",
+      "duration": 1.9964583333333332,
+      "speaker": "driver",
+      "sha256": "da3014e4b71702b5a5c2561d4431a569693465815d86e654f62ebc8c7724e440",
+      "bytes": 9817,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-b014": {
+      "file": "audio-v2/m01v2-b014.ogg",
+      "duration": 2.3885833333333335,
+      "speaker": "driver",
+      "sha256": "569ca10223fd240cb8fcc4da30e19327e3a00100f863af0c06e0d2586467ee58",
+      "bytes": 11337,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    },
+    "m01v2-b016": {
+      "file": "audio-v2/m01v2-b016.ogg",
+      "duration": 2.7042083333333333,
+      "speaker": "driver",
+      "sha256": "b45dfa6203bf2b077f7331d93f9f836e8e4cd31401769cc83f9d3179612cdffd",
+      "bytes": 13588,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
+    }
+  }
+}

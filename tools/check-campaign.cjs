@@ -16,7 +16,7 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   assert(await page.evaluate(()=>window.campaign?.ready),errors.join('\n')||await page.locator('#loading-status').textContent());
   const fieldRadioDir='assets/campaign/alpha/mission01/';
   const story=JSON.parse(fs.readFileSync(fieldRadioDir+'story-v2.json'));
-  const line=story.dialogue.find(cue=>cue.id==='m01v2-o01-l001');
+  const line=story.dialogue.find(cue=>cue.id==='m01-v3-general-coffee');
   const intro={...JSON.parse(fs.readFileSync(fieldRadioDir+'audio-v2.json')).clips[line.id],text:line.text};
   assert.equal(createHash('sha256').update(fs.readFileSync(fieldRadioDir+intro.file)).digest('hex'),intro.sha256);
   const introUrl=new URL('../'+fieldRadioDir+intro.file,page.url()).href;
@@ -69,7 +69,7 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
    const {mission,radio}=campaign;
    for(const id of mission.state.flags.raidIds)mission.entity(id).hp=0;
    mission.state.flags.contact=false;mission.state.flags.raidStarted=false;mission.state.artifactKeys=[];
-   radio.director.data.scenes.o01={status:'done',cursor:0,endedAt:0};campaign.advance(0);
+   radio.director.data.scenes.r01={status:'done',cursor:0,endedAt:0};campaign.advance(0);
   });
   await page.locator('.settings summary').click();
   assert(await page.locator('#objectives').isVisible());

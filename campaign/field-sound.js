@@ -280,7 +280,9 @@ export class FieldSound {
       this.updateDialogueMix();
     };
     source.start(now);
-    request.keepCaptionUntil(performance.now() + (request.buffer.duration + (request.cue?.pauseAfter ?? .18)) * 1000);
+    // A recorded actor's pause already occupies the gap; preserve the MP3 itself.
+    const gap=Math.max(0,(request.cue?.pauseAfter??.18)-(request.cue?.clip?.trailingSilence??0));
+    request.keepCaptionUntil(performance.now() + (request.buffer.duration + gap) * 1000);
   }
 
   updateDialogueMix() {
@@ -354,7 +356,7 @@ export class FieldSound {
   }
 
   configureStoryVoices(script,mission,isBusy) {
-    this.storyVoices=new Map(script.barks.map(cue=>[cue.id,cue]));
+    this.storyVoices=new Map(script.barks.map(cue=>[cue.event,cue]));
     this.storyMission=mission;this.storyBusy=isBusy;this.barkTimes=new Map();
     this.seenHostiles=new Set();this.lastOrderAt=performance.now();
   }
@@ -366,18 +368,20 @@ export class FieldSound {
     if(this.context)this.updateDialogueMix();
   }
 
-  async bark(number,{cooldown=20000}={}) {
-    const id='m01v2-b'+String(number).padStart(3,'0'),cue=this.storyVoices?.get(id),now=performance.now();
+  async bark(event,{cooldown=60000}={}) {
+    const cue=this.storyVoices?.get(event),id=cue?.id,now=performance.now(),story=this.storyMission.state.radioStory;
     if(!cue||!this.ready()||!this.storyEnabled||this.storyBusy()||this.pendingStory||this.storyPlayback||this.voiceSource)return false;
-    if(now-(this.lastBarkAt??-Infinity)<3500||now-(this.barkTimes.get(id)??-Infinity)<cooldown)return false;
+    if(story&&story.clock-story.lastCombat<8000)return false;
+    if(now-(this.lastBarkAt??-Infinity)<45000||now-(this.barkTimes.get(id)??-Infinity)<cooldown||story&&story.clock-(story.facts.lastChatterAt??-Infinity)<45000)return false;
     const request=this.barkRequest={id,time:now};
     const buffer=await this.storyClip('unit',cue);
     // Low-priority responses expire instead of piling up behind a conversation.
     if(this.barkRequest!==request)return false;
     this.barkRequest=null;
-    if(!buffer||!this.ready()||!this.storyEnabled||this.storyBusy()||this.storyPlayback||this.pendingStory||performance.now()-now>1300)return false;
+    if(!buffer||!this.ready()||!this.storyEnabled||this.storyBusy()||this.storyPlayback||this.pendingStory||performance.now()-now>1300||story&&story.clock-story.lastCombat<8000)return false;
     const source=this.context.createBufferSource();source.buffer=buffer;source.connect(this.commandOutput);
     this.voiceSource=source;this.voiceCueId=id;this.lastBarkAt=performance.now();this.barkTimes.set(id,this.lastBarkAt);
+    if(story)story.facts.lastChatterAt=story.clock;
     source.onended=()=>{source.disconnect();if(this.voiceSource===source){this.voiceSource=null;this.voiceCueId=null;this.updateDialogueMix();}};
     source.start();this.updateDialogueMix();return true;
   }
@@ -386,38 +390,49 @@ export class FieldSound {
     const units=ids.map(id=>this.storyMission.entity(id)).filter(e=>e?.hp>0);
     if(!units.length)return;
     this.lastOrderAt=performance.now();this.idleIds=ids;
-    const builder=units.every(e=>e.kind==='builder'),key=JSON.stringify([...ids].sort());
-    const repeat=this.lastSelection===key;
-    if(kind==='select'){this.lastSelection=key;this.bark(builder?(repeat?2:1):(repeat?7:6),{cooldown:12000});}
-    else {
+    if(kind!=='select') {
       this.stopVoice();
-      const number=kind==='build'?3:kind==='repair'?5:kind==='attack'?8:kind==='stop'?18:null;
-      if(number)this.bark(number,{cooldown:number===18?45000:16000});
+      if(kind==='stop')this.bark('a14');
     }
   }
 
   storyEvent(event) {
     if(!this.storyVoices)return;
     const mission=this.storyMission;
-    if(event.type==='construction-complete'&&!['generator','factory','lab','bunker','derrick'].includes(event.kind))this.bark(4);
-    if(event.type==='research-start')this.bark(11);
-    if(event.type==='research-complete'&&!['flamethrower','mg-ammo-1','mg-tower'].includes(event.key))this.bark(12);
-    if(event.type==='unit-damaged'&&mission.entity(event.target)?.kind!=='builder')this.bark(13,{cooldown:45000});
-    if(event.type==='destroyed'){
-      if(event.owner==='scavs')this.bark(9,{cooldown:30000});
-      else if(event.kind==='command')this.bark(15);
-    }
-    if(event.type==='unit-produced'&&!event.first&&event.kind!=='builder')this.bark(16,{cooldown:30000});
+    if(event.type==='research-start')this.bark('a07');
+    if(event.type==='research-complete'&&!['flamethrower','mg-ammo-1','mg-tower'].includes(event.key))this.bark('a08');
+    // A damage quip may use the first quiet moment, but never arrive minutes late.
+    if(event.type==='unit-damaged'&&mission.entity(event.target)?.kind!=='builder'&&this.afterCombatBark?.event!=='a11')
+      this.afterCombatBark={event:'a09',target:event.target,state:mission.state,expires:performance.now()+16000};
+    if(event.type==='destroyed'&&event.owner==='rai'&&event.kind==='command')
+      this.afterCombatBark={event:'a11',state:mission.state,expires:performance.now()+16000};
+    if(event.type==='unit-produced'&&!event.first&&event.kind!=='builder')this.bark('a12');
   }
 
   updateStoryVoices(field) {
     if(!field||!this.storyVoices)return;
     const now=performance.now();if(now-(this.lastBarkCheck??0)<1000)return;this.lastBarkCheck=now;
     const mission=this.storyMission,visible=mission.state.units.filter(e=>e.owner==='scavs'&&e.hp>0&&mission.visibleAt(e.x,e.y));
+    const pending=this.afterCombatBark;
+    if(pending){
+      if(pending.expires<now||pending.state!==mission.state||pending.target&&!mission.entity(pending.target))this.afterCombatBark=null;
+      else this.bark(pending.event).then(played=>{if(played&&this.afterCombatBark===pending)this.afterCombatBark=null;});
+    }
     const discovered=visible.some(e=>!this.seenHostiles.has(e.id));
     for(const e of visible)this.seenHostiles.add(e.id);
-    if(discovered&&mission.state.radioStory?.scenes.o08?.status==='done')this.bark(17,{cooldown:45000});
-    if(now-this.lastOrderAt>45000&&this.idleIds?.some(id=>{const unit=mission.entity(id);return unit?.hp>0&&unit.kind!=='builder'&&!unit.task&&!unit.path?.length;}))this.bark(14,{cooldown:90000});
+    if(discovered&&mission.state.flags.raidWon)this.bark('a13');
+    if(now-this.lastOrderAt>45000&&this.idleIds?.some(id=>{const unit=mission.entity(id);return unit?.hp>0&&unit.kind!=='builder'&&!unit.task&&!unit.path?.length;}))this.bark('a10',{cooldown:90000});
+    if(mission.state.energy<=0&&mission.state.buildings.some(b=>b.owner==='rai'&&(b.queue.length||b.research)))this.bark('a06',{cooldown:90000});
+    this.repairTargets??=new Map();
+    for(const [id,hp] of this.repairTargets){
+      const unit=mission.entity(id);
+      if(unit?.hp>hp&&unit.hp>=unit.maxHp)this.bark('a05');
+    }
+    this.repairTargets.clear();
+    for(const builder of mission.state.units.filter(e=>e.owner==='rai'&&e.task?.type==='repair')){
+      const unit=mission.entity(builder.task.targetId);
+      if(unit&&mission.config.units[unit.kind])this.repairTargets.set(unit.id,unit.hp);
+    }
   }
 
   playSkid(level, road) {
