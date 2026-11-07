@@ -17,7 +17,8 @@ export function missionSignal(chapter, mission) {
   const {config, field, state} = mission;
   const mark = (point, label, kind, distance) => point && {x:point.x,y:point.y,label,kind,distance};
   if (chapter === 'intro') {
-    const well = config.oilFields.map(field.gridToWorld).find(point => mission.exploredAt(point.x, point.y));
+    const well = config.oilFields.map(field.gridToWorld).find(point =>
+      mission.placement('derrick', point.x, point.y, 0, {checkMoney:false}).ok);
     return mark(well, 'К нефти', 'guidance', 320);
   }
   if (chapter === 'first-contact') {

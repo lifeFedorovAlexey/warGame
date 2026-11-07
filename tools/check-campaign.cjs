@@ -25,6 +25,7 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   });
   assert.deepEqual(briefing.target,briefing.start,'Briefing leaves the camera under player control');
   assert.equal(briefing.signal.kind,'guidance');
+  assert.equal(await page.locator('#objective-focus').isVisible(),false,'Only the radio shows the oil shortcut during the briefing');
   await page.locator('[data-focus]').click();
   assert(await page.evaluate(p=>{
    const {target}=window.campaign.world.controls;
@@ -61,9 +62,18 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   const position=await page.evaluate(()=>{const w=window.campaign.world;return w.screen(w.controls.target,0);});
   await page.mouse.click(position.x,position.y);
   await page.waitForFunction(()=>window.campaign.mission.state.buildings.some(b=>b.owner==='rai'&&b.kind==='generator'));
-  const oil=await page.evaluate(()=>{const c=window.campaign,p=c.world.field.gridToWorld(c.mission.config.oilFields[0]);c.world.centre(p,310);return c.world.screen(p,2);});
-  await page.mouse.click(oil.x,oil.y);
+  await page.getByRole('button',{name:'К нефти',exact:true}).click();
+  const oil=await page.evaluate(()=>{
+   const {world,storyAudio}=window.campaign,p=world.storySignals.current;
+   return {position:world.screen(p,2),target:{x:world.controls.target.x,y:world.controls.target.y},signal:p,playing:storyAudio.playing};
+  });
+  assert.deepEqual(oil.target,{x:briefing.signal.x,y:briefing.signal.y},'The objective opens the same playable oil point with radio off');
+  assert.equal(oil.signal.kind,'guidance');
+  assert.equal(oil.playing,false);
+  await page.mouse.click(oil.position.x,oil.position.y);
   await page.waitForFunction(()=>window.campaign.mission.state.buildings.some(b=>b.owner==='rai'&&b.kind==='derrick'));
+  assert.equal(await page.locator('#objective-focus').isVisible(),false);
+  assert.equal(await page.evaluate(()=>window.campaign.world.storySignals.current),null);
   assert.equal(await page.evaluate(()=>window.campaign.mission.state.energy),530);
   const construction=await page.evaluate(async ()=>{
    const c=window.campaign,m=c.mission,b=m.state.buildings.find(e=>e.owner==='rai'&&e.kind==='generator');
@@ -195,7 +205,7 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   assert.equal(signal.time,finalView.time);
   assert.equal(signal.explored,finalView.explored);
   await page.screenshot({path:'campaign/previews/field-southern-signal.png'});
-  const report={base,light,driven,pausedBetweenCommands:true,layeredConstruction:construction,oilDirectClick:true,radioSkipPersisted:true,optionalRadioFocus:true,signal,artifactModels:models,animatedPump:true,oilPowerLoss:powered.stopped,resumedPump:powered.resumed,errors};
+  const report={base,light,driven,pausedBetweenCommands:true,layeredConstruction:construction,oilDirectClick:true,radioSkipPersisted:true,optionalRadioFocus:true,oilFocusWithoutRadio:true,signal,artifactModels:models,animatedPump:true,oilPowerLoss:powered.stopped,resumedPump:powered.resumed,errors};
   assert.deepEqual(errors,[]);
   fs.mkdirSync('campaign/reports',{recursive:true});
   fs.writeFileSync('campaign/reports/campaign-browser.json',JSON.stringify(report,null,2));

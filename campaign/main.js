@@ -27,10 +27,25 @@ function visibleRaidContact(){
   if(!flags.raidStarted||flags.raidWon)return null;
   return units.find(unit=>flags.raidIds?.includes(unit.id)&&unit.hp>0&&mission.visibleAt(unit.x,unit.y));
 }
-function tacticalFocus(contact){
+function firstPowerSites(){
+  const owned=mission.state.buildings.filter(b=>b.owner==='rai'&&b.hp>0);
+  return {plant:owned.find(b=>b.kind==='generator'),well:owned.find(b=>b.kind==='derrick')};
+}
+function tacticalFocus(contact,{well}=firstPowerSites()){
+  if(mission.state.status!=='running')return null;
   if(contact)return {x:contact.x,y:contact.y,kind:'threat',label:'К контакту',distance:420};
-  if(mission.state.status==='running'&&mission.state.flags.lastRevealed&&!mission.state.camps[3].cleared)return missionSignal('last-camp',mission);
+  if(mission.state.flags.lastRevealed&&!mission.state.camps[3].cleared)return missionSignal('last-camp',mission);
+  if(!well&&radio.current?.kind!=='guidance')return missionSignal('intro',mission);
   return null;
+}
+function powerHint({plant,well},oilFound){
+  const oilHint=oilFound?'ЛКМ по нефтяной точке — вышка.':'Разведайте нефтяную точку.';
+  if(!plant&&!well)return 'АЭС через «Строить». '+oilHint;
+  if(!plant)return 'Для питания вышки постройте АЭС.';
+  if(!well)return oilHint;
+  if(plant.completed)return 'Достройте вышку.';
+  if(well.completed)return 'Достройте АЭС.';
+  return 'Достройте АЭС и вышку для подачи питания.';
 }
 const isMobile = entity => entity?.owner === 'rai' && !!config.units[entity.kind];
 const taskNames = {base:'База', power:'Питание', production:'Производство', research:'Исследования', security:'Лагеря'};
@@ -573,12 +588,19 @@ function updateUi() {
     }));
   }
   const contact=visibleRaidContact();
-  const marker=tacticalFocus(contact);
-  $('raid-focus').hidden=!marker;
-  if(marker)$('raid-focus').textContent=marker.label;
+  const sites=firstPowerSites(),marker=tacticalFocus(contact,sites);
+  const signal=world.storySignals.current;
+  if(signal?.kind==='guidance'&&sites.well?.x===signal.x&&sites.well.y===signal.y)presentSignal(null);
+  const focus=$('objective-focus');
+  focus.hidden=!marker;
+  if(marker){
+    focus.textContent=marker.label;
+    focus.classList.toggle('threat',marker.kind==='threat');
+  }
   const raidHint=contact?'Рейдеры в зоне обзора.':s.flags.raidStarted?'Рейдеры в пути.':'Прикройте базу. Ожидается рейд.';
   const repair=mobile.some(u=>u.kind==='builder')&&vehicles().some(u=>u.hp<u.maxHp);
-  $('hint').textContent = s.status !== 'running' ? '' : s.flags.contact && !s.flags.raidWon ? raidHint : repair ? 'ПКМ по повреждённой машине — ремонт.' : !s.powered ? 'АЭС через «Строить». Вышка по клику на нефтяную точку.' : !tasks[0].done ? 'Завод, НИИ и ДОТ.' : s.flags.lastRevealed ? 'Четвёртый лагерь открыт на юге.' : 'Разведайте лагеря и доставьте артефакты.';
+  const oilFound=marker?.kind==='guidance'||radio.current?.kind==='guidance';
+  $('hint').textContent = s.status !== 'running' ? '' : s.flags.contact && !s.flags.raidWon ? raidHint : repair ? 'ПКМ по повреждённой машине — ремонт.' : !s.powered ? powerHint(sites,oilFound) : !tasks[0].done ? 'Завод, НИИ и ДОТ.' : s.flags.lastRevealed ? 'Четвёртый лагерь открыт на юге.' : 'Разведайте лагеря и доставьте артефакты.';
   const entityName = first && (projectLabel(first.kind,first.projectId,first.designName)
     ?? config.buildings[first.kind]?.name ?? config.camps.find(camp=>camp.id===first.campId)?.name ?? 'Лагерь');
   $('selection').textContent = group.length > 1 ? 'Группа · ' + group.length : entityName ?? 'Нет выделения';
@@ -761,7 +783,7 @@ try {
   $('move-order').onclick = () => beginOrder('move');
   $('attack-order').onclick = () => beginOrder('attack');
   $('home').onclick = () => world.centre(world.field.gridToWorld(config.startGrid), 360);
-  $('raid-focus').onclick = () => {
+  $('objective-focus').onclick = () => {
     const signal=tacticalFocus(visibleRaidContact());
     if(!signal)return;
     presentSignal(signal);
