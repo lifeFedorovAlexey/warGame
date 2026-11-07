@@ -2,6 +2,7 @@ import {createCampaignWorld} from './world.js';
 import {Mission} from './mission.js';
 import {FieldRadio, missionSignal} from './field-radio.js';
 import {raidApproachSignal, visibleRaidContact, warehouseAdvanceHint, waterTowerSignal} from './threat-guidance.js';
+import {restoreRadioStory} from './radio-save.js';
 import {FieldSound} from './field-sound.js';
 import {buildLayerHeight} from './builder-optics.js';
 import {VehicleDesigner} from './designer.js';
@@ -186,6 +187,7 @@ function start(restore = false) {
       const data = localStorage.getItem(saveKey);
       if (!data) return toast('Сохранения ещё нет');
       mission.load(data);
+      if(radio.director)restoreRadioStory(mission.state);
     } catch (error) {
       return toast('Сохранение не открывается. ' + error.message);
     }
@@ -648,7 +650,7 @@ function updateUi() {
     taskKey = nextTasks;
     $('objectives').replaceChildren(...tasks.map(task => {
       const row = document.createElement('li'), name = document.createElement('span'), amount = document.createElement('small');
-      row.classList.toggle('done', task.done);
+      row.classList.toggle('done', Boolean(task.done));
       name.textContent = taskNames[task.id];
       amount.textContent = task.progress ?? '';
       row.append(name,amount);
