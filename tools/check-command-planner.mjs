@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import {fixture} from './check-start-latency-coordinator.mjs';
 
 const results=[];
+const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 function cars(m,count){return Array.from({length:count},(_,i)=>m.addUnit('bukhanka','rai',
  {x:(i%10-4.5)*32,y:-Math.floor(i/10)*32},{heading:0}));}
 function settle(m,max=2000){
@@ -55,6 +56,19 @@ function settle(m,max=2000){
  assert(units.every(u=>u.routeOrder.request.x===300&&u.routeOrder.request.y===400),'An obsolete result cannot overwrite the latest click');
  results.push({case:'Stop/same click and superseding revisions',passed:true});
 }
+for(const partial of [false,true]){
+ const m=fixture(),units=cars(m,partial?2:1),ids=units.map(u=>u.id),goal={x:0,y:500};
+ m.submitOrder(ids,'move',goal);settle(m);
+ // B is genuinely submitted, then superseded before its budgeted generator
+ // can apply. A still-valid A route must complete C's pending intent too.
+ m.submitOrder(ids,'move',{x:0,y:-500});
+ if(partial){m.order([units[1].id],'move',{x:300,y:300});}
+ const final=m.submitOrder(ids,'move',goal);settle(m);
+ assert(units.every(u=>!u.pendingOrder&&u.commandRevision===final.revision));
+ assert(units.every(u=>distance(u.routeOrder.request,goal)<.01));
+ assert.equal(m.state.commandOrders.at(-1).assigned.length,units.length,'Both reused and newly planned members commit the latest intent');
+ results.push({case:'A/B/A cancels unfinished B with '+(partial?'mixed reused/new routes':'all routes reused'),passed:true});
+}
 {
  const m=fixture(),units=cars(m,50),ids=units.map(u=>u.id);m.submitOrder(ids,'move',{x:0,y:500});m.advance(1/80,{budgetMs:0});
  assert(units.some(u=>u.pendingOrder));
@@ -91,6 +105,10 @@ function settle(m,max=2000){
  assert.equal(searches,1,'An isolated target is checked once, not once per nearby parking candidate');
  assert.equal(u.pendingOrder?.reason,'route-unreachable');assert.equal(u.navigation?.state,'UNREACHABLE');
  assert(!u.routeOrder&&!u.path.length,'A slot outside the target component cannot replace the requested destination');
+ m.stop([u.id]);m.submitOrder([u.id],'move',{x:0,y:0});settle(m);m.advance(.2,{budgetMs:6});
+ assert.equal(searches,1,'Stop/reissue reuses the negative cache without another search');
+ assert.equal(u.pendingOrder?.reason,'route-unreachable','A cached failure retains its connectivity proof');
+ assert.equal(u.navigation?.state,'UNREACHABLE');
  walls[0].hp=0;m.rebuildNavigation();m.advance(.1,{budgetMs:6});settle(m);
  assert(!u.pendingOrder&&u.path.length,'Opening the target component invalidates its negative proof');
  assert.deepEqual(u.routeOrder.destination,{x:0,y:0});

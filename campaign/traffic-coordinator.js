@@ -6,6 +6,33 @@ const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const cross=(a,b)=>a.x*b.y-a.y*b.x;
 const dot=(a,b)=>a.x*b.x+a.y*b.y;
 
+function crossingReleased(lease,byId,scale,field){
+ const zone=lease.zone,winner=byId.get(lease.winner);
+ if(!zone||!winner)return !winner;
+ const shape=vehicleEnvelope(winner,scale,field),side=(shape.x-zone.x)*zone.nx+(shape.y-zone.y)*zone.ny;
+ const clearance=footprintSupport(shape,zone.nx,zone.ny)+zone.width;
+ if(side*zone.exitSign>clearance)return true;
+ if(zone.ux!==undefined){
+  const transverse=(shape.x-zone.x)*-zone.uy+(shape.y-zone.y)*zone.ux;
+  if(Math.abs(transverse)>footprintSupport(shape,-zone.uy,zone.ux)+zone.ownerWidth+scale*.055)return true;
+ }
+ // A cancelled/replaced route outside the occupied crossing no longer owns
+ // its old approach. Cancellation while a body is inside does not erase it.
+ const goal=winner.path?.at(-1),waypoint=winner.path?.[0];
+ const changed=!goal||goal.x!==zone.goalX||goal.y!==zone.goalY
+  ||zone.waypointX!==undefined&&(waypoint?.x!==zone.waypointX||waypoint?.y!==zone.waypointY);
+ return changed&&Math.abs(side)>clearance;
+}
+
+function grantCrossing(lease,winner,other,along,scale,now){
+ const nx=-other.course.y,ny=other.course.x,goal=winner.unit.path.at(-1),waypoint=winner.unit.path[0];
+ lease.grantedAt??=now;
+ lease.zone={x:winner.unit.x+winner.course.x*along,y:winner.unit.y+winner.course.y*along,nx,ny,
+  width:footprintSupport(other.shape,nx,ny)+scale*.45,exitSign:Math.sign(winner.course.x*nx+winner.course.y*ny),
+  ux:winner.course.x,uy:winner.course.y,ownerWidth:footprintSupport(winner.shape,-winner.course.y,winner.course.x),
+  goalX:goal.x,goalY:goal.y,waypointX:waypoint.x,waypointY:waypoint.y};
+}
+
 // Nearly parallel routes can converge laterally. Following distance alone
 // only notices their bodies after the side clearance has nearly vanished.
 // Intersect the four translating OBB intervals over the same short horizon;
@@ -41,7 +68,8 @@ export class TrafficCoordinator{
   const saved=state.trafficControl??={version:1,leases:[],waiting:{}};
   const living=state.units.filter(u=>u.hp>0),byId=new Map(living.map(u=>[u.id,u]));
   this.passageDecisions=updatePassageReservations(mission,living);
-  const leases=new Map(saved.leases.filter(l=>l.expires>now&&byId.has(l.a)&&byId.has(l.b)).map(l=>[l.key,l]));
+  const leases=new Map(saved.leases.filter(l=>byId.has(l.a)&&byId.has(l.b)
+   &&(l.zone?!crossingReleased(l,byId,scale,field):l.expires>now)).map(l=>[l.key,l]));
   this.decisions.clear();this.queues.clear();this.intents.clear();this.groups.length=0;
   const zones=new Map();
   for(const u of living){
@@ -122,9 +150,9 @@ export class TrafficCoordinator{
    }
    crossings.push({a,b,da,db,ca,cb,lease});
   }
-  // A pairwise winner is only a proposal. Reconcile every proposal into one
-  // acyclic precedence graph, including the physical order within a convoy.
-  // Otherwise four approaches can each wait forever for the next approach.
+  // Retain already-issued crossing precedence until the owner's complete
+  // body clears the opposing lane. Rebuilding a DAG from scratch could flip
+  // a granted pair while both vehicles were already braking towards it.
   const successors=new Map();
   const precedes=(from,to)=>{
    const pending=[from],seen=new Set(pending);
@@ -134,12 +162,15 @@ export class TrafficCoordinator{
    return false;
   };
   const before=(leader,follower)=>{if(!successors.has(leader))successors.set(leader,new Set());successors.get(leader).add(follower);};
+  for(const lease of [...leases.values()].filter(l=>l.zone).sort((a,b)=>a.grantedAt-b.grantedAt||a.key.localeCompare(b.key)))
+   before(lease.winner,lease.winner===lease.a?lease.b:lease.a);
   for(const [leader,tail] of followers)for(const follower of tail)if(!precedes(follower,leader))before(leader,follower);
   let cyclesPrevented=0;
   for(const {a,b,da,db,ca,cb,lease,merge} of crossings){
    let winner=lease.winner,loserId=winner===a.unit.id?b.unit.id:a.unit.id;
-   if(precedes(loserId,winner)){[winner,loserId]=[loserId,winner];lease.winner=winner;cyclesPrevented++;}
+   if(!lease.zone&&precedes(loserId,winner)){[winner,loserId]=[loserId,winner];lease.winner=winner;cyclesPrevented++;}
    before(winner,loserId);
+   if(!merge&&!lease.zone)grantCrossing(lease,winner===a.unit.id?a:b,winner===a.unit.id?b:a,winner===a.unit.id?da:db,scale,now);
    const loser=loserId===a.unit.id?a:b,along=loser===a?da:db,clearance=loser===a?ca:cb;
    // Already inside: finish clearing the junction. Stopping there would
    // block its owner and cause a permanent deadlock.

@@ -39,6 +39,10 @@ import {configureCommandGroup,refreshCommandGroups,expandCommandIds,commandGroup
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 const routeOrderRevision=2;
 const workArrivalTolerance=.08;
+function selectedCommandIds(mission,ids,action,target){
+ const tactical=['move','attack-move','attack'].includes(action);
+ return tactical&&!(action==='move'&&target&&pickupTarget(mission,target))?expandCommandIds(mission,ids):ids;
+}
 function halfFootprint(footprint,scale,rotation){
  const [w,d]=footprint.map(length=>length*scale/2);
  return Math.abs(Math.round(rotation/(Math.PI/2)))%2?[d,w]:[w,d];
@@ -492,8 +496,8 @@ export class Mission{
  }
  configureGroup(ids,options){this.finishPendingStep();return configureCommandGroup(this,ids,options);}
  retreat(ids){this.finishPendingStep();return forceCombatRetreat(this,expandCommandIds(this,ids));}
- submitOrder(ids,action,target){if(action==='retreat')return this.retreat(ids);return (this.commandPlanner??=new CommandPlanner(this)).submit(expandCommandIds(this,ids),action,target);}
- order(ids,action,target){ids=expandCommandIds(this,ids);this.finishPendingStep();const result=completeSteps(this.orderSteps(ids,action,target));if(result.ok)this.commandPlanner?.cancel(result.assignedIds??ids.filter(id=>!result.unassigned?.includes(id)));return result;}
+ submitOrder(ids,action,target){if(action==='retreat')return this.retreat(ids);return (this.commandPlanner??=new CommandPlanner(this)).submit(selectedCommandIds(this,ids,action,target),action,target);}
+ order(ids,action,target){ids=selectedCommandIds(this,ids,action,target);this.finishPendingStep();const result=completeSteps(this.orderSteps(ids,action,target));if(result.ok)this.commandPlanner?.cancel(result.assignedIds??ids.filter(id=>!result.unassigned?.includes(id)));return result;}
  *orderSteps(ids,action,target){
   if(!['move','attack-move','attack','build','repair'].includes(action)||!target||!Number.isFinite(target.x)||!Number.isFinite(target.y))return this.fail('Недопустимый приказ');
   const travel=action==='move'||action==='attack-move',combat=action==='attack'||action==='attack-move';
@@ -519,7 +523,23 @@ export class Mission{
    const last=unit.task?.type==='attack'&&unit.task.targetId===target.id&&unit.path.at(-1);
    if(action==='attack'&&last&&distance(last,target)<=this.unitSpec(unit).range&&this.lineOfSight({...unit,...last},target))repeat.set(unit.id,last);
   }
-  if(repeat.size===units.length)return {ok:true,assigned:units.length,unassigned:[]};
+  const finishRepeat=function*(mission,unit){
+   const job=mission.commandJob;
+   if(job){
+    while(!job.copiedIds?.has(unit.id)&&job.mission.pendingTick){job.waitingTick=true;yield;}
+    job.waitingTick=false;
+    if(unit.hp<=0||unit.pendingOrder?.revision!==job.revision)return;
+    // A -> B -> A may reuse A's still-valid route while B was cancelled in
+    // the queue. Reusing geometry must also complete the NEW intent, or the
+    // pending guard freezes a route which this very command accepted.
+    delete unit.pendingOrder;job.assigned.push(unit.id);
+   }
+   assigned.add(unit.id);if(job)yield;
+  };
+  if(repeat.size===units.length){
+   for(const unit of units)yield* finishRepeat(this,unit);
+   return {ok:true,assigned:units.length,unassigned:[]};
+  }
   const reserved=[...repeat.values()],changedTraffic=new Set();
   const combatGroup=combat?'combat-'+(this.state.combatOrderSerial=(this.state.combatOrderSerial??0)+1):null;
   const groupCentre=units.reduce((centre,unit)=>({x:centre.x+unit.x/units.length,y:centre.y+unit.y/units.length}),{x:0,y:0});
@@ -581,7 +601,7 @@ export class Mission{
    if(this.commandJob&&unit.pendingOrder?.revision!==this.commandJob.revision)continue;
    const planningUnit=this.commandJob?{...unit}:unit;
    if(this.commandJob)this.commandJob.currentUnit=unit.id;
-   if(repeat.has(unit.id)){assigned.add(unit.id);if(unit.passage)preceding=unit.id;continue;}
+   if(repeat.has(unit.id)){yield* finishRepeat(this,unit);if(unit.passage)preceding=unit.id;continue;}
    const side=(index%columns-(columns-1)/2)*formationSpacing, row=Math.floor(index/columns)*formationSpacing;
    const formation={...(requestedFormation?.slots.get(unit.id)??{x:goal.x+right.x*side-forward.x*row,y:goal.y+right.y*side-forward.y*row})};
    if(passage)formation[passage.along]+=passageShift*passage.direction;
@@ -753,7 +773,7 @@ export class Mission{
   this.state.energy-=building.cost;return {ok:true,id:building.id,waiting:result.waiting};
  }
  setCombatPolicy(ids,changes){this.finishPendingStep();return configureCombat(this,ids,changes);}
- stop(ids){ids=expandCommandIds(this,ids);this.commandPlanner?.cancel(ids);this.finishPendingStep();for(const unit of this.state.units)if(ids.includes(unit.id)&&unit.owner==='rai'&&unit.hp>0){delete unit.yieldReturn;unit.task=null;unit.path=[];unit.builderWorking=false;cancelCombatRetreat(unit);cancelCombatDeployment(unit);delete unit.detour;delete unit.traffic;delete unit.trafficHold;delete unit.resumeConstructionId;}return{ok:true};}
+ stop(ids,{expandGroup=true}={}){if(expandGroup)ids=expandCommandIds(this,ids);this.commandPlanner?.cancel(ids);this.finishPendingStep();for(const unit of this.state.units)if(ids.includes(unit.id)&&unit.owner==='rai'&&unit.hp>0){delete unit.yieldReturn;unit.task=null;unit.path=[];unit.builderWorking=false;cancelCombatRetreat(unit);cancelCombatDeployment(unit);delete unit.detour;delete unit.traffic;delete unit.trafficHold;delete unit.resumeConstructionId;}return{ok:true};}
  setRally(id,point){const factory=this.entity(id);if(factory?.kind!=='factory'||factory.owner!=='rai'||!factory.completed)return this.fail('Выберите готовый завод');if(!this.inBounds(point.x,point.y)||!this.exploredAt(point.x,point.y))return this.fail('Точка сбора должна быть разведана');factory.rally={x:point.x,y:point.y};return{ok:true};}
  cancelBuilding(id){this.finishPendingStep();const building=this.entity(id);if(!building||building.owner!=='rai'||building.completed)return this.fail('Отменить можно только незавершённую стройку');this.state.energy=Math.min(this.config.energyCapacity,this.state.energy+building.cost*(1-building.progress));building.hp=0;this.rebuildNavigation();this.releaseSite(building);for(const unit of this.state.units)if(unit.task?.targetId===id){unit.task=null;unit.path=[];unit.foldTime=2.6;}this.emit('construction-cancelled',{building:id});return {ok:true};}
  availableVehicleRecipes(){
@@ -1599,11 +1619,17 @@ export class Mission{
    :checkingTurn?Math.min(coordinatorLimit,this.trafficSpeed(unit,forward,null,scale,stoppedObstacles)):coordinatorLimit;
   const speed=this.unitSpec(unit).speed*this.nav.roads.factor(unit.x,unit.y)*damageMobility(unit.damage);
   if(unit.navigation)unit.navigation.desiredSpeed=speed;
-  if(cruising)trafficLimit=Math.min(trafficLimit,turningHeadway(this,unit,waypoint,dt,scale,stoppedObstacles));
+  const reverseLimit=unit.task?.type==='clear-site'?scale*4:precise?scale*1.5:0;
+  const reverseApproach=remaining<reverseLimit
+   &&Math.abs(angleDelta(Math.atan2(unit.x-waypoint.x,waypoint.y-unit.y),unit.heading))>(unit.reversing?Math.PI*.47:Math.PI*.61);
+  // A work approach still has the same physical body and braking distance.
+  // Precision changes endpoint tolerance, not whether it brakes for a car.
+  if(!cruising&&!reverseApproach)trafficLimit=Math.min(trafficLimit,this.trafficSpeed(unit,forward,null,scale,stoppedObstacles));
+  if(!reverseApproach)trafficLimit=Math.min(trafficLimit,turningHeadway(this,unit,waypoint,dt,scale,stoppedObstacles));
   let contactSpeed;
   const onBlockedContact=speed=>{contactSpeed=speed;};
   let pose=driveStep(unit,waypoint,dt,{speed,grade,scale,tolerance,trafficLimit,
-   reverseLimit:unit.task?.type==='clear-site'?scale*4:precise?scale*1.5:0,allowed,onBlockedContact});
+   reverseLimit,allowed,onBlockedContact});
   if(!pose&&aligned&&cruising&&trafficLimit>speed*.25&&[...blockers].some(other=>
    other.owner===unit.owner&&Math.cos(unit.heading-other.heading)>.85)){
    const forward={x:unit.x-Math.sin(unit.heading)*scale*6,y:unit.y+Math.cos(unit.heading)*scale*6};

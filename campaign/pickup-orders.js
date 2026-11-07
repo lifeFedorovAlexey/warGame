@@ -25,7 +25,7 @@ function* pickupPathSteps(mission,unit,pickup){
     point=>distance(point,pickup.item)<22,{fallback:false,maxGoalDistance:4});
 }
 function stopPickup(mission,unit){
-  mission.stop([unit.id]);unit.driveSpeed=0;unit.steering=0;
+  mission.stop([unit.id],{expandGroup:false});unit.driveSpeed=0;unit.steering=0;
   for(const key of ['routeOrder','passage','passingLane','driveWatch','failedArcs','reverseDebt','pickupRetryAt','resumeConstructionId'])delete unit[key];
 }
 export function orderPickup(mission,units,pickup){

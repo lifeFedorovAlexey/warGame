@@ -1,12 +1,16 @@
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
 import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url),{chromium}=require(process.env.PLAYWRIGHT_PATH??'C:/Users/Алексей/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
 const baseline=process.argv.includes('--before'),forward=process.argv.includes('--forward'),complete=process.argv.includes('--complete'),label=(baseline?'before':'after')+(forward?'-forward':'')+(complete?'-complete':''),folder='campaign/previews/start-latency';fs.mkdirSync(folder,{recursive:true});
+const hashes=()=>Object.fromEntries(fs.readdirSync('campaign').filter(name=>/^(mission|navigation|arrival-planner|command-planner|traffic-|turning-|road-|vehicle-motion|vehicle-collision|maneuver-admission|passage-|combat-|group-command|formation-assignment)/.test(name)&&name.endsWith('.js')).map(name=>[name,createHash('sha256').update(fs.readFileSync('campaign/'+name)).digest('hex')]));
+const sources=hashes();
 const browser=await chromium.launch({executablePath:process.env.EDGE_PATH??'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true,args:['--use-angle=d3d11']});
 try{
  const page=await browser.newPage({viewport:{width:1920,height:1080}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto((process.env.WARGAME_URL??'http://127.0.0.1:8893')+'/campaign/');await page.waitForFunction(()=>window.campaign?.ready,null,{timeout:90000});
+ await page.evaluate(()=>campaign.radio.setEnabled(false));
  await page.locator('#begin').click();await page.locator('#pause').click();
  const fixture=await page.evaluate(async(forward)=>{
   const c=campaign,m=c.mission,w=c.world,{vehicleClearance}=await import('./vehicle-collision.js');c.radio.setEnabled(false);
@@ -52,8 +56,10 @@ try{
  const video=await page.evaluate(()=>new Promise(resolve=>{const v=campaign.startVideo;v.recorder.onstop=async()=>{resolve(Array.from(new Uint8Array(await new Blob(v.chunks).arrayBuffer())));v.stream.getTracks().forEach(t=>t.stop());};v.recorder.stop();}));
  fs.writeFileSync(folder+'/'+label+'.webm',Buffer.from(video));
  await page.setViewportSize({width:800,height:900});await page.waitForTimeout(250);await page.screenshot({path:folder+'/'+label+'-narrow.png'});
- const report={label,fixture,...result,errors};fs.mkdirSync('campaign/reports',{recursive:true});fs.writeFileSync('campaign/reports/start-latency-browser-'+label+'.json',JSON.stringify(report,null,2));
+ const sourceChanged=JSON.stringify(sources)!==JSON.stringify(hashes());
+ const report={label,recordedAt:new Date().toISOString(),sources,sourceChanged,fixture,...result,errors};fs.mkdirSync('campaign/reports',{recursive:true});fs.writeFileSync('campaign/reports/start-latency-browser-'+label+'.json',JSON.stringify(report,null,2));
  console.log(JSON.stringify({label,minimum:result.minimum,firstMotion:result.firstMotion,longestIdle:result.longestIdle,at10:result.samples.find(s=>s.t>=10).displacements,peakAdvanceCpuMs:Math.max(...result.samples.map(s=>s.cpuMs)),arrived:result.arrived,seconds:result.samples.at(-1).t,unexplained:result.unexplained,errors}));
+ assert(!sourceChanged,'Navigation changed during recording; repeat on a stable tree');
  assert.deepEqual(errors,[]);assert(result.minimum>=-.001,'No overlap while leaving the group');
  if(!baseline){assert(result.firstMotion.every(t=>t&&t.simulation<=.5&&t.wall<=.5),'Every vehicle reacts within half a second');if(!complete)assert(Math.max(...result.longestIdle)<=.50001,'No unexplained wait longer than half a second');assert(result.samples.find(s=>s.t>=10).displacements.every(d=>d>20),'Every car must leave its initial position promptly');assert(result.samples.every(s=>s.units.every(u=>u.hp===u.maxHp)),'A group order must not cause friendly collision damage');if(complete){assert(result.arrived.every(Boolean),'All accepted destinations must actually be reached');assert.deepEqual(result.unexplained,[],'No unexplained stops or wait cycles');}}
 }finally{await browser.close();}

@@ -6,6 +6,7 @@ const browser=await chromium.launch({executablePath:process.env.EDGE_PATH??'C:/P
 try{
  const page=await browser.newPage({viewport:{width:1920,height:1080}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto((process.env.WARGAME_URL??'http://127.0.0.1:8893')+'/campaign/');await page.waitForFunction(()=>window.campaign?.ready,null,{timeout:90000});
+ await page.evaluate(()=>campaign.radio.setEnabled(false));
  await page.locator('#begin').click();await page.locator('#pause').click();
  const selectedId=await page.evaluate(()=>{
   const c=campaign,u=c.mission.state.units.find(u=>u.owner==='rai'&&u.kind==='bukhanka');
