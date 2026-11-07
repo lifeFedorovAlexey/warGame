@@ -1,6 +1,21 @@
 import {pickupTarget} from './pickup-orders.js';
 import {isInfantry} from './scav-unit-profiles.js';
 import {movementEngaged} from './combat-orders.js';
+import {departureSlotOrder} from './traffic-start.js';
+
+// A suspended unit controller may be planning a yield for another vehicle.
+// Commit only BETWEEN controllers, never into any live movement generator.
+// Passage changes also wait for the next global admission snapshot.
+export function commandBoundary(mission,passageChange=false){
+ const tick=mission.pendingTick;
+ return !tick||!passageChange&&!tick.iterator&&!tick.goalRelease;
+}
+export function activateCommand(mission,unit){
+ // Routes may commit between controllers. Their first movement still needs
+ // the next coordinator snapshot, including incoming neighbours' intents.
+ if(mission.pendingTick)unit.commandStartAfter=mission.state.time;
+ else delete unit.commandStartAfter;
+}
 
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const travel=new Set(['move','attack-move','attack']);
@@ -18,11 +33,11 @@ function coupledStarts(mission,units,target){
   for(let i=0;i<group.length;i++){
    const unit=group[i],x=Math.floor(unit.x/range),y=Math.floor(unit.y/range);
    for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)for(const other of buckets.get((x+dx)+','+(y+dy))??[]){
-    if(visited.has(other)||Math.cos(other.heading-first.heading)<.995||distance(unit,other)>=range)continue;
+    if(visited.has(other)||Math.cos(other.heading-first.heading)<.999||distance(unit,other)>=range)continue;
     visited.add(other);group.push(other);
    }
   }
-  if(group.length>=3&&group.length<=12)cohorts.push(group.map(u=>u.id));
+  if(group.length>=3&&group.length<=12&&departureSlotOrder(group,target,mission.config.worldScale))cohorts.push(group.map(u=>u.id));
  }
  return cohorts;
 }
@@ -55,7 +70,7 @@ export class CommandPlanner{
  cancel(ids){
   const selected=new Set(ids);
   for(const unit of this.mission.state.units)if(selected.has(unit.id)){
-   delete unit.commandRevision;if(unit.pendingOrder){delete unit.pendingOrder;this.stats.cancelled++;}
+   delete unit.commandRevision;delete unit.commandStartAfter;if(unit.pendingOrder){delete unit.pendingOrder;this.stats.cancelled++;}
   }
   for(const record of this.mission.state.commandOrders)if(['queued','planning'].includes(record.status)
    &&!this.mission.state.units.some(u=>u.commandRevision===record.revision))record.status='cancelled';
@@ -113,15 +128,16 @@ export class CommandPlanner{
   return {record,runtime,copies,committedCohorts:new Set(),iterator:facade.orderSteps(record.ids,record.action,target),topology:this.nav.topologyRevision,bounds:this.nav.bounds.join(',')};
  }
  commitCohorts(active,partial=false){
-  const m=this.mission;if(!active.copies||m.pendingTick)return;
+  const m=this.mission;if(!active.copies||!commandBoundary(m))return;
   for(const [index,ids] of (active.record.cohorts??[active.record.ids]).entries()){
    if(active.committedCohorts.has(index))continue;
-   if(!partial&&ids.some(id=>m.entity(id)?.pendingOrder?.revision===active.record.revision&&active.copies.get(id)?.pendingOrder))continue;
+   if(m.pendingTick&&ids.some(id=>active.copies.get(id)?.passage||m.entity(id)?.passage))continue;
+   if(!partial&&ids.some(id=>m.entity(id)?.pendingOrder?.revision===active.record.revision&&active.copies.get(id)?.pendingOrder?.status==='planning'))continue;
    for(const id of ids){
     const unit=m.entity(id),copy=active.copies.get(id);
     if(!unit||unit.hp<=0||unit.pendingOrder?.revision!==active.record.revision||copy?.pendingOrder)continue;
     for(const key of plannedFields){if(Object.hasOwn(copy,key))unit[key]=copy[key];else delete unit[key];}
-    delete unit.pendingOrder;
+    delete unit.pendingOrder;activateCommand(m,unit);
    }
    active.committedCohorts.add(index);
   }
@@ -168,7 +184,7 @@ export class CommandPlanner{
    }
    const active=this.active,result=active.readyResult??active.iterator.next();
    this.commitCohorts(active,result.done);
-   if(result.done&&active.copies&&m.pendingTick){active.readyResult=result;break;}
+   if(result.done&&active.copies&&active.committedCohorts.size<(active.record.cohorts??[active.record.ids]).length){active.readyResult=result;break;}
    if(result.done){
     const record=active.record;record.status='complete';record.result=result.value;
     for(const id of record.ids){

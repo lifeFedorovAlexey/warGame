@@ -14,6 +14,37 @@ function settle(m,max=2000){
  throw Error('Command did not finish within '+max+' frames');
 }
 {
+ const m=fixture(),units=cars(m,20),selected=units.at(-1),start={x:selected.x,y:selected.y,heading:selected.heading,hp:selected.hp};
+ m.submitOrder([selected.id],'move',{x:400,y:500});m.beginTick(.1,true);
+ m.continueTick(performance.now()-1);const tick=m.pendingTick;
+ assert(tick&&!tick.iterator&&tick.cursor>0,'There is an unfinished whole tick at a real unit boundary');
+ for(let i=0;i<100&&selected.pendingOrder;i++)m.commandPlanner.advance(2);
+ assert(!selected.pendingOrder,'A ready route commits between units without waiting for the whole 20-unit tick');
+ assert.equal(m.pendingTick,tick);assert.deepEqual({x:selected.x,y:selected.y,heading:selected.heading,hp:selected.hp},start);
+ assert.equal(selected.commandStartAfter,m.state.time,'The new route is held until its neighbours have a fresh coordinator snapshot');
+ m.finishPendingStep();assert(selected.path.length||selected.task);
+ assert.deepEqual({x:selected.x,y:selected.y,heading:selected.heading,hp:selected.hp},start,'No movement may consume stale coordinator intents');
+ m.tick(.1);assert.equal(selected.commandStartAfter,undefined);assert(distance(selected,start)>.01,'The next tick activates the ready route');
+ results.push({case:'ready command commits at a unit boundary without overwriting pose/HP',passed:true});
+}
+{
+ const m=fixture(),units=cars(m,2),selected=units[0],update=m.updateUnitSteps;
+ m.updateUnitSteps=function*(...args){yield;return yield* update.apply(this,args);};
+ m.submitOrder([selected.id],'move',{x:400,y:500});m.beginTick(.1,true);m.continueTick(performance.now()-1);
+ assert(m.pendingTick.iterator,'A real unit controller is suspended');
+ for(let i=0;i<8;i++)m.commandPlanner.advance(2);
+ assert(selected.pendingOrder&&!selected.routeOrder,'No result may replace an active controller\'s route');
+ m.finishPendingStep();settle(m);assert(!selected.pendingOrder&&selected.routeOrder.request.x===400);
+ results.push({case:'active controller blocks commit until it leaves its safe boundary',passed:true});
+}
+{
+ const m=fixture(),units=Array.from({length:6},(_,i)=>m.addUnit('bukhanka','rai',
+  {x:i<3?-6:6,y:(i%3-1)*26},{heading:Math.PI+(i%2?.06:0)}));
+ m.submitOrder(units.map(u=>u.id),'move',{x:0,y:500});
+ assert.deepEqual(m.state.commandOrders[0].cohorts,[],'Atomic eligibility matches the actual departure controller geometry/alignment');
+ results.push({case:'unsupported departure shape has no artificial atomic barrier',passed:true});
+}
+{
  const m=fixture(),cohort=Array.from({length:6},(_,i)=>m.addUnit('bukhanka','rai',
   {x:i<3?-6:6,y:(i%3-1)*26},{heading:Math.PI}));
  const other=Array.from({length:44},(_,i)=>m.addUnit('bukhanka','rai',{x:400+(i%8)*40,y:-500-Math.floor(i/8)*40},{heading:0}));

@@ -9,6 +9,7 @@ export class SharedRouteTree{
   this.state=new Uint8Array(count);this.cost=new Float64Array(count);this.next=new Int32Array(count);
   this.ids=new Int32Array(4096);this.priorities=new Float64Array(4096);this.length=0;
   this.regions=new Map();this.expanded=0;this.queries=0;this.proof=null;
+  this.segmentCosts=new Map();this.costCacheHits=0;
   const [col,row]=nav.grid(goal.x,goal.y);this.root=row*nav.size+col;
   this.state[this.root]=1;this.next[this.root]=-1;this.mark(col,row);this.push(this.root,0);
  }
@@ -32,7 +33,7 @@ export class SharedRouteTree{
    this.ids[index]=last;this.priorities[index]=priority;
   }return id;
  }
- *route(from){
+ *branch(from){
   const nav=this.nav,n=nav.size,[cx,cy]=nav.grid(from.x,from.y),entries=new Map();this.queries++;
   nav.lastExhaustedReachability=null;
   if(!nav.allowed(cx,cy)||!nav.terrainAllowed(from.x,from.y))return null;
@@ -79,18 +80,60 @@ export class SharedRouteTree{
    }
    return null;
   }
-  const path=[];for(let id=source;id!==-1;id=this.next[id])path.push(nav.position(id%n,Math.floor(id/n)));
+  const path=[];for(let id=source;id!==-1;id=this.next[id])path.push(id);
+  return path;
+ }
+ position(id){return this.nav.position(id%this.nav.size,Math.floor(id/this.nav.size));}
+ travelCost(from,to){
+  const nav=this.nav,n=nav.size,ax=(from.x+nav.field.half)/nav.cell,ay=(nav.field.half-from.y)/nav.cell,
+   bx=(to.x+nav.field.half)/nav.cell,by=(nav.field.half-to.y)/nav.cell;
+  // Shared branches repeatedly smooth the same grid segments. Cache exact
+  // directed costs only; continuous endpoint connectors are always recomputed.
+  if(![ax,ay,bx,by].every(Number.isInteger))return nav.travelCost(from,to,this.pavedTrip);
+  const key=(ay*n+ax)*n*n+by*n+bx;
+  if(this.segmentCosts.has(key)){this.costCacheHits++;return this.segmentCosts.get(key);}
+  const cost=nav.travelCost(from,to,this.pavedTrip);this.segmentCosts.set(key,cost);
+  if(this.segmentCosts.size>8192)this.segmentCosts.delete(this.segmentCosts.keys().next().value);
+  return cost;
+ }
+ *route(from){
+  const branch=yield* this.branch(from);if(!branch)return null;
+  return yield* this.simplify(from,branch.map(id=>this.position(id)));
+ }
+ *between(from,to){
+  const left=yield* this.branch(from);if(!left)return null;
+  const right=yield* this.branch(to);if(!right)return null;
+  const indices=new Map(left.map((id,index)=>[id,index]));let joined=0;
+  while(!indices.has(right[joined]))joined++;
+  // Both chains strictly descend positive tree costs to the same root. Join
+  // at their first common ancestor, not at the root: no duplicate loop/backtrack.
+  const ids=left.slice(0,indices.get(right[joined])+1);
+  let previous=this.position(right[joined]);
+  for(let index=joined-1;index>=0;index--){
+   if(performance.now()>=(this.nav.workDeadline??Infinity))yield;
+   const point=this.position(right[index]);
+   // The target chain was settled for target -> root. Check root -> target
+   // edges again: today's absolute-grade passability is symmetric, whereas
+   // road/slope COST is directional and is recomputed below during smoothing.
+   const length=Math.hypot(point.x-previous.x,point.y-previous.y);
+   const grade=(this.nav.heights[right[index]]-this.nav.heights[right[index+1]])/length;
+   if(Math.abs(grade)>.52||!this.nav.lineClear(previous,point))return null;
+   ids.push(right[index]);previous=point;
+  }
+  if(!this.nav.lineClear(previous,to))return null;
+  const path=ids.map(id=>this.position(id));
+  if(Math.hypot(previous.x-to.x,previous.y-to.y)>.001)path.push({x:to.x,y:to.y});
   return yield* this.simplify(from,path);
  }
  *simplify(from,path){
   const nav=this.nav,roads=!!nav.roads.buckets.size,result=[];let anchor=from,index=0;
   while(index<path.length){
    if(performance.now()>=(nav.workDeadline??Infinity))yield;
-   let next=index,cost=roads?nav.travelCost(anchor,path[index],this.pavedTrip):0;
+   let next=index,cost=roads?this.travelCost(anchor,path[index]):0;
    while(next+1<path.length&&nav.lineClear(anchor,path[next+1])){
     if(performance.now()>=(nav.workDeadline??Infinity))yield;
-    const travel=roads?nav.travelCost(anchor,path[next+1],this.pavedTrip):0;
-    if(roads&&travel>cost+nav.travelCost(path[next],path[next+1],this.pavedTrip)+.04*nav.cell)break;
+    const travel=roads?this.travelCost(anchor,path[next+1]):0;
+    if(roads&&travel>cost+this.travelCost(path[next],path[next+1])+.04*nav.cell)break;
     next++;cost=travel;
    }
    result.push(path[next]);anchor=path[next];index=next+1;

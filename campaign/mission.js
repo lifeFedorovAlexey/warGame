@@ -34,7 +34,7 @@ import {roadDrivingLane} from './road-merge.js';
 import {turningHeadway} from './turning-headway.js';
 import {passageWaitClear} from './passage-reservations.js';
 import {beginNavigationStep,navigationDecision,finishNavigationStep,auditNavigationWaits} from './navigation-state.js';
-import {CommandPlanner} from './command-planner.js';
+import {CommandPlanner,commandBoundary,activateCommand} from './command-planner.js';
 import {ArrivalPlanner} from './arrival-planner.js';
 import {configureCommandGroup,refreshCommandGroups,expandCommandIds,commandGroupFor,formationRequest} from './group-command.js';
 
@@ -529,13 +529,13 @@ export class Mission{
   const finishRepeat=function*(mission,unit){
    const job=mission.commandJob;
    if(job){
-    while(!job.copiedIds?.has(unit.id)&&job.mission.pendingTick){job.waitingTick=true;yield;}
+    while(!job.copiedIds?.has(unit.id)&&!commandBoundary(job.mission)){job.waitingTick=true;yield;}
     job.waitingTick=false;
     if(unit.hp<=0||unit.pendingOrder?.revision!==job.revision)return;
     // A -> B -> A may reuse A's still-valid route while B was cancelled in
     // the queue. Reusing geometry must also complete the NEW intent, or the
     // pending guard freezes a route which this very command accepted.
-    delete unit.pendingOrder;job.assigned.push(unit.id);
+    delete unit.pendingOrder;if(!job.copiedIds?.has(unit.id))activateCommand(job.mission,unit);job.assigned.push(unit.id);
    }
    if(disengage.length)unit.combatDisengage=[...disengage];
    assigned.add(unit.id);if(job)yield;
@@ -601,6 +601,13 @@ export class Mission{
    units.sort((a,b)=>Number(ready.has(b))-Number(ready.has(a))||distance(a,target)-distance(b,target));
   }
   const arrivals=this.commandJob&&travel&&!passage?new ArrivalPlanner(this,units,target,{forward,right,spacing:formationSpacing,reserved}):null;
+  const failUnit=unit=>{
+   const job=this.commandJob;if(!job||unit.pendingOrder?.revision!==job.revision)return;
+   const failure=job.failures[unit.id]??={reason:'route-not-found',blockerId:null};
+   Object.assign(unit.pendingOrder,{status:'blocked',...failure});
+   const live=job.mission.entity(unit.id);
+   if(live?.hp>0&&live.pendingOrder?.revision===job.revision)Object.assign(live.pendingOrder,{status:'blocked',...failure});
+  };
   for(let index=0;index<units.length;index++){const unit=units[index],workOffset=(index-(units.length-1)/2)*18,goal=action==='build'||action==='repair'?this.workPoint(target,workOffset):target;
    if(performance.now()>=(this.nav.workDeadline??Infinity))yield;
    if(this.commandJob&&unit.pendingOrder?.revision!==this.commandJob.revision)continue;
@@ -633,7 +640,7 @@ export class Mission{
      viaPassage=[...approach,egress?.start??passage.exit,...far];
     }
    }
-   if(egress&&!viaPassage)continue;
+   if(egress&&!viaPassage){failUnit(unit);continue;}
    let path=action==='attack'?(yield* this.attackPathSteps(planningUnit,target,reserved)):['build','repair'].includes(action)?(yield* this.workPathSteps(planningUnit,target,workOffset)):roadPath??viaPassage??(arrivals
     ?(yield* arrivals.path(planningUnit,formation,{pathOptions:formationOptions}))
     :(yield* this.movePathSteps(planningUnit,formation,reserved,parkingRadius,false,()=>true,formationOptions))??(yield* this.movePathSteps(planningUnit,goal,reserved,parkingRadius,false,()=>true,formationOptions)));
@@ -641,7 +648,7 @@ export class Mission{
    if(!path&&travel){
     const [startCol,startRow]=this.nav.grid(unit.x,unit.y);
     const startCell=startRow*this.nav.size+startCol;
-    if(this.nav.walkable[startCell]&&!this.nav.occupied[startCell])continue;
+    if(this.nav.walkable[startCell]&&!this.nav.occupied[startCell]){failUnit(unit);continue;}
     // A checked exit and turn can reach the grid even if no straight entry does.
     const scale=this.config.worldScale,allowed=(from,to)=>this.vehicleMotionClear(unit,from,to,.60);
     const starts=[];
@@ -662,11 +669,11 @@ export class Mission{
      break;
     }
    }
-   if(!path)continue;
+   if(!path){failUnit(unit);continue;}
    if(this.commandJob){
-    // A private search may run while a movement tick is suspended, but route
-    // replacement is committed only at a deterministic tick boundary.
-    while(!this.commandJob.copiedIds?.has(unit.id)&&this.commandJob.mission.pendingTick){this.commandJob.waitingTick=true;yield;}
+    // A private search may run during a suspended tick, but replacement is
+    // committed between unit controllers, never inside an active controller.
+    while(!this.commandJob.copiedIds?.has(unit.id)&&!commandBoundary(this.commandJob.mission,!!(unit.passage||viaPassage))){this.commandJob.waitingTick=true;yield;}
     this.commandJob.waitingTick=false;
     if(unit.hp<=0||unit.pendingOrder?.revision!==this.commandJob.revision)continue;
    }
@@ -721,7 +728,7 @@ export class Mission{
    if(remainingEscape)unit.detour=remainingEscape;
    if(action==='build')unit.resumeConstructionId=target.id;
    assigned.add(unit.id);
-   if(this.commandJob){delete unit.pendingOrder;this.commandJob.assigned.push(unit.id);yield;}
+   if(this.commandJob){delete unit.pendingOrder;if(!this.commandJob.copiedIds?.has(unit.id))activateCommand(this.commandJob.mission,unit);this.commandJob.assigned.push(unit.id);yield;}
   }
   if(this.commandJob){
    if(changedTraffic.size)this.state.parkingGoalReleases=[...new Set([...(this.state.parkingGoalReleases??[]),...changedTraffic])];
@@ -1986,6 +1993,10 @@ export class Mission{
    const unreachable=blocked&&['static-disconnected','route-unreachable','destination-terrain-forbidden'].includes(pending.reason);
    navigationDecision(unit,unreachable?'UNREACHABLE':blocked?'BLOCKED':'GLOBAL_REPLAN',pending.reason??'command-route-pending',pending.blockerId??null,blocked?'await-changed-conditions':'apply-current-order-result');
    return;
+  }
+  if(unit.commandStartAfter!==undefined){
+   if(this.state.time<=unit.commandStartAfter){unit.driveSpeed=0;navigationDecision(unit,'WAITING_RESERVATION','await-next-traffic-snapshot',null,'start-on-next-tick');return;}
+   delete unit.commandStartAfter;
   }
   if(unit.task?.artifactId||unit.task?.salvageId){
    if(yield* updateCombatRetreat(this,unit,spec,dt))return;

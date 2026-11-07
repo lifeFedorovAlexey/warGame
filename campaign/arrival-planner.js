@@ -16,9 +16,9 @@ export class ArrivalPlanner{
   this.anchor=this.nav.terrainAllowed(target.x,target.y)?this.nav.nearest(target.x,target.y,3):null;
   this.connected=new Set();
   this.shared=units.length>=128;
-  this.claims=new UnitSpatialIndex(64);this.bodies=new UnitSpatialIndex(64);this.time=null;
+  this.claims=new UnitSpatialIndex(64);this.claimedCoordinates=new Set();this.bodies=new UnitSpatialIndex(64);this.time=null;
   this.maximumRadius=Math.max(...units.map(u=>{const box=vehicleEnvelope(u,mission.config.worldScale,mission.field);return Math.hypot(box.width,box.depth);}));
-  for(const point of reserved)this.claims.insert({...point,heading:Math.atan2(-forward.x,forward.y),kind:units[0].kind,hp:1});
+  for(const point of reserved){this.claims.insert({...point,heading:Math.atan2(-forward.x,forward.y),kind:units[0].kind,hp:1});this.claimedCoordinates.add(point.x+','+point.y);}
  }
  refresh(){
   const m=this.mission;if(this.time===m.state.time)return;
@@ -121,13 +121,17 @@ export class ArrivalPlanner{
    &&proof.reachable[anchorId>>>5]&(1<<(anchorId&31)))?.reachable;
   if(reachable)this.reachable=reachable;
   const tryPoint=function*(pool,point){
-   const key=point.x+','+point.y;if(seen.has(key))return null;seen.add(key);
+   const key=point.x+','+point.y;if(seen.has(key)||pool.claimedCoordinates.has(key))return null;seen.add(key);
    if(performance.now()>=(pool.nav.workDeadline??Infinity))yield;
    const [col,row]=pool.nav.grid(point.x,point.y),id=row*pool.nav.size+col;
    if(reachable&&!(reachable[id>>>5]&(1<<(id&31))))return null;
    if(!allowed(point)||roadOnly&&pool.nav.roads.coverage(point.x,point.y)<.58
     ||!pool.staticFree(unit,point,heading)||!pool.free(unit,point,heading))return null;
-   const path=yield* m.vehiclePathSteps(unit,point,{...pathOptions,maxGoalDistance:.01,fallback:false});
+   const sharedRoute=pool.shared&&pool.connected.size>1?(from,to)=>{
+    const paved=pool.nav.roads.nearPavement(from)&&pool.nav.roads.nearPavement(pool.anchor);
+    return sharedRouteTree(pool.nav,pool.anchor,paved).between(from,to);
+   }:null;
+   const path=yield* m.vehiclePathSteps(unit,point,{...pathOptions,maxGoalDistance:.01,fallback:false,sharedRoute});
    if(!path){
     reachable=pool.nav.lastExhaustedReachability??reachable;
     if(reachable?.[anchorId>>>5]&(1<<(anchorId&31)))pool.reachable=reachable;
@@ -137,6 +141,7 @@ export class ArrivalPlanner{
    const arrivalHeading=distance(previous,end)>.01?Math.atan2(previous.x-end.x,end.y-previous.y):unit.heading;
    if(distance(end,point)>.01||!pool.free(unit,end,arrivalHeading)||!pool.staticFree(unit,end,arrivalHeading))return null;
    pool.claims.insert({...end,id:unit.id,heading:arrivalHeading,kind:unit.kind,hp:1});
+   pool.claimedCoordinates.add(key);
    return path;
   };
   const direct=yield* tryPoint(this,desired);if(direct)return direct;

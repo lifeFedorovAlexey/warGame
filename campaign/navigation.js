@@ -215,7 +215,7 @@ export class TerrainNavigator{
   return total;
  }
  findPath(...args){this.beforeSynchronousSearch?.();return completeSteps(this.findPathSteps(...args));}
- *findPathSteps(from,to,{maxGoalDistance=Infinity,escapeSteepStart=false,occupancyKey='',terrainEscape=null,acceptEnd=null,acceptEndKey=''}={}){
+ *findPathSteps(from,to,{maxGoalDistance=Infinity,escapeSteepStart=false,occupancyKey='',terrainEscape=null,acceptEnd=null,acceptEndKey='',sharedRoute=null}={}){
   // Exact requests only: no quantisation of start, goal or dynamic obstacles.
   // Callers receive their own waypoint array because driving consumes it.
   this.lastExhaustedReachability=null;
@@ -230,7 +230,7 @@ export class TerrainNavigator{
    this.pathCachePoints-=(path?.length??0);cache.delete(key);metadata.delete(key);
   }
   const reachabilityKey=[from.x,from.y,from.heading??0,from.kind??'',this.vehicleScale,escapeSteepStart,terrainEscape?.x,terrainEscape?.y,terrainEscape?.height,terrainEscape?.radius,terrainEscape?.maxRise,...this.bounds,this.topologyRevision].join('|')+'|'+occupancyKey;
-  const options={maxGoalDistance,escapeSteepStart,terrainEscape,reachabilityKey,acceptEnd,occupancyKey};
+  const options={maxGoalDistance,escapeSteepStart,terrainEscape,reachabilityKey,acceptEnd,occupancyKey,sharedRoute};
   const reused=this.sharedCorridors?(yield* this.reuseCorridor(from,to,options)):null;
   const path=reused??(yield* this.computePathSteps(from,to,options));
   if(!path)this.lastExhaustedReachability=this.exhaustedReachability?.get(reachabilityKey)??this.lastExhaustedReachability;
@@ -246,7 +246,7 @@ export class TerrainNavigator{
   return path;
  }
  computePath(...args){this.beforeSynchronousSearch?.();return completeSteps(this.computePathSteps(...args));}
- *computePathSteps(from,to,{maxGoalDistance=Infinity,escapeSteepStart=false,terrainEscape=null,reachabilityKey=null,acceptEnd=null,occupancyKey=''}={}){
+ *computePathSteps(from,to,{maxGoalDistance=Infinity,escapeSteepStart=false,terrainEscape=null,reachabilityKey=null,acceptEnd=null,occupancyKey='',sharedRoute=null}={}){
   const gx=(to.x+this.field.half)/32,gy=(this.field.half-to.y)/32,bounds=this.bounds;if(gx<bounds[0]||gy<bounds[1]||gx>bounds[2]||gy>bounds[3])return null;
   const end=this.nearest(to.x,to.y);if(!end)return null;
   const goalAccepted=!acceptEnd||acceptEnd(to);
@@ -255,6 +255,11 @@ export class TerrainNavigator{
   const pavedTrip=roads&&this.roads.nearPavement(from)&&this.roads.nearPavement(to);
   const directCost=roads&&direct?this.travelCost(from,to,pavedTrip):Infinity;
   if(direct&&(!roads||!this.roads.worthChecking(from,to,directCost,pavedTrip)))return direct;
+  // A large command may provide an already settled static tree. Try that
+  // only after cheap direct/corridor reuse, before allocating another A*.
+  if(sharedRoute&&goalAccepted&&!terrainEscape&&!occupancyKey&&maxGoalDistance<=.01){
+   const shared=yield* sharedRoute(from,to);if(shared)return shared;
+  }
   const [cx,cy]=this.grid(from.x,from.y),entries=[];
   const entryRadius=terrainEscape?Math.ceil(terrainEscape.radius/this.cell):2;
   for(let dy=-entryRadius;dy<=entryRadius;dy++)for(let dx=-entryRadius;dx<=entryRadius;dx++){
