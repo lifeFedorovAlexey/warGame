@@ -81,6 +81,22 @@ function settle(m,max=2000){
  results.push({case:'negative result/local invalidation/retry',passed:true});
 }
 {
+ const m=fixture(),u=m.addUnit('bukhanka','rai',{x:0,y:-300},{heading:0}),walls=[];
+ for(const [x,y,halfWidth,halfDepth] of [[0,-100,120,12],[0,100,120,12],[-100,0,12,120],[100,0,12,120]])
+  walls.push(m.addStructure('factory','neutral',{x,y},{halfWidth,halfDepth,completed:true,progress:1}));
+ m.rebuildNavigation();m.submitOrder([u.id],'move',{x:0,y:0});
+ let searches=0;const compute=m.commandPlanner.nav.computePathSteps;
+ m.commandPlanner.nav.computePathSteps=function*(...args){searches++;return yield* compute.apply(this,args);};
+ settle(m);m.advance(.2,{budgetMs:6});
+ assert.equal(searches,1,'An isolated target is checked once, not once per nearby parking candidate');
+ assert.equal(u.pendingOrder?.reason,'route-unreachable');assert.equal(u.navigation?.state,'UNREACHABLE');
+ assert(!u.routeOrder&&!u.path.length,'A slot outside the target component cannot replace the requested destination');
+ walls[0].hp=0;m.rebuildNavigation();m.advance(.1,{budgetMs:6});settle(m);
+ assert(!u.pendingOrder&&u.path.length,'Opening the target component invalidates its negative proof');
+ assert.deepEqual(u.routeOrder.destination,{x:0,y:0});
+ results.push({case:'one connectivity proof / UNREACHABLE / opening the target component',passed:true});
+}
+{
  const m=fixture();m.addStructure('factory','rai',{x:0,y:200},{completed:true,progress:1});m.rebuildNavigation();
  const from={x:0,y:0,kind:'bukhanka',heading:0},to={x:0,y:400};
  const expected=m.nav.computePath(from,to),context=m.nav.createSearchContext();

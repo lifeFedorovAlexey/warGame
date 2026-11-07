@@ -13,7 +13,7 @@ const capMs=Number(process.argv.find(a=>a.startsWith('--cap-ms='))?.split('=')[1
 const percentile=(samples,p)=>samples.slice().sort((a,b)=>a-b)[Math.min(samples.length-1,Math.floor(samples.length*p))]??0;
 const distribution=samples=>({p50:percentile(samples,.5),p95:percentile(samples,.95),p99:percentile(samples,.99),max:Math.max(0,...samples),sum:samples.reduce((a,b)=>a+b,0)});
 const report={kind:'Actual submitOrder + budgeted advance on the authored heightfield. CPU only; no renderer/FPS claims.',capMs,
- sourceHashes:Object.fromEntries(['campaign/mission.js','campaign/navigation.js','campaign/command-planner.js'].map(p=>[p,createHash('sha256').update(fs.readFileSync(p)).digest('hex')])),results:[]};
+ sourceHashes:Object.fromEntries(['campaign/mission.js','campaign/navigation.js','campaign/command-planner.js','campaign/arrival-planner.js'].map(p=>[p,createHash('sha256').update(fs.readFileSync(p)).digest('hex')])),results:[]};
 for(const count of counts){
  const m=new Mission(config,field);Object.assign(m.state,{units:[],bounds:config.finalMapBounds.slice(),pendingCinematics:[]});
  m.updateMission=()=>{};m.visible.fill(1);m.explored.fill(1);m.rebuildNavigation();
@@ -43,14 +43,20 @@ for(const count of counts){
   }
   if(frame>80&&!m.state.commandOrders.some(r=>['queued','planning'].includes(r.status)))break;
  }
- const before=computes,repeatedAt=performance.now(),repeat=m.submitOrder(ids,'move',goal),repeatMs=performance.now()-repeatedAt;
- const result={count,submitMs,response,repeatMs,repeat,repeatedSyncSearches:computes-before,firstApplied,firstMotion,pendingAtFirstMotion,
+ // Snapshot BEFORE the repeat: casualties can change the selected live set,
+ // making that click a new revision. It must not rewrite the measured phase.
+ const snapshot={
+  completedPlanning:!m.state.commandOrders.some(r=>['queued','planning'].includes(r.status)),assigned:units.filter(u=>u.hp>0&&!u.pendingOrder&&u.routeOrder).length,
+  pending:units.filter(u=>u.hp>0&&u.pendingOrder?.status==='planning').length,blocked:units.filter(u=>u.hp>0&&u.pendingOrder?.status==='blocked').length,
+  destroyed:units.filter(u=>u.hp<=0).length};
+ const result={count,submitMs,response,firstApplied,firstMotion,pendingAtFirstMotion,
   wallMs:performance.now()-started,frameCount:frame+1,simulatedSeconds:m.state.time,
-  completedPlanning:!m.state.commandOrders.some(r=>['queued','planning'].includes(r.status)),assigned:units.filter(u=>!u.pendingOrder).length,
-  pending:units.filter(u=>u.pendingOrder?.status==='planning').length,blocked:units.filter(u=>u.pendingOrder?.status==='blocked').length,
+  ...snapshot,
   computes,aStarSearches:planner.nav.searchId,reachabilityRejects:planner.nav.reachabilityRejects??0,corridorHits:planner.nav.corridorHits??0,frameCpuMs:distribution(frames),plannerCpuMs:distribution(planning),
   heapDeltaBytes:process.memoryUsage().heapUsed-beforeHeap,damage:units.reduce((sum,u,i)=>sum+Math.max(0,starts[i].hp-u.hp),0),
-  ...(process.argv.includes('--diagnose')?{searches,activeUnit:planner.active?.runtime.currentUnit,active:units.filter(u=>u.pendingOrder).slice(0,5).map(u=>({id:u.id,x:u.x,y:u.y,pending:u.pendingOrder}))}:{} )};
+  ...(process.argv.includes('--diagnose')?{searches,activeUnit:planner.active?.runtime.currentUnit,active:units.filter(u=>u.pendingOrder).slice(0,5).map(u=>({id:u.id,x:u.x,y:u.y,pending:structuredClone(u.pendingOrder)}))}:{} )};
+ const before=computes,repeatedAt=performance.now(),repeat=m.submitOrder(ids,'move',goal),repeatMs=performance.now()-repeatedAt;
+ Object.assign(result,{repeatMs,repeat,repeatedSyncSearches:computes-before});
  report.results.push(result);fs.mkdirSync('campaign/reports',{recursive:true});fs.writeFileSync('campaign/reports/navigation-orders-after.json',JSON.stringify(report,null,2));
  fs.appendFileSync('campaign/reports/navigation-orders-after-runs.jsonl',JSON.stringify({...report,results:[result]})+'\n');
  console.log(JSON.stringify(result));

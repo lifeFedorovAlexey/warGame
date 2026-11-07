@@ -12,6 +12,8 @@ export class ArrivalPlanner{
   this.target=target;this.forward=forward;this.right=right;this.spacing=spacing;
   this.radius=Math.ceil(Math.sqrt(units.length))+5;this.points=[];this.ring=-1;this.staticCache=new Map();
   this.obstruction=this.nav.solids.find(s=>Math.abs(target.x-s.x)<s.halfWidth&&Math.abs(target.y-s.y)<s.halfDepth);
+  this.anchor=this.nav.terrainAllowed(target.x,target.y)?this.nav.nearest(target.x,target.y,3):null;
+  this.connected=new Set();
   this.claims=new UnitSpatialIndex(64);this.bodies=new UnitSpatialIndex(64);this.time=null;
   this.maximumRadius=Math.max(...units.map(u=>{const box=vehicleEnvelope(u,mission.config.worldScale,mission.field);return Math.hypot(box.width,box.depth);}));
   for(const point of reserved)this.claims.insert({...point,heading:Math.atan2(-forward.x,forward.y),kind:units[0].kind,hp:1});
@@ -50,9 +52,37 @@ export class ArrivalPlanner{
    if(performance.now()>=(this.nav.workDeadline??Infinity))yield;
   }
  }
+ *connect(unit){
+  if(this.connected.has(unit.id))return true;
+  const m=this.mission,nav=this.nav;
+  if(!this.anchor){m.commandJob.failures[unit.id]={reason:'destination-terrain-forbidden',blockerId:null};return false;}
+  const anchor={...this.anchor,heading:unit.heading,kind:unit.kind,owner:unit.owner};
+  // Search from the destination component first. A small isolated destination
+  // then exhausts once, instead of exploring the large outside world for
+  // every possible parking candidate. Costs still use the ordinary navigator.
+  let path;
+  if(!nav.terrainAllowed(unit.x,unit.y))path=yield* m.vehiclePathSteps(unit,anchor,{maxGoalDistance:.01,fallback:false});
+  else{
+   const backwards=yield* nav.findPathSteps(anchor,unit,{maxGoalDistance:.01,escapeSteepStart:false,occupancyKey:''});
+   if(backwards?.length)path=[...backwards.slice(0,-1).reverse(),{x:anchor.x,y:anchor.y}];
+  }
+  if(!path){
+   m.commandJob.failures[unit.id]={reason:nav.lastExhaustedReachability?'route-unreachable':'static-route-not-found',blockerId:null};
+   return false;
+  }
+  this.connected.add(unit.id);
+  // Store the forward corridor as well: subsequent individual destinations
+  // can reuse it with independently checked exact entry/exit connectors.
+  const corridors=nav.corridors??=[];
+  corridors.unshift({from:{x:unit.x,y:unit.y},to:{x:anchor.x,y:anchor.y},kind:unit.kind??'',scale:nav.vehicleScale,
+   bounds:nav.bounds.join(','),topologyRevision:nav.topologyRevision,regions:nav.pathRegions(unit,path),occupancyKey:'',path});
+  if(corridors.length>64)corridors.pop();
+  return true;
+ }
  *path(unit,desired,{roadOnly=false,allowed=()=>true,pathOptions={}}={}){
   const m=this.mission,heading=Math.atan2(-this.forward.x,this.forward.y),seen=new Set();let reachable=null,feasible=0,outside=0;
   if(this.obstruction){m.commandJob.failures[unit.id]={reason:'destination-occupied',blockerId:this.obstruction.id};return null;}
+  if(!(yield* this.connect(unit)))return null;
   const tryPoint=function*(pool,point){
    const key=point.x+','+point.y;if(seen.has(key))return null;seen.add(key);
    if(performance.now()>=(pool.nav.workDeadline??Infinity))yield;
@@ -81,7 +111,9 @@ export class ArrivalPlanner{
    first=this.points.length;yield* this.grow();
   }
   const obstruction=this.nav.solids.find(s=>Math.abs(this.target.x-s.x)<s.halfWidth&&Math.abs(this.target.y-s.y)<s.halfDepth);
-  m.commandJob.failures[unit.id]={reason:obstruction?'destination-occupied':reachable&&feasible>0&&outside>=feasible-1?'route-unreachable':'no-free-parking-in-area',blockerId:obstruction?.id??null};
+  // connect() already proved this unit can reach the target component. A
+  // shortage of available slots must never relabel that component unreachable.
+  m.commandJob.failures[unit.id]={reason:obstruction?'destination-occupied':'no-free-parking-in-area',blockerId:obstruction?.id??null};
   return null;
  }
 }

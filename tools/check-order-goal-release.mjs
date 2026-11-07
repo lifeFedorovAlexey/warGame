@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {fixture,opposingCase} from './check-start-latency-coordinator.mjs';
+import {vehicleClearance} from '../campaign/vehicle-collision.js';
+
+function finishCommands(m){for(let i=0;i<1000;i++){
+ m.advance(1/80,{budgetMs:6});
+ if(!m.state.commandOrders?.some(r=>['queued','planning'].includes(r.status)))return;
+}throw Error('Command planning did not finish');}
 
 function blockedOrder(){
  const m=fixture(),a=m.addUnit('bukhanka','rai',{x:0,y:-65},{heading:0}),
@@ -73,15 +79,32 @@ for(const range of [18,28,65])for(const width of [0,34]){
  const {m,a,b}=blockedOrder();m.damage(b,b.maxHp*4,a);m.stop([a.id]);m.advance(.1);
  assert(!a.task&&!a.path.length,'Stop cancels a queued death release');
 }
+const asynchronous=[];
+for(const alreadyMoving of [false,true])for(const width of [0,34]){
+ const m=fixture(width),a=m.addUnit('bukhanka','rai',{x:0,y:-65},{heading:0}),
+  b=m.addUnit('bukhanka','rai',{x:0,y:65},{heading:Math.PI}),goal={x:0,y:65};
+ if(alreadyMoving){m.submitOrder([b.id],'move',{x:0,y:-65});finishCommands(m);}
+ m.submitOrder([a.id],'move',goal);finishCommands(m);
+ if(!alreadyMoving){assert.deepEqual(a.routeOrder.goalBlockers,[b.id]);m.submitOrder([b.id],'move',{x:0,y:-65});finishCommands(m);}
+ let contacts=0,gap=Infinity;const collision=m.vehicleCollision.bind(m);m.vehicleCollision=(...args)=>{contacts++;return collision(...args);};
+ for(let step=0;step<500;step++){
+  m.advance(.1);gap=Math.min(gap,vehicleClearance(a,b,m.config.worldScale,m.field));
+  if(!a.task&&!b.task&&!a.path.length&&!b.path.length&&!a.detour&&!b.detour)break;
+ }
+ assert.deepEqual(a.routeOrder.destination,goal,'submitOrder must restore the exact click after a moving blocker leaves');
+ assert(Math.hypot(a.x-goal.x,a.y-goal.y)<3&&Math.hypot(b.x,b.y+65)<3,'Both actual async orders must finish');
+ assert.equal(contacts,0);assert(gap>=0);assert.equal(a.hp,a.maxHp);assert.equal(b.hp,b.maxHp);
+ asynchronous.push({alreadyMoving,width,contacts,gap,seconds:m.state.time,passed:true});
+}
 let groupOrderMs=0,releaseMs=0;
 {
  const m=fixture(),cars=Array.from({length:500},(_,i)=>m.addUnit('bukhanka','rai',
   {x:-600+(i%25)*48,y:-1200+Math.floor(i/25)*48},{heading:0}));
- let releaseSearches=0;const release=m.releaseParkingGoals,search=m.vehiclePathSteps;
- m.releaseParkingGoals=function(changed){
+ let releaseSearches=0;const release=m.releaseParkingGoalsSteps,search=m.vehiclePathSteps;
+ m.releaseParkingGoalsSteps=function*(changed){
   this.vehiclePathSteps=function*(...args){releaseSearches++;return yield* search.apply(this,args);};
   const started=performance.now();
-  try{return release.call(this,changed);}finally{releaseMs=performance.now()-started;this.vehiclePathSteps=search;}
+  try{return yield* release.call(this,changed);}finally{releaseMs=performance.now()-started;this.vehiclePathSteps=search;}
  };
  const started=performance.now(),result=m.order(cars.map(u=>u.id),'move',{x:0,y:700});groupOrderMs=performance.now()-started;
  assert.equal(result.assigned,500);
@@ -90,7 +113,7 @@ let groupOrderMs=0,releaseMs=0;
 }
 
 const report={passed:true,cases:results.length,stationaryAndReserved:true,stop:true,saveLoad:true,formationSlots:true,
- deathQueue:true,budgetedSearch:true,group500:{releaseSearches:0,releaseMs,groupOrderMs},results};
+ deathQueue:true,budgetedSearch:true,asynchronous,group500:{releaseSearches:0,releaseMs,groupOrderMs},results};
 fs.mkdirSync('campaign/reports',{recursive:true});
 fs.writeFileSync('campaign/reports/order-goal-release.json',JSON.stringify(report,null,2));
 console.log(JSON.stringify({...report,results:results.map(({range,width,seconds,minGap,goalErrors})=>({range,width,seconds,minGap,goalErrors}))},null,2));

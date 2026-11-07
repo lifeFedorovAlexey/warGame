@@ -669,11 +669,18 @@ export class Mission{
     if(units.length===1&&distance(destination,target)>3){
      const own=vehicleEnvelope(unit,this.config.worldScale,this.field);
      const blockers=this.state.units.filter(other=>{
-      if(other===unit||!vehicleObstacle(other)||other.path.length||other.owner!==unit.owner)return false;
+      if(other===unit||!vehicleObstacle(other)||other.owner!==unit.owner)return false;
       const shape=vehicleEnvelope(other,this.config.worldScale,this.field);
       return distance(other,target)<Math.hypot(own.width,own.depth)+Math.hypot(shape.width,shape.depth)+this.nav.cell*1.5;
      });
-     if(blockers.length)unit.routeOrder.goalBlockers=blockers.map(other=>other.id);
+     if(blockers.length){
+      unit.routeOrder.goalBlockers=blockers.map(other=>other.id);
+      // The blocker may already have been moving when this asynchronous
+      // result was planned. Schedule release at the normal tick boundary;
+      // otherwise its later disappearance has no new order event to trigger.
+      const moving=blockers.filter(other=>other.path.length).map(other=>other.id);
+      if(moving.length)this.state.parkingGoalReleases=[...new Set([...(this.state.parkingGoalReleases??[]),...moving])];
+     }
     }
    }
    else delete unit.routeOrder;
@@ -687,7 +694,9 @@ export class Mission{
    assigned.add(unit.id);
    if(this.commandJob){delete unit.pendingOrder;this.commandJob.assigned.push(unit.id);yield;}
   }
-  yield* this.releaseParkingGoalsSteps(changedTraffic);
+  if(this.commandJob){
+   if(changedTraffic.size)this.state.parkingGoalReleases=[...new Set([...(this.state.parkingGoalReleases??[]),...changedTraffic])];
+  }else yield* this.releaseParkingGoalsSteps(changedTraffic);
   if(action==='build'&&assigned.size){target.awaitingWorkers=false;delete target.builderIds;}
   return assigned.size?{ok:true,assigned:assigned.size,unassigned:units.filter(unit=>!assigned.has(unit.id)).map(unit=>unit.id)}:
    this.fail('Нет доступного пути или подходящего строителя');
@@ -1196,9 +1205,10 @@ export class Mission{
   };
   const final=leader.path.at(-1),previous=leader.path.at(-2)??leader;
   const finalPose=final&&{...final,heading:Math.atan2(previous.x-final.x,final.y-previous.y),kind:leader.kind,hp:1};
-  const reserveReturn=finalPose&&clearOfVehicles(null,unit,[finalPose],scale,true,null,this.field);
+  const borrowed=unit.yieldReturn,home=borrowed?.home??unit,history=borrowed?.legs??[];
+  const reserveReturn=finalPose&&clearOfVehicles(null,home,[finalPose],scale,true,null,this.field);
   const canReturn=(pose,legs)=>!reserveReturn||!!checkManeuver(pose,
-   legs.slice().reverse().map(leg=>({direction:-leg.direction,curve:-leg.curve,remaining:leg.remaining})),scale,
+   [...history,...legs].reverse().map(leg=>({direction:-leg.direction,curve:-leg.curve,remaining:leg.remaining})),scale,
    (from,to)=>clearOfVehicles(null,to,[finalPose],scale,false,from,this.field));
   // In a head-on encounter the yielder's right is the leader's left. Never
   // try the opposite shoulder merely because that search was cheaper.
@@ -1931,7 +1941,7 @@ export class Mission{
   if(unit.pendingOrder){
    unit.driveSpeed=0;
    const pending=unit.pendingOrder,blocked=pending.status==='blocked';
-   const unreachable=blocked&&['static-disconnected','destination-terrain-forbidden'].includes(pending.reason);
+   const unreachable=blocked&&['static-disconnected','route-unreachable','destination-terrain-forbidden'].includes(pending.reason);
    navigationDecision(unit,unreachable?'UNREACHABLE':blocked?'BLOCKED':'GLOBAL_REPLAN',pending.reason??'command-route-pending',pending.blockerId??null,blocked?'await-changed-conditions':'apply-current-order-result');
    return;
   }

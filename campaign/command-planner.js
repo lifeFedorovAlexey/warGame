@@ -42,6 +42,8 @@ export class CommandPlanner{
    const ids=[...new Set(pending.map(u=>u.pendingOrder.blockerId))].sort();
    return ['occupied',...m.state.bounds,...ids.map(id=>{const body=m.nav.solids.find(s=>s.id===id);return body?[id,body.x,body.y,body.halfWidth,body.halfDepth].join(','):'removed:'+id;})].join('|');
   }
+  if(record.status==='complete'&&pending.length&&pending.every(u=>['route-unreachable','destination-terrain-forbidden','static-route-not-found'].includes(u.pendingOrder.reason)))
+   return ['static',m.nav.topologyRevision,...m.state.bounds,...pending.map(u=>[u.id,u.x,u.y,u.kind].join(','))].join('|');
   const add=p=>{const x=Math.floor(p.x/size),y=Math.floor(p.y/size);for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)zones.add((x+dx)+','+(y+dy));};
   add(record.target);
   for(const unit of pending)add(unit);
@@ -156,7 +158,7 @@ export class CommandPlanner{
     for(const id of record.ids){
      const unit=m.entity(id);if(unit?.pendingOrder?.revision!==record.revision)continue;
      if(unit.hp<=0){delete unit.pendingOrder;continue;}
-     unit.pendingOrder.status='blocked';Object.assign(unit.pendingOrder,active.runtime.failures[id]??{reason:'route-unreachable',blockerId:null});
+     unit.pendingOrder.status='blocked';Object.assign(unit.pendingOrder,active.runtime.failures[id]??{reason:'route-not-found',blockerId:null});
     }
     record.signature=this.signature(record);this.stats.applied+=record.assigned.length;this.active=null;
    }

@@ -72,5 +72,26 @@ for(let i=0;i<300&&(a.yieldReturn||b.yieldReturn);i++)nested.advance(.1);
 assert(!a.yieldReturn&&!b.yieldReturn);
 assert(Math.hypot(a.x,a.y)<1e-8&&Math.hypot(b.x,b.y+30)<1e-8);
 assert.equal(a.hp,a.maxHp);assert.equal(b.hp,b.maxHp);
+// A second requester can park across an older leg of the first borrowed
+// route. Checking only the newest parking arc would strand the borrower.
+const historical=fixture(),borrower=historical.addUnit('bukhanka','rai',{x:0,y:60},{heading:0});
+const requester=historical.addUnit('bukhanka','rai',{x:-30,y:60},{heading:-Math.PI/2,
+ path:[{x:0,y:30}],task:{type:'move',x:0,y:30}});
+const allowed=(from,to)=>historical.vehicleMotionClear(borrower,from,to);
+const localOnly=historical.parkingManeuver(borrower,requester,allowed);
+assert(localOnly,'The newest local parking arc alone has a safe inverse');
+borrower.yieldReturn={home:{x:0,y:0,heading:0,kind:borrower.kind},
+ legs:[{direction:1,curve:0,remaining:60}],requesters:[],phase:'waiting',since:0,rough:false};
+assert.equal(historical.parkingManeuver(borrower,requester,allowed),null,
+ 'A later destination cannot cut through an already travelled return corridor');
+const accepted=fixture(),parked=accepted.addUnit('bukhanka','rai',{x:0,y:0},{heading:0,
+ routeOrder:{revision:2,request:{x:0,y:1},destination:{x:0,y:1}}});
+rememberYieldHome(parked,[],false,accepted.state.time,accepted);
+parked.detour={legs:[{direction:1,curve:0,remaining:20}],parking:true,idleYield:true,blocked:0};
+for(let i=0;i<200&&(parked.detour||parked.yieldReturn);i++)accepted.advance(.1);
+assert(!parked.detour&&!parked.yieldReturn);
+assert(Math.hypot(parked.x,parked.y-1)<2&&parked.y>0,
+ 'A real return can stop inside its immutable goal without replaying past that goal');
+assert.deepEqual(parked.routeOrder.destination,{x:0,y:1});assert.equal(parked.hp,parked.maxHp);
 console.log(JSON.stringify({roundtripError:Math.hypot(roundtrip.x-home.x,roundtrip.y-home.y),
- actualReturnError:Math.hypot(simple.u.x-home.x,simple.u.y-home.y),saveLoad:'identical',resumeAfterClear:.1,checks:7}));
+ actualReturnError:Math.hypot(simple.u.x-home.x,simple.u.y-home.y),saveLoad:'identical',resumeAfterClear:.1,checks:9}));

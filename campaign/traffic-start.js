@@ -208,7 +208,22 @@ export function recordYieldStep(unit,plan,leg,length){
 }
 export function* resumeYieldHome(mission,unit){
  const state=unit.yieldReturn,scale=mission.config.worldScale;
- if(!state||unit.detour)return;
+ if(!state)return;
+ const goal=unit.routeOrder?.destination;
+ if(['returning','routing'].includes(state.phase)&&goal&&(!unit.task||unit.task.yieldHome)
+  &&(!unit.detour||unit.detour.yieldReturning)
+  &&Math.hypot(state.home.x-goal.x,state.home.y-goal.y)<2
+  &&Math.hypot(unit.x-goal.x,unit.y-goal.y)<2
+  &&Math.cos(unit.heading-state.home.heading)>.9
+  &&borrowedHomeClear(mission,unit)&&mission.vehicleMotionClear(unit,unit,unit)){
+  // The borrowed position itself was an accepted arrival pose. Returning
+  // into the same goal tolerance is enough; do not drive past that goal
+  // merely to replay the last centimetres of a previously valid inverse.
+  delete unit.yieldReturn;delete unit.detour;
+  if(unit.task?.yieldHome){unit.task=null;unit.path=[];}
+  unit.driveSpeed=0;return;
+ }
+ if(unit.detour)return;
  if(state.phase==='routing'){
   if(unit.task?.yieldHome)return;
   if(!unit.task&&!unit.path.length){delete unit.yieldReturn;return;}
