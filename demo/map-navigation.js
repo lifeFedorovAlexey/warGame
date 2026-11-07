@@ -13,6 +13,7 @@ export function createMapNavigation(T,{terrain,vehicle,camera,controls,state,jum
  const pin=new T.Sprite(new T.SpriteMaterial({map:new T.CanvasTexture(pinCanvas),depthTest:false,transparent:true}));pin.scale.set(76,76,1);pin.renderOrder=5;terrain.root.add(pin);
  function rate(value){state.timeScale=value;tempo.textContent='Проездка: ×'+value;}
  function setCamera(value){
+  state.cameraPoseRevision=(state.cameraPoseRevision??0)+1;
   state.cameraMode=value;button.textContent=value==='overview'?'За машиной':'Вся карта';
   if(value==='overview'){
    const fit=Math.max(1,1/camera.aspect);controls.target.set(0,0,25);camera.position.set(0,-5500*fit,4800*fit);

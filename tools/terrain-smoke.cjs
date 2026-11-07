@@ -17,12 +17,18 @@ const fs=require('node:fs'),path=require('node:path');
   await page.selectOption('#checkpoint-select',String(map.stops.findIndex(stop=>stop.id==='north-high')));await page.waitForTimeout(1800);
   if(await page.evaluate(()=>window.demoState.groundHeight)<45)throw new Error('Upper plateau jump failed');
   await page.screenshot({path:path.resolve('demo/previews/alpha-follow.png')});
+  const cameraClearances=[];
+  for(const front of [false,true])for(const distance of [1617.227647,25346.737715]){
+   const revision=await page.evaluate(({front,distance})=>{front?window.demoActions.followFront():window.demoActions.follow();window.demoActions.setRouteDistance(distance);return window.demoState.cameraPoseRevision;},{front,distance});
+   await page.waitForFunction(revision=>window.demoState.cameraResolvedRevision===revision,revision);
+   const clearance=await page.evaluate(()=>window.demoState.cameraTerrainClearanceMetres);cameraClearances.push({front,distance,clearance});if(clearance<.89)throw new Error('Follow camera intersects terrain: '+JSON.stringify(cameraClearances.at(-1)));
+  }
   await page.evaluate(()=>{window.demoActions.followFront();window.demoActions.setCheckpoint(0);});await page.waitForTimeout(1200);await page.screenshot({path:path.resolve('demo/previews/environment-review.png')});
   await page.evaluate(()=>window.demoActions.setQuality('auto'));
   await page.locator('#terrain').click();await page.locator('#terrain').click();
   for(const [distance,lod] of [[110,1],[200,2],[45,0]]){await page.evaluate(d=>window.demoActions.setDistance(d),distance);await page.waitForFunction(n=>window.demoState.renderLod===n,lod);}
   await page.getByRole('button',{name:'Вся карта',exact:true}).click();await page.setViewportSize({width:390,height:844});await page.waitForTimeout(400);await page.screenshot({path:path.resolve('demo/previews/alpha-mobile.png')});
   if(errors.length)throw new Error(errors.join('\n'));
-  const report={map,contacts,cameras:true,checkpoints:true,lodSwitching:true,routeToggle:true,pageErrors:errors};fs.mkdirSync(path.resolve('demo/reports'),{recursive:true});fs.writeFileSync('demo/reports/terrain.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify({extent:map.extentMetres,routeKm:map.routeLengthMetres/1000,vehicleScale:map.vehicleScale,contacts,errors}));
+  const report={map,contacts,cameras:true,cameraClearances,checkpoints:true,lodSwitching:true,routeToggle:true,pageErrors:errors};fs.mkdirSync(path.resolve('demo/reports'),{recursive:true});fs.writeFileSync('demo/reports/terrain.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify({extent:map.extentMetres,routeKm:map.routeLengthMetres/1000,vehicleScale:map.vehicleScale,contacts,cameraClearances,errors}));
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exit(1)});
