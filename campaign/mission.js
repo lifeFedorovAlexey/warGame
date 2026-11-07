@@ -8,6 +8,7 @@ import {workProjection,projectorHasSight} from './builder-optics.js';
 import {combatContact} from './combat-contact.js';
 
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const routeOrderRevision=1;
 
 // Authoritative game state has no renderer objects, audio clocks or DOM references.
 export class Mission{
@@ -339,7 +340,7 @@ export class Mission{
   const repeat=new Map();
   for(const unit of units){
    const order=unit.routeOrder;
-   if(travel&&order&&(order.type??'move')===action&&distance(order.request,target)<3){
+   if(travel&&order?.revision===routeOrderRevision&&(order.type??'move')===action&&distance(order.request,target)<3){
     if(unit.task?.type===action&&unit.path.length)repeat.set(unit.id,unit.path.at(-1));
     else if(!unit.task&&distance(unit,order.destination)<5)repeat.set(unit.id,unit);
    }
@@ -408,7 +409,7 @@ export class Mission{
    const destination=travel?path.at(-1)??goal:goal;
    if(travel||action==='attack')reserved.push(path.at(-1)??unit);
    const targetId=travel?null:target.id??null;
-   if(unit.task?.type!==action||unit.task?.targetId!==targetId||travel&&distance(unit.task,destination)>5){
+   if(unit.task?.type!==action||unit.task?.targetId!==targetId||travel&&(unit.routeOrder?.revision!==routeOrderRevision||distance(unit.task,destination)>5)){
     delete unit.detour;delete unit.traffic;delete unit.trafficHold;delete unit.driveWatch;delete unit.reverseDebt;delete unit.failedArcs;
    }
    delete unit.passage;
@@ -421,7 +422,7 @@ export class Mission{
     preceding=unit.id;
    }
    if(travel){
-    unit.routeOrder={request:{x:target.x,y:target.y},destination};
+    unit.routeOrder={revision:routeOrderRevision,request:{x:target.x,y:target.y},destination};
     if(action==='attack-move')unit.routeOrder.type=action;
    }
    else delete unit.routeOrder;
@@ -437,7 +438,7 @@ export class Mission{
     const end=path?.at(-1);
     if(!end||distance(end,target)>=22)continue;
     unit.path=path;unit.task={type:'move',x:end.x,y:end.y};
-    unit.routeOrder={request:{x:target.x,y:target.y},destination:end};
+    unit.routeOrder={revision:routeOrderRevision,request:{x:target.x,y:target.y},destination:end};
     delete unit.passage;delete unit.detour;delete unit.traffic;delete unit.trafficHold;delete unit.driveWatch;delete unit.failedArcs;
     assigned.add(unit.id);
     break;

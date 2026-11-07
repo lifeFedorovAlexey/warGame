@@ -1,4 +1,4 @@
-import {RoadTraffic, asphaltBonus, gradeSpeed} from './road-traffic.js';
+import {RoadTraffic, asphaltBonus, gradeSpeed, surfaceTravelCost} from './road-traffic.js';
 import {sweepAvoidsFootprint, vehicleSweep} from './vehicle-collision.js';
 
 const climbableGrade = .52;
@@ -8,8 +8,8 @@ const climbableGrade = .52;
 export class TerrainNavigator{
  constructor(field,{cell=8,bounds=[0,0,127,127]}={}){
   this.field=field;this.cell=cell;this.clearance=11+cell/2;this.size=Math.round(field.extent/cell)+1;this.bounds=bounds;const count=this.size*this.size;this.heights=new Float32Array(count);this.walkable=new Uint8Array(count);this.occupied=new Uint8Array(count);this.edgeCache=new Uint8Array(count*8);this.searchId=0;this.closed=new Uint32Array(count);this.visited=new Uint32Array(count);this.cost=new Float32Array(count);this.parent=new Int32Array(count);
-  this.roads=new RoadTraffic(field);this.pavedFactors=new Float32Array(count);this.solids=[];
-  for(let row=0;row<this.size;row++)for(let col=0;col<this.size;col++){const p=this.position(col,row),id=row*this.size+col,g=field.gradientAt(p.x,p.y);this.heights[id]=field.heightAt(p.x,p.y);this.walkable[id]=Math.hypot(g.x,g.y)<.55?1:0;}
+  this.roads=new RoadTraffic(field);this.surfaceCosts=new Float32Array(count);this.pavedTripCosts=new Float32Array(count);this.slopes=new Float32Array(count);this.solids=[];
+  for(let row=0;row<this.size;row++)for(let col=0;col<this.size;col++){const p=this.position(col,row),id=row*this.size+col,g=field.gradientAt(p.x,p.y);this.heights[id]=field.heightAt(p.x,p.y);this.slopes[id]=Math.hypot(g.x,g.y);this.walkable[id]=this.slopes[id]<.55?1:0;}
  }
  position(col,row){return{x:col*this.cell-this.field.half,y:this.field.half-row*this.cell};}
  grid(x,y){return [Math.max(0,Math.min(this.size-1,Math.round((x+this.field.half)/this.cell))),Math.max(0,Math.min(this.size-1,Math.round((this.field.half-y)/this.cell)))];}
@@ -83,14 +83,15 @@ export class TerrainNavigator{
   if(!allowed(0)||!allowed(1))return false;
   let previous=0,height=this.field.heightAt(a.x,a.y);for(const t of times){if(t-previous<1e-8)continue;if(!allowed((previous+t)/2))return false;const h=this.field.heightAt(a.x+(b.x-a.x)*t,a.y+(b.y-a.y)*t);if(Math.abs(h-height)/Math.max(1e-7,length*(t-previous))>maximumGrade+.00001)return false;previous=t;height=h;}return true;
  }
- pavingFactor(id){
-  if(!this.pavedFactors[id]){
+ surfaceCost(id,pavedTrip){
+  const cache=pavedTrip?this.pavedTripCosts:this.surfaceCosts;
+  if(!cache[id]){
    const p=this.position(id%this.size,Math.floor(id/this.size));
-   this.pavedFactors[id]=this.roads.factor(p.x,p.y);
+   cache[id]=surfaceTravelCost(this.roads.coverage(p.x,p.y),this.slopes[id],pavedTrip);
   }
-  return this.pavedFactors[id];
+  return cache[id];
  }
- travelCost(a,b){
+ travelCost(a,b,pavedTrip=false){
   const distance=Math.hypot(b.x-a.x,b.y-a.y);
   if(distance<.001)return 0;
   const steps=Math.ceil(distance/6),step=distance/steps;
@@ -98,8 +99,9 @@ export class TerrainNavigator{
   for(let index=1;index<=steps;index++){
    const t=index/steps,middle=(index-.5)/steps;
    const height=this.field.heightAt(a.x+(b.x-a.x)*t,a.y+(b.y-a.y)*t);
-   const asphalt=this.roads.factor(a.x+(b.x-a.x)*middle,a.y+(b.y-a.y)*middle);
-   total+=step/(asphalt*gradeSpeed((height-previous)/step));
+   const x=a.x+(b.x-a.x)*middle,y=a.y+(b.y-a.y)*middle,gradient=this.field.gradientAt(x,y);
+   const surface=surfaceTravelCost(this.roads.coverage(x,y),Math.hypot(gradient.x,gradient.y),pavedTrip);
+   total+=step*surface/gradeSpeed((height-previous)/step);
    previous=height;
   }
   return total;
@@ -108,8 +110,10 @@ export class TerrainNavigator{
   const gx=(to.x+this.field.half)/32,gy=(this.field.half-to.y)/32,bounds=this.bounds;if(gx<bounds[0]||gy<bounds[1]||gx>bounds[2]||gy>bounds[3])return null;
   const end=this.nearest(to.x,to.y);if(!end)return null;
   const direct=this.lineClear(from,to,false,true)?[{x:to.x,y:to.y}]:null;
-  const roads=this.roads.buckets.size>0, directCost=roads&&direct?this.travelCost(from,to):Infinity;
-  if(direct&&(!roads||!this.roads.worthChecking(from,to,directCost)))return direct;
+  const roads=this.roads.buckets.size>0;
+  const pavedTrip=roads&&this.roads.nearPavement(from)&&this.roads.nearPavement(to);
+  const directCost=roads&&direct?this.travelCost(from,to,pavedTrip):Infinity;
+  if(direct&&(!roads||!this.roads.worthChecking(from,to,directCost,pavedTrip)))return direct;
   const [cx,cy]=this.grid(from.x,from.y),starts=[];for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){const col=cx+dx,row=cy+dy;if(!this.allowed(col,row))continue;const p=this.position(col,row);if(this.lineClear(from,p,false,true))starts.push({...p,col,row});}if(!starts.length)return direct;
   const n=this.size,endIds=new Set(),maxEndDistance=Math.min(maxGoalDistance,Math.hypot(end.x-to.x,end.y-to.y)+this.cell*1.5);for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){const col=end.col+dx,row=end.row+dy,p=this.position(col,row);if(this.allowed(col,row)&&Math.hypot(p.x-to.x,p.y-to.y)<=maxEndDistance)endIds.add(row*n+col);}if(!endIds.size)return direct;
   const stamp=++this.searchId,heap=[];let destination=null;
@@ -117,7 +121,7 @@ export class TerrainNavigator{
   const pop=()=>{const first=heap[0],last=heap.pop();if(heap.length){let i=0;while(i*2+1<heap.length){let child=i*2+1;if(child+1<heap.length&&heap[child+1].priority<heap[child].priority)child++;if(heap[child].priority>=last.priority)break;heap[i]=heap[child];i=child;}heap[i]=last;}return first.id;};
   const bestSpeed=roads?(1+asphaltBonus)*1.18:1;
   const heuristic=(col,row)=>Math.max(0,(Math.hypot(col-end.col,row-end.row)*this.cell-maxEndDistance)/bestSpeed);
-  for(const start of starts){const source=start.row*n+start.col,cost=roads?this.travelCost(from,start):Math.hypot(start.x-from.x,start.y-from.y);this.cost[source]=cost;this.parent[source]=-1;this.visited[source]=stamp;push(source,cost+heuristic(start.col,start.row));}let expanded=0,found=false;
+  for(const start of starts){const source=start.row*n+start.col,cost=roads?this.travelCost(from,start,pavedTrip):Math.hypot(start.x-from.x,start.y-from.y);this.cost[source]=cost;this.parent[source]=-1;this.visited[source]=stamp;push(source,cost+heuristic(start.col,start.row));}let expanded=0,found=false;
   while(heap.length&&expanded++<100000){const id=pop();if(this.closed[id]===stamp)continue;this.closed[id]=stamp;if(endIds.has(id)){destination=id;found=true;break;}const col=id%n,row=Math.floor(id/n);
    for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
     if(!dx&&!dy)continue;
@@ -129,7 +133,7 @@ export class TerrainNavigator{
     const edge=id*8+direction;
     if(!this.edgeCache[edge])this.edgeCache[edge]=this.lineClear(this.position(col,row),this.position(x,y),true)?1:2;
     if(this.edgeCache[edge]!==1)continue;
-    const edgeCost=roads?distance/(gradeSpeed(grade)*(this.pavingFactor(id)+this.pavingFactor(next))*.5):distance*(1+grade*grade*18);
+    const edgeCost=roads?distance*(this.surfaceCost(id,pavedTrip)+this.surfaceCost(next,pavedTrip))*.5/gradeSpeed(grade):distance*(1+grade*grade*18);
     const cost=this.cost[id]+edgeCost;
     if(this.visited[next]!==stamp||cost<this.cost[next]){this.visited[next]=stamp;this.cost[next]=cost;this.parent[next]=id;push(next,cost+heuristic(x,y));}
    }
@@ -143,10 +147,10 @@ export class TerrainNavigator{
   const simplified=[];
   let anchor=from,index=0,total=0;
   while(index<path.length){
-   let next=index,cost=roads?this.travelCost(anchor,path[index]):0;
+   let next=index,cost=roads?this.travelCost(anchor,path[index],pavedTrip):0;
    while(next+1<path.length&&this.lineClear(anchor,path[next+1])){
-    const travel=roads?this.travelCost(anchor,path[next+1]):0;
-    if(roads&&travel>cost+this.travelCost(path[next],path[next+1])+.04*this.cell)break;
+    const travel=roads?this.travelCost(anchor,path[next+1],pavedTrip):0;
+    if(roads&&travel>cost+this.travelCost(path[next],path[next+1],pavedTrip)+.04*this.cell)break;
     next++;cost=travel;
    }
    simplified.push(path[next]);anchor=path[next];index=next+1;total+=cost;

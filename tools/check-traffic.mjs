@@ -169,6 +169,35 @@ assert(roadConvoy.gap>0);
 assert(roadConvoy.history.every(frame=>frame.every(p=>convoy.nav.roads.coverage(p.x,p.y)>=.4)),
  'Convoy follows the asphalt around the mesa');
 
+const junction=session(alpha,{...alphaConfig,initialUnits:[]});
+const baseRoad=roads.paths.find(road=>road.id==='player--junction-1-1').points;
+const campRoad=roads.paths.find(road=>road.id==='junction-6--nw-pocket-17').points;
+const approachIds=Array.from({length:5},(_,index)=>{
+ const i=244-index*9,p=baseRoad[i],next=baseRoad[i+1];
+ return junction.addUnit('bukhanka','rai',p,{heading:Math.atan2(p.x-next.x,next.y-p.y)}).id;
+});
+const campEntrance=campRoad.at(-1);
+assert.equal(junction.order(approachIds,'move',campEntrance).assigned,approachIds.length);
+const legacyOrder=JSON.parse(junction.save());
+const legacyVan=legacyOrder.state.units.find(u=>u.id===approachIds[0]);
+const oldShortcut={x:-832,y:432};
+delete legacyVan.routeOrder.revision;
+legacyVan.path=[oldShortcut,legacyVan.routeOrder.destination];
+junction.load(legacyOrder);
+assert.equal(junction.order(approachIds,'move',campEntrance).assigned,approachIds.length);
+const approaching=approachIds.map(id=>junction.entity(id));
+assert.notDeepEqual(approaching[0].path[0],oldShortcut,'Reissuing an old saved order replans the shortcut');
+assert(approaching.every(u=>junction.nav.roads.coverage(u.path.at(-1).x,u.path.at(-1).y)>=.58),
+ 'A group arriving from another branch parks along the destination road');
+const junctionRun=sample(junction,approaching,50);
+assert.equal(junctionRun.complete,approaching.length);
+assert(junctionRun.gap>0);
+const junctionSamples=junctionRun.history.flat();
+assert(junctionSamples.filter(p=>junction.nav.roads.coverage(p.x,p.y)>=.4).length>=junctionSamples.length*.95,
+ 'Vehicles stay on the paved approach to the first camp');
+assert(junctionSamples.every(p=>{const g=alpha.gradientAt(p.x,p.y);return Math.hypot(g.x,g.y)<.15;}),
+ 'The convoy does not cut across the steep hillside');
+
 function gateFixture(opening,count,setup=()=>{}){
  const terrain={...field,roadNetwork:null,roadBlendAt:null};
  const m=session(terrain);

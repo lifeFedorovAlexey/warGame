@@ -6,11 +6,19 @@ export function gradeSpeed(grade) {
   return clamp(1 - grade * 1.6, .57, 1.18);
 }
 
+export function surfaceTravelCost(coverage, slope, pavedTrip) {
+  // A downhill shortcut can be fast and still have poor grip on a side slope.
+  const looseSlope = Math.max(0, slope - .07);
+  const sandCost = (pavedTrip ? 1.85 : .12) + 8 * looseSlope * looseSlope;
+  return (1 + (1 - coverage) * sandCost) / (1 + asphaltBonus * coverage);
+}
+
 export class RoadTraffic {
   constructor(field) {
     this.field = field;
     this.buckets = new Map();
     this.routes = new Map();
+    this.junctionLinks = new Map();
     this.intersections = (field.roadNetwork?.nodes ?? []).filter(node => node.degree > 2 || node.base);
     for (const [pathIndex,path] of (field.roadNetwork?.paths ?? []).entries()) {
       const pathId=path.id??pathIndex,segments=[];
@@ -33,6 +41,13 @@ export class RoadTraffic {
           const list = this.buckets.get(key) ?? [];
           list.push(segment);
           this.buckets.set(key, list);
+        }
+      }
+      if (progress && path.from != null && path.to != null) {
+        for (const [from, to] of [[path.from, path.to], [path.to, path.from]]) {
+          const links = this.junctionLinks.get(from) ?? [];
+          links.push({to, length: progress});
+          this.junctionLinks.set(from, links);
         }
       }
     }
@@ -67,9 +82,15 @@ export class RoadTraffic {
     return 1 + asphaltBonus * this.coverage(x, y);
   }
 
-  worthChecking(from, to, directCost) {
+  nearPavement(point) {
+    return this.nearest(point, 5) !== null;
+  }
+
+  worthChecking(from, to, directCost, pavedTrip) {
     const length = Math.hypot(to.x - from.x, to.y - from.y);
-    if (length < 68 || !this.buckets.size || directCost < length / (1 + asphaltBonus) * 1.035) return false;
+    if (!this.buckets.size || directCost < length / (1 + asphaltBonus) * 1.035) return false;
+    if (pavedTrip) return true;
+    if (length < 68) return false;
     const radius = Math.min(155, length * .32);
     const a = this.nearest(from, radius), b = this.nearest(to, radius);
     if (!a || !b) return false;
@@ -78,18 +99,49 @@ export class RoadTraffic {
     return estimate < directCost * .98;
   }
 
+  roadPosition(road) {
+    const {segment, along} = road;
+    const last = this.routes.get(segment.pathId).at(-1);
+    return {progress: segment.progress + along, length: last.progress + last.length};
+  }
+
+  distancesAlongRoads(road) {
+    const {from, to} = road.segment.path;
+    if (from == null || to == null) return new Map();
+    const {progress, length} = this.roadPosition(road);
+    const distances = new Map([[from, progress], [to, length - progress]]);
+    const open = new Set(distances.keys());
+    while (open.size) {
+      const closest = [...open].reduce((a, b) => distances.get(a) <= distances.get(b) ? a : b);
+      open.delete(closest);
+      for (const link of this.junctionLinks.get(closest) ?? []) {
+        const distance = distances.get(closest) + link.length;
+        if (distance >= (distances.get(link.to) ?? Infinity)) continue;
+        distances.set(link.to, distance);
+        open.add(link.to);
+      }
+    }
+    return distances;
+  }
+
   formation(goal, approach, count, scale) {
     if (count < 2 || this.coverage(goal.x, goal.y) < .58) return null;
     const road = this.nearest(goal);
     if (!road) return null;
     const {segment} = road;
-    const progress = segment.progress + road.along, spacing = scale * 5.8;
+    const {progress, length: end} = this.roadPosition(road), spacing = scale * 5.8;
     const approachRoad = this.nearest(approach,scale*15);
     const direct = (goal.x - approach.x) * segment.ux + (goal.y - approach.y) * segment.uy;
-    const offset = approachRoad?.segment.pathId === segment.pathId
+    let offset = approachRoad?.segment.pathId === segment.pathId
       ? progress - approachRoad.segment.progress - approachRoad.along : direct;
+    if (approachRoad && approachRoad.segment.pathId !== segment.pathId) {
+      const distances = this.distancesAlongRoads(approachRoad);
+      const viaStart = (distances.get(segment.path.from) ?? Infinity) + progress;
+      const viaEnd = (distances.get(segment.path.to) ?? Infinity) + end - progress;
+      if (viaStart !== viaEnd) offset = viaStart < viaEnd ? 1 : -1;
+    }
     const direction = Math.sign(offset) || 1;
-    const segments = this.routes.get(segment.pathId), last = segments.at(-1), end = last.progress + last.length;
+    const segments = this.routes.get(segment.pathId);
     const slots = [];
     const add = position => {
       if (position < 0 || position > end) return;
@@ -105,13 +157,24 @@ export class RoadTraffic {
     add(progress);
     for (let index = 1; index <= count + 3 && slots.length < count + 2; index++) add(progress - direction * index * spacing);
     for (let index = 1; index <= count + 3 && slots.length < count + 2; index++) add(progress + direction * index * spacing);
-    return slots.length ? {slots,path:segment.pathId,direction,targetProgress:progress*direction} : null;
+    return slots.length ? {slots,goal,path:segment.pathId,direction,targetProgress:progress*direction,
+      distances:this.distancesAlongRoads(road)} : null;
   }
 
   formationProgress(unit, layout, scale) {
     const road = this.nearest(unit,scale*7);
-    if (road?.segment.pathId !== layout.path || road.distance > road.width) return null;
+    if (!road || road.distance > road.width) return null;
     const {segment} = road, progress = (segment.progress + road.along) * layout.direction;
+    if (segment.pathId !== layout.path) {
+      if (this.coverage(unit.x, unit.y) < .4) return null;
+      const {progress, length} = this.roadPosition(road);
+      const remaining = Math.min(
+        (layout.distances.get(segment.path.from) ?? Infinity) + progress,
+        (layout.distances.get(segment.path.to) ?? Infinity) + length - progress
+      );
+      const direct = Math.hypot(unit.x - layout.goal.x, unit.y - layout.goal.y);
+      return remaining <= direct * 3 + 60 ? layout.targetProgress - remaining : null;
+    }
     if (this.coverage(unit.x,unit.y) >= .4) return progress;
     const aligned = (-Math.sin(unit.heading) * segment.ux + Math.cos(unit.heading) * segment.uy) * layout.direction;
     return aligned >= .62 && progress <= layout.targetProgress ? progress : null;
