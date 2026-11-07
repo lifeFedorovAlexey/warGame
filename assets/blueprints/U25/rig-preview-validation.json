@@ -4,23 +4,23 @@
   "geometry": {
     "id": "U25",
     "lod": 0,
-    "triangles": 876,
-    "vertices": 1053,
-    "primitives": 16,
+    "triangles": 1012,
+    "vertices": 1245,
+    "primitives": 19,
     "materials": 6,
     "removedDegenerate": 0,
-    "inputTriangles": 876,
-    "bytes": 56256,
+    "inputTriangles": 1012,
+    "bytes": 66296,
     "boundsMm": {
       "min": [
         -538,
-        -715,
+        -945,
         0
       ],
       "max": [
         580,
-        800,
-        1150
+        695,
+        1185
       ]
     }
   }

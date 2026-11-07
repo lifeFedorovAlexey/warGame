@@ -3,10 +3,17 @@ import {createBuilderRig} from './builder-rig.js';
 
 // One instance stream per GLB primitive. More units do not add draw calls.
 class PoseBatch{
- constructor(T,parent,prototype,capacity){this.T=T;this.prototype=prototype;this.parts=[];prototype.updateMatrixWorld(true);prototype.traverse(node=>{if(!node.isMesh)return;const mesh=new T.InstancedMesh(node.geometry,node.material,capacity);mesh.instanceMatrix.setUsage(T.DynamicDrawUsage);mesh.frustumCulled=false;mesh.castShadow=mesh.receiveShadow=true;mesh.count=0;parent.add(mesh);this.parts.push({node,mesh});});this.world=new T.Matrix4();this.combined=new T.Matrix4();this.index=0;}
+ constructor(T,parent,prototype,capacity){this.T=T;this.prototype=prototype;this.parts=[];prototype.updateMatrixWorld(true);prototype.traverse(node=>{
+  if(!node.isMesh)return;let geometry=node.geometry,material=node.material,emission=null,signal=null;
+  if(['builder_work_lamp','builder_status'].includes(material.name)){
+   geometry=geometry.clone();material=material.clone();signal=material.name==='builder_work_lamp'?'lamp':'status';material.emissiveIntensity=signal==='lamp'?1.7:.75;emission=new T.InstancedBufferAttribute(new Float32Array(capacity),1);geometry.setAttribute('instanceEmission',emission);
+   material.onBeforeCompile=shader=>{shader.vertexShader='attribute float instanceEmission;varying float vInstanceEmission;\n'+shader.vertexShader;shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvInstanceEmission=instanceEmission;');shader.fragmentShader='varying float vInstanceEmission;\n'+shader.fragmentShader;shader.fragmentShader=shader.fragmentShader.replace('#include <emissivemap_fragment>','#include <emissivemap_fragment>\ntotalEmissiveRadiance*=vInstanceEmission;');};material.customProgramCacheKey=()=> 'builder_instance_emission_v1';
+  }
+  const mesh=new T.InstancedMesh(geometry,material,capacity);mesh.instanceMatrix.setUsage(T.DynamicDrawUsage);mesh.frustumCulled=false;mesh.castShadow=mesh.receiveShadow=true;mesh.count=0;parent.add(mesh);this.parts.push({node,mesh,emission,signal});
+ });this.world=new T.Matrix4();this.combined=new T.Matrix4();this.index=0;}
  begin(){this.index=0;}
- add(transform,color){const index=this.index++;this.prototype.updateMatrixWorld(true);for(const part of this.parts){this.combined.multiplyMatrices(transform,part.node.matrixWorld);part.mesh.setMatrixAt(index,this.combined);part.mesh.setColorAt(index,color);}}
- end(){for(const {mesh} of this.parts){mesh.count=this.index;mesh.instanceMatrix.needsUpdate=true;if(mesh.instanceColor)mesh.instanceColor.needsUpdate=true;}}
+ add(transform,color,signals={}){const index=this.index++;this.prototype.updateMatrixWorld(true);for(const part of this.parts){this.combined.multiplyMatrices(transform,part.node.matrixWorld);part.mesh.setMatrixAt(index,this.combined);part.mesh.setColorAt(index,color);if(part.emission)part.emission.setX(index,signals[part.signal]??0);}}
+ end(){for(const {mesh,emission} of this.parts){mesh.count=this.index;mesh.instanceMatrix.needsUpdate=true;if(mesh.instanceColor)mesh.instanceColor.needsUpdate=true;if(emission)emission.needsUpdate=true;}}
  visible(value){for(const {mesh} of this.parts)mesh.visible=value;}
 }
 
@@ -32,7 +39,7 @@ export async function createVehicleLayer(T,scene,field,config){
    color.set(unit.owner==='rai'?'#ffffff':'#d0a18a');
    for(const batch of lods[activeLod]){batch.prototype.traverse(node=>{if(node.name.endsWith('_wheel'))node.rotation.x=data.spin;if(node.name==='sprung_frame')node.position.z=speed>.1?Math.sin(time*5+unit.x*.03)*.025:0;});batch.add(matrix,color);}
    let aim=0;if(unit.aimTarget){const angle=Math.atan2(-(unit.aimTarget.x-unit.x),unit.aimTarget.y-unit.y)-unit.heading;aim=Math.atan2(Math.sin(angle),Math.cos(angle));}
-   if(unit.kind==='builder'){builder.pose(unit.tool,aim*180/Math.PI,time,false);builderBatch.add(matrix,color);if(unit.tool>.985&&!unit.path.length&&['build','repair'].includes(unit.task?.type))weldTips.push(builder.tip.getWorldPosition(new T.Vector3()).applyMatrix4(matrix));}else if(unit.kind==='command')commandBatch.add(matrix,color);else{turret.rotation.z=aim;gunBatch.add(matrix,color);}
+   if(unit.kind==='builder'){builder.applyPose(unit.rig?.q,time,false);builderBatch.add(matrix,color,{lamp:unit.rig&&unit.rig.phase!=='stowed'?1:0,status:unit.builderWorking?1:.3});if(unit.builderWorking)weldTips.push(builder.tip.getWorldPosition(new T.Vector3()).applyMatrix4(matrix));}else if(unit.kind==='command')commandBatch.add(matrix,color);else{turret.rotation.z=aim;gunBatch.add(matrix,color);}
   }
   for(const batch of [...lods[activeLod],builderBatch,gunBatch,commandBatch])batch.end();
  }

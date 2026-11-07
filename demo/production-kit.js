@@ -20,7 +20,7 @@ export function createProductionExporter(parts,lod){
   for(const [id,source] of Object.entries(parts)){
    const root=source.clone(true);root.position.set(0,0,0);root.rotation.set(0,0,0);root.scale.set(1,1,1);
    const discard=[];
-   root.traverse(o=>{if((id==='C01'&&o.name==='B01_BUKHANKA')||(id==='B01'&&o.name==='U01_KORD')||o.isLight||o.isLine||o.name==='attachment_guides'||o.name==='light_target')discard.push(o);if(o.name==='sprung_frame'){o.position.set(0,0,0);o.rotation.set(0,0,0);}if(o.name.includes('_wheel')||o.name.includes('_steer'))o.rotation.set(0,0,0);});
+   root.traverse(o=>{if(o.userData.exportExclude||(id==='C01'&&o.name==='B01_BUKHANKA')||(id==='B01'&&o.name==='U01_KORD')||o.isLight||o.isLine||o.name==='attachment_guides'||o.name==='light_target')discard.push(o);if(o.name==='sprung_frame'){o.position.set(0,0,0);o.rotation.set(0,0,0);}if(o.name.includes('_wheel')||o.name.includes('_steer'))o.rotation.set(0,0,0);});
    discard.forEach(o=>o.removeFromParent());
    if(id==='B01'){
     root.updateMatrixWorld(true);const inverse=new THREE.Matrix4().copy(root.matrixWorld).invert(),all=[];

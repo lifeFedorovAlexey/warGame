@@ -16,7 +16,7 @@
   "measuredBounds": {
     "min": [
       -4,
-      -4,
+      -4.090000152587891,
       2.9802322831784522e-9
     ],
     "max": [
@@ -26,9 +26,25 @@
     ]
   },
   "anchors": {
+    "work_contact": [
+      0,
+      -4.09,
+      0.4
+    ],
     "work_anchor": [
       0,
       -6,
+      0
+    ]
+  },
+  "construction": {
+    "staticGroup": "building_foundation",
+    "growingGroup": "building_structure",
+    "scaleZ": "0.1 + 0.9 × progress",
+    "workSurface": "steel foundation rail",
+    "contactNormal": [
+      0,
+      -1,
       0
     ]
   },
@@ -45,17 +61,17 @@
   "geometry": {
     "id": "derrick",
     "lod": 0,
-    "triangles": 756,
-    "vertices": 856,
-    "primitives": 3,
+    "triangles": 768,
+    "vertices": 880,
+    "primitives": 4,
     "materials": 3,
     "removedDegenerate": 0,
-    "inputTriangles": 756,
-    "bytes": 35684,
+    "inputTriangles": 768,
+    "bytes": 37676,
     "boundsMm": {
       "min": [
         -4000,
-        -4000,
+        -4090,
         0
       ],
       "max": [

@@ -26,9 +26,25 @@
     ]
   },
   "anchors": {
+    "work_contact": [
+      0,
+      -3.59,
+      0.4
+    ],
     "work_anchor": [
       0,
       -6,
+      0
+    ]
+  },
+  "construction": {
+    "staticGroup": "building_foundation",
+    "growingGroup": "building_structure",
+    "scaleZ": "0.1 + 0.9 × progress",
+    "workSurface": "steel foundation rail",
+    "contactNormal": [
+      0,
+      -1,
       0
     ]
   },
@@ -45,13 +61,13 @@
   "geometry": {
     "id": "mg-tower",
     "lod": 0,
-    "triangles": 336,
-    "vertices": 420,
-    "primitives": 4,
+    "triangles": 348,
+    "vertices": 444,
+    "primitives": 5,
     "materials": 4,
     "removedDegenerate": 0,
-    "inputTriangles": 336,
-    "bytes": 20308,
+    "inputTriangles": 348,
+    "bytes": 22324,
     "boundsMm": {
       "min": [
         -3500,

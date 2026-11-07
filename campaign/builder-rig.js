@@ -1,3 +1,4 @@
+import {BUILDER,restJoints} from './builder-kinematics.js';
 // U25 owns only its flange, tool assembly and work effects. All values are metres.
 export function createBuilderRig(T,{lod=0}={}){
  const root=new T.Group();root.name='U25_STROITEL';root.userData={id:'U25',size:'S',status:'engineering-draft',ringDiameterMetres:.9};
@@ -15,22 +16,26 @@ export function createBuilderRig(T,{lod=0}={}){
  box(yaw,[.56,.68,.32],[0,-.13,.16],paint);for(const x of [-.19,.19])box(yaw,[.09,.26,.27],[x,-.25,.25],dark);
  const shoulder=group(yaw,'shoulder',[0,-.25,.37]);cylinder(shoulder,.095,.49,[0,0,0],steel,'X');beam(shoulder,[0,0,0],[0,.85,.60],.16,.17);
  for(const x of [-.10,.10])beam(shoulder,[x,.08,.09],[x,.76,.57],.027,.027,rubber);
- const elbow=group(shoulder,'elbow',[0,.85,.60]);cylinder(elbow,.095,.34,[0,0,0],dark,'X');beam(elbow,[0,-.04,0],[0,-.90,.03],.13,.14,paint);
- const telescope=group(elbow,'telescope',[0,-.9,.03]);beam(telescope,[0,1.10,0],[0,-.30,0],.085,.09,steel);beam(telescope,[0,-.30,0],[0,-.30,-.23],.085,.09,steel);
- const wrist=group(telescope,'wrist',[0,-.30,-.23]);cylinder(wrist,.065,.22,[0,0,0],dark,'X');box(wrist,[.16,.19,.18],[0,-.02,-.10],dark);cylinder(wrist,.025,.16,[0,-.02,-.19],steel);
- const tip=group(wrist,'tool_tip',[0,-.02,-.15]);box(wrist,[.17,.065,.07],[0,-.005,.10],dark);box(wrist,[.13,.012,.045],[0,.034,.10],lens);
+ const elbow=group(shoulder,'elbow',BUILDER.upper);cylinder(elbow,.095,.34,[0,0,0],dark,'X');
+ function tube(parent,size,material,name){const wall=.006,half=size/2,inner=half-wall,shape=new T.Shape();shape.moveTo(-half,-half);shape.lineTo(half,-half);shape.lineTo(half,half);shape.lineTo(-half,half);shape.closePath();const hole=new T.Path();hole.moveTo(-inner,-inner);hole.lineTo(-inner,inner);hole.lineTo(inner,inner);hole.lineTo(inner,-inner);hole.closePath();shape.holes.push(hole);const geometry=new T.ExtrudeGeometry(shape,{depth:BUILDER.stageLength,bevelEnabled:false,steps:1});geometry.rotateX(Math.PI/2);return mesh(parent,geometry,material,[0,0,0],name);}
+ tube(elbow,.17,paint,'outer_boom_tube');const telescopes=[];let parent=elbow;
+ for(let i=0;i<BUILDER.stages;i++){const stage=group(parent,'telescope_'+(i+1),[0,0,0]);tube(stage,[.14,.11,.08,.05][i],steel,'inner_tube_'+(i+1));telescopes.push(stage);parent=stage;}
+ beam(parent,[0,-BUILDER.boom,0],[0,-BUILDER.boom+BUILDER.adapter[1],BUILDER.adapter[2]],.05,.06,steel);
+ const wrist=group(parent,'wrist',[0,-BUILDER.boom+BUILDER.adapter[1],BUILDER.adapter[2]]);cylinder(wrist,.065,.22,[0,0,0],dark,'X');box(wrist,[.16,.19,.18],[0,-.02,-.10],dark);cylinder(wrist,.025,.16,[0,-.02,-.19],steel,'Z','welding_nozzle');
+ const tip=group(wrist,'tool_tip',BUILDER.tip);box(wrist,[.17,.065,.07],[0,-.005,.10],dark);box(wrist,[.13,.012,.045],[0,.034,.10],lens);
  box(root,[.28,.52,.28],[.44,-.38,.22],dark,'tool_case');cylinder(root,.18,.17,[-.43,-.4,.30],rubber,'X','cable_reel');cylinder(root,.19,.025,[-.525,-.4,.30],steel,'X');
  mesh(root,new T.SphereGeometry(.015,8,6),status,[.42,-.5,.22],'status');
  const pistonBody=mesh(yaw,new T.CylinderGeometry(.048,.048,1,segments),dark),pistonRod=mesh(yaw,new T.CylinderGeometry(.025,.025,1,segments),steel);
- const sparkPositions=new Float32Array(16*3),sparkGeometry=new T.BufferGeometry();sparkGeometry.setAttribute('position',new T.BufferAttribute(sparkPositions,3));const sparks=new T.Points(sparkGeometry,new T.PointsMaterial({color:'#ffd690',size:.024,transparent:true,opacity:.85,depthWrite:false}));sparks.name='builder_weld_sparks';sparks.visible=false;tip.add(sparks);
+ const sparkPositions=new Float32Array(16*3),sparkGeometry=new T.BufferGeometry();sparkGeometry.setAttribute('position',new T.BufferAttribute(sparkPositions,3));const sparks=new T.Points(sparkGeometry,new T.PointsMaterial({color:'#ffd690',size:.024,transparent:true,opacity:.85,depthWrite:false}));sparks.name='builder_weld_sparks';sparks.userData.exportExclude=true;sparks.visible=false;tip.add(sparks);
  function setRod(item,a,b){const direction=b.clone().sub(a);item.position.copy(a).add(b).multiplyScalar(.5);item.scale.y=direction.length();item.quaternion.setFromUnitVectors(Y,direction.normalize());}
  const clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),smooth=n=>{const t=clamp(n,0,1);return t*t*(3-2*t);};
- function pose(amount=0,heading=0,time=0,working=true){
-  const first=smooth(amount/.25),unfold=smooth((amount-.25)/.45),extend=smooth((amount-.7)/.3);yaw.rotation.z=clamp(heading,-150,150)*Math.PI/180*unfold;shoulder.rotation.x=(25*first-35*unfold)*Math.PI/180;elbow.rotation.x=-145*unfold*Math.PI/180;telescope.position.y=-.90-1.05*extend;wrist.rotation.x=-25*extend*Math.PI/180;
+ function applyPose(q=restJoints(),time=0,working=false){
+  yaw.rotation.z=q.yaw;shoulder.rotation.x=q.shoulder;elbow.rotation.x=q.elbow;wrist.rotation.x=q.wrist;telescopes.forEach(stage=>stage.position.y=-q.extension/BUILDER.stages);
   root.updateWorldMatrix(true,true);const a=new T.Vector3(.18,-.13,.16),b=yaw.worldToLocal(shoulder.localToWorld(new T.Vector3(.18,.45,.30))),delta=b.clone().sub(a);setRod(pistonBody,a,a.clone().addScaledVector(delta,.65));setRod(pistonRod,a.clone().addScaledVector(delta,.55),b);
-  const welding=working&&amount>.985&&Math.sin(time*23)>.1;sparks.visible=welding;lens.emissiveIntensity=amount>.7?1.7:0;status.emissiveIntensity=amount>.9?.75:.25;
+  const deployed=q.extension>.05||Math.abs(q.elbow)>.2,welding=working&&Math.sin(time*23)>.1;sparks.visible=welding;lens.emissiveIntensity=deployed?1.7:0;status.emissiveIntensity=working?.75:.25;
   if(welding){for(let i=0;i<16;i++){const life=((time*2.7+i*.13)%1),angle=i*2.399;sparkPositions[i*3]=Math.cos(angle)*life*.15;sparkPositions[i*3+1]=Math.sin(angle)*life*.15;sparkPositions[i*3+2]=.04*life-.32*life*life;}sparkGeometry.attributes.position.needsUpdate=true;}
-  return {deployed:amount>.985,welding,yawDegrees:yaw.rotation.z*180/Math.PI};
+  return {deployed,welding,yawDegrees:yaw.rotation.z*180/Math.PI};
  }
- pose(0,0,0,false);return {root,pose,tip,joints:{yaw,shoulder,elbow,telescope,wrist}};
+ function pose(amount=0,heading=0,time=0,working=true){const first=smooth(amount/.25),unfold=smooth((amount-.25)/.45),extend=smooth((amount-.7)/.3),q={yaw:clamp(heading,-150,150)*Math.PI/180*unfold,shoulder:(25*first-15*unfold)*Math.PI/180,elbow:-145*unfold*Math.PI/180,wrist:0,extension:3*extend};return applyPose(q,time,working&&amount>.985);}
+ applyPose();return {root,pose,applyPose,tip,joints:{yaw,shoulder,elbow,...Object.fromEntries(telescopes.map((stage,i)=>['telescope_'+(i+1),stage])),wrist}};
 }

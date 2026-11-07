@@ -8,43 +8,43 @@
       "id": "generator",
       "path": "generator/prototype.glb",
       "spec": "generator/module.json",
-      "triangles": 420,
-      "bytes": 27120
+      "triangles": 432,
+      "bytes": 29132
     },
     {
       "id": "derrick",
       "path": "derrick/prototype.glb",
       "spec": "derrick/module.json",
-      "triangles": 756,
-      "bytes": 35684
+      "triangles": 768,
+      "bytes": 37676
     },
     {
       "id": "factory",
       "path": "factory/prototype.glb",
       "spec": "factory/module.json",
-      "triangles": 240,
-      "bytes": 22892
+      "triangles": 252,
+      "bytes": 24928
     },
     {
       "id": "lab",
       "path": "lab/prototype.glb",
       "spec": "lab/module.json",
-      "triangles": 180,
-      "bytes": 15948
+      "triangles": 192,
+      "bytes": 18796
     },
     {
       "id": "bunker",
       "path": "bunker/prototype.glb",
       "spec": "bunker/module.json",
-      "triangles": 80,
-      "bytes": 8412
+      "triangles": 92,
+      "bytes": 11284
     },
     {
       "id": "mg-tower",
       "path": "mg-tower/prototype.glb",
       "spec": "mg-tower/module.json",
-      "triangles": 336,
-      "bytes": 20308
+      "triangles": 348,
+      "bytes": 22324
     }
   ]
 }

@@ -45,6 +45,6 @@
 <text x="940" y="907" class="small">+Y — вперёд, +X — вправо, +Z — вверх</text>
 <text x="940" y="938" class="small">Габарит показан в исходном положении.</text>
 <text x="940" y="969" class="small">mount: (0, 0, 0)</text>
-<text x="940" y="1000" class="small">tool_tip: (0, -620, 700)</text>
+<text x="940" y="1000" class="small">tool_tip: (0, -850, 780)</text>
 <text x="60" y="1160" class="small">Размеры, оси и ограничения движений: module.json. Импортируемый размерный шаблон: blockout.glb.</text>
 </svg>

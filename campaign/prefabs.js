@@ -1,12 +1,16 @@
+import {buildingWorkRail} from './builder-kinematics.js';
 // Replaceable engineering prefabs. Dimensions and anchors belong to gameplay.json.
 export function createBuildingPrefab(T,kind,spec){
  const root=new T.Group();root.name=kind;root.userData={kind,artStatus:'engineering-placeholder',dimensionsMetres:spec.realSizeMetres};
- const [w,d,h]=spec.realSizeMetres??[12,10,5],paint=new T.MeshStandardMaterial({color:'#66674e',metalness:.4,roughness:.69}),steel=new T.MeshStandardMaterial({color:'#454b47',metalness:.7,roughness:.55}),concrete=new T.MeshStandardMaterial({color:'#8d8574',roughness:1}),dark=new T.MeshStandardMaterial({color:'#242e2d',roughness:.7}),light=new T.MeshStandardMaterial({color:'#c8b282',emissive:'#ac8a43',emissiveIntensity:.35}),groups=new Map();
+ const [w,d,h]=spec.realSizeMetres??[12,10,5],paint=new T.MeshStandardMaterial({color:'#66674e',metalness:.4,roughness:.69}),steel=new T.MeshStandardMaterial({color:'#454b47',metalness:.7,roughness:.55}),concrete=new T.MeshStandardMaterial({color:'#8d8574',roughness:1}),dark=new T.MeshStandardMaterial({color:'#242e2d',roughness:.7}),light=new T.MeshStandardMaterial({color:'#c8b282',emissive:'#ac8a43',emissiveIntensity:.35}),baseGroups=new Map(),structureGroups=new Map();let groups=baseGroups;
+ paint.name='building_paint';steel.name='building_structural_steel';concrete.name='foundation_concrete';dark.name='building_dark';light.name='building_lamp';
  function mesh(geo,mat,pos=[0,0,0],rotation){const part=new T.Mesh(geo,mat);part.position.set(...pos);if(rotation)part.rotation.set(...rotation);part.updateMatrix();geo.applyMatrix4(part.matrix);if(!groups.has(mat))groups.set(mat,[]);groups.get(mat).push(geo.index?geo.toNonIndexed():geo);}
  const box=(size,pos,mat=paint,rotation)=>mesh(new T.BoxGeometry(...size),mat,pos,rotation);
  function rod(a,b,r=.1,mat=steel){const start=new T.Vector3(...a),end=new T.Vector3(...b),geo=new T.CylinderGeometry(r,r,start.distanceTo(end),8);geo.applyQuaternion(new T.Quaternion().setFromUnitVectors(new T.Vector3(0,1,0),end.clone().sub(start).normalize()));mesh(geo,mat,start.add(end).multiplyScalar(.5).toArray());}
  const cylinder=(r,height,pos,mat=steel)=>{const geo=new T.CylinderGeometry(r,r,height,12);geo.rotateX(Math.PI/2);mesh(geo,mat,pos);};
  box([w,d,.35],[0,0,.175],concrete);
+ const rail=buildingWorkRail(spec);box([rail.width,rail.depth,rail.height],rail.position,steel);
+ groups=structureGroups;
  if(kind==='generator'){
   box([w*.78,d*.75,h*.62],[0,0,h*.36]);for(const x of [-1,1]){box([.18,d*.7,h*.68],[x*w*.37,0,h*.41],steel);for(let j=0;j<5;j++)box([.12,d*.55,.09],[x*w*.397,0,h*.25+j*.26],dark);}
   box([w*.62,d*.55,.15],[0,0,h*.69],steel);cylinder(.32,h*.36,[w*.25,d*.23,h*.82]);for(const x of [-1,1])for(const y of [-1,1])cylinder(.45,.5,[x*w*.4,y*d*.36,.5]);
@@ -30,7 +34,8 @@ export function createBuildingPrefab(T,kind,spec){
  }else{
   box([w,d,h*.72],[0,0,h*.38],steel);box([w*1.08,d*1.06,.25],[0,0,h*.77],paint);for(let j=0;j<4;j++)box([w*.12,.12,h*.18],[(j-1.5)*w*.22,-d*.51,h*.5],dark);
  }
- for(const [material,geometries] of groups){const merged=new T.BufferGeometry();for(const key of ['position','normal','uv']){const arrays=geometries.map(g=>g.getAttribute(key)).filter(Boolean);if(arrays.length!==geometries.length)continue;const values=new Float32Array(arrays.reduce((sum,a)=>sum+a.array.length,0));let offset=0;for(const a of arrays){values.set(a.array,offset);offset+=a.array.length;}merged.setAttribute(key,new T.BufferAttribute(values,key==='uv'?2:3));}const part=new T.Mesh(merged,material);part.castShadow=part.receiveShadow=true;root.add(part);for(const geo of geometries)geo.dispose();}
+ for(const [name,grouped] of [['building_foundation',baseGroups],['building_structure',structureGroups]]){const group=new T.Group();group.name=name;root.add(group);for(const [material,geometries] of grouped){const merged=new T.BufferGeometry();for(const key of ['position','normal','uv']){const arrays=geometries.map(g=>g.getAttribute(key)).filter(Boolean);if(arrays.length!==geometries.length)continue;const values=new Float32Array(arrays.reduce((sum,a)=>sum+a.array.length,0));let offset=0;for(const a of arrays){values.set(a.array,offset);offset+=a.array.length;}merged.setAttribute(key,new T.BufferAttribute(values,key==='uv'?2:3));}const part=new T.Mesh(merged,material);part.castShadow=part.receiveShadow=true;group.add(part);for(const geo of geometries)geo.dispose();}}
+ const contact=new T.Object3D();contact.name='work_contact';contact.position.set(0,rail.position[1]-rail.depth/2,rail.position[2]);root.add(contact);
  for(const [key,point] of Object.entries({work:spec.workAnchor,exit:spec.exitAnchor}).filter(([,value])=>value)){const anchor=new T.Object3D();anchor.name=key+'_anchor';anchor.position.set(...point);root.add(anchor);}
  return root;
 }

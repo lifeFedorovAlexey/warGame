@@ -1,4 +1,5 @@
 import {TerrainNavigator} from './navigation.js';
+import {BUILDER,angleDelta,createBuilderState,stepBuilderRig,desiredBuilderHeading,workContact,forwardBuilder,vehiclePose,builderClearOfGround,builderClearOfTarget} from './builder-kinematics.js';
 
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 
@@ -49,7 +50,12 @@ export class Mission{
   return {ok:true,x,y,rotation:Math.round(rotation/(Math.PI/2))*Math.PI/2,halfWidth:w,halfDepth:d,height:Math.max(...heights)};
  }
  workPoint(building,offset=0){if(this.config.units[building.kind])return{x:building.x+Math.sin(building.heading)*20+Math.cos(building.heading)*offset,y:building.y-Math.cos(building.heading)*20+Math.sin(building.heading)*offset};const spec=this.buildingSpec(building),local=spec.workAnchor??[0,-building.halfDepth/this.config.worldScale-4,0],c=Math.cos(building.rotation),s=Math.sin(building.rotation),scale=this.config.worldScale;return{x:building.x+(local[0]*c-local[1]*s)*scale+c*offset,y:building.y+(local[0]*s+local[1]*c)*scale+s*offset};}
- workPath(unit,target){return this.nav.findPath(unit,this.workPoint(target,unit.task?.workOffset??0),{maxGoalDistance:this.config.builderRangeMetres-.5})??[];}
+ workPath(unit,target,offset=unit.task?.workOffset??0){
+  const goal=this.workPoint(target,offset),heading=desiredBuilderHeading(target,!!this.config.units[target.kind]),[col,row]=this.nav.grid(goal.x,goal.y),candidates=[];
+  for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){if(!this.nav.allowed(col+dx,row+dy))continue;const p=this.nav.position(col+dx,row+dy);if(distance(p,goal)<=this.config.builderRangeMetres-.5&&workContact({...unit,...p,heading},target,this.config,this.field))candidates.push(p);}
+  candidates.sort((a,b)=>distance(a,goal)-distance(b,goal));
+  for(const p of candidates){const path=this.nav.findPath(unit,p,{maxGoalDistance:.01});if(path)return path;}return null;
+ }
  attackPath(unit,target){const spec=this.unitSpec(unit);if(distance(unit,target)<=spec.range&&this.lineOfSight(unit,target))return[];const angle=Math.atan2(unit.y-target.y,unit.x-target.x),radius=spec.range*.82;for(const offset of [0,.45,-.45,.9,-.9,1.4,-1.4,Math.PI]){const goal={x:target.x+Math.cos(angle+offset)*radius,y:target.y+Math.sin(angle+offset)*radius};if(!this.inBounds(goal.x,goal.y))continue;const path=this.nav.findPath(unit,goal),end=path?.at(-1);if(end&&distance(end,target)<=spec.range&&this.lineOfSight({...unit,...end},target))return path;}return null;}
  order(ids,action,target){
   if(!['move','attack','build','repair'].includes(action)||!target||!Number.isFinite(target.x)||!Number.isFinite(target.y))return this.fail('Недопустимый приказ');
@@ -57,9 +63,9 @@ export class Mission{
   if(['build','repair'].includes(action)&&(target.owner!=='rai'||!this.entity(target.id)))return this.fail('Нужна своя техника или постройка');
   const units=this.state.units.filter(u=>ids.includes(u.id)&&u.owner==='rai'&&u.hp>0&&(!['build','repair'].includes(action)||this.unitSpec(u).role==='builder')&&(action!=='attack'||this.unitSpec(u).damage));if(!units.length)return this.fail('Не выбрана подходящая техника');let assigned=0;
   for(let index=0;index<units.length;index++){const unit=units[index],workOffset=(index-(units.length-1)/2)*18,goal=action==='build'||action==='repair'?this.workPoint(target,workOffset):target,columns=Math.min(3,units.length);
-   let destination=action==='move'?{x:goal.x+(index%columns-(columns-1)/2)*20,y:goal.y-Math.floor(index/columns)*22}:goal,path=action==='attack'?this.attackPath(unit,target):this.nav.findPath(unit,destination,{maxGoalDistance:['build','repair'].includes(action)?this.config.builderRangeMetres-.5:24});
+   let destination=action==='move'?{x:goal.x+(index%columns-(columns-1)/2)*20,y:goal.y-Math.floor(index/columns)*22}:goal,path=action==='attack'?this.attackPath(unit,target):['build','repair'].includes(action)?this.workPath(unit,target,workOffset):this.nav.findPath(unit,destination,{maxGoalDistance:24});
    if(!path&&action==='move'&&units.length>1){destination=goal;path=this.nav.findPath(unit,goal,{maxGoalDistance:24});}if(!path)continue;
-   if(['build','repair'].includes(action)&&distance(path.at(-1),goal)>this.config.builderRangeMetres)continue;
+   if(['build','repair'].includes(action)&&distance(path.at(-1)??unit,goal)>this.config.builderRangeMetres)continue;
    if(action==='move'&&distance(path.at(-1),goal)>24)continue;
    unit.path=path;unit.task={type:action,targetId:action==='move'?null:target.id??null,x:destination.x,y:destination.y,workOffset};if(unit.tool>.01)unit.foldTime=2.6;assigned++;
   }
@@ -82,10 +88,43 @@ export class Mission{
  move(unit,dt){
   if(!unit.path.length)return false;const point=unit.path[0],d=distance(unit,point),preciseEnd=!unit.path[1]&&['build','repair'].includes(unit.task?.type);if(d<.2||(!preciseEnd&&d<2&&(!unit.path[1]||this.nav.lineClear(unit,unit.path[1])))){unit.path.shift();return true;}const spec=this.unitSpec(unit),z0=this.field.heightAt(unit.x,unit.y),z1=this.field.heightAt(point.x,point.y),grade=(z1-z0)/Math.max(1,d),speed=spec.speed*clamp(1-grade*1.8,.5,1.22),step=Math.min(d,speed*dt),baseDx=(point.x-unit.x)/d*step,baseDy=(point.y-unit.y)/d*step;let dx=baseDx,dy=baseDy;
   for(const other of this.state.units){if(d<3||other===unit||other.hp<=0)continue;const gap=distance(unit,other);if(gap<12&&gap>.1){dx+=(unit.x-other.x)/gap*(12-gap)*dt*.65;dy+=(unit.y-other.y)/gap*(12-gap)*dt*.65;}}
-  let destination={x:unit.x+dx,y:unit.y+dy};if(!this.nav.lineClear(unit,destination)||((dx!==baseDx||dy!==baseDy)&&!this.nav.lineClear(destination,point))){dx=baseDx;dy=baseDy;destination={x:unit.x+dx,y:unit.y+dy};}if(this.nav.lineClear(unit,destination)){unit.x+=dx;unit.y+=dy;unit.heading=Math.atan2(-dx,dy);return true;}unit.repath=(unit.repath??0)+dt;if(unit.repath>1){unit.repath=0;const target=unit.task?.targetId?this.entity(unit.task.targetId):null;unit.path=target&&['build','repair'].includes(unit.task.type)?this.workPath(unit,target):this.nav.findPath(unit,target??unit.task??point)??[];}return false;
+  let destination={x:unit.x+dx,y:unit.y+dy};if(!this.nav.lineClear(unit,destination)||((dx!==baseDx||dy!==baseDy)&&!this.nav.lineClear(destination,point))){dx=baseDx;dy=baseDy;destination={x:unit.x+dx,y:unit.y+dy};}if(this.nav.lineClear(unit,destination)){unit.x+=dx;unit.y+=dy;unit.heading=Math.atan2(-dx,dy);return true;}unit.repath=(unit.repath??0)+dt;if(unit.repath>1){unit.repath=0;const target=unit.task?.targetId?this.entity(unit.task.targetId):null;unit.path=target&&['build','repair'].includes(unit.task.type)?this.workPath(unit,target)??[]:this.nav.findPath(unit,target??unit.task??point)??[];}return false;
+ }
+ updateBuilder(unit,dt){
+  unit.rig??=createBuilderState();unit.rig.lastStepQ={...unit.rig.q};unit.builderWorking=false;unit.builderContact=null;
+  let target=unit.task?.targetId?this.entity(unit.task.targetId):null;
+  if(unit.task?.targetId&&(!target||unit.task.type==='build'&&target.completed||unit.task.type==='repair'&&target.hp>=target.maxHp)){unit.task=null;unit.path=[];target=null;}
+  const isWork=target&&['build','repair'].includes(unit.task?.type),parked=isWork&&!unit.path.length&&distance(unit,this.workPoint(target,unit.task.workOffset??0))<=this.config.builderRangeMetres;
+  const heading=parked?desiredBuilderHeading(target,!!this.config.units[target.kind]):unit.heading,turn=angleDelta(heading,unit.heading),aligned=Math.abs(turn)<.01;
+  const targetMoving=target&&this.config.units[target.kind]&&Math.hypot(target.x-target.previousX,target.y-target.previousY)>.05;
+  const solution=parked&&aligned&&!targetMoving?workContact(unit,target,this.config,this.field):null;
+  const pose=vehiclePose(unit,this.field,this.config.worldScale);stepBuilderRig(unit.rig,solution,dt,target?.id??null,q=>builderClearOfGround(q,pose,this.field)&&(!solution||builderClearOfTarget(q,pose,solution)));unit.tool=unit.rig.progress;unit.foldTime=!solution&&unit.rig.phase!=='stowed'?1:0;
+  if(unit.rig.phase!=='stowed'&&!solution)return;
+  if(parked&&!aligned){if(unit.rig.phase==='stowed')unit.heading+=Math.sign(turn)*Math.min(Math.abs(turn),BUILDER.rates.yaw*dt);return;}
+  if(solution){
+   unit.aimTarget={x:target.x,y:target.y};unit.builderContact=solution.world;
+   if(!unit.rig.ready||!builderClearOfGround(unit.rig.q,vehiclePose(unit,this.field,this.config.worldScale),this.field))return;
+   const tip=forwardBuilder(unit.rig.q).tip;if(Math.hypot(...tip.map((v,i)=>v-solution.local[i]))>.002)return;
+   // Commit work after every unit has moved, so repair cannot depend on array order.
+   unit.builderWorking=true;
+   return;
+  }
+  if(isWork&&!unit.path.length&&this.state.time-(unit.lastRepath??-10)>1){unit.path=this.workPath(unit,target)??[];unit.lastRepath=this.state.time;}
+  if(unit.rig.phase==='stowed'){this.move(unit,dt);if(unit.task?.type==='move'&&!unit.path.length){if(distance(unit,unit.task)<24)unit.task=null;else if(this.state.time-(unit.lastRepath??-10)>1){unit.path=this.nav.findPath(unit,unit.task)??[];unit.lastRepath=this.state.time;}}}
+ }
+ finalizeBuilderContacts(dt){
+  for(const unit of this.state.units){if(unit.hp<=0||!unit.builderWorking)continue;const target=this.entity(unit.task?.targetId),contact=target?workContact(unit,target,this.config,this.field):null;if(!contact){unit.builderWorking=false;continue;}
+   const previous=unit.rig.lastStepQ??unit.rig.q,withinRates=Object.keys(contact.q).every(key=>Math.abs(contact.q[key]-previous[key])<=BUILDER.rates[key]*dt+1e-6),moving=this.config.units[target.kind]&&Math.hypot(target.x-target.previousX,target.y-target.previousY)>.05;
+   if(!withinRates||moving){unit.builderWorking=false;continue;}
+   unit.rig.q=contact.q;unit.builderContact=contact.world;
+   if(unit.task.type==='build'&&!target.completed){target.progress=Math.min(1,target.progress+dt/this.buildingSpec(target).seconds);if(target.progress>=1){target.completed=true;this.state.statistics.buildingsCompleted++;this.emit('construction-complete',{kind:target.kind,building:target.id});}}
+   else if(unit.task.type==='repair'&&target.hp<target.maxHp&&this.state.energy>=dt*1.5){target.hp=Math.min(target.maxHp,target.hp+dt*40);this.state.energy-=dt*1.5;}
+   else unit.builderWorking=false;
+  }
  }
  updateUnit(unit,dt){
   if(unit.hp<=0)return;unit.previousX=unit.x;unit.previousY=unit.y;unit.cooldown=Math.max(0,unit.cooldown-dt);const spec=this.unitSpec(unit);
+  if(spec.role==='builder'){this.updateBuilder(unit,dt);return;}
   if(unit.foldTime>0){unit.foldTime=Math.max(0,unit.foldTime-dt);unit.tool=Math.max(0,unit.tool-dt/2.6);return;}
   let target=unit.task?.targetId?this.entity(unit.task.targetId):null;
   if(unit.task?.targetId&&(!target||unit.task.type==='build'&&target.completed)){unit.task=null;unit.path=[];if(unit.tool>.01)unit.foldTime=2.6;target=null;}
@@ -125,7 +164,7 @@ export class Mission{
   if(s.camps.every(c=>c.cleared)&&has('generator')&&has('derrick')&&has('factory')&&has('lab')&&(has('bunker')||has('mg-tower'))&&s.statistics.produced>0&&Object.keys(this.config.research).every(key=>s.research[key])&&s.flags.raidWon){s.status='victory';this.cinematic('victory');this.cinematic('outro');this.emit('victory');}
   if(!s.units.some(u=>u.owner==='rai'&&u.hp>0&&this.unitSpec(u).role==='builder')&&!s.buildings.some(b=>b.owner==='rai'&&b.hp>0&&b.completed&&b.kind==='factory')){s.status='defeat';this.emit('defeat',{reason:'Утрачены строители и производство'});}
  }
- tick(dt){if(this.state.status!=='running'||this.state.pendingCinematics.length)return;this.state.time+=dt;for(const unit of this.state.units)this.updateUnit(unit,dt);this.updateEconomy(dt);for(const b of this.state.buildings)if(b.owner==='scavs'&&b.hp>0){b.cooldown=Math.max(0,b.cooldown-dt);const spec=this.buildingSpec(b);if(spec.damage){const enemy=this.nearestEnemy(b,spec.range);if(enemy)this.attack(b,enemy,spec);}}this.fogTimer+=dt;if(this.fogTimer>=.25){this.fogTimer=0;this.updateFog();}this.updateMission();if(this.navigationDirty){this.rebuildNavigation();this.navigationDirty=false;}}
+ tick(dt){if(this.state.status!=='running'||this.state.pendingCinematics.length)return;this.state.time+=dt;for(const unit of this.state.units)this.updateUnit(unit,dt);this.finalizeBuilderContacts(dt);this.updateEconomy(dt);for(const b of this.state.buildings)if(b.owner==='scavs'&&b.hp>0){b.cooldown=Math.max(0,b.cooldown-dt);const spec=this.buildingSpec(b);if(spec.damage){const enemy=this.nearestEnemy(b,spec.range);if(enemy)this.attack(b,enemy,spec);}}this.fogTimer+=dt;if(this.fogTimer>=.25){this.fogTimer=0;this.updateFog();}this.updateMission();if(this.navigationDirty){this.rebuildNavigation();this.navigationDirty=false;}}
  advance(seconds){this.accumulator+=Math.max(0,seconds);let ticks=0;while(this.accumulator+1e-8>=this.config.simulationStep){this.accumulator-=this.config.simulationStep;this.tick(this.config.simulationStep);ticks++;}return ticks;}
  objectives(){const s=this.state,has=kind=>s.buildings.some(b=>b.owner==='rai'&&b.hp>0&&b.completed&&b.kind===kind);return [{id:'base',name:'Развернуть передовую базу',done:has('generator')&&has('factory')&&has('lab')&&(has('bunker')||has('mg-tower'))},{id:'power',name:'Обеспечить энергоснабжение',done:s.powered},{id:'production',name:'Наладить производство техники',done:s.statistics.produced>0},{id:'research',name:'Организовать научные исследования',done:Object.keys(this.config.research).every(key=>s.research[key]),progress:Object.keys(s.research).length+'/3'},{id:'security',name:s.flags.contact?'Уничтожить четыре лагеря':'Обеспечить безопасность района',done:s.camps.every(c=>c.cleared)&&s.flags.raidWon,progress:s.camps.filter(c=>c.cleared).length+'/4'}];}
  save(){this.updateFog();return JSON.stringify({version:1,mission:this.config.id,serial:this.serial,randomState:this.randomState,accumulator:this.accumulator,fogTimer:this.fogTimer,state:this.state,explored:Array.from(this.explored)});}

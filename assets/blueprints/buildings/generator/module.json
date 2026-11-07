@@ -16,7 +16,7 @@
   "measuredBounds": {
     "min": [
       -6,
-      -5,
+      -5.090000152587891,
       2.9802322831784522e-9
     ],
     "max": [
@@ -26,9 +26,25 @@
     ]
   },
   "anchors": {
+    "work_contact": [
+      0,
+      -5.09,
+      0.4
+    ],
     "work_anchor": [
       0,
       -8,
+      0
+    ]
+  },
+  "construction": {
+    "staticGroup": "building_foundation",
+    "growingGroup": "building_structure",
+    "scaleZ": "0.1 + 0.9 × progress",
+    "workSurface": "steel foundation rail",
+    "contactNormal": [
+      0,
+      -1,
       0
     ]
   },
@@ -45,17 +61,17 @@
   "geometry": {
     "id": "generator",
     "lod": 0,
-    "triangles": 420,
-    "vertices": 620,
-    "primitives": 4,
+    "triangles": 432,
+    "vertices": 644,
+    "primitives": 5,
     "materials": 4,
     "removedDegenerate": 0,
-    "inputTriangles": 420,
-    "bytes": 27120,
+    "inputTriangles": 432,
+    "bytes": 29132,
     "boundsMm": {
       "min": [
         -6000,
-        -5000,
+        -5090,
         0
       ],
       "max": [
