@@ -11,6 +11,7 @@
     "check:terrain": "node tools/terrain-smoke.cjs",
     "check:driving": "node tools/drive-smoke.cjs",
     "check:map": "node tools/check-alpha-map.cjs",
+    "check:roads": "node tools/check-road-tour.cjs",
     "build:map": "python tools/build-alpha-map.py",
     "build:map-textures": "node tools/build-alpha-texture.cjs",
     "build:roads": "node tools/build-roads.cjs"

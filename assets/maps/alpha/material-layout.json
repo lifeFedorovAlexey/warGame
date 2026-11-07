@@ -1,62 +1,62 @@
 [
   {
     "name": "dune-sand",
-    "coveragePercent": 21.648648824422406,
-    "dominantPercent": 20.807838439941406
+    "coveragePercent": 22.37988843126383,
+    "dominantPercent": 21.773052215576172
   },
   {
     "name": "bleached-sand",
-    "coveragePercent": 3.1389620101436533,
-    "dominantPercent": 3.0958175659179688
+    "coveragePercent": 3.232100047846292,
+    "dominantPercent": 3.258037567138672
   },
   {
     "name": "rust-clay",
-    "coveragePercent": 6.212138451546907,
-    "dominantPercent": 7.1895599365234375
+    "coveragePercent": 6.350620649810043,
+    "dominantPercent": 7.4558258056640625
   },
   {
     "name": "desert-gravel",
-    "coveragePercent": 10.82662332750451,
-    "dominantPercent": 10.574150085449219
+    "coveragePercent": 10.803091677848869,
+    "dominantPercent": 10.61258316040039
   },
   {
     "name": "scorched-rock",
-    "coveragePercent": 0.011693438020065103,
+    "coveragePercent": 0.011845035258549373,
     "dominantPercent": 0
   },
   {
     "name": "ash-earth",
-    "coveragePercent": 1.6574209321878142,
-    "dominantPercent": 1.63421630859375
+    "coveragePercent": 1.7231340480830772,
+    "dominantPercent": 1.7975807189941406
   },
   {
     "name": "ruined-asphalt",
-    "coveragePercent": 1.6670151535647462,
-    "dominantPercent": 1.8472671508789062
+    "coveragePercent": 2.2378542101159455,
+    "dominantPercent": 2.406787872314453
   },
   {
     "name": "weathered-concrete",
-    "coveragePercent": 0.04856434118634249,
-    "dominantPercent": 0.01125335693359375
+    "coveragePercent": 0.04856434121640772,
+    "dominantPercent": 0.011157989501953125
   },
   {
     "name": "transition-sand",
-    "coveragePercent": 1.4968208214576808,
-    "dominantPercent": 0
+    "coveragePercent": 1.644949780793862,
+    "dominantPercent": 0.14886856079101562
   },
   {
     "name": "dusty-sandstone",
-    "coveragePercent": 18.585698516174627,
-    "dominantPercent": 19.353294372558594
+    "coveragePercent": 18.623124790965186,
+    "dominantPercent": 19.40460205078125
   },
   {
     "name": "sandy-talus",
-    "coveragePercent": 20.034801234111242,
-    "dominantPercent": 20.711326599121094
+    "coveragePercent": 18.478153836522687,
+    "dominantPercent": 18.521404266357422
   },
   {
     "name": "weathered-limestone",
-    "coveragePercent": 14.67161294968018,
-    "dominantPercent": 14.775276184082031
+    "coveragePercent": 14.466673150275684,
+    "dominantPercent": 14.610099792480469
   }
 ]

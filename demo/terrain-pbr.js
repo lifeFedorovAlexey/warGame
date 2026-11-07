@@ -20,10 +20,14 @@ float pbrScale(float kind){return kind==2.?18.:(kind==3.?13.:10.);}
 `;
 
 export const terrainPbrSurface=`
+if(pavementCoverage>.5){pbrKinds=vec2(2.,0.);pbrMix=pavementSand;}
 vec2 surfacePbrUv=vTerrainPosition.xy;vec3 surfacePbrNormal=vec3(0.,0.,1.);
-if(abs(vTerrainNormal.z)<.55||(pbrKinds.x==3.&&pbrMix<.6)||(pbrKinds.y==3.&&pbrMix>.4))surfacePbrUv=abs(vTerrainNormal.x)>abs(vTerrainNormal.y)?vTerrainPosition.yz:vTerrainPosition.xz;
 if(pbrFade>.002){
- if(pavementCoverage>.5){pbrKinds=vec2(2.);pbrMix=0.;}
+if(abs(vTerrainNormal.z)<.55||(pbrKinds.x==3.&&pbrMix<.6)||(pbrKinds.y==3.&&pbrMix>.4))surfacePbrUv=abs(vTerrainNormal.x)>abs(vTerrainNormal.y)?vTerrainPosition.yz:vTerrainPosition.xz;
+bool layeredRock=(pbrKinds.x==3.&&pbrMix<.6)||(pbrKinds.y==3.&&pbrMix>.4);
+surfacePbrUv.x+=(tnoise(surfacePbrUv/19.)-.5)*3.2;
+if(!layeredRock)surfacePbrUv.y+=(tnoise(surfacePbrUv.yx/23.+17.)-.5)*3.2;
+
  vec3 uvA=vec3(surfacePbrUv/pbrScale(pbrKinds.x),pbrKinds.x),uvB=vec3(surfacePbrUv/pbrScale(pbrKinds.y),pbrKinds.y);
  vec4 ca=texture(pbrAlbedo,uvA),na=texture(pbrDetail,uvA),cb=ca,nb=na;
  if(pbrKinds.x!=pbrKinds.y&&pbrMix>.005){cb=texture(pbrAlbedo,uvB);nb=texture(pbrDetail,uvB);}
@@ -43,5 +47,7 @@ if(pbrFade>.002){
  vec3 dpX=dFdx(-vViewPosition),dpY=dFdy(-vViewPosition),perpY=cross(dpY,normal),perpX=cross(normal,dpX);vec2 uvX=dFdx(surfacePbrUv),uvY=dFdy(surfacePbrUv);
  vec3 tangent=perpY*uvX.x+perpX*uvY.x,bitangent=perpY*uvX.y+perpX*uvY.y;float invScale=inversesqrt(max(.000000000001,max(dot(tangent,tangent),dot(bitangent,bitangent))));
  vec3 mapped=normalize(mat3(tangent*invScale,bitangent*invScale,normal)*normalize(surfacePbrNormal));normal=normalize(mix(normal,mapped,pbrFade));
+ float ripple=sin(dot(vTerrainPosition.xy,vec2(.94,.34))*9.+tnoise(vTerrainPosition.xy/3.)*2.);float sandHeight=.10*pavementSand*(.82+.18*ripple);
+ vec3 rx=cross(dpY,normal),ry=cross(normal,dpX);float determinant=dot(dpX,rx);vec3 gradient=sign(determinant)*(dFdx(sandHeight)*rx+dFdy(sandHeight)*ry);gradient*=min(1.,abs(determinant)*.16/max(.00000001,length(gradient)));if(abs(determinant)>.00000001)normal=normalize(abs(determinant)*normal-gradient*pbrFade);
 }
 `;

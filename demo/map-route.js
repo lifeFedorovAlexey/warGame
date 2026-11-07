@@ -16,6 +16,7 @@ export function createHeightfield(data){
 }
 
 export function createMapRoute(field,data){
+ if(data.roadGraphTour){const points=data.pointsGrid.map(grid=>{const p=field.gridToWorld(grid);return {...p,z:field.heightAt(p.x,p.y)};});return finishRoute(field,data,points);}
  const rawGrid=data.pointsGrid.map(field.gridToWorld);
  const raw=rawGrid.filter((b,i)=>{const a=rawGrid[(i+rawGrid.length-1)%rawGrid.length],c=rawGrid[(i+1)%rawGrid.length];return Math.abs((b.x-a.x)*(c.y-b.y)-(b.y-a.y)*(c.x-b.x))>.01;});
  const points=[];
@@ -47,6 +48,10 @@ export function createMapRoute(field,data){
  for(let k=points.length*2-1;k>=0;k--){const i=k%points.length,j=(i+1)%points.length;margins[i]=Math.min(margins[i],margins[j]+Math.hypot(points[i].x-points[j].x,points[i].y-points[j].y));}
  let travelled=0;
  for(let i=0;i<points.length;i++){const a=original[(i+points.length-1)%points.length],b=original[(i+1)%points.length],p=original[i],length=Math.hypot(b.x-a.x,b.y-a.y),t=Math.min(1,margins[i]/55),fade=t*t*(3-2*t),offset=(Math.sin(travelled/47)*7+Math.sin(travelled/103+1.8)*4)*fade;points[i].x=p.x-(b.y-a.y)/length*offset;points[i].y=p.y+(b.x-a.x)/length*offset;points[i].z=field.heightAt(points[i].x,points[i].y);travelled+=Math.hypot(p.x-a.x,p.y-a.y);}
+ return finishRoute(field,data,points);
+}
+
+function finishRoute(field,data,points){
  const distances=[0];for(let i=0;i<points.length;i++){const a=points[i],b=points[(i+1)%points.length];distances.push(distances.at(-1)+Math.hypot(b.x-a.x,b.y-a.y));}
  const length=distances.at(-1);
  const tangents=points.map((p,i)=>{const a=points[(i+points.length-1)%points.length],b=points[(i+1)%points.length];return Math.atan2(-(b.x-a.x),b.y-a.y);});
@@ -56,7 +61,7 @@ export function createMapRoute(field,data){
   const a=points[lo],b=points[(lo+1)%points.length],t=(d-distances[lo])/(distances[lo+1]-distances[lo]),x=a.x+(b.x-a.x)*t,y=a.y+(b.y-a.y)*t;
   return {x,y,z:field.heightAt(x,y),heading:tangents[lo]+Math.atan2(Math.sin(tangents[(lo+1)%points.length]-tangents[lo]),Math.cos(tangents[(lo+1)%points.length]-tangents[lo]))*t,distance:d,index:lo};
  }
- const stops=data.stops.map(s=>{const p=field.gridToWorld(s.grid);let index=0,best=Infinity;points.forEach((q,i)=>{const d=(p.x-q.x)**2+(p.y-q.y)**2;if(d<best){best=d;index=i;}});return {...s,distance:distances[index],...sample(distances[index])};});
+ const stops=data.stops.map(s=>{const p=field.gridToWorld(s.grid);let index=data.roadGraphTour?Math.min(points.length-1,s.routePointIndex??0):0,best=Infinity;if(!data.roadGraphTour)points.forEach((q,i)=>{const d=(p.x-q.x)**2+(p.y-q.y)**2;if(d<best){best=d;index=i;}});return {...s,distance:distances[index],...sample(distances[index])};});
  function curvature(distance){const a=sample(distance-2).heading,b=sample(distance+2).heading;return Math.atan2(Math.sin(b-a),Math.cos(b-a))/4;}
  return {points,distances,length,sample,curvature,stops};
 }

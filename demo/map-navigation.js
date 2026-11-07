@@ -26,9 +26,10 @@ export function createMapNavigation(T,{terrain,vehicle,camera,controls,state,jum
  function go(index){checkpoint=(index+route.stops.length)%route.stops.length;select.value=String(checkpoint);jump(route.stops[checkpoint].distance);}
  next.onclick=()=>go(checkpoint+1);select.onchange=()=>go(Number(select.value));
  mini.onclick=e=>{if(e.target===select||e.target.closest('select'))return;setCamera('overview');};
+ document.getElementById('map-route-count').textContent=route.stops.length;
  document.getElementById('route-length').textContent=(route.length/1000).toFixed(2);document.getElementById('map-route-length').textContent=(route.length/1000).toFixed(1)+' км';
  function update(){
-  terrain.baseOutline.visible=state.cameraMode==='overview';
+  terrain.baseOutline.visible=state.cameraMode==='overview'&&terrain.path.visible;
   const p=vehicle.position,[gx,gy]=terrain.field.worldToGrid(p.x,p.y);marker.style.left=gx/127*100+'%';marker.style.top=gy/127*100+'%';marker.style.transform='translate(-50%,-50%) rotate('+(-state.heading||0)+'rad)';
   pin.visible=state.mode==='arena'&&state.cameraMode==='overview';pin.position.set(p.x,p.y,p.z+30);
   document.getElementById('route-progress').textContent=((state.routeDistance||0)/1000).toFixed(2);

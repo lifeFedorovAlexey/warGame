@@ -19,10 +19,13 @@ const fs=require('node:fs'),path=require('node:path');
   const slip=await page.evaluate(()=>window.demoState.wheelSlip);
   await simulate(1.2);const effects=await page.evaluate(()=>({...window.demoState.effects}));
   if(!effects.trackCount||!effects.dustCount||effects.trackCount>effects.trackLimit||effects.dustCount>effects.dustLimit||effects.drawCalls!==2)throw new Error('Wheel FX pool failed: '+JSON.stringify(effects));
+  const groundDust=await page.evaluate(()=>({...window.demoState.groundDust}));
+  if(groundDust.drawCalls!==1||groundDust.instances>groundDust.instanceLimit||groundDust.activeWakes>12||!groundDust.activeWakes||groundDust.lowlandProbe<.3||groundDust.highlandProbe>.005||groundDust.maxOpacity>.06)throw new Error('Ground dust density or fixed pool failed: '+JSON.stringify(groundDust));
   fs.mkdirSync(path.resolve('demo/previews'),{recursive:true});await page.screenshot({path:path.resolve('demo/previews/driving.png')});
   await page.evaluate(()=>window.demoActions.mode('inspect'));await simulate(2.1);
   const stopped=await page.evaluate(()=>({speed:window.demoState.speedKmh,dust:window.demoState.effects.dustCount}));if(stopped.speed!==0||stopped.dust!==0)throw new Error('Dust does not stop: '+JSON.stringify(stopped));
   if(errors.length)throw new Error(errors.join('\n'));
-  const report={samples,slipPeakObserved:slip,effects,stopped,pageErrors:errors};fs.mkdirSync(path.resolve('demo/reports'),{recursive:true});fs.writeFileSync(path.resolve('demo/reports/driving.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report));
+  await page.evaluate(()=>window.demoActions.setGroundDust(false));await simulate(.2);const hiddenDust=await page.evaluate(()=>window.demoState.groundDust.drawCalls);if(hiddenDust!==0)throw new Error('Disabled ground dust still renders');
+  const report={samples,slipPeakObserved:slip,effects,groundDust,stopped,pageErrors:errors};fs.mkdirSync(path.resolve('demo/reports'),{recursive:true});fs.writeFileSync(path.resolve('demo/reports/driving.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report));
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exit(1)});

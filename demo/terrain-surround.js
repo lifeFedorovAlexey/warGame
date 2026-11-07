@@ -1,7 +1,7 @@
 // Non-playable continuation hides the rectangular cut of the source heightmap.
 // Its inner rim uses the same samples as collision/render terrain, without a gap.
 export function createTerrainSurround(T,field,material){
- const edge=[],n=field.renderSize-1,scale=(field.size-1)/n;
+ const edge=[],n=(field.coarseSize??field.renderSize)-1,scale=(field.size-1)/n;
  for(let x=0;x<=n;x++)edge.push([x*scale,0]);
  for(let y=1;y<=n;y++)edge.push([field.size-1,y*scale]);
  for(let x=n-1;x>=0;x--)edge.push([x*scale,field.size-1]);
@@ -18,6 +18,6 @@ export function createTerrainSurround(T,field,material){
   vertices.push(x,y,height+.03);uv.push((x+field.half)/field.extent,(y+field.half)/field.extent);
   if(r){const a=(r-1)*edge.length+i,b=(r-1)*edge.length+(i+1)%edge.length,c=r*edge.length+i,d=r*edge.length+(i+1)%edge.length;indices.push(a,b,c,b,d,c);}
  }));
- const geometry=new T.BufferGeometry();geometry.setAttribute('position',new T.Float32BufferAttribute(vertices,3));geometry.setAttribute('uv',new T.Float32BufferAttribute(uv,2));geometry.setAttribute('color',new T.Float32BufferAttribute(new Float32Array(vertices.length).fill(1),3));geometry.setIndex(indices);geometry.computeVertexNormals();
+ const geometry=new T.BufferGeometry();geometry.setAttribute('position',new T.Float32BufferAttribute(vertices,3));geometry.setAttribute('uv',new T.Float32BufferAttribute(uv,2));geometry.setAttribute('color',new T.Float32BufferAttribute(new Float32Array(vertices.length).fill(1),3));geometry.setIndex(indices);geometry.userData.rimVertexCount=edge.length;geometry.computeVertexNormals();
  const mesh=new T.Mesh(geometry,material);mesh.name='non_playable_desert_surround';mesh.receiveShadow=false;return mesh;
 }

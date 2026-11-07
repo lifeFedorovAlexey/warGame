@@ -1,0 +1,215 @@
+{
+  "source": "user base-zones sketch; gates verified against original terrain levels",
+  "openingStages": [
+    {
+      "stage": 0,
+      "name": "Старт"
+    },
+    {
+      "stage": 1,
+      "name": "Северо-запад"
+    },
+    {
+      "stage": 2,
+      "name": "Юго-запад"
+    },
+    {
+      "stage": 3,
+      "name": "Восток и центр"
+    }
+  ],
+  "sites": [
+    {
+      "id": "player",
+      "name": "Западная база",
+      "center": [
+        14.5,
+        53.5
+      ],
+      "gate": [
+        14.5,
+        53.5
+      ],
+      "stage": 0,
+      "enemy": false,
+      "reservedCoreRadiusMetres": 70,
+      "gateHeightMetres": 0.002275880891829729
+    },
+    {
+      "id": "nw-pocket",
+      "name": "Западный перевал",
+      "center": [
+        31.5,
+        42.7
+      ],
+      "gate": [
+        35.5,
+        42.5
+      ],
+      "stage": 1,
+      "enemy": true,
+      "reservedCoreRadiusMetres": 70,
+      "gateHeightMetres": 3.2223989963531494
+    },
+    {
+      "id": "nw-west",
+      "name": "Северо-западный лагерь",
+      "center": [
+        15.9,
+        30.5
+      ],
+      "gate": [
+        18.5,
+        33.5
+      ],
+      "stage": 1,
+      "enemy": true,
+      "reservedCoreRadiusMetres": 70,
+      "gateHeightMetres": 4.8039751052856445
+    },
+    {
+      "id": "nw-east",
+      "name": "Северный опорный пункт",
+      "center": [
+        39.6,
+        25.9
+      ],
+      "gate": [
+        38.5,
+        29.5
+      ],
+      "stage": 1,
+      "enemy": true,
+      "reservedCoreRadiusMetres": 70,
+      "gateHeightMetres": 2.3054988384246826
+    },
+    {
+      "id": "west-south",
+      "name": "Западное плато",
+      "center": [
+        14.2,
+        70.9
+      ],
+      "gate": [
+        14.5,
+        67.5
+      ],
+      "stage": 2,
+      "enemy": true,
+      "reservedCoreRadiusMetres": 70,
+      "gateHeightMetres": 42.28636169433594
+    },
+    {
+      "id": "south-west",
+      "name": "Юго-западная база",
+      "center": [
+        26.2,
+        109.6
+      ],
+      "gate": [
+        28.5,
+        108.5
+      ],
+      "stage": 2,
+      "enemy": true,
+      "reservedCoreRadiusMetres": 70,
+      "gateHeightMetres": 36.103172302246094
+    },
+    {
+      "id": "central",
+      "name": "Центральная низина",
+      "center": [
+        69.8,
+        62
+      ],
+      "gate": [
+        67.5,
+        57.5
+      ],
+      "stage": 3,
+      "enemy": true,
+      "reservedCoreRadiusMetres": 70,
+      "gateHeightMetres": 12.300000190734863
+    },
+    {
+      "id": "east-middle",
+      "name": "Восточный котлован",
+      "center": [
+        86.5,
+        93
+      ],
+      "gate": [
+        83.5,
+        92.5
+      ],
+      "stage": 3,
+      "enemy": true,
+      "reservedCoreRadiusMetres": 70,
+      "gateHeightMetres": 3.2248737812042236
+    },
+    {
+      "id": "south",
+      "name": "Южная база",
+      "center": [
+        79.3,
+        118
+      ],
+      "gate": [
+        79.5,
+        113.5
+      ],
+      "stage": 3,
+      "enemy": true,
+      "reservedCoreRadiusMetres": 70,
+      "gateHeightMetres": 0.9784846901893616
+    },
+    {
+      "id": "south-east",
+      "name": "Юго-восточный узел",
+      "center": [
+        101.5,
+        110.3
+      ],
+      "gate": [
+        100.5,
+        106.5
+      ],
+      "stage": 3,
+      "enemy": true,
+      "reservedCoreRadiusMetres": 70,
+      "gateHeightMetres": 21
+    },
+    {
+      "id": "north-east",
+      "name": "Восточное верхнее плато",
+      "center": [
+        106.3,
+        39.2
+      ],
+      "gate": [
+        109.5,
+        37.5
+      ],
+      "stage": 3,
+      "enemy": true,
+      "reservedCoreRadiusMetres": 70,
+      "gateHeightMetres": 54.8997802734375
+    },
+    {
+      "id": "north-high",
+      "name": "Северное верхнее плато",
+      "center": [
+        94,
+        28.2
+      ],
+      "gate": [
+        90.5,
+        27.5
+      ],
+      "stage": 3,
+      "enemy": true,
+      "reservedCoreRadiusMetres": 70,
+      "gateHeightMetres": 62.4749870300293
+    }
+  ]
+}
