@@ -295,6 +295,20 @@ function suggestSite() {
 function installInput() {
   const canvas = world.renderer.domElement;
   const settings = document.querySelector('.settings');
+  const sections = [...settings.querySelectorAll('.operation-sections button')];
+  function showOperationSection(activeSection) {
+    for (const section of sections) {
+      const visible = section === activeSection;
+      section.setAttribute('aria-pressed', String(visible));
+      $(section.getAttribute('aria-controls')).hidden = !visible;
+    }
+  }
+  for (const section of sections) {
+    section.addEventListener('click', () => showOperationSection(section));
+  }
+  settings.addEventListener('toggle', () => {
+    if (!settings.open) showOperationSection(sections[0]);
+  });
   canvas.addEventListener('contextmenu', event => event.preventDefault());
   canvas.addEventListener('pointerdown', event => {
     if (!active || mission.state.status !== 'running') return;
@@ -786,11 +800,6 @@ try {
   $('begin').onclick = () => start();
   $('resume-save').onclick = $('load').onclick = () => start(true);
   $('save').onclick = () => saveGame();
-  $('controls-help').onclick = () => {
-    const hints = $('control-hints');
-    hints.hidden = !hints.hidden;
-    $('controls-help').setAttribute('aria-expanded', String(!hints.hidden));
-  };
   $('pause').onclick = () => { paused = !paused; world.keys.clear(); updateUi(); };
   $('tempo').onclick = () => { speed = speed === 1 ? 2 : speed === 2 ? 4 : 1; updateUi(); };
   $('design-toggle').onclick = toggleDesigner;

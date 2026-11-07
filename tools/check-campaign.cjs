@@ -54,11 +54,15 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   assert.equal(await page.evaluate(()=>window.campaign.storyAudio.playing),false);
   assert.equal(await page.evaluate(()=>window.campaign.radio.queue.length),0,'Skipping radio also drops queued transmissions');
   assert.deepEqual(await page.locator('#minimap').boundingBox(),minimapWithRadio,'Dismissing the radio does not move the minimap');
-  if(!await page.locator('#home').isVisible())await page.locator('.settings > summary').click();
+  await page.locator('.settings > summary').click();
+  assert(await page.locator('#objectives').isVisible());
+  assert(await page.locator('#radio-toggle').isHidden());
   assert(await page.locator('#control-hints').isHidden());
   await page.locator('#controls-help').click();
   assert(await page.locator('#control-hints').isVisible());
-  await page.locator('#controls-help').click();
+  assert(await page.locator('#radio-toggle').isHidden());
+  await page.locator('[aria-controls="operation-actions"]').click();
+  assert(await page.locator('#control-hints').isHidden());
   await page.locator('#home').click();
   assert.equal(await page.locator('.settings').getAttribute('open'),null);
   await page.locator('#pause').click();
