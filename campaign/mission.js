@@ -1,3 +1,4 @@
+import {placeExtraCampGuards,updateScavReinforcements} from './scav-reinforcements.js';
 import {TerrainNavigator} from './navigation.js';
 import {waterTower} from './threat-guidance.js';
 import {driveStep,clearOfVehicles,vehicleClearance,planManeuver,maneuverStep,checkManeuver} from './vehicle-motion.js';
@@ -37,7 +38,7 @@ export class Mission{
    }
    for(let i=0;i<data.units;i++)this.addUnit('raider','scavs',{x:gate.x+(i%3-1)*24,y:gate.y+30+Math.floor(i/3)*24},{campId:data.id,guard:{...gate}});
   });
-  this.rebuildNavigation();this.updateFog();this.reserveRaid();
+  this.rebuildNavigation();this.updateFog();this.reserveRaid();placeExtraCampGuards(this);
  }
  id(prefix){return prefix+this.serial++;}
  reserveRaid(unseen=false){
@@ -1428,6 +1429,7 @@ export class Mission{
   for(const artifact of s.artifacts)if(!artifact.collected&&s.units.some(u=>u.owner==='rai'&&u.hp>0&&distance(u,artifact)<24)){artifact.collected=true;if(!s.artifactKeys.includes(artifact.key))s.artifactKeys.push(artifact.key);this.emit('artifact-collected',{key:artifact.key});if(artifact.key!=='mg-tower')this.cinematic('artifact-'+artifact.key);}
   const enemyVisible=s.units.some(u=>u.owner==='scavs'&&u.hp>0&&this.visibleAt(u.x,u.y));const has=kind=>s.buildings.some(b=>b.owner==='rai'&&b.hp>0&&b.completed&&b.kind===kind);
   this.updateRaid(enemyVisible||(has('factory')&&has('lab')&&s.statistics.produced>0));
+  updateScavReinforcements(this);
   if(!s.flags.thirdSighted){
    const tower=waterTower(this);
    if(tower&&this.visibleAt(tower.x,tower.y)){s.flags.thirdSighted=true;this.cinematic('camp3-sighted');}
