@@ -20,7 +20,12 @@ float pbrScale(float kind){return kind==2.?18.:(kind==3.?13.:(kind==1.?6.:10.));
 `;
 
 export const terrainPbrSurface=`
-if(pavementCoverage>.5){pbrKinds=vec2(2.,1.);pbrMix=pavementSand;}
+if(pavementCoverage>.5){
+ pbrKinds=vec2(2.,1.);pbrMix=pavementSand;
+ pbrFade*=smoothstep(.55,.96,pavementCoverage);
+}else{
+ pbrFade*=1.-smoothstep(.15,.45,pavementCoverage);
+}
 vec2 surfacePbrUv=vTerrainPosition.xy;vec3 surfacePbrNormal=vec3(0.,0.,1.);
 if(pbrFade>.002){
 if(pavementCoverage<.5&&max(pbrKinds.x,pbrKinds.y)<1.5){pbrKinds=vec2(1.,0.);pbrMix=smoothstep(.34,.72,tnoise(vTerrainPosition.xy/37.+vec2(tnoise(vTerrainPosition.xy/93.),0.)))*.85;diffuseColor.rgb*=mix(vec3(1.),vec3(.88,.92,.96),pbrMix*pbrFade);}
