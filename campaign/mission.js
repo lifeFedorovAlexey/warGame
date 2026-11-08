@@ -14,6 +14,7 @@ import {destroyDamage,damageMobility,partMissing,upgradeDamageState} from './dam
 import {ensureSalvage,updateSalvage,armorMultiplier,salvageFromWreck,availableFieldRecipes,modificationInstalled,touchesSalvage,canInstallRecipe,syncFieldHp} from './vehicle-salvage.js';
 import {scheduleWreck,updateWrecks} from './wreck-lifecycle.js';
 import {updateStreetFurniture} from './street-furniture.js';
+import {updateOpeningConstruction} from './opening-construction.js';
 const completeSteps=iterator=>{let step;do{step=iterator.next();}while(!step.done);return step.value;};
 import {UnitSpatialIndex} from './unit-spatial-index.js';
 import {vehicleContact,impactPower,fallbackVehicleImpact} from './vehicle-impact.js';
@@ -66,7 +67,8 @@ export class Mission{
   this.state.designs=starterProjects(this.vehicleRecipes);
   this.visible=new Uint8Array(128*128);this.explored=new Uint8Array(128*128);this.visionSources=[];this.fogTimer=1;this.fogRevision=0;
   const start=field.gridToWorld(config.startGrid);
-  config.initialUnits.forEach((kind,index)=>this.addUnit(kind,'rai',{x:start.x+(index%3-1)*28,y:start.y-45-Math.floor(index/3)*30}));
+  const row=config.initialRow??{offset:[-(config.initialUnits.length-1)*14,-60],spacing:28};
+  config.initialUnits.forEach((kind,index)=>this.addUnit(kind,'rai',{x:start.x+row.offset[0]+index*row.spacing,y:start.y+row.offset[1]}));
   config.camps.forEach((data,index)=>{
    const point=field.gridToWorld(data.grid),gate=field.gridToWorld(data.gateGrid);
    const camp={...data,index,...point,gate,cleared:false,artifactSpawned:false};
@@ -2278,7 +2280,7 @@ export class Mission{
    this.updateProjectiles();updateStreetFurniture(this);updateSalvage(this);updateWrecks(this);this.finalizeBuilderContacts(dt);this.updateConstructionSites();this.updateEconomy(dt);
    for(const b of this.state.buildings)if(b.owner==='scavs'&&b.hp>0){b.cooldown=Math.max(0,b.cooldown-dt);const spec=this.buildingSpec(b);if(spec.damage){const enemy=this.nearestEnemy(b,spec.range);if(enemy)this.attack(b,enemy,spec);}}
    this.fogTimer+=dt;if(this.fogTimer>=.25){this.fogTimer=0;this.updateFog();}this.updateMission();if(this.navigationDirty){this.rebuildNavigation();this.navigationDirty=false;}
-   this.pendingTick=null;return true;
+   this.pendingTick=null;updateOpeningConstruction(this);return true;
   }finally{this.unitIndexActive=false;this.nav.workDeadline=Infinity;}
  }
  vehicleCollision(unit,speed,blockers){

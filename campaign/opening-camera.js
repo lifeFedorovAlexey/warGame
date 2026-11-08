@@ -1,4 +1,4 @@
-// The owner requested a camera sequence only for the builder's opening job.
+// The opening shows the first car's salvage pickup, then the builder's job.
 // Normal radio dialogue never starts or restores this controller.
 export class OpeningCamera {
   constructor(world,mission){
@@ -35,7 +35,14 @@ export class OpeningCamera {
     const signZ=sign.groundHeight??field.heightAt(sign.x,sign.y),truckZ=field.heightAt(builder.x,builder.y)+7;
     const target=controls.target.clone(),position=camera.position.clone();
     let angle,radius,height;
-    if(sign.completed){
+    const demo=scene.salvageDemo,car=demo&&demo.status!=='done'?this.mission.entity(demo.vehicleId):null;
+    if(car){
+      this.phase=demo.status==='show'?'bumper':'salvage';
+      const forward={x:-Math.sin(car.heading),y:Math.cos(car.heading)};
+      target.set(car.x+forward.x*5,car.y+forward.y*5,field.heightAt(car.x,car.y)+6);
+      // Front quarter: the falling pole and the newly fitted tubes remain visible.
+      angle=car.heading+Math.PI-.55;radius=demo.status==='show'?95:112;height=demo.status==='show'?52:78;
+    }else if(sign.completed){
       this.phase='sign';target.set(sign.x,sign.y,signZ+9);angle=sign.rotation;radius=108;height=58;
     }else if(sign.progress>0||builder.builderWorking){
       this.phase='build';target.set(builder.x*.60+sign.x*.40,builder.y*.60+sign.y*.40,truckZ*.60+(signZ+8)*.40);

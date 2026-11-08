@@ -56,10 +56,12 @@ export function createBaseYard(T,field,config,addFog){
   }
   const crossings=[start.x-205,start.x-28];
   function crosswalk(x,y,span,turned=false){
-    const stripeWidth=2.1,pitch=4.2;
-    for(let i=-2;i<=2;i++){
-      if(turned)marking(x,y+i*pitch,span,stripeWidth);
-      else marking(x+i*pitch,y,stripeWidth,span);
+    const stripeWidth=2.1,pitch=4.2,stripeLength=18.9,count=Math.max(2,Math.floor(span/pitch));
+    // Long axes follow traffic; stripes repeat across the carriageway.
+    for(let i=0;i<count;i++){
+      const across=(i-(count-1)/2)*pitch;
+      if(turned)marking(x+across,y,stripeWidth,stripeLength);
+      else marking(x,y+across,stripeLength,stripeWidth);
     }
   }
   const nearCrossing=x=>crossings.some(c=>Math.abs(x-c)<15);

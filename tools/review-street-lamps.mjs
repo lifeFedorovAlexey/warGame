@@ -22,7 +22,7 @@ try{
  await page.locator('[data-salvage-enabled]').uncheck();await page.locator('[data-close-designer]').click();
  const fixture=await page.evaluate(async()=>{
   const {streetLampSites}=await import('./street-furniture.js');
-  const {mission:m,world:w}=campaign,lamp=streetLampSites(w.field,m.config)[0],car=m.state.units.find(u=>u.kind==='bukhanka'&&u.owner==='rai');
+  const {mission:m,world:w}=campaign,lamp=streetLampSites(w.field,m.config)[0],car=m.state.units.find(u=>u.kind==='bukhanka'&&u.owner==='rai'&&!u.damage?.parts?.[26]?.installed);
   // Initial condition only. Every subsequent movement uses ordinary map input.
   car.x=car.previousX=lamp.x;car.y=car.previousY=lamp.y-60;car.heading=car.previousHeading=0;car.path=[];car.task=null;car.driveSpeed=0;
   const site=m.config.baseSites.find(s=>s.kind==='generator'),p=w.field.gridToWorld(site.grid),placement=m.placement('generator',p.x,p.y,Math.PI,{checkMoney:false});

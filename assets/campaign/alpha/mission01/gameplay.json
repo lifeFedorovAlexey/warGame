@@ -20,6 +20,8 @@
   "raidStagingGrid": [29.5, 52.125],
   "raidRoster": ["raider", "scav-zaporozhets", "scav-rifleman", "scav-grenadier"],
   "initialUnits": ["bukhanka", "bukhanka", "bukhanka", "builder", "builder"],
+  "initialRow": {"offset": [-78, -60], "spacing": 28},
+  "openingSalvageLamp": "street-lamp-2",
   "initialMapBounds": [0, 0, 53, 66],
   "finalMapBounds": [0, 0, 53, 83],
   "buildingGridMetres": 8,
