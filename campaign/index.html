@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="hud-layout.css">
 <link rel="stylesheet" href="combat-menu.css">
 <link rel="stylesheet" href="opening-television.css">
+<link rel="stylesheet" href="main-menu.css">
 </head>
 <body>
 <main id="game">
@@ -67,6 +68,7 @@
               <button id="load" data-icon="load" aria-label="Загрузить"></button>
               <button id="tempo" title="Скорость симуляции" data-icon="speed-one" aria-label="Скорость симуляции"></button>
               <button id="home" title="К начальной базе · Home" data-icon="home" aria-label="К базе"></button>
+              <button id="main-menu-return" data-icon="menu" aria-label="Сохранить и выйти в главное меню"></button>
             </div>
           </section>
           <section id="operation-audio" class="operation-pane" aria-labelledby="communication-controls" hidden>
@@ -214,12 +216,24 @@
     </div>
   </dialog>
   <div id="toast" role="status" hidden></div>
-  <section id="welcome" class="corner-card panel">
-    <p class="eyebrow">ОПЕРАЦИЯ «РАЙ» / АЛЬФА</p>
-    <h1>Освоение целины</h1>
-    <p id="loading-status">Подготовка карты…</p>
-    <button id="begin" class="primary" disabled data-icon="play" aria-label="Начать"></button>
-    <button id="resume-save" hidden data-icon="load" aria-label="Продолжить"></button>
+  <section id="welcome" class="main-menu" aria-label="Операция «Рай» — главное меню">
+    <div class="menu-art">
+      <img src="../assets/menu/desert-main-menu.png" alt="" draggable="false">
+      <button id="begin" class="menu-plate" disabled aria-label="Новая игра" title="Новая игра"></button>
+      <button id="resume-save" class="menu-plate" disabled aria-label="Продолжить" title="Сохранения ещё нет"></button>
+      <button id="menu-settings" class="menu-plate" disabled aria-label="Настройки" title="Настройки"></button>
+      <button id="menu-exit" class="menu-plate" aria-label="Выход" title="Выход"></button>
+    </div>
+    <section id="main-menu-settings" hidden aria-labelledby="main-menu-settings-title">
+      <h2 id="main-menu-settings-title">Настройки</h2>
+      <div class="menu-options">
+        <span>Звук и музыка</span><button id="menu-sound" data-icon="sound" aria-label="Звук"></button><output></output>
+        <span>Озвучка диалогов</span><button id="menu-voice" data-icon="voice" aria-label="Голос радио"></button><output></output>
+        <span>Радиопереговоры</span><button id="menu-radio" data-icon="radio" aria-label="Радио"></button><output></output>
+      </div>
+      <button id="menu-settings-close" data-icon="previous" aria-label="Назад в меню"></button>
+    </section>
+    <p id="loading-status" role="status">Подготовка карты…</p>
   </section>
   <section id="result" class="corner-card panel" hidden>
     <h1 id="result-title"></h1>

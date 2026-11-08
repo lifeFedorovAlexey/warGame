@@ -8,6 +8,7 @@ import {FieldSound} from './field-sound.js';
 import {StoryDirector, loadMissionStory} from './story-director.js';
 import {startOpeningConstruction,restoreOpeningConstruction,openingCanHandOver} from './opening-construction.js';
 import {OpeningTelevision} from './opening-television.js';
+import {mainMenu} from './main-menu.js';
 import {storyObjectives} from './story-objectives.js';
 import {buildLayerHeight} from './builder-optics.js';
 import {VehicleDesigner} from './designer.js';
@@ -222,8 +223,10 @@ function saveGame(notify = true) {
   try {
     localStorage.setItem(saveKey, mission.save());
     if (notify) toast('Операция сохранена');
+    return true;
   } catch {
     if (notify) toast('Сохранение недоступно');
+    return false;
   }
 }
 function start(restore = false) {
@@ -234,7 +237,8 @@ function start(restore = false) {
       mission.load(data);
       if(radio.director)restoreRadioStory(mission.state);
     } catch (error) {
-      return toast('Сохранение не открывается. ' + error.message);
+      const message='Сохранение не открывается. '+error.message;
+      return $('welcome').hidden?toast(message):mainMenu.error(message);
     }
   }
   if(!restore)mission.state.storyConstruction={enabled:true,unlocked:['generator'],research:false,requiredBunkers:2};
@@ -949,7 +953,7 @@ function frame(now) {
   requestAnimationFrame(frame);
   const dt = Math.min(.65, (now - last) / 1000);
   last = now;
-  if (!world || !mission) return;
+  if (!world || !mission || !$('welcome').hidden) return;
   if(window.campaign?.renderSuspended)return;
   if(openingTelevision?.active){
     openingTelevision.update(dt);
@@ -1050,12 +1054,13 @@ try {
   if(new URLSearchParams(location.search).has('navigation'))await toggleNavigationDebug(true);
   miniBackground.src = '../assets/maps/alpha/macro-albedo.jpg';
   installInput();
-  $('loading-status').textContent = 'Карта готова. Первый приказ — развернуть базу.';
-  $('begin').disabled = false;
-  try { $('resume-save').hidden = !localStorage.getItem(saveKey); } catch {}
+  let hasSave=false;
+  try { hasSave=!!localStorage.getItem(saveKey); } catch {}
+  mainMenu.ready(hasSave);
   $('begin').onclick = () => start();
   $('resume-save').onclick = $('load').onclick = () => start(true);
   $('save').onclick = () => saveGame();
+  $('main-menu-return').onclick = () => {if(saveGame())location.reload();};
   $('pause').onclick = () => { paused = !paused; world.keys.clear(); updateUi(); };
   $('tempo').onclick = () => { speed = speed === 1 ? 2 : speed === 2 ? 4 : 1; updateUi(); };
   $('design-toggle').onclick = toggleDesigner;
@@ -1100,5 +1105,5 @@ try {
   $('restart').onclick = () => location.reload();
 } catch (error) {
   console.error(error);
-  $('loading-status').textContent = 'Ошибка запуска. ' + error.message;
+  mainMenu.error('Ошибка запуска. ' + error.message);
 }
