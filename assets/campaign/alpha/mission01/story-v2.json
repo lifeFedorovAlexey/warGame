@@ -4,7 +4,7 @@
   "edition": "owner-radio-v3",
   "source": {
     "path": "docs/campaign/alpha/mission01-radio-v3.md",
-    "sha256": "47bfa765b1b3a3c03c27a615392587440fe34a526bf0861bcb2b2a030ef1c33e"
+    "sha256": "2ce5c3d0ebf05c89caba40a5c07624f32be063341b3f753b3cc2e2b33ce197bb"
   },
   "speakers": {
     "narrator": {
@@ -498,7 +498,7 @@
       "cues": [
         "m01-s09-l001",
         "m01-s09-l002",
-        "m01-s09-l003"
+        "m01-v3-ammo-stock-report"
       ],
       "sourceLine": 579,
       "sections": [
@@ -511,7 +511,7 @@
       "cues": [
         "m01-s09-l006",
         "m01-s09-l007",
-        "m01-s09-l008",
+        "m01-v3-ammo-feed-improvement",
         "m01-s09-l009",
         "m01-s09-l010"
       ],
@@ -1555,12 +1555,12 @@
       "recordingStatus": "В"
     },
     {
-      "id": "m01-s09-l003",
+      "id": "m01-v3-ammo-stock-report",
       "speaker": "scout",
-      "text": "Хорошее. Всё обмотано синей изолентой.",
+      "text": "Хорошее. Ящики с патронами целы. Образцы отправляем в НИИ.",
       "pauseAfter": 0.2,
       "sourceLine": 593,
-      "recordingStatus": "В"
+      "recordingStatus": "Н"
     },
     {
       "id": "m01-s09-l006",
@@ -1579,12 +1579,12 @@
       "recordingStatus": "В"
     },
     {
-      "id": "m01-s09-l008",
+      "id": "m01-v3-ammo-feed-improvement",
       "speaker": "scientist",
-      "text": "Учёные выяснили, что патроны можно хранить без изоленты.",
+      "text": "Убрали ограничитель подачи патронов.",
       "pauseAfter": 0.2,
       "sourceLine": 609,
-      "recordingStatus": "В"
+      "recordingStatus": "Н"
     },
     {
       "id": "m01-s09-l009",

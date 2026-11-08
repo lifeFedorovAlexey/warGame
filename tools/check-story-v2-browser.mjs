@@ -112,7 +112,8 @@ try{
  assert.equal(await unlocked('lab'),true);
  await page.evaluate(()=>{const m=campaign.mission;m.state.statistics.produced++;campaign.radio.director.note({type:'unit-produced',kind:'bukhanka'},m);campaign.advance(0);});
  await playScene('r09');
- await page.evaluate(()=>{const d=campaign.radio.director.data;d.clock+=13000;campaign.advance(0);});await playScene('r10',{snap:'original-bukhanka-monologue'});
+ await page.evaluate(()=>{const d=campaign.radio.director.data;d.clock+=13000;campaign.advance(0);});
+ assert.notEqual(await page.evaluate(()=>campaign.radio.entry?.storyScene),'r10','First van production does not announce an upgrade');
  const lab=await addBuilding('lab',40,160);
  const raidDuringSpeech=await page.evaluate(()=>{const m=campaign.mission;m.updateMission();return{started:m.state.flags.raidStarted,scene:campaign.radio.entry.storyScene};});
  assert.deepEqual(raidDuringSpeech,{started:true,scene:'r11'},'The raid starts from the base state while the NII exchange is still running');
@@ -120,6 +121,9 @@ try{
  assert.equal(await page.evaluate(()=>campaign.mission.researchUnlocked()),true);
  const result=await page.evaluate(id=>{const m=campaign.mission;m.state.artifactKeys.push('flamethrower');m.state.energy=2400;const result=m.research(id,'flamethrower');m.entity(id).research.progress=.99999;m.updateEconomy(.2);campaign.advance(0);return{ok:result.ok,unlocked:m.state.research.flamethrower};},lab);
  assert.deepEqual(result,{ok:true,unlocked:true});await playScene('r30-alt',{snap:'research-desktop'});
+ const ammo=await page.evaluate(id=>{const m=campaign.mission;m.state.artifactKeys.push('mg-ammo-1');m.state.energy=2400;const result=m.research(id,'mg-ammo-1');m.entity(id).research.progress=.99999;m.updateEconomy(.2);campaign.advance(0);return{ok:result.ok,unlocked:m.state.research['mg-ammo-1']};},lab);
+ assert.deepEqual(ammo,{ok:true,unlocked:true});await playScene('r33');
+ await page.evaluate(()=>{campaign.radio.director.data.clock+=3000;campaign.advance(0);});await playScene('r10',{snap:'original-bukhanka-monologue'});
  const enemy=await page.evaluate(()=>{const m=campaign.mission,p=m.field.gridToWorld(m.config.startGrid),enemy=m.addUnit('raider','scavs',{x:p.x+25,y:p.y-40});m.state.flags.raidStarted=true;m.state.flags.contact=true;m.state.flags.raidIds=[enemy.id];m.updateFog();campaign.advance(0);return enemy.id;});
  await playScene('r14',{snap:'original-first-contact'});
  await waitCue('m01-s07-l006');

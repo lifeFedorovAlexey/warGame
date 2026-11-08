@@ -56,7 +56,7 @@ function fixture(startImmediately=true){
  f.building('factory');assert.equal(f.tick().storyScene,'r08');assert(f.unlocked('lab'));f.finish();
  assert.equal(f.tick().storyScene,'r06');f.finish();
  f.director.note({type:'unit-produced',kind:'bukhanka'},f.mission);assert.equal(f.tick().storyScene,'r09');f.finish();
- assert.equal(f.tick(13).storyScene,'r10');assert.equal(f.director.cue().clip.origin,'user-recording');f.finish();
+ assert.equal(f.tick(13),null,'Producing the first van does not announce an upgrade');
  f.building('lab');assert.equal(f.tick().storyScene,'r11');assert(researchUnlocked(s));f.finish();
  assert.equal(f.tick().storyScene,'r13');f.finish();
  s.units.push({id:'raid',owner:'scavs',hp:100,x:20,y:0});s.flags.raidIds=['raid'];s.flags.contact=true;
@@ -90,6 +90,49 @@ for(const keys of [['mg-tower','flamethrower','mg-ammo-1'],['mg-ammo-1','mg-towe
  const fast=fixture();fast.finish();fast.mission.state.artifactKeys.push('flamethrower');fast.tick();fast.director.completeLine();
  fast.mission.state.research.flamethrower=true;assert.equal(fast.tick().storyScene,'r26');fast.finish();
  assert.equal(fast.tick().storyScene,'r30-alt');assert.equal(fast.director.record('r26').status,'done');
+}
+// Each artifact has its own exchange, regardless of collection order. The
+// original upgrade recording follows ammunition research, not van production.
+for(const keys of [['flamethrower','mg-ammo-1'],['mg-ammo-1','flamethrower']]){
+ const f=fixture();f.finish();
+ f.director.note({type:'unit-produced',kind:'bukhanka'},f.mission);
+ assert.equal(f.tick().storyScene,'r09');f.finish();assert.equal(f.tick(60),null);
+ const transmissions=[];
+ const play=id=>{
+  const cue=f.tick();assert.equal(cue?.storyScene,id);
+  while(f.director.data.active===id){
+   transmissions.push(f.director.cue());f.director.completeLine();
+  }
+ };
+ for(const key of keys){
+  const s=f.mission.state;
+  s.camps.find(c=>c.artifact===key).cleared=true;s.artifactKeys.push(key);
+  const start=transmissions.length;
+  for(const id of key==='flamethrower'?['r25','r26','r27']:['r32'])play(id);
+  assert(!transmissions.slice(start).some(c=>c.id==='warrant:upgrade'),'Picking up an artifact is not an upgrade');
+  s.research[key]=true;play(key==='flamethrower'?'r29':'r33');
+  if(key==='mg-ammo-1'){
+   // A save between the report and the comment must keep the pending comment.
+   f.mission.state=JSON.parse(JSON.stringify(f.mission.state));
+   assert.equal(f.tick(),null);assert.equal(f.tick(1),null);f.tick(1);play('r10');
+   assert.equal(transmissions.at(-1).clip.origin,'user-recording');
+   assert(!transmissions.slice(start).some(c=>/изолент/i.test(c.text)),'Ammunition does not repeat the flamethrower joke');
+  }
+ }
+ assert.equal(transmissions.filter(c=>c.id==='warrant:upgrade').length,1);
+ assert.equal(transmissions.filter(c=>c.id==='m01-s08-l005').length,1);
+ f.mission.state=JSON.parse(JSON.stringify(f.mission.state));
+ assert.equal(f.tick(60),null,'Completed artifact exchanges and the upgrade comment do not replay after loading');
+}
+{
+ const f=fixture();f.finish();
+ // A pre-fix save may have parked the comment before any upgrade existed.
+ f.director.data.scenes.r10={status:'playing',cursor:0};
+ f.mission.state=JSON.parse(JSON.stringify(f.mission.state));
+ assert.equal(f.tick(),null);assert.equal(f.tick(60),null);
+ f.mission.state.research['mg-ammo-1']=true;
+ assert.equal(f.tick().storyScene,'r33');f.finish();
+ assert.equal(f.tick(2).storyScene,'r10','Upgrading the starting vans does not require producing another van');f.finish();
 }
 // Discoveries identify the actual camp, without false ordinals on another route.
 {
@@ -127,6 +170,12 @@ for(const enabled of [false,true]){
  f.mission.state.radioStory={version:2,scriptRevision:4,clock:10,scenes:{o01:{status:'done'},'16-alt':{status:'done'}},facts:{},journal:[],lastEnd:0,lastCombat:-30000};
  f.tick();assert.equal(f.director.record('r01').status,'skipped');assert.equal(f.director.record('r30-alt').status,'skipped');
  assert.equal(f.director.data.scriptRevision,5);assert(!f.director.heard('r01'));
+}
+{
+ const f=fixture(false);f.mission.state.statistics.produced=1;
+ f.mission.state.radioStory={version:2,scriptRevision:4,clock:10,scenes:{'05':{status:'done'}},facts:{},journal:[],lastEnd:0,lastCombat:-30000};
+ f.tick();assert.equal(f.director.record('r09').status,'skipped');
+ assert.equal(f.director.data.scenes.r10,undefined,'Legacy van production must not retire an unheard upgrade comment');
 }
 // Chatter requires real movement or queues, with at least 45 seconds between exchanges.
 {

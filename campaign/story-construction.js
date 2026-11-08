@@ -25,7 +25,7 @@ export function migrateStoryOpening(mission,data){
     [ready('generator'),['r01','r01a','r01b']],
     [s.oilLinked>0,['r02','r03','r04']],
     [ready('factory'),['r05','r06','r08']],
-    [s.statistics.produced>0,['r09','r10']],
+    [s.statistics.produced>0,['r09']],
     [ready('lab'),['r11','r13']],
     [s.flags.raidWon,['r14','r16']],
     [ready('bunker'),['r21','r22']],

@@ -15,7 +15,6 @@ export function storyFacts(mission,d) {
   const contact=d.facts.contact;
   if(contact&&shots.some(e=>contact.ids.includes(e.from)||contact.ids.includes(e.targetId)))contact.fired=true;
   if(s.flags.raidWon||contact?.fired&&!raiders.length)d.facts.firstWin=true;
-  if(d.facts.firstVan&&d.facts.firstVanAt==null)d.facts.firstVanAt=d.clock;
   const known=key=>s.artifactKeys.includes(key)||s.artifacts.some(a=>a.key===key&&(a.collected||visible(a)));
   const researching=key=>own.some(e=>e.research?.key===key);
   const campFor=key=>s.camps.find(c=>(c.artifact??(mission.config.camps??[]).find(spec=>spec.id===c.id)?.artifact)===key);
@@ -88,7 +87,7 @@ export function storyRules(director,f) {
     r06:p(2,!!f.building('factory'),!f.ready('lab')),
     r08:p(1,f.ready('factory'),!d.facts.firstVan),
     r09:p(1,!!d.facts.firstVan),
-    r10:p(2,!!d.facts.firstVan&&d.clock-d.facts.firstVanAt>=12000&&after('r09',12),true,12),
+    r10:p(2,f.ammoStudied&&after('r33',2),true,2),
     r11:p(2,!!f.building('lab')),
     r13:p(2,f.ready('lab')&&heard('r11')),
     r14:p(0,!!f.contact,f.contactAlive,0,f.contactAlive),

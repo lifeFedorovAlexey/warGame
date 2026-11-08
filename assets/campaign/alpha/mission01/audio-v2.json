@@ -4,7 +4,7 @@
   "language": "ru-RU",
   "source": {
     "path": "docs/campaign/alpha/mission01-radio-v3.md",
-    "sha256": "47bfa765b1b3a3c03c27a615392587440fe34a526bf0861bcb2b2a030ef1c33e"
+    "sha256": "2ce5c3d0ebf05c89caba40a5c07624f32be063341b3f753b3cc2e2b33ce197bb"
   },
   "voices": {
     "narrator": {
@@ -1766,20 +1766,17 @@
       },
       "textMatch": "exact"
     },
-    "m01-s09-l008": {
-      "file": "audio/m01-s09-l008.ogg",
-      "duration": 3.2462916666666666,
-      "leadingSilence": 0.01,
-      "trailingSilence": 0.37629166666666647,
+    "m01-v3-ammo-feed-improvement": {
+      "file": "audio-v2/m01-v3-ammo-feed-improvement.ogg",
+      "duration": 2.1782083333333335,
+      "leadingSilence": 0.04,
+      "trailingSilence": 0.32820833333333344,
       "speaker": "scientist",
-      "sha256": "db00defb903e17fed537d43c9ab76a8471088a0917615843b6beef7ceb09bc5e",
-      "bytes": 16050,
+      "sha256": "260562173891b43c1c445d1c09cad271c5c0c531b5c7a0d121653b98f49654a8",
+      "bytes": 10854,
       "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s09-l008"
-      },
-      "textMatch": "exact"
+      "generator": "local Piper + FFmpeg",
+      "voice": "dmitri"
     },
     "m01-s09-l010": {
       "file": "audio/m01-s09-l010.ogg",
@@ -2123,20 +2120,17 @@
       },
       "textMatch": "exact"
     },
-    "m01-s09-l003": {
-      "file": "audio/m01-s09-l003.ogg",
-      "duration": 3.464958333333333,
-      "leadingSilence": 0.06,
-      "trailingSilence": 0.4249583333333331,
+    "m01-v3-ammo-stock-report": {
+      "file": "audio-v2/m01-v3-ammo-stock-report.ogg",
+      "duration": 5.029416666666667,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.3394166666666667,
       "speaker": "scout",
-      "sha256": "1dfadfb2743500a0773fa8e0e29506e029825bf30a8fa042abf22013775a928f",
-      "bytes": 16448,
+      "sha256": "4bc15fd4b6d5f854bcc2248ba3fe7dceaadc3724a50572ef56b23794009d6c6a",
+      "bytes": 24073,
       "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s09-l003"
-      },
-      "textMatch": "exact"
+      "generator": "local Piper + FFmpeg",
+      "voice": "denis"
     },
     "m01-v3-r35-l001": {
       "file": "audio-v2/m01-v3-r35-l001.ogg",
