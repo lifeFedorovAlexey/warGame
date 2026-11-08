@@ -53,7 +53,7 @@ function nextObjectiveHint(state,{plant,well},tasks,artifact,contact,southernApp
   if(state.status!=='running')return '';
   if(state.flags.contact&&!state.flags.raidWon)return contact ? 'Отразите рейд на базу.' : 'Прикройте въезд к базе.';
   if(artifact)return 'Подберите артефакт.';
-  if(!state.powered){
+  if(!state.powered||!(state.oilLinked>0)){
     if(!plant&&!well)return 'Постройте АЭС и вышку.';
     if(!well)return 'Поставьте вышку на нефти.';
     if(!plant)return 'Постройте АЭС.';

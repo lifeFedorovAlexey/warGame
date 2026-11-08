@@ -10,8 +10,8 @@ export function storyObjectives(mission,{radioEnabled=true}={}) {
   const add=(id,name,done,progress)=>{if(!done)tasks.push({id,name,progress});};
   if(told('r01')||told('r01a')||!radioEnabled)add('generator','Построить электростанцию',ready('generator'));
   if((told('r02')||buildings.some(e=>e.kind==='derrick')||!radioEnabled&&ready('generator'))&&constructionUnlocked(s,'derrick'))
-    add('power','Построить нефтяную вышку',s.powered);
-  if((told('r05')||buildings.some(e=>e.kind==='factory')||!radioEnabled&&s.powered)&&constructionUnlocked(s,'factory'))
+    add('power','Построить нефтяную вышку',s.oilLinked>0);
+  if((told('r05')||buildings.some(e=>e.kind==='factory')||!radioEnabled&&s.oilLinked>0)&&constructionUnlocked(s,'factory'))
     add('factory','Построить завод',ready('factory'));
   if(ready('factory')&&constructionUnlocked(s,'lab'))
     add('lab','Построить НИИ',ready('lab'));

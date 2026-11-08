@@ -49,9 +49,9 @@ function fixture(startImmediately=true){
  assert.deepEqual(storyObjectives(f.mission),[]);assert(f.unlocked('generator'));assert(!f.unlocked('factory'));
  f.director.completeLine();assert.equal(f.tick().id,'m01-s06-l008');
  f.director.completeLine();f.tick();assert.equal(storyObjectives(f.mission)[0].id,'generator');f.finish();
- f.building('generator');assert.equal(f.tick().storyScene,'r02');assert(f.unlocked('derrick'));assert(!f.unlocked('factory'));
+ f.building('generator');s.powered=true;assert.equal(f.tick().storyScene,'r02');assert(f.unlocked('derrick'));assert(!f.unlocked('factory'));
  f.finish();f.tick();assert.equal(storyObjectives(f.mission)[0].id,'power');
- f.building('derrick');s.powered=true;assert.equal(f.tick().storyScene,'r04');assert(f.unlocked('factory'));
+ f.building('derrick');s.oilLinked=1;assert.equal(f.tick().storyScene,'r04');assert(f.unlocked('factory'));
  f.finish();assert.equal(f.tick().storyScene,'r05');f.finish();f.tick();assert.equal(storyObjectives(f.mission)[0].id,'factory');
  f.building('factory');assert.equal(f.tick().storyScene,'r08');assert(f.unlocked('lab'));f.finish();
  assert.equal(f.tick().storyScene,'r06');f.finish();
@@ -116,7 +116,8 @@ for(const keys of [['mg-tower','flamethrower','mg-ammo-1'],['mg-ammo-1','mg-towe
 }
 for(const enabled of [false,true]){
  const f=fixture();f.building('generator');f.tick(0,enabled);assert(f.unlocked('derrick'));
- f.mission.state.powered=true;f.tick(0,enabled);assert(f.unlocked('factory'));
+ f.mission.state.powered=true;f.tick(0,enabled);assert(!f.unlocked('factory'));
+ f.mission.state.oilLinked=1;f.tick(0,enabled);assert(f.unlocked('factory'));
  f.building('factory');f.tick(0,enabled);assert(f.unlocked('lab'));
  f.building('lab');f.tick(0,enabled);assert(researchUnlocked(f.mission.state));
  f.mission.state.flags.raidWon=true;f.tick(0,enabled);assert(f.unlocked('bunker'));
@@ -163,13 +164,13 @@ for(const enabled of [false,true]){
  const f=fixture();f.director.completeLine();const cue=f.tick();f.building('generator',false);
  assert.equal(f.tick().id,cue.id);f.finish();assert.equal(f.tick(),null);
  f.mission.state.buildings[0].completed=true;assert.equal(f.tick().storyScene,'r02');
- f.mission.state.powered=true;assert.equal(f.tick().id,'m01-v3-power-ready-fuel');f.finish();
+ f.mission.state.powered=true;f.mission.state.oilLinked=1;assert.equal(f.tick().id,'m01-v3-nuclear-power-ready');f.finish();
  assert.equal(f.tick().storyScene,'r04');
 }
 {
  const f=fixture();f.finish();f.building('generator');f.tick();f.director.record('r02').cursor=2;
  f.mission.state=JSON.parse(JSON.stringify(f.mission.state));
- assert.equal(f.tick().id,'m01-v3-power-ready-fuel','Old saves resume the revised report safely');
+ assert.equal(f.tick().id,'m01-v3-nuclear-power-ready','Old saves resume the revised report safely');
  assert(!source.dialogue.some(c=>c.text==='Почему электричества нет?'));
 }
 console.log('PASS: integrated opening, complete exchanges through construction/research, 39 original recordings, alternate routes, interruptions, native and old saves, finale');

@@ -4,7 +4,7 @@
   "language": "ru-RU",
   "source": {
     "path": "docs/campaign/alpha/mission01-radio-v3.md",
-    "sha256": "dc0656e0ebe6175afc483e2bfcc40b86adb9abfaf22d5c5476cc19e0211dbc29"
+    "sha256": "0976cbe99226579a3f3127594fc420363dbf53f93cd1f1d6e905b1f978290db5"
   },
   "voices": {
     "narrator": {
@@ -179,14 +179,14 @@
       "generator": "local Piper + FFmpeg",
       "voice": "denis"
     },
-    "m01-v3-r05-l001": {
-      "file": "audio-v2/m01-v3-r05-l001.ogg",
-      "duration": 3.178625,
-      "leadingSilence": 0.08,
-      "trailingSilence": 0.44862499999999983,
+    "m01-v3-oil-supply-ready": {
+      "file": "audio-v2/m01-v3-oil-supply-ready.ogg",
+      "duration": 2.6213333333333333,
+      "leadingSilence": 0.04,
+      "trailingSilence": 0.4913333333333334,
       "speaker": "commander",
-      "sha256": "da13e8bc1535d2fea894b2e1b81cbbfccbcda82b6c230d7626f271aa1a391a43",
-      "bytes": 15439,
+      "sha256": "4b10abcce6cac0418c154fc433eb09f38636e69ebb15c9bc2adad9cfb7725964",
+      "bytes": 12238,
       "origin": "temporary-synthesis",
       "generator": "local Piper + FFmpeg",
       "voice": "denis"
@@ -2531,26 +2531,26 @@
       "generator": "local Piper + FFmpeg",
       "voice": "denis"
     },
-    "m01-v3-power-ready-fuel": {
-      "file": "audio-v2/m01-v3-power-ready-fuel.ogg",
-      "duration": 5.0435,
+    "m01-v3-nuclear-power-ready": {
+      "file": "audio-v2/m01-v3-nuclear-power-ready.ogg",
+      "duration": 6.727291666666667,
       "leadingSilence": 0.06,
-      "trailingSilence": 0.42349999999999977,
+      "trailingSilence": 0.37729166666666636,
       "speaker": "builder",
-      "sha256": "e6f6818a4b9d9c3bdb1dea3b3f0734e716a787110a251efb1fef3d008dac1d84",
-      "bytes": 24532,
+      "sha256": "bde8e46b03589a39ee69ea0e5bfd03facebdabf8cab32f7f42b20bbfba070e8d",
+      "bytes": 32897,
       "origin": "temporary-synthesis",
       "generator": "local Piper + FFmpeg",
       "voice": "denis"
     },
-    "m01-v3-r04-l001": {
-      "file": "audio-v2/m01-v3-r04-l001.ogg",
-      "duration": 3.2468333333333335,
-      "leadingSilence": 0.04,
-      "trailingSilence": 0.2868333333333335,
+    "m01-v3-first-oil-online": {
+      "file": "audio-v2/m01-v3-first-oil-online.ogg",
+      "duration": 3.3164583333333333,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.3464583333333331,
       "speaker": "builder",
-      "sha256": "7c2ff8254fe0ba204ec031fd2c884dbe5956c49616031f84ba290415d2f82d65",
-      "bytes": 15764,
+      "sha256": "640748d6f8f4e4756397abcf7eda2d5b0dfb5bfb210223996801743057f7b668",
+      "bytes": 16178,
       "origin": "temporary-synthesis",
       "generator": "local Piper + FFmpeg",
       "voice": "denis"

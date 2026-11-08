@@ -23,7 +23,7 @@ export function migrateStoryOpening(mission,data){
   for(const [id,prior] of Object.entries(old))skip(id,told(...prior));
   for(const [condition,ids] of [
     [ready('generator'),['r01','r01a','r01b']],
-    [s.powered,['r02','r03','r04']],
+    [s.oilLinked>0,['r02','r03','r04']],
     [ready('factory'),['r05','r06','r08']],
     [s.statistics.produced>0,['r09','r10']],
     [ready('lab'),['r11','r13']],
@@ -41,7 +41,7 @@ export function updateStoryConstruction(mission,{radioEnabled=true}={}) {
   const unlock=(kind,condition)=>{if(condition&&!progress.unlocked.includes(kind))progress.unlocked.push(kind);};
   // Radio announces these milestones, but cannot hold a completed economy hostage.
   unlock('derrick',ready('generator'));
-  unlock('factory',s.powered);
+  unlock('factory',s.oilLinked>0);
   unlock('lab',ready('factory'));
   if(ready('lab'))progress.research=true;
   unlock('bunker',s.flags.raidWon);

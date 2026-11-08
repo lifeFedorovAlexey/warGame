@@ -2189,7 +2189,7 @@ export class Mission{
    if(dt>0)well.pumpTime=(well.pumpTime??0)+dt;
   }
   this.state.oilLinked=linked;
-  this.state.powered=linked>0;
+  this.state.powered=slots>0;
   return generation;
  }
  updateEconomy(dt){
