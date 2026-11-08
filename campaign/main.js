@@ -6,6 +6,7 @@ import {raidApproachSignal, visibleRaidContact, warehouseAdvanceHint, waterTower
 import {restoreRadioStory} from './radio-save.js';
 import {FieldSound} from './field-sound.js';
 import {StoryDirector, loadMissionStory} from './story-director.js';
+import {startOpeningConstruction,restoreOpeningConstruction,openingCanHandOver} from './opening-construction.js';
 import {storyObjectives} from './story-objectives.js';
 import {buildLayerHeight} from './builder-optics.js';
 import {VehicleDesigner} from './designer.js';
@@ -21,6 +22,7 @@ const selected = new Set();
 const miniBackground = new Image();
 let world, mission, config, radio, sound, designer, combatMenu;
 let active = false, paused = false, speed = 1, resultShown = false;
+let openingPlaying = false;
 let pausedBeforeDesigner = false;
 let buildOpen = false, buildKind = null, rotation = 0, orderMode = null;
 let pointer = null, drag = null, site = null, placing = null;
@@ -236,11 +238,17 @@ function start(restore = false) {
   }
   if(!restore)mission.state.storyConstruction={enabled:true,unlocked:['generator'],research:false,requiredBunkers:2};
   designer.close(false);
-  active = true;
   paused = false;
   resultShown = false;
   radio.reset();
   if(!restore)radio.director.beginStory(mission,{enabled:radio.enabled});
+  if(!restore)startOpeningConstruction(mission);
+  else restoreOpeningConstruction(mission);
+  openingPlaying=!!mission.state.openingScene&&!mission.state.openingScene.handedOver;
+  active=!openingPlaying;
+  world.controls.enabled=!openingPlaying;
+  world.keys.clear();
+  $('mission-hud').classList.toggle('opening-playing',openingPlaying);
   world.storySignals.show(null);
   blockedOrders.clear();
   $('order-feedback').hidden=true;
@@ -249,9 +257,11 @@ function start(restore = false) {
   $('mission-hud').hidden = false;
   document.querySelector('.settings').open = false;
   const worker = builders()[0];
-  const centre = restore ? vehicles()[0] : world.field.gridToWorld(config.startGrid);
+  const startPoint=world.field.gridToWorld(config.startGrid),signPoint=world.field.gridToWorld(config.openingSignGrid);
+  // Establish the initial view once, with both the base and hillside construction visible.
+  const centre = restore&&!openingPlaying ? vehicles()[0] : {x:startPoint.x+(signPoint.x-startPoint.x)*.25,y:startPoint.y+(signPoint.y-startPoint.y)*.25};
   if (centre) world.centre(centre, 360);
-  select(worker ? [worker.id] : [], false, false);
+  select(worker&&!openingPlaying ? [worker.id] : [], false, false);
   sound.unlock();
   radio.consume(mission, performance.now());
   if (restore) toast('Операция загружена');
@@ -307,6 +317,7 @@ function hitEntity(x, y) {
   if(direct)return direct;
   let nearest = null, best = 24;
   for (const entity of [...mission.state.units, ...mission.state.buildings]) {
+    if(config.buildings[entity.kind]?.storyOnly)continue;
     if (entity.hp <= 0 || entity.owner !== 'rai' && !mission.visibleAt(entity.x, entity.y)) continue;
     const p = world.screen(entity);
     const distance = Math.hypot(p.x - x, p.y - y);
@@ -317,7 +328,7 @@ function hitEntity(x, y) {
   }
   if (nearest) return nearest;
   const point = world.ground(x, y);
-  return point && mission.state.buildings.find(b => b.hp > 0 && (b.owner === 'rai' || mission.visibleAt(b.x, b.y)) && Math.abs(point.x - b.x) < b.halfWidth && Math.abs(point.y - b.y) < b.halfDepth);
+  return point && mission.state.buildings.find(b => !config.buildings[b.kind]?.storyOnly && b.hp > 0 && (b.owner === 'rai' || mission.visibleAt(b.x, b.y)) && Math.abs(point.x - b.x) < b.halfWidth && Math.abs(point.y - b.y) < b.halfDepth);
 }
 function oilAt(x,y) {
   if(!mission.constructionUnlocked('derrick'))return null;
@@ -588,7 +599,7 @@ function updatePalette() {
     control.classList.toggle('active',!!building&&selected.has(building.id));
   }
   if (!buildOpen) return;
-  const s = mission.state, entries = Object.entries(config.buildings).filter(([kind,spec])=>mission.constructionUnlocked(kind)&&(!spec.requires||s.research[spec.requires]));
+  const s = mission.state, entries = Object.entries(config.buildings).filter(([kind,spec])=>!spec.storyOnly&&mission.constructionUnlocked(kind)&&(!spec.requires||s.research[spec.requires]));
   const available = ([kind,spec]) => (!spec.requires || s.research[spec.requires]) && mission.canSpend(spec.cost);
   const key = entries.map(entry => entry[0]+Number(available(entry))).join(',') + Object.keys(s.research).join(',');
   if (key === paletteKey) return;
@@ -850,7 +861,7 @@ function updateUi() {
 function minimap(){const canvas=$('minimap'),ctx=canvas.getContext('2d'),size=canvas.width,field=world.field;ctx.fillStyle='#171e1c';ctx.fillRect(0,0,size,size);if(miniBackground.complete&&miniBackground.naturalWidth)ctx.drawImage(miniBackground,0,0,size,size);
  world.drawMinimapFog(ctx,size);
  for(const grid of config.oilFields){const p=field.gridToWorld(grid);if(!mission.exploredAt(p.x,p.y))continue;ctx.fillStyle='#d5b869';ctx.fillRect(grid[0]/127*size-2,grid[1]/127*size-2,4,4);}
- for(const e of [...mission.state.units,...mission.state.buildings]){if(e.hp<=0||e.owner!=='rai'&&!mission.visibleAt(e.x,e.y))continue;const [x,y]=field.worldToGrid(e.x,e.y);ctx.fillStyle=selected.has(e.id)?'#eff2c3':e.owner==='rai'?'#a8c28a':'#d77e60';ctx.fillRect(x/127*size-2,y/127*size-2,e.path?3:5,e.path?3:5);}for(const a of mission.state.artifacts)if(!a.collected&&mission.exploredAt(a.x,a.y)){const [x,y]=field.worldToGrid(a.x,a.y);ctx.fillStyle='#e8d891';ctx.fillRect(x/127*size-3,y/127*size-3,6,6);}if(mission.state.flags.lastRevealed&&!mission.state.camps[3].cleared){const camp=mission.state.camps[3],x=camp.grid[0]/127*size,y=camp.grid[1]/127*size;ctx.strokeStyle='#df997b';ctx.strokeRect(x-5,y-5,10,10);ctx.fillStyle='#edc6a2';ctx.font='10px Arial';ctx.fillText('4',x+7,y+3);}const [cx,cy]=field.worldToGrid(world.controls.target.x,world.controls.target.y);ctx.strokeStyle='#e3d4a3';ctx.lineWidth=1;ctx.strokeRect(cx/127*size-9,cy/127*size-7,18,14);
+ for(const e of [...mission.state.units,...mission.state.buildings]){if(config.buildings[e.kind]?.storyOnly)continue;if(e.hp<=0||e.owner!=='rai'&&!mission.visibleAt(e.x,e.y))continue;const [x,y]=field.worldToGrid(e.x,e.y);ctx.fillStyle=selected.has(e.id)?'#eff2c3':e.owner==='rai'?'#a8c28a':'#d77e60';ctx.fillRect(x/127*size-2,y/127*size-2,e.path?3:5,e.path?3:5);}for(const a of mission.state.artifacts)if(!a.collected&&mission.exploredAt(a.x,a.y)){const [x,y]=field.worldToGrid(a.x,a.y);ctx.fillStyle='#e8d891';ctx.fillRect(x/127*size-3,y/127*size-3,6,6);}if(mission.state.flags.lastRevealed&&!mission.state.camps[3].cleared){const camp=mission.state.camps[3],x=camp.grid[0]/127*size,y=camp.grid[1]/127*size;ctx.strokeStyle='#df997b';ctx.strokeRect(x-5,y-5,10,10);ctx.fillStyle='#edc6a2';ctx.font='10px Arial';ctx.fillText('4',x+7,y+3);}const [cx,cy]=field.worldToGrid(world.controls.target.x,world.controls.target.y);ctx.strokeStyle='#e3d4a3';ctx.lineWidth=1;ctx.strokeRect(cx/127*size-9,cy/127*size-7,18,14);
  world.storySignals.drawMap(ctx,size);
  const contact=visibleRaidContact(mission);
  if(contact){
@@ -869,6 +880,7 @@ function labels() {
   ctx.setTransform(dpr,0,0,dpr,0,0);
   ctx.clearRect(0,0,innerWidth,innerHeight);
   for (const entity of [...mission.state.units, ...mission.state.buildings]) {
+    if(config.buildings[entity.kind]?.storyOnly)continue;
     if (entity.hp <= 0 || entity.owner !== 'rai' && !mission.visibleAt(entity.x,entity.y)) continue;
     if (entity.hp === entity.maxHp && !selected.has(entity.id) && entity.completed !== false) continue;
     const unit = config.units[entity.kind];
@@ -901,6 +913,7 @@ function labels() {
 function events() {
   for (const event of mission.drainEvents()) {
     radio?.director?.note(event,mission);
+    if(event.type==='construction-complete'&&config.buildings[event.kind]?.storyOnly)continue;
     sound?.storyEvent?.(event);
     if (event.type === 'construction-complete') {
       toast('Построено · ' + config.buildings[event.kind].name);
@@ -935,12 +948,19 @@ function frame(now) {
     sound.update();
     return;
   }
-  if (active) {
+  if (active || openingPlaying) {
     if (!paused) mission.advance(dt * speed,{budgetMs:mission.config.simulationCpuBudgetMs,rate:speed});
     events();
     radio.consume(mission, now);
+    if(openingPlaying&&openingCanHandOver(mission,radio.director,radio.enabled)){
+      mission.state.openingScene.handedOver=true;
+      openingPlaying=false;active=true;world.controls.enabled=true;
+      $('mission-hud').classList.remove('opening-playing');
+      select(builders().slice(0,1).map(u=>u.id),false,false);
+      saveGame(false);
+    }
   }
-  world.update(mission, selected, dt, active && !paused && mission.state.status==='running');
+  world.update(mission, selected, dt, (active||openingPlaying) && !paused && mission.state.status==='running');
   navigationDebug?.update();
   if (active) {
     labels();
@@ -1007,7 +1027,7 @@ try {
     get storyAudio() { return {playing:!!sound.storyPlayback, enabled:sound.storyEnabled, chapter:sound.storyPlayback?.chapter, cueId:sound.storyPlayback?.cueId, urgent:!!sound.storyPlayback?.urgent}; },
     get unitVoice() {return {playing:!!sound.voiceSource,cueId:sound.voiceCueId};},
     get selected() { return [...selected]; },
-    get state() { return {active, paused, speed, buildKind, orderMode}; },
+    get state() { return {active, openingPlaying, paused, speed, buildKind, orderMode}; },
     advance(seconds) { mission.advance(seconds); events(); radio.consume(mission, performance.now()); updateUi(); return mission.state; },
   };
   if(new URLSearchParams(location.search).has('damage')){

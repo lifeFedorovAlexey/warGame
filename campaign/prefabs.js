@@ -2,6 +2,7 @@ import {buildingWorkRail} from './builder-kinematics.js';
 import {createOilPump} from './oil-pump.js';
 import {buildIndustrialStructure} from './industrial-buildings.js';
 import {buildDefenseTower} from './defense-tower.js';
+import {buildBaseSign} from './base-sign.js';
 
 // Replaceable engineering prefabs. Dimensions and anchors belong to gameplay.json.
 export function createBuildingPrefab(T,kind,spec){
@@ -15,13 +16,15 @@ export function createBuildingPrefab(T,kind,spec){
  const box=(size,pos,mat=paint,rotation)=>mesh(new T.BoxGeometry(...size),mat,pos,rotation);
  function rod(a,b,r=.1,mat=steel){const start=new T.Vector3(...a),end=new T.Vector3(...b),geo=new T.CylinderGeometry(r,r,start.distanceTo(end),8);geo.applyQuaternion(new T.Quaternion().setFromUnitVectors(new T.Vector3(0,1,0),end.clone().sub(start).normalize()));mesh(geo,mat,start.add(end).multiplyScalar(.5).toArray());}
  const cylinder=(r,height,pos,mat=steel)=>{const geo=new T.CylinderGeometry(r,r,height,12);geo.rotateX(Math.PI/2);mesh(geo,mat,pos);};
- const foundationHeight=kind==='bunker'?.20:.35;
- box([w,d,foundationHeight],[0,0,foundationHeight/2],concrete);
+ const foundationHeight=kind==='base-sign'?.95:kind==='bunker'?.20:.35;
+ box([w,d,foundationHeight],[0,0,kind==='base-sign'?.35-foundationHeight/2:foundationHeight/2],concrete);
  const rail=buildingWorkRail(spec);box([rail.width,rail.depth,rail.height],rail.position,steel);
  if(kind==='bunker')for(const x of [-w*.24,0,w*.24])box([.17,.22,.21],[x,-d*.487,.30],steel);
  groups=structureGroups;
  if(['generator','factory','lab'].includes(kind)){
   buildIndustrialStructure(T,kind,[w,d,h],{box,cylinder,rod,mesh,part});
+ }else if(kind==='base-sign'){
+  buildBaseSign(T,{box,mesh},{concrete,steel,paint});
  }else if(kind==='derrick'){
   oilPump=createOilPump(T,w,d,h);
  }else if(kind==='bunker'){

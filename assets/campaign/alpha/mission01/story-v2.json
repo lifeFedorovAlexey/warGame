@@ -4,7 +4,7 @@
   "edition": "owner-radio-v3",
   "source": {
     "path": "docs/campaign/alpha/mission01-radio-v3.md",
-    "sha256": "202464253f88ba9aac31fdc2a12a483dfd9890e6f086dfe3f72e18ee2dcdccd3"
+    "sha256": "dc0656e0ebe6175afc483e2bfcc40b86adb9abfaf22d5c5476cc19e0211dbc29"
   },
   "speakers": {
     "narrator": {
@@ -150,7 +150,7 @@
       "title": "Вывеска",
       "cues": [
         "m01-s03-l001",
-        "m01-s03-l002",
+        "m01-v3-builder-crooked-wall",
         "m01-s03-l003"
       ],
       "sourceLine": 61,
@@ -175,9 +175,7 @@
       "id": "r02",
       "title": "Электростанция построена",
       "cues": [
-        "m01-v3-r02-l001",
-        "m01-v3-r02-l002",
-        "m01-v3-r02-l003"
+        "m01-v3-power-ready-fuel"
       ],
       "sourceLine": 101,
       "sections": [
@@ -192,7 +190,7 @@
         "m01-v3-r03-l002",
         "m01-v3-r03-l003"
       ],
-      "sourceLine": 125,
+      "sourceLine": 117,
       "sections": [
         "r03"
       ]
@@ -205,7 +203,7 @@
         "m01-v3-r04-l002",
         "m01-v3-r04-l003"
       ],
-      "sourceLine": 141,
+      "sourceLine": 133,
       "sections": [
         "r04"
       ]
@@ -217,7 +215,7 @@
         "m01-v3-r05-l001",
         "m01-v3-r05-l002"
       ],
-      "sourceLine": 157,
+      "sourceLine": 149,
       "sections": [
         "r05"
       ]
@@ -233,7 +231,7 @@
         "m01-s05-l015",
         "m01-s05-l016"
       ],
-      "sourceLine": 175,
+      "sourceLine": 167,
       "sections": [
         "r06",
         "r07"
@@ -245,7 +243,7 @@
       "cues": [
         "m01-b005"
       ],
-      "sourceLine": 207,
+      "sourceLine": 199,
       "sections": [
         "r08"
       ]
@@ -256,7 +254,7 @@
       "cues": [
         "m01-b006"
       ],
-      "sourceLine": 217,
+      "sourceLine": 209,
       "sections": [
         "r09"
       ]
@@ -267,7 +265,7 @@
       "cues": [
         "warrant:upgrade"
       ],
-      "sourceLine": 225,
+      "sourceLine": 217,
       "sections": [
         "r10"
       ]
@@ -281,7 +279,7 @@
         "m01-s05-l004",
         "m01-s05-l005"
       ],
-      "sourceLine": 239,
+      "sourceLine": 231,
       "sections": [
         "r11",
         "r12"
@@ -295,7 +293,7 @@
         "m01-s05-l007",
         "m01-s05-l008"
       ],
-      "sourceLine": 265,
+      "sourceLine": 257,
       "sections": [
         "r13"
       ]
@@ -310,7 +308,7 @@
         "m01-s07-l004",
         "m01-s07-l005"
       ],
-      "sourceLine": 287,
+      "sourceLine": 279,
       "sections": [
         "r14",
         "r15"
@@ -325,7 +323,7 @@
         "m01-s07-l008",
         "m01-s07-l009"
       ],
-      "sourceLine": 315,
+      "sourceLine": 307,
       "sections": [
         "r16",
         "r17"
@@ -337,7 +335,7 @@
       "cues": [
         "field:raid-won"
       ],
-      "sourceLine": 343,
+      "sourceLine": 335,
       "sections": [
         "r18"
       ]
@@ -353,7 +351,7 @@
         "m01-s07-l014",
         "m01-s07-l016"
       ],
-      "sourceLine": 351,
+      "sourceLine": 343,
       "sections": [
         "r19",
         "r20"
@@ -367,7 +365,7 @@
         "m01-v3-r21-l002",
         "m01-v3-r21-l003"
       ],
-      "sourceLine": 387,
+      "sourceLine": 379,
       "sections": [
         "r21"
       ]
@@ -380,7 +378,7 @@
         "m01-v3-r22-l002",
         "m01-v3-r22-l003"
       ],
-      "sourceLine": 405,
+      "sourceLine": 397,
       "sections": [
         "r22"
       ]
@@ -392,7 +390,7 @@
         "m01-v3-r23-l001",
         "m01-v3-r23-l002"
       ],
-      "sourceLine": 421,
+      "sourceLine": 413,
       "sections": [
         "r23"
       ]
@@ -405,7 +403,7 @@
         "m01-v3-r24-l002",
         "m01-v3-r24-l003"
       ],
-      "sourceLine": 441,
+      "sourceLine": 433,
       "sections": [
         "r24"
       ]
@@ -417,7 +415,7 @@
         "m01-v3-r25-l001",
         "m01-v3-r25-l002"
       ],
-      "sourceLine": 459,
+      "sourceLine": 451,
       "sections": [
         "r25"
       ]
@@ -430,7 +428,7 @@
         "m01-s08-l002",
         "m01-s08-l003"
       ],
-      "sourceLine": 471,
+      "sourceLine": 463,
       "sections": [
         "r26"
       ]
@@ -446,7 +444,7 @@
         "m01-s08-l009",
         "m01-s08-l011"
       ],
-      "sourceLine": 487,
+      "sourceLine": 479,
       "sections": [
         "r27",
         "r28"
@@ -462,7 +460,7 @@
         "m01-s08-l018",
         "m01-s08-l019"
       ],
-      "sourceLine": 523,
+      "sourceLine": 515,
       "sections": [
         "r29",
         "r30"
@@ -476,7 +474,7 @@
         "m01-s08-l018",
         "m01-s08-l019"
       ],
-      "sourceLine": 553,
+      "sourceLine": 545,
       "sections": [
         "r30-alt"
       ]
@@ -489,7 +487,7 @@
         "m01-v3-r31-l002",
         "m01-v3-r31-l003"
       ],
-      "sourceLine": 571,
+      "sourceLine": 563,
       "sections": [
         "r31"
       ]
@@ -502,7 +500,7 @@
         "m01-s09-l002",
         "m01-s09-l003"
       ],
-      "sourceLine": 587,
+      "sourceLine": 579,
       "sections": [
         "r32"
       ]
@@ -517,7 +515,7 @@
         "m01-s09-l009",
         "m01-s09-l010"
       ],
-      "sourceLine": 603,
+      "sourceLine": 595,
       "sections": [
         "r33",
         "r34"
@@ -531,7 +529,7 @@
         "m01-v3-r35-l002",
         "m01-v3-r35-l003"
       ],
-      "sourceLine": 635,
+      "sourceLine": 627,
       "sections": [
         "r35"
       ]
@@ -547,7 +545,7 @@
         "m01-s10-l009",
         "m01-s10-l010"
       ],
-      "sourceLine": 655,
+      "sourceLine": 647,
       "sections": [
         "r36",
         "r37"
@@ -560,7 +558,7 @@
         "m01-v3-r38-l001",
         "m01-v3-r38-l002"
       ],
-      "sourceLine": 687,
+      "sourceLine": 679,
       "sections": [
         "r38"
       ]
@@ -573,7 +571,7 @@
         "m01-s10-l012",
         "m01-s10-l013"
       ],
-      "sourceLine": 701,
+      "sourceLine": 693,
       "sections": [
         "r39"
       ]
@@ -586,7 +584,7 @@
         "m01-s10-l019",
         "m01-s10-l020"
       ],
-      "sourceLine": 717,
+      "sourceLine": 709,
       "sections": [
         "r40"
       ]
@@ -599,7 +597,7 @@
         "m01-v3-r41-l002",
         "m01-v3-r41-l003"
       ],
-      "sourceLine": 739,
+      "sourceLine": 731,
       "sections": [
         "r41"
       ]
@@ -619,7 +617,7 @@
         "m01-s11-l009",
         "m01-s11-l010"
       ],
-      "sourceLine": 755,
+      "sourceLine": 747,
       "sections": [
         "r42",
         "r43",
@@ -634,7 +632,7 @@
         "m01-s11-l012",
         "m01-s11-l013"
       ],
-      "sourceLine": 809,
+      "sourceLine": 801,
       "sections": [
         "r45"
       ]
@@ -646,7 +644,7 @@
         "m01-v3-r46-l001",
         "m01-v3-r46-l002"
       ],
-      "sourceLine": 827,
+      "sourceLine": 819,
       "sections": [
         "r46"
       ]
@@ -658,7 +656,7 @@
         "m01-v3-r47-l001",
         "m01-v3-r47-l002"
       ],
-      "sourceLine": 841,
+      "sourceLine": 833,
       "sections": [
         "r47"
       ]
@@ -670,7 +668,7 @@
         "m01-s12-l001",
         "field:victory"
       ],
-      "sourceLine": 859,
+      "sourceLine": 851,
       "sections": [
         "r48"
       ]
@@ -683,7 +681,7 @@
         "m01-s13-l002",
         "m01-s13-l003"
       ],
-      "sourceLine": 871,
+      "sourceLine": 863,
       "sections": [
         "r49"
       ]
@@ -703,7 +701,7 @@
         "m01-s14-l009",
         "m01-s14-l010"
       ],
-      "sourceLine": 891,
+      "sourceLine": 883,
       "sections": [
         "r50",
         "r51",
@@ -719,7 +717,7 @@
         "m01-s14-l016",
         "m01-s14-l017"
       ],
-      "sourceLine": 949,
+      "sourceLine": 941,
       "sections": [
         "r54"
       ]
@@ -731,7 +729,7 @@
         "m01-v3-a01-l001",
         "m01-v3-a01-l002"
       ],
-      "sourceLine": 975,
+      "sourceLine": 967,
       "sections": [
         "a01"
       ]
@@ -743,7 +741,7 @@
         "m01-v3-a02-l001",
         "m01-v3-a02-l002"
       ],
-      "sourceLine": 985,
+      "sourceLine": 977,
       "sections": [
         "a02"
       ]
@@ -756,7 +754,7 @@
         "m01-v3-a03-l002",
         "m01-v3-a03-l003"
       ],
-      "sourceLine": 995,
+      "sourceLine": 987,
       "sections": [
         "a03"
       ]
@@ -768,7 +766,7 @@
         "m01-v3-a04-l001",
         "m01-v3-a04-l002"
       ],
-      "sourceLine": 1009,
+      "sourceLine": 1001,
       "sections": [
         "a04"
       ]
@@ -782,7 +780,7 @@
         "m01-s08-l022",
         "m01-s08-l023"
       ],
-      "sourceLine": 1085,
+      "sourceLine": 1077,
       "sections": [
         "u01"
       ]
@@ -797,7 +795,7 @@
         "m01-s12-l013",
         "m01-s12-l014"
       ],
-      "sourceLine": 1105,
+      "sourceLine": 1097,
       "sections": [
         "u02",
         "u03"
@@ -810,7 +808,7 @@
         "m01-s14-l018",
         "m01-s14-warrant-sigh"
       ],
-      "sourceLine": 1133,
+      "sourceLine": 1125,
       "sections": [
         "u04"
       ]
@@ -925,12 +923,12 @@
       "recordingStatus": "Т"
     },
     {
-      "id": "m01-s03-l002",
-      "speaker": "soldier",
+      "id": "m01-v3-builder-crooked-wall",
+      "speaker": "builder",
       "text": "Так стена кривая.",
       "pauseAfter": 0.2,
       "sourceLine": 69,
-      "recordingStatus": "В"
+      "recordingStatus": "Н"
     },
     {
       "id": "m01-s03-l003",
@@ -965,27 +963,11 @@
       "recordingStatus": "Н"
     },
     {
-      "id": "m01-v3-r02-l001",
+      "id": "m01-v3-power-ready-fuel",
       "speaker": "builder",
-      "text": "Электростанция готова.",
+      "text": "Электростанция готова. Для запуска нужна нефть. Ставим вышки.",
       "pauseAfter": 0.2,
       "sourceLine": 107,
-      "recordingStatus": "Н"
-    },
-    {
-      "id": "m01-v3-r02-l002",
-      "speaker": "commander",
-      "text": "Почему электричества нет?",
-      "pauseAfter": 0.2,
-      "sourceLine": 111,
-      "recordingStatus": "Н"
-    },
-    {
-      "id": "m01-v3-r02-l003",
-      "speaker": "builder",
-      "text": "Топлива нет. Нефтяные вышки нужны.",
-      "pauseAfter": 0.2,
-      "sourceLine": 115,
       "recordingStatus": "Н"
     },
     {
@@ -993,7 +975,7 @@
       "speaker": "scout",
       "text": "Командир, нефть обнаружили.",
       "pauseAfter": 0.2,
-      "sourceLine": 131,
+      "sourceLine": 123,
       "recordingStatus": "Н"
     },
     {
@@ -1001,7 +983,7 @@
       "speaker": "commander",
       "text": "Запасы большие?",
       "pauseAfter": 0.2,
-      "sourceLine": 135,
+      "sourceLine": 127,
       "recordingStatus": "Н"
     },
     {
@@ -1009,7 +991,7 @@
       "speaker": "warrant",
       "text": "Пока не добывали — практически неисчерпаемые.",
       "pauseAfter": 0.2,
-      "sourceLine": 139,
+      "sourceLine": 131,
       "recordingStatus": "Н"
     },
     {
@@ -1017,7 +999,7 @@
       "speaker": "builder",
       "text": "Нефть пошла. Электростанция заработала.",
       "pauseAfter": 0.2,
-      "sourceLine": 147,
+      "sourceLine": 139,
       "recordingStatus": "Н"
     },
     {
@@ -1025,7 +1007,7 @@
       "speaker": "general",
       "text": "А кофе?",
       "pauseAfter": 0.2,
-      "sourceLine": 151,
+      "sourceLine": 143,
       "recordingStatus": "Н"
     },
     {
@@ -1033,7 +1015,7 @@
       "speaker": "warrant",
       "text": "Электричество выделили. Кофе в следующей заявке.",
       "pauseAfter": 0.2,
-      "sourceLine": 155,
+      "sourceLine": 147,
       "recordingStatus": "Н"
     },
     {
@@ -1041,7 +1023,7 @@
       "speaker": "commander",
       "text": "Снабжение энергией обеспечено. Что дальше?",
       "pauseAfter": 0.2,
-      "sourceLine": 163,
+      "sourceLine": 155,
       "recordingStatus": "Н"
     },
     {
@@ -1049,7 +1031,7 @@
       "speaker": "general",
       "text": "Организуйте производство техники.",
       "pauseAfter": 0.2,
-      "sourceLine": 167,
+      "sourceLine": 159,
       "recordingStatus": "Н"
     },
     {
@@ -1057,7 +1039,7 @@
       "speaker": "general",
       "text": "Снабжение ограничено. Основу бронегруппы составляют автомобили УАЗ-452 с пулемётным вооружением.",
       "pauseAfter": 0.2,
-      "sourceLine": 181,
+      "sourceLine": 173,
       "recordingStatus": "В"
     },
     {
@@ -1065,7 +1047,7 @@
       "speaker": "commander",
       "text": "А бронетехника что?",
       "pauseAfter": 0.2,
-      "sourceLine": 185,
+      "sourceLine": 177,
       "recordingStatus": "Т"
     },
     {
@@ -1073,7 +1055,7 @@
       "speaker": "general",
       "text": "УАЗ-452 с пулемётным вооружением.",
       "pauseAfter": 0.2,
-      "sourceLine": 189,
+      "sourceLine": 181,
       "recordingStatus": "В"
     },
     {
@@ -1081,7 +1063,7 @@
       "speaker": "commander",
       "text": "Я имею в виду защищённую.",
       "pauseAfter": 0.2,
-      "sourceLine": 197,
+      "sourceLine": 189,
       "recordingStatus": "Т"
     },
     {
@@ -1089,7 +1071,7 @@
       "speaker": "general",
       "text": "Предусмотрена установка дополнительных стальных листов по мере поступления материалов.",
       "pauseAfter": 0.2,
-      "sourceLine": 201,
+      "sourceLine": 193,
       "recordingStatus": "В"
     },
     {
@@ -1097,7 +1079,7 @@
       "speaker": "warrant",
       "text": "Ясно. Броня пока в научной разработке.",
       "pauseAfter": 0.2,
-      "sourceLine": 205,
+      "sourceLine": 197,
       "recordingStatus": "Т"
     },
     {
@@ -1105,7 +1087,7 @@
       "speaker": "builder",
       "text": "Завод построили. Осталось придумать, что выпускать.",
       "pauseAfter": 0.2,
-      "sourceLine": 213,
+      "sourceLine": 205,
       "recordingStatus": "В"
     },
     {
@@ -1113,7 +1095,7 @@
       "speaker": "builder",
       "text": "С конвейера сошла. Сама. Никто не толкал.",
       "pauseAfter": 0.2,
-      "sourceLine": 223,
+      "sourceLine": 215,
       "recordingStatus": "В"
     },
     {
@@ -1121,7 +1103,7 @@
       "speaker": "warrant",
       "text": "Вот «Буханку» опять обновили. Зря, конечно. Хорошая была машина. Сорок лет ничего не меняли — и правильно делали. А теперь ручку дверную другую поставили. Спрашивается, зачем?",
       "pauseAfter": 0.2,
-      "sourceLine": 231,
+      "sourceLine": 223,
       "recordingStatus": "Т"
     },
     {
@@ -1129,7 +1111,7 @@
       "speaker": "general",
       "text": "Особый интерес представляет сооружение, в котором, предположительно, находится технология синаптической связи.",
       "pauseAfter": 0.2,
-      "sourceLine": 245,
+      "sourceLine": 237,
       "recordingStatus": "В"
     },
     {
@@ -1137,7 +1119,7 @@
       "speaker": "warrant",
       "text": "А это что такое?",
       "pauseAfter": 0.2,
-      "sourceLine": 249,
+      "sourceLine": 241,
       "recordingStatus": "Т"
     },
     {
@@ -1145,7 +1127,7 @@
       "speaker": "general",
       "text": "Технология, позволяющая передавать команды непосредственно из мозга в мозг.",
       "pauseAfter": 0.2,
-      "sourceLine": 253,
+      "sourceLine": 245,
       "recordingStatus": "В"
     },
     {
@@ -1153,7 +1135,7 @@
       "speaker": "warrant",
       "text": "Так у нас в армии это давно. Я ещё подумать не успел, а уже виноват.",
       "pauseAfter": 0.2,
-      "sourceLine": 261,
+      "sourceLine": 253,
       "recordingStatus": "Т"
     },
     {
@@ -1161,7 +1143,7 @@
       "speaker": "general",
       "text": "Синаптическая связь позволит существенно повысить эффективность управления войсками.",
       "pauseAfter": 0.2,
-      "sourceLine": 271,
+      "sourceLine": 263,
       "recordingStatus": "В"
     },
     {
@@ -1169,7 +1151,7 @@
       "speaker": "warrant",
       "text": "А если у начальства мозгов нет?",
       "pauseAfter": 0.2,
-      "sourceLine": 275,
+      "sourceLine": 267,
       "recordingStatus": "Т"
     },
     {
@@ -1177,7 +1159,7 @@
       "speaker": "general",
       "text": "Именно поэтому технология пока экспериментальная.",
       "pauseAfter": 0.2,
-      "sourceLine": 279,
+      "sourceLine": 271,
       "recordingStatus": "В"
     },
     {
@@ -1185,7 +1167,7 @@
       "speaker": "scout",
       "text": "Командир, движение на северо-востоке.",
       "pauseAfter": 0.2,
-      "sourceLine": 293,
+      "sourceLine": 285,
       "recordingStatus": "В"
     },
     {
@@ -1193,7 +1175,7 @@
       "speaker": "commander",
       "text": "Кто?",
       "pauseAfter": 0.2,
-      "sourceLine": 297,
+      "sourceLine": 289,
       "recordingStatus": "Т"
     },
     {
@@ -1201,7 +1183,7 @@
       "speaker": "scout",
       "text": "Неизвестные. Вооружены. Техника кустарного производства. На броне мусор, тряпки, железо.",
       "pauseAfter": 0.2,
-      "sourceLine": 301,
+      "sourceLine": 293,
       "recordingStatus": "В"
     },
     {
@@ -1209,7 +1191,7 @@
       "speaker": "commander",
       "text": "Наши?",
       "pauseAfter": 0.2,
-      "sourceLine": 309,
+      "sourceLine": 301,
       "recordingStatus": "Т"
     },
     {
@@ -1217,7 +1199,7 @@
       "speaker": "scout",
       "text": "Нет. У наших номера есть.",
       "pauseAfter": 0.2,
-      "sourceLine": 313,
+      "sourceLine": 305,
       "recordingStatus": "В"
     },
     {
@@ -1225,7 +1207,7 @@
       "speaker": "raider",
       "text": "Эй, вы кто такие?! Чего припёрлись?!",
       "pauseAfter": 0.2,
-      "sourceLine": 321,
+      "sourceLine": 313,
       "recordingStatus": "В"
     },
     {
@@ -1233,7 +1215,7 @@
       "speaker": "commander",
       "text": "Спецназ Вооружённых сил Российской Федерации. Группа «Альфа». Предлагаю сложить оружие.",
       "pauseAfter": 0.2,
-      "sourceLine": 325,
+      "sourceLine": 317,
       "recordingStatus": "Т"
     },
     {
@@ -1241,7 +1223,7 @@
       "speaker": "raider",
       "text": "Какая ещё Федерация?! Тут наша земля!",
       "pauseAfter": 0.2,
-      "sourceLine": 333,
+      "sourceLine": 325,
       "recordingStatus": "В"
     },
     {
@@ -1249,7 +1231,7 @@
       "speaker": "commander",
       "text": "Значит, будете федеративным округом.",
       "pauseAfter": 0.2,
-      "sourceLine": 337,
+      "sourceLine": 329,
       "recordingStatus": "Т"
     },
     {
@@ -1257,7 +1239,7 @@
       "speaker": "commander",
       "text": "Сектор зачищен. Проверьте машины. Продолжаем операцию.",
       "pauseAfter": 0.2,
-      "sourceLine": 349,
+      "sourceLine": 341,
       "recordingStatus": "Т"
     },
     {
@@ -1265,7 +1247,7 @@
       "speaker": "radio",
       "text": "Альфа, противник идентифицирован как местные вооружённые формирования. Условное наименование — «Отбросы».",
       "pauseAfter": 0.2,
-      "sourceLine": 357,
+      "sourceLine": 349,
       "recordingStatus": "В"
     },
     {
@@ -1273,7 +1255,7 @@
       "speaker": "commander",
       "text": "Почему отбросы?",
       "pauseAfter": 0.2,
-      "sourceLine": 361,
+      "sourceLine": 353,
       "recordingStatus": "Т"
     },
     {
@@ -1281,7 +1263,7 @@
       "speaker": "radio",
       "text": "Разведка доложила, что проживают на свалках и используют мусор.",
       "pauseAfter": 0.2,
-      "sourceLine": 365,
+      "sourceLine": 357,
       "recordingStatus": "В"
     },
     {
@@ -1289,7 +1271,7 @@
       "speaker": "commander",
       "text": "А мы?",
       "pauseAfter": 0.2,
-      "sourceLine": 373,
+      "sourceLine": 365,
       "recordingStatus": "Т"
     },
     {
@@ -1297,7 +1279,7 @@
       "speaker": "radio",
       "text": "А мы — организованная структура.",
       "pauseAfter": 0.2,
-      "sourceLine": 377,
+      "sourceLine": 369,
       "recordingStatus": "В"
     },
     {
@@ -1305,7 +1287,7 @@
       "speaker": "warrant",
       "text": "И потом, у нас мусор на балансе.",
       "pauseAfter": 0.2,
-      "sourceLine": 381,
+      "sourceLine": 373,
       "recordingStatus": "Т"
     },
     {
@@ -1313,7 +1295,7 @@
       "speaker": "commander",
       "text": "ДОТы поставьте на подходах к базе.",
       "pauseAfter": 0.2,
-      "sourceLine": 393,
+      "sourceLine": 385,
       "recordingStatus": "Н"
     },
     {
@@ -1321,7 +1303,7 @@
       "speaker": "builder",
       "text": "А если больше не нападут?",
       "pauseAfter": 0.2,
-      "sourceLine": 397,
+      "sourceLine": 389,
       "recordingStatus": "Н"
     },
     {
@@ -1329,7 +1311,7 @@
       "speaker": "warrant",
       "text": "Значит, помогло.",
       "pauseAfter": 0.2,
-      "sourceLine": 401,
+      "sourceLine": 393,
       "recordingStatus": "Н"
     },
     {
@@ -1337,7 +1319,7 @@
       "speaker": "builder",
       "text": "ДОТ готов.",
       "pauseAfter": 0.2,
-      "sourceLine": 411,
+      "sourceLine": 403,
       "recordingStatus": "Н"
     },
     {
@@ -1345,7 +1327,7 @@
       "speaker": "commander",
       "text": "Проверяли?",
       "pauseAfter": 0.2,
-      "sourceLine": 415,
+      "sourceLine": 407,
       "recordingStatus": "Н"
     },
     {
@@ -1353,7 +1335,7 @@
       "speaker": "builder",
       "text": "Пока желающих с той стороны не было.",
       "pauseAfter": 0.2,
-      "sourceLine": 419,
+      "sourceLine": 411,
       "recordingStatus": "Н"
     },
     {
@@ -1361,7 +1343,7 @@
       "speaker": "radio",
       "text": "Разведка установила расположение четырёх лагерей отбросов.",
       "pauseAfter": 0.2,
-      "sourceLine": 427,
+      "sourceLine": 419,
       "recordingStatus": "Н"
     },
     {
@@ -1369,7 +1351,7 @@
       "speaker": "commander",
       "text": "Оборону организовали. Теперь к ним.",
       "pauseAfter": 0.2,
-      "sourceLine": 431,
+      "sourceLine": 423,
       "recordingStatus": "Н"
     },
     {
@@ -1377,7 +1359,7 @@
       "speaker": "scout",
       "text": "Первый лагерь обнаружен. Машины за укрытиями.",
       "pauseAfter": 0.2,
-      "sourceLine": 447,
+      "sourceLine": 439,
       "recordingStatus": "Н"
     },
     {
@@ -1385,7 +1367,7 @@
       "speaker": "commander",
       "text": "Подходы?",
       "pauseAfter": 0.2,
-      "sourceLine": 451,
+      "sourceLine": 443,
       "recordingStatus": "Н"
     },
     {
@@ -1393,7 +1375,7 @@
       "speaker": "scout",
       "text": "Один открытый. Остальные придётся проверить.",
       "pauseAfter": 0.2,
-      "sourceLine": 455,
+      "sourceLine": 447,
       "recordingStatus": "Н"
     },
     {
@@ -1401,7 +1383,7 @@
       "speaker": "scout",
       "text": "Лагерь зачищен. Среди обломков довоенная техника.",
       "pauseAfter": 0.2,
-      "sourceLine": 465,
+      "sourceLine": 457,
       "recordingStatus": "Н"
     },
     {
@@ -1409,7 +1391,7 @@
       "speaker": "commander",
       "text": "Осмотреть. Всё неизвестное — в НИИ.",
       "pauseAfter": 0.2,
-      "sourceLine": 469,
+      "sourceLine": 461,
       "recordingStatus": "Н"
     },
     {
@@ -1417,7 +1399,7 @@
       "speaker": "scout",
       "text": "Командир, нашли артефакт.",
       "pauseAfter": 0.2,
-      "sourceLine": 477,
+      "sourceLine": 469,
       "recordingStatus": "В"
     },
     {
@@ -1425,7 +1407,7 @@
       "speaker": "commander",
       "text": "Докладывай.",
       "pauseAfter": 0.2,
-      "sourceLine": 481,
+      "sourceLine": 473,
       "recordingStatus": "Т"
     },
     {
@@ -1433,7 +1415,7 @@
       "speaker": "scout",
       "text": "Довоенная боевая машина. Вооружение неизвестного типа. К корпусу синей изолентой прикручен какой-то агрегат.",
       "pauseAfter": 0.2,
-      "sourceLine": 485,
+      "sourceLine": 477,
       "recordingStatus": "В"
     },
     {
@@ -1441,7 +1423,7 @@
       "speaker": "scout",
       "text": "Товарищ командир, синюю изоленту сняли.",
       "pauseAfter": 0.2,
-      "sourceLine": 493,
+      "sourceLine": 485,
       "recordingStatus": "В"
     },
     {
@@ -1449,7 +1431,7 @@
       "speaker": "commander",
       "text": "Отлично. И что за агрегат?",
       "pauseAfter": 0.2,
-      "sourceLine": 497,
+      "sourceLine": 489,
       "recordingStatus": "Т"
     },
     {
@@ -1457,7 +1439,7 @@
       "speaker": "scout",
       "text": "Неизвестно. Под ней жёлтая.",
       "pauseAfter": 0.2,
-      "sourceLine": 501,
+      "sourceLine": 493,
       "recordingStatus": "В"
     },
     {
@@ -1465,7 +1447,7 @@
       "speaker": "commander",
       "text": "Ну снимайте и жёлтую.",
       "pauseAfter": 0.2,
-      "sourceLine": 509,
+      "sourceLine": 501,
       "recordingStatus": "Т"
     },
     {
@@ -1473,7 +1455,7 @@
       "speaker": "scout",
       "text": "Никак нельзя.",
       "pauseAfter": 0.2,
-      "sourceLine": 513,
+      "sourceLine": 505,
       "recordingStatus": "В"
     },
     {
@@ -1481,7 +1463,7 @@
       "speaker": "scout",
       "text": "Она, похоже, заводская.",
       "pauseAfter": 0.2,
-      "sourceLine": 517,
+      "sourceLine": 509,
       "recordingStatus": "В"
     },
     {
@@ -1489,7 +1471,7 @@
       "speaker": "scientist",
       "text": "Товарищ командир, мы провели комплексный анализ.",
       "pauseAfter": 0.2,
-      "sourceLine": 529,
+      "sourceLine": 521,
       "recordingStatus": "В"
     },
     {
@@ -1497,7 +1479,7 @@
       "speaker": "commander",
       "text": "И что обнаружили?",
       "pauseAfter": 0.2,
-      "sourceLine": 533,
+      "sourceLine": 525,
       "recordingStatus": "Т"
     },
     {
@@ -1505,7 +1487,7 @@
       "speaker": "scientist",
       "text": "Это огнемёт.",
       "pauseAfter": 0.2,
-      "sourceLine": 537,
+      "sourceLine": 529,
       "recordingStatus": "В"
     },
     {
@@ -1513,7 +1495,7 @@
       "speaker": "commander",
       "text": "А зачем синяя?",
       "pauseAfter": 0.2,
-      "sourceLine": 545,
+      "sourceLine": 537,
       "recordingStatus": "Т"
     },
     {
@@ -1521,7 +1503,7 @@
       "speaker": "scientist",
       "text": "Чтобы жёлтая не разматывалась.",
       "pauseAfter": 0.2,
-      "sourceLine": 549,
+      "sourceLine": 541,
       "recordingStatus": "В"
     },
     {
@@ -1529,7 +1511,7 @@
       "speaker": "scientist",
       "text": "Изучили найденный агрегат. Это огнемёт, примотанный двумя слоями изоленты.",
       "pauseAfter": 0.2,
-      "sourceLine": 557,
+      "sourceLine": 549,
       "recordingStatus": "Н"
     },
     {
@@ -1537,7 +1519,7 @@
       "speaker": "scout",
       "text": "Обнаружен склад отбросов. Охрана усиленная.",
       "pauseAfter": 0.2,
-      "sourceLine": 577,
+      "sourceLine": 569,
       "recordingStatus": "Н"
     },
     {
@@ -1545,7 +1527,7 @@
       "speaker": "commander",
       "text": "Что хранят?",
       "pauseAfter": 0.2,
-      "sourceLine": 581,
+      "sourceLine": 573,
       "recordingStatus": "Н"
     },
     {
@@ -1553,7 +1535,7 @@
       "speaker": "scout",
       "text": "Пока что нас туда не пускают.",
       "pauseAfter": 0.2,
-      "sourceLine": 585,
+      "sourceLine": 577,
       "recordingStatus": "Н"
     },
     {
@@ -1561,7 +1543,7 @@
       "speaker": "scout",
       "text": "Командир, нашли склад вооружения.",
       "pauseAfter": 0.2,
-      "sourceLine": 593,
+      "sourceLine": 585,
       "recordingStatus": "В"
     },
     {
@@ -1569,7 +1551,7 @@
       "speaker": "commander",
       "text": "Состояние?",
       "pauseAfter": 0.2,
-      "sourceLine": 597,
+      "sourceLine": 589,
       "recordingStatus": "В"
     },
     {
@@ -1577,7 +1559,7 @@
       "speaker": "scout",
       "text": "Хорошее. Всё обмотано синей изолентой.",
       "pauseAfter": 0.2,
-      "sourceLine": 601,
+      "sourceLine": 593,
       "recordingStatus": "В"
     },
     {
@@ -1585,7 +1567,7 @@
       "speaker": "scientist",
       "text": "НИИ докладывает: увеличена эффективность пулемётного вооружения.",
       "pauseAfter": 0.2,
-      "sourceLine": 609,
+      "sourceLine": 601,
       "recordingStatus": "В"
     },
     {
@@ -1593,7 +1575,7 @@
       "speaker": "commander",
       "text": "За счёт чего?",
       "pauseAfter": 0.2,
-      "sourceLine": 613,
+      "sourceLine": 605,
       "recordingStatus": "В"
     },
     {
@@ -1601,7 +1583,7 @@
       "speaker": "scientist",
       "text": "Учёные выяснили, что патроны можно хранить без изоленты.",
       "pauseAfter": 0.2,
-      "sourceLine": 617,
+      "sourceLine": 609,
       "recordingStatus": "В"
     },
     {
@@ -1609,7 +1591,7 @@
       "speaker": "commander",
       "text": "И что?",
       "pauseAfter": 0.2,
-      "sourceLine": 625,
+      "sourceLine": 617,
       "recordingStatus": "В"
     },
     {
@@ -1617,7 +1599,7 @@
       "speaker": "scientist",
       "text": "Подаются быстрее.",
       "pauseAfter": 0.2,
-      "sourceLine": 629,
+      "sourceLine": 621,
       "recordingStatus": "В"
     },
     {
@@ -1625,7 +1607,7 @@
       "speaker": "scout",
       "text": "Впереди укреплённые позиции. Похоже, отбросы готовились.",
       "pauseAfter": 0.2,
-      "sourceLine": 641,
+      "sourceLine": 633,
       "recordingStatus": "Н"
     },
     {
@@ -1633,7 +1615,7 @@
       "speaker": "commander",
       "text": "К чему?",
       "pauseAfter": 0.2,
-      "sourceLine": 645,
+      "sourceLine": 637,
       "recordingStatus": "Н"
     },
     {
@@ -1641,7 +1623,7 @@
       "speaker": "scout",
       "text": "Судя по количеству бетона, к долгому разговору.",
       "pauseAfter": 0.2,
-      "sourceLine": 649,
+      "sourceLine": 641,
       "recordingStatus": "Н"
     },
     {
@@ -1649,7 +1631,7 @@
       "speaker": "scout",
       "text": "По предварительным данным, отбросы поставили пулемёт на водонапорную башню.",
       "pauseAfter": 0.2,
-      "sourceLine": 661,
+      "sourceLine": 653,
       "recordingStatus": "В"
     },
     {
@@ -1657,7 +1639,7 @@
       "speaker": "commander",
       "text": "Работает?",
       "pauseAfter": 0.2,
-      "sourceLine": 665,
+      "sourceLine": 657,
       "recordingStatus": "В"
     },
     {
@@ -1665,7 +1647,7 @@
       "speaker": "scout",
       "text": "Стреляет.",
       "pauseAfter": 0.2,
-      "sourceLine": 669,
+      "sourceLine": 661,
       "recordingStatus": "В"
     },
     {
@@ -1673,7 +1655,7 @@
       "speaker": "commander",
       "text": "А вода?",
       "pauseAfter": 0.2,
-      "sourceLine": 677,
+      "sourceLine": 669,
       "recordingStatus": "В"
     },
     {
@@ -1681,7 +1663,7 @@
       "speaker": "scout",
       "text": "Не поступает.",
       "pauseAfter": 0.2,
-      "sourceLine": 681,
+      "sourceLine": 673,
       "recordingStatus": "В"
     },
     {
@@ -1689,7 +1671,7 @@
       "speaker": "commander",
       "text": "Значит, по военному назначению работает исправно.",
       "pauseAfter": 0.2,
-      "sourceLine": 685,
+      "sourceLine": 677,
       "recordingStatus": "В"
     },
     {
@@ -1697,7 +1679,7 @@
       "speaker": "scout",
       "text": "Башню подавили. Чертежи сохранились.",
       "pauseAfter": 0.2,
-      "sourceLine": 693,
+      "sourceLine": 685,
       "recordingStatus": "Н"
     },
     {
@@ -1705,7 +1687,7 @@
       "speaker": "commander",
       "text": "В НИИ. Пусть теперь наши такую сделают.",
       "pauseAfter": 0.2,
-      "sourceLine": 697,
+      "sourceLine": 689,
       "recordingStatus": "Н"
     },
     {
@@ -1713,7 +1695,7 @@
       "speaker": "scientist",
       "text": "Мы установили принцип действия оборонительного сооружения.",
       "pauseAfter": 0.2,
-      "sourceLine": 707,
+      "sourceLine": 699,
       "recordingStatus": "В"
     },
     {
@@ -1721,7 +1703,7 @@
       "speaker": "commander",
       "text": "Докладывайте.",
       "pauseAfter": 0.2,
-      "sourceLine": 711,
+      "sourceLine": 703,
       "recordingStatus": "В"
     },
     {
@@ -1729,7 +1711,7 @@
       "speaker": "scientist",
       "text": "Если пулемёт поставить повыше, он стреляет дальше.",
       "pauseAfter": 0.2,
-      "sourceLine": 715,
+      "sourceLine": 707,
       "recordingStatus": "В"
     },
     {
@@ -1737,7 +1719,7 @@
       "speaker": "commander",
       "text": "А ведь раньше целые институты были…",
       "pauseAfter": 0.2,
-      "sourceLine": 723,
+      "sourceLine": 715,
       "recordingStatus": "В"
     },
     {
@@ -1745,7 +1727,7 @@
       "speaker": "scientist",
       "text": "Так мы и есть институт.",
       "pauseAfter": 0.2,
-      "sourceLine": 727,
+      "sourceLine": 719,
       "recordingStatus": "В"
     },
     {
@@ -1753,7 +1735,7 @@
       "speaker": "commander",
       "text": "Вот я и говорю.",
       "pauseAfter": 0.2,
-      "sourceLine": 731,
+      "sourceLine": 723,
       "recordingStatus": "В"
     },
     {
@@ -1761,7 +1743,7 @@
       "speaker": "scout",
       "text": "Командир, последний лагерь обнаружен. Укреплён серьёзно.",
       "pauseAfter": 0.2,
-      "sourceLine": 745,
+      "sourceLine": 737,
       "recordingStatus": "Н"
     },
     {
@@ -1769,7 +1751,7 @@
       "speaker": "commander",
       "text": "Кто командует?",
       "pauseAfter": 0.2,
-      "sourceLine": 749,
+      "sourceLine": 741,
       "recordingStatus": "Н"
     },
     {
@@ -1777,7 +1759,7 @@
       "speaker": "scout",
       "text": "Местные говорят — Петрович.",
       "pauseAfter": 0.2,
-      "sourceLine": 753,
+      "sourceLine": 745,
       "recordingStatus": "Н"
     },
     {
@@ -1785,7 +1767,7 @@
       "speaker": "chief",
       "text": "Слышь, командир! Вы чё к нам пристали?! Мы тут уже сто лет живём!",
       "pauseAfter": 0.2,
-      "sourceLine": 761,
+      "sourceLine": 753,
       "recordingStatus": "В"
     },
     {
@@ -1793,7 +1775,7 @@
       "speaker": "commander",
       "text": "Какое у вас государственное образование?",
       "pauseAfter": 0.2,
-      "sourceLine": 765,
+      "sourceLine": 757,
       "recordingStatus": "В"
     },
     {
@@ -1801,7 +1783,7 @@
       "speaker": "chief",
       "text": "Чего?",
       "pauseAfter": 0.2,
-      "sourceLine": 769,
+      "sourceLine": 761,
       "recordingStatus": "В"
     },
     {
@@ -1809,7 +1791,7 @@
       "speaker": "commander",
       "text": "Кто у вас главный?",
       "pauseAfter": 0.2,
-      "sourceLine": 777,
+      "sourceLine": 769,
       "recordingStatus": "В"
     },
     {
@@ -1817,7 +1799,7 @@
       "speaker": "chief",
       "text": "Петрович.",
       "pauseAfter": 0.2,
-      "sourceLine": 781,
+      "sourceLine": 773,
       "recordingStatus": "В"
     },
     {
@@ -1825,7 +1807,7 @@
       "speaker": "commander",
       "text": "Должность?",
       "pauseAfter": 0.2,
-      "sourceLine": 785,
+      "sourceLine": 777,
       "recordingStatus": "В"
     },
     {
@@ -1833,7 +1815,7 @@
       "speaker": "chief",
       "text": "Ну… Петрович.",
       "pauseAfter": 0.2,
-      "sourceLine": 789,
+      "sourceLine": 781,
       "recordingStatus": "В"
     },
     {
@@ -1841,7 +1823,7 @@
       "speaker": "commander",
       "text": "Конституция имеется?",
       "pauseAfter": 0.2,
-      "sourceLine": 799,
+      "sourceLine": 791,
       "recordingStatus": "В"
     },
     {
@@ -1849,7 +1831,7 @@
       "speaker": "chief",
       "text": "Чего?!",
       "pauseAfter": 0.2,
-      "sourceLine": 803,
+      "sourceLine": 795,
       "recordingStatus": "В"
     },
     {
@@ -1857,7 +1839,7 @@
       "speaker": "commander",
       "text": "Запиши. Нелегитимное вооружённое формирование. Отсутствуют признаки государственного управления.",
       "pauseAfter": 0.2,
-      "sourceLine": 807,
+      "sourceLine": 799,
       "recordingStatus": "В"
     },
     {
@@ -1865,7 +1847,7 @@
       "speaker": "warrant",
       "text": "Товарищ командир, так у них электричество, вода, хозяйство своё. Даже огороды имеются.",
       "pauseAfter": 0.2,
-      "sourceLine": 815,
+      "sourceLine": 807,
       "recordingStatus": "Т"
     },
     {
@@ -1873,7 +1855,7 @@
       "speaker": "commander",
       "text": "И?",
       "pauseAfter": 0.2,
-      "sourceLine": 819,
+      "sourceLine": 811,
       "recordingStatus": "В"
     },
     {
@@ -1881,7 +1863,7 @@
       "speaker": "warrant",
       "text": "А у нас пока только три ангара и сортир без крыши.",
       "pauseAfter": 0.2,
-      "sourceLine": 823,
+      "sourceLine": 815,
       "recordingStatus": "Т"
     },
     {
@@ -1889,7 +1871,7 @@
       "speaker": "radio",
       "text": "Альфа, противник стягивает оставшиеся силы к штабу.",
       "pauseAfter": 0.2,
-      "sourceLine": 833,
+      "sourceLine": 825,
       "recordingStatus": "Н"
     },
     {
@@ -1897,7 +1879,7 @@
       "speaker": "commander",
       "text": "Пути отхода перекрыть. Продолжать наступление.",
       "pauseAfter": 0.2,
-      "sourceLine": 837,
+      "sourceLine": 829,
       "recordingStatus": "Н"
     },
     {
@@ -1905,7 +1887,7 @@
       "speaker": "scout",
       "text": "Последний лагерь зачищен. Сопротивление прекращено.",
       "pauseAfter": 0.2,
-      "sourceLine": 847,
+      "sourceLine": 839,
       "recordingStatus": "Н"
     },
     {
@@ -1913,7 +1895,7 @@
       "speaker": "commander",
       "text": "Территорию проверить. Технику собрать у базы.",
       "pauseAfter": 0.2,
-      "sourceLine": 851,
+      "sourceLine": 843,
       "recordingStatus": "Н"
     },
     {
@@ -1921,7 +1903,7 @@
       "speaker": "radio",
       "text": "Альфа, доложите обстановку.",
       "pauseAfter": 0.2,
-      "sourceLine": 865,
+      "sourceLine": 857,
       "recordingStatus": "В"
     },
     {
@@ -1929,7 +1911,7 @@
       "speaker": "commander",
       "text": "База действует. Все четыре лагеря зачищены.",
       "pauseAfter": 0.2,
-      "sourceLine": 869,
+      "sourceLine": 861,
       "recordingStatus": "Т"
     },
     {
@@ -1937,7 +1919,7 @@
       "speaker": "warrant",
       "text": "Вот, товарищ командир. С нуля цивилизацию подняли.",
       "pauseAfter": 0.2,
-      "sourceLine": 877,
+      "sourceLine": 869,
       "recordingStatus": "Т"
     },
     {
@@ -1945,7 +1927,7 @@
       "speaker": "commander",
       "text": "Подняли, конечно. Только вот до войны, говорят, люди на Луну летали.",
       "pauseAfter": 0.2,
-      "sourceLine": 881,
+      "sourceLine": 873,
       "recordingStatus": "В"
     },
     {
@@ -1953,7 +1935,7 @@
       "speaker": "warrant",
       "text": "А нам зачем на Луну? Нам тут ещё работы непочатый край.",
       "pauseAfter": 0.2,
-      "sourceLine": 885,
+      "sourceLine": 877,
       "recordingStatus": "Т"
     },
     {
@@ -1961,7 +1943,7 @@
       "speaker": "radio",
       "text": "Альфа! Срочное сообщение! Разведка зафиксировала мощный энергетический всплеск к югу от ваших позиций.",
       "pauseAfter": 0.2,
-      "sourceLine": 897,
+      "sourceLine": 889,
       "recordingStatus": "В"
     },
     {
@@ -1969,7 +1951,7 @@
       "speaker": "commander",
       "text": "Что там?",
       "pauseAfter": 0.2,
-      "sourceLine": 901,
+      "sourceLine": 893,
       "recordingStatus": "В"
     },
     {
@@ -1977,7 +1959,7 @@
       "speaker": "radio",
       "text": "Источник неизвестен. Возможно, довоенный технологический комплекс.",
       "pauseAfter": 0.2,
-      "sourceLine": 905,
+      "sourceLine": 897,
       "recordingStatus": "В"
     },
     {
@@ -1985,7 +1967,7 @@
       "speaker": "commander",
       "text": "Опасен?",
       "pauseAfter": 0.2,
-      "sourceLine": 913,
+      "sourceLine": 905,
       "recordingStatus": "В"
     },
     {
@@ -1993,7 +1975,7 @@
       "speaker": "radio",
       "text": "Не исключено.",
       "pauseAfter": 0.2,
-      "sourceLine": 917,
+      "sourceLine": 909,
       "recordingStatus": "В"
     },
     {
@@ -2001,7 +1983,7 @@
       "speaker": "commander",
       "text": "Ценный?",
       "pauseAfter": 0.2,
-      "sourceLine": 925,
+      "sourceLine": 917,
       "recordingStatus": "В"
     },
     {
@@ -2009,7 +1991,7 @@
       "speaker": "radio",
       "text": "Вероятно.",
       "pauseAfter": 0.2,
-      "sourceLine": 929,
+      "sourceLine": 921,
       "recordingStatus": "В"
     },
     {
@@ -2017,7 +1999,7 @@
       "speaker": "commander",
       "text": "Наш?",
       "pauseAfter": 0.2,
-      "sourceLine": 937,
+      "sourceLine": 929,
       "recordingStatus": "В"
     },
     {
@@ -2025,7 +2007,7 @@
       "speaker": "radio",
       "text": "Пока нет.",
       "pauseAfter": 0.2,
-      "sourceLine": 941,
+      "sourceLine": 933,
       "recordingStatus": "В"
     },
     {
@@ -2033,7 +2015,7 @@
       "speaker": "commander",
       "text": "Ну, значит, будет наш.",
       "pauseAfter": 0.2,
-      "sourceLine": 945,
+      "sourceLine": 937,
       "recordingStatus": "В"
     },
     {
@@ -2041,7 +2023,7 @@
       "speaker": "warrant",
       "text": "А если работает?",
       "pauseAfter": 0.2,
-      "sourceLine": 955,
+      "sourceLine": 947,
       "recordingStatus": "Т"
     },
     {
@@ -2049,7 +2031,7 @@
       "speaker": "commander",
       "text": "Тогда впервые за всю экспедицию ничего чинить не придётся.",
       "pauseAfter": 0.2,
-      "sourceLine": 959,
+      "sourceLine": 951,
       "recordingStatus": "В"
     },
     {
@@ -2057,7 +2039,7 @@
       "speaker": "warrant",
       "text": "Не верю.",
       "pauseAfter": 0.2,
-      "sourceLine": 963,
+      "sourceLine": 955,
       "recordingStatus": "Т"
     },
     {
@@ -2065,7 +2047,7 @@
       "speaker": "commander",
       "text": "Колонна готова?",
       "pauseAfter": 0.2,
-      "sourceLine": 979,
+      "sourceLine": 971,
       "recordingStatus": "Н"
     },
     {
@@ -2073,7 +2055,7 @@
       "speaker": "scout",
       "text": "Готова. Последняя «Буханка» тоже завелась.",
       "pauseAfter": 0.2,
-      "sourceLine": 983,
+      "sourceLine": 975,
       "recordingStatus": "Н"
     },
     {
@@ -2081,7 +2063,7 @@
       "speaker": "driver",
       "text": "Встречного пропустили.",
       "pauseAfter": 0.2,
-      "sourceLine": 989,
+      "sourceLine": 981,
       "recordingStatus": "Н"
     },
     {
@@ -2089,7 +2071,7 @@
       "speaker": "warrant",
       "text": "Правильно. Железо нынче дороже вежливости.",
       "pauseAfter": 0.2,
-      "sourceLine": 993,
+      "sourceLine": 985,
       "recordingStatus": "Н"
     },
     {
@@ -2097,7 +2079,7 @@
       "speaker": "driver",
       "text": "Колонна встала.",
       "pauseAfter": 0.2,
-      "sourceLine": 999,
+      "sourceLine": 991,
       "recordingStatus": "Н"
     },
     {
@@ -2105,7 +2087,7 @@
       "speaker": "commander",
       "text": "Причина?",
       "pauseAfter": 0.2,
-      "sourceLine": 1003,
+      "sourceLine": 995,
       "recordingStatus": "Н"
     },
     {
@@ -2113,7 +2095,7 @@
       "speaker": "driver",
       "text": "Впереди тоже колонна. Наша.",
       "pauseAfter": 0.2,
-      "sourceLine": 1007,
+      "sourceLine": 999,
       "recordingStatus": "Н"
     },
     {
@@ -2121,7 +2103,7 @@
       "speaker": "driver",
       "text": "Проезд освободили.",
       "pauseAfter": 0.2,
-      "sourceLine": 1013,
+      "sourceLine": 1005,
       "recordingStatus": "Н"
     },
     {
@@ -2129,7 +2111,7 @@
       "speaker": "warrant",
       "text": "Запомните это место. Тут у нас порядок был.",
       "pauseAfter": 0.2,
-      "sourceLine": 1017,
+      "sourceLine": 1009,
       "recordingStatus": "Н"
     },
     {
@@ -2137,7 +2119,7 @@
       "speaker": "commander",
       "text": "Понятно. Испытывали?",
       "pauseAfter": 0.2,
-      "sourceLine": 1091,
+      "sourceLine": 1083,
       "recordingStatus": "В"
     },
     {
@@ -2145,7 +2127,7 @@
       "speaker": "scientist",
       "text": "Да. Сгорела лаборатория.",
       "pauseAfter": 0.2,
-      "sourceLine": 1095,
+      "sourceLine": 1087,
       "recordingStatus": "В"
     },
     {
@@ -2153,7 +2135,7 @@
       "speaker": "commander",
       "text": "Значит, работает?",
       "pauseAfter": 0.2,
-      "sourceLine": 1099,
+      "sourceLine": 1091,
       "recordingStatus": "В"
     },
     {
@@ -2161,7 +2143,7 @@
       "speaker": "scientist",
       "text": "Превосходно.",
       "pauseAfter": 0.2,
-      "sourceLine": 1103,
+      "sourceLine": 1095,
       "recordingStatus": "В"
     },
     {
@@ -2169,7 +2151,7 @@
       "speaker": "radio",
       "text": "Продовольствие пригодно к употреблению?",
       "pauseAfter": 0.2,
-      "sourceLine": 1111,
+      "sourceLine": 1103,
       "recordingStatus": "В"
     },
     {
@@ -2177,7 +2159,7 @@
       "speaker": "commander",
       "text": "Прапорщик пробует.",
       "pauseAfter": 0.2,
-      "sourceLine": 1115,
+      "sourceLine": 1107,
       "recordingStatus": "В"
     },
     {
@@ -2185,7 +2167,7 @@
       "speaker": "warrant",
       "text": "Товарищ командир, передайте, что до войны вкуснее делали.",
       "pauseAfter": 0.2,
-      "sourceLine": 1119,
+      "sourceLine": 1111,
       "recordingStatus": "Т"
     },
     {
@@ -2193,7 +2175,7 @@
       "speaker": "radio",
       "text": "Продолжайте выполнение задачи. Трофейное продовольствие поставить на учёт.",
       "pauseAfter": 0.2,
-      "sourceLine": 1127,
+      "sourceLine": 1119,
       "recordingStatus": "В"
     },
     {
@@ -2201,7 +2183,7 @@
       "speaker": "warrant",
       "text": "Вот теперь поздно.",
       "pauseAfter": 0.2,
-      "sourceLine": 1131,
+      "sourceLine": 1123,
       "recordingStatus": "Т"
     },
     {
@@ -2209,7 +2191,7 @@
       "speaker": "soldier",
       "text": "Товарищ прапорщик! Генератор опять встал!",
       "pauseAfter": 0.2,
-      "sourceLine": 1139,
+      "sourceLine": 1131,
       "recordingStatus": "В"
     },
     {
@@ -2217,7 +2199,7 @@
       "speaker": "warrant",
       "text": "[Тяжёлый вздох, без слов.]",
       "pauseAfter": 0.2,
-      "sourceLine": 1143,
+      "sourceLine": 1135,
       "recordingStatus": "Т"
     },
     {
@@ -2251,7 +2233,7 @@
       "speaker": "builder",
       "text": "Держится. Только дверью не хлопайте.",
       "pauseAfter": 0.2,
-      "sourceLine": 1023,
+      "sourceLine": 1015,
       "recordingStatus": "В",
       "event": "a05",
       "title": "Ремонт машины"
@@ -2261,7 +2243,7 @@
       "speaker": "scout",
       "text": "Экономика встала.",
       "pauseAfter": 0.2,
-      "sourceLine": 1029,
+      "sourceLine": 1021,
       "recordingStatus": "В",
       "event": "a06",
       "title": "Недостаточно энергии"
@@ -2271,7 +2253,7 @@
       "speaker": "scientist",
       "text": "Сейчас посмотрим, что там накрутили.",
       "pauseAfter": 0.2,
-      "sourceLine": 1035,
+      "sourceLine": 1027,
       "recordingStatus": "В",
       "event": "a07",
       "title": "Исследование начато"
@@ -2281,7 +2263,7 @@
       "speaker": "scientist",
       "text": "Разобрались. Собрать обратно не обещаем.",
       "pauseAfter": 0.2,
-      "sourceLine": 1041,
+      "sourceLine": 1033,
       "recordingStatus": "В",
       "event": "a08",
       "title": "Обычное исследование завершено"
@@ -2291,7 +2273,7 @@
       "speaker": "scout",
       "text": "Да это ещё с завода было.",
       "pauseAfter": 0.2,
-      "sourceLine": 1047,
+      "sourceLine": 1039,
       "recordingStatus": "В",
       "event": "a09",
       "title": "Повреждение машины"
@@ -2301,7 +2283,7 @@
       "speaker": "scout",
       "text": "Стоим. Никого не трогаем.",
       "pauseAfter": 0.2,
-      "sourceLine": 1053,
+      "sourceLine": 1045,
       "recordingStatus": "В",
       "event": "a10",
       "title": "Отряд без приказа"
@@ -2311,7 +2293,7 @@
       "speaker": "commander",
       "text": "Рацию спасли?",
       "pauseAfter": 0.2,
-      "sourceLine": 1059,
+      "sourceLine": 1051,
       "recordingStatus": "В",
       "event": "a11",
       "title": "Командирский УАЗ подбит"
@@ -2321,7 +2303,7 @@
       "speaker": "scout",
       "text": "Обкатку проводить будем или сразу в бой?",
       "pauseAfter": 0.2,
-      "sourceLine": 1065,
+      "sourceLine": 1057,
       "recordingStatus": "В",
       "event": "a12",
       "title": "Произведена новая техника"
@@ -2331,7 +2313,7 @@
       "speaker": "scout",
       "text": "Опять местные без приглашения.",
       "pauseAfter": 0.2,
-      "sourceLine": 1071,
+      "sourceLine": 1063,
       "recordingStatus": "В",
       "event": "a13",
       "title": "Новый противник"
@@ -2341,7 +2323,7 @@
       "speaker": "warrant",
       "text": "Стоим организованно. Беспорядочно стоять у нас — запрещено.",
       "pauseAfter": 0.2,
-      "sourceLine": 1077,
+      "sourceLine": 1069,
       "recordingStatus": "Т",
       "event": "a14",
       "title": "Приказ остановиться"

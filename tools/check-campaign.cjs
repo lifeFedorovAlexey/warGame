@@ -20,12 +20,13 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   const intro={...JSON.parse(fs.readFileSync(fieldRadioDir+'audio-v2.json')).clips[line.id],text:line.text};
   assert.equal(createHash('sha256').update(fs.readFileSync(fieldRadioDir+intro.file)).digest('hex'),intro.sha256);
   const introUrl=new URL('../'+fieldRadioDir+intro.file,page.url()).href;
-  const introResponse=page.waitForResponse(response=>response.url()===introUrl&&response.ok());
+  const introResponse=page.waitForResponse(response=>response.url()===introUrl&&response.ok(),{timeout:90000});
   await page.locator('#begin').click();
+  const initialView=await page.evaluate(()=>({x:campaign.world.controls.target.x,y:campaign.world.controls.target.y}));
   // The main button includes the opening. This general control smoke skips it
   // through the UI; the story browser suite listens to every line naturally.
   for(const scene of ['p01','p02','p03','p04']){
-   await page.waitForFunction(id=>campaign.radio.entry?.storyScene===id,scene);
+   await page.waitForFunction(id=>campaign.radio.entry?.storyScene===id,scene,{timeout:60000});
    await page.locator('#radio [data-dismiss]').click();
   }
   await introResponse;
@@ -42,7 +43,7 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
    const start=field.gridToWorld(c.mission.config.startGrid);
    return {target:{x:controls.target.x,y:controls.target.y},start,signal:storySignals.current};
   });
-  assert.deepEqual(briefing.target,briefing.start,'Briefing leaves the camera under player control');
+  assert.deepEqual(briefing.target,initialView,'Dialogue keeps the initial view of the base and hillside');
   assert.equal(briefing.signal.kind,'guidance');
   assert.equal(await page.locator('#objective-focus').isVisible(),false,'Only the radio shows the oil shortcut during the briefing');
   await page.locator('[data-focus]').click();

@@ -110,6 +110,7 @@ export async function createCampaignWorld(host,config,sound){
   pointerRay(clientX,clientY);
   let selected=null,nearest=Infinity;
   for(const b of mission.state.buildings){
+   if(config.buildings[b.kind]?.storyOnly)continue;
    const model=buildings.get(b.id);
    if(!model?.visible||b.hp<=0||b.owner!=='rai'&&!mission.visibleAt(b.x,b.y))continue;
    const layer=b.completed?Infinity:buildLayerHeight(b,config.buildings[b.kind],config.worldScale);
@@ -169,6 +170,7 @@ export async function createCampaignWorld(host,config,sound){
    renderer.setSize(192,116,false);
    const aspect=192/116, corner=new T.Vector3();
    for (const kind of Object.keys(config.buildings)) {
+    if(config.buildings[kind].storyOnly)continue;
     const mesh = getPrefab(kind).clone(true), bounds = new T.Box3().setFromObject(mesh);
     const centre = bounds.getCenter(new T.Vector3());
     camera.position.copy(centre).add(new T.Vector3(kind==='factory'||kind==='generator'?22:-22,-29,20));

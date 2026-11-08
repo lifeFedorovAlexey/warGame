@@ -26,7 +26,7 @@ try{
   };
  });
  const waitCue=async id=>{
-  try{await page.waitForFunction(id=>campaign.storyAudio.cueId===id,id,{timeout:15000});}
+  try{await page.waitForFunction(id=>campaign.storyAudio.cueId===id,id,{timeout:id==='m01-s03-l001'?45000:15000});}
   catch(error){throw new Error(JSON.stringify({expected:id,...await page.evaluate(()=>({audio:campaign.storyAudio,entry:campaign.radio.entry,until:campaign.radio.until,now:performance.now(),state:campaign.state,radio:campaign.mission.state.radioStory}))}),{cause:error});}
  };
  const finishLine=()=>page.evaluate(()=>{campaign.radio.testHeldCue=null;campaign.radio.until=0;campaign.advance(0);});
@@ -60,23 +60,34 @@ try{
  await screenshot('start-desktop');await screenshot('start-narrow',true);await page.setViewportSize({width:1440,height:900});
  await page.locator('#begin').click();await waitCue('m01-s01-l003');
  assert.equal(await page.locator('#welcome').isHidden(),true);
- assert.equal(await page.evaluate(()=>campaign.state.active&&!campaign.state.paused),true);
+ assert.equal(await page.evaluate(()=>!campaign.state.active&&campaign.state.openingPlaying&&!campaign.state.paused),true);
+ assert.equal(await page.evaluate(()=>campaign.world.controls.enabled),false);
  // No second button, forced completion, pause or fixture injection through the opening.
  await playScene('p01',{natural:true});
  await playScene('p02',{natural:true,check:async i=>{
   if(i===0){await screenshot('opening-commander-desktop');await screenshot('opening-commander-narrow',true);}
  }});
- await playScene('p03',{natural:true});await playScene('p04',{natural:true});
+ await playScene('p03',{natural:true});
+ await playScene('p04',{natural:true,check:async i=>{
+  assert(await page.evaluate(()=>campaign.mission.state.buildings.some(b=>b.kind==='base-sign'&&b.completed)));
+  assert.equal(await page.evaluate(()=>campaign.state.active),false);
+  if(i===0){await screenshot('sign-finished-desktop');await screenshot('sign-finished-narrow',true);}
+ }});
  await waitCue('m01-v3-general-coffee');
+ assert(await page.evaluate(()=>campaign.state.active&&campaign.world.controls.enabled&&campaign.mission.state.openingScene.handedOver));
  assert.equal(await page.evaluate(()=>campaign.state.paused),false);
  await playScene('r01',{natural:true,check:async i=>{
   if(i===1){await screenshot('original-commander-desktop');await screenshot('original-commander-narrow',true);}
-  if(i===2)assert.equal(await page.locator('#field-tasks').isHidden(),false);
+  if(i===2)await page.waitForFunction(()=>!document.querySelector('#field-tasks').hidden);
  }});
  const opening=await page.evaluate(()=>({lines:campaign.radio.testTransmissions,time:campaign.mission.state.time,opening:campaign.mission.state.radioStory.includeOpening}));
  assert.equal(opening.lines.length,14);assert(opening.time>20);assert(opening.opening);
  for(const line of opening.lines)assert(line.finished-line.presented>=(line.duration-.12)*1000,JSON.stringify(line));
- for(let i=1;i<opening.lines.length;i++)assert(opening.lines[i].presented-opening.lines[i-1].finished<700,'Broken exchange: '+JSON.stringify(opening.lines.slice(i-1,i+1)));
+ for(let i=1;i<opening.lines.length;i++){
+  // Between these scenes the player watches the actual builder finish the wall.
+  if(opening.lines[i].id==='m01-s03-l001')continue;
+  assert(opening.lines[i].presented-opening.lines[i-1].finished<700,'Broken exchange: '+JSON.stringify(opening.lines.slice(i-1,i+1)));
+ }
  fs.writeFileSync(folder+'/opening-timeline.json',JSON.stringify(opening,null,2));
  await page.waitForFunction(()=>document.querySelector('#field-objectives').textContent.includes('Построить электростанцию'));
  await screenshot('power-task-narrow',true);await screenshot('power-task-desktop');
@@ -140,5 +151,5 @@ try{
  assert(verification.portraits.every(([,ok])=>ok));assert.equal(verification.portraits.length,12);
  assert(verification.layout.left>=0&&verification.layout.right<=verification.layout.width);assert.equal(verification.layout.border,'0px');assert.equal(verification.layout.background,'rgba(0, 0, 0, 0)');
  assert.deepEqual(errors,[]);fs.writeFileSync(folder+'/verification.json',JSON.stringify({...verification,errors},null,2));
- console.log('PASS: radio v3 prologue, original recordings in game, full base progression, real combat interruption, saves, 184 decoded clips, desktop and narrow screenshots');
+ console.log('PASS: radio v3 prologue, original recordings in game, full base progression, real combat interruption, saves, '+verification.clips.length+' decoded clips, desktop and narrow screenshots');
 }finally{await browser.close();}

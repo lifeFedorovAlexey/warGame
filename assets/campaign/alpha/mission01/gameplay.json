@@ -9,6 +9,8 @@
   "initialEnergy": 760,
   "energyCapacity": 2400,
   "startGrid": [14.5, 53.5],
+  "openingSignGrid": [13.25, 45],
+  "openingSignRotationDegrees": -37,
   "raidApproachGrid": [21, 52.25],
   "raidStagingGrid": [29.5, 52.125],
   "raidRoster": ["raider", "scav-zaporozhets", "scav-rifleman", "scav-grenadier"],
@@ -38,6 +40,18 @@
     "scav-grenadier": {"name": "Гренадёр", "cost": 0, "seconds": 0, "hp": 70, "speed": 12, "range": 62, "damage": 32, "cooldown": 3.2, "vision": 150, "role": "combat", "weapon": "grenade", "splash": 16, "infantry": true}
   },
   "buildings": {
+    "base-sign": {
+      "name": "Вывеска «РАЙ»",
+      "storyOnly": true,
+      "realSizeMetres": [8.2, 1.3, 4.3],
+      "footprintMetres": [9.5, 4],
+      "cost": 0,
+      "seconds": 6,
+      "hp": 300,
+      "vision": 0,
+      "power": 0,
+      "workAnchor": [0, -4, 0]
+    },
     "generator": {"name": "АЭС", "realSizeMetres": [12, 10, 5], "footprintMetres": [14, 12], "cost": 140, "seconds": 20, "hp": 950, "vision": 130, "power": 0, "oilSlots": 4, "workAnchor": [0, -8, 0]},
     "derrick": {"name": "Вышка", "realSizeMetres": [8, 8, 14], "footprintMetres": [10, 10], "cost": 90, "seconds": 16, "hp": 650, "vision": 100, "power": 0, "energyPerSecond": 5, "requiresOil": true, "workAnchor": [0, -6, 0]},
     "factory": {"name": "Завод", "realSizeMetres": [26, 20, 9], "footprintMetres": [28, 24], "cost": 220, "seconds": 35, "hp": 1400, "vision": 150, "power": 1, "workAnchor": [0, -14, 0], "exitAnchor": [0, -18, 0], "production": ["bukhanka", "builder", "flamer"]},

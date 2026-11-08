@@ -56,6 +56,13 @@ button.active { border-color: #e5db9d; box-shadow: inset 0 -2px #e5db9d; }
 #power { color: var(--muted); }
 #power.online { color: #b5c28d; }
 .settings { position: relative; }
+/* The owner requested this construction before handing over mission controls. */
+.opening-playing .command-deck,
+.opening-playing .resources,
+.opening-playing #pause,
+.opening-playing #field-tasks,
+.opening-playing #home,
+.opening-playing #objective-focus { visibility: hidden; }
 .settings > summary { list-style: none; padding: 5px 4px; }
 .settings p { grid-column: 1 / -1; margin: 4px 0 0; color: var(--muted); font-size: 11px; }
 .mission-tasks {
@@ -243,4 +250,8 @@ button.radio-focus { color: var(--accent); }
   #build-cards { grid-template-columns: repeat(var(--build-columns,5), minmax(0, 1fr)); }
   #build-cards button { font-size: 10px; }
   #build-palette { max-width: none; }
+}
+
+@media (max-width: 720px) {
+  #mission-hud.opening-playing > #radio { top: auto; bottom: 20px; }
 }

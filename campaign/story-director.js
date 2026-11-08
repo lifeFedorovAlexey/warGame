@@ -1,6 +1,7 @@
 import {storyFacts,storyRules} from './story-events.js';
 import {parkRadioStory} from './radio-save.js';
 import {updateStoryConstruction,migrateStoryOpening} from './story-construction.js';
+import {openingConstructionReady} from './opening-construction.js';
 
 const terminal = status => ['done','skipped','cancelled'].includes(status);
 const sceneSignal = {r01:'intro',r14:'first-contact',r18:'raid-won',r36:'camp3-sighted',r41:'last-camp',r50:'outro'};
@@ -21,6 +22,10 @@ export class StoryDirector {
       this.data=state;this.lastNow=null;
       parkRadioStory(state);
       migrateStoryOpening(mission,state);
+      // A revised exchange may have fewer lines than the saved version.
+      for(const [id,record] of Object.entries(state.scenes)){
+        if(!terminal(record.status)&&record.cursor>=(this.scenes.get(id)?.cues.length??Infinity))record.cursor=0;
+      }
     }
     this.mission=mission;
     return state;
@@ -32,6 +37,7 @@ export class StoryDirector {
   record(id){return this.data.scenes[id]??={status:'pending',cursor:0};}
   finished(id){return terminal(this.data.scenes[id]?.status);}
   heard(id){return this.data.scenes[id]?.status==='done';}
+  get openingFinished(){return !this.data?.includeOpening||prologueScenes.every(id=>this.finished(id));}
   anyFinished(ids){return ids.some(id=>['done','skipped'].includes(this.data.scenes[id]?.status));}
   ended(id){return this.data.scenes[id]?.endedAt??-Infinity;}
   note(event,mission) {
@@ -75,7 +81,7 @@ export class StoryDirector {
     this.lastNow=now;
     const f=this.facts(mission),rules=this.rules(f);
     const opening=d.includeOpening&&prologueScenes.find(id=>!this.finished(id));
-    if(opening)rules[opening]={priority:1,trigger:true,valid:true};
+    if(opening)rules[opening]={priority:1,trigger:opening!=='p04'||openingConstructionReady(mission),valid:true};
     if(!enabled||mission.state.status==='defeat'){this.suspend();return null;}
     if(d.active){
       const rule=rules[d.active];
@@ -108,7 +114,7 @@ export class StoryDirector {
   cue(rules={}) {
     const d=this.data,id=d.active;if(!id)return null;
     const record=this.record(id),cueId=this.scenes.get(id).cues[record.cursor],line=this.lines.get(cueId);
-    const order={r01:2,r02:2,r05:1,r21:0,r23:1};
+    const order={r01:2,r02:0,r05:1,r21:0,r23:1};
     if(record.cursor>=order[id])(d.announced??={})[id]=true;
     return {...line,storyScene:id,story:true,dialogue:true,chapter:sceneSignal[id]??'story-'+id,
       token:`${id}:${record.cursor}`,priority:4-(rules[id]?.priority??2),station:this.script.speakers[line.speaker].name,

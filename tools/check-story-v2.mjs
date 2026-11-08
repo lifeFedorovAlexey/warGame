@@ -106,12 +106,13 @@ for(const keys of [['mg-tower','flamethrower','mg-ammo-1'],['mg-ammo-1','mg-towe
 }
 // Saves resume an answer; combat restarts the whole exchange with its question.
 {
- const f=fixture();f.finish();f.building('generator');f.tick();f.director.completeLine();
- f.mission.state=JSON.parse(JSON.stringify(f.mission.state));assert.equal(f.tick().id,'m01-v3-r02-l002');
+ const f=fixture();f.finish();f.building('factory',false);f.tick();f.director.completeLine();
+ const reply=f.tick().id;
+ f.mission.state=JSON.parse(JSON.stringify(f.mission.state));assert.equal(f.tick().id,reply);
  f.mission.state.units.push({id:'raid',owner:'scavs',hp:100,x:0,y:0});f.mission.state.flags.raidIds=['raid'];
- assert.equal(f.tick().storyScene,'r14');assert.equal(f.director.record('r02').cursor,0);f.finish();
+ assert.equal(f.tick().storyScene,'r14');assert.equal(f.director.record('r06').cursor,0);f.finish();
  f.mission.effects=[{type:'shot',from:'raid'}];assert.equal(f.tick(),null);f.mission.effects=[];
- assert.equal(f.tick(9).id,'m01-v3-r02-l001');
+ assert.equal(f.tick(9).id,source.scenes.find(s=>s.id==='r06').cues[0]);
 }
 for(const enabled of [false,true]){
  const f=fixture();f.building('generator');f.tick(0,enabled);assert(f.unlocked('derrick'));
@@ -142,7 +143,11 @@ for(const enabled of [false,true]){
 }
 {
  const f=fixture(false);f.director.beginStory(f.mission);
- for(const id of ['p01','p02','p03','p04']){assert.equal(f.tick().storyScene,id);f.finish();}
+ for(const id of ['p01','p02','p03']){assert.equal(f.tick().storyScene,id);f.finish();}
+ assert.equal(f.tick(),null,'The sign dialogue waits for actual construction');
+ const sign=f.building('base-sign',false);assert.equal(f.tick(),null);
+ sign.completed=true;assert.equal(f.tick().storyScene,'p04');f.finish();
+ assert(f.director.openingFinished);
  assert.equal(f.tick().storyScene,'r01');
 }
 // Saving the opening keeps it in the same mission, including the current reply.
@@ -157,8 +162,14 @@ for(const enabled of [false,true]){
 {
  const f=fixture();f.director.completeLine();const cue=f.tick();f.building('generator',false);
  assert.equal(f.tick().id,cue.id);f.finish();assert.equal(f.tick(),null);
- f.mission.state.buildings[0].completed=true;assert.equal(f.tick().storyScene,'r02');f.director.completeLine();
- f.mission.state.powered=true;assert.equal(f.tick().id,'m01-v3-r02-l002');f.finish();
+ f.mission.state.buildings[0].completed=true;assert.equal(f.tick().storyScene,'r02');
+ f.mission.state.powered=true;assert.equal(f.tick().id,'m01-v3-power-ready-fuel');f.finish();
  assert.equal(f.tick().storyScene,'r04');
+}
+{
+ const f=fixture();f.finish();f.building('generator');f.tick();f.director.record('r02').cursor=2;
+ f.mission.state=JSON.parse(JSON.stringify(f.mission.state));
+ assert.equal(f.tick().id,'m01-v3-power-ready-fuel','Old saves resume the revised report safely');
+ assert(!source.dialogue.some(c=>c.text==='Почему электричества нет?'));
 }
 console.log('PASS: integrated opening, complete exchanges through construction/research, 39 original recordings, alternate routes, interruptions, native and old saves, finale');
