@@ -11,7 +11,8 @@ try{
  await page.goto((process.env.WARGAME_URL??'http://127.0.0.1:8766/review/opening-sign')+'/campaign/');
  await page.waitForFunction(()=>window.campaign?.ready,null,{timeout:90000});
  await page.locator('#begin').click();
- for(const scene of ['p01','p02','p03']){
+ await page.locator('[data-dream="skip"]').click();
+ for(const scene of ['p02','p03']){
   await page.waitForFunction(id=>campaign.radio.entry?.storyScene===id,scene);
   await page.locator('#radio [data-dismiss]').click();
  }

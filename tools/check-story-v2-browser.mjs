@@ -58,12 +58,14 @@ try{
  const unlocked=kind=>page.evaluate(k=>campaign.mission.constructionUnlocked(k),kind);
  assert.equal(await page.locator('#prologue').count(),0);
  await screenshot('start-desktop');await screenshot('start-narrow',true);await page.setViewportSize({width:1440,height:900});
- await page.locator('#begin').click();await waitCue('m01-s01-l003');
+ await page.locator('#begin').click();
+ // Natural playback of the supplied movie, cities and globe is covered by
+ // check-opening-television. This suite continues through all spoken exchanges.
+ await page.locator('[data-dream="skip"]').click();await waitCue('m01-s02-l003');
  assert.equal(await page.locator('#welcome').isHidden(),true);
  assert.equal(await page.evaluate(()=>!campaign.state.active&&campaign.state.openingPlaying&&!campaign.state.paused),true);
  assert.equal(await page.evaluate(()=>campaign.world.controls.enabled),false);
  // No second button, forced completion, pause or fixture injection through the opening.
- await playScene('p01',{natural:true});
  await playScene('p02',{natural:true,check:async i=>{
   if(i===0){await screenshot('opening-commander-desktop');await screenshot('opening-commander-narrow',true);}
  }});
@@ -81,7 +83,7 @@ try{
   if(i===2)await page.waitForFunction(()=>!document.querySelector('#field-tasks').hidden);
  }});
  const opening=await page.evaluate(()=>({lines:campaign.radio.testTransmissions,time:campaign.mission.state.time,opening:campaign.mission.state.radioStory.includeOpening}));
- assert.equal(opening.lines.length,14);assert(opening.time>20);assert(opening.opening);
+ assert.equal(opening.lines.length,12);assert(opening.time>20);assert(opening.opening);
  for(const line of opening.lines)assert(line.finished-line.presented>=(line.duration-.12)*1000,JSON.stringify(line));
  for(let i=1;i<opening.lines.length;i++){
   // Between these scenes the player watches the actual builder finish the wall.

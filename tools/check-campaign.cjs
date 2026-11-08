@@ -25,7 +25,8 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   const initialView=await page.evaluate(()=>({x:campaign.world.controls.target.x,y:campaign.world.controls.target.y}));
   // The main button includes the opening. This general control smoke skips it
   // through the UI; the story browser suite listens to every line naturally.
-  for(const scene of ['p01','p02','p03','p04']){
+  await page.locator('[data-dream="skip"]').click();
+  for(const scene of ['p02','p03','p04']){
    if(scene==='p04')await page.evaluate(()=>campaign.advance(45));
    await page.waitForFunction(id=>campaign.radio.entry?.storyScene===id,scene,{timeout:60000});
    await page.locator('#radio [data-dismiss]').click();

@@ -7,6 +7,7 @@ import {restoreRadioStory} from './radio-save.js';
 import {FieldSound} from './field-sound.js';
 import {StoryDirector, loadMissionStory} from './story-director.js';
 import {startOpeningConstruction,restoreOpeningConstruction,openingCanHandOver} from './opening-construction.js';
+import {OpeningTelevision} from './opening-television.js';
 import {storyObjectives} from './story-objectives.js';
 import {buildLayerHeight} from './builder-optics.js';
 import {VehicleDesigner} from './designer.js';
@@ -20,7 +21,7 @@ const saveKey = 'warGame.alpha.mission01.v1';
 const dataUrl = '../assets/campaign/alpha/mission01/gameplay.json';
 const selected = new Set();
 const miniBackground = new Image();
-let world, mission, config, radio, sound, designer, combatMenu;
+let world, mission, config, radio, sound, designer, combatMenu, openingTelevision;
 let active = false, paused = false, speed = 1, resultShown = false;
 let openingPlaying = false;
 let pausedBeforeDesigner = false;
@@ -263,7 +264,7 @@ function start(restore = false) {
   if (centre) world.centre(centre, 360);
   select(worker&&!openingPlaying ? [worker.id] : [], false, false);
   sound.unlock();
-  radio.consume(mission, performance.now());
+  if(!openingTelevision.start(mission,radio.director,{enabled:radio.enabled}))radio.consume(mission, performance.now());
   if (restore) toast('Операция загружена');
 }
 function ordersAt(point, target, mode) {
@@ -944,6 +945,11 @@ function frame(now) {
   last = now;
   if (!world || !mission) return;
   if(window.campaign?.renderSuspended)return;
+  if(openingTelevision?.active){
+    openingTelevision.update(dt);
+    world.update(mission,selected,dt,false);
+    return;
+  }
   if (designer?.visible) {
     sound.update();
     return;
@@ -989,6 +995,7 @@ try {
   config = await response.json();
   const story = await loadMissionStory();
   sound = new FieldSound($('sound-toggle'), $('story-voice-toggle'));
+  openingTelevision = new OpeningTelevision(sound);
   world = await createCampaignWorld($('world'), config, sound);
   mission = new Mission(config, world.field);
   world.damage.bindMission(mission);
@@ -1027,8 +1034,8 @@ try {
     get storyAudio() { return {playing:!!sound.storyPlayback, enabled:sound.storyEnabled, chapter:sound.storyPlayback?.chapter, cueId:sound.storyPlayback?.cueId, urgent:!!sound.storyPlayback?.urgent}; },
     get unitVoice() {return {playing:!!sound.voiceSource,cueId:sound.voiceCueId};},
     get selected() { return [...selected]; },
-    get state() { return {active, openingPlaying, paused, speed, buildKind, orderMode}; },
-    advance(seconds) { mission.advance(seconds); events(); radio.consume(mission, performance.now()); updateUi(); return mission.state; },
+    get state() { return {active, openingPlaying, dreamPlaying:openingTelevision.active, paused, speed, buildKind, orderMode}; },
+    advance(seconds) { if(openingTelevision.active)return mission.state;mission.advance(seconds); events(); radio.consume(mission, performance.now()); updateUi(); return mission.state; },
   };
   if(new URLSearchParams(location.search).has('damage')){
     const [{installDamageDebug},T]=await Promise.all([import('./damage-debug.js'),import('three')]);

@@ -68,8 +68,10 @@ export class FieldSound {
     this.toggle.setAttribute('aria-pressed', String(this.enabled));
     setButtonIcon(this.storyToggle, this.storyEnabled ? 'voice' : 'voice-off', this.storyEnabled ? 'Голос радио: вкл.' : 'Голос радио: выкл.');
     this.storyToggle.setAttribute('aria-pressed', String(this.storyEnabled));
-    if (this.output) this.output.gain.setTargetAtTime(this.enabled ? .62 : 0, this.context.currentTime, .018);
+    if (this.output) this.output.gain.setTargetAtTime(this.enabled && !this.openingMix ? .62 : 0, this.context.currentTime, .018);
   }
+
+  setOpeningMix(active) { this.openingMix=active;this.refresh(); }
 
   async unlock() {
     if (!this.enabled) return;
@@ -85,7 +87,7 @@ export class FieldSound {
   setup() {
     const ctx = this.context = new AudioContext();
     this.output = ctx.createGain();
-    this.output.gain.value = .62;
+    this.output.gain.value = this.openingMix ? 0 : .62;
     const limiter = ctx.createDynamicsCompressor();
     limiter.threshold.value = -15;
     this.output.connect(limiter).connect(ctx.destination);
