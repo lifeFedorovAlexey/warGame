@@ -55,18 +55,25 @@ export function createBaseYard(T,field,config,addFog){
     }
   }
   const crossings=[start.x-205,start.x-28];
+  function crosswalk(x,y,span,turned=false){
+    const stripeWidth=2.1,pitch=4.2;
+    for(let i=-2;i<=2;i++){
+      if(turned)marking(x,y+i*pitch,span,stripeWidth);
+      else marking(x+i*pitch,y,stripeWidth,span);
+    }
+  }
   const nearCrossing=x=>crossings.some(c=>Math.abs(x-c)<15);
   for(let x=west+12;x<east-12;x+=14)if(!nearCrossing(x))marking(x,start.y,7.5,.50);
   for(const side of [-1,1])for(let x=west+10;x<east-4;x+=6){
     const junction=roads.slice(1).some(r=>Math.sign(r.points[1].y-start.y)===side&&Math.abs(x-r.points[0].x)<r.width/2+3);
     if(!junction&&!nearCrossing(x))marking(x,start.y+side*12.6,5.96,.42);
   }
-  for(const crossing of crossings)for(let i=-2;i<=2;i++)marking(crossing+i*4.2,start.y,2.1,26);
+  for(const crossing of crossings)crosswalk(crossing,start.y,street.width-4);
   for(const road of roads.slice(1).filter(r=>r.points[1].y>start.y)){
     const x=road.points[0].x;
     // Zebra crossings continue the pavement across the entrances.
-    for(let i=-2;i<=2;i++)marking(x,start.y+20+i*2.6,road.width-3,1.35);
-    marking(x,start.y+31,road.width-3,.65);
+    crosswalk(x,start.y+26,road.width-4,true);
+    marking(x,start.y+40,road.width-3,.65);
     for(let y=start.y+46;y<road.points[1].y-7;y+=14)marking(x,y,.42,7);
   }
   function surface(name,vertices,uv,material,attributes){

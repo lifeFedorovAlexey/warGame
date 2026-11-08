@@ -22,7 +22,8 @@ try{
   w.centre({x:start.x-25,y:start.y+50},530);
   const yard=w.scene.getObjectByName('base_yard');
   const markings=yard.getObjectByName('building_plot_markings');
-  return {hasYard:!!yard,plotVertices:markings?.geometry.attributes.position.count,buildings:m.state.buildings.filter(b=>b.owner==='rai').length,lights:yard.children.filter(c=>c.isPointLight).map(c=>c.intensity)};
+  const lights=[];yard.traverse(node=>{if(node.isPointLight)lights.push(node.intensity);});
+  return {hasYard:!!yard,plotVertices:markings?.geometry.attributes.position.count,buildings:m.state.buildings.filter(b=>b.owner==='rai').length,lights};
  });
  assert(state.hasYard);
  assert(state.plotVertices>0,'Prepared sites have physical survey markings');
@@ -42,7 +43,11 @@ try{
  assert.deepEqual(power,{powered:true,oil:0});
  await page.screenshot({path:folder+'/developed-base-desktop.png'});
  await page.setViewportSize({width:390,height:844});await page.screenshot({path:folder+'/developed-base-narrow.png'});
- assert(await page.evaluate(()=>campaign.world.scene.getObjectByName('base_yard').children.filter(c=>c.isPointLight).every(c=>c.intensity>0)),'AЭС powers the yard lights before oil extraction');
+ assert(await page.evaluate(()=>{
+  const {mission,world}=campaign,lights=[];
+  world.scene.getObjectByName('base_yard').traverse(node=>{if(node.isPointLight)lights.push(node);});
+  return lights.every(light=>mission.state.streetFurniture?.[light.name]?light.intensity===0:light.intensity>0);
+ }),'AЭС powers intact yard lamps before oil extraction; broken poles remain off');
  await page.setViewportSize({width:1440,height:900});
  await page.evaluate(()=>{
   const {mission:m,world:w}=campaign,sign=m.entity(m.state.openingScene.signId);w.centre(sign,150);
