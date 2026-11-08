@@ -17,6 +17,7 @@ import {SCAV_PROFILES} from './scav-unit-profiles.js';
 import {CombatMenu} from './combat-menu.js';
 import {pickupTarget} from './pickup-orders.js';
 import {expandCommandIds} from './group-command.js';
+import {latestVehicleProject} from './vehicle-designs.js';
 
 const $ = id => document.getElementById(id);
 const saveKey = 'warGame.alpha.mission01.v1';
@@ -109,7 +110,8 @@ const isMobile = entity => entity?.owner === 'rai' && !!config.units[entity.kind
 const hpColor = fraction => fraction > .58 ? '#9cdd69' : fraction > .28 ? '#f1cc58' : '#ed6a4d';
 const sampleNames = {'flamethrower':'Устройство №001','mg-ammo-1':'Образец со склада','mg-tower':'Узел башни'};
 const sampleIcons = {'flamethrower':'technology','mg-ammo-1':'ammunition','mg-tower':'turret-ring'};
-const projectLabel = (kind, id, name) => (id && id === kind ? config.units[kind]?.name : name) ?? config.units[kind]?.name;
+const projectLabel = vehicle => latestVehicleProject(mission.state.designs,vehicle,config)?.name
+  ?? (vehicle.projectId===vehicle.kind?null:vehicle.designName) ?? config.units[vehicle.kind]?.name;
 
 function toast(message, milliseconds = 2600) {
   $('toast').textContent = message;
@@ -641,8 +643,7 @@ function updateRoster() {
     if(!types.has(design))types.set(design,types.size);
     const key=stack&&!separate?[blocked,design,selected.has(unit.id)].join(':'):unit.id;
     if(!groups.has(key)){
-      const customName=unit.projectId===unit.kind?null:unit.designName;
-      const label=customName??config.units[unit.kind].name+(stack&&!separate?'':' '+counts[unit.kind]);
+      const name=projectLabel(unit),label=name+(name===config.units[unit.kind].name&&(!stack||separate)?' '+counts[unit.kind]:'');
       groups.set(key,{label,kind:unit.kind,design,units:[]});
     }
     groups.get(key).units.push(unit);
@@ -685,6 +686,7 @@ function updateRoster() {
     const active=units.every(unit=>selected.has(unit.id));
     b.classList.toggle('active',active);
     b.setAttribute('aria-pressed',String(active));
+    b.setAttribute('aria-label',units.length>1?label+' · '+units.length+' машин':label);
     const lowest=units.reduce((min,unit)=>unit.hp/unit.maxHp<min.hp/min.maxHp?unit:min);
     b.style.setProperty('--hp',100*lowest.hp/lowest.maxHp+'%');
     b.style.setProperty('--hp-color',hpColor(lowest.hp/lowest.maxHp));
@@ -712,7 +714,7 @@ function updateContext(first) {
     };
     if (factory) {
       for (const {id, kind, name, spec} of projects) {
-        const label=projectLabel(kind,id,name);
+        const label=name;
         const control=add(label, spec.cost + ' ⚡ · ' + spec.seconds + ' с', () => {
           const result=mission.produce(first.id,id);
           if(result.ok)sound.signal('order');
@@ -726,6 +728,8 @@ function updateContext(first) {
           report(result);if(result.ok)sound.signal('order');updateUi();
         };
         const count=document.createElement('span');count.className='production-count';count.hidden=true;count.setAttribute('aria-hidden','true');control.append(count);
+        const progress=document.createElement('progress');progress.className='production-progress';progress.max=1;progress.hidden=true;progress.setAttribute('aria-label','Выпуск · '+label);control.append(progress);
+        const time=document.createElement('span');time.className='production-time';time.hidden=true;time.setAttribute('aria-hidden','true');control.append(time);
       }
     }
     if (first?.owner === 'rai' && first.completed && first.kind === 'lab'&&mission.researchUnlocked()) {
@@ -763,8 +767,16 @@ function updateContext(first) {
       control.disabled=!canProduce&&!count;
       control.classList.toggle('cannot-produce',!canProduce);
       badge.hidden=!count;badge.textContent=String(count);
-      control.classList.toggle('has-queue',count>0);control.classList.toggle('is-producing',running&&s.powered&&!first.exitBlocked);
-      const status=count?'В очереди: '+count+(running?(first.exitBlocked?' · Ждёт выезда':!s.powered?' · Нет питания':' · Выпуск '+Math.floor(jobs[0].progress*100)+'%'):''):'';
+      const progress=control.querySelector('.production-progress'),time=control.querySelector('.production-time');
+      const blocked=running&&first.exitBlocked,stopped=paused||!s.powered;
+      const value=running?Math.max(0,Math.min(1,jobs[0].progress)):0;
+      const remaining=running?Math.ceil((1-value)*config.units[jobs[0].kind].seconds):0;
+      progress.hidden=time.hidden=!running;progress.value=value;
+      time.textContent=running?(blocked?'!':!s.powered?'Ⅱ':remaining+'с'):'';
+      control.dataset.productionState=running?(blocked?'blocked':stopped?'paused':'running'):'waiting';
+      control.classList.toggle('has-queue',count>0);control.classList.toggle('is-producing',running&&!stopped&&!blocked);
+      const status=count?'В очереди: '+count+(running?' · Выпуск '+Math.floor(value*100)+'% · Осталось '+remaining+' с'+(blocked?' · Ждёт выезда':!s.powered?' · Нет питания':paused?' · Пауза':''):' · Ожидает очереди'):'';
+      progress.setAttribute('aria-valuetext',status);
       control.title=control.dataset.baseTitle+' · ЛКМ — заказать · ПКМ — отменить один'+(status?' · '+status:'');
       if(status)control.setAttribute('aria-description',status);else control.removeAttribute('aria-description');
     }
@@ -851,7 +863,7 @@ function updateUi() {
     setButtonIcon(focus,focusIcons[marker.kind]??'focus',marker.label,focusDetails[marker.kind]);
     focus.classList.toggle('threat',marker.kind==='threat');
   }
-  const entityName = first && (projectLabel(first.kind,first.projectId,first.designName)
+  const entityName = first && (projectLabel(first)
     ?? config.buildings[first.kind]?.name ?? config.camps.find(camp=>camp.id===first.campId)?.name ?? 'Лагерь');
   $('selection').parentElement.hidden=!first;
   $('selection').textContent = group.length > 1 ? 'Группа · ' + group.length : entityName ?? '';

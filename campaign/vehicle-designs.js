@@ -10,9 +10,17 @@ export function vehicleComponentName(id, config) {
 
 export const designNameKey = name => name.trim().normalize('NFC').toLocaleLowerCase('ru');
 
-export function projectAssemblyKey({components, engineUpgradeLevel = 0, paint, kind}) {
+export function projectAssemblyKey({components, engineUpgradeLevel = 0}) {
+  // Paint and project names are cosmetic; only the assembly defines a type.
   const level = Number.isSafeInteger(engineUpgradeLevel) && engineUpgradeLevel > 0 ? engineUpgradeLevel : 0;
-  return JSON.stringify([components, level, vehiclePaint({components, paint, kind}).id]);
+  return JSON.stringify([components, level]);
+}
+
+export function latestVehicleProject(projects, vehicle, config) {
+  const components = vehicle.components ?? config.units[vehicle.kind]?.components;
+  if (!components) return undefined;
+  const key = projectAssemblyKey({...vehicle, components});
+  return projects.findLast(project => projectAssemblyKey(project) === key);
 }
 
 export function latestVehicleProjects(projects) {

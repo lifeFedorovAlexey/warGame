@@ -319,9 +319,9 @@ export class VehicleDesigner {
 
   syncName() {
     const {state, config} = this.mission;
-    const assembly = projectAssemblyKey({components:this.components,paint:this.paint});
-    const current = state.designs.find(project => projectAssemblyKey(project) === assembly);
-    this.saveButton.title = current ? 'Заменит проект «' + current.name + '» для этого набора деталей' : 'Новый проект';
+    const assembly = projectAssemblyKey({components:this.components});
+    const current = state.designs.findLast(project => projectAssemblyKey(project) === assembly);
+    this.saveButton.title = current ? 'Обновит название и окраску проекта «' + current.name + '» для новых заказов' : 'Новый проект';
     this.autoName.disabled = !this.manualName || !this.components.length;
     if (!this.manualName) {
       this.name.value = this.components.length ? projectDesignation(this.components, state.designs, config, state.research) : '';

@@ -4,7 +4,7 @@ import {constructionUnlocked,researchUnlocked,defenseReady} from './story-constr
 import {driveStep,clearOfVehicles,vehicleClearance,planManeuver,planManeuverSteps,maneuverStep,checkManeuver} from './vehicle-motion.js';
 import {footprintSupport,vehicleEnvelope,vehicleSweep,vehicleGroundSafe,vehicleObstacle,vehicleRadiusBound} from './vehicle-collision.js';
 import {passageStillOpen,preparePassageEgress} from './passage-egress.js';
-import {vehicleRecipes,starterProjects,matchingRecipe,projectDesignation,designNameKey,projectAssemblyKey,latestVehicleProjects} from './vehicle-designs.js';
+import {vehicleRecipes,starterProjects,matchingRecipe,projectDesignation,designNameKey,projectAssemblyKey,latestVehicleProjects,latestVehicleProject} from './vehicle-designs.js';
 import {vehiclePaint} from './vehicle-paint.js';
 import {angleDelta} from './builder-kinematics.js';
 import {workProjection,projectorHasSight} from './builder-optics.js';
@@ -800,7 +800,7 @@ export class Mission{
  }
  factoryProjects(){
   const recipes=this.availableVehicleRecipes();
-  return this.state.designs.flatMap(project=>{
+  return latestVehicleProjects(this.state.designs).flatMap(project=>{
    const recipe=matchingRecipe(recipes,project.components);
    return recipe?[{...project,...recipe,components:project.components}]:[];
   });
@@ -2171,7 +2171,8 @@ export class Mission{
   }
   const path=this.movePath(departure,rally,reservations,scale*27);
   if(!path)return false;
-  const design=item.projectId?{projectId:item.projectId,designName:item.name,components:[...item.components],paint:vehiclePaint(item).id}:{};
+  const project=latestVehicleProject(this.state.designs,item,this.config);
+  const design=item.projectId?{projectId:project?.id??item.projectId,designName:project?.name??item.name,components:[...item.components],paint:vehiclePaint(item).id}:{};
   const unit=this.addUnit(item.kind,'rai',exit,design),destination=path.at(-1);
   unit.heading=heading;
   unit.path=path;
@@ -2179,7 +2180,7 @@ export class Mission{
   building.producedCount=slot+1;
   building.queue.shift();
   this.state.statistics.produced++;
-  this.emit('unit-produced',{unit:unit.id,kind:unit.kind,name:item.name??this.config.units[item.kind].name,first:this.state.statistics.produced===1});
+  this.emit('unit-produced',{unit:unit.id,kind:unit.kind,name:unit.designName??item.name??this.config.units[item.kind].name,first:this.state.statistics.produced===1});
   return true;
  }
  linkOilWells(structures,dt){

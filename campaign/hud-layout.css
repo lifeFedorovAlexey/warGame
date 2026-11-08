@@ -41,6 +41,14 @@
 #actions .production-count { display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: #d9c18b; color: #172019; font: 700 10px/1 Arial, sans-serif; font-variant-numeric: tabular-nums; pointer-events: none; text-shadow: none; }
 #actions .production-count[hidden] { display: grid; visibility: hidden; }
 #actions .is-producing .production-count { background: #eda33f; }
+#actions .production-progress {position:absolute;left:2px;bottom:0;width:calc(var(--icon-size) - 4px);height:3px;margin:0;border:0;border-radius:0;appearance:none;background:#263026;pointer-events:none;}
+#actions .production-progress::-webkit-progress-bar {background:#263026;}
+#actions .production-progress::-webkit-progress-value {background:#eda33f;}
+#actions .production-progress::-moz-progress-bar {background:#eda33f;}
+#actions [data-production-state=paused] .production-progress::-webkit-progress-value {background:#c1b58f;}
+#actions [data-production-state=paused] .production-progress::-moz-progress-bar {background:#c1b58f;}
+#actions .production-time {position:absolute;right:0;top:calc(50% + 10px);width:18px;color:#f2dfb3;font:700 9px/10px Arial,sans-serif;font-variant-numeric:tabular-nums;pointer-events:none;}
+#actions [data-production-state=blocked] .production-time {color:#f0a04b;}
 #actions button.has-queue.cannot-produce .game-icon { opacity: .65; filter: saturate(.65); }
 #queue { padding: 0; margin-bottom: 6px; font-size: 10px; text-shadow: none; }
 #placement { margin-bottom: 6px; padding: 0; gap: 4px; }
