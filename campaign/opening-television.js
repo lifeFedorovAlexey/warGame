@@ -1,5 +1,5 @@
 import {setButtonIcon} from '../assets/ui/icons.js';
-import {drawDreamBlasts,playDreamBlast,DREAM_BLAST_SECONDS} from './dream-blasts.js';
+import {drawDreamBlasts,playDreamBlast,prepareDreamBlasts,disposeDreamBlasts,DREAM_BLAST_SECONDS} from './dream-blasts.js';
 
 const movie=new URL('../assets/campaign/alpha/mission01/opening-television.mp4',import.meta.url).href;
 const prop=`<svg viewBox="0 0 600 630" aria-hidden="true">
@@ -121,7 +121,11 @@ export class OpeningTelevision {
 
   update(dt) {
     if(!this.active)return;
-    if(this.record.phase==='television'){if(this.seekPosition===null)this.record.position=this.video.currentTime;return;}
+    if(this.record.phase==='television'){
+      if(this.seekPosition===null)this.record.position=this.video.currentTime;
+      if(this.video.currentTime>2)prepareDreamBlasts(this.canvas);
+      return;
+    }
     const before=this.record.elapsed;
     if(!this.paused)this.record.elapsed+=Math.max(0,Math.min(.1,dt));
     for(const [time,seed] of [[.12,51],[2.1,401],[5.6,802],[7.7,903]])if(before<time&&this.record.elapsed>=time&&this.blastGain){
@@ -137,6 +141,7 @@ export class OpeningTelevision {
     const wasActive=this.active;this.active=false;
     this.video.pause();this.stopBlasts();this.blastGain?.disconnect();this.blastGain=null;
     if(wasActive){this.sound.setOpeningMix(false);this.video.removeAttribute('src');this.video.load();}
+    disposeDreamBlasts(this.canvas);
     this.canvas.width=this.canvas.height=1;
     this.root.hidden=true;document.body.classList.remove('television-playing');
   }

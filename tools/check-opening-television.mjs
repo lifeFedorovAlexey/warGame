@@ -9,7 +9,7 @@ const directory='campaign/previews/opening-television';fs.mkdirSync(directory,{r
 const base=process.env.WARGAME_URL??'http://127.0.0.1:8766/review/opening-television';
 const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true,args:['--use-angle=d3d11']});
 const report={errors:[],checks:[]},started=performance.now();
-report.sources=Object.fromEntries(['campaign/opening-television.js','campaign/opening-television.css','campaign/dream-blasts.js','campaign/dream-globe.js'].map(file=>[file,createHash('sha256').update(fs.readFileSync(file)).digest('hex')]));
+report.sources=Object.fromEntries(['campaign/opening-television.js','campaign/opening-television.css','campaign/dream-blasts.js','campaign/dream-globe.js','campaign/dream-city.js','campaign/dream-render-kit.js','assets/campaign/alpha/mission01/dream-earth.png'].map(file=>[file,createHash('sha256').update(fs.readFileSync(file)).digest('hex')]));
 const check=(name,data={})=>{report.checks.push({name,...data});console.log('PASS',name,JSON.stringify(data));};
 try{
  const context=await browser.newContext({viewport:{width:1920,height:1080},recordVideo:{dir:directory+'/recording',size:{width:1280,height:720}}});
@@ -51,12 +51,17 @@ try{
  assert.equal(await page.evaluate(()=>campaign.mission.state.time),before.time);
  check('natural video end starts nuclear dream; mission time held',ended);
  await page.waitForFunction(()=>campaign.mission.state.radioStory.openingDream.elapsed>3.5);
+ assert.equal(await page.locator('.dream-blasts').getAttribute('data-shot'),'city');
+ const cityCalls=Number(await page.locator('.dream-blasts').getAttribute('data-draw-calls'));assert(cityCalls>1);
  await page.screenshot({path:directory+'/nuclear-desktop.png'});
  await page.locator('[data-dream="pause"]').click();
  await page.setViewportSize({width:390,height:844});
  await page.screenshot({path:directory+'/nuclear-narrow.png'});
  await page.locator('[data-dream="pause"]').click();
  await page.waitForFunction(()=>campaign.mission.state.radioStory.openingDream.elapsed>7.5);
+ assert.equal(await page.locator('.dream-blasts').getAttribute('data-shot'),'globe');
+ assert.equal(await page.locator('.dream-blasts').getAttribute('data-earth-ready'),'true');
+ check('rendered 3D city and loaded Earth texture',{cityDrawCalls:cityCalls,globeDrawCalls:Number(await page.locator('.dream-blasts').getAttribute('data-draw-calls'))});
  await page.locator('[data-dream="pause"]').click();
  await page.screenshot({path:directory+'/globe-narrow.png'});
  await page.setViewportSize({width:1920,height:1080});await page.screenshot({path:directory+'/globe-desktop.png'});
@@ -65,6 +70,8 @@ try{
  await page.waitForFunction(()=>campaign.radio.entry?.id==='m01-s02-l003',null,{timeout:15000});
  assert.equal(await page.locator('.opening-dream').isHidden(),true);
  assert.equal(await page.locator('video').getAttribute('src'),null,'Release the video decoder on returning to the map');
+ assert.equal(await page.locator('.dream-blasts').getAttribute('data-shot'),null,'Dispose opening renderer on returning to the map');
+ assert.equal(await page.locator('.dream-blasts').evaluate(c=>c.width*c.height),1);
  assert.equal(await page.locator('#radio p').textContent(),'Сон приснился. Будто все умерли.');
  assert.equal(await page.evaluate(()=>campaign.radio.transmissions[0].id),'m01-s02-l003');
  check('nuclear dream ends into the existing dream dialogue');
