@@ -18,7 +18,8 @@ import {CombatMenu} from './combat-menu.js';
 import {pickupTarget} from './pickup-orders.js';
 import {expandCommandIds} from './group-command.js';
 import {latestVehicleProject} from './vehicle-designs.js';
-import {oilPowerStatus} from './oil-economy.js';
+import {oilPowerStatus,oilReserved,oilFundingRemaining,oilOrderProgress} from './oil-economy.js';
+import {installNavigationTelemetry} from './navigation-telemetry.js';
 
 const $ = id => document.getElementById(id);
 const saveKey = 'warGame.alpha.mission01.v1';
@@ -37,6 +38,7 @@ let actionKey = '', rosterKey = '', paletteKey = '', taskKey = '', queueKey = ''
 let blockedOrders = new Set(), blockedUntil = 0;
 let lastCommandRevision=null,lastCommandFeedback='';
 let navigationDebug, navigationDebugLoading;
+let navigationTelemetry;
 async function toggleNavigationDebug(force){
  navigationDebug??=await (navigationDebugLoading??=import('./navigation-debug.js').then(({installNavigationDebug})=>installNavigationDebug(world,mission,()=>selected)));
  navigationDebug.setEnabled(force??!navigationDebug.enabled);
@@ -698,8 +700,7 @@ function updateRoster() {
 }
 function updateContext(first) {
   const s = mission.state;
-  const energy = s.energy;
-  const thresholds = [...Object.values(config.units), ...Object.values(config.research)].map(spec => Number(energy >= spec.cost)).join('');
+  const thresholds = [...Object.values(config.units), ...Object.values(config.research)].map(spec => Number(mission.canSpend(spec.cost))).join('');
   const factory = first?.owner === 'rai' && first.completed && first.kind === 'factory';
   const projects = factory ? mission.factoryProjects() : [];
   const designs = factory ? s.designs.map(project => project.id + ':' + project.name).join(',') : '';
@@ -770,13 +771,14 @@ function updateContext(first) {
       badge.hidden=!count;badge.textContent=String(count);
       const progress=control.querySelector('.production-progress'),time=control.querySelector('.production-time');
       const blocked=running&&first.exitBlocked,stopped=paused;
-      const value=running?Math.max(0,Math.min(1,jobs[0].progress)):0;
-      const remaining=running?Math.ceil((1-value)*config.units[jobs[0].kind].seconds):0;
+      const flow=running?oilOrderProgress(jobs[0],config.units[jobs[0].kind].seconds,config):null;
+      const value=flow?.progress??0,remaining=Math.ceil(flow?.remaining??0);
       progress.hidden=time.hidden=!running;progress.value=value;
       time.textContent=running?(blocked?'!':remaining+'с'):'';
-      control.dataset.productionState=running?(blocked?'blocked':stopped?'paused':'running'):'waiting';
+      control.dataset.productionState=running?(blocked?'blocked':stopped?'paused':flow.funding?'funding':'running'):'waiting';
       control.classList.toggle('has-queue',count>0);control.classList.toggle('is-producing',running&&!stopped&&!blocked);
-      const status=count?'В очереди: '+count+(running?' · Выпуск '+Math.floor(value*100)+'% · Осталось '+remaining+' с'+(blocked?' · Ждёт выезда':paused?' · Пауза':''):' · Ожидает очереди'):'';
+      const phase=flow?.funding?'Перечисление нефти '+Math.floor(jobs[0].funding.paid)+'/'+jobs[0].cost:'Выпуск '+Math.floor((jobs[0]?.progress??0)*100)+'%';
+      const status=count?'В очереди: '+count+(running?' · '+phase+' · Осталось '+remaining+' с'+(blocked?' · Ждёт выезда':paused?' · Пауза':''):' · Ожидает очереди'):'';
       progress.setAttribute('aria-valuetext',status);
       control.title=control.dataset.baseTitle+' · ЛКМ — заказать · ПКМ — отменить один'+(status?' · '+status:'');
       if(status)control.setAttribute('aria-description',status);else control.removeAttribute('aria-description');
@@ -787,15 +789,16 @@ function updateContext(first) {
   queue.hidden = !job;
   if (job) {
     const label=sampleNames[job.key]??'Образец';
-    const nextKey=[first.id,job.key].join('|');
+    const flow=oilOrderProgress(job,config.research[job.key].seconds,config);
+    const nextKey=[first.id,job.key,flow.funding>0].join('|');
     if(nextKey!==queueKey){
       queueKey=nextKey;
       const running=document.createElement('div'),progress=document.createElement('progress');
-      running.textContent='Анализ · '+label;
+      running.textContent=(flow.funding?'Перечисление нефти · ':'Анализ · ')+label;
       progress.max=1;running.append(progress);
       queue.replaceChildren(running);
     }
-    queue.querySelector('progress').value=job.progress;
+    queue.querySelector('progress').value=flow.progress;
   }
 }
 function positionFieldTasks(){
@@ -818,9 +821,12 @@ function updateUi() {
   for (const id of selected) if (!mission.entity(id)) selected.delete(id);
   const group = selection(), first = group[0], mobile = group.filter(isMobile);
   $('energy').textContent = Math.floor(s.energy);
-  $('income').textContent = (s.energyRate >= 0 ? '+' : '') + s.energyRate.toFixed(1) + '/с';
-  $('income').classList.toggle('deficit',s.energyRate<0);
-  $('oil-resource').title='Нефть: '+Math.floor(s.energy)+' / '+config.energyCapacity+' · Добыча: '+s.energyRate.toFixed(1)+'/с';
+  const oilRate=Math.round(s.energyRate*10)/10,income=$('income');
+  income.textContent=oilRate?(oilRate>0?'+':'−')+Math.abs(oilRate).toLocaleString('ru-RU'):'';
+  income.hidden=oilRate===0;
+  income.classList.toggle('deficit',oilRate<0);
+  income.title='Баланс нефти в секунду';
+  $('oil-resource').title='Нефть: '+Math.floor(s.energy)+' / '+config.energyCapacity+' · Добыча: '+(s.oilIncomeRate??s.energyRate).toFixed(1)+'/с · Расход: '+(s.oilExpenseRate??0).toFixed(1)+'/с · В заказах: '+Math.ceil(oilReserved(s));
   $('oil-resource').setAttribute('aria-label',$('oil-resource').title);
   const population=vehicles().length;
   $('population').textContent = population + ' / ' + (config.unitLimit??48);
@@ -876,7 +882,8 @@ function updateUi() {
   const hp = group.reduce((sum,entity)=>sum+entity.hp,0), maxHp = group.reduce((sum,entity)=>sum+entity.maxHp,0);
   const wellStatus=group.length===1&&first?.owner==='rai'&&first.kind==='derrick'&&first.completed
     ? ' · '+(first.powered?'Качает':s.powered?'Лимит АЭС':'Нет питания'):'';
-  $('details').textContent = first?.clearing ? 'Освобождение площадки' : first?.awaitingWorkers ? 'В очереди строителей' : first ? Math.ceil(hp) + '/' + maxHp + (first.completed === false ? ' · ' + Math.floor(first.progress*100) + '%' : ' HP')+wellStatus : '';
+  const buildingStatus=first?.completed===false?(oilFundingRemaining(first)>0?' · Нефть '+Math.floor(first.funding.paid)+'/'+first.cost:' · '+Math.floor(first.progress*100)+'%'):' HP';
+  $('details').textContent = first?.clearing ? 'Освобождение площадки' : first?.awaitingWorkers ? 'В очереди строителей' : first ? Math.ceil(hp) + '/' + maxHp + buildingStatus+wellStatus : '';
   $('move-order').classList.toggle('active', orderMode === 'move');
   $('attack-order').classList.toggle('active', orderMode === 'attack');
   $('attack-order').setAttribute('aria-pressed',String(orderMode==='attack'));
@@ -973,6 +980,7 @@ function focusSignal(signal) {
 }
 function frame(now) {
   requestAnimationFrame(frame);
+  navigationTelemetry?.frame(now);
   const dt = Math.min(.65, (now - last) / 1000);
   last = now;
   if (!world || !mission || !$('welcome').hidden) return;
@@ -1032,6 +1040,8 @@ try {
   openingTelevision = new OpeningTelevision(sound);
   world = await createCampaignWorld($('world'), config, sound);
   mission = new Mission(config, world.field);
+  navigationTelemetry=installNavigationTelemetry(mission,()=>({active,paused,speed,openingPlaying,
+   designerVisible:!!designer?.visible,renderSuspended:!!window.campaign?.renderSuspended,selected:[...selected]}));
   world.damage.bindMission(mission);
   designer = new VehicleDesigner($('designer'), $('design-toggle'), mission, {
     makeModel: (components, paint) => world.vehicles.makeDesignModel(components, paint),

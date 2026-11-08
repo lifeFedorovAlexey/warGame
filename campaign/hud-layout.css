@@ -5,7 +5,9 @@
 .top > a { font-size: 12px; }
 .top .resources { margin: 0 auto 0 20px; gap: 20px; }
 .resource { min-width: 60px; }
-.resource-oil { min-width: 102px; }
+.resource-oil { min-width: 84px; }
+.resource-oil #income { margin-left: 1px; color: #a9cb78; font-size: 11px; font-weight: 600; }
+.resource-oil #income.deficit { color: #e77f72; }
 .resource-power { min-width: 48px; }
 .resource-power .resource-icon { color: #e9a34e; }
 .resource-power.overloaded { color: #f0a04b; }
@@ -69,10 +71,8 @@
   .top { padding-inline: 12px; gap: 4px; }
   .top .resources { margin-left: 6px; gap: 8px; font-size: 11px; }
   .resource { min-width: 44px; }
-  .resource-oil { min-width: 58px; }
-  .resource-oil > span { display:grid;grid-template-columns:15px auto;column-gap:4px;row-gap:1px; }
-  .resource-oil .resource-icon { grid-row:1/3;align-self:center; }
-  .resource-oil #income { grid-column:2;margin:0;font-size:9px; }
+  .resource-oil { min-width: 70px; }
+  .resource-oil #income { font-size: 10px; }
   .resource-power { min-width:42px; }
   #hint.mission-hint { left: 12px; width: calc(100vw - 24px); font-size: 10px; }
   #build-cards button.icon-button { --button-size: 40px; --icon-size: 36px; flex-basis: 40px; width: 40px; min-width: 40px; height: 40px; }

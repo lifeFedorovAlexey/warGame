@@ -8,6 +8,7 @@
   "salvage": {"initialRecipes": ["hood-guard", "window-grille", "tube-bumper"]},
   "initialEnergy": 760,
   "energyCapacity": 2400,
+  "oilTransferPerSecond": 25,
   "startGrid": [14.5, 53.5],
   "openingSignGrid": [13.25, 45],
   "openingSignRotationDegrees": -37,

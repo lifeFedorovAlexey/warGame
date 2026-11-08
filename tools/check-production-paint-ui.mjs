@@ -25,6 +25,8 @@ try {
   for(let i=0;i<3;i++)m.produce(factory.id,old.id);
   factory.queue[0].progress=.35;
   const latest=m.saveDesign('ДБО-2',parts,'sand');for(let i=0;i<2;i++)m.produce(factory.id,latest.id);
+  // This fixture represents an older save with prepaid production orders.
+  for(const job of factory.queue){delete job.funding;m.state.energy-=job.cost;}
   // A save from the previous version can still contain both paint projects.
   m.state.designs.unshift(oldProject);
   const liveProjects=m.factoryProjects().filter(p=>p.kind==='bukhanka').map(p=>p.name);

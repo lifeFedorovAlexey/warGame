@@ -7,6 +7,7 @@ import {passageStillOpen,preparePassageEgress} from './passage-egress.js';
 import {vehicleRecipes,starterProjects,matchingRecipe,projectDesignation,designNameKey,projectAssemblyKey,latestVehicleProjects,latestVehicleProject} from './vehicle-designs.js';
 import {vehiclePaint} from './vehicle-paint.js';
 import {isCampPerimeter,updateCampPerimeters} from './camp-demolition.js';
+import {availableOil,oilFundingRemaining,oilRefund,beginOilFlow,finishOilFlow,transferOil,fundedWorkTime,repairWithOil} from './oil-economy.js';
 import {angleDelta} from './builder-kinematics.js';
 import {workProjection,projectorHasSight} from './builder-optics.js';
 import {combatContact} from './combat-contact.js';
@@ -162,7 +163,7 @@ export class Mission{
  addStructure(kind,owner,point,extra={}){const spec=this.config.buildings[kind]??{},scale=this.config.worldScale,foot=spec.footprintMetres??[14,12],item={id:this.id('b'),kind,owner,x:point.x,y:point.y,rotation:0,hp:spec.hp??750,maxHp:spec.hp??750,halfWidth:foot[0]*scale/2,halfDepth:foot[1]*scale/2,progress:owner==='rai'?0:1,completed:owner!=='rai',queue:[],research:null,cooldown:0,...extra};item.maxHp=item.hp;this.state.buildings.push(item);return item;}
  rebuildNavigation(){this.finishPendingStep();this.nav.bounds=this.state.bounds.slice();this.nav.rebuild(this.state.buildings.filter(building=>!building.clearing));}
  fail(reason){return {ok:false,reason};}
- canSpend(cost){return this.state.energy+1e-6>=cost;}
+ canSpend(cost){return availableOil(this.state)+1e-6>=cost;}
  inBounds(x,y){const [gx,gy]=this.field.worldToGrid(x,y),b=this.state.bounds;return gx>=b[0]&&gx<=b[2]&&gy>=b[1]&&gy<=b[3];}
  exploredAt(x,y){const [gx,gy]=this.field.worldToGrid(x,y),col=Math.round(gx),row=Math.round(gy);return col>=0&&row>=0&&col<128&&row<128&&!!this.explored[row*128+col];}
  visibleAt(x,y){const [gx,gy]=this.field.worldToGrid(x,y),col=Math.round(gx),row=Math.round(gy);return col>=0&&row>=0&&col<128&&row<128&&!!this.visible[row*128+col];}
@@ -779,24 +780,24 @@ export class Mission{
    if(!exit)return this.fail('Машинам некуда выехать с площадки');
    exits.push(exit);
   }
-  const building=this.addStructure(kind,'rai',place,{rotation:place.rotation,halfWidth:place.halfWidth,halfDepth:place.halfDepth,groundHeight:place.height,cost:this.config.buildings[kind].cost});
+  const building=this.addStructure(kind,'rai',place,{rotation:place.rotation,halfWidth:place.halfWidth,halfDepth:place.halfDepth,groundHeight:place.height,cost:this.config.buildings[kind].cost,funding:{paid:0}});
   const builderIds=builders.map(unit=>unit.id);
   building.builderIds=builderIds;
   if(exits.length){
    building.clearing=true;building.builderIds=builderIds;
-   this.state.energy-=building.cost;
+
    for(const exit of exits)this.evacuate(building,exit);
    return {ok:true,id:building.id,clearing:true};
   }
   this.rebuildNavigation();
   const result=this.assignConstruction(building);
   if(!result.ok){this.state.buildings.pop();this.rebuildNavigation();return result;}
-  this.state.energy-=building.cost;return {ok:true,id:building.id,waiting:result.waiting};
+  return {ok:true,id:building.id,waiting:result.waiting};
  }
  setCombatPolicy(ids,changes){this.finishPendingStep();return configureCombat(this,ids,changes);}
  stop(ids,{expandGroup=true}={}){if(expandGroup)ids=expandCommandIds(this,ids);this.commandPlanner?.cancel(ids);this.finishPendingStep();for(const unit of this.state.units)if(ids.includes(unit.id)&&unit.owner==='rai'&&unit.hp>0){delete unit.yieldReturn;unit.task=null;unit.path=[];unit.builderWorking=false;cancelCombatRetreat(unit);cancelCombatDeployment(unit);delete unit.detour;delete unit.traffic;delete unit.trafficHold;delete unit.resumeConstructionId;}return{ok:true};}
  setRally(id,point){const factory=this.entity(id);if(factory?.kind!=='factory'||factory.owner!=='rai'||!factory.completed)return this.fail('Выберите готовый завод');if(!this.inBounds(point.x,point.y)||!this.exploredAt(point.x,point.y))return this.fail('Точка сбора должна быть разведана');factory.rally={x:point.x,y:point.y};return{ok:true};}
- cancelBuilding(id){this.finishPendingStep();const building=this.entity(id);if(!building||building.owner!=='rai'||building.completed)return this.fail('Отменить можно только незавершённую стройку');this.state.energy=Math.min(this.config.energyCapacity,this.state.energy+building.cost*(1-building.progress));building.hp=0;this.rebuildNavigation();this.releaseSite(building);for(const unit of this.state.units)if(unit.task?.targetId===id){unit.task=null;unit.path=[];unit.foldTime=2.6;}this.emit('construction-cancelled',{building:id});return {ok:true};}
+ cancelBuilding(id){this.finishPendingStep();const building=this.entity(id);if(!building||building.owner!=='rai'||building.completed)return this.fail('Отменить можно только незавершённую стройку');this.state.energy=Math.min(this.config.energyCapacity,this.state.energy+oilRefund(building));building.hp=0;this.rebuildNavigation();this.releaseSite(building);for(const unit of this.state.units)if(unit.task?.targetId===id){unit.task=null;unit.path=[];unit.foldTime=2.6;}this.emit('construction-cancelled',{building:id});return {ok:true};}
  availableVehicleRecipes(){
   return this.vehicleRecipes.filter(({spec})=>!spec.requires||this.state.research[spec.requires]);
  }
@@ -834,7 +835,7 @@ export class Mission{
   // Remove the newest matching order first, preserving work already in progress.
   const index=factory.queue.findLastIndex(job=>this.productionProjectId(job,projects)===projectId);
   if(index<0)return this.fail('В очереди нет этого проекта');
-  const [job]=factory.queue.splice(index,1),refund=job.cost*(1-clamp(job.progress,0,1));
+  const [job]=factory.queue.splice(index,1),refund=oilRefund(job);
   this.state.energy=Math.min(this.config.energyCapacity,this.state.energy+refund);
   if(index===0){delete factory.exitBlocked;delete factory.exitRetryAt;}
   return {ok:true,refund};
@@ -849,11 +850,11 @@ export class Mission{
   const deployed=this.state.units.filter(unit=>unit.owner==='rai'&&unit.hp>0).length;
   const queued=this.state.buildings.reduce((sum,building)=>sum+building.queue.length,0);
   if(deployed+queued>=(this.config.unitLimit??48))return this.fail('Достигнут предел техники');
-  this.state.energy-=spec.cost;
-  factory.queue.push({kind,projectId,name,components:[...components],paint:vehiclePaint(project).id,progress:0,cost:spec.cost});
+
+  factory.queue.push({kind,projectId,name,components:[...components],paint:vehiclePaint(project).id,progress:0,cost:spec.cost,funding:{paid:0}});
   return {ok:true};
  }
- research(id,key){this.finishPendingStep();if(!this.researchUnlocked())return this.fail('НИИ ещё не принят в эксплуатацию');const lab=this.entity(id),spec=this.config.research[key];if(!lab||lab.kind!=='lab'||lab.owner!=='rai'||!lab.completed)return this.fail('Нужен исследовательский центр');if(!spec||!this.state.artifactKeys.includes(key))return this.fail('Сначала найдите артефакт');if(this.state.research[key]||this.state.buildings.some(b=>b.hp>0&&b.research?.key===key))return this.fail('Исследование уже выполнено или выполняется');if(lab.research)return this.fail('Лаборатория занята');if(!this.canSpend(spec.cost))return this.fail('Недостаточно нефти');this.state.energy-=spec.cost;lab.research={key,progress:0,cost:spec.cost};this.emit('research-start',{key});return {ok:true};}
+ research(id,key){this.finishPendingStep();if(!this.researchUnlocked())return this.fail('НИИ ещё не принят в эксплуатацию');const lab=this.entity(id),spec=this.config.research[key];if(!lab||lab.kind!=='lab'||lab.owner!=='rai'||!lab.completed)return this.fail('Нужен исследовательский центр');if(!spec||!this.state.artifactKeys.includes(key))return this.fail('Сначала найдите артефакт');if(this.state.research[key]||this.state.buildings.some(b=>b.hp>0&&b.research?.key===key))return this.fail('Исследование уже выполнено или выполняется');if(lab.research)return this.fail('Лаборатория занята');if(!this.canSpend(spec.cost))return this.fail('Недостаточно нефти');lab.research={key,progress:0,cost:spec.cost,funding:{paid:0}};this.emit('research-start',{key});return {ok:true};}
  lineOfSight(from,to){return clearCombatSight(this,from,to);}
  damage(target,amount,source,contact){
   this.finishPendingStep();if(target.hp<=0||!Number.isFinite(amount)||amount<=0)return;
@@ -1979,7 +1980,8 @@ export class Mission{
    unit.driveSpeed=0;
    if(Math.abs(yawError)<.06&&Math.abs(pitchError)<.06){
     unit.projector.yaw=aim.yaw;unit.projector.pitch=aim.pitch;
-    unit.builderWorking=true;unit.builderContact=aim.world;
+    unit.builderWorking=job!=='build'||oilFundingRemaining(target)===0;
+    if(unit.builderWorking)unit.builderContact=aim.world;
    }else if(Math.abs(angleDelta(unit.projector.yaw,previousYaw))+Math.abs(unit.projector.pitch-previousPitch)>1e-7){
     // The parked builder is already at a verified working pose. Diagnose
     // actual projector motion, never turn a blocked approach into a fake wait.
@@ -2007,10 +2009,10 @@ export class Mission{
    const moving=target&&this.config.units[target.kind]&&Math.hypot(target.x-target.previousX,target.y-target.previousY)>.05;
    if(!target||moving||!this.projectorAim(unit,target)){unit.builderWorking=false;unit.builderContact=null;continue;}
    if(unit.task.type==='build'&&!target.completed){
-    target.progress=Math.min(1,target.progress+dt/this.buildingSpec(target).seconds);
+    target.progress=Math.min(1,target.progress+(oilFundingRemaining(target)>0?0:dt)/this.buildingSpec(target).seconds);
     if(target.progress>=1){target.completed=true;this.state.statistics.buildingsCompleted++;this.emit('construction-complete',{kind:target.kind,building:target.id});}
-   }else if(unit.task.type==='repair'&&target.hp<target.maxHp&&this.state.energy>=dt*1.5){
-    target.hp=Math.min(target.maxHp,target.hp+dt*40);this.state.energy-=dt*1.5;
+   }else if(unit.task.type==='repair'&&target.hp<target.maxHp){
+    repairWithOil(this,target,dt);
    }else unit.builderWorking=false;
   }
  }
@@ -2099,8 +2101,8 @@ export class Mission{
   else if(spec.damage){const enemy=automaticCombatTarget(this,unit,spec);if(enemy)this.attack(unit,enemy,spec);}
   const working=target&&['build','repair'].includes(unit.task?.type)&&!unit.path.length&&distance(unit,this.workPoint(target,unit.task.workOffset??0))<=this.config.builderRangeMetres;
   if(working){unit.path=[];unit.tool=Math.min(1,unit.tool+dt/2.6);unit.aimTarget={x:target.x,y:target.y};if(unit.tool<.99)return;
-   if(unit.task.type==='build'&&!target.completed){target.progress=Math.min(1,target.progress+dt/this.buildingSpec(target).seconds);if(target.progress>=1){target.completed=true;this.state.statistics.buildingsCompleted++;this.emit('construction-complete',{kind:target.kind,building:target.id});}}
-   else if(unit.task.type==='repair'&&target.hp<target.maxHp&&this.state.energy>dt*1.5){target.hp=Math.min(target.maxHp,target.hp+dt*40);this.state.energy-=dt*1.5;}
+   if(unit.task.type==='build'&&!target.completed){target.progress=Math.min(1,target.progress+(oilFundingRemaining(target)>0?0:dt)/this.buildingSpec(target).seconds);if(target.progress>=1){target.completed=true;this.state.statistics.buildingsCompleted++;this.emit('construction-complete',{kind:target.kind,building:target.id});}}
+   else if(unit.task.type==='repair'&&target.hp<target.maxHp){repairWithOil(this,target,dt);}
    if((unit.task.type==='build'&&target.completed)||(unit.task.type==='repair'&&target.hp>=target.maxHp)){unit.task=null;unit.foldTime=2.6;}
   }else{
    if(unit.tool>0){unit.foldTime=2.6;return;}
@@ -2203,14 +2205,12 @@ export class Mission{
  updateEconomy(dt){
   const structures=this.state.buildings.filter(b=>b.owner==='rai'&&b.hp>0&&b.completed);
   const generation=this.linkOilWells(structures,dt);
-  // This legacy balance stores oil. Orders are paid up front; only wells
-  // require electricity, and running factories/labs do not drain the balance.
-  this.state.energyRate=generation;
-  this.state.energy=clamp(this.state.energy+this.state.energyRate*dt,0,this.config.energyCapacity);
+  beginOilFlow(this,generation,dt);
+  transferOil(this,dt);
   for(const building of structures){building.cooldown=Math.max(0,building.cooldown-dt);const spec=this.buildingSpec(building);if(spec.damage){const target=this.nearestEnemy(building,spec.range);if(target)this.attack(building,target,spec);}
    if(building.queue.length){
     const item=building.queue[0],unitSpec=this.config.units[item.kind];
-    item.progress=Math.min(1,item.progress+dt/unitSpec.seconds);
+    item.progress=Math.min(1,item.progress+fundedWorkTime(this,item,dt)/unitSpec.seconds);
     if(item.progress>=1&&!(building.exitRetryAt>this.state.time)){
      if(this.spawnProducedVehicle(building,item,spec)){
       delete building.exitBlocked;
@@ -2221,8 +2221,9 @@ export class Mission{
      }
     }
    }
-   if(building.research){const task=building.research;task.progress=Math.min(1,task.progress+dt/this.config.research[task.key].seconds);if(task.progress>=1){this.state.research[task.key]=true;this.emit('research-complete',{key:task.key});this.cinematic('research-'+task.key);building.research=null;}}
+   if(building.research){const task=building.research;task.progress=Math.min(1,task.progress+fundedWorkTime(this,task,dt)/this.config.research[task.key].seconds);if(task.progress>=1){this.state.research[task.key]=true;this.emit('research-complete',{key:task.key});this.cinematic('research-'+task.key);building.research=null;}}
   }
+  finishOilFlow(this,dt);
  }
  updateFog(){
   this.fogRevision++;
@@ -2379,6 +2380,7 @@ export class Mission{
   }
  }
  load(json){const data=typeof json==='string'?JSON.parse(json):json;if(data.version!==1||data.mission!==this.config.id||!Array.isArray(data.state?.units)||data.explored?.length!==16384)throw new Error('Несовместимое сохранение');this.state=data.state;
+  this.oilSpent=0;this.oilWorkTime=null;
   this.commandPlanner=null;this.scavJob=null;
   this.pendingTick=null;this.unitFrameTimes=new WeakMap();this.unitIndexActive=false;this.collisionPairs=new Map();this.contactRockPairs=new Map();this.trafficCoordinator=new TrafficCoordinator();
   ensureSalvage(this);
