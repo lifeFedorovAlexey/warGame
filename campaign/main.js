@@ -365,6 +365,12 @@ function updatePlacement() {
 }
 function suggestSite() {
   if (!buildKind) return;
+  const prepared=config.baseSites?.find(site=>site.kind===buildKind);
+  if(prepared&&rotation===0){
+    const angle=(prepared.rotationDegrees??0)*Math.PI/180;
+    const point=world.field.gridToWorld(prepared.grid),place=mission.placement(buildKind,point.x,point.y,angle);
+    if(place.ok&&!place.blockers.length){rotation=angle;site=place;world.centre(site,320);updatePlacement();return;}
+  }
   const origin = selection().find(isMobile) ?? world.controls.target;
   const keepRoadClear=['factory','lab'].includes(buildKind);
   const found = [];

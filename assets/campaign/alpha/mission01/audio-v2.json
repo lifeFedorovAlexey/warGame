@@ -4,7 +4,7 @@
   "language": "ru-RU",
   "source": {
     "path": "docs/campaign/alpha/mission01-radio-v3.md",
-    "sha256": "0976cbe99226579a3f3127594fc420363dbf53f93cd1f1d6e905b1f978290db5"
+    "sha256": "47bfa765b1b3a3c03c27a615392587440fe34a526bf0861bcb2b2a030ef1c33e"
   },
   "voices": {
     "narrator": {
@@ -2519,14 +2519,14 @@
       },
       "textMatch": "exact"
     },
-    "m01-v3-builder-crooked-wall": {
-      "file": "audio-v2/m01-v3-builder-crooked-wall.ogg",
-      "duration": 1.51925,
-      "leadingSilence": 0.06,
-      "trailingSilence": 0.37924999999999986,
+    "m01-v3-builder-crooked-plinth": {
+      "file": "audio-v2/m01-v3-builder-crooked-plinth.ogg",
+      "duration": 1.8210416666666667,
+      "leadingSilence": 0.03,
+      "trailingSilence": 0.41104166666666675,
       "speaker": "builder",
-      "sha256": "dd243d7806fa9431ab3aad87a061db2ce01d618bcf2afd4838d716fb426bf5e5",
-      "bytes": 7324,
+      "sha256": "c67bfb7704c4da49385a1fc6c4a15a6a84961e3e362c662802ca7fc1a60c36a8",
+      "bytes": 8749,
       "origin": "temporary-synthesis",
       "generator": "local Piper + FFmpeg",
       "voice": "denis"
