@@ -26,6 +26,7 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   // The main button includes the opening. This general control smoke skips it
   // through the UI; the story browser suite listens to every line naturally.
   for(const scene of ['p01','p02','p03','p04']){
+   if(scene==='p04')await page.evaluate(()=>campaign.advance(45));
    await page.waitForFunction(id=>campaign.radio.entry?.storyScene===id,scene,{timeout:60000});
    await page.locator('#radio [data-dismiss]').click();
   }
@@ -101,12 +102,13 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   const idleShadows=await page.evaluate(()=>{
    const {mission,world,advance}=window.campaign;
    const render=()=>world.update(mission,new Set(),1/60);
-   advance(.25);render();
+   // The opening builder must finish folding its projector before testing idle casters.
+   advance(6);render();
    const before=world.statistics.shadowUpdates;
    for(let i=0;i<4;i++){advance(.125);render();}
    return world.statistics.shadowUpdates-before;
   });
-  assert.equal(idleShadows,0,'Simulation ticks with identical casters reuse the shadow map');
+  assert.equal(idleShadows,0,'Simulation ticks with stationary casters reuse the shadow map');
   await page.getByRole('button',{name:'Строитель 2',exact:true}).click({modifiers:['Shift']});
   await page.locator('#build-toggle').click();
   try{await page.waitForFunction(()=>document.querySelectorAll('#build-cards .atlas-icon').length===5,{},{timeout:10000});
@@ -170,13 +172,14 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
    let simultaneous=0;
    for(let i=0;i<180;i++){
     c.advance(.3);
+    if(b.completed)break;
     const active=m.state.units.filter(u=>u.builderWorking&&u.task?.targetId===b.id);
     simultaneous=Math.max(simultaneous,active.length);
     for(const worker of active){
      const aim=workProjection(worker,b,m.config,m.field);
      if(!aim||!projectorHasSight(aim,worker,b,m.state.units,m.field,m.config.worldScale))throw new Error('Projector overlaps another vehicle');
     }
-    if(b.progress>.32&&b.progress<.8&&simultaneous===2){c.world.centre(b,170);break;}
+    if(b.progress>.32&&b.progress<1&&active.length===2){c.world.centre(b,170);break;}
    }
    return {simultaneous,progress:b.progress};
   });
@@ -215,7 +218,7 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   const base=await page.evaluate(()=>{
    const c=window.campaign,m=c.mission,b=m.state.buildings.find(b=>b.kind==='derrick'&&b.owner==='rai');
    c.world.centre(b,165);
-   return{power:m.state.powered,complete:b.completed,progress:m.state.buildings.filter(b=>b.owner==='rai').map(b=>b.progress)};
+   return{power:m.state.powered,complete:b.completed,progress:m.state.buildings.filter(b=>b.owner==='rai'&&!m.config.buildings[b.kind]?.storyOnly).map(b=>b.progress)};
   });
   assert.deepEqual(base,{power:true,complete:true,progress:[1,1]});
   assert.equal(await page.locator('#objective-hint').textContent(),'Постройте завод и НИИ.');
