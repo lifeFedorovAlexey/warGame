@@ -47,14 +47,18 @@ export function driveStep(unit, point, dt, {speed, grade, scale, tolerance, reve
   const direction = reverse ? -1 : 1;
   const angle = wrap(direct + (reverse ? Math.PI : 0));
   const curve = Math.tan(clamp(angle * 1.55, -steeringLimit, steeringLimit));
-  const mainLimit = direction > 0 ? curveLimit?.(curve) ?? Infinity : Infinity;
   const targetSpeed = Math.min(speed * gradeSpeed(grade) * (reverse ? .59 : 1),
     Math.sqrt(2*dynamics.braking * Math.max(.05, distance - tolerance * .6)), speed / (1 + dynamics.turnPenalty * Math.abs(angle)),
-    reverse ? Infinity : Math.min(trafficLimit,mainLimit));
+    reverse ? Infinity : trafficLimit);
   const lastSpeed = unit.reversing === reverse ? unit.driveSpeed ?? 0 : 0;
-  const nextSpeed = lastSpeed + clamp(targetSpeed - lastSpeed, -dynamics.braking * dt, dynamics.acceleration * dt);
+  const availableSpeed=lastSpeed+clamp(targetSpeed-lastSpeed,-dynamics.braking*dt,dynamics.acceleration*dt);
+  if(Math.min(distance,Math.max(0,availableSpeed*dt))<.001)return null;
+  const mainLimit = direction > 0 ? curveLimit?.(curve) ?? Infinity : Infinity;
+  const fallbackTarget=lastSpeed<.001?targetSpeed:Math.min(targetSpeed,mainLimit);
+  const nextSpeed = lastSpeed + clamp(Math.min(targetSpeed,mainLimit) - lastSpeed, -dynamics.braking * dt, dynamics.acceleration * dt);
   const travel = Math.min(distance, Math.max(0, nextSpeed * dt));
-  if (travel < .001) return null;
+  // A stopped requested arc must not suppress a different, independently
+  // checked arc. Only the shared traffic limit applies to every candidate.
   // A new waypoint can request a tight turn while the body is still moving
   // too fast to enter its stopping corridor. Brake along the current arc
   // first, preserving inertia; changing steering before slowing can make a
@@ -72,7 +76,7 @@ export function driveStep(unit, point, dt, {speed, grade, scale, tolerance, reve
   // A gentle physical contact also triggers suspension feedback. Combat
   // damage keeps its separate, much higher kinetic-energy threshold.
   const blocked=lastSpeed>.18*scale?{}:null;
-  const pose = nextSpeed<=mainLimit+1e-6?traceArc(unit, direction, curve, travel, scale, allowed,blocked):null;
+  const pose = travel>=.001&&nextSpeed<=mainLimit+1e-6?traceArc(unit, direction, curve, travel, scale, allowed,blocked):null;
   if (pose) return vehiclePose(unit, pose, direction, curve, travel, dt);
   for (const alternative of [maximumCurve, -maximumCurve, 0]) {
     // A different arc has a different stopping corridor. Passing the main
@@ -80,7 +84,7 @@ export function driveStep(unit, point, dt, {speed, grade, scale, tolerance, reve
     // vehicle's unavoidable braking path. Check the executed fallback speed
     // against that arc's own cap; retain the existing slow fallback handling.
     const limit = direction > 0 ? curveLimit?.(alternative) ?? Infinity : Infinity;
-    const alternativeSpeed = lastSpeed + clamp(Math.min(targetSpeed,limit) - lastSpeed, -dynamics.braking * dt, dynamics.acceleration * dt);
+    const alternativeSpeed = lastSpeed + clamp(Math.min(fallbackTarget,limit) - lastSpeed, -dynamics.braking * dt, dynamics.acceleration * dt);
     const fallbackTravel = Math.min(distance, Math.max(0,alternativeSpeed * dt)) * .70;
     if(fallbackTravel<.001||fallbackTravel/dt>limit+1e-6)continue;
     const next = traceArc(unit, direction, alternative, fallbackTravel, scale, allowed);

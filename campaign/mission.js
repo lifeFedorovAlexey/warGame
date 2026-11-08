@@ -1657,10 +1657,11 @@ export class Mission{
   const steeringLimit=vehicleDynamics(unit).steeringLimit;
   const requestedCurve=Math.tan(clamp(angleDelta(Math.atan2(unit.x-waypoint.x,waypoint.y-unit.y),unit.heading)*1.55,-steeringLimit,steeringLimit));
   const requestedLimit=reverseApproach?Infinity:turningHeadway(this,unit,waypoint,dt,scale,stoppedObstacles,.52,requestedCurve);
+  const commonTrafficLimit=trafficLimit;
   if(!reverseApproach)trafficLimit=Math.min(trafficLimit,requestedLimit);
   let contactSpeed;
   const onBlockedContact=speed=>{contactSpeed=speed;};
-  let pose=driveStep(unit,waypoint,dt,{speed,grade,scale,tolerance,trafficLimit,
+  let pose=driveStep(unit,waypoint,dt,{speed,grade,scale,tolerance,trafficLimit:commonTrafficLimit,
    reverseLimit,allowed,onBlockedContact,
    curveLimit:reverseApproach?undefined:curve=>curve===requestedCurve?requestedLimit
     :turningHeadway(this,unit,waypoint,dt,scale,stoppedObstacles,.52,curve)});
