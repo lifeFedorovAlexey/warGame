@@ -42,7 +42,7 @@ button.active { border-color: #e5db9d; box-shadow: inset 0 -2px #e5db9d; }
 .mission-name { color: var(--muted); font-size: 12px; font-weight: 550; }
 .resources { display: flex; align-items: center; gap: 13px; margin-left: auto; white-space: nowrap; font-size: 12px; font-variant-numeric: tabular-nums; }
 .resource { display: grid; gap: 3px; min-width: 64px; }
-.resource-energy { min-width: 106px; }
+.resource-oil { min-width: 106px; }
 .resource > span { display: flex; align-items: center; gap: 4px; line-height: 1.1; }
 .resource-icon { width: 15px; height: 14px; color: #cdd5a6; }
 .resources small { margin-left: auto; color: #bfce99; }
@@ -50,9 +50,9 @@ button.active { border-color: #e5db9d; box-shadow: inset 0 -2px #e5db9d; }
 .resource meter { appearance: none; display: block; width: 100%; height: 3px; background: #343d31; }
 .resource meter::-webkit-meter-bar { height: 3px; background: #343d31; border: 0; border-radius: 0; }
 .resource meter::-webkit-meter-optimum-value { background: #bdcb86; }
-.resource-energy meter::-webkit-meter-optimum-value { background: #dbb778; }
+.resource-oil meter::-webkit-meter-optimum-value { background: #dbb778; }
 .resource meter::-moz-meter-bar { background: #bdcb86; }
-.resource-energy meter::-moz-meter-bar { background: #dbb778; }
+.resource-oil meter::-moz-meter-bar { background: #dbb778; }
 #power { color: var(--muted); }
 #power.online { color: #b5c28d; }
 .settings { position: relative; }
@@ -225,7 +225,7 @@ button.radio-focus { color: var(--accent); }
 .key-guide kbd { font: inherit; }
 .key-guide abbr { text-decoration: none; }
 @media (max-width: 850px) {
-  .mission-name, #power { display: none; }
+  .mission-name { display: none; }
 }
 @media (max-width: 570px) {
   #build-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -237,7 +237,7 @@ button.radio-focus { color: var(--accent); }
   .top { gap: 5px; }
   .resources { gap: 6px; font-size: 10px; }
   .resource { min-width: 46px; }
-  .resource-energy { min-width: 64px; }
+  .resource-oil { min-width: 64px; }
   .resource-icon { width: 12px; height: 11px; }
   .mission-tasks { width: 38vw; }
   .tactical-dock { flex-wrap: wrap; gap: 5px; }

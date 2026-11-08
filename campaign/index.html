@@ -24,15 +24,17 @@
     <header class="top">
       <a href="../demo/" title="Вернуться к осмотру машины">РАЙ</a>
       <div class="resources">
-        <div class="resource resource-energy">
-          <span><span class="resource-icon" aria-hidden="true">⚡</span><b id="energy">760</b><small id="income"></small></span>
-          <meter id="energy-meter" aria-label="Запас энергии" min="0" max="2400" value="760"></meter>
+        <div id="oil-resource" class="resource resource-oil" title="Запас нефти">
+          <span><svg class="resource-icon" aria-hidden="true"><use href="hud-icons.svg#oil"/></svg><b id="energy">760</b><small id="income"></small></span>
+          <meter id="energy-meter" aria-label="Запас нефти" min="0" max="2400" value="760"></meter>
+        </div>
+        <div id="power-resource" class="resource resource-power" title="1 АЭС питает 4 вышки">
+          <span><svg class="resource-icon" aria-hidden="true"><use href="hud-icons.svg#power"/></svg><b id="power">0/0</b></span>
         </div>
         <div class="resource resource-fleet">
           <span><svg class="resource-icon" aria-hidden="true"><use href="hud-icons.svg#bukhanka"/></svg><b id="population">5 / 48</b></span>
           <meter id="fleet-meter" aria-label="Лимит техники" min="0" max="48" value="5"></meter>
         </div>
-        <span id="power" title="Питание от АЭС"></span>
         <button id="objective-focus" class="quiet" hidden data-icon="focus" aria-label="К цели"></button>
       </div>
       <button id="pause" title="Пауза · Пробел" data-icon="pause" aria-label="Пауза"></button>
@@ -197,7 +199,7 @@
           <div><dt>Скорость</dt><dd data-design-speed></dd></div>
           <div><dt>Дальность</dt><dd data-design-range></dd></div>
           <div><dt>Обзор</dt><dd data-design-vision></dd></div>
-          <div><dt>Энергия</dt><dd data-design-cost></dd></div>
+          <div><dt>Нефть</dt><dd data-design-cost></dd></div>
           <div><dt>Сборка</dt><dd data-design-time></dd></div>
           <div><dt title="Оценка по модулям">Масса</dt><dd data-design-mass></dd></div>
           <div><dt>Броня</dt><dd data-design-armor></dd></div>

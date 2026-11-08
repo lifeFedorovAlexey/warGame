@@ -18,6 +18,7 @@ import {CombatMenu} from './combat-menu.js';
 import {pickupTarget} from './pickup-orders.js';
 import {expandCommandIds} from './group-command.js';
 import {latestVehicleProject} from './vehicle-designs.js';
+import {oilPowerStatus} from './oil-economy.js';
 
 const $ = id => document.getElementById(id);
 const saveKey = 'warGame.alpha.mission01.v1';
@@ -120,7 +121,7 @@ function toast(message, milliseconds = 2600) {
 }
 function report(result) {
   if (!result?.ok) toast(result?.reason ?? 'Приказ не выполнен');
-  if(!result?.ok&&result?.reason==='Недостаточно энергии')sound.bark(10);
+  if(!result?.ok&&result?.reason==='Недостаточно нефти')sound.bark('a06');
   return result?.ok;
 }
 function commandFeedback(){
@@ -612,7 +613,7 @@ function updatePalette() {
     const building=availableBuilding(kind),control=$(id),spec=config.buildings[kind];
     control.hidden=!building&&!mission.constructionUnlocked(kind);
     control.disabled=!building&&(!builders().length||!mission.canSpend(spec.cost)||!mission.constructionUnlocked(kind));
-    control.title=building?label+' · Двойной клик — к зданию':'Построить '+spec.name+' · '+spec.cost+' ⚡';
+    control.title=building?label+' · Двойной клик — к зданию':'Построить '+spec.name+' · '+spec.cost+' нефти';
     control.classList.toggle('active',!!building&&selected.has(building.id));
   }
   if (!buildOpen) return;
@@ -623,7 +624,7 @@ function updatePalette() {
   paletteKey = key;
   $('build-cards').style.setProperty('--build-columns',entries.length);
   $('build-cards').replaceChildren(...entries.map(([kind,spec]) => {
-    const b = button(spec.name, spec.cost + ' ⚡ · ' + spec.seconds + ' с', () => beginPlacement(kind), !available([kind,spec]), kind);
+    const b = button(spec.name, spec.cost + ' нефти · ' + spec.seconds + ' с', () => beginPlacement(kind), !available([kind,spec]), kind);
     if (spec.oilSlots) b.title += ' · До ' + spec.oilSlots + ' вышек';
     return b;
   }));
@@ -715,7 +716,7 @@ function updateContext(first) {
     if (factory) {
       for (const {id, kind, name, spec} of projects) {
         const label=name;
-        const control=add(label, spec.cost + ' ⚡ · ' + spec.seconds + ' с', () => {
+        const control=add(label, spec.cost + ' нефти · ' + spec.seconds + ' с', () => {
           const result=mission.produce(first.id,id);
           if(result.ok)sound.signal('order');
           return result;
@@ -737,7 +738,7 @@ function updateContext(first) {
         const done = s.research[id], known = s.artifactKeys.includes(id);
         if(done||!known||first.research||activeResearch.includes(id)||!mission.canSpend(spec.cost))continue;
         const label=sampleNames[id]??'Неизвестный образец';
-        add(label, spec.cost + ' ⚡ · ' + spec.seconds + ' с', () => mission.research(first.id,id), false, sampleIcons[id] ?? 'research').dataset.research = id;
+        add(label, spec.cost + ' нефти · ' + spec.seconds + ' с', () => mission.research(first.id,id), false, sampleIcons[id] ?? 'research').dataset.research = id;
       }
     }
     if (first?.owner === 'rai' && first.completed === false) {
@@ -747,7 +748,7 @@ function updateContext(first) {
         if (result.ok) sound.acknowledge('build', ids);
         return result;
       }, first.clearing||!builders().length, 'build');
-      add('Отменить', 'Вернуть остаток энергии', () => mission.cancelBuilding(first.id), false, 'close');
+      add('Отменить', 'Вернуть остаток нефти', () => mission.cancelBuilding(first.id), false, 'close');
     }
     $('actions').replaceChildren(...items);
     $('actions').classList.toggle('factory-actions', !!factory);
@@ -763,19 +764,19 @@ function updateContext(first) {
     for(const control of $('actions').querySelectorAll('[data-production]')){
       const id=control.dataset.production,count=counts.get(id)??0,badge=control.querySelector('.production-count'),running=count>0&&id===current;
       const canProduce=mission.canSpend(projects.find(project=>project.id===id).spec.cost);
-      // A queued project stays interactive so it can be cancelled without energy.
+      // A queued project stays interactive so it can be cancelled without oil.
       control.disabled=!canProduce&&!count;
       control.classList.toggle('cannot-produce',!canProduce);
       badge.hidden=!count;badge.textContent=String(count);
       const progress=control.querySelector('.production-progress'),time=control.querySelector('.production-time');
-      const blocked=running&&first.exitBlocked,stopped=paused||!s.powered;
+      const blocked=running&&first.exitBlocked,stopped=paused;
       const value=running?Math.max(0,Math.min(1,jobs[0].progress)):0;
       const remaining=running?Math.ceil((1-value)*config.units[jobs[0].kind].seconds):0;
       progress.hidden=time.hidden=!running;progress.value=value;
-      time.textContent=running?(blocked?'!':!s.powered?'Ⅱ':remaining+'с'):'';
+      time.textContent=running?(blocked?'!':remaining+'с'):'';
       control.dataset.productionState=running?(blocked?'blocked':stopped?'paused':'running'):'waiting';
       control.classList.toggle('has-queue',count>0);control.classList.toggle('is-producing',running&&!stopped&&!blocked);
-      const status=count?'В очереди: '+count+(running?' · Выпуск '+Math.floor(value*100)+'% · Осталось '+remaining+' с'+(blocked?' · Ждёт выезда':!s.powered?' · Нет питания':paused?' · Пауза':''):' · Ожидает очереди'):'';
+      const status=count?'В очереди: '+count+(running?' · Выпуск '+Math.floor(value*100)+'% · Осталось '+remaining+' с'+(blocked?' · Ждёт выезда':paused?' · Пауза':''):' · Ожидает очереди'):'';
       progress.setAttribute('aria-valuetext',status);
       control.title=control.dataset.baseTitle+' · ЛКМ — заказать · ПКМ — отменить один'+(status?' · '+status:'');
       if(status)control.setAttribute('aria-description',status);else control.removeAttribute('aria-description');
@@ -786,11 +787,11 @@ function updateContext(first) {
   queue.hidden = !job;
   if (job) {
     const label=sampleNames[job.key]??'Образец';
-    const nextKey=[first.id,s.powered,job.key].join('|');
+    const nextKey=[first.id,job.key].join('|');
     if(nextKey!==queueKey){
       queueKey=nextKey;
       const running=document.createElement('div'),progress=document.createElement('progress');
-      running.textContent=(s.powered?'':'Нет питания · ')+'Анализ · '+label;
+      running.textContent='Анализ · '+label;
       progress.max=1;running.append(progress);
       queue.replaceChildren(running);
     }
@@ -819,13 +820,18 @@ function updateUi() {
   $('energy').textContent = Math.floor(s.energy);
   $('income').textContent = (s.energyRate >= 0 ? '+' : '') + s.energyRate.toFixed(1) + '/с';
   $('income').classList.toggle('deficit',s.energyRate<0);
+  $('oil-resource').title='Нефть: '+Math.floor(s.energy)+' / '+config.energyCapacity+' · Добыча: '+s.energyRate.toFixed(1)+'/с';
+  $('oil-resource').setAttribute('aria-label',$('oil-resource').title);
   const population=vehicles().length;
   $('population').textContent = population + ' / ' + (config.unitLimit??48);
   $('energy-meter').max=config.energyCapacity;
   $('energy-meter').value=s.energy;
   $('fleet-meter').value=population;
-  $('power').textContent = s.powered ? 'Сеть онлайн' : 'Нет питания';
-  $('power').classList.toggle('online',s.powered);
+  const supply=oilPowerStatus(s,config),power=$('power-resource');
+  $('power').textContent=supply.wells+'/'+supply.capacity;
+  power.classList.toggle('overloaded',supply.unpowered>0);
+  power.title='АЭС: '+supply.stations+' · Вышки: '+supply.connected+' работают из '+supply.wells+' · 1 АЭС — '+supply.perStation+' вышки'+(supply.unpowered?' · Без питания: '+supply.unpowered:'');
+  power.setAttribute('aria-label',power.title);
   setButtonIcon($('pause'), paused ? 'play' : 'pause', paused ? 'Продолжить' : 'Пауза', 'Пробел');
   setButtonIcon($('tempo'), speedIcon(speed), 'Скорость ×' + speed);
   const tasks = mission.objectives();

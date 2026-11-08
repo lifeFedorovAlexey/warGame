@@ -55,7 +55,9 @@ try {
   const m=campaign.mission,f=m.entity(id);return {progress:f.queue[0].progress,paint:f.queue[0].paint};
  },fixture.factoryId);assert.equal(stopped.paint,'gray');
  await page.evaluate(({factoryId,generatorId})=>{const m=campaign.mission;m.entity(generatorId).completed=false;m.updateEconomy(4);campaign.advance(0);},fixture);
- assert.equal(await gun.locator('progress').evaluate(p=>p.value),stopped.progress);assert.equal(await gun.locator('.production-time').textContent(),'Ⅱ');
+ assert(Math.abs(await gun.locator('progress').evaluate(p=>p.value)-stopped.progress-4/seconds)<1e-8,'Prepaid production continues without a nuclear station');
+ assert.equal(await gun.locator('.production-time').textContent(),Math.ceil((1-stopped.progress-4/seconds)*seconds)+'с');
+ assert(!(await gun.getAttribute('title')).includes('Нет питания'));
  await page.evaluate(({factoryId,generatorId})=>{const m=campaign.mission;m.entity(generatorId).completed=true;const f=m.entity(factoryId);f.queue[0].progress=1;f.exitBlocked=true;f.exitRetryAt=m.state.time+100;campaign.advance(0);},fixture);
  assert.equal(await gun.locator('.production-time').textContent(),'!');assert.equal(await gun.getAttribute('data-production-state'),'blocked');
  await page.evaluate(({factoryId})=>{const m=campaign.mission,f=m.entity(factoryId);f.queue[0].progress=.45;delete f.exitBlocked;delete f.exitRetryAt;m.updateEconomy(0);campaign.advance(0);},fixture);
@@ -77,5 +79,5 @@ try {
  assert.equal(await gun.locator('.production-count').textContent(),'3');
  assert.deepEqual(await page.evaluate(()=>{const u=campaign.mission.state.units.at(-1);return {paint:u.paint,name:u.designName};}),{paint:'gray',name:'ДБО-3'});
  assert(await builder.locator('progress').isHidden());assert.deepEqual(errors,[]);
- console.log('PASS: old paint projects merge, newest name everywhere, 7/3 roster groups, combined queue/count/cancel, live progress/countdown, power loss, blocked exit, completion, desktop/narrow/landscape');
+ console.log('PASS: old paint projects merge, newest name everywhere, 7/3 roster groups, combined queue/count/cancel, live progress/countdown, production without NPP, blocked exit, completion, desktop/narrow/landscape');
 }finally{await browser.close();}

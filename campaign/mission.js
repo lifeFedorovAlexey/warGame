@@ -171,7 +171,7 @@ export class Mission{
  defenseReady(){return defenseReady(this.state);}
  placement(kind,x,y,rotation=0,{checkMoney=true}={}){
   if(!this.constructionUnlocked(kind))return this.fail('Строительство ещё не открыто');
-  const spec=this.config.buildings[kind];if(!spec)return this.fail('Неизвестное здание');if(spec.requires&&!this.state.research[spec.requires])return this.fail('Требуется исследование: '+this.config.research[spec.requires].name);if(checkMoney&&!this.canSpend(spec.cost))return this.fail('Недостаточно энергии');if(!this.inBounds(x,y)||!this.exploredAt(x,y))return this.fail('Район ещё не разведан');
+  const spec=this.config.buildings[kind];if(!spec)return this.fail('Неизвестное здание');if(spec.requires&&!this.state.research[spec.requires])return this.fail('Требуется исследование: '+this.config.research[spec.requires].name);if(checkMoney&&!this.canSpend(spec.cost))return this.fail('Недостаточно нефти');if(!this.inBounds(x,y)||!this.exploredAt(x,y))return this.fail('Район ещё не разведан');
   if(spec.requiresOil){const oil=this.config.oilFields.map(grid=>this.field.gridToWorld(grid)).find(p=>Math.hypot(p.x-x,p.y-y)<25);if(!oil)return this.fail('Нужна нефтяная точка');x=oil.x;y=oil.y;}
   else{x=Math.round(x/this.config.buildingGridMetres)*this.config.buildingGridMetres;y=Math.round(y/this.config.buildingGridMetres)*this.config.buildingGridMetres;}
   const [w,d]=halfFootprint(spec.footprintMetres,this.config.worldScale,rotation),heights=[];
@@ -845,7 +845,7 @@ export class Mission{
   const project=this.factoryProjects().find(candidate=>candidate.id===projectId);
   if(!project)return this.fail('Сначала сохраните проект в конструкторе');
   const {kind,spec,components,name}=project;
-  if(!this.canSpend(spec.cost))return this.fail('Недостаточно энергии');
+  if(!this.canSpend(spec.cost))return this.fail('Недостаточно нефти');
   const deployed=this.state.units.filter(unit=>unit.owner==='rai'&&unit.hp>0).length;
   const queued=this.state.buildings.reduce((sum,building)=>sum+building.queue.length,0);
   if(deployed+queued>=(this.config.unitLimit??48))return this.fail('Достигнут предел техники');
@@ -853,7 +853,7 @@ export class Mission{
   factory.queue.push({kind,projectId,name,components:[...components],paint:vehiclePaint(project).id,progress:0,cost:spec.cost});
   return {ok:true};
  }
- research(id,key){this.finishPendingStep();if(!this.researchUnlocked())return this.fail('НИИ ещё не принят в эксплуатацию');const lab=this.entity(id),spec=this.config.research[key];if(!lab||lab.kind!=='lab'||lab.owner!=='rai'||!lab.completed)return this.fail('Нужен исследовательский центр');if(!spec||!this.state.artifactKeys.includes(key))return this.fail('Сначала найдите артефакт');if(this.state.research[key]||this.state.buildings.some(b=>b.hp>0&&b.research?.key===key))return this.fail('Исследование уже выполнено или выполняется');if(lab.research)return this.fail('Лаборатория занята');if(!this.canSpend(spec.cost))return this.fail('Недостаточно энергии');this.state.energy-=spec.cost;lab.research={key,progress:0,cost:spec.cost};this.emit('research-start',{key});return {ok:true};}
+ research(id,key){this.finishPendingStep();if(!this.researchUnlocked())return this.fail('НИИ ещё не принят в эксплуатацию');const lab=this.entity(id),spec=this.config.research[key];if(!lab||lab.kind!=='lab'||lab.owner!=='rai'||!lab.completed)return this.fail('Нужен исследовательский центр');if(!spec||!this.state.artifactKeys.includes(key))return this.fail('Сначала найдите артефакт');if(this.state.research[key]||this.state.buildings.some(b=>b.hp>0&&b.research?.key===key))return this.fail('Исследование уже выполнено или выполняется');if(lab.research)return this.fail('Лаборатория занята');if(!this.canSpend(spec.cost))return this.fail('Недостаточно нефти');this.state.energy-=spec.cost;lab.research={key,progress:0,cost:spec.cost};this.emit('research-start',{key});return {ok:true};}
  lineOfSight(from,to){return clearCombatSight(this,from,to);}
  damage(target,amount,source,contact){
   this.finishPendingStep();if(target.hp<=0||!Number.isFinite(amount)||amount<=0)return;
@@ -2203,11 +2203,11 @@ export class Mission{
  updateEconomy(dt){
   const structures=this.state.buildings.filter(b=>b.owner==='rai'&&b.hp>0&&b.completed);
   const generation=this.linkOilWells(structures,dt);
-  let use=0;
-  for(const b of structures)if(b.queue.length||b.research)use+=this.buildingSpec(b).power??0;
-  this.state.energyRate=this.state.powered?generation-use:0;
+  // This legacy balance stores oil. Orders are paid up front; only wells
+  // require electricity, and running factories/labs do not drain the balance.
+  this.state.energyRate=generation;
   this.state.energy=clamp(this.state.energy+this.state.energyRate*dt,0,this.config.energyCapacity);
-  for(const building of structures){building.cooldown=Math.max(0,building.cooldown-dt);const spec=this.buildingSpec(building);if(spec.damage){const target=this.nearestEnemy(building,spec.range);if(target)this.attack(building,target,spec);}if(!this.state.powered)continue;
+  for(const building of structures){building.cooldown=Math.max(0,building.cooldown-dt);const spec=this.buildingSpec(building);if(spec.damage){const target=this.nearestEnemy(building,spec.range);if(target)this.attack(building,target,spec);}
    if(building.queue.length){
     const item=building.queue[0],unitSpec=this.config.units[item.kind];
     item.progress=Math.min(1,item.progress+dt/unitSpec.seconds);

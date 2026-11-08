@@ -274,7 +274,7 @@ export class VehicleDesigner {
     const modifications=this.fieldPreview(),bonus=modifications.reduce((sum,r)=>sum+r.hpBonus,0);
     const values = {
       hp:spec ? spec.hp+bonus : null,
-      cost:spec && spec.cost + ' ⚡',
+      cost:spec && String(spec.cost),
       time:spec && spec.seconds + ' с',
       speed:spec && spec.speed + ' м/с',
       range:spec?.range ? spec.range + ' м' : null,
