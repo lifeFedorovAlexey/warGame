@@ -1,4 +1,5 @@
 import {extractDamagePart} from './damage-geometry.js';
+import {vehiclePaint,vehiclePaintTint,isVehiclePaintMaterial} from './vehicle-paint.js';
 
 export function createDamageDebris(T,scene,field,scale,{activeLimit=24,capacity=64}={}){
   const root=new T.Group();root.name='damage_debris_pool';scene.add(root);
@@ -19,11 +20,15 @@ export function createDamageDebris(T,scene,field,scale,{activeLimit=24,capacity=
     if(slot.model){const materials=new Set();slot.model.traverse(n=>{if(n.isMesh){n.geometry.dispose();materials.add(n.material);}});for(const m of materials)m.dispose();root.remove(slot.model);}
     slot.model=null;slot.active=false;
   }
-  function spawn(bindings,id,state,matrix,direction,power,transforms){
+  function spawn(bindings,id,state,matrix,direction,power,transforms,vehicle){
     if(slots.filter(s=>s.active).length>=activeLimit)return false;
     const slot=slots.find(s=>!s.model)??slots.filter(s=>!s.active).sort((a,b)=>b.age-a.age)[0];
     if(!slot)return false;
     const part=extractDamagePart(T,bindings,id,state,transforms);if(!part)return false;
+    if(vehicle){
+      const tint=vehiclePaintTint(T,vehiclePaint(vehicle)),painted=new Set();
+      part.root.traverse(node=>{const material=node.material;if(node.isMesh&&isVehiclePaintMaterial(material)&&!painted.has(material)){material.color.multiply(tint);painted.add(material);}});
+    }
     clear(slot);slot.model=part.root;slot.age=0;slot.active=true;slot.serial=serial++;
     matrix.decompose(slot.model.position,slot.model.quaternion,slot.model.scale);
     slot.model.position.copy(part.centre.applyMatrix4(matrix));

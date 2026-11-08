@@ -5,6 +5,7 @@ import {driveStep,clearOfVehicles,vehicleClearance,planManeuver,planManeuverStep
 import {footprintSupport,vehicleEnvelope,vehicleSweep,vehicleGroundSafe,vehicleObstacle,vehicleRadiusBound} from './vehicle-collision.js';
 import {passageStillOpen,preparePassageEgress} from './passage-egress.js';
 import {vehicleRecipes,starterProjects,matchingRecipe,projectDesignation,designNameKey,projectAssemblyKey,latestVehicleProjects} from './vehicle-designs.js';
+import {vehiclePaint} from './vehicle-paint.js';
 import {angleDelta} from './builder-kinematics.js';
 import {workProjection,projectorHasSight} from './builder-optics.js';
 import {combatContact} from './combat-contact.js';
@@ -804,19 +805,20 @@ export class Mission{
    return recipe?[{...project,...recipe,components:project.components}]:[];
   });
  }
- saveDesign(name,components){
+ saveDesign(name,components,paint){
   const recipe=matchingRecipe(this.availableVehicleRecipes(),components);
   if(!recipe)return this.fail('Компоненты несовместимы или ещё не изучены');
   const custom=typeof name==='string'?name.trim().replace(/\s+/g,' '):'';
   const title=custom||projectDesignation(recipe.components,this.state.designs,this.config,this.state.research);
   if(title.length>36)return this.fail('Название должно содержать не больше 36 знаков');
-  const key=projectAssemblyKey(recipe);
+  const paintId=vehiclePaint({components,paint}).id;
+  const key=projectAssemblyKey({...recipe,paint:paintId});
   const others=this.state.designs.filter(project=>projectAssemblyKey(project)!==key);
   if(others.some(project=>designNameKey(project.name)===designNameKey(title))){
    return this.fail('Проект с таким названием уже есть');
   }
   const id=this.id('p');
-  this.state.designs=[...others,{id,name:title,components:[...recipe.components]}];
+  this.state.designs=[...others,{id,name:title,components:[...recipe.components],paint:paintId}];
   return {ok:true,id};
  }
  productionProjectId(job,projects=this.factoryProjects()){
@@ -846,7 +848,7 @@ export class Mission{
   const queued=this.state.buildings.reduce((sum,building)=>sum+building.queue.length,0);
   if(deployed+queued>=(this.config.unitLimit??48))return this.fail('Достигнут предел техники');
   this.state.energy-=spec.cost;
-  factory.queue.push({kind,projectId,name,components:[...components],progress:0,cost:spec.cost});
+  factory.queue.push({kind,projectId,name,components:[...components],paint:vehiclePaint(project).id,progress:0,cost:spec.cost});
   return {ok:true};
  }
  research(id,key){this.finishPendingStep();if(!this.researchUnlocked())return this.fail('НИИ ещё не принят в эксплуатацию');const lab=this.entity(id),spec=this.config.research[key];if(!lab||lab.kind!=='lab'||lab.owner!=='rai'||!lab.completed)return this.fail('Нужен исследовательский центр');if(!spec||!this.state.artifactKeys.includes(key))return this.fail('Сначала найдите артефакт');if(this.state.research[key]||this.state.buildings.some(b=>b.hp>0&&b.research?.key===key))return this.fail('Исследование уже выполнено или выполняется');if(lab.research)return this.fail('Лаборатория занята');if(!this.canSpend(spec.cost))return this.fail('Недостаточно энергии');this.state.energy-=spec.cost;lab.research={key,progress:0,cost:spec.cost};this.emit('research-start',{key});return {ok:true};}
@@ -2169,7 +2171,7 @@ export class Mission{
   }
   const path=this.movePath(departure,rally,reservations,scale*27);
   if(!path)return false;
-  const design=item.projectId?{projectId:item.projectId,designName:item.name,components:[...item.components]}:{};
+  const design=item.projectId?{projectId:item.projectId,designName:item.name,components:[...item.components],paint:vehiclePaint(item).id}:{};
   const unit=this.addUnit(item.kind,'rai',exit,design),destination=path.at(-1);
   unit.heading=heading;
   unit.path=path;

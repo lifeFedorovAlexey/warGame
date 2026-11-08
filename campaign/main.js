@@ -1016,7 +1016,7 @@ try {
   mission = new Mission(config, world.field);
   world.damage.bindMission(mission);
   designer = new VehicleDesigner($('designer'), $('design-toggle'), mission, {
-    makeModel: components => world.vehicles.makeDesignModel(components),
+    makeModel: (components, paint) => world.vehicles.makeDesignModel(components, paint),
     onActiveChange(open) {
       if (open) {
         pausedBeforeDesigner = paused;
