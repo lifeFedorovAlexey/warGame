@@ -19,7 +19,7 @@ import {vehicleContact,impactPower,fallbackVehicleImpact} from './vehicle-impact
 import {kickContactRock} from './vehicle-contact-rock.js';
 import {TrafficCoordinator} from './traffic-coordinator.js';
 import {prepareTrafficDeparture,departureSlotOrder,rememberYieldHome,recordYieldStep,resumeYieldHome,borrowedHomeClear} from './traffic-start.js';
-import {checkedRouteShortcut,checkedProgressTurn,checkedDetourAlternative,recoveryConditions,unchangedRecoveryFailure,rememberRecoveryFailure} from './traffic-shortcut.js';
+import {checkedRouteShortcut,checkedProgressTurn,checkedDetourAlternative,checkedRouteRejoin,recoveryConditions,unchangedRecoveryFailure,rememberRecoveryFailure} from './traffic-shortcut.js';
 import {maneuverAdmissionBlocker} from './maneuver-admission.js';
 import {recoverWaitCycle,resumeCycleRoute} from './traffic-cycle.js';
 import {vehicleDynamics} from './vehicle-dynamics.js';
@@ -1680,6 +1680,14 @@ export class Mission{
   else if(!pose)navigationDecision(unit,'BLOCKED',blockers.size?'vehicle-sweep-blocked':'terrain-or-steering-blocked',blockers.values().next().value?.id??null,'local-recovery',speed);
   if(pose)applyPose(pose);else stop();
   if(impactSpeed){this.vehicleCollision(unit,impactSpeed,blockers);if(unit.hp<=0)return !!pose;}
+  if(!pose&&commonTrafficLimit>0&&!gate&&!unit.combatParking
+   &&['move','attack-move'].includes(unit.task?.type)
+   &&[...blockers,...stoppedObstacles].some(other=>other.hp>0&&(other.driveSpeed??0)<.01)){
+   const rejoin=yield* checkedRouteRejoin(this,unit,point,(from,to)=>this.vehicleMotionClear(unit,from,to)
+    &&!maneuverAdmissionBlocker(this,unit,from,to,dt),dt);
+   if(unit.pendingOrder||unit.hp<=0)return false;
+   if(rejoin){unit.detour={legs:rejoin,parking:false,progressRecovery:true,blocked:0};return false;}
+  }
   if(!pose&&trafficLimit>0&&!blockers.size&&!stoppedObstacles.size
    &&['move','attack-move','combat-position'].includes(unit.task?.type)
    &&(unit.reverseDebt??0)>=scale*3.4&&(point.x-unit.x)*forward.x+(point.y-unit.y)*forward.y<0){

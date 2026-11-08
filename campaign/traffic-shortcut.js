@@ -10,6 +10,7 @@ const failures=new WeakMap();
 const recoveryFailures=new WeakMap();
 const progressTurnFailures=new WeakMap();
 const blockedDetourFailures=new WeakMap();
+const routeRejoinFailures=new WeakMap();
 export function recoveryConditions(mission,unit,radius=mission.config.worldScale*22){
  const neighbours=mission.nearbyUnits(unit,radius).filter(other=>other.hp>0);
  const admission=mission.trafficCoordinator.passageDecisions.get(unit.id);
@@ -21,6 +22,12 @@ export function recoveryConditions(mission,unit,radius=mission.config.worldScale
 }
 export function unchangedRecoveryFailure(unit,conditions){return recoveryFailures.get(unit)===conditions;}
 export function rememberRecoveryFailure(unit,conditions){recoveryFailures.set(unit,conditions);}
+function boundedRecoveryConditions(mission,unit,extent,goal,dt){
+ const radius=Math.max(mission.config.worldScale*22,extent+maneuverAdmissionRadius(mission,unit,dt));
+ return radius+'|'+recoveryConditions(mission,unit,radius)+'|'+goal.x+','+goal.y+'|'
+  +mission.nearbyUnits(unit,radius).filter(other=>other.hp>0&&(other.driveSpeed??0)>0)
+   .map(other=>[other.id,other.driveSpeed,other.steering,other.reversing].join(',')).join(';');
+}
 // A previously valid local manoeuvre can become blocked by a newly parked
 // body. Try the bounded alternatives on that geometry change, rather than
 // waiting for the old plan's one-second timeout. Special cooperative/arrival
@@ -29,14 +36,8 @@ export function* checkedDetourAlternative(mission,unit,plan,goal,allowed,dt=.1){
  if(plan.parking||plan.idleYield||plan.yieldReturning||plan.departure||plan.passageExit
   ||plan.progressRecovery||plan.pickup||plan.arrival||plan.rough||unit.pendingOrder)return null;
  const scale=mission.config.worldScale,state=mission.state,revision=unit.commandRevision;
- const condition=()=>{
-  // A fast neighbour beyond the old fixed local radius can still brake
-  // through any of the nine 1.2-scale legs or their 2.5-scale continuation.
-  const radius=Math.max(scale*22,scale*(9*1.2+2.5)+maneuverAdmissionRadius(mission,unit,dt));
-  return radius+'|'+recoveryConditions(mission,unit,radius)+'|'+goal.x+','+goal.y+'|'
-   +mission.nearbyUnits(unit,radius).filter(other=>other.hp>0&&(other.driveSpeed??0)>0)
-    .map(other=>[other.id,other.driveSpeed,other.steering,other.reversing].join(',')).join(';');
- };
+ // Include all nine legs, their continuation and neighbours' braking paths.
+ const condition=()=>boundedRecoveryConditions(mission,unit,scale*(9*1.2+2.5),goal,dt);
  const signature=condition();
  if(blockedDetourFailures.get(plan)===signature)return null;
  const legs=yield* mission.planManeuverSteps(unit,goal,{scale,allowed,attempts:2,maximumLegs:9,
@@ -47,6 +48,51 @@ export function* checkedDetourAlternative(mission,unit,plan,goal,allowed,dt=.1){
   ||unit.pendingOrder||unit.commandRevision!==revision||condition()!==signature)return null;
  if(!legs)blockedDetourFailures.set(plan,signature);
  return legs;
+}
+// Exhausted historical reverse allowance must not strand a car against a
+// stationary body forever. Grant only a completely checked finite rejoin:
+// at most half its own length backwards, then forward onto the same route.
+// The remaining route length must decrease by at least that half-length.
+// No waypoint, accepted goal or accumulated reverse debt is rewritten.
+export function* checkedRouteRejoin(mission,unit,point,allowed,dt){
+ const goal=unit.routeOrder?.destination,scale=mission.config.worldScale;
+ if(!goal||unit.pendingOrder||unit.detour||unit.routeContinuation||!unit.path.length
+  ||Math.hypot(unit.path.at(-1).x-goal.x,unit.path.at(-1).y-goal.y)>.01)return null;
+ const halfLength=vehicleEnvelope(unit,scale,mission.field).depth;
+ if(scale*4-(unit.reverseDebt??0)>=halfLength)return null;
+ const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),initial=distance(unit,point);
+ if(initial<halfLength+.1)return null;
+ const state=mission.state,field=mission.field,nav=mission.nav,revision=unit.commandRevision,
+  kind=unit.kind,start={x:unit.x,y:unit.y,heading:unit.heading},limit=vehicleDynamics(unit).steeringLimit,curve=Math.tan(limit);
+ const condition=()=>boundedRecoveryConditions(mission,unit,halfLength*2+scale*5*1.2,point,dt)
+  +'|accepted:'+unit.routeOrder?.destination?.x+','+unit.routeOrder?.destination?.y;
+ const signature=condition(),failed=routeRejoinFailures.get(unit);
+ if(failed?.signature===signature&&failed.field===field&&failed.nav===nav&&failed.kind===kind)return null;
+ const ownerValid=()=>mission.state===state&&mission.field===field&&mission.nav===nav&&mission.entity(unit.id)===unit&&unit.hp>0
+  &&unit.kind===kind&&unit.x===start.x&&unit.y===start.y&&unit.heading===start.heading
+  &&!unit.pendingOrder&&!unit.detour&&unit.commandRevision===revision;
+ for(const reverse of [halfLength*.5,halfLength])for(const steering of [0,curve/2,-curve/2,curve,-curve]){
+  if(performance.now()>=(mission.nav.workDeadline??Infinity)){yield;if(!ownerValid())return null;}
+  const first={direction:-1,curve:steering,remaining:reverse},exit=checkManeuver(unit,[first],scale,allowed);
+  if(!exit)continue;
+  let continuation;
+  const search=mission.planManeuverSteps(exit,point,{scale,allowed,attempts:2,reverseBudget:0,maximumLegs:5,
+   accept:pose=>{
+    const remaining=distance(pose,point),angle=Math.atan2(Math.sin(Math.atan2(pose.x-point.x,point.y-pose.y)-pose.heading),
+     Math.cos(Math.atan2(pose.x-point.x,point.y-pose.y)-pose.heading));
+    if(remaining>.1&&Math.abs(angle)>.65)return false;
+    const leg={direction:1,curve:Math.tan(Math.max(-limit,Math.min(limit,angle*1.55))),remaining:Math.min(halfLength,remaining)};
+    const end=checkManeuver(pose,[leg],scale,allowed);
+    if(!end||distance(end,point)>initial-halfLength)return false;
+    continuation=leg.remaining>1e-6?leg:null;return true;
+   }});
+  let result;
+  do{result=search.next();if(!result.done){yield;if(!ownerValid()){search.return();return null;}}}while(!result.done);
+  if(!ownerValid()||condition()!==signature)return null;
+  if(result.value)return [first,...result.value,...(continuation?[continuation]:[])];
+ }
+ if(ownerValid()&&condition()===signature)routeRejoinFailures.set(unit,{signature,field,nav,kind});
+ return null;
 }
 export function* checkedProgressTurn(mission,unit,waypoint,destination,allowed){
  const scale=mission.config.worldScale,depth=vehicleEnvelope(unit,scale,mission.field).depth,
