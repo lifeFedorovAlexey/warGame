@@ -8,6 +8,7 @@ import {FieldSound} from './field-sound.js';
 import {StoryDirector, loadMissionStory} from './story-director.js';
 import {startOpeningConstruction,restoreOpeningConstruction,openingCanHandOver} from './opening-construction.js';
 import {OpeningTelevision} from './opening-television.js';
+import {OpeningCamera} from './opening-camera.js';
 import {mainMenu} from './main-menu.js';
 import {storyObjectives} from './story-objectives.js';
 import {buildLayerHeight} from './builder-optics.js';
@@ -25,6 +26,7 @@ const miniBackground = new Image();
 let world, mission, config, radio, sound, designer, combatMenu, openingTelevision;
 let active = false, paused = false, speed = 1, resultShown = false;
 let openingPlaying = false;
+let openingCamera=null;
 let pausedBeforeDesigner = false;
 let buildOpen = false, buildKind = null, rotation = 0, orderMode = null;
 let pointer = null, drag = null, site = null, placing = null;
@@ -266,6 +268,8 @@ function start(restore = false) {
   // Establish the initial view once, with both the base and hillside construction visible.
   const centre = restore&&!openingPlaying ? vehicles()[0] : {x:startPoint.x+(signPoint.x-startPoint.x)*.25,y:startPoint.y+(signPoint.y-startPoint.y)*.25};
   if (centre) world.centre(centre, 360);
+  openingCamera?.dispose();
+  openingCamera=openingPlaying?new OpeningCamera(world,mission):null;
   select(worker&&!openingPlaying ? [worker.id] : [], false, false);
   sound.unlock();
   if(!openingTelevision.start(mission,radio.director,{enabled:radio.enabled}))radio.consume(mission, performance.now());
@@ -968,11 +972,13 @@ function frame(now) {
     if (!paused) mission.advance(dt * speed,{budgetMs:mission.config.simulationCpuBudgetMs,rate:speed});
     events();
     radio.consume(mission, now);
-    if(openingPlaying&&openingCanHandOver(mission,radio.director,radio.enabled)){
+    if(openingPlaying&&openingCamera.update(dt,openingCanHandOver(mission,radio.director,radio.enabled))){
       mission.state.openingScene.handedOver=true;
       openingPlaying=false;active=true;world.controls.enabled=true;
+      openingCamera=null;
       $('mission-hud').classList.remove('opening-playing');
       select(builders().slice(0,1).map(u=>u.id),false,false);
+      toast('Управление передано вам',3800);
       saveGame(false);
     }
   }
@@ -1044,7 +1050,7 @@ try {
     get storyAudio() { return {playing:!!sound.storyPlayback, enabled:sound.storyEnabled, chapter:sound.storyPlayback?.chapter, cueId:sound.storyPlayback?.cueId, urgent:!!sound.storyPlayback?.urgent}; },
     get unitVoice() {return {playing:!!sound.voiceSource,cueId:sound.voiceCueId};},
     get selected() { return [...selected]; },
-    get state() { return {active, openingPlaying, dreamPlaying:openingTelevision.active, paused, speed, buildKind, orderMode}; },
+    get state() { return {active, openingPlaying, openingCamera:openingCamera?.phase??null, dreamPlaying:openingTelevision.active, paused, speed, buildKind, orderMode}; },
     advance(seconds) { if(openingTelevision.active)return mission.state;mission.advance(seconds); events(); radio.consume(mission, performance.now()); updateUi(); return mission.state; },
   };
   if(new URLSearchParams(location.search).has('damage')){
