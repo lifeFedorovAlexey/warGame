@@ -6,6 +6,14 @@ const profiles=new Map();
 // opaque structural volumes from the existing prefabs, not the larger
 // construction exclusion footprint. Open pump/tower frames stay open.
 export function sightVolumes(building,spec,scale){
+ if(building.kind==='scav-fence'){
+  const span=building.fenceSpan??7,profile=building.fenceProfile??[0,0,0],key='fence|'+span+'|'+profile;
+  if(!profiles.has(key)){
+   const height=t=>{const i=Math.min(1,Math.floor(t));return profile[i]+(profile[i+1]-profile[i])*(t-i);};
+   profiles.set(key,Array.from({length:4},(_,i)=>{const a=height(i/2),b=height((i+1)/2);return [(i-1.5)*span/4,0,Math.min(a,b),span/4,.7,Math.max(a,b)+2.5];}));
+  }
+  return profiles.get(key);
+ }
  if(spec.sightVolumes)return spec.sightVolumes;
  const size=spec.realSizeMetres,key=building.kind+'|'+(building.campId??'')+'|'+(size?.join(',')??[building.halfWidth,building.halfDepth,scale].join(','));
  if(profiles.has(key))return profiles.get(key);

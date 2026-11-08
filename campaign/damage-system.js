@@ -24,7 +24,7 @@ export function createDamageSystem(T,scene,field,config){
     dummy.scale.setScalar(config.worldScale);dummy.updateMatrix();return dummy.matrix;
   }
   function getTemplate(entity){
-    const key=(config.units[entity.kind]?'vehicle:':'building:')+entity.kind+(!config.units[entity.kind]?':'+entity.owner+':'+(entity.campId??''):'');
+    const key=(config.units[entity.kind]?'vehicle:':'building:')+entity.kind+(!config.units[entity.kind]?':'+entity.owner+':'+(entity.campId??'')+':'+(entity.scavVariant??'')+':'+(entity.fenceSpan??7)+':'+(entity.fenceProfile??null):'');
     if(!templates.has(key)&&templateProvider){const model=templateProvider(entity);if(model)templates.set(key,model);}
     const template=templates.get(key);if(template&&!template.collider)template.collider=createDamageCollider(T,template.bindings);
     if(template&&!template.regions)template.regions=collectDamageRegions(template.bindings);

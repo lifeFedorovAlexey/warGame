@@ -1,5 +1,4 @@
-const waveLimit = 4;
-const retrySeconds = 8;
+import {updateScavProduction} from './scav-production.js';
 const distance = (a,b) => Math.hypot(a.x-b.x,a.y-b.y);
 
 function campAxes(camp) {
@@ -49,71 +48,4 @@ export function placeExtraCampGuards(mission) {
   }
 }
 
-function planSquad(mission,camp,types) {
-  const axis=campAxes(camp),squad=[];
-  const exitHeading=Math.atan2(-axis.x,axis.y);
-  for(const [index,type] of types.entries()){
-    const kind=mission.config.units[type]?type:'raider';
-    const flank=index%2?1:-1;
-    const rallySpots=squad.map(member=>member.rally);
-    let rally;
-    for(const [along,across] of [[12,26],[28,26],[12,44],[28,44],[44,36]]){
-      const target=offset(camp.gate,axis,along,flank*across);
-      const point=mission.nav.nearest(target.x,target.y,2);
-      if(point&&freePose(mission,kind,point,exitHeading,rallySpots)){
-        rally=point;
-        break;
-      }
-    }
-    if(!rally)return null;
-    let member;
-    for(const behind of [72,104,136]){
-      for(const across of [36,-36,64,-64,0]){
-        const sample=offset(camp,axis,-behind,flank*across);
-        const point=mission.nav.nearest(sample.x,sample.y,2);
-        if(!point||mission.visibleAt(point.x,point.y)||distance(point,rally)<42)continue;
-        const initialHeading=Math.atan2(point.x-rally.x,rally.y-point.y);
-        if(!freePose(mission,kind,point,initialHeading,squad))continue;
-        const path=mission.nav.findPath(point,rally,{maxGoalDistance:1});
-        if(!path?.length)continue;
-        const heading=Math.atan2(point.x-path[0].x,path[0].y-point.y);
-        const pose=freePose(mission,kind,point,heading,squad);
-        if(!pose)continue;
-        member={...pose,path,rally};
-        break;
-      }
-      if(member)break;
-    }
-    if(!member)return null;
-    squad.push(member);
-  }
-  return squad;
-}
-
-export function updateScavReinforcements(mission) {
-  const {state}=mission;
-  if(!state.flags.raidWon)return;
-  for(const {id,wave} of mission.config.camps){
-    if(!wave?.units.length)continue;
-    const camp=state.camps.find(item=>item.id===id);
-    if(!camp||camp.cleared||!mission.inBounds(camp.x,camp.y))continue;
-    const core=state.buildings.find(item=>item.campId===id&&item.kind==='camp-core'&&item.hp>0);
-    if(!core)continue;
-    if(camp.nextWaveAt===undefined){
-      camp.nextWaveAt=state.time+wave.seconds;
-      continue;
-    }
-    if(state.time<camp.nextWaveAt)continue;
-    const discovered=mission.exploredAt(camp.x,camp.y)||mission.exploredAt(camp.gate.x,camp.gate.y);
-    const limit=discovered?waveLimit:wave.units.length;
-    const active=state.units.filter(unit=>unit.campId===id&&unit.reinforcement&&unit.hp>0).length;
-    const squad=active+wave.units.length<=limit&&planSquad(mission,camp,wave.units);
-    camp.nextWaveAt=state.time+(squad?wave.seconds:retrySeconds);
-    if(!squad)continue;
-    for(const {kind,x,y,heading,path,rally} of squad){
-      mission.addUnit(kind,'scavs',{x,y},{heading,path,campId:id,reinforcement:true,guard:{...camp.gate},
-        task:{type:'move',x:rally.x,y:rally.y}});
-    }
-    mission.emit('scav-reinforcements',{camp:id,count:squad.length});
-  }
-}
+export const updateScavReinforcements = updateScavProduction;

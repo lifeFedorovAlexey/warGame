@@ -8,7 +8,7 @@ export function createScavPrefab(T, kind, site) {
   root.add(structure);
   const depot = site === 'nw-west';
   const waterTower = kind === 'mg-tower' && site === 'nw-east';
-  const stronghold = site === 'west-south';
+  const stronghold = site.startsWith('west-south'),improvised=site.includes(':watch');
   const mats = {
     rust: new T.MeshStandardMaterial({color:stronghold ? '#51443b' : depot ? '#685a4e' : '#795145', roughness:.87, metalness:.25}),
     tin: new T.MeshStandardMaterial({color:waterTower ? '#8aaca9' : site === 'nw-east' ? '#778985' : depot ? '#939c98' : stronghold ? '#77796a' : '#8b8476', roughness:.74, metalness:.46}),
@@ -74,12 +74,20 @@ export function createScavPrefab(T, kind, site) {
   }
   if (kind === 'mg-tower') {
     for (const x of [-2.2,2.2]) for (const y of [-2.2,2.2]) {
-      beam([x,y,0], [x*.63,y*.63,9.15], .23, mats.rust);
+      beam([x,y,-.6], [x*.63,y*.63,9.15], .23, improvised?mats.wood:mats.rust);
       beam([x,y,1.25], [-x*.72,y*.73,7.9], .14, mats.dark);
       if (stronghold) box([.76,.76,.28], [x,y,-.08], mats.wood);
       if (waterTower) box([.71,.71,.60], [x,y,-.19], mats.dark);
     }
     box([3.75,3.75,.24],[0,0,9.15],mats.wood);
+    for(const x of [-.43,.43])beam([x,2.18,-.3],[x,1.62,9.36],.11,mats.dark);
+    for(let z=.4;z<9.2;z+=.48)beam([-.49,2.18-z*.06,z],[.49,2.18-z*.06,z],.085,mats.rust);
+    if(improvised){
+      for(const side of [-1,1])for(let i=0;i<4;i++)box([.18,.69,1.05],[side*1.65,-1.1+i*.73,9.65],i%2?mats.rust:mats.wood,[0,side*.08,0]);
+      box([1.36,1.66,.07],[.70,.29,11.20],mats.rust,[.08,0,-.09]);
+      beam([-1.45,-1.43,9.1],[-1.53,-1.45,11.1],.14,mats.wood);
+      box([.8,.12,.6],[0,-1.70,9.9],mats.tin,[0,0,.08]);
+    }
     const yaw = new T.Group();
     yaw.name = 'tower_yaw';
     structure.add(yaw);

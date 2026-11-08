@@ -17,6 +17,7 @@ import {ensureSalvage,updateSalvage,armorMultiplier,salvageFromWreck,availableFi
 import {scheduleWreck,updateWrecks} from './wreck-lifecycle.js';
 import {updateStreetFurniture} from './street-furniture.js';
 import {updateOpeningConstruction} from './opening-construction.js';
+import {installScavBases,campGuardPose} from './scav-base-layout.js';
 const completeSteps=iterator=>{let step;do{step=iterator.next();}while(!step.done);return step.value;};
 import {UnitSpatialIndex} from './unit-spatial-index.js';
 import {vehicleContact,impactPower,fallbackVehicleImpact} from './vehicle-impact.js';
@@ -81,9 +82,9 @@ export class Mission{
     this.addStructure('mg-tower','scavs',field.gridToWorld(grid),{campId:data.id,hp:850*data.strength});
    }
    const roster=SCAV_ROSTERS[data.id];
-   for(let i=0;i<data.units;i++)this.addUnit(roster?.[i%roster.length]??'raider','scavs',{x:gate.x+(i%3-1)*40,y:gate.y+36+Math.floor(i/3)*40},{campId:data.id,guard:{...gate}});
+   for(let i=0;i<data.units;i++){const pose=campGuardPose(camp,i);this.addUnit(roster?.[i%roster.length]??'raider','scavs',pose,{campId:data.id,heading:pose.heading,guard:pose.guard});}
   });
-  this.state.scavRosterVersion=1;this.state.projectiles=[];
+  this.state.scavRosterVersion=1;this.state.projectiles=[];installScavBases(this);
   this.rebuildNavigation();this.updateFog();this.reserveRaid();placeExtraCampGuards(this);
  }
  id(prefix){return prefix+this.serial++;}
@@ -165,7 +166,7 @@ export class Mission{
  inBounds(x,y){const [gx,gy]=this.field.worldToGrid(x,y),b=this.state.bounds;return gx>=b[0]&&gx<=b[2]&&gy>=b[1]&&gy<=b[3];}
  exploredAt(x,y){const [gx,gy]=this.field.worldToGrid(x,y),col=Math.round(gx),row=Math.round(gy);return col>=0&&row>=0&&col<128&&row<128&&!!this.explored[row*128+col];}
  visibleAt(x,y){const [gx,gy]=this.field.worldToGrid(x,y),col=Math.round(gx),row=Math.round(gy);return col>=0&&row>=0&&col<128&&row<128&&!!this.visible[row*128+col];}
- constructionUnlocked(kind){return constructionUnlocked(this.state,kind);}
+ constructionUnlocked(kind){return !this.config.buildings[kind]?.enemyOnly&&constructionUnlocked(this.state,kind);}
  researchUnlocked(){return researchUnlocked(this.state);}
  defenseReady(){return defenseReady(this.state);}
  placement(kind,x,y,rotation=0,{checkMoney=true}={}){
@@ -2245,7 +2246,6 @@ export class Mission{
   this.updateRaid(s.storyConstruction?.enabled
    ? s.powered&&has('factory')&&has('lab')&&s.statistics.produced>0
    : enemyVisible||(has('factory')&&has('lab')&&s.statistics.produced>0));
-  updateScavReinforcements(this);
   if(!s.flags.thirdSighted){
    const tower=waterTower(this);
    if(tower&&this.visibleAt(tower.x,tower.y)){s.flags.thirdSighted=true;this.cinematic('camp3-sighted');}
@@ -2285,7 +2285,7 @@ export class Mission{
    this.updateProjectiles();updateStreetFurniture(this);updateSalvage(this);updateWrecks(this);this.finalizeBuilderContacts(dt);this.updateConstructionSites();this.updateEconomy(dt);
    for(const b of this.state.buildings)if(b.owner==='scavs'&&b.hp>0){b.cooldown=Math.max(0,b.cooldown-dt);const spec=this.buildingSpec(b);if(spec.damage){const enemy=this.nearestEnemy(b,spec.range);if(enemy)this.attack(b,enemy,spec);}}
    this.fogTimer+=dt;if(this.fogTimer>=.25){this.fogTimer=0;this.updateFog();}this.updateMission();if(this.navigationDirty){this.rebuildNavigation();this.navigationDirty=false;}
-   this.pendingTick=null;updateOpeningConstruction(this);return true;
+   this.pendingTick=null;updateOpeningConstruction(this);updateScavReinforcements(this);return true;
   }finally{this.unitIndexActive=false;this.nav.workDeadline=Infinity;}
  }
  vehicleCollision(unit,speed,blockers){
@@ -2379,7 +2379,7 @@ export class Mission{
   }
  }
  load(json){const data=typeof json==='string'?JSON.parse(json):json;if(data.version!==1||data.mission!==this.config.id||!Array.isArray(data.state?.units)||data.explored?.length!==16384)throw new Error('Несовместимое сохранение');this.state=data.state;
-  this.commandPlanner=null;
+  this.commandPlanner=null;this.scavJob=null;
   this.pendingTick=null;this.unitFrameTimes=new WeakMap();this.unitIndexActive=false;this.collisionPairs=new Map();this.contactRockPairs=new Map();this.trafficCoordinator=new TrafficCoordinator();
   ensureSalvage(this);
   this.state.projectiles??=[];
@@ -2406,6 +2406,7 @@ export class Mission{
    building.halfDepth=Math.min(building.halfDepth,halfDepth);
   }
   this.state.bounds=(this.state.flags.lastRevealed?this.config.finalMapBounds:this.config.initialMapBounds).slice();this.state.designs=Array.isArray(this.state.designs)?latestVehicleProjects(this.state.designs):starterProjects(this.vehicleRecipes);this.serial=data.serial;this.randomState=data.randomState;this.explored.set(data.explored);this.events=[];this.effects=[];this.accumulator=data.accumulator??0;this.fogTimer=data.fogTimer??0;this.navigationDirty=false;this.linkOilWells(this.state.buildings.filter(b=>b.owner==='rai'&&b.hp>0&&b.completed),0);this.rebuildNavigation();this.updateFog();
+  installScavBases(this,{restoring:true});this.rebuildNavigation();
   for(const entity of legacyWrecks){
    const state=entity.damage,mark=state?.marks?.at(-1);
    if(state){state.burn=Math.max(state.burn,.48);state.revision++;}

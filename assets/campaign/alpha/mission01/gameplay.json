@@ -47,6 +47,10 @@
     "scav-grenadier": {"name": "Гренадёр", "cost": 0, "seconds": 0, "hp": 70, "speed": 12, "range": 62, "damage": 32, "cooldown": 3.2, "vision": 150, "role": "combat", "weapon": "grenade", "splash": 16, "infantry": true}
   },
   "buildings": {
+    "scav-barracks": {"name":"Барак отбросов","enemyOnly":true,"realSizeMetres":[9.5,6.8,4.6],"footprintMetres":[10,7],"hp":620,"vision":150,"power":0,"seconds":1},
+    "scav-store": {"name":"Склад хлама","enemyOnly":true,"realSizeMetres":[5.9,5,2.8],"footprintMetres":[6,5],"hp":260,"vision":0,"power":0,"seconds":1},
+    "scav-fence": {"name":"Забор из металлолома","enemyOnly":true,"realSizeMetres":[7,0.7,2.7],"footprintMetres":[7,0.7],"hp":160,"vision":0,"power":0,"seconds":1},
+    "scav-gate": {"name":"Створка ворот","enemyOnly":true,"realSizeMetres":[1,5.6,4.8],"footprintMetres":[1,5.6],"hp":260,"vision":0,"power":0,"seconds":1},
     "base-sign": {
       "name": "Вывеска «РАЙ»",
       "storyOnly": true,

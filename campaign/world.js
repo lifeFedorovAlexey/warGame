@@ -5,6 +5,7 @@ import {createDesertSky} from '../demo/sky.js';
 import {createVehicleLayer} from './vehicle-layer.js';
 import {createBuildingPrefab} from './prefabs.js';
 import {createScavPrefab} from './scav-prefabs.js';
+import {createScavBasePrefab} from './scav-base-prefabs.js';
 import {aimTowerWeapon,towerDamagePose} from './tower-weapon.js';
 import {mgRecoil} from './mg-burst.js';
 import {createShadowCasters} from './shadow-casters.js';
@@ -60,7 +61,7 @@ export async function createCampaignWorld(host,config,sound){
  const damage=createDamageSystem(T,scene,field,config);
  const vehicles=await createVehicleLayer(T,scene,field,config,damage),buildingRoot=new T.Group();scene.add(buildingRoot);const buildings=new Map(),prefabs=new Map(),selectionRoot=new T.Group();scene.add(selectionRoot);
  damage.setTemplateProvider(entity=>{
-   const root=getPrefab(entity.kind,entity.owner,entity.campId);root.updateMatrixWorld(true);
+   const root=getPrefab(entity.kind,entity.owner,entity.campId,entity.scavVariant,entity.fenceSpan,entity.fenceProfile);root.updateMatrixWorld(true);
    const bindings=[];root.traverse(node=>{if(node.isMesh)bindings.push(damage.prepare(node,'building',0));});
    return {bindings,parts:root.userData.damageParts??{0:{name:'structure',material:'concrete'}},pose:towerDamagePose(T,root,bindings,field,config.worldScale)};
  });
@@ -146,10 +147,10 @@ export async function createCampaignWorld(host,config,sound){
   camera.position.set(x,y,field.heightAt(x,y)+120);
   controls.update();
  }
- function getPrefab(kind,owner='rai',camp=''){
-  const key = owner + ':' + kind + ':' + camp;
+ function getPrefab(kind,owner='rai',camp='',variant='',span=7,profile=null){
+  const key = owner + ':' + kind + ':' + camp+':'+variant+':'+span+':'+profile;
   if (!prefabs.has(key)) {
-   const prefab = owner === 'scavs' ? createScavPrefab(T,kind,camp) : createBuildingPrefab(T,kind,config.buildings[kind]);
+   const prefab = owner === 'scavs' ? kind.startsWith('scav-')?createScavBasePrefab(T,kind,camp,span,variant,profile):createScavPrefab(T,kind,variant?camp+':'+variant:camp) : createBuildingPrefab(T,kind,config.buildings[kind]);
    prefab.userData.kind = kind;
    prefab.userData.owner = owner;
    prefabs.set(key,prefab);
@@ -172,7 +173,7 @@ export async function createCampaignWorld(host,config,sound){
    renderer.setSize(192,116,false);
    const aspect=192/116, corner=new T.Vector3();
    for (const kind of Object.keys(config.buildings)) {
-    if(config.buildings[kind].storyOnly)continue;
+    if(config.buildings[kind].storyOnly||config.buildings[kind].enemyOnly)continue;
     const mesh = getPrefab(kind).clone(true), bounds = new T.Box3().setFromObject(mesh);
     const centre = bounds.getCenter(new T.Vector3());
     camera.position.copy(centre).add(new T.Vector3(kind==='factory'||kind==='generator'?22:-22,-29,20));
@@ -281,7 +282,7 @@ export async function createCampaignWorld(host,config,sound){
    if(pose){root.matrix.copy(pose.matrix).multiply(lightLift);root.matrixWorldNeedsUpdate=true;const unit=mission.entity(near[i].id);spots.forEach((spot,j)=>{if(partMissing(unit?.damage,j+5))spot.intensity=0;else headlightCount++;});}
   });
   const buildingIds=new Set(mission.state.buildings.map(b=>b.id));for(const [id,object] of buildings)if(!buildingIds.has(id)){construction.release(object);damage.releaseBuilding(object);buildingRoot.remove(object);buildings.delete(id);}
-  for(const b of mission.state.buildings){let object=buildings.get(b.id);if(object&&(object.userData.kind!==b.kind||object.userData.owner!==b.owner)){construction.release(object);damage.releaseBuilding(object);buildingRoot.remove(object);buildings.delete(b.id);object=null;}if(!object){object=getPrefab(b.kind,b.owner,b.campId).clone(true);object.userData.entity=b.id;damage.attachBuilding(object,b);buildingRoot.add(object);buildings.set(b.id,object);}object.visible=(b.hp>0||b.damage?.wreck)&&(b.owner==='rai'||mission.exploredAt(b.x,b.y));if(!object.visible)continue;object.position.set(b.x,b.y,b.groundHeight??field.heightAt(b.x,b.y));object.rotation.z=b.rotation;object.scale.setScalar(config.worldScale);
+  for(const b of mission.state.buildings){let object=buildings.get(b.id);if(object&&(object.userData.kind!==b.kind||object.userData.owner!==b.owner)){construction.release(object);damage.releaseBuilding(object);buildingRoot.remove(object);buildings.delete(b.id);object=null;}if(!object){object=getPrefab(b.kind,b.owner,b.campId,b.scavVariant,b.fenceSpan,b.fenceProfile).clone(true);object.userData.entity=b.id;damage.attachBuilding(object,b);buildingRoot.add(object);buildings.set(b.id,object);}object.visible=(b.hp>0||b.damage?.wreck)&&(b.owner==='rai'||mission.exploredAt(b.x,b.y));if(!object.visible)continue;object.position.set(b.x,b.y,b.groundHeight??field.heightAt(b.x,b.y));object.rotation.z=b.rotation;object.scale.setScalar(config.worldScale);
    if(b.kind==='mg-tower')aimTowerWeapon(object,b,field,config.worldScale,b.aimTarget,now-(shotTimes.get(b.id)??-Infinity));
    if(b.owner==='rai'&&b.hp>0)construction.building(object,b,config.buildings[b.kind]);
    damage.updateBuilding(object,b);
