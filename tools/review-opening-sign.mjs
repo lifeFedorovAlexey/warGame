@@ -4,7 +4,7 @@ import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url);
 const {chromium}=require('C:/Users/Алексей/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
 const folder='campaign/previews/opening-sign';fs.mkdirSync(folder,{recursive:true});
-const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true,args:['--enable-unsafe-swiftshader','--use-angle=swiftshader']});
+const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true,args:['--use-angle=d3d11']});
 try{
  const page=await browser.newPage({viewport:{width:1440,height:900}}),errors=[];
  page.on('pageerror',e=>errors.push(e.message));
@@ -43,6 +43,16 @@ try{
   world.centre(sign,220);
  });
  await page.screenshot({path:folder+'/sign-at-hill.png'});
+ await page.evaluate(()=>{
+  const {world,mission}=campaign,sign=mission.entity(mission.state.openingScene.signId);
+  const z=sign.groundHeight+1.7*mission.config.worldScale,angle=sign.rotation;
+  world.controls.target.set(sign.x,sign.y,z);
+  world.camera.position.set(sign.x+Math.sin(angle)*102,sign.y-Math.cos(angle)*102,z+43);
+  world.controls.update();
+ });
+ await page.screenshot({path:folder+'/sign-lettering-close.png'});
+ await page.screenshot({path:folder+'/sign-lettering-detail.png',clip:{x:480,y:310,width:480,height:310}});
+ await page.setViewportSize({width:390,height:844});await page.screenshot({path:folder+'/sign-lettering-narrow.png'});
  assert.deepEqual(errors,[]);
  console.log('PASS: sign at the hill, real construction, input locked until dialogue ends, wide/narrow screenshots');
 }finally{await browser.close();}
