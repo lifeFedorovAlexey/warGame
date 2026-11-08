@@ -21,7 +21,7 @@ float pbrScale(float kind){return kind==2.?18.:(kind==3.?13.:(kind==1.?6.:10.));
 
 export const terrainPbrSurface=`
 if(pavementCoverage>.5){
- pbrKinds=vec2(2.,1.);pbrMix=pavementSand;
+ pbrKinds=vec2(2.);pbrMix=0.;
  pbrFade*=smoothstep(.55,.96,pavementCoverage);
 }else{
  pbrFade*=1.-smoothstep(.15,.45,pavementCoverage);
@@ -40,7 +40,7 @@ if(!layeredRock)surfacePbrUv.y+=(tnoise(surfacePbrUv.yx/23.+17.)-.5)*3.2;
  vec4 color=mix(ca,cb,pbrMix),detail=mix(na,nb,pbrMix);
  vec3 meanColor=mix(pbrMeanColor[int(pbrKinds.x)],pbrMeanColor[int(pbrKinds.y)],pbrMix),grain=clamp(color.rgb/max(vec3(.015),meanColor),vec3(.40),vec3(1.9));
  diffuseColor.rgb*=mix(vec3(1.),grain,.78*pbrFade)*mix(1.,.78+.22*color.a,pbrFade);
- if(pavementCoverage>.5)diffuseColor.rgb=mix(diffuseColor.rgb,harmonize(color.rgb,.15)*vec3(1.05,1.07,1.09),pavementClean*.3*pbrFade);
+ if(pavementCoverage>.5)diffuseColor.rgb=mix(diffuseColor.rgb,harmonize(color.rgb,.15)*vec3(1.05,1.07,1.09),pavementCoverage*.3*pbrFade);
  surfacePbrNormal=normalize(detail.rgb*2.-1.);surfacePbrNormal.xy*=pbrKinds.x==3.?.6:.62;
  terrainRoughness=mix(terrainRoughness,clamp(detail.a,.64,.99),pbrFade);
 }
@@ -53,7 +53,5 @@ if(pbrFade>.002){
  vec3 dpX=dFdx(-vViewPosition),dpY=dFdy(-vViewPosition),perpY=cross(dpY,normal),perpX=cross(normal,dpX);vec2 uvX=dFdx(surfacePbrUv),uvY=dFdy(surfacePbrUv);
  vec3 tangent=perpY*uvX.x+perpX*uvY.x,bitangent=perpY*uvX.y+perpX*uvY.y;float invScale=inversesqrt(max(.000000000001,max(dot(tangent,tangent),dot(bitangent,bitangent))));
  vec3 mapped=normalize(mat3(tangent*invScale,bitangent*invScale,normal)*normalize(surfacePbrNormal));normal=normalize(mix(normal,mapped,pbrFade));
- float sandHeight=.12*pavementSand*(.96+.04*tnoise(vTerrainPosition.xy*2.6));
- vec3 rx=cross(dpY,normal),ry=cross(normal,dpX);float determinant=dot(dpX,rx);vec3 gradient=sign(determinant)*(dFdx(sandHeight)*rx+dFdy(sandHeight)*ry);gradient*=min(1.,abs(determinant)*.16/max(.00000001,length(gradient)));if(abs(determinant)>.00000001)normal=normalize(abs(determinant)*normal-gradient*pbrFade);
 }
 `;
