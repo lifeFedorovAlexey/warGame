@@ -6,9 +6,10 @@ const folder='campaign/previews/street-lamps';fs.mkdirSync(folder,{recursive:tru
 if(fs.existsSync('tools/.runtime-media/playwright'))process.env.PLAYWRIGHT_BROWSERS_PATH=fs.realpathSync('tools/.runtime-media/playwright');
 const {chromium}=require('C:/Users/Алексей/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
 const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true,args:['--use-angle=d3d11']});
+const errors=[];
 try{
  const context=await browser.newContext({viewport:{width:1920,height:1080},recordVideo:{dir:folder,size:{width:1280,height:720}}});
- const page=await context.newPage(),errors=[];
+ const page=await context.newPage();
  page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
  page.on('response',r=>{if(r.status()>=400)errors.push(r.status()+' '+r.url());});
  await page.addInitScript(()=>localStorage.setItem('warGame.fieldRadio','off'));
@@ -92,4 +93,5 @@ try{
  await page.close();await context.close();
  await page.video().saveAs(folder+'/drive-break-collect.webm');
  console.log('PASS: ordinary map clicks drive through a lit lamp without stopping, lamp falls/goes dark, reload preserves stock, pickup installs a real bumper; desktop/narrow/constructor checked');
-}finally{await browser.close();}
+}catch(error){console.error('Browser errors before failure:',JSON.stringify(errors));throw error;}
+finally{await browser.close();}
