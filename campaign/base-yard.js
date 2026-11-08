@@ -1,7 +1,9 @@
 import {baseApproachRoads} from './base-roads.js';
+import {createBaseSiteMarkings} from './base-site-markings.js';
 // Physical scenery only. Nothing here is registered as an entity or navigation obstacle.
 export function createBaseYard(T,field,config,addFog){
   const root=new T.Group();root.name='base_yard';root.userData.decorative=true;
+  root.add(createBaseSiteMarkings(T,field,config,addFog));
   const scale=config.worldScale,loader=new T.TextureLoader(),lights=[];
   const texture=name=>{const map=loader.load(new URL('../assets/maps/alpha/materials/'+name,import.meta.url).href);map.wrapS=map.wrapT=T.RepeatWrapping;map.colorSpace=T.SRGBColorSpace;return map;};
   const concrete=new T.MeshStandardMaterial({color:'#d4ccae',map:texture('weathered-concrete.jpg'),vertexColors:true,roughness:1,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1});

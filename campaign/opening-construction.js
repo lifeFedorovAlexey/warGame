@@ -3,9 +3,13 @@ function signPlacement(mission){
   const point=mission.field.gridToWorld(mission.config.openingSignGrid);
   const rotation=mission.config.openingSignRotationDegrees*Math.PI/180,c=Math.cos(rotation),s=Math.sin(rotation);
   const [w,d]=mission.config.buildings['base-sign'].realSizeMetres,scale=mission.config.worldScale;
-  const heights=[-w/2,0,w/2].flatMap(x=>[-d/2,d/2].map(y=>mission.field.heightAt(point.x+(x*c-y*s)*scale,point.y+(x*s+y*c)*scale)));
+  const steps=Math.ceil(w/.25),heights=[];
+  for(let i=0;i<=steps;i++)for(const y of [-d/2,0,d/2]){
+    const x=-w/2+w*i/steps;
+    heights.push(mission.field.heightAt(point.x+(x*c-y*s)*scale,point.y+(x*s+y*c)*scale));
+  }
   // The footing extends into the hillside; its top stays above the highest corner.
-  return {...point,rotation,groundHeight:Math.max(...heights)-.35*scale+.05};
+  return {...point,rotation,groundHeight:Math.max(...heights)-.35*scale+.05*scale};
 }
 
 export function startOpeningConstruction(mission) {
@@ -30,8 +34,9 @@ export function restoreOpeningConstruction(mission) {
   const sign=mission.entity(scene.signId);
   if(!sign)return;
   const point=signPlacement(mission);
-  if(Math.hypot(sign.x-point.x,sign.y-point.y)<1&&Math.abs(sign.rotation-point.rotation)<.001)return;
-  // Existing saves from the first placement keep their progress and dialogue.
+  if(Math.hypot(sign.x-point.x,sign.y-point.y)<1&&Math.abs(sign.rotation-point.rotation)<.001&&Math.abs(sign.groundHeight-point.groundHeight)<.01)return;
+  // Saved height can predate the hillside footing even at the same XY/rotation.
+  // Re-seat it on load while preserving construction progress and dialogue.
   Object.assign(sign,point);
   mission.rebuildNavigation();
   if(!sign.completed)mission.order([scene.builderId],'build',sign);

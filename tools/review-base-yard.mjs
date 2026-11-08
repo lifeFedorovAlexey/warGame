@@ -4,7 +4,7 @@ import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url);
 const {chromium}=require('C:/Users/Алексей/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
 const folder='campaign/previews/base-yard';fs.mkdirSync(folder,{recursive:true});
-const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true,args:['--enable-unsafe-swiftshader','--use-angle=swiftshader']});
+const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true,args:['--use-angle=d3d11']});
 try{
  const page=await browser.newPage({viewport:{width:1440,height:960}}),errors=[];
  page.on('pageerror',e=>errors.push(e.message));page.on('response',r=>{if(r.status()>=400)errors.push(r.status()+' '+r.url());});
@@ -21,9 +21,11 @@ try{
   m.explored.fill(255);m.visible.fill(255);m.visionSources.push({x:14.5,y:53.5,radius:14});m.fogRevision++;
   w.centre({x:start.x-25,y:start.y+50},530);
   const yard=w.scene.getObjectByName('base_yard');
-  return {hasYard:!!yard,buildings:m.state.buildings.filter(b=>b.owner==='rai').length,lights:yard.children.filter(c=>c.isPointLight).map(c=>c.intensity)};
+  const markings=yard.getObjectByName('building_plot_markings');
+  return {hasYard:!!yard,plotVertices:markings?.geometry.attributes.position.count,buildings:m.state.buildings.filter(b=>b.owner==='rai').length,lights:yard.children.filter(c=>c.isPointLight).map(c=>c.intensity)};
  });
  assert(state.hasYard);
+ assert(state.plotVertices>0,'Prepared sites have physical survey markings');
  assert.equal(state.buildings,1,'Only the built sign is a gameplay structure; scenery adds none');
  assert.equal(state.lights.length,7);assert(state.lights.every(i=>i===0),'Yard lamps wait for the AЭС');
  await page.screenshot({path:folder+'/prepared-sites-desktop.png'});

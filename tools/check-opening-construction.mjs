@@ -34,6 +34,19 @@ assert(openingCanHandOver(mission,{openingFinished:true},true));
 assert(openingCanHandOver(mission,{openingFinished:false},false),'Radio disabled still requires construction');
 assert.equal(mission.state.buildings.filter(b=>b.kind==='base-sign').length,1);
 const position=field.gridToWorld(config.openingSignGrid);assert.equal(sign.x,position.x);assert.equal(sign.y,position.y);
+// An old save at the SAME site must not retain its obsolete floating elevation.
+const seatedHeight=sign.groundHeight;
+sign.groundHeight+=12;
+const elevated=new Mission(config,field);elevated.load(mission.save());restoreOpeningConstruction(elevated);
+const seated=elevated.entity(sign.id);
+assert.equal(seated.groundHeight,seatedHeight,'Re-seat stale height without requiring an XY change');
+assert.equal(seated.completed,sign.completed);assert.equal(seated.progress,sign.progress);
+const [width,depth]=config.buildings['base-sign'].realSizeMetres,scale=config.worldScale,c=Math.cos(seated.rotation),s=Math.sin(seated.rotation);
+for(let i=0;i<=32;i++)for(const y of [-depth/2,depth/2]){
+ const x=-width/2+width*i/32,terrain=field.heightAt(seated.x+(x*c-y*s)*scale,seated.y+(x*s+y*c)*scale);
+ assert(seated.groundHeight-.60*scale<terrain,'Footing must enter the soil along its entire length');
+ assert(seated.groundHeight+.35*scale>terrain,'Level top must remain above the hillside');
+}
 opening.handedOver=true;sign.y-=300;restoreOpeningConstruction(mission);
 assert.equal(sign.y,position.y);assert(opening.handedOver);assert(sign.completed);
 const legacy=new Mission(config,field);
