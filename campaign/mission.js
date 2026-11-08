@@ -13,6 +13,7 @@ import {recordDamage} from './damage-contact.js';
 import {destroyDamage,damageMobility,partMissing,upgradeDamageState} from './damage-state.js';
 import {ensureSalvage,updateSalvage,armorMultiplier,salvageFromWreck,availableFieldRecipes,modificationInstalled,touchesSalvage,canInstallRecipe,syncFieldHp} from './vehicle-salvage.js';
 import {scheduleWreck,updateWrecks} from './wreck-lifecycle.js';
+import {updateStreetFurniture} from './street-furniture.js';
 const completeSteps=iterator=>{let step;do{step=iterator.next();}while(!step.done);return step.value;};
 import {UnitSpatialIndex} from './unit-spatial-index.js';
 import {vehicleContact,impactPower,fallbackVehicleImpact} from './vehicle-impact.js';
@@ -2274,7 +2275,7 @@ export class Mission{
     if(pending.budgeted)this.unitFrameTimes.set(unit,performance.now());
     if(performance.now()>=deadline&&pending.cursor<pending.units.length)return false;
    }
-   this.updateProjectiles();updateSalvage(this);updateWrecks(this);this.finalizeBuilderContacts(dt);this.updateConstructionSites();this.updateEconomy(dt);
+   this.updateProjectiles();updateStreetFurniture(this);updateSalvage(this);updateWrecks(this);this.finalizeBuilderContacts(dt);this.updateConstructionSites();this.updateEconomy(dt);
    for(const b of this.state.buildings)if(b.owner==='scavs'&&b.hp>0){b.cooldown=Math.max(0,b.cooldown-dt);const spec=this.buildingSpec(b);if(spec.damage){const enemy=this.nearestEnemy(b,spec.range);if(enemy)this.attack(b,enemy,spec);}}
    this.fogTimer+=dt;if(this.fogTimer>=.25){this.fogTimer=0;this.updateFog();}this.updateMission();if(this.navigationDirty){this.rebuildNavigation();this.navigationDirty=false;}
    this.pendingTick=null;return true;

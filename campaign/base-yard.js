@@ -1,19 +1,19 @@
 import {baseApproachRoads} from './base-roads.js';
 import {createBaseSiteMarkings} from './base-site-markings.js';
+import {createStreetLampLayer} from './street-lamp-layer.js';
 // Physical scenery only. Nothing here is registered as an entity or navigation obstacle.
 export function createBaseYard(T,field,config,addFog){
   const root=new T.Group();root.name='base_yard';root.userData.decorative=true;
   root.add(createBaseSiteMarkings(T,field,config,addFog));
-  const scale=config.worldScale,loader=new T.TextureLoader(),lights=[];
+  const scale=config.worldScale,loader=new T.TextureLoader(),lamps=createStreetLampLayer(T,field,config,addFog);root.add(lamps.root);
   const texture=name=>{const map=loader.load(new URL('../assets/maps/alpha/materials/'+name,import.meta.url).href);map.wrapS=map.wrapT=T.RepeatWrapping;map.colorSpace=T.SRGBColorSpace;return map;};
   const concrete=new T.MeshStandardMaterial({color:'#d4ccae',map:texture('weathered-concrete.jpg'),vertexColors:true,roughness:1,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1});
   const steel=new T.MeshStandardMaterial({color:'#454b40',roughness:.85,metalness:.35});
   const olive=new T.MeshStandardMaterial({color:'#65674b',roughness:.94});
   const wood=new T.MeshStandardMaterial({color:'#857459',roughness:1});
   const rust=new T.MeshStandardMaterial({color:'#865638',roughness:1});
-  const lens=new T.MeshStandardMaterial({color:'#c3b79a',emissive:'#edc17a',emissiveIntensity:0,roughness:.7});
   const paint=new T.MeshStandardMaterial({color:'#ddd2b9',roughness:1,vertexColors:true,transparent:true,opacity:.84,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});
-  for(const material of [concrete,steel,olive,wood,rust,lens,paint])addFog(material);
+  for(const material of [concrete,steel,olive,wood,rust,paint])addFog(material);
   const positions=[],colors=[],uvs=[];
   const random=(x,y)=>{const n=Math.sin(x*127.1+y*311.7)*43758.5453;return n-Math.floor(n);};
   const sites=(config.baseSites??[]).map(site=>({...site,...field.gridToWorld(site.grid)}));
@@ -89,24 +89,6 @@ export function createBaseYard(T,field,config,addFog){
     if(!parts.has(material))parts.set(material,[]);parts.get(material).push(geometry.index?geometry.toNonIndexed():geometry);
   }
   const box=(size,pos,mat=olive,rot)=>shape(new T.BoxGeometry(...size),mat,pos,rot);
-  function rod(a,b,r,mat=steel){const start=new T.Vector3(...a),end=new T.Vector3(...b),g=new T.CylinderGeometry(r,r,start.distanceTo(end),6);g.applyQuaternion(new T.Quaternion().setFromUnitVectors(new T.Vector3(0,1,0),end.clone().sub(start).normalize()));shape(g,mat,start.add(end).multiplyScalar(.5).toArray());}
-  function lamp(grid,angle){
-    const p=field.gridToWorld(grid),z=field.heightAt(p.x,p.y),c=Math.cos(angle),s=Math.sin(angle);
-    const point=(x,y,h)=>[p.x+(x*c-y*s)*scale,p.y+(x*s+y*c)*scale,z+h*scale];
-    box([.45*scale,.45*scale,.17*scale],point(0,0,.085),steel);
-    rod(point(0,0,.14),point(0,0,4.8),.075*scale);
-    rod(point(0,0,4.8),point(0,-1.0,5.05),.055*scale);
-    box([.46*scale,.76*scale,.20*scale],point(0,-1.12,5.04),olive,[0,0,angle]);
-    box([.37*scale,.60*scale,.035*scale],point(0,-1.12,4.92),lens,[0,0,angle]);
-    box([.18*scale,.16*scale,.44*scale],point(.04,.08,1.15),steel);
-    const light=new T.PointLight('#ffdc9c',0,scale*11,2);
-    light.position.set(...point(0,-1.12,4.83));root.add(light);lights.push(light);
-  }
-  for(const [i,offset] of [-210,-144,-78,-12,54,120].entries()){
-    const side=i%2?1:-1;
-    lamp(field.worldToGrid(start.x+offset,start.y+side*22.3),side>0?0:Math.PI);
-  }
-  lamp([14.35,50.9],0);
   // A few street furnishings, all decorative and outside the carriageway.
   for(const offset of [-110,32]){
     const x=start.x+offset,y=start.y+21,z=field.heightAt(x,y);
@@ -141,5 +123,5 @@ export function createBaseYard(T,field,config,addFog){
     }
     const mesh=new T.Mesh(geometry,mat);mesh.castShadow=mesh.receiveShadow=true;root.add(mesh);for(const g of geometries)g.dispose();
   }
-  return {root,sites,roads,update(powered){lens.emissiveIntensity=powered?3:0;for(const light of lights)light.intensity=powered?1800:0;}};
+  return {root,sites,roads,lamps,update(mission,time){return lamps.update(mission,time);}};
 }

@@ -5,7 +5,7 @@
   "simulationStep": 0.1,
   "simulationCpuBudgetMs": 5,
   "unitLimit": 500,
-  "salvage": {"initialRecipes": ["hood-guard", "window-grille"]},
+  "salvage": {"initialRecipes": ["hood-guard", "window-grille", "tube-bumper"]},
   "initialEnergy": 760,
   "energyCapacity": 2400,
   "startGrid": [14.5, 53.5],

@@ -28,6 +28,7 @@ for(let i=0;i<900&&!sign.completed;i++){
  }
 }
 assert(sign.completed,JSON.stringify({time:mission.state.time,sign,builder:mission.entity(opening.builderId)}));
+assert.equal(Object.keys(mission.state.streetFurniture??{}).length,0,'The opening builder route must leave the street lamps intact');
 assert(saved);assert(wasWorking);
 assert(!openingCanHandOver(mission,{openingFinished:false},true),'The dialogue must also finish');
 assert(openingCanHandOver(mission,{openingFinished:true},true));

@@ -44,6 +44,7 @@ export const VEHICLE_PARTS = {
   23:{name:'window_grille',material:'metal',detachable:true,strength:80},
   24:{name:'cargo_rail_left',material:'metal',detachable:true,strength:75},
   25:{name:'cargo_rail_right',material:'metal',detachable:true,strength:75},
+  26:{name:'tube_bumper',material:'metal',detachable:true,strength:150},
 };
 export const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
 export const normalize = v=>{const l=Math.hypot(...v)||1;return v.map(x=>x/l);};

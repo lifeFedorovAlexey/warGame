@@ -41,7 +41,7 @@ export async function createCampaignWorld(host,config,sound){
  const fog=createFogMask(T);
  const storySignals=createStorySignals(T,scene,field);
  const rallyFlags=createRallyFlags(T,scene,field,config.worldScale);
- const foggedMaterials=new Set();function addFog(material){if(!material||foggedMaterials.has(material))return;foggedMaterials.add(material);const before=material.onBeforeCompile,cache=material.customProgramCacheKey.bind(material);material.onBeforeCompile=shader=>{before.call(material,shader);shader.uniforms.missionFog={value:fog.texture};shader.uniforms.missionExtent={value:field.extent};shader.uniforms.storySpill=storySignals.spill;shader.uniforms.storyObserver=storySignals.observer;shader.vertexShader='varying vec2 vMissionXY;\n'+shader.vertexShader;shader.vertexShader=shader.vertexShader.replace('#include <worldpos_vertex>','#include <worldpos_vertex>\nvMissionXY=(modelMatrix*vec4(transformed,1.)).xy;');shader.fragmentShader='uniform sampler2D missionFog;uniform float missionExtent;uniform vec3 storySpill;uniform vec2 storyObserver;varying vec2 vMissionXY;\n'+shader.fragmentShader;shader.fragmentShader=shader.fragmentShader.replace('#include <dithering_fragment>',`#include <dithering_fragment>
+ const foggedMaterials=new Set();function addFog(material){if(!material||foggedMaterials.has(material))return;foggedMaterials.add(material);const before=material.onBeforeCompile,cache=material.customProgramCacheKey.bind(material);material.onBeforeCompile=shader=>{before.call(material,shader);shader.uniforms.missionFog={value:fog.texture};shader.uniforms.missionExtent={value:field.extent};shader.uniforms.storySpill=storySignals.spill;shader.uniforms.storyObserver=storySignals.observer;shader.vertexShader='varying vec2 vMissionXY;\n'+shader.vertexShader;shader.vertexShader=shader.vertexShader.replace('#include <worldpos_vertex>','#include <worldpos_vertex>\nvec4 missionPosition=vec4(transformed,1.);\n#ifdef USE_INSTANCING\nmissionPosition=instanceMatrix*missionPosition;\n#endif\nvMissionXY=(modelMatrix*missionPosition).xy;');shader.fragmentShader='uniform sampler2D missionFog;uniform float missionExtent;uniform vec3 storySpill;uniform vec2 storyObserver;varying vec2 vMissionXY;\n'+shader.fragmentShader;shader.fragmentShader=shader.fragmentShader.replace('#include <dithering_fragment>',`#include <dithering_fragment>
  vec2 missionUv=vec2(vMissionXY.x,-vMissionXY.y)/missionExtent+.5;
  vec2 visibility=texture2D(missionFog,clamp(missionUv,vec2(0.),vec2(1.))).rg;
  float inside=step(0.,missionUv.x)*step(missionUv.x,1.)*step(0.,missionUv.y)*step(missionUv.y,1.);
@@ -54,7 +54,7 @@ export async function createCampaignWorld(host,config,sound){
    hidden+=vec3(.19,.24,.35)*halo*storySpill.z*(.3+.7*surface);
  }
  gl_FragColor.rgb=mix(hidden,gl_FragColor.rgb,(visibility.g*.30+visibility.r*.70)*inside);
- `);};material.customProgramCacheKey=()=>cache()+'_mission_fog_v4';material.needsUpdate=true;}
+ `);};material.customProgramCacheKey=()=>cache()+'_mission_fog_v5';material.needsUpdate=true;}
  for(const material of terrain.terrainMaterials) addFog(material);
  const baseYard=createBaseYard(T,field,config,addFog);scene.add(baseYard.root);terrain.setLocalRoads(baseYard.roads);
  const damage=createDamageSystem(T,scene,field,config);
@@ -238,7 +238,7 @@ export async function createCampaignWorld(host,config,sound){
   const distance=camera.position.distanceTo(controls.target),pan=distance*dt*.7;let dx=(keys.has('KeyD')?1:0)-(keys.has('KeyA')?1:0),dy=(keys.has('KeyW')?1:0)-(keys.has('KeyS')?1:0);if(dx||dy){const right=new T.Vector3().setFromMatrixColumn(camera.matrixWorld,0);right.z=0;right.normalize();const forward=new T.Vector3(-right.y,right.x,0);const offset=right.multiplyScalar(dx*pan).addScaledVector(forward,dy*pan);camera.position.add(offset);controls.target.add(offset);}
   controls.target.x=T.MathUtils.clamp(controls.target.x,-field.half,field.half);controls.target.y=T.MathUtils.clamp(controls.target.y,-field.half,field.half);controls.update();camera.position.z=Math.max(camera.position.z,field.heightAt(camera.position.x,camera.position.y)+minimumCameraHeight);
   sky.update(camera,false);
-  baseYard.update(mission.state.powered);
+  if(baseYard.update(mission,time+(live?mission.accumulator:0)))renderer.shadowMap.needsUpdate=true;
   storySignals.update(mission,camera,now);
   rallyFlags.update(mission,selected,camera);
   const threshold=software?145:800;

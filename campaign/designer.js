@@ -138,7 +138,7 @@ export class VehicleDesigner {
     this.salvageChoices.replaceChildren(...Object.entries(FIELD_RECIPES).map(([id,recipe])=>{
       const label=document.createElement('label'),input=document.createElement('input');input.type='checkbox';input.checked=state.wanted.includes(id);input.disabled=!state.enabled||!state.recipes.includes(id);
       label.append(input,document.createTextNode(' '+recipe.name+' · +'+recipe.hpBonus+' HP'+(state.recipes.includes(id)?'':' · нет чертежа')));
-      input.onchange=()=>{state.wanted=input.checked?[...new Set([...state.wanted,id])]:state.wanted.filter(key=>key!==id);this.paintSalvage();};return label;
+      input.onchange=()=>{state.userConfigured=true;state.wanted=input.checked?[...new Set([...state.wanted,id])]:state.wanted.filter(key=>key!==id);this.paintSalvage();};return label;
     }));
   }
 
@@ -284,7 +284,7 @@ export class VehicleDesigner {
       const button=document.createElement('button');button.type='button';button.className='design-part';
       button.dataset.designModification=recipe.id;
       button.setAttribute('aria-pressed',String(this.previewModules.has(recipe.id)));
-      setButtonIcon(button,recipe.id==='hood-guard'?'armor-plate':'wall',recipe.name,'Показать на машине · +'+recipe.hpBonus+' HP');
+      setButtonIcon(button,recipe.icon??(recipe.id==='hood-guard'?'armor-plate':'wall'),recipe.name,'Показать на машине · +'+recipe.hpBonus+' HP');
       button.onclick=()=>{
         if(this.previewModules.has(recipe.id))this.previewModules.delete(recipe.id);else this.previewModules.add(recipe.id);
         this.paintFieldChoices();this.paintAssembly();

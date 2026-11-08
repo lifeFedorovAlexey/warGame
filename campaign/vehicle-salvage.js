@@ -10,11 +10,18 @@ export const canInstallRecipe=(mission,unit,recipe)=>unit.kind!=='command'&&!!mi
 export const FIELD_RECIPES={
   'hood-guard':{name:'Защита передка',part:22,stock:'guard-stock',body:'B01',strength:120,hpBonus:120,bulletMultiplier:.65},
   'window-grille':{name:'Решётки лобовых стёкол',part:23,stock:'guard-stock',body:'B01',strength:80,hpBonus:80,bulletMultiplier:.75},
+  'tube-bumper':{name:'Трубчатый бампер',icon:'armor-upgrade',part:26,stock:'tube-stock',body:'B01',strength:150,hpBonus:80,bulletMultiplier:.8},
 };
 export function ensureSalvage(mission){
   const state=mission.state.salvage??={enabled:true,recipes:[...(mission.config.salvage?.initialRecipes??[])],wanted:Object.keys(FIELD_RECIPES),items:[],serial:0};
   // Previous saves had an implicit off default. Keep explicit user choices.
   if(!state.preferenceVersion){if(!state.userConfigured)state.enabled=true;state.preferenceVersion=1;}
+  if(!state.recipeVersion){
+    for(const id of mission.config.salvage?.initialRecipes??[])if(!state.recipes.includes(id)){
+      state.recipes.push(id);if(!state.userConfigured&&!state.wanted.includes(id))state.wanted.push(id);
+    }
+    state.recipeVersion=1;
+  }
   return state;
 }
 export function availableFieldRecipes(mission){
