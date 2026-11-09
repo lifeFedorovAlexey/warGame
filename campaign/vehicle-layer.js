@@ -253,7 +253,7 @@ export async function createVehicleLayer(T,scene,field,config,damage,onLoaded=()
     scavBatches.get(unit.kind).add(matrix,color,{},damageInfo);
     muzzles.set(unit.id,new T.Vector3().setFromMatrixPosition(custom.gun.muzzle.matrixWorld).applyMatrix4(matrix));
    }else if(unit.kind==='builder'){
-    const target=unit.builderWorking&&unit.task?.type==='build'?mission.entity(unit.task.targetId):null;
+    const target=unit.builderWorking?mission.entity(unit.task?.targetId):null;
     const sweep=target&&scanner.scan(unit,target,buildingObjects?.get(target.id),pose,workTime);
     builder.aim(sweep?.yaw??unit.projector?.yaw??0,sweep?.pitch??unit.projector?.pitch??0,false);
     builderBatch.add(matrix,color,{projector:unit.hp>0&&unit.builderWorking?1:.015},damageInfo);

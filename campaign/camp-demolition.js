@@ -9,7 +9,7 @@ export function updateCampPerimeters(mission) {
     const camp = camps.get(building.campId);
     if (!camp) continue;
     if (isCampPerimeter(building)) camp.walls.push(building);
-    else camp.buildings = true;
+    else if(!building.campResource)camp.buildings = true;
   }
   const time = mission.state.time;
   for (const camp of camps.values()) {

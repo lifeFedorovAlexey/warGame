@@ -4,10 +4,23 @@ from pathlib import Path
 import os
 import re
 import socket
+from dialogue_editor import handle as handle_dialogues
 
 os.chdir(Path(__file__).resolve().parents[1])
 
 class ReviewHandler(SimpleHTTPRequestHandler):
+    def do_GET(self):
+        if not handle_dialogues(self):
+            super().do_GET()
+
+    def do_PUT(self):
+        if not handle_dialogues(self):
+            self.send_error(404)
+
+    def do_POST(self):
+        if not handle_dialogues(self):
+            self.send_error(404)
+
     def translate_path(self, path):
         path = re.sub(r'^/review/[^/]+/', '/', path)
         return super().translate_path(path)
@@ -80,6 +93,8 @@ class ReviewServer(ThreadingHTTPServer):
             self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
         super().server_bind()
 
-server = ReviewServer(('127.0.0.1', 8766), ReviewHandler)
-print('warGame review: http://127.0.0.1:8766/demo/', flush=True)
-server.serve_forever()
+if __name__ == '__main__':
+    server = ReviewServer(('127.0.0.1', 8766), ReviewHandler)
+    print('warGame review: http://127.0.0.1:8766/demo/', flush=True)
+    print('Dialogue workshop: http://127.0.0.1:8766/dialogues/', flush=True)
+    server.serve_forever()

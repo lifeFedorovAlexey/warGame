@@ -1,14 +1,15 @@
 // Road destinations come from the base-zone plan; terrain selects the corridors.
 const fs=require('node:fs');
+const {profileRoadWidths,roadApronRadius}=require('./road-width-profile.cjs');
 (async()=>{
  const T=await import('../demo/vendor/three.core.js'),{createHeightfield}=await import('../demo/map-route.js'),{shapeMesaRims}=await import('../demo/mesa-shaping.js');
  const field=createHeightfield(JSON.parse(fs.readFileSync('assets/maps/alpha/heightfield.json','utf8')));shapeMesaRims(field);
  const sites=[
   ['player','Западная база',[14.5,53.5],[14.5,53.5],0],
-  ['nw-pocket','Западный перевал',[31.5,42.7],[35.5,42.5],1],
+  ['nw-pocket','Западный перевал',[32,42.5],[35.5,42.5],1],
   ['nw-west','Северо-западный лагерь',[15.9,30.5],[18.5,33.5],1],
-  ['nw-east','Северный опорный пункт',[39.6,25.9],[38.5,29.5],1],
-  ['west-south','Западное плато',[14.2,70.9],[14.5,67.5],2],
+  ['nw-east','Северный опорный пункт',[38.1,24.4],[38.5,29.5],1],
+  ['west-south','Западное плато',[13.25,71.75],[14.5,67.5],2],
   ['south-west','Юго-западная база',[26.2,109.6],[28.5,108.5],2],
   ['central','Центральная низина',[69.8,62.0],[67.5,57.5],3],
   ['east-middle','Восточный котлован',[86.5,93.0],[83.5,92.5],3],
@@ -80,10 +81,10 @@ const fs=require('node:fs');
   const {from,to,chain}=entry,a=nodes[from],b=nodes[to],raw=chain.map(id=>({...gridVertices.get(id)})),oldStart={...raw[0]},oldEnd={...raw.at(-1)};
   raw.forEach(p=>{const start=1-smooth(0,100,Math.hypot(p.wx-oldStart.wx,p.wy-oldStart.wy)),end=1-smooth(0,100,Math.hypot(p.wx-oldEnd.wx,p.wy-oldEnd.wy));p.wx+=(a.wx-oldStart.wx)*start+(b.wx-oldEnd.wx)*end;p.wy+=(a.wy-oldStart.wy)*start+(b.wy-oldEnd.wy)*end;});
   raw[0].wx=a.wx;raw[0].wy=a.wy;raw.at(-1).wx=b.wx;raw.at(-1).wy=b.wy;const points=smoothPath(raw);for(const [node,reverse] of [[a,false],[b,true]])if(node.base&&node.degree===1){const end=reverse?points.at(-1):points[0],anchor=points[reverse?Math.max(0,points.length-41):Math.min(points.length-1,40)],dx=end.x-anchor.x,dy=end.y-anchor.y,length=Math.hypot(dx,dy);for(let i=0;i<points.length;i++){const p=points[i],distance=Math.hypot(p.x-end.x,p.y-end.y);if(distance>120)continue;const blend=1-smooth(0,120,distance),x=end.x-dx/length*distance,y=end.y-dy/length*distance;if(Math.abs(field.heightAt(x,y)-field.heightAt(p.x,p.y))<1.8){p.x+=(x-p.x)*blend;p.y+=(y-p.y)*blend;}}}const distances=[0];for(let i=1;i<points.length;i++)distances.push(distances.at(-1)+Math.hypot(points[i].x-points[i-1].x,points[i].y-points[i-1].y));const length=distances.at(-1),width=a.degree>2&&b.degree>2?26:24;
-  profileRoad(points,a,b);points.forEach((p,i)=>{const start=(a.base||a.degree>2)?1-smooth(0,85,distances[i]):0,end=(b.base||b.degree>2)?1-smooth(0,85,length-distances[i]):0;p.width=width+(56-width)*(start+end-start*end);});
+  profileRoad(points,a,b);profileRoadWidths(points,width,a,b);
   paths.push({id:from+'--'+to+'-'+index,from,to,width,lengthMetres:length,points});connections.push([from,to]);totalLength+=length;
  }
- const graphNodes=Object.values(nodes).map(n=>({id:n.key,x:n.wx,y:n.wy,z:n.h,grid:field.worldToGrid(n.wx,n.wy),degree:n.degree,base:n.base,planeX:n.planeX,planeY:n.planeY,apronRadius:n.base||n.degree>2?28:0}));
+ const graphNodes=Object.values(nodes).map(n=>({id:n.key,x:n.wx,y:n.wy,z:n.h,grid:field.worldToGrid(n.wx,n.wy),degree:n.degree,base:n.base,planeX:n.planeX,planeY:n.planeY,apronRadius:roadApronRadius(n)}));
  const roads={source:'connected logistics network through original terrain corridors and all future enemy base gates',grading:{enabled:true,maxChangeMetres:8},nodes:graphNodes,edges:connections,paths,statistics:{components:1,corridors:paths.length,lengthMetres:totalLength,enemyBases:11}};
  const adjacency=new Map(graphNodes.map(n=>[n.id,[]]));paths.forEach((p,index)=>{adjacency.get(p.from).push({to:p.to,index,reverse:false,cost:p.lengthMetres});adjacency.get(p.to).push({to:p.from,index,reverse:true,cost:p.lengthMetres});});
  function shortest(from,to){const heap=new Heap(),cost=new Map([[from,0]]),prev=new Map();heap.push([0,from]);while(heap.length){const [distance,id]=heap.pop();if(distance>cost.get(id))continue;if(id===to){const result=[];let cursor=to;while(cursor!==from){const p=prev.get(cursor);result.push(p.edge);cursor=p.from;}return result.reverse();}for(const edge of adjacency.get(id)){const next=distance+edge.cost;if(next<(cost.get(edge.to)??Infinity)){cost.set(edge.to,next);prev.set(edge.to,{from:id,edge});heap.push([next,edge.to]);}}}throw new Error('Disconnected graph');}

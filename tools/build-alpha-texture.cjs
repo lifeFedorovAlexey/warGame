@@ -6,7 +6,10 @@ const fs=require('node:fs'),path=require('node:path');
  try{
   const page=await browser.newPage();await page.goto('http://127.0.0.1:8766/references/terrain/README.md');
   const {createHeightfield}=await import('../demo/map-route.js'),{shapeMesaRims}=await import('../demo/mesa-shaping.js'),{refineRoadHeightfield}=await import('../demo/road-heightfield.js'),{applyRoadGrades}=await import('../demo/road-grading.js'),raw=JSON.parse(fs.readFileSync('assets/maps/alpha/heightfield.json','utf8')),coarse=createHeightfield(raw),roads=JSON.parse(fs.readFileSync('assets/maps/alpha/roads.json','utf8'));shapeMesaRims(coarse);const field=refineRoadHeightfield(coarse);applyRoadGrades(field,roads);
-  const result=await page.evaluate(async({size,samples,roads})=>{
+  const {campBaseLayout}=await import('../campaign/scav-base-layout.js'),config=JSON.parse(fs.readFileSync('assets/campaign/alpha/mission01/gameplay.json','utf8'));
+  const depot=config.camps.find(c=>c.id==='nw-west'),depotBounds=campBaseLayout({...depot,...field.gridToWorld(depot.grid)}).bounds;
+  depotBounds[1]-=160; // The obsolete yard apron also continued south of the gate.
+  const result=await page.evaluate(async({size,samples,roads,roadsOnly,depotBounds,surfaceOnly})=>{
    const load=async src=>{const im=new Image();im.src=src;await im.decode();return im;},make=(w,h=w)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;};
    const clamp=v=>Math.max(0,Math.min(1,v)),smooth=(a,b,v)=>{const t=clamp((v-a)/(b-a));return t*t*(3-2*t);},gauss=(x,y,cx,cy,r)=>Math.exp(-((x-cx)**2+(y-cy)**2)/(r*r));
    const source=await load('/references/terrain/alpha/map-sectors.jpg'),ref=make(2048),rc=ref.getContext('2d',{willReadFrequently:true});rc.drawImage(source,192,320,4096,4096,0,0,2048,2048);rc.drawImage(ref,380,804,180,64,184,804,180,64);
@@ -31,6 +34,7 @@ const fs=require('node:fs'),path=require('node:path');
    for(let y=0;y<2048;y++)for(let x=0;x<2048;x++){let sum=0;for(let d=-3;d<=3;d++)sum+=signedField[y*2048+Math.max(0,Math.min(2047,x+d))]*kernel[d+3];distanceScratch[y*2048+x]=sum/64;}
    for(let y=0;y<2048;y++)for(let x=0;x<2048;x++){let signed=0;for(let d=-3;d<=3;d++)signed+=distanceScratch[Math.max(0,Math.min(2047,y+d))*2048+x]*kernel[d+3];signed/=64;const index=(y*2048+x)*4;roadPixels.data[index]=smooth(-2.2,2.2,signed)*255;roadPixels.data[index+1]=Math.max(0,Math.min(255,(.5+signed/24)*255));roadPixels.data[index+2]=0;}
    rd.putImageData(roadPixels,0,0);
+   if(roadsOnly)return {output:{'road-detail.png':roadDetail.toDataURL('image/png').split(',')[1]},roads};
    const road=roadCtx.getImageData(0,0,1024,1024).data,shoulder=shoulderCtx.getImageData(0,0,1024,1024).data;
    const names=['dune-sand','bleached-sand','rust-clay','desert-gravel','scorched-rock','ash-earth','ruined-asphalt','weathered-concrete','transition-sand','dusty-sandstone','sandy-talus','weathered-limestone'];
    const controls=Array.from({length:4},()=>make(1024)),data=controls.map(c=>c.getContext('2d').createImageData(1024,1024)),mini=make(1024),mc=mini.getContext('2d'),mp=mc.createImageData(1024,1024),totals=Array(12).fill(0),dominant=Array(12).fill(0);
@@ -50,7 +54,11 @@ const fs=require('node:fs'),path=require('node:path');
     ];
     w[10]+=(shoulder[i]-road[i])/255*(.55+n*.65);w[8]+=(shoulder[i]-road[i])/255*.65;
     const max=Math.max(...w);for(let j=0;j<12;j++)w[j]=Math.pow(Math.max(0,w[j]-max*.28),1.55);const sum=w.reduce((a,b)=>a+b,0);for(let j=0;j<12;j++)w[j]/=sum;
-    const sx=Math.min(2047,Math.floor(gx*16)),sy=Math.min(2047,Math.floor(gy*16)),ri=(sy*2048+sx)*4,r=pixels[ri],g=pixels[ri+1],b=pixels[ri+2],paved=r>75&&Math.max(r,g,b)-Math.min(r,g,b)<28?smooth(75,110,r)*clamp((g-r+2)/12)*clamp((b-r+10)/18)*(1-smooth(.12,.4,slope))*.85:0;
+    // The reference sheet contains obsolete pale foundation/road fragments
+    // around the depot. Its authored buildings and lanes now define the yard.
+    // Fade this old classification out beyond the fence and entrance as well.
+    const wx=gx*32-2032,wy=2032-gy*32,distance=Math.max(depotBounds[0]-wx,depotBounds[1]-wy,wx-depotBounds[2],wy-depotBounds[3]),legacyPavement=smooth(88,112,distance);
+    const sx=Math.min(2047,Math.floor(gx*16)),sy=Math.min(2047,Math.floor(gy*16)),ri=(sy*2048+sx)*4,r=pixels[ri],g=pixels[ri+1],b=pixels[ri+2],paved=r>75&&Math.max(r,g,b)-Math.min(r,g,b)<28?smooth(75,110,r)*clamp((g-r+2)/12)*clamp((b-r+10)/18)*(1-smooth(.12,.4,slope))*.85*legacyPavement:0;
     const asphalt=road[i]/255*(.90+.10*n)*(1-paved),remaining=1-asphalt-paved;for(let j=0;j<12;j++)w[j]*=remaining;w[6]=asphalt;w[7]=paved;
     for(let j=0;j<12;j++){totals[j]+=w[j];data[Math.floor(j/3)].data[i+j%3]=w[j]*255;}for(const d of data)d.data[i+3]=255;dominant[w.indexOf(Math.max(...w))]++;
     const light=Math.max(.5,Math.min(1.17,(.96-dx*.4-dy*.3)/Math.sqrt(1+dx*dx+dy*dy))),color=[0,0,0];w.forEach((a,j)=>palette[j].forEach((v,k)=>color[k]+=v*a*light));mp.data.set([...color,255],i);
@@ -63,9 +71,23 @@ const fs=require('node:fs'),path=require('node:path');
    for(let i=0;i<md.data.length;i+=4){const weights=names.map((_,j)=>decoded[Math.floor(j/3)][i+j%3]/255),paved=weights[7];let total=0,color=[0,0,0];for(let j=0;j<12;j++){if(j===6||j===7)continue;total+=weights[j];for(let k=0;k<3;k++)color[k]+=means[j][k]*weights[j];}for(let k=0;k<3;k++){color[k]/=Math.max(.001,total);color[k]=color[k]*(1-paved)+means[7][k]*.87*paved;md.data[i+k]=Math.pow(Math.max(0,color[k]),1/2.2)*255;}md.data[i+3]=255;weights[6]=0;let a=0,b=1;for(let j=0;j<12;j++)if(weights[j]>weights[a])a=j;for(let j=0;j<12;j++)if(j!==a&&(b===a||weights[j]>weights[b]))b=j;sd.data.set([a,b,Math.round(weights[b]/Math.max(.001,weights[a]+weights[b])*255),255],i);}
    mx.putImageData(md,0,0);sc.putImageData(sd,0,0);output['macro-albedo.jpg']=macro.toDataURL('image/jpeg',.94).split(',')[1];output['detail-selection.png']=selection.toDataURL('image/png').split(',')[1];
    const sky=await load('/assets/maps/alpha/materials/source/desert-sky.png'),sk=make(2048,1024);sk.getContext('2d').drawImage(sky,0,0,2048,1024);output['materials/desert-sky.jpg']=sk.toDataURL('image/jpeg',.93).split(',')[1];
-   return {output,roads,layout:names.map((name,i)=>({name,coveragePercent:totals[i]/1024**2*100,dominantPercent:dominant[i]/1024**2*100}))};
-  },{size:field.renderSize,samples:Array.from(field.renderSamples),roads});
-  for(const [name,data] of Object.entries(result.output)){const target=path.resolve('assets/maps/alpha',name);fs.mkdirSync(path.dirname(target),{recursive:true});fs.writeFileSync(target,Buffer.from(data,'base64'));}
-  fs.writeFileSync('assets/maps/alpha/material-layout.json',JSON.stringify(result.layout,null,2)+'\n');console.log(JSON.stringify({materials:result.layout.length,roadSegments:result.roads.paths.length,roadSource:result.roads.source,files:Object.keys(result.output).length}));
+   if(surfaceOnly){
+    // Apply this yard repair locally to the checked-in maps. A full rebake can
+    // also pick up older, unrelated edits to the main road widths elsewhere.
+    for(const name of Object.keys(output)){
+     if(!/^(surface-control-\d\.png|macro-albedo\.jpg|detail-selection\.png|minimap\.jpg)$/.test(name)){delete output[name];continue;}
+     const original=await load('/assets/maps/alpha/'+name),updated=await load('data:image/'+(name.endsWith('.jpg')?'jpeg':'png')+';base64,'+output[name]);
+     const local=make(original.width,original.height),lc=local.getContext('2d'),s=original.width/4064;
+     const x=Math.floor((depotBounds[0]-112+2032)*s),y=Math.floor((2032-depotBounds[3]-112)*s),right=Math.ceil((depotBounds[2]+112+2032)*s),bottom=Math.ceil((2032-depotBounds[1]+112)*s);
+     lc.drawImage(original,0,0);lc.drawImage(updated,x,y,right-x,bottom-y,x,y,right-x,bottom-y);
+     output[name]=local.toDataURL(name.endsWith('.jpg')?'image/jpeg':'image/png',name==='minimap.jpg'?.9:.94).split(',')[1];
+    }
+   }
+   return {output,roads,layout:surfaceOnly?null:names.map((name,i)=>({name,coveragePercent:totals[i]/1024**2*100,dominantPercent:dominant[i]/1024**2*100}))};
+  },{size:field.renderSize,samples:Array.from(field.renderSamples),roads,depotBounds,roadsOnly:process.argv.includes('--roads-only'),surfaceOnly:process.argv.includes('--surface-only')});
+  for(const [name,data] of Object.entries(result.output)){
+   const target=path.resolve('assets/maps/alpha',name);fs.mkdirSync(path.dirname(target),{recursive:true});fs.writeFileSync(target,Buffer.from(data,'base64'));
+  }
+  if(result.layout)fs.writeFileSync('assets/maps/alpha/material-layout.json',JSON.stringify(result.layout,null,2)+'\n');console.log(JSON.stringify({materials:result.layout?.length,roadSegments:result.roads.paths.length,roadSource:result.roads.source,files:Object.keys(result.output).length}));
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exit(1)});

@@ -7,11 +7,11 @@ const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Micr
 try{
  const page=await browser.newPage({viewport:{width:1920,height:1080}}),errors=[];
  page.on('pageerror',e=>{errors.push(e.message);console.error(e.message);});
+ await page.route('**/navigation',r=>r.fulfill({status:200,headers:{'Access-Control-Allow-Origin':'*'},body:'{}'}));
  await page.addInitScript(()=>{for(const k of ['fieldRadio','fieldSound','fieldStoryVoice'])localStorage.setItem('warGame.'+k,'off');});
  await page.goto('http://127.0.0.1:8766/review/factory-distribution-'+Date.now()+'/campaign/');
- await page.waitForFunction(()=>window.campaign?.ready,null,{timeout:90000});
- await page.locator('#begin').click();await page.waitForFunction(()=>document.getElementById('welcome').hidden);
- await page.evaluate(()=>{const m=campaign.mission,s=m.entity(m.state.openingScene.signId);s.completed=true;s.progress=1;});
+ await page.waitForFunction(()=>window.campaign?.ready&&!document.getElementById('begin').disabled,null,{timeout:90000});
+ await page.evaluate(()=>{const m=campaign.mission;m.state.pendingCinematics=[];m.state.openingScene={...m.state.openingScene,handedOver:true};localStorage.setItem('warGame.alpha.mission01.v1',m.save());document.getElementById('load').click();});
  await page.waitForFunction(()=>campaign.state.active,null,{timeout:25000});await page.locator('#pause').click();
  const ids=await page.evaluate(()=>{
   const c=campaign,m=c.mission,w=c.world,p=w.field.gridToWorld(m.config.startGrid);
@@ -24,6 +24,7 @@ try{
  });
  await page.locator('#production-toggle').click();
  assert.equal(await page.locator('#actions > [data-production]').count(),0,'No duplicate shared production row');
+ assert.equal(await page.locator('#actions .production-time').count(),0,'ETA stays in tooltips, not under the icons');
  const row=id=>page.locator('[data-factory-row="'+id+'"]');
  for(const id of ids)for(let i=0;i<3;i++)await row(id).locator('[data-factory-production=bukhanka]').click();
  const lengths=()=>page.evaluate(ids=>ids.map(id=>campaign.mission.entity(id).queue.length),ids);
@@ -49,6 +50,12 @@ try{
    for(const row of root.querySelectorAll('[data-factory-row]')){
     const style=getComputedStyle(row);if(style.backgroundColor!=='rgba(0, 0, 0, 0)'||style.borderTopWidth!=='0px')issues.push('Framed row');
     const rs=[...row.children].map(b=>b.getBoundingClientRect());if(rs.some(r=>Math.abs(r.top-rs[0].top)>1))issues.push('Factory split into several rows');
+   }
+   for(const b of root.querySelectorAll('[data-factory-production]')){
+    if(b.querySelector('.production-count').hidden)continue;
+    const icon=b.querySelector('.game-icon').getBoundingClientRect(),badge=b.querySelector('.production-count').getBoundingClientRect();
+    const box=b.getBoundingClientRect();
+    if(Math.abs(badge.right-box.right)>.5||Math.abs(badge.bottom-box.bottom)>.5||badge.left>=icon.right||badge.top>=icon.bottom)issues.push({reason:'Counter must overlap the lower right icon corner',icon:icon.toJSON(),badge:badge.toJSON()});
    }
    return issues;
   });assert.deepEqual(issues,[],name);await page.screenshot({path:folder+'/'+name+'.png'});

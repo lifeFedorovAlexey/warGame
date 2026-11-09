@@ -25,6 +25,8 @@ import {createFogMask} from './fog-mask.js';
 import {createStorySignals} from './story-signals.js';
 import {createRallyFlags} from './rally-flags.js';
 import {createBaseYard} from './base-yard.js';
+import {scavBaseRoads} from './scav-base-roads.js';
+import {createScavOilPrefab} from './scav-oil-prefab.js';
 import {createDamEnvironment} from './dam-environment.js';
 import {createDesertDressing} from './desert-dressing.js';
 import {createFieldArtifact} from './field-artifacts.js';
@@ -66,10 +68,10 @@ export async function createCampaignWorld(host,config,sound,loading){
  `);};material.customProgramCacheKey=()=>cache()+'_mission_fog_v5';material.needsUpdate=true;}
  for(const material of terrain.terrainMaterials) addFog(material);
  const baseYard=createBaseYard(T,field,config,addFog);scene.add(baseYard.root);
- const dam=createDamEnvironment(T,field,config,addFog,sound,terrain);scene.add(dam.root);baseYard.roads.push(dam.road);terrain.setLocalRoads(baseYard.roads);
+ const dam=createDamEnvironment(T,field,config,addFog,sound,terrain);scene.add(dam.root);baseYard.roads.push(dam.road,...scavBaseRoads(field,config));terrain.setLocalRoads(baseYard.roads);
  field.localRoads=baseYard.roads;
- const factoryRoads=createFactoryRoadView(T,scene,field,terrain,baseYard.roads,addFog,baseYard.setAccessRoads);
  const dressing=createDesertDressing(T,field,config,[...terrain.roadPaths,...baseYard.roads],dam.layout,addFog);scene.add(dressing.root);
+ const factoryRoads=createFactoryRoadView(T,scene,field,terrain,baseYard.roads,addFog,roads=>{baseYard.setAccessRoads(roads);dressing.setAccessRoads(roads);});
  const damage=createDamageSystem(T,scene,field,config);
  await loading?.stage('vehicles');
  const vehicles=await createVehicleLayer(T,scene,field,config,damage,(completed,total)=>loading?.update('vehicles',completed,total)),buildingRoot=new T.Group();scene.add(buildingRoot);const buildings=new Map(),prefabs=new Map(),selectionRoot=new T.Group();scene.add(selectionRoot);
@@ -168,12 +170,14 @@ export async function createCampaignWorld(host,config,sound,loading){
   camera.position.set(x,y,field.heightAt(x,y)+120);
   controls.update();
  }
+ const prefabKey=(kind,owner='rai',camp='',variant='',span=7,profile=null)=>owner+':'+kind+':'+camp+':'+variant+':'+span+':'+profile;
  function getPrefab(kind,owner='rai',camp='',variant='',span=7,profile=null){
-  const key = owner + ':' + kind + ':' + camp+':'+variant+':'+span+':'+profile;
+  const key = prefabKey(kind,owner,camp,variant,span,profile);
   if (!prefabs.has(key)) {
-   const prefab = owner === 'scavs' ? kind.startsWith('scav-')?createScavBasePrefab(T,kind,camp,span,variant,profile):createScavPrefab(T,kind,variant?camp+':'+variant:camp) : createBuildingPrefab(T,kind,config.buildings[kind]);
+   const prefab = kind==='derrick'&&(owner==='scavs'||variant==='scav-oil')?createScavOilPrefab(T,config.buildings.derrick):owner === 'scavs' ? kind.startsWith('scav-')?createScavBasePrefab(T,kind,camp,span,variant,profile):createScavPrefab(T,kind,variant?camp+':'+variant:camp) : createBuildingPrefab(T,kind,config.buildings[kind]);
    prefab.userData.kind = kind;
    prefab.userData.owner = owner;
+   prefab.userData.prefabKey = key;
    prefabs.set(key,prefab);
   }
   return prefabs.get(key);
@@ -401,13 +405,13 @@ export async function createCampaignWorld(host,config,sound,loading){
    if(pose){root.matrix.copy(pose.matrix).multiply(lightLift);root.matrixWorldNeedsUpdate=true;const unit=mission.entity(near[i].id);spots.forEach((spot,j)=>{if(partMissing(unit?.damage,j+5))spot.intensity=0;else headlightCount++;});}
   });
   const buildingIds=new Set(mission.state.buildings.map(b=>b.id));for(const [id,object] of buildings)if(!buildingIds.has(id)){construction.release(object);damage.releaseBuilding(object);buildingRoot.remove(object);buildings.delete(id);}
-  for(const b of mission.state.buildings){let object=buildings.get(b.id);if(object&&(object.userData.kind!==b.kind||object.userData.owner!==b.owner)){construction.release(object);damage.releaseBuilding(object);buildingRoot.remove(object);buildings.delete(b.id);object=null;}if(!object){object=getPrefab(b.kind,b.owner,b.campId,b.scavVariant,b.fenceSpan,b.fenceProfile).clone(true);object.userData.entity=b.id;damage.attachBuilding(object,b);buildingRoot.add(object);buildings.set(b.id,object);}object.visible=(b.hp>0||b.damage?.wreck)&&(b.owner==='rai'||mission.exploredAt(b.x,b.y));if(!object.visible)continue;object.position.set(b.x,b.y,b.groundHeight??field.heightAt(b.x,b.y));object.rotation.z=b.rotation;object.scale.setScalar(config.worldScale);
+  for(const b of mission.state.buildings){let object=buildings.get(b.id);if(object&&object.userData.prefabKey!==prefabKey(b.kind,b.owner,b.campId,b.scavVariant,b.fenceSpan,b.fenceProfile)){construction.release(object);damage.releaseBuilding(object);buildingRoot.remove(object);buildings.delete(b.id);object=null;}if(!object){object=getPrefab(b.kind,b.owner,b.campId,b.scavVariant,b.fenceSpan,b.fenceProfile).clone(true);object.userData.entity=b.id;damage.attachBuilding(object,b);buildingRoot.add(object);buildings.set(b.id,object);}object.visible=(b.hp>0||b.damage?.wreck)&&(b.owner==='rai'||mission.exploredAt(b.x,b.y));if(!object.visible)continue;object.position.set(b.x,b.y,b.groundHeight??field.heightAt(b.x,b.y));object.rotation.z=b.rotation;object.scale.setScalar(config.worldScale);
    fitBuildingFoundation(object,b,field,config);
    if(b.kind==='mg-tower')aimTowerWeapon(object,b,field,config.worldScale,b.aimTarget,now-(shotTimes.get(b.id)??-Infinity));
    if(b.owner==='rai'&&b.hp>0)construction.building(object,b,config.buildings[b.kind]);
    damage.updateBuilding(object,b);
    if(b.kind==='derrick'&&b.completed&&b.hp>0){
-    const phase=(b.pumpTime??0)+(b.powered&&mission.state.status==='running'?Math.max(0,mission.accumulator):0);
+    const phase=b.owner==='scavs'?time+Math.max(0,mission.accumulator):(b.pumpTime??0)+(b.powered&&mission.state.status==='running'?Math.max(0,mission.accumulator):0);
     if(object.userData.pumpPhase!==phase){updateOilPump(object,phase);object.userData.pumpPhase=phase;}
    }
    const aim=b.aimTarget,recoil=mgRecoil(now-(shotTimes.get(b.id)??-Infinity));

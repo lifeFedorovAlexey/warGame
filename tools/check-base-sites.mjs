@@ -12,8 +12,10 @@ const json=p=>JSON.parse(fs.readFileSync(p,'utf8')),config=json('assets/campaign
 const raw=createHeightfield(json('assets/maps/alpha/heightfield.json'));shapeMesaRims(raw);
 const field=refineRoadHeightfield(raw);applyRoadGrades(field,json('assets/maps/alpha/roads.json'));
 const mission=new Mission(config,field);mission.explored.fill(1);
+// Check fixed site/road compatibility independently of movable starting units.
+mission.state.units=[];mission.rebuildNavigation();
 const roads=baseApproachRoads(field,config),mask=createLocalRoadMask(T);mask.setRoads(roads);
-assert.equal(roads.length,4);
+assert.equal(roads.length,3,'Only the street, generator and lab approaches are prebuilt; factories add their own roads');
 for(const road of roads){
  for(const p of road.points){
   assert(mask.blendAt(p.x,p.y)>.9,'Continuous asphalt along every approach');
@@ -30,7 +32,7 @@ for(const site of config.baseSites){
  const point=field.gridToWorld(site.grid),angle=(site.rotationDegrees??0)*Math.PI/180,place=mission.placement(site.kind,point.x,point.y,angle,{checkMoney:false});
  assert(place.ok,site.kind+': '+place.reason);assert.equal(place.blockers.length,0,site.kind);
  assert.equal(place.x,point.x);assert.equal(place.y,point.y);
- mission.addStructure(site.kind,'rai',place,{completed:true,rotation:angle,groundHeight:place.height});mission.rebuildNavigation();
+ mission.addStructure(site.kind,'rai',place,{completed:true,rotation:angle,groundHeight:place.height,accessRoads:place.accessRoads});mission.rebuildNavigation();
 }
 for(const grid of config.oilFields.slice(0,2)){
  const point=field.gridToWorld(grid),place=mission.placement('derrick',point.x,point.y,0,{checkMoney:false});
@@ -38,6 +40,6 @@ for(const grid of config.oilFields.slice(0,2)){
 }
 const factory=mission.state.buildings.find(b=>b.kind==='factory');
 mission.updateEconomy(0);mission.produce(factory.id,'bukhanka');
-mission.updateEconomy(config.units.bukhanka.seconds+1);
+mission.updateEconomy(config.units.bukhanka.seconds+config.units.bukhanka.cost/config.oilTransferPerSecond+1);
 assert.equal(mission.state.statistics.produced,1,'The planned factory has a usable exit');
 console.log('PASS: all prepared sites are buildable together, original oil sites stay clear, factory exit works');

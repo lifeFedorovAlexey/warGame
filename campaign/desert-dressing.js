@@ -74,8 +74,38 @@ export function createDesertDressing(T,field,config,roads,dam,addFog){
  const dummy=new T.Object3D(),color=new T.Color();let instances=0,triangles=0;
  for(const item of batches){
   const mesh=new T.InstancedMesh(item.geometry,item.material,item.poses.length);mesh.name=item.name;mesh.castShadow=mesh.receiveShadow=true;
+  item.mesh=mesh;
   item.poses.forEach((p,i)=>{dummy.position.set(p.x,p.y,p.z);dummy.rotation.set(0,0,p.rotation);dummy.scale.set(...p.s);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);const v=.84+random()*.16;color.setRGB(v,v,v*.97);mesh.setColorAt(i,color);});
   mesh.instanceMatrix.needsUpdate=true;mesh.computeBoundingSphere();root.add(mesh);instances+=item.poses.length;triangles+=item.poses.length*(item.geometry.index?.count??item.geometry.attributes.position.count)/3;
  }
- return {root,statistics:{instances,triangles,drawCalls:batches.length}};
+ // Road layout changes are rare. Move only affected trees, keeping their paired
+ // trunk/crown instances, colours and scale; no geometry or per-frame work.
+ function setAccessRoads(accessRoads){
+  const access=[];for(const road of accessRoads)for(let i=1;i<road.points.length;i++)access.push({a:road.points[i-1],b:road.points[i],width:road.width});
+  const clear=(p,r)=>access.every(s=>roadDistance(p,s)>=r+3);
+  let moved=0;
+  pine.poses.forEach((p,i)=>{
+   const radius=2.13*p.s[0];if(clear(p,radius))return;
+   let destination=null;
+   // Nearest clear ring first. Stable order prevents a new road from shuffling
+   // unrelated vegetation, and removed roads do not make trees jump back.
+   for(let distance=4;distance<=256&&!destination;distance+=4)for(let step=0;step<32;step++){
+    const angle=step*Math.PI/16,q={x:p.x+Math.cos(angle)*distance,y:p.y+Math.sin(angle)*distance};
+    const grid=field.worldToGrid(q.x,q.y);
+    if(grid[0]<bounds[0]||grid[0]>bounds[2]||grid[1]<bounds[1]||grid[1]>bounds[3])continue;
+    if(!clear(q,radius)||reserved(q,radius))continue;
+    if(pine.poses.some((other,j)=>i!==j&&Math.hypot(q.x-other.x,q.y-other.y)<radius+2.13*other.s[0]))continue;
+    destination=q;break;
+   }
+   if(!destination)return;
+   for(const item of [trunks,pine]){
+    const pose=item.poses[i];Object.assign(pose,destination,{z:field.heightAt(destination.x,destination.y)});
+    dummy.position.set(pose.x,pose.y,pose.z);dummy.rotation.set(0,0,pose.rotation);dummy.scale.set(...pose.s);dummy.updateMatrix();item.mesh.setMatrixAt(i,dummy.matrix);
+   }
+   moved++;
+  });
+  if(moved)for(const item of [trunks,pine]){item.mesh.instanceMatrix.needsUpdate=true;item.mesh.computeBoundingSphere();}
+  return moved;
+ }
+ return {root,setAccessRoads,statistics:{instances,triangles,drawCalls:batches.length}};
 }

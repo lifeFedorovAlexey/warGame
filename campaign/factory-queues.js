@@ -5,7 +5,6 @@ import {oilOrderProgress} from './oil-economy.js';
 function indicators(control,label){
  const count=document.createElement('span');count.className='production-count';count.hidden=true;count.setAttribute('aria-hidden','true');control.append(count);
  const progress=document.createElement('progress');progress.className='production-progress';progress.max=1;progress.hidden=true;progress.setAttribute('aria-label',label);control.append(progress);
- const time=document.createElement('span');time.className='production-time';time.hidden=true;time.setAttribute('aria-hidden','true');control.append(time);
 }
 
 export function createFactoryRows(mission,factories,projects,{act,focus}){
@@ -43,11 +42,10 @@ export function updateProductionButtons(root,mission,factories,projects,paused){
   const current=rows[0],running=!!current,canProduce=mission.canSpend(projects.find(p=>p.id===id).spec.cost);
   control.disabled=!canProduce&&!count;control.classList.toggle('cannot-produce',!canProduce);
   const badge=control.querySelector('.production-count');badge.hidden=!count;badge.textContent=String(count);
-  const progress=control.querySelector('progress'),time=control.querySelector('.production-time');
+  const progress=control.querySelector('progress');
   const servicing=running&&current.factory.productionPaused,blocked=running&&current.factory.exitBlocked&&!servicing,stopped=paused||servicing;
   const flow=current?.flow,remaining=Math.ceil(flow?.remaining??0);
-  progress.hidden=time.hidden=!running;progress.value=flow?.progress??0;
-  time.textContent=running?(servicing?'Ⅱ':blocked?'!':remaining+'с'):'';
+  progress.hidden=!running;progress.value=flow?.progress??0;
   control.dataset.productionState=running?(blocked?'blocked':stopped?'paused':flow.funding?'funding':'running'):'waiting';
   control.classList.toggle('has-queue',count>0);control.classList.toggle('is-producing',running&&!stopped&&!blocked);
   const phase=running?(flow.funding?'Нефть '+Math.floor(current.job.funding.paid)+'/'+current.job.cost:'Выпуск '+Math.floor((current.job.progress??0)*100)+'%'):'';

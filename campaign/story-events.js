@@ -72,7 +72,7 @@ export function storyFacts(mission,d) {
 export function storyRules(director,f) {
   const {s,d}=f,done=id=>director.finished(id),heard=id=>director.heard(id);
   const after=(id,seconds=0)=>done(id)&&d.clock-director.ended(id)>=seconds*1000;
-  const p=(priority,trigger,valid=true,gap=0,continueValid=true)=>({priority,trigger,valid,gap,continueValid});
+  const p=(priority,trigger,valid=true,gap=0)=>({priority,trigger,valid,gap});
   const openingDone=director.anyFinished(['r01','r01a','r01b']);
   const flameDone=['r29','r30-alt'].some(done),fullFlame=heard('r27');
   const firstWin=!!d.facts.firstWin;
@@ -84,14 +84,14 @@ export function storyRules(director,f) {
     r03:p(2,f.ready('generator')&&!!d.facts.oilKnown,!f.ready('derrick')),
     r04:p(1,s.oilLinked>0,!f.ready('factory')),
     r05:p(1,s.oilLinked>0&&(done('r04')||!!f.building('factory')),!f.ready('factory')),
-    r06:p(2,!!f.building('factory'),!f.ready('lab')),
-    r08:p(1,f.ready('factory'),!d.facts.firstVan),
-    r09:p(1,!!d.facts.firstVan),
+    r06:p(2,!!f.building('factory')),
+    r08:p(1,f.ready('factory')&&done('r06')),
+    r09:p(1,!!d.facts.firstVan&&done('r08')),
     r10:p(2,f.ammoStudied&&after('r33',2),true,2),
-    r11:p(2,!!f.building('lab')),
+    r11:p(2,f.ready('factory')&&done('r08')),
     r13:p(2,f.ready('lab')&&heard('r11')),
-    r14:p(0,!!f.contact,f.contactAlive,0,f.contactAlive),
-    r16:p(0,heard('r14')&&!!f.contact,!f.contact?.fired&&f.contactAlive&&!f.battle,0,!f.contact?.fired&&f.contactAlive&&!f.battle),
+    r14:p(0,!!f.contact,f.contactAlive),
+    r16:p(0,heard('r14')&&!!f.contact,!f.contact?.fired&&f.contactAlive&&!f.battle),
     r18:p(1,firstWin&&!f.battle),
     r19:p(2,after('r18',10),!f.allCamps,0),
     r21:p(1,firstWin&&(done('r19')||f.allCamps||f.bunkers>0),!f.defense),
@@ -113,9 +113,9 @@ export function storyRules(director,f) {
     r39:p(1,f.towerStudied),
     r40:p(2,after('r39',12),true,12),
     r41:p(1,f.chiefReachable,f.chief),
-    r42:p(2,heard('r41'),f.chief,0,f.chief),
-    r45:p(2,heard('r42')&&!!s.storyFacts?.enemyGarden&&!!s.storyFacts?.ownThreeHangarsRooflessLatrine,f.chief,35,f.chief),
-    r46:p(0,!!d.facts.chiefAssault,f.chief,0,f.chief),
+    r42:p(2,heard('r41'),f.chief),
+    r45:p(2,heard('r42')&&!!s.storyFacts?.enemyGarden&&!!s.storyFacts?.ownThreeHangarsRooflessLatrine,f.chief,35),
+    r46:p(0,!!d.facts.chiefAssault,f.chief),
     r47:p(1,f.allCamps,!f.victory),
     r48:p(1,f.victory),
     r49:p(2,after('r48',5),f.victory,5),

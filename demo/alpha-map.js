@@ -27,7 +27,7 @@ export async function createAlphaMap(T,{lightweightOverview=false}={}){
  const paint=[];
  function paintStrip(x,y,ex,ey,nx,ny,offset,width){const ox=nx*offset,oy=ny*offset,wx=nx*width/2,wy=ny*width/2,vertex=(px,py)=>[px,py,field.heightAt(px,py)+.10],ap=vertex(x+ox+wx,y+oy+wy),am=vertex(x+ox-wx,y+oy-wy),bp=vertex(ex+ox+wx,ey+oy+wy),bm=vertex(ex+ox-wx,ey+oy-wy);paint.push(...am,...ap,...bm,...bm,...ap,...bp);}
  for(const road of roads.paths){let travelled=0;for(let i=0;i<road.points.length-1;i++){const a=road.points[i],b=road.points[i+1],length=Math.hypot(b.x-a.x,b.y-a.y),count=Math.max(1,Math.ceil(length/3)),nx=-(b.y-a.y)/length,ny=(b.x-a.x)/length;
-  for(let j=0;j<count;j++){const begin=travelled+length*j/count;if(roads.nodes?.some(node=>(node.degree>2||node.base)&&Math.hypot(node.x-a.x,node.y-a.y)<110))continue;const x=a.x+(b.x-a.x)*j/count,y=a.y+(b.y-a.y)*j/count,ex=a.x+(b.x-a.x)*(j+1)/count,ey=a.y+(b.y-a.y)*(j+1)/count;
+  for(let j=0;j<count;j++){const begin=travelled+length*j/count;if(roads.nodes?.some(node=>(node.degree>2||node.base)&&Math.hypot(node.x-a.x,node.y-a.y)<(node.degree>2?38:16)))continue;const x=a.x+(b.x-a.x)*j/count,y=a.y+(b.y-a.y)*j/count,ex=a.x+(b.x-a.x)*(j+1)/count,ey=a.y+(b.y-a.y)*(j+1)/count;
    if(begin%12<4.5&&Math.sin(begin*.09+i)*.5+.5>.16)paintStrip(x,y,ex,ey,nx,ny,0,.54);
    for(const side of [-1,1])if(Math.sin(begin*.052+side*4.)*.5+Math.cos(begin*.17)*.2>.08)paintStrip(x,y,ex,ey,nx,ny,side*((a.width??road.width)/2-2),.34);
   }travelled+=length;}}

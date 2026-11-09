@@ -15,6 +15,7 @@ import {isCampPerimeter,updateCampPerimeters} from './camp-demolition.js';
 import {availableOil,oilFundingRemaining,oilRefund,beginOilFlow,finishOilFlow,transferOil,fundedWorkTime,repairWithOil} from './oil-economy.js';
 import {angleDelta} from './builder-kinematics.js';
 import {workProjection,projectorHasSight} from './builder-optics.js';
+import {setBuilderAutoRepair,assignAutomaticRepair,releaseInvalidRepairTarget,repairableBuilding} from './builder-auto-repair.js';
 import {combatContact} from './combat-contact.js';
 import {clearCombatSight} from './combat-sight.js';
 import {recordDamage} from './damage-contact.js';
@@ -25,6 +26,8 @@ import {updateBurning} from './burning.js';
 import {updateStreetFurniture} from './street-furniture.js';
 import {updateOpeningConstruction} from './opening-construction.js';
 import {installScavBases,campGuardPose} from './scav-base-layout.js';
+import {installCampResources,captureCampResources} from './camp-resources.js';
+import {migrateScavLayout} from './scav-layout-migration.js';
 const completeSteps=iterator=>{let step;do{step=iterator.next();}while(!step.done);return step.value;};
 import {UnitSpatialIndex} from './unit-spatial-index.js';
 import {vehicleContact,impactPower,fallbackVehicleImpact,resolveVehicleOverlapsSteps} from './vehicle-impact.js';
@@ -58,7 +61,7 @@ import {configureCommandGroup,refreshCommandGroups,expandCommandIds,commandGroup
 
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 const routeOrderRevision=2;
-const workArrivalTolerance=.08;
+const workArrivalTolerance=2;
 function selectedCommandIds(mission,ids,action,target){
  const tactical=['move','attack-move','attack'].includes(action);
  return tactical&&!(action==='move'&&target&&pickupTarget(mission,target))?expandCommandIds(mission,ids,{action}):ids;
@@ -96,7 +99,7 @@ export class Mission{
    const roster=SCAV_ROSTERS[data.id];
    for(let i=0;i<data.units;i++){const pose=campGuardPose(camp,i);this.addUnit(roster?.[i%roster.length]??'raider','scavs',pose,{campId:data.id,heading:pose.heading,guard:pose.guard});}
   });
-  this.state.scavRosterVersion=1;this.state.projectiles=[];installScavBases(this);
+  this.state.scavRosterVersion=1;this.state.projectiles=[];installScavBases(this);installCampResources(this);
   this.rebuildNavigation();this.updateFog();this.reserveRaid();placeExtraCampGuards(this);
  }
  id(prefix){return prefix+this.serial++;}
@@ -428,7 +431,9 @@ export class Mission{
    const at={...unit,...parked};
    const aim=this.projectorAim(at,target);
    if(!aim||!projectorHasSight(aim,at,target,reservations,this.field,scale))return;
-   if(!repair&&!workProjection(at,{...target,progress:1},this.config,this.field))return;
+   // Leave room for the final chassis heading. A tall building's rising layer
+   // can request a nearer pose later; do not insist on its roof from the start.
+   if(!workProjection(at,target,this.config,this.field,{reachMargin:1}))return;
    candidates.push(p);
   };
   for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++)sample(col+dx,row+dy);
@@ -449,7 +454,7 @@ export class Mission{
     sample(...this.nav.grid(target.x+along,target.y+side*(d+gap)));
    }
   }
-  const cost=p=>distance(p,unit)+distance(p,goal)*(repair?.18:.31);
+  const cost=p=>distance(p,unit);
   candidates.sort((a,b)=>cost(a)-cost(b));
   for(const p of candidates.slice(0,24)){
    const path=(yield* this.vehiclePathSteps(unit,p,{maxGoalDistance:.01}));
@@ -506,6 +511,7 @@ export class Mission{
   if(action==='attack'&&(target.owner==='rai'||!this.entity(target.id)||!this.visibleAt(target.x,target.y)))return this.fail('Цель не обнаружена');
   if(action==='build'&&target.clearing)return this.fail('Техника освобождает площадку');
   if(action==='demolish'&&!canDemolish(this,target))return this.fail('Выберите своё готовое здание');
+  if(action==='repair'&&!repairableBuilding(this,target))return this.fail('Строители ремонтируют только готовые постройки');
   if(['build','repair','demolish'].includes(action)&&(target.owner!=='rai'||!this.entity(target.id)))return this.fail('Нужна своя техника или постройка');
   const units=this.state.units.filter(u=>ids.includes(u.id)&&u.owner==='rai'&&u.hp>0&&!inFactoryInterior(u)&&(!['build','repair','demolish'].includes(action)||this.unitSpec(u).role==='builder')&&(!combat||this.unitSpec(u).damage));if(!units.length)return this.fail('Не выбрана подходящая техника');const assigned=new Set();
   const pickup=action==='move'?pickupTarget(this,target):null;
@@ -773,6 +779,7 @@ export class Mission{
  }
  setCombatPolicy(ids,changes){const result=configureCombat(this,ids,changes);if(result.ok)this.trafficCoordinator.intentChanged();return result;}
  setArmyCombatPolicy(changes){const result=configureArmyCombat(this,changes);if(result.ok)this.trafficCoordinator.intentChanged();return result;}
+ setBuilderAutoRepair(enabled){return setBuilderAutoRepair(this,enabled);}
  stop(ids,{expandGroup=true}={}){
   if(expandGroup)ids=expandCommandIds(this,ids);
   ids=ids.filter(id=>{const unit=this.entity(id);return !unit||!inFactoryInterior(unit);});
@@ -2065,26 +2072,32 @@ export class Mission{
  }
  projectorAim(unit,target){
   const aim=workProjection(unit,target,this.config,this.field);
-  return aim&&projectorHasSight(aim,unit,target,this.state.units,this.field,this.config.worldScale)?aim:null;
+  return aim&&projectorHasSight(aim,unit,target,this.state.units,this.field,this.config.worldScale,this.state.buildings,this.config.buildings)?aim:null;
  }
  canWorkHere(unit,target){
   if(!target||!clearOfVehicles(unit,unit,this.state.units,this.config.worldScale,true))return false;
   if(!this.projectorAim(unit,target))return false;
-  return !!this.config.units[target.kind]||!!workProjection(unit,{...target,progress:1},this.config,this.field);
+  return true;
  }
  updateBuilder(...args){this.finishPendingStep();return completeSteps(this.updateBuilderSteps(...args));}
  *updateBuilderSteps(unit,dt){
   unit.builderWorking=false;
   unit.builderContact=null;
   unit.projector??={yaw:0,pitch:0};
+  releaseInvalidRepairTarget(this,unit);
+  yield* assignAutomaticRepair(this,unit);
   let target=unit.task?.targetId?this.entity(unit.task.targetId):null;
   const job=unit.task?.type;
   if(unit.task?.targetId&&(!target||job==='build'&&target.completed||job==='repair'&&target.hp>=target.maxHp||job==='demolish'&&!canDemolish(this,target))){
    unit.task=null;unit.path=[];target=null;
   }
   const working=target&&['build','repair','demolish'].includes(job)&&!target.clearing;
-  const parked=working&&!unit.path.length&&this.canWorkHere(unit,target);
   const moving=working&&this.config.units[target.kind]&&Math.hypot(target.x-target.previousX,target.y-target.previousY)>.05;
+  const parked=working&&!moving&&this.canWorkHere(unit,target);
+  if(parked){
+   unit.path=[];unit.driveSpeed=0;
+   for(const key of ['detour','driveWatch','trafficHold','routeOrder','routeContinuation'])delete unit[key];
+  }
   const aim=parked&&!moving?this.projectorAim(unit,target):null;
   const requested=aim??{yaw:0,pitch:0};
   const yawError=angleDelta(requested.yaw,unit.projector.yaw), pitchError=requested.pitch-unit.projector.pitch;
@@ -2104,7 +2117,7 @@ export class Mission{
    }
    return;
   }
-  if(working&&!unit.path.length&&this.state.time-(unit.lastRepath??-10)>1){
+  if(working&&!unit.path.length&&this.state.time-(unit.lastRepath??-10)>=.4){
    unit.path=(yield* this.workPathSteps(unit,target))??[];unit.lastRepath=this.state.time;
   }
   (yield* this.moveSteps(unit,dt));
@@ -2126,7 +2139,7 @@ export class Mission{
    if(unit.task.type==='build'&&!target.completed){
     target.progress=Math.min(1,target.progress+(oilFundingRemaining(target)>0?0:dt)/this.buildingSpec(target).seconds);
     if(target.progress>=1){target.completed=true;this.state.statistics.buildingsCompleted++;this.emit('construction-complete',{kind:target.kind,building:target.id});}
-   }else if(unit.task.type==='repair'&&target.hp<target.maxHp){
+   }else if(unit.task.type==='repair'&&repairableBuilding(this,target)&&target.hp<target.maxHp){
     repairWithOil(this,target,dt);
    }else if(unit.task.type==='demolish'){
     unit.builderWorking=advanceDemolition(this,unit,target,dt);
@@ -2210,7 +2223,7 @@ export class Mission{
   const working=target&&['build','repair','demolish'].includes(unit.task?.type)&&!unit.path.length&&distance(unit,this.workPoint(target,unit.task.workOffset??0))<=this.config.builderRangeMetres;
   if(working){unit.path=[];unit.tool=Math.min(1,unit.tool+dt/2.6);unit.aimTarget={x:target.x,y:target.y};if(unit.tool<.99)return;
    if(unit.task.type==='build'&&!target.completed){target.progress=Math.min(1,target.progress+(oilFundingRemaining(target)>0?0:dt)/this.buildingSpec(target).seconds);if(target.progress>=1){target.completed=true;this.state.statistics.buildingsCompleted++;this.emit('construction-complete',{kind:target.kind,building:target.id});}}
-   else if(unit.task.type==='repair'&&target.hp<target.maxHp){repairWithOil(this,target,dt);}
+   else if(unit.task.type==='repair'&&repairableBuilding(this,target)&&target.hp<target.maxHp){repairWithOil(this,target,dt);}
    if((unit.task.type==='build'&&target.completed)||(unit.task.type==='repair'&&target.hp>=target.maxHp)){unit.task=null;unit.foldTime=2.6;}
   }else{
    if(unit.tool>0){unit.foldTime=2.6;return;}
@@ -2361,7 +2374,7 @@ export class Mission{
  updateMission(){
   updateCampPerimeters(this);
   const s=this.state,captured=s.camps.filter(c=>c.cleared).length;
-  for(const camp of s.camps){if(camp.cleared)continue;const hostile=[...s.units,...s.buildings].some(e=>e.campId===camp.id&&e.hp>0&&!isCampPerimeter(e));if(!hostile){camp.cleared=true;this.emit('camp-cleared',{camp:camp.id});if(camp.artifact&&!camp.artifactSpawned){const point=this.nav.nearest(camp.x+35,camp.y,8)??camp;s.artifacts.push({id:this.id('a'),key:camp.artifact,x:point.x,y:point.y,collected:false});camp.artifactSpawned=true;}}}
+  for(const camp of s.camps){if(camp.cleared)continue;const hostile=[...s.units,...s.buildings].some(e=>e.campId===camp.id&&e.owner==='scavs'&&e.hp>0&&!isCampPerimeter(e)&&!e.campResource);if(!hostile){camp.cleared=true;captureCampResources(this,camp);this.emit('camp-cleared',{camp:camp.id});if(camp.artifact&&!camp.artifactSpawned){const point=this.nav.nearest(camp.x+35,camp.y,8)??camp;s.artifacts.push({id:this.id('a'),key:camp.artifact,x:point.x,y:point.y,collected:false});camp.artifactSpawned=true;}}}
   for(const artifact of s.artifacts)if(!artifact.collected&&s.units.some(u=>u.owner==='rai'&&u.hp>0&&distance(u,artifact)<24)){artifact.collected=true;if(!s.artifactKeys.includes(artifact.key))s.artifactKeys.push(artifact.key);this.emit('artifact-collected',{key:artifact.key});if(artifact.key!=='mg-tower')this.cinematic('artifact-'+artifact.key);}
   const enemyVisible=s.units.some(u=>u.owner==='scavs'&&u.hp>0&&this.visibleAt(u.x,u.y));const has=kind=>s.buildings.some(b=>b.owner==='rai'&&b.hp>0&&b.completed&&b.kind===kind);
   this.updateRaid(s.storyConstruction?.enabled
@@ -2539,6 +2552,7 @@ export class Mission{
   this.oilSpent=0;this.oilWorkTime=null;
   this.commandPlanner=null;this.scavJob=null;this.pendingStops=null;
   this.pendingTick=null;this.unitFrameTimes=new WeakMap();this.unitIndexActive=false;this.collisionPairs=new Map();this.contactRockPairs=new Map();this.trafficCoordinator=new PredictiveTraffic();
+  for(const unit of this.state.units)if(this.unitSpec(unit).role==='builder')releaseInvalidRepairTarget(this,unit);
   ensureSalvage(this);
   this.state.projectiles??=[];
   if(!this.state.scavRosterVersion){
@@ -2551,12 +2565,13 @@ export class Mission{
   const legacyWrecks=[],armyPolicy=normalizeCombatPolicy(armyCombatPolicy(this));this.state.armyCombatPolicy=armyPolicy;
   for(const entity of [...this.state.units,...this.state.buildings]){
    if(entity.combatPolicy)entity.combatPolicy=normalizeCombatPolicy(entity.combatPolicy);
-   if(entity.owner==='rai'&&this.config.units[entity.kind]?.damage)entity.combatPolicy={...armyPolicy};
+   // Army defaults fill legacy omissions; explicit saved unit rules survive.
+   if(entity.owner==='rai'&&this.config.units[entity.kind]?.damage&&!entity.combatPolicy)entity.combatPolicy={...armyPolicy};
    upgradeDamageState(entity.damage,!!this.config.units[entity.kind]);
    if(this.config.units[entity.kind])syncFieldHp(this,entity);
    if(entity.hp<=0){if(entity.destroyedAt===undefined)legacyWrecks.push(entity);scheduleWreck(this,entity);}
   }
-  this.updateUnrevealedCampLayout();
+  this.updateUnrevealedCampLayout();migrateScavLayout(this);
   // Keep existing wells on their authored oil points after the base-yard edit.
   // This is a building relocation; vehicle positions and orders are untouched.
   for(const relocation of this.config.oilFieldRelocations??[]){
@@ -2583,7 +2598,7 @@ export class Mission{
    building.halfDepth=Math.min(building.halfDepth,halfDepth);
   }
   this.state.bounds=(this.state.flags.lastRevealed?this.config.finalMapBounds:this.config.initialMapBounds).slice();this.state.designs=Array.isArray(this.state.designs)?latestVehicleProjects(this.state.designs):starterProjects(this.vehicleRecipes);this.serial=data.serial;this.randomState=data.randomState;this.explored.set(data.explored);this.events=[];this.effects=[];this.accumulator=data.accumulator??0;this.fogTimer=data.fogTimer??0;this.navigationDirty=false;this.linkOilWells(this.state.buildings.filter(b=>b.owner==='rai'&&b.hp>0&&b.completed),0);this.rebuildNavigation();this.updateFog();
-  installScavBases(this,{restoring:true});this.rebuildNavigation();
+  installScavBases(this,{restoring:true});installCampResources(this);this.rebuildNavigation();
   if(refreshFactoryAccess(this))this.rebuildNavigation();
   for(const entity of legacyWrecks){
    const state=entity.damage,mark=state?.marks?.at(-1);

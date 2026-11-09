@@ -1,0 +1,1113 @@
+{
+  "schemaVersion": 1,
+  "draftRevision": 86,
+  "draftSha256": "6f93344e51b1bf47e8fd28b83fb1088aec68275fc77d2e0742fe872bc9b70b90",
+  "throughScene": "r13",
+  "appliedAt": "2026-11-09T20:51:24.711841+00:00",
+  "scenes": [
+    {
+      "id": "p01",
+      "title": "Видео в телевизоре",
+      "cues": [],
+      "sourceLine": 19,
+      "sections": [
+        "p01"
+      ],
+      "triggerDescription": "Вступление, до передачи управления.",
+      "notes": "",
+      "enabled": true,
+      "presentation": {
+        "type": "video",
+        "file": "opening-television.mp4",
+        "title": "Видео в телевизоре",
+        "replaces": [
+          "m01-s01-l003",
+          "m01-s01-l004"
+        ]
+      }
+    },
+    {
+      "id": "p02",
+      "title": "Приказ на смерть",
+      "cues": [
+        "m01-s02-l003",
+        "m01-s02-l004",
+        "m01-s02-l007",
+        "m01-s02-l008"
+      ],
+      "sourceLine": 31,
+      "sections": [
+        "p02"
+      ],
+      "triggerDescription": "Вступление, до передачи управления.",
+      "notes": "",
+      "enabled": true
+    },
+    {
+      "id": "p03",
+      "title": "Подъём",
+      "cues": [
+        "m01-s02-l013",
+        "m01-s02-l014"
+      ],
+      "sourceLine": 51,
+      "sections": [
+        "p03"
+      ],
+      "triggerDescription": "Вступление, до передачи управления.",
+      "notes": "",
+      "enabled": true
+    },
+    {
+      "id": "p04",
+      "title": "Вывеска",
+      "cues": [
+        "m01-s03-l001",
+        "m01-v3-builder-crooked-plinth",
+        "m01-s03-l003"
+      ],
+      "sourceLine": 61,
+      "sections": [
+        "p04"
+      ],
+      "triggerDescription": "Строитель завершил стену с вывеской «РАЙ». После диалога — передача управления.",
+      "notes": "",
+      "enabled": true
+    },
+    {
+      "id": "r01",
+      "title": "Кофе для генерала",
+      "cues": [
+        "m01-v3-general-coffee",
+        "m01-s06-l008",
+        "m01-v3-general-build-power"
+      ],
+      "sourceLine": 81,
+      "sections": [
+        "r01"
+      ],
+      "triggerDescription": "начало миссии. Электростанция отсутствует.",
+      "notes": "",
+      "enabled": true
+    },
+    {
+      "id": "r02",
+      "title": "Электростанция построена",
+      "cues": [
+        "m01-v3-nuclear-power-ready"
+      ],
+      "sourceLine": 101,
+      "sections": [
+        "r02"
+      ],
+      "triggerDescription": "электростанция завершена, но добыча нефти ещё не организована.",
+      "notes": "",
+      "enabled": true
+    },
+    {
+      "id": "r01a",
+      "title": "Кофе — электростанция уже строится",
+      "cues": [
+        "m01-v3-r01a-l001"
+      ],
+      "sourceLine": 108,
+      "sections": [
+        "r01a"
+      ],
+      "triggerDescription": "Начало миссии: электростанция уже строится. Вариант вместо «Кофе для генерала».",
+      "notes": "",
+      "enabled": true
+    },
+    {
+      "id": "r01b",
+      "title": "Кофе — электростанция уже готова",
+      "cues": [
+        "m01-v3-r01b-l001"
+      ],
+      "sourceLine": 108,
+      "sections": [
+        "r01b"
+      ],
+      "triggerDescription": "Начало миссии: электростанция уже готова. Вариант вместо «Кофе для генерала».",
+      "notes": "",
+      "enabled": true
+    },
+    {
+      "id": "r03",
+      "title": "Разведка месторождений",
+      "cues": [
+        "m01-v3-r03-l001",
+        "m01-v3-r03-l002",
+        "m01-v3-r03-l003"
+      ],
+      "sourceLine": 117,
+      "sections": [
+        "r03"
+      ],
+      "triggerDescription": "обнаружено первое доступное месторождение.",
+      "notes": "",
+      "enabled": true
+    },
+    {
+      "id": "r04",
+      "title": "Первая нефтяная вышка",
+      "cues": [
+        "m01-v3-first-oil-online",
+        "m01-v3-r04-l002",
+        "m01-v3-r04-l003"
+      ],
+      "sourceLine": 133,
+      "sections": [
+        "r04"
+      ],
+      "triggerDescription": "первая вышка начала добывать нефть.",
+      "notes": "",
+      "enabled": true
+    },
+    {
+      "id": "r05",
+      "title": "Добыча налажена",
+      "cues": [
+        "m01-v3-r05-l002",
+        "m01-v3-oil-supply-ready",
+        "new-04b15a4c-032d-4174-9691-2890720a00ff"
+      ],
+      "sourceLine": 149,
+      "sections": [
+        "r05"
+      ],
+      "triggerDescription": "выполнено требование миссии по добыче нефти и энергоснабжению.",
+      "notes": "",
+      "enabled": true,
+      "announcementCue": "new-04b15a4c-032d-4174-9691-2890720a00ff"
+    },
+    {
+      "id": "r06",
+      "title": "Выданная бронетехника",
+      "cues": [
+        "m01-s05-l011",
+        "m01-s05-l012",
+        "m01-s05-l013"
+      ],
+      "sourceLine": 167,
+      "sections": [
+        "r06",
+        "r07"
+      ],
+      "triggerDescription": "строительство завода заказано или начато.",
+      "notes": "",
+      "enabled": true
+    },
+    {
+      "id": "r08",
+      "title": "Завод работает",
+      "cues": [
+        "m01-b005"
+      ],
+      "sourceLine": 199,
+      "sections": [
+        "r08"
+      ],
+      "triggerDescription": "первый завод завершён.",
+      "notes": "",
+      "enabled": true
+    },
+    {
+      "id": "r09",
+      "title": "Первая машина",
+      "cues": [
+        "m01-b006"
+      ],
+      "sourceLine": 209,
+      "sections": [
+        "r09"
+      ],
+      "triggerDescription": "выпущена первая «Буханка».",
+      "notes": "",
+      "enabled": true
+    },
+    {
+      "id": "r10",
+      "title": "Идеальный дизайн",
+      "cues": [
+        "warrant:upgrade"
+      ],
+      "sourceLine": 217,
+      "sections": [
+        "r10"
+      ],
+      "triggerDescription": "исследованы боеприпасы из второго артефакта (mg-ammo-1), завершён доклад 33–34, прошло 2 секунды спокойного эфира. Выпуск первой машины и выезд с базы этот монолог не запускают.",
+      "notes": "",
+      "enabled": true
+    },
+    {
+      "id": "r11",
+      "title": "Научное обеспечение",
+      "cues": [
+        "m01-s05-l002",
+        "m01-s05-l003",
+        "m01-s05-l004",
+        "m01-s05-l005"
+      ],
+      "sourceLine": 231,
+      "sections": [
+        "r11",
+        "r12"
+      ],
+      "triggerDescription": "Завод готов; разговор о запуске производства завершён. Приказ строить НИИ звучит до начала его строительства.",
+      "notes": "",
+      "enabled": true
+    },
+    {
+      "id": "r13",
+      "title": "Эффективность командования",
+      "cues": [
+        "m01-s05-l006",
+        "m01-s05-l007",
+        "m01-s05-l008"
+      ],
+      "sourceLine": 257,
+      "sections": [
+        "r13"
+      ],
+      "triggerDescription": "НИИ построен; спокойный эфир. Сцены 11–12 завершены.",
+      "notes": "",
+      "enabled": true
+    }
+  ],
+  "dialogue": [
+    {
+      "id": "m01-s05-l002",
+      "speaker": "general",
+      "text": "Завод есть. Теперь НИИ стройте.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s05-l003",
+      "speaker": "warrant",
+      "text": "А это, зачем ... а главное на...ху-... ...ой - куда, нам эти дармоеды?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s05-l004",
+      "speaker": "general",
+      "text": "Учёные будут изучать находки. пОЛУЧАТ новые чертежи — смоГУТ другую технику собирать.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s05-l005",
+      "speaker": "warrant",
+      "text": "Пусть сначала детали из бардачка посмотрят. Может, всё-таки надо было их куда-то поставить.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s05-l006",
+      "speaker": "general",
+      "text": "Всё непонятное, что найдёте, отправляйте в ИНСТИТУТ. Пусть учёные разбираются.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s05-l007",
+      "speaker": "warrant",
+      "text": "Ваши приказы тоже?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s05-l008",
+      "speaker": "general",
+      "text": "Приказы - выполнять! Железки. - им везите!",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s02-l003",
+      "speaker": "commander",
+      "text": "Сон приснился. Будто все умерли.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s02-l004",
+      "speaker": "warrant",
+      "text": "А приказ на это был?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s02-l007",
+      "speaker": "commander",
+      "text": "Не было.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s02-l008",
+      "speaker": "warrant",
+      "text": "Значит, сон. Спи дальше.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s02-l013",
+      "speaker": "commander",
+      "text": "Подъём! Родину восстанавливать будем!",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s02-l014",
+      "speaker": "soldier",
+      "text": "Опять копать?! ",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s03-l001",
+      "speaker": "warrant",
+      "text": "Криво повесил.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-v3-builder-crooked-plinth",
+      "speaker": "builder",
+      "text": "Так постамент кривой.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s03-l003",
+      "speaker": "warrant",
+      "text": "Тогда нормально.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-v3-general-coffee",
+      "speaker": "general",
+      "text": "А кофе почему нет?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s06-l008",
+      "speaker": "commander",
+      "text": "Потому что электричества нет.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-v3-general-build-power",
+      "speaker": "general",
+      "text": "Так электростанцию стройте! Вам на всё приказ нужен?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-v3-nuclear-power-ready",
+      "speaker": "builder",
+      "text": "АЭС работает. Одной станции хватит на четыре нефтяные вышки. Можно начинать добычу.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-v3-r01a-l001",
+      "speaker": "general",
+      "text": "Строится? Хорошо. Тогда к делу.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-v3-r01b-l001",
+      "speaker": "general",
+      "text": "Со светом разобрались. Теперь к делу.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-v3-r03-l001",
+      "speaker": "scout",
+      "text": "Командир, нефть нашли. В двух местах.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-v3-r03-l002",
+      "speaker": "commander",
+      "text": "А хозяева есть?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-v3-r03-l003",
+      "speaker": "warrant",
+      "text": "Пока нет. Как вышки поставим — появятся.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-v3-first-oil-online",
+      "speaker": "builder",
+      "text": "Вышку подключили. Нефть пошла.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-v3-r04-l002",
+      "speaker": "general",
+      "text": "А кофе?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-v3-r04-l003",
+      "speaker": "warrant",
+      "text": "Пока только нефть. Вам с сахаром?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-v3-r05-l002",
+      "speaker": "general",
+      "text": "Пополнение получили?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-v3-oil-supply-ready",
+      "speaker": "commander",
+      "text": "Нет. Всё те же три «Буханки».",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "new-04b15a4c-032d-4174-9691-2890720a00ff",
+      "speaker": "general",
+      "text": "А по бумагам получили. Завод стройте!",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s05-l011",
+      "speaker": "general",
+      "text": "В конструкторе подбирайте модули, завод соберёт. Заказывайте что угодно.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s05-l012",
+      "speaker": "commander",
+      "text": "Не получится из букв «Ж», «О», «П», «А»...тоесть «УАЗ» — собрать слово «счастье»...я имел ввиду -  танк.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s05-l013",
+      "speaker": "general",
+      "text": "Читайте мелкий шрифт в доступных чертежах:«Доработать напильником».",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-b005",
+      "speaker": "builder",
+      "text": "Завод готов. Напильник я, правда, не нашёл. Так что пока без танка.\nЗато нашёл пару вёдер краски и чёрные саморезы. Профессиональные.Найдёте железяку — прикрутим к борту, покрасим. Будет вам дополнительная броня.Краска и саморезы входят в зип каждой машины. Собственно, это весь её зип.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-b006",
+      "speaker": "builder",
+      "text": "Первая «Буханка» готова! Лишние детали в бардачок положил. Вдруг не лишние.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "warrant:upgrade",
+      "speaker": "warrant",
+      "text": "Вот «Буханку» опять обновили. Зря, конечно. Хорошая была машина. Сорок лет ничего не меняли — и правильно делали. А теперь ручку дверную другую поставили. Спрашивается, зачем?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    }
+  ],
+  "clips": {
+    "m01-s05-l002": {
+      "file": "recordings/reviewed/m01-s05-l002-cfeed48a6de6.mp3",
+      "duration": 2.925708333333333,
+      "leadingSilence": 0.04,
+      "trailingSilence": 0.3557083333333333,
+      "speaker": "general",
+      "sha256": "cfeed48a6de68d330a8c44a5b02718d8d53fdc638d90aaea3545ca74d5fb14ac",
+      "bytes": 63748,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T20_09_45_Artem Lebedev - Captivating and Engaging_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 86,
+      "transcriptSource": "owner-workshop",
+      "text": "Завод есть. Теперь НИИ стройте."
+    },
+    "m01-s05-l003": {
+      "file": "recordings/reviewed/m01-s05-l003-6dda1675f252.mp3",
+      "duration": 5.720833333333333,
+      "leadingSilence": 0.23,
+      "trailingSilence": 0.3608333333333329,
+      "speaker": "warrant",
+      "sha256": "6dda1675f25270d19501ee75642c9177c0275a87dccf03b4dddcc0d9f065aa33",
+      "bytes": 108470,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T20_14_28_Egor Gadzhiyev - Clear and Commanding_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 86,
+      "transcriptSource": "owner-workshop",
+      "text": "А это, зачем ... а главное на...ху-... ...ой - куда, нам эти дармоеды?"
+    },
+    "m01-s05-l004": {
+      "file": "recordings/reviewed/m01-s05-l004-f72d2f650537.mp3",
+      "duration": 6.034291666666666,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.4042916666666665,
+      "speaker": "general",
+      "sha256": "f72d2f65053746f1041516a2da3367be076ddb0397a560f85268692982f23079",
+      "bytes": 113485,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T20_17_12_Artem Lebedev - Captivating and Engaging_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 86,
+      "transcriptSource": "owner-workshop",
+      "text": "Учёные будут изучать находки. пОЛУЧАТ новые чертежи — смоГУТ другую технику собирать."
+    },
+    "m01-s05-l005": {
+      "file": "recordings/reviewed/m01-s05-l005-4adf21ab7f7b.mp3",
+      "duration": 5.250625,
+      "leadingSilence": 0.08,
+      "trailingSilence": 0.2006250000000005,
+      "speaker": "warrant",
+      "sha256": "4adf21ab7f7b2841f7c5dd05020cf8d74f23667661ddf8d90bf8b7165acb3c98",
+      "bytes": 100946,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T20_18_04_Egor Gadzhiyev - Clear and Commanding_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 86,
+      "transcriptSource": "owner-workshop",
+      "text": "Пусть сначала детали из бардачка посмотрят. Может, всё-таки надо было их куда-то поставить."
+    },
+    "m01-s05-l006": {
+      "file": "recordings/reviewed/m01-s05-l006-dcbcf9a5112d.mp3",
+      "duration": 5.06775,
+      "leadingSilence": 0.11,
+      "trailingSilence": 0.22775000000000034,
+      "speaker": "general",
+      "sha256": "dcbcf9a5112d18f3ffefc78a6bad5c139a28b97868f6f794904eb19dcad12af8",
+      "bytes": 98021,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T20_25_36_Artem Lebedev - Captivating and Engaging_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 86,
+      "transcriptSource": "owner-workshop",
+      "text": "Всё непонятное, что найдёте, отправляйте в ИНСТИТУТ. Пусть учёные разбираются."
+    },
+    "m01-s05-l007": {
+      "file": "recordings/reviewed/m01-s05-l007-91a3a65e5c13.mp3",
+      "duration": 1.8808333333333334,
+      "leadingSilence": 0.35000000000000003,
+      "trailingSilence": 0.36083333333333334,
+      "speaker": "warrant",
+      "sha256": "91a3a65e5c13588a52d3dea71166bf0608977514f1c3b6692c58a76554770743",
+      "bytes": 47030,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T20_26_14_Egor Gadzhiyev - Clear and Commanding_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 86,
+      "transcriptSource": "owner-workshop",
+      "text": "Ваши приказы тоже?"
+    },
+    "m01-s05-l008": {
+      "file": "recordings/reviewed/m01-s05-l008-688286cbc05a.mp3",
+      "duration": 3.970625,
+      "leadingSilence": 0.12,
+      "trailingSilence": 0.20062500000000005,
+      "speaker": "general",
+      "sha256": "688286cbc05a42807e28bb5331cbbad3276e8d0c75334e858bfd8addc5d1c861",
+      "bytes": 80466,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T20_27_13_Artem Lebedev - Captivating and Engaging_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 86,
+      "transcriptSource": "owner-workshop",
+      "text": "Приказы - выполнять! Железки. - им везите!"
+    },
+    "m01-s02-l003": {
+      "file": "recordings/commander/m01-s02-l003.mp3",
+      "duration": 3.6310416666666665,
+      "leadingSilence": 0.29,
+      "trailingSilence": 0.15104166666666652,
+      "speaker": "commander",
+      "sha256": "0ef4535fc76297db4a41b7ff5ed781ba747fe429fbd9b58ee0264bf910d734b9",
+      "bytes": 75033,
+      "origin": "user-recording",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-s02-l003"
+      },
+      "textMatch": "exact",
+      "text": "Сон приснился. Будто все умерли."
+    },
+    "m01-s02-l004": {
+      "file": "recordings/warrant/m01-s02-l004.mp3",
+      "duration": 1.7240833333333334,
+      "leadingSilence": 0.13,
+      "trailingSilence": 0.3540833333333333,
+      "speaker": "warrant",
+      "sha256": "8e529f614b943b2abc76458e67da77e7befed7d8bab3aeeae4f4df6251abd083",
+      "bytes": 44522,
+      "origin": "user-recording",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-s02-l004"
+      },
+      "textMatch": "exact",
+      "text": "А приказ на это был?"
+    },
+    "m01-s02-l007": {
+      "file": "recordings/commander/m01-s02-l007.mp3",
+      "duration": 1.410625,
+      "leadingSilence": 0.13,
+      "trailingSilence": 0.400625,
+      "speaker": "commander",
+      "sha256": "f4702a08562ef9c7482aaddecb62e4fc7085a76affe0f9e6c3d60caeb5e2e574",
+      "bytes": 39506,
+      "origin": "user-recording",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-s02-l007"
+      },
+      "textMatch": "exact",
+      "text": "Не было."
+    },
+    "m01-s02-l008": {
+      "file": "recordings/reviewed/m01-s02-l008-db561c85e7c8.mp3",
+      "duration": 2.925708333333333,
+      "leadingSilence": 0.39,
+      "trailingSilence": 0.265708333333333,
+      "speaker": "warrant",
+      "sha256": "db561c85e7c86cc2af7fc2126dcd4cf173f579202507d7ed5c89cbda42e9ff90",
+      "bytes": 63748,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T17_04_55_Egor Gadzhiyev - Clear and Commanding_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 70,
+      "transcriptSource": "owner-workshop",
+      "text": "Значит, сон. Спи дальше.",
+      "textEditedAfterUpload": true
+    },
+    "m01-s02-l013": {
+      "file": "recordings/reviewed/m01-s02-l013-09a7b8618ab7.mp3",
+      "duration": 3.0824583333333333,
+      "leadingSilence": 0.11,
+      "trailingSilence": 0.32245833333333307,
+      "speaker": "commander",
+      "sha256": "09a7b8618ab7d771c6f9e021c59abd4deca57bebd3c5002564b342de63e7da07",
+      "bytes": 66256,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T17_12_53_comandorNig_gen_s50_sim75_v4.mp3",
+      "draftRevision": 70,
+      "transcriptSource": "owner-workshop",
+      "text": "Подъём! Родину восстанавливать будем!"
+    },
+    "m01-s02-l014": {
+      "file": "recordings/reviewed/m01-s02-l014-391572f78bf4.mp3",
+      "duration": 1.489,
+      "leadingSilence": 0.06,
+      "trailingSilence": 0.30900000000000016,
+      "speaker": "soldier",
+      "sha256": "391572f78bf40f26bcc0a6f648f9f96a54ab61552bee392cb4e8401e70c9c615",
+      "bytes": 40760,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T17_16_11_Ivan - Energetic and Sassy_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 70,
+      "transcriptSource": "owner-workshop",
+      "text": "Опять копать?! "
+    },
+    "m01-s03-l001": {
+      "file": "recordings/warrant/m01-s03-l001.mp3",
+      "duration": 1.5673333333333332,
+      "leadingSilence": 0.22,
+      "trailingSilence": 0.43733333333333313,
+      "speaker": "warrant",
+      "sha256": "bd64fa8e549c91dffb9bfc35373ddc789e0b025ab75e7b5fb994e299dd64d5a6",
+      "bytes": 42014,
+      "origin": "user-recording",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-s03-l001"
+      },
+      "textMatch": "exact",
+      "text": "Криво повесил."
+    },
+    "m01-v3-builder-crooked-plinth": {
+      "file": "recordings/reviewed/m01-v3-builder-crooked-plinth-8e0311c0b77a.mp3",
+      "duration": 1.8024583333333333,
+      "leadingSilence": 0.1,
+      "trailingSilence": 0.3224583333333333,
+      "speaker": "builder",
+      "sha256": "8e0311c0b77abdb367ebe7fc71dfc745c48cca922b140d2da23d0beec4225f0d",
+      "bytes": 45776,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T17_21_12_Alexandr Vlasov - Vibrant and Energetic_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 70,
+      "transcriptSource": "owner-workshop",
+      "text": "Так постамент кривой."
+    },
+    "m01-s03-l003": {
+      "file": "recordings/reviewed/m01-s03-l003-ab5edd4cebae.mp3",
+      "duration": 1.489,
+      "leadingSilence": 0.13,
+      "trailingSilence": 0.41900000000000004,
+      "speaker": "warrant",
+      "sha256": "ab5edd4cebae9e5403fcbc455c22c3b84d939e7711610afe97641b9225535f6f",
+      "bytes": 40760,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T18_03_48_Egor Gadzhiyev - Clear and Commanding_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 70,
+      "transcriptSource": "owner-workshop",
+      "text": "Тогда нормально."
+    },
+    "m01-v3-general-coffee": {
+      "file": "recordings/reviewed/m01-v3-general-coffee-e0340deb6dc0.mp3",
+      "duration": 1.8808333333333334,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.3108333333333333,
+      "speaker": "general",
+      "sha256": "e0340deb6dc0ff40d7df7d1fa1fc4db78b48a5a573cf1f159b81f434f0f11acd",
+      "bytes": 47030,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T17_34_43_Artem Lebedev - Captivating and Engaging_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 70,
+      "transcriptSource": "owner-workshop",
+      "text": "А кофе почему нет?"
+    },
+    "m01-s06-l008": {
+      "file": "recordings/commander/m01-s07-l002.mp3",
+      "duration": 2.429375,
+      "leadingSilence": 0.13,
+      "trailingSilence": 0.339375,
+      "speaker": "commander",
+      "sha256": "3ddb97446f3b9e7db327117aec79f5c37d7ed2b226154a1e936dacb0c406ef2f",
+      "bytes": 55807,
+      "origin": "user-recording",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-s06-l008"
+      },
+      "textMatch": "exact",
+      "text": "Потому что электричества нет."
+    },
+    "m01-v3-general-build-power": {
+      "file": "recordings/reviewed/m01-v3-general-build-power-024fc11c6559.mp3",
+      "duration": 4.205708333333333,
+      "leadingSilence": 0.11,
+      "trailingSilence": 0.20570833333333294,
+      "speaker": "general",
+      "sha256": "024fc11c65591a3eb2079e32571a66d1d7a51f4643d160d3f77069f754ac76c9",
+      "bytes": 84228,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T17_35_10_Artem Lebedev - Captivating and Engaging_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 70,
+      "transcriptSource": "owner-workshop",
+      "text": "Так электростанцию стройте! Вам на всё приказ нужен?"
+    },
+    "m01-v3-nuclear-power-ready": {
+      "file": "recordings/reviewed/m01-v3-nuclear-power-ready-64c6075a36bd.mp3",
+      "duration": 5.5640833333333335,
+      "leadingSilence": 0.07,
+      "trailingSilence": 0.3640833333333333,
+      "speaker": "builder",
+      "sha256": "64c6075a36bd9092d4ed83f9d52dcd4a5cb6e07da357b8daba537cc2c2254c8b",
+      "bytes": 105962,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T17_39_07_Alexandr Vlasov - Vibrant and Energetic_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 70,
+      "transcriptSource": "owner-workshop",
+      "text": "АЭС работает. Одной станции хватит на четыре нефтяные вышки. Можно начинать добычу."
+    },
+    "m01-v3-r01a-l001": {
+      "file": "recordings/reviewed/m01-v3-r01a-l001-4658da106db1.mp3",
+      "duration": 3.0040833333333334,
+      "leadingSilence": 0.07,
+      "trailingSilence": 0.2240833333333332,
+      "speaker": "general",
+      "sha256": "4658da106db1695e07d6d6188108137fa7a6ca4d940e7e01650f5aabb4cf726f",
+      "bytes": 65002,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T17_40_52_Artem Lebedev - Captivating and Engaging_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 70,
+      "transcriptSource": "owner-workshop",
+      "text": "Строится? Хорошо. Тогда к делу."
+    },
+    "m01-v3-r01b-l001": {
+      "file": "recordings/reviewed/m01-v3-r01b-l001-1dfeb34c3c47.mp3",
+      "duration": 3.0040833333333334,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.30408333333333326,
+      "speaker": "general",
+      "sha256": "1dfeb34c3c47b1797d4668cf42c10fc2728f781881cf83c569b9ec8fb7c191e3",
+      "bytes": 65002,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T17_41_35_Artem Lebedev - Captivating and Engaging_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 70,
+      "transcriptSource": "owner-workshop",
+      "text": "Со светом разобрались. Теперь к делу."
+    },
+    "m01-v3-r03-l001": {
+      "file": "recordings/reviewed/m01-v3-r03-l001-5517db4c79ec.mp3",
+      "duration": 2.8473333333333333,
+      "leadingSilence": 0.07,
+      "trailingSilence": 0.32733333333333325,
+      "speaker": "scout",
+      "sha256": "5517db4c79ecfa3dd22908317fc0084ed5f692e9601fd98747dfbb2dc3948fb0",
+      "bytes": 62494,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T17_58_36_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 70,
+      "transcriptSource": "owner-workshop",
+      "text": "Командир, нефть нашли. В двух местах."
+    },
+    "m01-v3-r03-l002": {
+      "file": "recordings/reviewed/m01-v3-r03-l002-dbe82219e5f4.mp3",
+      "duration": 1.6457083333333333,
+      "leadingSilence": 0.16,
+      "trailingSilence": 0.32570833333333327,
+      "speaker": "commander",
+      "sha256": "dbe82219e5f44d693f3b758562a2827bd9f0af4e9f2916a806500a96fbac9d02",
+      "bytes": 43268,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T18_00_13_comandorNig_gen_s50_sim75_v4.mp3",
+      "draftRevision": 70,
+      "transcriptSource": "owner-workshop",
+      "text": "А хозяева есть?"
+    },
+    "m01-v3-r03-l003": {
+      "file": "recordings/reviewed/m01-v3-r03-l003-80aaa2d3e2e2.mp3",
+      "duration": 3.3959166666666665,
+      "leadingSilence": 0.16,
+      "trailingSilence": 0.2159166666666663,
+      "speaker": "warrant",
+      "sha256": "80aaa2d3e2e24e77ef6955d49d851a3d0559f850096e2e76b71ac8c4f7a31d98",
+      "bytes": 71271,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T18_02_03_Egor Gadzhiyev - Clear and Commanding_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 70,
+      "transcriptSource": "owner-workshop",
+      "text": "Пока нет. Как вышки поставим — появятся."
+    },
+    "m01-v3-first-oil-online": {
+      "file": "recordings/reviewed/m01-v3-first-oil-online-fc55c0f2ff28.mp3",
+      "duration": 2.8473333333333333,
+      "leadingSilence": 0.02,
+      "trailingSilence": 0.30733333333333324,
+      "speaker": "builder",
+      "sha256": "fc55c0f2ff282d41837b57c191fe4345daeb15b5782e939f8c01332d0eb1bc0e",
+      "bytes": 62494,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T18_05_01_Alexandr Vlasov - Vibrant and Energetic_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 70,
+      "transcriptSource": "owner-workshop",
+      "text": "Вышку подключили. Нефть пошла.",
+      "textEditedAfterUpload": true
+    },
+    "m01-v3-r04-l002": {
+      "file": "recordings/reviewed/m01-v3-r04-l002-4e07e19a0668.mp3",
+      "duration": 1.0710416666666667,
+      "leadingSilence": 0.08,
+      "trailingSilence": 0.2610416666666666,
+      "speaker": "general",
+      "sha256": "4e07e19a06684a0039a63117d3db98acabfe7a9fe8ded5f9af78f4de58a61fe7",
+      "bytes": 34073,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T18_05_30_Artem Lebedev - Captivating and Engaging_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 70,
+      "transcriptSource": "owner-workshop",
+      "text": "А кофе?"
+    },
+    "m01-v3-r04-l003": {
+      "file": "recordings/reviewed/m01-v3-r04-l003-2adcf20d45ec.mp3",
+      "duration": 2.769,
+      "leadingSilence": 0.13,
+      "trailingSilence": 0.359,
+      "speaker": "warrant",
+      "sha256": "2adcf20d45eca30d0e507add0bc93f98bb266aaf270ff683197cb2b9567aae97",
+      "bytes": 61240,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T18_09_11_Egor Gadzhiyev - Clear and Commanding_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 70,
+      "transcriptSource": "owner-workshop",
+      "text": "Пока только нефть. Вам с сахаром?"
+    },
+    "m01-v3-r05-l002": {
+      "file": "recordings/reviewed/m01-v3-r05-l002-c47e868a016b.mp3",
+      "duration": 1.7240833333333334,
+      "leadingSilence": 0.13,
+      "trailingSilence": 0.28408333333333347,
+      "speaker": "general",
+      "sha256": "c47e868a016b149e945d7ba8902945bcbe2e87188c8bce55e3f7dfea85c5263c",
+      "bytes": 44522,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T18_17_59_Artem Lebedev - Captivating and Engaging_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 70,
+      "transcriptSource": "owner-workshop",
+      "text": "Пополнение получили?"
+    },
+    "m01-v3-oil-supply-ready": {
+      "file": "recordings/reviewed/m01-v3-oil-supply-ready-f6cdad0fe176.mp3",
+      "duration": 2.586125,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.26612500000000017,
+      "speaker": "commander",
+      "sha256": "f6cdad0fe176ce73913addff1569d8444359f53899bf669a9c38048913b7ee6f",
+      "bytes": 58314,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T18_18_36_comandorNig_gen_s50_sim75_v4.mp3",
+      "draftRevision": 70,
+      "transcriptSource": "owner-workshop",
+      "text": "Нет. Всё те же три «Буханки»."
+    },
+    "new-04b15a4c-032d-4174-9691-2890720a00ff": {
+      "file": "recordings/reviewed/new-04b15a4c-032d-4174-9691-2890720a00ff-91b174526746.mp3",
+      "duration": 2.925708333333333,
+      "leadingSilence": 0.11,
+      "trailingSilence": 0.15570833333333312,
+      "speaker": "general",
+      "sha256": "91b1745267469c12982ec4b3e8b291e3f670bbaf602f8e7b6dedeb44be9072a7",
+      "bytes": 63748,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T18_19_09_Artem Lebedev - Captivating and Engaging_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 70,
+      "transcriptSource": "owner-workshop",
+      "text": "А по бумагам получили. Завод стройте!"
+    },
+    "m01-s05-l011": {
+      "file": "recordings/reviewed/m01-s05-l011-94f75ea6f773.mp3",
+      "duration": 4.754291666666667,
+      "leadingSilence": 0.1,
+      "trailingSilence": 0.1442916666666667,
+      "speaker": "general",
+      "sha256": "94f75ea6f77360fbee3f1b879de74973d6a14ccdcba05500af7c732f3dd7a253",
+      "bytes": 93005,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T18_46_05_Artem Lebedev - Captivating and Engaging_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 70,
+      "transcriptSource": "owner-workshop",
+      "text": "В конструкторе подбирайте модули, завод соберёт. Заказывайте что угодно."
+    },
+    "m01-s05-l012": {
+      "file": "recordings/reviewed/m01-s05-l012-d190e97ede4d.mp3",
+      "duration": 10.840833333333334,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.1608333333333345,
+      "speaker": "commander",
+      "sha256": "d190e97ede4d534ba217ec01b75713449aa19d3c9bde90c13a2d944f441403fc",
+      "bytes": 190390,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T18_41_16_comandorNig_gen_s50_sim75_v4.mp3",
+      "draftRevision": 70,
+      "transcriptSource": "owner-workshop",
+      "text": "Не получится из букв «Ж», «О», «П», «А»...тоесть «УАЗ» — собрать слово «счастье»...я имел ввиду -  танк.",
+      "textEditedAfterUpload": true
+    },
+    "m01-s05-l013": {
+      "file": "recordings/reviewed/m01-s05-l013-0aedb6128dc0.mp3",
+      "duration": 4.832666666666666,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.33266666666666644,
+      "speaker": "general",
+      "sha256": "0aedb6128dc0c4327653a24952d60c80a043b8a262e39f95d846258a681ef7ff",
+      "bytes": 94259,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T18_44_56_Artem Lebedev - Captivating and Engaging_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 70,
+      "transcriptSource": "owner-workshop",
+      "text": "Читайте мелкий шрифт в доступных чертежах:«Доработать напильником»."
+    },
+    "m01-b005": {
+      "file": "recordings/reviewed/m01-b005-6abfe5e83bb0.mp3",
+      "duration": 18.912666666666667,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.17266666666666453,
+      "speaker": "builder",
+      "sha256": "6abfe5e83bb0679f662524c7455b0a56be41422fad880b47c949c71e4ecf950e",
+      "bytes": 319539,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T18_53_12_Alexandr Vlasov - Vibrant and Energetic_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 70,
+      "transcriptSource": "owner-workshop",
+      "text": "Завод готов. Напильник я, правда, не нашёл. Так что пока без танка.\nЗато нашёл пару вёдер краски и чёрные саморезы. Профессиональные.Найдёте железяку — прикрутим к борту, покрасим. Будет вам дополнительная броня.Краска и саморезы входят в зип каждой машины. Собственно, это весь её зип.",
+      "textEditedAfterUpload": true
+    },
+    "m01-b006": {
+      "file": "recordings/reviewed/m01-b006-21db273154b9.mp3",
+      "duration": 5.329,
+      "leadingSilence": 0.07,
+      "trailingSilence": 0.19899999999999984,
+      "speaker": "builder",
+      "sha256": "21db273154b96a1cc8a968da11cb6dc0396ffb5c0d9f07fb22419ab2427eb32e",
+      "bytes": 102200,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T18_57_35_Alexandr Vlasov - Vibrant and Energetic_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 70,
+      "transcriptSource": "owner-workshop",
+      "text": "Первая «Буханка» готова! Лишние детали в бардачок положил. Вдруг не лишние.",
+      "textEditedAfterUpload": true
+    },
+    "warrant:upgrade": {
+      "file": "warrant-radio/upgrade.mp3",
+      "duration": 14.367333333333333,
+      "leadingSilence": 0.11,
+      "trailingSilence": 0.2673333333333332,
+      "speaker": "warrant",
+      "sha256": "1d1f17d3c1067f7de3725a75aeda47afc38e62541226ae8fed41d30d3435db2b",
+      "bytes": 246814,
+      "origin": "user-recording",
+      "reusedFrom": {
+        "catalog": "warrant-radio/manifest.json",
+        "cueId": "upgrade"
+      },
+      "textMatch": "exact",
+      "text": "Вот «Буханку» опять обновили. Зря, конечно. Хорошая была машина. Сорок лет ничего не меняли — и правильно делали. А теперь ручку дверную другую поставили. Спрашивается, зачем?"
+    }
+  }
+}

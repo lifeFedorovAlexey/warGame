@@ -1,4 +1,4 @@
-import {vehiclePose, vehicleToWorld, worldToVehicle, buildingWorkRail} from './builder-kinematics.js';
+import {vehiclePose, vehicleToWorld, worldToVehicle} from './builder-kinematics.js';
 import {vehicleLocalBoxes} from './vehicle-collision.js';
 import {generatorWorkPoints} from './generator-layout.js';
 
@@ -9,7 +9,7 @@ export function buildLayerHeight(building,spec,scale) {
   return building.groundHeight+slice*scale;
 }
 
-export function workProjection(unit,target,config,field) {
+export function workProjection(unit,target,config,field,{reachMargin=0}={}) {
   const scale=config.worldScale, pose=vehiclePose(unit,field,scale);
   let contacts;
   if(config.units[target.kind]){
@@ -22,13 +22,7 @@ export function workProjection(unit,target,config,field) {
     const angle=target.rotation, c=Math.cos(angle), s=Math.sin(angle);
     const dx=unit.x-target.x,dy=unit.y-target.y,localX=dx*c+dy*s,localY=-dx*s+dy*c;
     const layer=buildLayerHeight(target,spec,scale);
-    if(target.completed){
-      // Completed buildings have a physical service rail; construction uses the rising layer.
-      const rail=buildingWorkRail(spec),faceY=rail.position[1]-rail.depth/2;
-      if(localY>=faceY*scale)return null;
-      const x=Math.max(-rail.width/2+.12,Math.min(rail.width/2-.12,localX/scale));
-      contacts=[[target.x+(x*c-faceY*s)*scale,target.y+(x*s+faceY*c)*scale,target.groundHeight+rail.position[2]*scale]];
-    }else if(target.kind==='generator'){
+    if(target.kind==='generator'){
       contacts=generatorWorkPoints(spec.realSizeMetres,localX/scale,localY/scale,(layer-target.groundHeight)/scale)
         .map(([x,y,z])=>[target.x+(x*c-y*s)*scale,target.y+(x*s+y*c)*scale,target.groundHeight+z*scale]);
     }else{
@@ -45,7 +39,7 @@ export function workProjection(unit,target,config,field) {
     const radius=Math.hypot(dx,dy),yaw=Math.atan2(-dx,dy),pitch=Math.atan2(dz,radius-.21);
     // Reach is a gameplay distance in metres, independent of chassis scale.
     // Angles and emitter geometry remain in the scaled model's local space.
-    if(radius<1.1||Math.hypot(radius,dz)*pose.scale>reach*scale||pitch<-.87||pitch>1.13)continue;
+    if(radius<1.1||Math.hypot(radius,dz)*pose.scale>(reach-reachMargin)*scale||pitch<-.87||pitch>1.13)continue;
     const along=.21+.511*Math.cos(pitch)-.003*Math.sin(pitch);
     const emitter=vehicleToWorld([-Math.sin(yaw)*along,-.65+Math.cos(yaw)*along,3.377+.511*Math.sin(pitch)+.003*Math.cos(pitch)],pose);
     let blocked=false;
@@ -79,10 +73,16 @@ function crossesBox(start,end,box) {
   return true;
 }
 
-export function projectorHasSight(aim,unit,target,vehicles,field,scale) {
+export function projectorHasSight(aim,unit,target,vehicles,field,scale,buildings=[],specs={}) {
   const {emitter,world}=aim,margin=3*scale;
   const minX=Math.min(emitter[0],world[0])-margin,maxX=Math.max(emitter[0],world[0])+margin;
   const minY=Math.min(emitter[1],world[1])-margin,maxY=Math.max(emitter[1],world[1])+margin;
+  for(const building of buildings){
+    if(building.id===target.id||building.hp<=0||building.x+building.halfWidth<minX||building.x-building.halfWidth>maxX||building.y+building.halfDepth<minY||building.y-building.halfDepth>maxY)continue;
+    const height=specs[building.kind]?.realSizeMetres?.[2];if(!height)continue;
+    const floor=building.groundHeight??field.heightAt(building.x,building.y),top=floor+height*scale*(building.completed?1:Math.max(.05,building.progress));
+    if(crossesBox(emitter,world,[[building.x-building.halfWidth,building.x+building.halfWidth],[building.y-building.halfDepth,building.y+building.halfDepth],[floor,top]]))return false;
+  }
   for(const other of vehicles){
     if(other.id===unit.id||other.id===target.id||other.hp<=0||
        other.x<minX||other.x>maxX||other.y<minY||other.y>maxY)continue;
