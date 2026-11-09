@@ -1,0 +1,68 @@
+{
+  "first": {
+    "blocked": true,
+    "buildingHit": {
+      "entityId": "b36",
+      "partId": 0,
+      "point": [
+        4.682499885559082,
+        0.3133333325386048,
+        1.2837500100334487
+      ],
+      "worldPoint": [
+        -1546.9287505149841,
+        321.4099999964237,
+        5.779150926042349
+      ],
+      "normal": [
+        1,
+        0,
+        0
+      ],
+      "type": "shell",
+      "power": 750,
+      "hits": 1
+    },
+    "carHit": {
+      "entityId": "u37",
+      "partId": 0,
+      "point": [
+        5.684330040240284e-14,
+        0.330499968469133,
+        1.7200000000000006
+      ],
+      "worldPoint": [
+        -1473.1011786242846,
+        321.4382439475013,
+        8.023049615341883
+      ],
+      "normal": [
+        -0.006299798439281379,
+        0.8731488429241765,
+        0.48741297750449375
+      ],
+      "type": "bullet",
+      "power": 170,
+      "hits": 1
+    },
+    "explosions": 2,
+    "physics": 4,
+    "parts": [
+      {
+        "id": "scrap-1",
+        "kind": "raider",
+        "part": 7
+      }
+    ]
+  },
+  "result": {
+    "campRemoved": true,
+    "rebuild": true,
+    "raiderRemoved": true,
+    "raiderRenderRemoved": true,
+    "installed": true,
+    "ticks": 159,
+    "activePhysics": 0,
+    "geometryUpdates": 0
+  }
+}

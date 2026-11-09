@@ -1,8 +1,9 @@
 import {createMuzzleFlash} from '../demo/vehicle-effects.js';
 import {createFlameEffects} from './flame-effects.js';
 import {mgRoundCount,mgRoundSpacing,mgFlashDuration} from './mg-burst.js';
+import {createExplosionEffects} from './explosion-effects.js';
 
-export function createCombatEffects(T,scene,scale,sound) {
+export function createCombatEffects(T,scene,scale,sound,field) {
   const limit=128,impactLimit=32,source=new T.Vector3(),target=new T.Vector3();
   const roundLimit=limit*mgRoundCount;
   const shots=[],impacts=[],matrix=new T.Object3D(),forward=new T.Vector3(0,1,0);
@@ -26,6 +27,7 @@ export function createCombatEffects(T,scene,scale,sound) {
   const sparkMesh=new T.Points(sparkGeometry,new T.PointsMaterial({size:.31*scale,vertexColors:true,transparent:true,opacity:.85,depthWrite:false}));
   sparkMesh.name='field_impact_particles';sparkMesh.frustumCulled=false;scene.add(sparkMesh);
   const flame=createFlameEffects(T,scene,scale);
+  const explosions=createExplosionEffects(T,scene,scale,field);
   const grenades=new T.InstancedMesh(new T.IcosahedronGeometry(.095*scale,1),new T.MeshStandardMaterial({color:'#605c3c',roughness:.95}),limit);
   grenades.name='thrown_grenades';grenades.frustumCulled=false;grenades.count=0;grenades.instanceMatrix.setUsage(T.DynamicDrawUsage);scene.add(grenades);
   const shade=new T.Color();
@@ -35,6 +37,10 @@ export function createCombatEffects(T,scene,scale,sound) {
     return {gain:Math.max(0,1-relative.length()/1050),pan:T.MathUtils.clamp(relative.dot(right)/370,-.8,.8)};
   }
   function hit(end,details,now,camera,audible=true) {
+    if(details.surface==='infantry'&&details.weapon!=='flame'){
+      if(audible)flame.dustImpact(end,now);
+      return;
+    }
     const destroyed=audible&&details.destroyed;
     impacts.push({end,born:now,weapon:details.weapon,surface:details.surface,destroyed});
     if(impacts.length>impactLimit)impacts.shift();
@@ -65,8 +71,9 @@ export function createCombatEffects(T,scene,scale,sound) {
       sound?.shot(weapon,gain,pan);
     },
     hit,
-    explode(point,radius,now,camera){flame.blast(point,now,radius);const {gain,pan}=spatial(point,camera);sound?.impact(gain,pan,'debris');},
-    reset(){shots.length=impacts.length=0;grenades.count=0;flame.reset();},
+    explode(point,radius,now,camera){explosions.spawn(point,radius,now);const {gain,pan}=spatial(point,camera);sound?.impact(gain,pan,'debris');},
+    updateBurning(mission,transforms){explosions.setBurning(mission,transforms);},
+    reset(){shots.length=impacts.length=0;grenades.count=0;flame.reset();explosions.reset();},
     updateGrenades(projectiles,time,visible){
       let count=0;
       for(const shot of projectiles){
@@ -146,9 +153,10 @@ export function createCombatEffects(T,scene,scale,sound) {
       tracer.count=tracerCount;if(tracerCount)tracer.instanceMatrix.needsUpdate=true;
       flashes.count=flashCount;if(flashCount)flashes.instanceMatrix.needsUpdate=true;
       flame.update(now,viewportHeight);
+      explosions.update(now,camera,viewportHeight);
       sparkGeometry.setDrawRange(0,sparkCount);
       if(sparkCount)sparks.needsUpdate=shades.needsUpdate=true;
     },
-    get statistics(){return {shots:shots.length,shotLimit:limit,tracers:tracer.count,grenades:grenades.count,impacts:impacts.length,...flame.statistics};},
+    get statistics(){return {shots:shots.length,shotLimit:limit,tracers:tracer.count,grenades:grenades.count,impacts:impacts.length,...flame.statistics,...explosions.statistics};},
   };
 }

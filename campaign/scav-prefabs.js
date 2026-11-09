@@ -8,7 +8,7 @@ export function createScavPrefab(T, kind, site) {
   root.add(structure);
   const depot = site === 'nw-west';
   const waterTower = kind === 'mg-tower' && site === 'nw-east';
-  const stronghold = site === 'west-south';
+  const stronghold = site.startsWith('west-south'),improvised=site.includes(':watch');
   const mats = {
     rust: new T.MeshStandardMaterial({color:stronghold ? '#51443b' : depot ? '#685a4e' : '#795145', roughness:.87, metalness:.25}),
     tin: new T.MeshStandardMaterial({color:waterTower ? '#8aaca9' : site === 'nw-east' ? '#778985' : depot ? '#939c98' : stronghold ? '#77796a' : '#8b8476', roughness:.74, metalness:.46}),
@@ -74,12 +74,20 @@ export function createScavPrefab(T, kind, site) {
   }
   if (kind === 'mg-tower') {
     for (const x of [-2.2,2.2]) for (const y of [-2.2,2.2]) {
-      beam([x,y,0], [x*.63,y*.63,9.15], .23, mats.rust);
+      beam([x,y,-.6], [x*.63,y*.63,9.15], .23, improvised?mats.wood:mats.rust);
       beam([x,y,1.25], [-x*.72,y*.73,7.9], .14, mats.dark);
       if (stronghold) box([.76,.76,.28], [x,y,-.08], mats.wood);
       if (waterTower) box([.71,.71,.60], [x,y,-.19], mats.dark);
     }
     box([3.75,3.75,.24],[0,0,9.15],mats.wood);
+    for(const x of [-.43,.43])beam([x,2.18,-.3],[x,1.62,9.36],.11,mats.dark);
+    for(let z=.4;z<9.2;z+=.48)beam([-.49,2.18-z*.06,z],[.49,2.18-z*.06,z],.085,mats.rust);
+    if(improvised){
+      for(const side of [-1,1])for(let i=0;i<4;i++)box([.18,.69,1.05],[side*1.65,-1.1+i*.73,9.65],i%2?mats.rust:mats.wood,[0,side*.08,0]);
+      box([1.36,1.66,.07],[.70,.29,11.20],mats.rust,[.08,0,-.09]);
+      beam([-1.45,-1.43,9.1],[-1.53,-1.45,11.1],.14,mats.wood);
+      box([.8,.12,.6],[0,-1.70,9.9],mats.tin,[0,0,.08]);
+    }
     const yaw = new T.Group();
     yaw.name = 'tower_yaw';
     structure.add(yaw);
@@ -130,20 +138,60 @@ export function createScavPrefab(T, kind, site) {
     activeBatches = batches;
   } else if (site === 'nw-pocket') {
     shed(-2.6,.40,4.2,4.3,2.65,mats.rust);
-    shed(3.25,1.55,3.1,2.45,1.95,mats.wood);
-    box([4.25,2.4,.08],[2.1,-1.25,2.18],mats.tarp,[.12,0,-.12]);
-    for (const x of [.22,4.1]) beam([x,-2.5,0],[x,-2.5,2.05],.14,mats.wood);
+    box([1.47,1.26,.09],[-3.32,-.81,2.90],mats.tin,[.23,0,0]);
+    for (const x of [-3.78,-3.31,-2.84])
+      box([.061,1.25,.05],[x,-.81,2.96],mats.dark,[.23,0,0]);
+
+    // Open repair bay made of salvaged panels, with enough space to read the
+    // workbench and the spare wheels from the tactical camera.
+    const deckTop = 1.14;
+    box([4.52,4.04,.22],[2.77,-.14,deckTop-.11],mats.wood);
+    for (const x of [.62,4.91]) {
+      beam([x,-2.17,0],[x,-2.17,2.72],.17,mats.wood);
+      beam([x,2.05,-.28],[x,2.05,3.14],.19,mats.dark);
+      beam([x,-2.17,2.65],[x,2.05,3.07],.17,mats.wood);
+      beam([x,-2.02,.67],[x,1.98,.67],.18,mats.dark);
+    }
+    beam([.62,-2.17,2.66],[4.91,-2.17,2.66],.16,mats.dark);
+    beam([.62,2.05,3.07],[4.91,2.05,3.07],.16,mats.dark);
+    beam([4.91,-2.17,deckTop],[4.91,2.05,2.95],.13,mats.wood);
+    const panels = [[1.30,1.70,2.95,mats.tin],[2.84,1.57,2.98,mats.rust],[4.36,1.53,2.93,mats.tin]];
+    for (const [x,width,z,material] of panels) {
+      box([width,4.60,.11],[x,-.02,z],material,[.10,0,0]);
+      for (const offset of [-.42,.05,.48])
+        box([.064,4.58,.041],[x+offset,-.02,z+.07],material,[.10,0,0]);
+      box([width-.10,.13,1.38],[x,2.02,deckTop+.69],material);
+    }
+    const benchY=-2.82,benchTop=1.79;
+    box([2.08,.74,.14],[1.97,benchY,benchTop-.07],mats.wood);
+    for (const [x,foot] of [[1.14,.54],[2.80,.81]])
+      for (const y of [benchY-.23,benchY+.23]) beam([x,y,foot],[x,y,benchTop-.14],.14,mats.dark);
+    box([.51,.43,.21],[1.50,benchY,benchTop+.105],mats.rust);
+    box([.42,.37,.17],[2.65,benchY,benchTop+.085],mats.dark);
+    for (const x of [2.52,2.79]) box([.09,.34,.14],[x,benchY,benchTop+.21],mats.tin);
+    for (const [x,y,z] of [[4.30,-1.87,deckTop+.47],[4.48,-2.37,1.52]])
+      shape(new T.TorusGeometry(.34,.13,6,12),mats.dark,[x,y,z],[Math.PI/2,0,.08]);
     for (const side of [-1,1]) {
       const x=side*3.55;
-      box([3.75,.58,.50],[x,-4.21,.25],mats.dark);
-      box([3.69,.17,.77],[x,-4.30,.73],side<0?mats.rust:mats.tin,[.13,0,0]);
-      for (const offset of [-1.64,1.64]) box([.16,.23,1.23],[x+offset,-4.16,.615],mats.wood);
+      // The apron slopes across the entrance; seat the barriers in the bank.
+      const foot=side<0?.13:1.37,slope=side<0?.12:.21;
+      box([3.75,.58,.50],[x,-4.21,foot+.25],mats.dark,[0,-slope,0]);
+      box([3.69,.17,.77],[x,-4.30,foot+.73],side<0?mats.rust:mats.tin,[.13,-slope,0]);
+      for (const offset of [-1.64,1.64])
+        box([.16,.23,1.23],[x+offset,-4.16,foot+.615+offset*Math.tan(slope)],mats.wood);
     }
     // A salvaged sidewall leans behind the barricade with its broken frame visible.
     box([2.72,.17,1.69],[-2.98,-3.12,1.02],mats.tin,[.18,0,.19]);
     beam([-4.28,-3.38,.24],[-4.28,-3.66,2.14],.19,mats.dark);
     beam([-1.65,-2.87,.22],[-1.65,-3.15,1.89],.18,mats.dark);
     for(const z of [.58,1.21])beam([-4.22,-3.40,z],[-1.74,-2.93,z],.11,mats.rust);
+    // Reinforced opening between the salvaged walls of the workshop.
+    for (const [x,foot] of [[-1.93,.35],[1.93,1.13]]) {
+      beam([x,-4.23,foot],[x,-4.23,3.82],.18,mats.dark);
+      beam([x,-4.23,2.7],[x*1.48,-4.22,3.70],.11,mats.rust);
+    }
+    beam([-2.12,-4.23,3.82],[2.12,-4.23,3.82],.18,mats.rust);
+    box([.72,.13,.28],[1.24,-4.34,3.64],mats.tin);
   } else if (site === 'nw-west') {
     shed(0,1.1,9.9,4.1,3.05,mats.tin,true);
     box([8.9,1.55,.53],[0,-1.72,.265],mats.wood);
@@ -159,6 +207,14 @@ export function createScavPrefab(T, kind, site) {
         for(const offset of [-.33,.33])box([.09,.03,.73],[x+offset,y-.48,z],mats.dark);
       }
     }
+    for(const side of [-1,1]){
+      const x=side*3.66;
+      box([2.61,.22,1.05],[x,-4.10,.72],mats.rust,[.11,0,side*.16]);
+      for(const offset of [-.91,.89])beam([x+offset,-4.03,.08],[x+offset,-4.04,1.38],.15,mats.dark);
+      beam([x-side*.94,-4.08,.29],[x+side*.94,-4.01,1.11],.12,mats.wood);
+    }
+    box([1.57,.91,.18],[-2.38,1.70,3.40],mats.dark,[.12,0,0]);
+    for(const x of [-2.92,-2.65,-2.38,-2.11,-1.84])box([.085,.83,.073],[x,1.70,3.53],mats.tin,[.12,0,0]);
   } else if (site === 'nw-east') {
     box([5.85,4.25,.52],[1.31,.27,-.10],mats.dark);
     box([5.65,.15,2.3],[1.31,2.32,1.27],mats.rust);
@@ -199,6 +255,13 @@ export function createScavPrefab(T, kind, site) {
     beam([-4.43,-2.13,.13],[-4.43,-2.13,.73],.15,mats.dark);
     drum(.34,.91,[3.53,-2.77,.24],mats.rust);
     drum(.355,.07,[3.53,-2.77,.35],mats.dark);
+    for(const x of [-4.83,-2.71]){
+      beam([x,1.91,-.20],[x,1.91,1.66],.12,mats.dark);
+      box([.64,.34,.22],[x,1.91,-.07],mats.wood);
+    }
+    for(const z of [.75,1.56])beam([-4.83,1.91,z],[-2.71,1.91,z],.10,mats.rust);
+    box([.82,.48,.36],[2.90,-1.64,2.10],mats.dark);
+    pipe([[3.05,-1.67,2.08],[3.05,-1.67,1.16],[2.66,-1.71,1.16]],.065,mats.tin);
   } else {
     box([11.1,7.2,.60],[0,0,.12],mats.wood);
     box([3.32,4.75,2.91],[-3.64,.85,1.66],mats.rust);
@@ -213,6 +276,25 @@ export function createScavPrefab(T, kind, site) {
       box([3.78,.56,1.28],[x,-3.16,.89],mats.dark,[.16,0,side*.17]);
       box([.53,1.41,1.54],[x-side*1.48,-2.45,.98],mats.tin,[0,0,side*.24]);
       box([.84,.19,1.65],[x+side*1.2,-1.68,1.12],mats.tin,[.13,0,0]);
+    }
+    // A low command post with a radio mast and recessed front fighting ports.
+    const mastX=-3.62,mastY=1.34;
+    for(const dx of [-.32,.32])for(const dy of [-.30,.30])
+      beam([mastX+dx,mastY+dy,3.52],[mastX,mastY,5.91],.10,mats.dark);
+    beam([mastX-1.15,mastY,5.57],[mastX+1.15,mastY,5.57],.09,mats.tin);
+    beam([mastX,mastY,5.73],[mastX,mastY,6.35],.085,mats.rust);
+    beam([mastX,mastY,4.93],[-.66,.12,3.57],.040,mats.dark);
+    for(const x of [-4.81,-3.62,-2.41,-1.23,-.02,1.16,2.35,3.55,4.72])
+      box([.064,5.15,.055],[x,.79,3.55],mats.dark);
+    box([1.96,1.42,.065],[-2.1,-.43,3.57],mats.rust,[0,0,-.05]);
+    for(const x of [-3.68,2.83]){
+      box([1.98,.19,.46],[x,-1.62,2.36],mats.tin);
+      box([1.64,.10,.19],[x,-1.74,2.39],mats.dark);
+      box([2.14,.38,.13],[x,-1.72,2.60],mats.rust);
+    }
+    for(const x of [-4.58,-2.82,2.46,4.53]){
+      beam([x,3.35,.14],[x,3.35,1.48],.17,mats.dark);
+      box([1.52,.19,.74],[x,3.37,.91],mats.rust,[.13,0,0]);
     }
   }
   if (kind !== 'mg-tower' && site !== 'nw-east') {

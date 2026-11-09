@@ -5,7 +5,9 @@ const common=`
 uniform sampler2D damageAtlas;
 uniform float damageEnabled;
 uniform float damageTime;
-vec4 damageTex(float row,int column){return texelFetch(damageAtlas,ivec2(column,int(row)),0);}
+// Interpolated instance IDs can be 0.99999994 instead of 1. Truncating read
+// the previous vehicle's row on scattered pixels, shredding the damage mask.
+vec4 damageTex(float row,int column){return texelFetch(damageAtlas,ivec2(column,int(row+.5)),0);}
 `;
 const cage=`
 uniform vec3 damageCageMin;
@@ -64,6 +66,13 @@ mat3 damageJac=mat3(1.);vec3 damageOffset=vec3(0.);
 #ifdef DAMAGE_DEFORM
 if(ds.x>.5&&ds.y<1.5&&damageMeta.z>.5)damageOffset=damageCage(damagePosition,ds.x,damageJac);
 #endif
+#ifdef DAMAGE_COLLAPSE
+if(ds.x>.5&&damageMeta.w>.5){
+  vec4 life=damageTex(ds.x,${META_OFFSET+1});
+  float fall=smoothstep(life.x+.12,life.x+1.65,damageTime);
+  damageOffset.z-=max(0.,damagePosition.z-.35)*fall*.92;
+}
+#endif
 `;
 const fragmentHeader=common+`
 void damageLayer(inout vec3 ink,inout float coverage,vec3 colour,float alpha){
@@ -94,7 +103,7 @@ if(vDamageState.x>.5){
   if(vDamageState.y<1.5){
     int markLimit=vDamageState.y<.5?${MAX_MARKS}:6;
     for(int m=0;m<${MAX_MARKS};m++){
-      if(m>=int(vDamageMeta.x)||m>=markLimit)break;
+      if(m>=int(vDamageMeta.x+.5)||m>=markLimit)break;
       vec4 hit=damageTex(vDamageState.x,${MARK_OFFSET}+m*3);
       vec4 orient=damageTex(vDamageState.x,${MARK_OFFSET}+m*3+1);
       vec4 info=damageTex(vDamageState.x,${MARK_OFFSET}+m*3+2);
@@ -117,7 +126,10 @@ if(vDamageState.x>.5){
       }
 #endif
       if(radius>1.8)continue;
-      float edgeNoise=sin(uv.x*8.+sin(uv.y*7.))*sin(uv.y*11.+.4),r=radius*(1.+edgeNoise*.09);
+      // Stable material-space variation: each impact has its own chipped rim,
+      // which follows the same deformed surface and survives camera changes.
+      float seed=dot(hit.xyz,vec3(17.13,31.71,11.93));
+      float edgeNoise=sin(uv.x*8.+sin(uv.y*7.)+seed)*sin(uv.y*11.+seed*.7),r=radius*(1.+edgeNoise*.14);
       if(info.x>2.5){
         // A contact rubs paint off a dent; it is not a large black bullet hole.
         float envelope=1.-smoothstep(.7,1.15,length(uv*vec2(.78,1.8)));
@@ -131,13 +143,15 @@ if(vDamageState.x>.5){
         float soot=1.-smoothstep(.45,1.65,r);
         damageLayer(damageInk,damageCoverage,vec3(.025,.026,.022),soot*.78);damageRoughness=max(damageRoughness,soot*.5);
       }else{
-        float chip=1.-smoothstep(.72-aa,.72+aa,r),core=1.-smoothstep(.27-aa,.27+aa,r);
+        // The wide support is a painted dent. Only the narrow torn lip exposes
+        // metal: filling the whole support silver looked like painted symbols.
+        float chip=1.-smoothstep(.40-aa,.40+aa,r),core=1.-smoothstep(.25-aa,.25+aa,r);
         float concrete=step(.5,info.z)*step(info.z,1.5);
-        vec3 exposed=mix(vec3(.26,.285,.28),vec3(.36,.31,.24),concrete);
-        damageLayer(damageInk,damageCoverage,vec3(.085,.09,.065),(1.-smoothstep(.78,1.05,r))*.65);
-        damageLayer(damageInk,damageCoverage,exposed,chip*.94);
+        vec3 exposed=mix(vec3(.20,.225,.21),vec3(.43,.38,.30),concrete);
+        damageLayer(damageInk,damageCoverage,vec3(.045,.05,.037),(1.-smoothstep(.34,1.15,r))*.52);
+        damageLayer(damageInk,damageCoverage,exposed,chip*.9);
         damageLayer(damageInk,damageCoverage,vec3(.012,.014,.013),core*.98);
-        damageHeight-=hit.w*.12*(1.-smoothstep(0.,.8,r));
+        damageHeight-=hit.w*.24*(1.-smoothstep(0.,1.15,r));
         damageMetal=max(damageMetal,chip*(1.-core)*(1.-concrete)*.85);
         damageRoughness=max(damageRoughness,chip*.25);
         if(info.x>.5&&r<.25)discard; // visual perforation, no Boolean mesh edit
@@ -158,7 +172,7 @@ export function attachDamageShader(T,mesh,binding,atlas,enabled,{instanced=false
       damageCageMin:{value:new T.Vector3(...binding.cageBounds.min)},damageCageScale:{value:new T.Vector3(...[4,8,4].map((v,i)=>v/(binding.cageBounds.max[i]-binding.cageBounds.min[i])))},
       damageToPart:{value:binding.inverseLinear},normalToDamage:{value:new T.Matrix3().getNormalMatrix(binding.bind)},normalFromDamage:{value:new T.Matrix3().getNormalMatrix(binding.bind).invert()}});
     const glazing=/window_glass|building_window/.test(binding.material.name??'');
-    const defines=(instanced?'#define DAMAGE_INSTANCED\n':'')+(binding.deform?'#define DAMAGE_DEFORM\n':'')+(glazing?'#define DAMAGE_GLAZING\n':'');
+    const defines=(instanced?'#define DAMAGE_INSTANCED\n':'')+(binding.deform?'#define DAMAGE_DEFORM\n':'')+(glazing?'#define DAMAGE_GLAZING\n':'')+(binding.category==='building'&&binding.constructionClipped?'#define DAMAGE_COLLAPSE\n':'');
     shader.vertexShader=defines+common+vertexHeader+cage+shader.vertexShader;
     shader.vertexShader=shader.vertexShader.replace(/void main\(\)\s*\{/,match=>match+'\n'+vertexSetup);
     shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\ntransformed+=damageToPart*damageOffset;');
@@ -186,10 +200,10 @@ export function attachDamageShader(T,mesh,binding,atlas,enabled,{instanced=false
     }
   }
   material.onBeforeCompile=shader=>patch(shader);
-  material.customProgramCacheKey=()=>oldKey()+'_damage_v3_'+instanced+'_'+binding.deform+'_'+/window_glass|building_window/.test(binding.material.name??'');
+  material.customProgramCacheKey=()=>oldKey()+'_damage_v5_'+instanced+'_'+binding.deform+'_'+binding.constructionClipped+'_'+/window_glass|building_window/.test(binding.material.name??'');
   mesh.material=material;
   const depth=new T.MeshDepthMaterial({depthPacking:T.RGBADepthPacking,side:source.side});
-  depth.onBeforeCompile=shader=>patch(shader,true);depth.customProgramCacheKey=()=> 'damage_depth_v3_'+instanced+'_'+binding.deform+'_'+/window_glass|building_window/.test(binding.material.name??'');
+  depth.onBeforeCompile=shader=>patch(shader,true);depth.customProgramCacheKey=()=> 'damage_depth_v5_'+instanced+'_'+binding.deform+'_'+binding.constructionClipped+'_'+/window_glass|building_window/.test(binding.material.name??'');
   mesh.customDepthMaterial=depth;
   return {objectDamage,dispose(){material.dispose();depth.dispose();}};
 }

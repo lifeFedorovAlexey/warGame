@@ -1,0 +1,35 @@
+import assert from 'node:assert/strict';
+import * as T from '../demo/vendor/three.module.js';
+import {OpeningCamera} from '../campaign/opening-camera.js';
+
+const camera=new T.PerspectiveCamera(43,1.6,1,10000);camera.position.set(80,-240,260);
+const target=new T.Vector3(0,80,0),controls={target,enabled:true,enableDamping:true,update(){camera.lookAt(target);}};
+const world={camera,controls,keys:new Set(['KeyW']),field:{heightAt(){return 0;}}};
+const sign={id:'sign',x:0,y:180,groundHeight:0,rotation:-.6,progress:0,completed:false};
+const builder={id:'builder',x:0,y:0};
+const car={id:'first-car',x:-78,y:-60,heading:0};
+const mission={state:{openingScene:{signId:'sign',builderId:'builder',salvageDemo:{vehicleId:car.id,status:'approach'}}},entity(id){return id==='sign'?sign:id==='builder'?builder:id===car.id?car:null;}};
+const position=camera.position.clone(),look=target.clone(),sequence=new OpeningCamera(world,mission);
+assert.equal(controls.enabled,false);assert.equal(world.keys.size,0);
+for(let i=0;i<120;i++)sequence.update(1/60);
+assert.equal(sequence.phase,'salvage');assert(Math.abs(target.x-car.x)<3);
+mission.state.openingScene.salvageDemo.status='show';sequence.update(1/60);assert.equal(sequence.phase,'bumper');
+mission.state.openingScene.salvageDemo.status='done';
+for(let i=0;i<600;i++){builder.y=i*.15;sequence.update(1/60);}
+assert.equal(sequence.phase,'drive');assert(Math.abs(target.y-builder.y)<9,'Camera tracks the moving builder');
+assert(camera.position.distanceTo(position)>50,'Opening visibly changes the view');
+builder.builderWorking=true;sign.progress=.2;
+for(let i=0;i<180;i++)sequence.update(1/60);
+assert.equal(sequence.phase,'build');assert.equal(controls.enabled,false);
+sign.completed=true;
+for(let i=0;i<180;i++)sequence.update(1/60);
+assert.equal(sequence.phase,'sign','Finishing construction alone does not hand over during the sign dialogue');
+assert.equal(sequence.update(1/60,true),false);assert.equal(sequence.phase,'return');
+for(let i=0;i<180;i++)sequence.update(1/60,true);
+assert.equal(sequence.phase,'done');assert.equal(controls.enableDamping,true);
+assert(camera.position.distanceTo(position)<1e-9);assert(target.distanceTo(look)<1e-9);
+camera.position.set(32,50,90);target.set(20,30,0);sequence.update(1,true);
+assert.deepEqual(camera.position.toArray(),[32,50,90],'Finished sequence cannot override the player camera');
+assert.deepEqual(target.toArray(),[20,30,0]);
+const replacement=new OpeningCamera(world,mission);replacement.dispose();assert.equal(controls.enableDamping,true);
+console.log('PASS: driving and building shots, wait for dialogue, smooth overview return, camera released after handoff');

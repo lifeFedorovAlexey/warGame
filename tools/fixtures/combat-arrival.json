@@ -1,0 +1,806 @@
+{
+  "time": 25.30000000000009,
+  "units": [
+    {
+      "id": "u34",
+      "kind": "bukhanka",
+      "owner": "rai",
+      "x": -1603.117683322396,
+      "y": 563.1455685901662,
+      "previousX": -1603.117683322396,
+      "previousY": 563.1455685901662,
+      "hp": 320,
+      "maxHp": 320,
+      "heading": -0.5933184401350415,
+      "path": [],
+      "task": null,
+      "cooldown": 0,
+      "tool": 0,
+      "foldTime": 0,
+      "routeOrder": {
+        "revision": 2,
+        "request": {
+          "x": -1568.0000000289428,
+          "y": 589.9999983952753
+        },
+        "destination": {
+          "x": -1603.117683322396,
+          "y": 563.1455685901662
+        },
+        "type": "attack-move"
+      },
+      "retreatSuppressed": false,
+      "combatGroup": "combat-1",
+      "previousHeading": -0.5933184401350415,
+      "previousWheelDistance": 275.7518252645391,
+      "previousSteering": -1.3278887085307494e-14,
+      "combatContactAt": 17.549999999999976,
+      "driveSpeed": 0,
+      "reversing": false,
+      "steering": -9.029643218009096e-15,
+      "wheelDistance": 275.7518252645391,
+      "aimTarget": {
+        "x": -1563.5379289314203,
+        "y": 522.5770218266659,
+        "z": 9.238339505916183
+      },
+      "reverseDebt": 0,
+      "driveWatch": {
+        "x": -1592,
+        "y": 576,
+        "distance": 19.10863485094562,
+        "elapsed": 0.1,
+        "blocked": 0,
+        "attempts": 0,
+        "queued": false
+      }
+    },
+    {
+      "id": "u35",
+      "kind": "bukhanka",
+      "owner": "rai",
+      "x": -1607.7726778322167,
+      "y": 534.1035723830707,
+      "previousX": -1608.1903128783347,
+      "previousY": 533.6110093373355,
+      "hp": 314,
+      "maxHp": 320,
+      "heading": -0.7251288951533905,
+      "path": [
+        {
+          "x": -1600,
+          "y": 520
+        },
+        {
+          "x": -1576,
+          "y": 528
+        },
+        {
+          "x": -1564.4750000246013,
+          "y": 541.999998397446
+        }
+      ],
+      "task": {
+        "type": "attack-move",
+        "targetId": null,
+        "x": -1564.4750000246013,
+        "y": 541.999998397446,
+        "workOffset": 72
+      },
+      "cooldown": 0,
+      "tool": 0,
+      "foldTime": 0,
+      "routeOrder": {
+        "revision": 2,
+        "request": {
+          "x": -1568.0000000289428,
+          "y": 589.9999983952753
+        },
+        "destination": {
+          "x": -1564.4750000246013,
+          "y": 541.999998397446
+        },
+        "type": "attack-move"
+      },
+      "retreatSuppressed": false,
+      "combatGroup": "combat-1",
+      "previousHeading": -0.6813967503175217,
+      "previousWheelDistance": 249.20105259272992,
+      "previousSteering": -0.67,
+      "driveSpeed": 6.458357821278347,
+      "reversing": false,
+      "steering": -0.67,
+      "wheelDistance": 249.84688837485777,
+      "aimTarget": {
+        "x": -1559.434412768577,
+        "y": 525.6740935409698,
+        "z": 10.829675935015143
+      },
+      "damage": {
+        "version": 2,
+        "revision": 1,
+        "hits": 1,
+        "total": 6,
+        "burn": 0,
+        "wreck": false,
+        "cage": null,
+        "parts": {
+          "0": {
+            "damage": 0.04,
+            "detached": false
+          }
+        },
+        "marks": [
+          {
+            "point": [
+              -0.3256663416707535,
+              2.1101642123723217,
+              1.8624573992728217
+            ],
+            "normal": [
+              -0.0020130289878515627,
+              0.9828448661975859,
+              0.1844232000138359
+            ],
+            "radius": 0.048,
+            "part": 0,
+            "kind": 0,
+            "material": 0
+          }
+        ],
+        "lastImpact": {
+          "direction": [
+            0.23208408317240084,
+            -0.9703853107787607,
+            -0.0670024399767211
+          ],
+          "power": 6,
+          "partId": 0
+        }
+      },
+      "lastHostileHit": {
+        "id": "u43",
+        "x": -1599.621908251955,
+        "y": 494.4001984925026,
+        "time": 3.800000000000002,
+        "range": 115
+      },
+      "lastDamageBark": 3.800000000000002,
+      "combatContactAt": 25.350000000000087,
+      "reverseDebt": 0,
+      "driveWatch": {
+        "x": -1600,
+        "y": 520,
+        "distance": 14.247566210952568,
+        "elapsed": 0.9999999999999999,
+        "blocked": 0,
+        "attempts": 0,
+        "queued": false
+      },
+      "trafficReplan": {
+        "x": -1610.4931845815508,
+        "y": 529.637749751523,
+        "time": 24.300000000000075
+      }
+    },
+    {
+      "id": "u36",
+      "kind": "bukhanka",
+      "owner": "rai",
+      "x": -1516.969692875794,
+      "y": 528.0919881884713,
+      "previousX": -1516.969692875794,
+      "previousY": 528.0919881884713,
+      "hp": 284,
+      "maxHp": 320,
+      "heading": 0.42988787281271346,
+      "path": [],
+      "task": null,
+      "cooldown": 0,
+      "tool": 0,
+      "foldTime": 0,
+      "routeOrder": {
+        "revision": 2,
+        "request": {
+          "x": -1568.0000000289428,
+          "y": 589.9999983952753
+        },
+        "destination": {
+          "x": -1514.7191409235998,
+          "y": 523.18332076131
+        },
+        "type": "attack-move"
+      },
+      "retreatSuppressed": false,
+      "combatGroup": "combat-1",
+      "previousHeading": 0.42988787281271346,
+      "previousWheelDistance": 231.37521311594796,
+      "previousSteering": 0,
+      "driveSpeed": 0,
+      "reversing": false,
+      "steering": 0,
+      "wheelDistance": 231.37521311594796,
+      "aimTarget": {
+        "x": -1556.717737598587,
+        "y": 526.4567133665904,
+        "z": 10.941998765315509
+      },
+      "damage": {
+        "version": 2,
+        "revision": 6,
+        "hits": 6,
+        "total": 36,
+        "burn": 0,
+        "wreck": false,
+        "cage": null,
+        "parts": {
+          "0": {
+            "damage": 0.24000000000000002,
+            "detached": false
+          }
+        },
+        "marks": [
+          {
+            "point": [
+              -0.7094674340237921,
+              2.111076134989011,
+              1.8575939654732716
+            ],
+            "normal": [
+              -0.003196154953324681,
+              0.9828372392042449,
+              0.1844471355887433
+            ],
+            "radius": 0.048,
+            "part": 0,
+            "kind": 0,
+            "material": 0
+          },
+          {
+            "point": [
+              -0.8096213939581529,
+              2.049799839054713,
+              1.9462486167138138
+            ],
+            "normal": [
+              -0.1634212776652557,
+              0.7397864264578359,
+              0.6526940548488245
+            ],
+            "radius": 0.048,
+            "part": 0,
+            "kind": 0,
+            "material": 0
+          },
+          {
+            "point": [
+              -0.9535023929841244,
+              1.996445949381347,
+              1.8187469113565982
+            ],
+            "normal": [
+              -0.9306500855003159,
+              0.3483942706644999,
+              0.11185638348527945
+            ],
+            "radius": 0.048,
+            "part": 0,
+            "kind": 0,
+            "material": 0
+          },
+          {
+            "point": [
+              -0.9692920278594177,
+              1.557851079769694,
+              1.7641581827201702
+            ],
+            "normal": [
+              -0.9987434792353468,
+              0.0008167014764888335,
+              0.05010784053990276
+            ],
+            "radius": 0.048,
+            "part": 0,
+            "kind": 0,
+            "material": 0
+          },
+          {
+            "point": [
+              -0.9633071016424138,
+              1.8338768522548428,
+              1.8838578875238317
+            ],
+            "normal": [
+              -0.9978914091358607,
+              0.0010500723580274274,
+              0.06489709485708382
+            ],
+            "radius": 0.048,
+            "part": 0,
+            "kind": 0,
+            "material": 0
+          },
+          {
+            "point": [
+              -0.9645156423902472,
+              1.714889806387787,
+              1.8596863245552109
+            ],
+            "normal": [
+              -0.9987464975614568,
+              0.0005447569787871845,
+              0.05005134212543028
+            ],
+            "radius": 0.048,
+            "part": 0,
+            "kind": 0,
+            "material": 0
+          }
+        ],
+        "lastImpact": {
+          "direction": [
+            0.43779000202438395,
+            -0.8905733564262543,
+            -0.12336535555481432
+          ],
+          "power": 6,
+          "partId": 0
+        }
+      },
+      "lastHostileHit": {
+        "id": "u46",
+        "x": -1558.164493527256,
+        "y": 530.8508390219424,
+        "time": 9.99999999999998,
+        "range": 115
+      },
+      "lastDamageBark": 4.000000000000002,
+      "combatContactAt": 15.449999999999962,
+      "reverseDebt": 0,
+      "trafficRest": 27.100000000000044
+    },
+    {
+      "id": "u37",
+      "kind": "bukhanka",
+      "owner": "rai",
+      "x": -1621.3161002741392,
+      "y": 550.3801478642883,
+      "previousX": -1621.3161002741392,
+      "previousY": 550.3801478642883,
+      "hp": 320,
+      "maxHp": 320,
+      "heading": -0.029551421293684516,
+      "path": [],
+      "task": null,
+      "cooldown": 0,
+      "tool": 0,
+      "foldTime": 0,
+      "routeOrder": {
+        "revision": 2,
+        "request": {
+          "x": -1568.0000000289428,
+          "y": 589.9999983952753
+        },
+        "destination": {
+          "x": -1621.3161002741392,
+          "y": 550.3801478642883
+        },
+        "type": "attack-move"
+      },
+      "retreatSuppressed": false,
+      "combatGroup": "combat-1",
+      "previousHeading": -0.029551421293684516,
+      "previousWheelDistance": 303.881698080477,
+      "previousSteering": 0,
+      "driveSpeed": 0,
+      "steering": 0,
+      "queueSince": 18.29999999999999,
+      "reversing": false,
+      "wheelDistance": 303.881698080477,
+      "aimTarget": {
+        "x": -1565.1243517560895,
+        "y": 524.8486704039819,
+        "z": 9.619203954569604
+      },
+      "combatContactAt": 20.55000000000002,
+      "reverseDebt": 0,
+      "driveWatch": {
+        "x": -1612.475000026772,
+        "y": 565.9999983931045,
+        "distance": 26.040253484768336,
+        "elapsed": 0,
+        "blocked": 0,
+        "attempts": 1,
+        "queued": false,
+        "arrivalBlockedAt": 18.799999999999997
+      }
+    },
+    {
+      "id": "u38",
+      "kind": "bukhanka",
+      "owner": "rai",
+      "x": -1591.1601513371972,
+      "y": 551.2131753201129,
+      "previousX": -1591.1601513371972,
+      "previousY": 551.2131753201129,
+      "hp": 314,
+      "maxHp": 320,
+      "heading": -0.8969177189605458,
+      "path": [],
+      "task": null,
+      "cooldown": 0,
+      "tool": 0,
+      "foldTime": 0,
+      "routeOrder": {
+        "revision": 2,
+        "request": {
+          "x": -1568.0000000289428,
+          "y": 589.9999983952753
+        },
+        "destination": {
+          "x": -1591.1601513371972,
+          "y": 551.2131753201129
+        },
+        "type": "attack-move"
+      },
+      "retreatSuppressed": false,
+      "combatGroup": "combat-1",
+      "previousHeading": -0.8969177189605458,
+      "previousWheelDistance": 298.3511319588787,
+      "previousSteering": -3.581215018046929e-9,
+      "driveSpeed": 0,
+      "reversing": false,
+      "steering": -2.435226212271912e-9,
+      "wheelDistance": 298.3511319588787,
+      "aimTarget": {
+        "x": -1560.2269021604122,
+        "y": 524.1784551989244,
+        "z": 10.363275327399133
+      },
+      "damage": {
+        "version": 2,
+        "revision": 1,
+        "hits": 1,
+        "total": 6,
+        "burn": 0,
+        "wreck": false,
+        "cage": null,
+        "parts": {
+          "0": {
+            "damage": 0.04,
+            "detached": false
+          }
+        },
+        "marks": [
+          {
+            "point": [
+              0.657568294733116,
+              2.1094390002264256,
+              1.866325418386306
+            ],
+            "normal": [
+              0.001131563306740953,
+              0.9828583815994886,
+              0.18435867564103628
+            ],
+            "radius": 0.048,
+            "part": 0,
+            "kind": 0,
+            "material": 0
+          }
+        ],
+        "lastImpact": {
+          "direction": [
+            -0.021538452892396545,
+            -0.9977302117604883,
+            -0.06380062372244649
+          ],
+          "power": 6,
+          "partId": 0
+        }
+      },
+      "lastHostileHit": {
+        "id": "u43",
+        "x": -1598.1826515773605,
+        "y": 495.9122976408344,
+        "time": 5.299999999999997,
+        "range": 115
+      },
+      "lastDamageBark": 5.299999999999997,
+      "combatContactAt": 20.75000000000002,
+      "reverseDebt": 0,
+      "driveWatch": {
+        "x": -1576,
+        "y": 560,
+        "distance": 25.028725021802103,
+        "elapsed": 0.5,
+        "blocked": 0,
+        "attempts": 0,
+        "queued": false
+      }
+    },
+    {
+      "id": "u39",
+      "kind": "bukhanka",
+      "owner": "rai",
+      "x": -1525.824704173788,
+      "y": 510.7589023764095,
+      "previousX": -1525.7488703684255,
+      "previousY": 510.65012257870563,
+      "hp": 320,
+      "maxHp": 320,
+      "heading": 0.6087980886300157,
+      "path": [
+        {
+          "x": -1544,
+          "y": 544
+        }
+      ],
+      "task": {
+        "type": "attack-move",
+        "targetId": null,
+        "x": -1544,
+        "y": 544,
+        "workOffset": -36
+      },
+      "cooldown": 0,
+      "tool": 0,
+      "foldTime": 0,
+      "routeOrder": {
+        "revision": 2,
+        "request": {
+          "x": -1568.0000000289428,
+          "y": 589.9999983952753
+        },
+        "destination": {
+          "x": -1544,
+          "y": 544
+        },
+        "type": "attack-move"
+      },
+      "retreatSuppressed": false,
+      "combatGroup": "combat-1",
+      "previousHeading": 0.6087980886300157,
+      "previousWheelDistance": 252.26450050243218,
+      "previousSteering": 0,
+      "driveSpeed": 0,
+      "reversing": false,
+      "steering": 0,
+      "wheelDistance": 252.39710446324878,
+      "queueSince": 16.499999999999964,
+      "aimTarget": {
+        "x": -1557.955348316884,
+        "y": 525.6005797076289,
+        "z": 10.566801572389426
+      },
+      "combatContactAt": 25.55000000000009,
+      "reverseDebt": 0
+    },
+    {
+      "id": "u40",
+      "kind": "bukhanka",
+      "owner": "rai",
+      "x": -1637.074592020413,
+      "y": 527.2299013934636,
+      "previousX": -1637.7044287936274,
+      "previousY": 526.9244792200165,
+      "hp": 320,
+      "maxHp": 320,
+      "heading": -1.131133071249944,
+      "path": [
+        {
+          "x": -1594.0537878937378,
+          "y": 542.9183564685588
+        }
+      ],
+      "task": {
+        "type": "attack-move",
+        "targetId": null,
+        "x": -1594.0537878937378,
+        "y": 542.9183564685588,
+        "workOffset": 0
+      },
+      "cooldown": 0,
+      "tool": 0,
+      "foldTime": 0,
+      "routeOrder": {
+        "revision": 2,
+        "request": {
+          "x": -1568.0000000289428,
+          "y": 589.9999983952753
+        },
+        "destination": {
+          "x": -1594.0537878937378,
+          "y": 542.9183564685588
+        },
+        "type": "attack-move"
+      },
+      "retreatSuppressed": false,
+      "combatGroup": "combat-1",
+      "previousHeading": -1.1074331600401244,
+      "previousWheelDistance": 307.884773982397,
+      "previousSteering": -0.37716320700093175,
+      "driveSpeed": 7.000000000000002,
+      "reversing": false,
+      "steering": -0.37716320700093175,
+      "wheelDistance": 308.584773982397,
+      "queueSince": 22.50000000000005,
+      "combatContactAt": 25.55000000000009,
+      "trafficRest": 11.09999999999998,
+      "reverseDebt": 0,
+      "driveWatch": {
+        "x": -1594.0537878937378,
+        "y": 542.9183564685588,
+        "distance": 47.87586790341412,
+        "elapsed": 0,
+        "blocked": 0,
+        "attempts": 1,
+        "queued": false,
+        "arrivalBlockedAt": 24.800000000000082
+      },
+      "detour": {
+        "legs": [
+          {
+            "direction": 1,
+            "curve": -0.39612708736412844,
+            "remaining": 3.2999999999999994
+          },
+          {
+            "direction": -1,
+            "curve": 0,
+            "remaining": 5.3999999999999995
+          },
+          {
+            "direction": -1,
+            "curve": 0,
+            "remaining": 5.3999999999999995
+          }
+        ],
+        "parking": false,
+        "blocked": 0
+      }
+    },
+    {
+      "id": "u41",
+      "kind": "bukhanka",
+      "owner": "rai",
+      "x": -1621.2925100506989,
+      "y": 498.47969930355,
+      "previousX": -1621.7544579093424,
+      "previousY": 497.0186678701789,
+      "hp": 320,
+      "maxHp": 320,
+      "heading": -0.35813641414586506,
+      "path": [
+        {
+          "x": -1600,
+          "y": 520
+        },
+        {
+          "x": -1592.0000000246014,
+          "y": 521.5249983931045
+        }
+      ],
+      "task": {
+        "type": "attack-move",
+        "targetId": null,
+        "x": -1592.0000000246014,
+        "y": 521.5249983931045,
+        "workOffset": 36
+      },
+      "cooldown": 0,
+      "tool": 0,
+      "foldTime": 0,
+      "routeOrder": {
+        "revision": 2,
+        "request": {
+          "x": -1568.0000000289428,
+          "y": 589.9999983952753
+        },
+        "destination": {
+          "x": -1592.0000000246014,
+          "y": 521.5249983931045
+        },
+        "type": "attack-move"
+      },
+      "retreatSuppressed": false,
+      "combatGroup": "combat-1",
+      "previousHeading": -0.2543301565931811,
+      "previousWheelDistance": 268.0867466423161,
+      "previousSteering": -0.67,
+      "driveSpeed": 15.330095468199803,
+      "reversing": false,
+      "steering": -0.67,
+      "wheelDistance": 269.61975618913607,
+      "aimTarget": {
+        "x": -1540.5808657268653,
+        "y": 492.73200477053757,
+        "z": 7.95053819605805
+      },
+      "combatContactAt": 25.55000000000009,
+      "reverseDebt": 0,
+      "driveWatch": {
+        "x": -1600,
+        "y": 520,
+        "distance": 38.09010764417651,
+        "elapsed": 0.7,
+        "blocked": 0,
+        "attempts": 0,
+        "queued": false
+      }
+    },
+    {
+      "id": "u42",
+      "kind": "bukhanka",
+      "owner": "rai",
+      "x": -1609.3735752690584,
+      "y": 470.53208072247594,
+      "previousX": -1608.5318089531768,
+      "previousY": 469.52674097519673,
+      "hp": 320,
+      "maxHp": 320,
+      "heading": 0.697073842789145,
+      "path": [
+        {
+          "x": -1624,
+          "y": 488
+        },
+        {
+          "x": -1616,
+          "y": 512
+        },
+        {
+          "x": -1600,
+          "y": 520
+        }
+      ],
+      "task": {
+        "type": "attack-move",
+        "targetId": null,
+        "x": -1568.0000000246014,
+        "y": 521.5249983952752,
+        "workOffset": 54
+      },
+      "cooldown": 0,
+      "tool": 0,
+      "foldTime": 0,
+      "routeOrder": {
+        "revision": 2,
+        "request": {
+          "x": -1568.0000000289428,
+          "y": 589.9999983952753
+        },
+        "destination": {
+          "x": -1568.0000000246014,
+          "y": 521.5249983952752
+        },
+        "type": "attack-move"
+      },
+      "retreatSuppressed": false,
+      "combatGroup": "combat-1",
+      "previousHeading": 0.697070109026512,
+      "previousWheelDistance": 250.67073554944642,
+      "previousSteering": 0.00003786195980758356,
+      "driveSpeed": 13.112126212077602,
+      "reversing": false,
+      "steering": 0.000033316505716229904,
+      "wheelDistance": 251.9819481706542,
+      "aimTarget": {
+        "x": -1540.2009955517071,
+        "y": 492.3974605113398,
+        "z": 7.1623661043439135
+      },
+      "combatContactAt": 25.55000000000009,
+      "reverseDebt": 0,
+      "driveWatch": {
+        "x": -1624,
+        "y": 488,
+        "distance": 24.09411200394191,
+        "elapsed": 0,
+        "blocked": 0,
+        "attempts": 0,
+        "queued": false
+      }
+    }
+  ]
+}

@@ -57,13 +57,13 @@
   "geometry": {
     "id": "generator",
     "lod": 0,
-    "triangles": 7080,
-    "vertices": 7874,
+    "triangles": 7560,
+    "vertices": 8884,
     "primitives": 11,
     "materials": 11,
     "removedDegenerate": 0,
-    "inputTriangles": 7080,
-    "bytes": 307112,
+    "inputTriangles": 7560,
+    "bytes": 345284,
     "boundsMm": {
       "min": [
         -6000,

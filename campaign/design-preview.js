@@ -83,11 +83,13 @@ export class DesignPreview {
     this.requestRender();
   }
 
-  setModel({root, chassis, body, upper}, modifications = []) {
+  setModel({root, chassis, body, upper, dispose}, modifications = []) {
     const initial = !this.model;
     const interrupted = !!this.motion;
     this.motion = null;
     if (this.model) this.scene.remove(this.model);
+    this.disposeModel?.();
+    this.disposeModel = dispose;
     this.disposeModifications();
     this.modifications=modifications.map(id=>{
       const module=createFieldModification(T,id);
@@ -113,6 +115,8 @@ export class DesignPreview {
   }
 
   clearModel() {
+    this.disposeModel?.();
+    this.disposeModel = null;
     if (this.model) this.scene.remove(this.model);
     this.model = null;
     this.motion = null;
@@ -176,6 +180,8 @@ export class DesignPreview {
   }
 
   dispose() {
+    this.disposeModel?.();
+    this.disposeModel = null;
     cancelAnimationFrame(this.frame);
     this.resizer.disconnect();
     this.controls.dispose();

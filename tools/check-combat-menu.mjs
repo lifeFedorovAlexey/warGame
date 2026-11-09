@@ -15,7 +15,12 @@ try {
   const c=window.campaign;c.radio.setEnabled(false);const ids=c.mission.state.units.filter(u=>u.owner==='rai'&&u.kind==='bukhanka').map(u=>u.id);
   c.select(ids);c.advance(0);return ids;
  });
- await page.locator('#attack-order').click();assert(await page.locator('#combat-menu').isVisible());
+ const settleOrders=()=>page.waitForFunction(()=>{campaign.advance(0);return !campaign.mission.state.units.some(u=>u.owner==='rai'&&u.pendingOrder?.status==='planning');});
+ await page.locator('#attack-order').click();assert.equal(await page.evaluate(()=>campaign.state.orderMode),'attack');
+ assert(await page.locator('#combat-menu').isHidden(),'Left click enables attack without opening settings');
+ await page.locator('#attack-order').click();assert.equal(await page.evaluate(()=>campaign.state.orderMode),null);
+ await page.locator('#attack-order').click({button:'right'});assert(await page.locator('#combat-menu').isVisible());
+ assert.equal(await page.evaluate(()=>campaign.state.orderMode),null,'Opening settings does not issue an attack mode');
  assert.equal(await page.locator('#combat-menu button').count(),10);
  await page.locator('[data-policy=retreat][data-value=light]').click();
  await page.locator('[data-policy=response][data-value=return]').click();
@@ -58,11 +63,13 @@ try {
  await page.keyboard.press('KeyF');assert.equal(await page.evaluate(()=>campaign.state.orderMode),'attack');assert(await page.locator('#combat-menu').isHidden());
  const point=await page.evaluate(()=>{const c=campaign,u=c.mission.entity(c.selected[0]);return c.world.screen({x:u.x-60,y:u.y-65},0);});
  await page.mouse.click(point.x,point.y);
+ await settleOrders();
  assert.equal(await page.evaluate(id=>campaign.mission.entity(id).task?.type,ids[0]),'attack-move');
  assert.equal(await page.locator('#attack-order').getAttribute('aria-pressed'),'true');
  const firstTask=await page.evaluate(id=>campaign.mission.entity(id).task,ids[0]);
  const next=await page.evaluate(()=>{const c=campaign,u=c.mission.entity(c.selected[0]);return c.world.screen({x:u.x-95,y:u.y-110},0);});
  await page.mouse.click(next.x,next.y);
+ await settleOrders();
  const nextTask=await page.evaluate(id=>campaign.mission.entity(id).task,ids[0]);
  assert.equal(nextTask.type,'attack-move');assert.notDeepEqual([nextTask.x,nextTask.y],[firstTask.x,firstTask.y],'second click issues another order');
  await page.locator('#stop').click();assert.equal(await page.evaluate(()=>campaign.state.orderMode),'attack','Stop keeps attack cursor');

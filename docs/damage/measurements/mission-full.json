@@ -1,0 +1,135 @@
+{
+  "seconds": 1125.300000000072,
+  "status": "victory",
+  "research": {
+    "flamethrower": true,
+    "mg-ammo-1": true,
+    "mg-tower": true
+  },
+  "artifactKeys": [
+    "flamethrower",
+    "mg-ammo-1",
+    "mg-tower"
+  ],
+  "camps": [
+    {
+      "id": "nw-pocket",
+      "cleared": true
+    },
+    {
+      "id": "nw-west",
+      "cleared": true
+    },
+    {
+      "id": "nw-east",
+      "cleared": true
+    },
+    {
+      "id": "west-south",
+      "cleared": true
+    }
+  ],
+  "statistics": {
+    "produced": 14,
+    "buildingsCompleted": 5,
+    "enemiesDestroyed": 28
+  },
+  "raidWon": true,
+  "objectives": [
+    {
+      "id": "base",
+      "name": "Развернуть передовую базу",
+      "done": true
+    },
+    {
+      "id": "power",
+      "name": "Обеспечить энергоснабжение",
+      "done": true
+    },
+    {
+      "id": "production",
+      "name": "Наладить производство техники",
+      "done": true
+    },
+    {
+      "id": "research",
+      "name": "Организовать научные исследования",
+      "done": true,
+      "progress": "3/3"
+    },
+    {
+      "id": "security",
+      "name": "Уничтожить четыре лагеря",
+      "done": true,
+      "progress": "4/4"
+    }
+  ],
+  "survivors": 2,
+  "cinematics": [
+    {
+      "key": "intro",
+      "time": 0.1
+    },
+    {
+      "key": "briefing",
+      "time": 0.1
+    },
+    {
+      "key": "arrival",
+      "time": 0.1
+    },
+    {
+      "key": "first-contact",
+      "time": 189.39999999999353
+    },
+    {
+      "key": "raid-won",
+      "time": 209.89999999999236
+    },
+    {
+      "key": "artifact-flamethrower",
+      "time": 419.2000000000268
+    },
+    {
+      "key": "research-flamethrower",
+      "time": 449.30000000003366
+    },
+    {
+      "key": "camp3-sighted",
+      "time": 460.9000000000363
+    },
+    {
+      "key": "artifact-mg-ammo-1",
+      "time": 602.6000000000685
+    },
+    {
+      "key": "research-mg-ammo-1",
+      "time": 637.6000000000764
+    },
+    {
+      "key": "last-camp",
+      "time": 669.7000000000837
+    },
+    {
+      "key": "research-mg-tower",
+      "time": 713.3000000000936
+    },
+    {
+      "key": "victory",
+      "time": 1125.300000000072
+    },
+    {
+      "key": "outro",
+      "time": 1125.300000000072
+    }
+  ],
+  "mechanics": {
+    "workSteps": 1212,
+    "constructionGated": true,
+    "repairGated": true,
+    "interruptProjection": true,
+    "movingRepair": true,
+    "builderHandoff": true
+  },
+  "saveRoundTrip": true
+}

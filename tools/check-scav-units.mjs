@@ -38,7 +38,7 @@ for(const [kind,profile] of Object.entries(SCAV_PROFILES)){
   else assert(model.wheels.every(w=>Math.abs(w.wheel.rotation.x)>.1));
   models[kind]={size:box.getSize(new T.Vector3()).toArray()};
 }
-for(const camp of m.state.camps)assert.deepEqual(m.state.units.filter(u=>u.campId===camp.id).map(u=>u.kind),SCAV_ROSTERS[camp.id]);
+for(const camp of m.state.camps)assert.deepEqual(m.state.units.filter(u=>u.campId===camp.id).map(u=>u.kind),[...SCAV_ROSTERS[camp.id],...camp.extraGuards]);
 assert.deepEqual(m.state.raidReserve.map(id=>m.entity(id).kind),config.raidRoster);
 const legacy=JSON.parse(m.save());delete legacy.state.scavRosterVersion;delete legacy.state.projectiles;
 for(const u of legacy.state.units.filter(u=>u.owner==='scavs')){u.kind='raider';u.hp=u.maxHp=config.units.raider.hp;}

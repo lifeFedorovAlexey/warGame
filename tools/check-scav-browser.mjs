@@ -17,7 +17,7 @@ try{
   const kinds=['scav-zaporozhets','scav-firetruck','scav-bus','scav-rifleman','scav-grenadier'];
   const offsets=[[-44,0],[0,0],[46,0],[-8,33],[8,33]];
   const ids=kinds.map((kind,i)=>m.addUnit(kind,'scavs',{x:p.x+offsets[i][0],y:p.y+offsets[i][1]},{raidReserve:true}).id);
-  document.querySelector('#labels').hidden=true;document.querySelector('#mission-hud').hidden=true;
+  w.scene.getObjectByName('unit_health_bars').layers.disableAll();document.querySelector('#mission-hud').hidden=true;
   window.scavReview={p,ids};return ids;
  });
  async function camera(point,offset){await page.evaluate(({point,offset})=>{

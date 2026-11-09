@@ -1,0 +1,34 @@
+import assert from 'node:assert/strict';
+import {createRequire} from 'node:module';
+const require=createRequire(import.meta.url);
+const {chromium}=require('C:/Users/Алексей/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true,args:['--enable-unsafe-swiftshader','--use-angle=swiftshader']});
+try{
+ const page=await browser.newPage({viewport:{width:1280,height:800}}),errors=[];
+ page.on('pageerror',e=>errors.push(e.message));
+ await page.goto((process.env.WARGAME_URL??'http://127.0.0.1:8884')+'/campaign/');
+ await page.waitForFunction(()=>window.campaign?.ready,null,{timeout:90000});
+ await page.locator('#begin').click();
+ await page.locator('.settings summary').click();
+ await page.locator('[aria-controls="operation-actions"]').click();
+ await page.waitForFunction(()=>campaign.storyAudio.cueId==='m01-s02-l008',null,{timeout:30000});
+ await page.locator('#save').click();
+ const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('warGame.alpha.mission01.v1')).state);
+ assert(saved.radioStory.includeOpening);
+ assert.equal(saved.radioStory.scenes.p01.status,'done');assert.equal(saved.radioStory.scenes.p02.cursor,3);
+ await page.reload();await page.waitForFunction(()=>window.campaign?.ready,null,{timeout:90000});
+ await page.locator('#resume-save').click();
+ await page.waitForFunction(()=>campaign.storyAudio.cueId==='m01-s02-l008');
+ assert.equal(await page.evaluate(()=>campaign.radio.entry.storyScene),'p02');
+ await page.locator('.settings summary').click();
+ await page.locator('[aria-controls="operation-audio"]').click();
+ await page.locator('#story-voice-toggle').click();
+ assert.equal(await page.evaluate(()=>campaign.storyAudio.enabled),false);
+ assert(await page.evaluate(()=>Number.isFinite(campaign.radio.until)),'Muting releases the audio-owned deadline');
+ await page.waitForFunction(()=>campaign.radio.entry?.storyScene==='p03',null,{timeout:15000});
+ await page.locator('#story-voice-toggle').click();
+ await page.waitForFunction(()=>campaign.storyAudio.playing,null,{timeout:15000});
+ assert.equal(await page.evaluate(()=>campaign.mission.state.radioStory.scenes.p01.status),'done');
+ assert.deepEqual(errors,[]);
+ console.log('PASS: save from the operation menu during the opening, reload through Continue, no replay, voice mute/unmute without stuck subtitles');
+}finally{await browser.close();}

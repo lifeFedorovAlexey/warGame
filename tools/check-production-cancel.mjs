@@ -8,10 +8,11 @@ const m=new Mission(config,createHeightfield(json('assets/maps/alpha/heightfield
 const factory=m.addStructure('factory','rai',{x:0,y:0},{completed:true,progress:1});
 m.state.energy=2000;
 for(const kind of ['bukhanka','builder','bukhanka'])assert(m.produce(factory.id,kind).ok);
+m.updateEconomy(config.units.bukhanka.cost/config.oilTransferPerSecond);
 factory.queue[0].progress=.4;
 let energy=m.state.energy;
 assert(m.cancelProduction(factory.id,'bukhanka').ok);
-assert.equal(m.state.energy,energy+130);
+assert.equal(m.state.energy,energy,'The last queued order has not been paid yet');
 assert.equal(factory.queue[0].progress,.4,'Cancel the last matching job before the running job');
 energy=m.state.energy;
 factory.exitBlocked=true;factory.exitRetryAt=100;
@@ -27,6 +28,7 @@ assert.equal(m.state.energy,energy,'Repeated cancellation cannot duplicate the r
 factory.owner='scavs';assert(!m.cancelProduction(factory.id,'builder').ok);
 factory.owner='rai';factory.hp=0;assert(!m.cancelProduction(factory.id,'builder').ok);
 factory.hp=factory.maxHp;
+m.updateEconomy(.8);
 m.saveDesign('Новый строитель',config.units.builder.components);
 const replacement=m.factoryProjects().find(p=>p.kind==='builder');
 m.load(m.save());

@@ -1,18 +1,19 @@
 import {setButtonIcon} from '../assets/ui/icons.js';
-import {raidApproachSignal, waterTowerSignal} from './threat-guidance.js';
+import {raidApproachSignal, southernApproachSignal, visibleRaidContact, waterTowerSignal} from './threat-guidance.js';
+import {setCharacterPortrait} from './character-portraits.js';
 
 const messages = {
-  intro: { station: 'Штаб', text: 'Альфа, ставьте атомную станцию. Вышку — на нефтяной точке.' },
-  'first-contact': { station: 'Разведка', text: 'Отбросы в ущелье. Прикройте въезд!' },
-  'raid-won': { station: 'Командир', text: 'Атаку отбили. Проверьте машины и выдвигайтесь к лагерям.' },
+  'first-contact': { station: 'Разведка', speaker:'scout', portrait:'radio', text: 'Отбросы в ущелье. Прикройте въезд!' },
+  'raid-won': { station: 'Командир', speaker:'commander', portrait:'radio', text: 'Сектор зачищен. Проверьте машины. Продолжаем операцию.' },
   'artifact-flamethrower': { station: 'Лаборатория', text: 'Нашли модуль с синей лентой. Изучите в лаборатории.' },
   'research-flamethrower': { station: 'Лаборатория', text: 'Огнемёт готов. Ищите модуль в конструкторе.' },
   'artifact-mg-ammo-1': { station: 'Лаборатория', text: 'На складе нашли новые боеприпасы. Образцы в лаборатории.' },
   'research-mg-ammo-1': { station: 'Лаборатория', text: 'Новые патроны уже на машинах.' },
-  'camp3-sighted': { station: 'Разведка', text: 'На башне пулемёт. Ищите укрытие!' },
+  'warrant-upgrade': { station: 'Прапорщик', speaker:'warrant', portrait:'neutral', text: 'Вот «Буханку» опять обновили. Зря, конечно. Хорошая была машина. Сорок лет ничего не меняли — и правильно делали. А теперь ручку дверную другую поставили. Спрашивается, зачем?' },
+  'camp3-sighted': { station: 'Разведка', speaker:'scout', portrait:'radio', text: 'На башне пулемёт. Ищите укрытие!' },
   'research-mg-tower': { station: 'Лаборатория', text: 'Чертёж башни готов. Можно строить.' },
-  'last-camp': { station: 'Разведка', text: 'Штаб Петровича на юге. Заходите по западной дороге.' },
-  victory: { station: 'Командир', text: 'База действует. Все четыре лагеря зачищены.' },
+  'last-camp': { station: 'Разведка', speaker:'scout', portrait:'radio', text: 'Штаб Петровича на юге. Заходите по западной дороге.' },
+  victory: { station: 'Командир', speaker:'commander', portrait:'neutral', text: 'База действует. Все четыре лагеря зачищены.' },
   outro: { station: 'Штаб', text: 'Сильный сигнал на юге. Нужна разведка.' },
 };
 
@@ -40,17 +41,19 @@ export function missionSignal(chapter, mission) {
     return mark(well, 'К нефти', 'guidance', 320);
   }
   if (chapter === 'first-contact') {
-    const contact = state.units.find(unit => unit.owner === 'scavs' && unit.hp > 0 && mission.visibleAt(unit.x, unit.y));
+    const contact = visibleRaidContact(mission);
     return raidApproachSignal(mission) ?? (contact ? mark(contact, 'К контакту', 'threat', 400) :
       mark(field.gridToWorld(config.startGrid), 'К базе', 'threat', 380));
+  }
+  if (chapter === 'raid-won' && state.flags.raidWon && state.camps[0] && !state.camps[0].cleared && config.raidApproachGrid) {
+    const entry = field.gridToWorld(config.raidApproachGrid);
+    if (mission.exploredAt(entry.x, entry.y)) return mark(entry, 'К выезду на разведку', 'recon', 420);
   }
   if (chapter === 'camp3-sighted') {
     return waterTowerSignal(mission);
   }
   if (chapter === 'last-camp') {
-    const approach = config.camps[3].approachGrid;
-    return approach ? mark(field.gridToWorld(approach), 'К подходу', 'intel', 530) :
-      mark(state.camps[3].gate, 'К въезду', 'intel', 530);
+    return southernApproachSignal(mission);
   }
   if (chapter === 'outro') {
     const [x] = config.startGrid;
@@ -60,12 +63,19 @@ export function missionSignal(chapter, mission) {
 }
 
 export class FieldRadio {
-  constructor(panel, toggle, {onSignal, onFocus}) {
+  constructor(panel, toggle, {onSignal, onFocus, dialogue = {}, director = null}) {
     this.panel = panel;
     this.toggle = toggle;
     this.onSignal = onSignal;
+    this.dialogue = dialogue;
+    this.director = director;
     this.queue = [];
     this.until = 0;
+    this.portrait = document.createElement('canvas');
+    this.portrait.className = 'radio-portrait';
+    this.portrait.hidden = true;
+    this.portrait.setAttribute('aria-hidden', 'true');
+    panel.prepend(this.portrait);
     this.focus = panel.querySelector('[data-focus]');
     this.focus.onclick = () => { if (this.current) onFocus(this.current); };
     try { this.enabled = localStorage.getItem('warGame.fieldRadio') !== 'off'; }
@@ -89,10 +99,28 @@ export class FieldRadio {
 
   reset() {
     this.queue.length = 0;
-    this.dismiss();
+    this.director?.suspend();
+    this.hide();
   }
 
   dismiss() {
+    const entry = this.entry;
+    if (entry?.story) this.director.skip();
+    else if (entry?.dialogue) {
+      const progress = this.mission.state.fieldDialogue ??= {};
+      progress[entry.chapter] = entry.index + 1;
+      if (progress[entry.chapter] >= this.dialogue[entry.chapter].length) this.mission.finishCinematic(entry.chapter);
+    }
+    return this.hide();
+  }
+
+  suspendDialogue() {
+    // Reopen the interrupted line on returning from the constructor.
+    if (this.entry?.dialogue) { this.director?.suspend(); this.hide(); }
+  }
+
+  hide() {
+    setCharacterPortrait(this.portrait, null);
     if (this.panel.hidden) return false;
     this.panel.hidden = true;
     this.until = 0;
@@ -103,26 +131,57 @@ export class FieldRadio {
   }
 
   consume(mission, now) {
+    if(this.director)return this.consumeStory(mission,now);
+    this.mission = mission;
     let queued = false;
     for (const chapter of [...mission.state.pendingCinematics]) {
+      // A chapter is complete only after its last line, never when it is queued.
+      if (this.dialogue[chapter]) continue;
       mission.finishCinematic(chapter);
       if (!this.enabled || !messages[chapter]) continue;
       const priority = priorities[chapter] ?? 0;
       this.queue.push({chapter, ...messages[chapter], priority, queuedAt:now});
+      if (chapter === 'research-mg-ammo-1') {
+        this.queue.push({chapter:'warrant-upgrade', ...messages['warrant-upgrade'], priority:0, queuedAt:now});
+      }
       queued = true;
     }
     if (!this.enabled) return;
     if (queued) this.queue.sort((a,b) => b.priority - a.priority);
     while (this.queue.length && !relevant(this.queue[0], mission, now)) this.queue.shift();
-    if (this.entry && (now >= this.until || mission.state.status === 'defeat')) this.dismiss();
+    if (mission.state.status !== 'running' && this.entry?.dialogue) this.hide();
+    if (mission.state.status === 'defeat') { this.hide(); return; }
+    if (this.entry && now >= this.until) this.dismiss();
     const next = this.queue[0];
-    if (!next || (this.entry && next.priority <= this.entry.priority)) return;
-    this.queue.shift();
-    this.present(next, mission, now);
+    if (next && (!this.entry || next.priority > this.entry.priority)) {
+      this.queue.shift();
+      this.present(next, mission, now);
+    }
+    if (this.entry || mission.state.status !== 'running') return;
+    for (const chapter of [...mission.state.pendingCinematics]) {
+      const lines = this.dialogue[chapter];
+      if (!lines) continue;
+      const index = mission.state.fieldDialogue?.[chapter] ?? 0;
+      if (index >= lines.length) { mission.finishCinematic(chapter); continue; }
+      this.present({...lines[index], chapter, index, dialogue:true, priority:-1}, mission, now);
+      break;
+    }
+  }
+
+  consumeStory(mission,now) {
+    this.mission=mission;
+    // Legacy chapter flags still drive objectives and signals, but no longer enqueue duplicate speech.
+    for(const chapter of [...mission.state.pendingCinematics])mission.finishCinematic(chapter);
+    if(this.entry?.story&&now>=this.until){this.director.completeLine();this.hide();}
+    const next=this.director.update(mission,now,{enabled:this.enabled});
+    if(!next){if(this.entry)this.hide();return;}
+    if(this.entry?.story&&this.entry.token===next.token)return;
+    this.present(next,mission,now);
   }
 
   present(entry, mission, now) {
     this.entry = entry;
+    setCharacterPortrait(this.portrait, entry.speaker, entry.portrait);
     const { chapter, station, text, priority } = entry;
     this.current = missionSignal(chapter, mission);
     this.focus.hidden = !this.current;
@@ -130,9 +189,9 @@ export class FieldRadio {
     this.panel.querySelector('strong').textContent = station;
     this.panel.querySelector('p').textContent = text;
     this.panel.hidden = false;
-    this.until = now + Math.min(6700, 3000 + text.length * 28);
+    this.until = now + (entry.dialogue ? Math.max(2200, text.length * 60) : Math.min(6700, 3000 + text.length * 28));
     this.onSignal(this.current, chapter, until => {
-      if (this.entry === entry) this.until = Math.max(this.until, until);
-    }, priority >= tacticalPriority && priority < endingPriority);
+      if (this.entry === entry) this.until = entry.dialogue ? until : Math.max(this.until, until);
+    }, entry.story ? priority===4 : priority >= tacticalPriority && priority < endingPriority, entry.dialogue ? entry : null);
   }
 }

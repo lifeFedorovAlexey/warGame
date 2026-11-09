@@ -14,7 +14,7 @@ const executablePath=process.env.EDGE_PATH??'C:/Program Files (x86)/Microsoft/Ed
 const browser=await playwright.chromium.launch({executablePath,headless:true,args:['--enable-precise-memory-info',...(budget?['--disable-frame-rate-limit','--disable-gpu-vsync']:[]),...(software?['--enable-unsafe-swiftshader','--use-angle=swiftshader']:['--use-angle=d3d11'])]});
 const errors=[];
 try{
-  const viewport=budget?performanceBudget.viewport:{width:1280,height:720};
+  const viewport=benchmark?performanceBudget.viewport:{width:1280,height:720};
   const page=await browser.newPage({viewport});
   page.on('pageerror',e=>{errors.push(e.message);console.log(JSON.stringify({pageError:e.message}));});page.on('console',m=>{if(m.type()==='error'){errors.push(m.text());console.log(JSON.stringify({browserError:m.text()}));}});
   await page.goto((process.env.DAMAGE_BASE_URL??'http://127.0.0.1:8766')+'/campaign/?damage=1');
@@ -28,6 +28,7 @@ try{
   environment.viewport=[viewport.width,viewport.height];environment.unlimitedFrameRate=budget;
   environment.node=process.version;environment.sources=Object.fromEntries([...fs.readdirSync('campaign').filter(n=>n.startsWith('damage-')||n.includes('salvage')||n==='field-modification-models.js').map(n=>'campaign/'+n),'campaign/vehicle-layer.js','campaign/world.js','campaign/mission.js','campaign/main.js','campaign/fog-mask.js','campaign/unit-spatial-index.js','campaign/navigation.js','assets/campaign/alpha/mission01/gameplay.json','tools/check-damage-browser.mjs','tools/performance-budget.json'].map(path=>[path,createHash('sha256').update(fs.readFileSync(path)).digest('hex')]));
   for(const path of ['campaign/traffic-coordinator.js','campaign/wreck-lifecycle.js','campaign/flame-effects.js','campaign/combat-effects.js','campaign/vehicle-motion.js','campaign/vehicle-collision.js','campaign/vehicle-impact.js','campaign/vehicle-contact-shadows.js','campaign/builder-kinematics.js','campaign/field-vehicles.js'])environment.sources[path]=createHash('sha256').update(fs.readFileSync(path)).digest('hex');
+  for(const path of ['campaign/vehicle-contact-rock.js','campaign/terrain-passability.js','campaign/combat-policy.js','campaign/combat-deployment.js'])environment.sources[path]=createHash('sha256').update(fs.readFileSync(path)).digest('hex');
   console.log(JSON.stringify({environment:{renderer:environment.renderer,browser:environment.browser,date:environment.date,timerQuery:environment.timerQuery}}));
   fs.mkdirSync('campaign/reports',{recursive:true});fs.mkdirSync('campaign/previews',{recursive:true});
   if(process.argv.includes('--destruction')){
@@ -114,7 +115,7 @@ try{
     await page.evaluate(()=>{window.campaign.damageDebug.panel.hidden=true;});
     const counts=(process.env.DAMAGE_COUNTS??(budget?'500':allNear?'200':'1,10,50,100,200')).split(',').map(Number),results=[];
     for(const count of counts)for(const enabled of (profiler?[true]:[false,true])){
-      await page.evaluate(async({count,enabled,allNear,viewport,budget})=>{
+      const fixture=await page.evaluate(async({count,enabled,allNear,viewport,budget})=>{
         const c=window.campaign,w=c.world,m=c.mission,d=c.damageDebug;
         m.pendingTick=null;m.unitFrameTimes=new WeakMap();m.unitIndexActive=false;m.accumulator=0;m.state.time=0;
         m.state.units=[];m.state.buildings=[];m.state.salvage.items=[];m.effects=[];m.events=[];w.damage.reset();w.damage.enabled=enabled;m.damageEnabled=enabled;
@@ -130,6 +131,8 @@ try{
         if(enabled)for(const u of units){d.hit(u.id,{type:'collision',power:110,side:'right'});d.hit(u.id,{type:'burst',side:'front'});}
         for(let i=0;i<90;i++){await new Promise(requestAnimationFrame);w.update(m,new Set(),1/60);}
         c.damageBenchUnits=units.map(u=>u.id);w.damage.resetMetrics();
+        return {illegalTerrainStarts:units.filter(u=>!m.nav.terrainAllowed(u.x,u.y)).length,
+          navigation:'Synthetic grid and direct forward waypoints; does not validate a mass UI order or legal route arrival'};
       },{count,enabled,allNear,viewport,budget});
       for(const phase of (profiler?['simulation']:budget?performanceBudget.requiredPhases:['settled','impacts'])){
         if(phase==='simulation')await page.evaluate(()=>{
@@ -182,7 +185,7 @@ try{
         const processes=await browserSession.send('SystemInfo.getProcessInfo');
         let processMemory;
         try{processMemory=JSON.parse(execFileSync('powershell.exe',['-NoProfile','-ExecutionPolicy','Bypass','-File','tools/damage-process-metrics.ps1','-ProcessIds',processes.processInfo.map(p=>p.id).join(',')],{encoding:'utf8',windowsHide:true}));}catch(error){processMemory={reason:error.message};}
-        const result={count,enabled,...run,processMemory};results.push(result);
+        const result={count,enabled,...run,fixture,processMemory};results.push(result);
         fs.writeFileSync(reportPath,JSON.stringify({environment,results,errors},null,2));
         console.log(JSON.stringify({count,enabled,phase,fps:run.fps,cpu:run.cpuFrameMs.mean,gpu:run.gpuFrameMs?.mean,draw:run.drawCalls.mean,visible:run.visibleMin,damage:run.damage,memory:processMemory}));
         assert.equal(run.visibleMin,count,'Every fixture vehicle must actually be rendered');assert(run.activePhysicsMax<=24);if(phase==='settled')assert.equal(run.damage.textureRows,0,'Idle damaged vehicles upload no damage data');

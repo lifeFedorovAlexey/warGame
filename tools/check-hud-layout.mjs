@@ -59,10 +59,12 @@ export async function checkHudLayout(page) {
   await page.locator('#build-toggle').click();
   await capture('02-build');
   await page.locator('.settings summary').click();
+  assert(await page.locator('#objectives').isVisible());
   assert(await page.locator('#control-hints').isHidden());
   await page.locator('#controls-help').click();
   assert(await page.locator('#control-hints').isVisible());
-  await page.locator('#controls-help').click();
+  assert(await page.locator('#objectives').isHidden());
+  await page.locator('[aria-controls="operation-tasks"]').click();
   assert(await page.locator('#control-hints').isHidden());
   await capture('03-menu');
   await page.keyboard.press('Escape');
@@ -72,11 +74,21 @@ export async function checkHudLayout(page) {
     await page.setViewportSize({width,height});
     await capture(name);
   }
+  await page.setViewportSize({width:390,height:844});
+  await page.locator('.settings summary').click();
+  await capture('06a-narrow-menu-radio');
+  assert(await page.locator('#radio [data-dismiss]').isVisible());
+  const dispatch=await page.locator('#radio').boundingBox(),menu=await page.locator('.operation-menu').boundingBox();
+  assert(dispatch.x+dispatch.width<menu.x,'Radio controls remain beside the operation menu');
+  await page.locator('#radio [data-dismiss]').click();
+  assert(await page.locator('#radio').isHidden());
+  assert(await page.locator('.settings').getAttribute('open')!==null,'Skipping radio leaves the menu open');
+  await page.keyboard.press('Escape');
   await page.setViewportSize({width:1440,height:900});
-  await page.locator('[data-dismiss]').click();
   await page.locator('#close-build').click();
   await capture('07-field-quiet');
   await page.locator('.settings summary').click();
+  await page.locator('[aria-controls="operation-actions"]').click();
   await page.locator('#home').click();
   assert.equal(await page.locator('.settings').getAttribute('open'),null);
   // Exercise construction through the resized canvas, then cancel the pending order.

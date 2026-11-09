@@ -1,7 +1,9 @@
 // WebGL2 texture array: twelve surfaces share one sampler and independent mip chains.
-import {terrainNoiseGLSL,roadSandGLSL} from './road-surface.js';
+import {terrainNoiseGLSL,roadEdgeGLSL} from './road-surface.js';
 import {loadTerrainPbr,terrainPbrDeclarations,terrainPbrSurface,terrainPbrNormals} from './terrain-pbr.js';
+import {createLocalRoadMask,localRoadGLSL} from './local-road-mask.js';
 export async function createTerrainMaterials(T,extent,{lightweightOverview=false}={}){
+ const localRoads=createLocalRoadMask(T);
  const loader=new T.TextureLoader(),base='../assets/maps/alpha/',names=['dune-sand','bleached-sand','rust-clay','desert-gravel','scorched-rock','ash-earth','ruined-asphalt','weathered-concrete','transition-sand','dusty-sandstone','sandy-talus','weathered-limestone'];
  const [controls,images,macro,selection,roadDetail,pbr]=await Promise.all([Promise.all([0,1,2,3].map(i=>loader.loadAsync(base+'surface-control-'+i+'.png'))),Promise.all(names.map(name=>loader.loadAsync(base+'materials/'+name+'.jpg'))),loader.loadAsync(base+'macro-albedo.jpg'),loader.loadAsync(base+'detail-selection.png'),loader.loadAsync(base+'road-detail.png'),loadTerrainPbr(T,loader,base)]);macro.colorSpace=T.SRGBColorSpace;selection.minFilter=selection.magFilter=T.NearestFilter;selection.generateMipmaps=false;
  const resolution=768,bytes=new Uint8Array(resolution*resolution*4*names.length),sourceMeans=[],canvas=document.createElement('canvas');canvas.width=canvas.height=resolution;const context=canvas.getContext('2d',{willReadFrequently:true});
@@ -13,10 +15,11 @@ export async function createTerrainMaterials(T,extent,{lightweightOverview=false
  uniform float sourceMean[12];
  uniform sampler2D control0; uniform sampler2D control1; uniform sampler2D control2; uniform sampler2D control3;
  varying vec3 vTerrainPosition; varying vec3 vTerrainNormal;
- float pavementRelief=0.;float pavementCoverage=0.;float pavementClean=0.;float pavementSand=0.;
+ float pavementRelief=0.;float pavementCoverage=0.;
  ${terrainPbrDeclarations}
  ${terrainNoiseGLSL}
- ${roadSandGLSL}
+ ${roadEdgeGLSL}
+ ${localRoadGLSL}
  vec3 terrainSample(float layer,vec2 uv){if(fastTerrain>.5){vec2 flow=vec2(tnoise(vTerrainPosition.xy/100.+layer),tnoise(vTerrainPosition.yx/137.-layer));return texture(terrainLayers,vec3(uv+(flow-.5)*1.8,layer)).rgb;}float k=tnoise(vTerrainPosition.xy/103.+layer)*7.,a=floor(k),f=fract(k);vec2 oa=sin(vec2(3.,7.)*(a+layer)),ob=sin(vec2(3.,7.)*(a+1.+layer));vec3 ca=texture(terrainLayers,vec3(uv+oa,layer)).rgb,cb=texture(terrainLayers,vec3(mat2(0.,-1.,1.,0.)*uv+ob,layer)).rgb;return mix(ca,cb,smoothstep(.15,.85,f));}
  vec3 harmonize(vec3 color,float saturation){float l=dot(color,vec3(.3,.59,.11));return mix(vec3(l),color,saturation);}
  vec3 agedAsphalt(vec2 p){
@@ -28,26 +31,22 @@ export async function createTerrainMaterials(T,extent,{lightweightOverview=false
   return c;
  }
  vec3 roadSurface(vec3 ground,float inward){
+  inward=withLocalRoad(vTerrainPosition.xy,inward);
   float footprint=fwidth(inward);
   vec2 p=vTerrainPosition.xy,gritUv=p/13.;
   vec2 gritDx=dFdx(gritUv),gritDy=dFdy(gritUv);
   if(inward < -8.5)return ground;
-  float edge=inward+roadEdgeOffset(p);
-  float shoulder=smoothstep(-6.5,-1.4,edge)*(1.-smoothstep(.1,3.4,edge));
+  float shoulder=smoothstep(-6.5,-1.4,inward)*(1.-smoothstep(-.6,0.,inward));
   if(shoulder>.001){
    float grit=dot(textureGrad(terrainLayers,vec3(gritUv,3.),gritDx,gritDy).rgb,vec3(.3,.59,.11))/max(.02,sourceMean[3]);
    vec3 gravel=ground*clamp(.74+.14*grit,.79,1.02);
    ground=mix(ground,gravel,.55*shoulder);
   }
-  float mask=roadEdgeMask(edge,footprint);
+  float mask=roadEdgeMask(inward,footprint);
   if(mask<=0.)return ground;
-  float sand=roadSandAmount(p,edge,footprint);
   vec3 asphalt=agedAsphalt(p);
-  // Dust has the local ground colour, so shoulders inherit each valley's sand.
-  vec3 dust=ground*mix(1.02,1.06,tnoise(p/12.));
-  asphalt=mix(asphalt,dust,clamp(sand,0.,1.));
-  pavementCoverage=mask;pavementSand=sand*mask;pavementClean=mask*(1.-clamp(sand,0.,1.));
-  return mix(ground,asphalt,mask*.97);
+  pavementCoverage=mask;
+  return mix(ground,asphalt,mask);
  }
 
  `;
@@ -95,13 +94,15 @@ export async function createTerrainMaterials(T,extent,{lightweightOverview=false
  if(detailFade>.002){
   vec3 selected=texture2D(detailSelection,vMapUv).rgb;
   float first=pbrKind(floor(selected.r*255.+.5)),second=pbrKind(floor(selected.g*255.+.5));
-  vec3 p=vTerrainPosition,n=vTerrainNormal;
-  vec2 uv=abs(n.z)<.55?(abs(n.x)>abs(n.y)?p.yz:p.xz):p.xy;
+  vec3 p=vTerrainPosition,weights=terrainProjectionWeights(vTerrainNormal);
   float scaleA=first==1.?10.:pbrScale(first),scaleB=second==1.?10.:pbrScale(second);
-  vec3 a=texture(pbrAlbedo,vec3(uv/scaleA,first)).rgb,b=a;
-  if(first!=second&&selected.b>.005)b=texture(pbrAlbedo,vec3(uv/scaleB,second)).rgb;
   vec3 average=mix(pbrMeanColor[int(first)],pbrMeanColor[int(second)],selected.b);
-  vec3 grain=clamp(mix(a,b,selected.b)/max(vec3(.015),average),vec3(.48),vec3(1.72));
+  vec3 grain=vec3(0.);
+  for(int axis=0;axis<3;axis++){float weight=weights[axis];if(weight<.001)continue;vec2 uv=axis==0?p.yz:(axis==1?p.xz:p.xy);
+   vec3 a=texture(pbrAlbedo,vec3(uv/scaleA,first)).rgb,b=a;
+   if(first!=second&&selected.b>.005)b=texture(pbrAlbedo,vec3(uv/scaleB,second)).rgb;
+   grain+=clamp(mix(a,b,selected.b)/max(vec3(.015),average),vec3(.48),vec3(1.72))*weight;
+  }
   ground*=mix(vec3(1.),grain,.63*detailFade);
  }
  ground=roadSurface(ground,(texture2D(roadDetail,vMapUv).g-.5)*24.);
@@ -110,6 +111,7 @@ export async function createTerrainMaterials(T,extent,{lightweightOverview=false
  function configure(material,key,mode){
   material.onBeforeCompile=shader=>{
    Object.assign(shader.uniforms,{
+    ...localRoads.uniforms,
     terrainLayers:{value:layers},sourceMean:{value:sourceMeans},pbrAlbedo:{value:pbr.albedo},
     pbrDetail:{value:pbr.detail},pbrMean:{value:pbr.means},pbrMeanColor:{value:pbr.meanColors},
     roadDetail:{value:roadDetail},macroAlbedo:{value:macro},detailSelection:{value:selection},
@@ -128,11 +130,10 @@ export async function createTerrainMaterials(T,extent,{lightweightOverview=false
   material.customProgramCacheKey=()=>key;
   return material;
  }
- const markings=new T.MeshLambertMaterial({color:'#d1c8ad',transparent:true,opacity:.38,depthWrite:false,side:T.DoubleSide});markings.onBeforeCompile=shader=>{shader.uniforms.roadMask={value:roadDetail};shader.vertexShader='varying vec3 vMarkWorld;\n'+shader.vertexShader;shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvMarkWorld=(modelMatrix*vec4(position,1.)).xyz;');shader.fragmentShader='varying vec3 vMarkWorld;uniform sampler2D roadMask;\n'+terrainNoiseGLSL+roadSandGLSL+shader.fragmentShader;shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
+ const markings=new T.MeshLambertMaterial({color:'#d1c8ad',transparent:true,opacity:.38,depthWrite:false,side:T.DoubleSide});markings.onBeforeCompile=shader=>{Object.assign(shader.uniforms,localRoads.uniforms);shader.uniforms.roadMask={value:roadDetail};shader.vertexShader='varying vec3 vMarkWorld;\n'+shader.vertexShader;shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvMarkWorld=(modelMatrix*vec4(position,1.)).xyz;');shader.fragmentShader='varying vec3 vMarkWorld;uniform sampler2D roadMask;\n'+roadEdgeGLSL+localRoadGLSL+shader.fragmentShader;shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
  vec2 roadUv=(vMarkWorld.xy+${(extent/2).toFixed(1)})/${extent.toFixed(1)};
  float inward=(texture2D(roadMask,roadUv).g-.5)*24.,footprint=fwidth(inward);
- float edge=inward+roadEdgeOffset(vMarkWorld.xy);
- diffuseColor.a*=roadEdgeMask(edge,footprint)*(1.-roadSandAmount(vMarkWorld.xy,edge,footprint));`);};markings.customProgramCacheKey=()=> 'buried_road_paint_v2';
+ diffuseColor.a*=(1.-localRoadReplacement(vMarkWorld.xy))*roadEdgeMask(inward,footprint);`);};markings.customProgramCacheKey=()=> 'road_paint_v3';
  // The distant continuation uses two regular samples, without the layer shader.
  const farTile=images[8];farTile.colorSpace=T.SRGBColorSpace;farTile.wrapS=farTile.wrapT=T.MirroredRepeatWrapping;farTile.repeat.set(extent/35,extent/35);
  const surround=new T.MeshLambertMaterial({map:farTile,vertexColors:true});surround.onBeforeCompile=shader=>{shader.uniforms.macroAlbedo={value:macro};shader.vertexShader='varying vec3 vSurroundPosition;\n'+shader.vertexShader;shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvSurroundPosition=(modelMatrix*vec4(position,1.)).xyz;');shader.fragmentShader='varying vec3 vSurroundPosition;\nuniform sampler2D macroAlbedo;\n'+shader.fragmentShader;shader.fragmentShader=shader.fragmentShader.replace('#include <map_fragment>',`#include <map_fragment>
@@ -147,9 +148,9 @@ export async function createTerrainMaterials(T,extent,{lightweightOverview=false
   }
   const u=Math.max(0,Math.min(size-1,Math.round((.5+x/extent)*(size-1))));
   const v=Math.max(0,Math.min(size-1,Math.round((.5-y/extent)*(size-1))));
-  return roadPixels[(v*size+u)*4]/255;
+  return localRoads.blendAt(x,y,roadPixels[(v*size+u)*4]/255);
  }
- const overview=configure(new T.MeshLambertMaterial({map:controls[0],vertexColors:true}),lightweightOverview?'mesa_software_v2':'mesa_array_v8',lightweightOverview?'light':'overview');
- const close=configure(new T.MeshStandardMaterial({map:controls[0],roughness:.96,metalness:0,vertexColors:true}),'mesa_array_pbr_v8','close');
- return {roadBlendAt,overview,close,surround,markings,statistics:{style:'ochre desert terrain, layered rock and broken asphalt',albedoTiles:12,tileResolution:resolution,controlMaps:4,maskResolution:1024,blending:'height + smoothed slope + organic deposition + stochastic UVs + scanned PBR surfaces',pbr:pbr.statistics,normalDetail:'scanned OpenGL normal maps; fades from 220m to 800m',roughnessByMaterial:true,distantShaderSamples:2,textureArray:true,sourceSheetAsAlbedo:false,lightweightOverview}};
+ const overview=configure(new T.MeshLambertMaterial({map:controls[0],vertexColors:true}),lightweightOverview?'mesa_software_v3':'mesa_array_v9',lightweightOverview?'light':'overview');
+ const close=configure(new T.MeshStandardMaterial({map:controls[0],roughness:.96,metalness:0,vertexColors:true}),'mesa_array_pbr_v9','close');
+ return {setLocalRoads:localRoads.setRoads,roadBlendAt,overview,close,surround,markings,statistics:{style:'ochre desert terrain, layered rock and broken asphalt',albedoTiles:12,tileResolution:resolution,controlMaps:4,maskResolution:1024,blending:'height + smoothed slope + organic deposition + stochastic UVs + scanned PBR surfaces',pbr:pbr.statistics,normalDetail:'scanned OpenGL normal maps; fades from 220m to 800m',roughnessByMaterial:true,distantShaderSamples:2,textureArray:true,sourceSheetAsAlbedo:false,lightweightOverview}};
 }

@@ -5,10 +5,14 @@
 .top > a { font-size: 12px; }
 .top .resources { margin: 0 auto 0 20px; gap: 20px; }
 .resource { min-width: 60px; }
-.resource-energy { min-width: 102px; }
+.resource-oil { min-width: 84px; }
+.resource-oil #income { margin-left: 1px; color: #a9cb78; font-size: 11px; font-weight: 600; }
+.resource-oil #income.deficit { color: #e77f72; }
+.resource-power { min-width: 48px; }
+.resource-power .resource-icon { color: #e9a34e; }
+.resource-power.overloaded { color: #f0a04b; }
 .resource meter { display: none; }
-.top #power { font-size: 11px; }
-.top #power.online { display: none; }
+.top #power { font-size: 11px; color: inherit; }
 .top button.icon-button, .top summary.icon-button { --button-size: 36px; --icon-size: 26px; }
 #hint.mission-hint { position: fixed; z-index: 2; top: calc(var(--hud-top) + 12px); left: 16px; width: min(340px, calc(100vw - 32px)); margin: 0; color: #d7d0a9; font-size: 11px; text-shadow: 0 1px 3px #111a10, 0 2px 8px #111a10; pointer-events: none; }
 #hint:empty { display: none; }
@@ -20,6 +24,8 @@
 .selection-title strong { font-size: 11px; font-weight: 600; }
 .selection-title small { font-size: 10px; }
 .squad { max-width: 280px; }
+.army-roster { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: start; gap: 6px; }
+#select-army.icon-button { --button-size: 40px; --icon-size: 34px; padding: 3px; }
 #roster { grid-template-columns: repeat(var(--roster-cols, 5), 40px); gap: 4px; max-width: none; max-height: 88px; overflow-y: auto; scrollbar-width: thin; }
 #roster button.icon-button { --button-size: 40px; --icon-size: 34px; display: flex; align-items: center; justify-content: center; height: 40px; padding: 3px; }
 #roster button.icon-button.active { outline: 1px solid #e3d5a980; outline-offset: -1px; }
@@ -41,11 +47,19 @@
 #actions .production-count { display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: #d9c18b; color: #172019; font: 700 10px/1 Arial, sans-serif; font-variant-numeric: tabular-nums; pointer-events: none; text-shadow: none; }
 #actions .production-count[hidden] { display: grid; visibility: hidden; }
 #actions .is-producing .production-count { background: #eda33f; }
+#actions .production-progress {position:absolute;left:2px;bottom:0;width:calc(var(--icon-size) - 4px);height:3px;margin:0;border:0;border-radius:0;appearance:none;background:#263026;pointer-events:none;}
+#actions .production-progress::-webkit-progress-bar {background:#263026;}
+#actions .production-progress::-webkit-progress-value {background:#eda33f;}
+#actions .production-progress::-moz-progress-bar {background:#eda33f;}
+#actions [data-production-state=paused] .production-progress::-webkit-progress-value {background:#c1b58f;}
+#actions [data-production-state=paused] .production-progress::-moz-progress-bar {background:#c1b58f;}
+#actions .production-time {position:absolute;right:0;top:calc(50% + 10px);width:18px;color:#f2dfb3;font:700 9px/10px Arial,sans-serif;font-variant-numeric:tabular-nums;pointer-events:none;}
+#actions [data-production-state=blocked] .production-time {color:#f0a04b;}
 #actions button.has-queue.cannot-produce .game-icon { opacity: .65; filter: saturate(.65); }
 #queue { padding: 0; margin-bottom: 6px; font-size: 10px; text-shadow: none; }
-#placement { margin-bottom: 6px; padding: 0; gap: 4px; }
+#placement { margin-bottom: 6px; padding: 0; gap: 4px; flex-wrap:wrap; max-width:304px; }
 #placement strong { font-size: 11px; }
-#placement p { font-size: 10px; }
+#placement p { font-size: 10px; flex-basis:100%; }
 #placement button.icon-button, #select-blocked.icon-button { --button-size: 32px; --icon-size: 26px; }
 #order-feedback { font-size: 10px; padding: 0; }
 #toast { top: auto; bottom: calc(var(--hud-bottom) + 12px); font-size: 12px; }
@@ -57,10 +71,11 @@
 @media (max-width: 700px) {
   :root { --hud-bottom: 184px; --map-size: 88px; }
   .top { padding-inline: 12px; gap: 4px; }
-  .top .resources { margin-left: 12px; gap: 12px; font-size: 11px; }
+  .top .resources { margin-left: 6px; gap: 8px; font-size: 11px; }
   .resource { min-width: 44px; }
-  .resource-energy { min-width: 88px; }
-  .top #power { display: none; }
+  .resource-oil { min-width: 70px; }
+  .resource-oil #income { font-size: 10px; }
+  .resource-power { min-width:42px; }
   #hint.mission-hint { left: 12px; width: calc(100vw - 24px); font-size: 10px; }
   #build-cards button.icon-button { --button-size: 40px; --icon-size: 36px; flex-basis: 40px; width: 40px; min-width: 40px; height: 40px; }
   #actions button.icon-button { --button-size: 40px; --icon-size: 36px; }
@@ -77,6 +92,7 @@
 @media (min-width: 701px) and (max-height: 480px) {
   :root { --hud-bottom: 136px; --map-size: 88px; }
   .squad { max-width: 216px; }
+  #select-army.icon-button { --button-size: 32px; --icon-size: 28px; }
   #roster { grid-template-columns: repeat(var(--roster-cols, 5), 32px); }
   #roster button.icon-button { --button-size: 32px; --icon-size: 28px; height: 32px; }
   .order-bar { max-width: 248px; }
@@ -112,3 +128,14 @@
   #designer :is(.designer-tabs button, .design-part) { --icon-size: 34px; height: 44px; }
   #designer .design-part { flex-basis: 48px; width: 48px; }
 }
+/* Paint samples are free colour marks, with a check on the chosen finish. */
+#designer .designer-paint-row {display:flex;align-items:center;justify-content:center;gap:8px;min-width:0;}
+#designer .designer-paint-row > span {font-size:11px;color:#b7b9a7;}
+#designer [data-design-paints] {display:flex;align-items:center;gap:2px;}
+#designer button.design-paint {display:grid;place-items:center;flex:none;width:34px;height:34px;min-height:0;padding:0;border:0;border-radius:0;box-shadow:none;background:transparent;}
+#designer .design-paint svg {width:28px;height:28px;}
+#designer .design-paint:hover svg {filter:brightness(1.15);}
+#designer .design-paint:focus-visible svg {filter:brightness(1.3);}
+#designer .design-paint :is(.paint-check,.paint-check-shadow) {display:none;fill:none;stroke:#f2e6c7;stroke-width:2;stroke-linecap:square;stroke-linejoin:miter;}
+#designer .design-paint .paint-check-shadow {stroke:#262a24;stroke-width:4;}
+#designer .design-paint[aria-pressed=true] :is(.paint-check,.paint-check-shadow) {display:block;}

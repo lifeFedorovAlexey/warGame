@@ -100,6 +100,18 @@ const onApproach=Array.from({length:5},(_,i)=>shoulderGroup.addUnit('bukhanka','
 assert.equal(shoulderGroup.order(onApproach.map(u=>u.id),'move',{x:160,y:roadY}).assigned,onApproach.length);
 assert(onApproach.every(u=>shoulderGroup.nav.roads.coverage(u.path.at(-1).x,u.path.at(-1).y)>=.58));
 assert.equal(sample(shoulderGroup,onApproach,60).complete,onApproach.length);
+const turningTraffic=session({...field,roadNetwork:null,roadBlendAt:null});
+const turningVan=turningTraffic.addUnit('bukhanka','rai',{x:0,y:0},{heading:-Math.PI/2,driveSpeed:13});
+const parkedVan=turningTraffic.addUnit('bukhanka','rai',{x:25,y:0},{heading:-Math.PI/2});
+turningVan.path=[{x:90,y:100}];turningVan.task={type:'move',...turningVan.path[0]};
+turningTraffic.move(turningVan,.1);
+assert(turningVan.driveSpeed<11.1,'A turning vehicle brakes for the van in its current direction');
+assert(vehicleClearance(turningVan,parkedVan,scale,turningTraffic.field)>0);
+const apronGroup=session();
+const apronUnits=[-140,-174,-208].map(x=>apronGroup.addUnit('bukhanka','rai',{x,y:0},{heading:0}));
+assert.equal(apronGroup.order(apronUnits.map(u=>u.id),'move',{x:160,y:roadY}).assigned,apronUnits.length);
+assert(apronUnits.every(u=>apronGroup.nav.roads.coverage(u.path.at(-1).x,u.path.at(-1).y)>=.58),
+ 'Units approaching the same road from the apron receive paved slots');
 function shoulder(separation){
  const curved={...field,roadBlendAt:null,roadNetwork:{paths:[{id:'curve',width:28,points:[
   {x:-450,y:38},{x:-180,y:38},{x:-135,y:45},{x:-95,y:61},{x:-45,y:65},{x:450,y:65}]}]}};
@@ -122,23 +134,29 @@ assert(touching.min>0);
 assert.equal(oldSave.complete,2);
 assert(oldSave.min>=oldSave.initial-.00001);
 
-function boxed({builders=false,overlap=false}={}){
- const m=session({...field,roadNetwork:null,roadBlendAt:null});
- const centre=m.addUnit('bukhanka','rai',{x:0,y:0}),others=[];
+function boxed({builders=false,overlap=false,terrain,origin={x:0,y:0}}={}){
+ const m=terrain?session(terrain,alphaConfig):session({...field,roadNetwork:null,roadBlendAt:null});
+ const centreId=m.addUnit('bukhanka','rai',origin).id,others=[];
  for(let x=-1;x<=1;x++)for(let y=-1;y<=1;y++){
   if(!x&&!y)continue;
-  const point={x:x*(overlap?10.3:10.95),y:y*(overlap?21.3:22.15)};
-  others.push({point,unit:m.addUnit(builders&&x===0?'builder':'bukhanka','rai',point)});
+  const point={x:origin.x+x*(overlap?10.3:10.95),y:origin.y+y*(overlap?21.3:22.15)};
+  others.push({point,id:m.addUnit(builders&&x===0?'builder':'bukhanka','rai',point).id});
  }
- const units=[centre,...others.map(({unit})=>unit)];
- const initial=Math.min(...others.map(({unit})=>vehicleClearance(centre,unit,scale,m.field)));
- assert(m.order([centre.id],builders?'attack-move':'move',{x:135,y:0}).ok);
+ if(overlap)m.load(m.save());
+ const centre=m.entity(centreId),parked=others.map(({id})=>m.entity(id));
+ const units=[centre,...parked];
+ let initial=Infinity;
+ for(let i=0;i<units.length;i++)for(let j=0;j<i;j++)
+  initial=Math.min(initial,vehicleClearance(units[i],units[j],scale,m.field));
+ const goal={x:origin.x+135,y:origin.y};
+ assert(m.order([centre.id],builders?'attack-move':'move',goal).ok);
  const out=sample(m,units,40);
  assert.equal(out.complete,9);
- assert(Math.hypot(centre.x-135,centre.y)<3,'The boxed vehicle reaches its original order');
+ assert(Math.hypot(centre.x-goal.x,centre.y-goal.y)<3,'The boxed vehicle reaches its original order');
  assert(overlap?out.gap>=initial-.00001:out.gap>0,'Recovery does not introduce deeper vehicle overlap');
- const yielded=others.filter(({point,unit})=>Math.hypot(unit.x-point.x,unit.y-point.y)>1).length;
- assert(overlap?yielded>0:yielded===1,'One parked ally opens the aisle when the group starts clear');
+ const yielded=others.filter(({point},i)=>Math.hypot(parked[i].x-point.x,parked[i].y-point.y)>1).length;
+ assert.equal(yielded,1,'One parked ally opens the aisle even after loading an overlapping formation');
+ if(overlap)assert(out.seconds<=25,'Legacy overlap must clear without several rounds of shuffling');
  return {seconds:Math.round(out.seconds*10)/10,gap:out.gap,yielded};
 }
 const boxedClear=boxed(),boxedBuilders=boxed({builders:true}),boxedLegacy=boxed({overlap:true});
@@ -148,6 +166,7 @@ const source=createHeightfield(json('assets/maps/alpha/heightfield.json'));
 shapeMesaRims(source);
 const alpha=refineRoadHeightfield(source);
 applyRoadGrades(alpha,roads);
+const boxedSlope=boxed({overlap:true,terrain:alpha,origin:{x:-1640,y:410}});
 
 const row=new Mission(alphaConfig,alpha);
 for(const [kind,x,y] of [['generator',-1648,248],['derrick',-1696,368]]){
@@ -378,7 +397,7 @@ console.log(JSON.stringify({
  tripCost:total,directCost:nav.travelCost(from,to),asphaltPeak:result.peak,
  opposite:{gap:result.gap,complete:result.complete},
  merge:{leftAhead:leftAhead.leader,rightAhead:rightAhead.leader,tied:tied.leader},touching,oldSave,
- boxed:{clear:boxedClear,builders:boxedBuilders,legacy:boxedLegacy},
+ boxed:{clear:boxedClear,builders:boxedBuilders,legacy:boxedLegacy,slope:boxedSlope},
  alpha:{parkedRowGap:parkedRow.gap,bendGap:actualBend.gap,roadConvoy:{completed:roadConvoy.complete,gap:roadConvoy.gap}},
  singleFile,wideFunnel,mixedExit:{completed:group.length,seconds:Math.round(mixedExit.seconds*10)/10,gap:mixedExit.gap},
  closedGateRejected:true,factoryExit,attackMove:{bothArrived:true,twoContacts:true,saveRoundTrip:true}

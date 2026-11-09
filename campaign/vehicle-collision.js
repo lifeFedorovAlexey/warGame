@@ -9,9 +9,21 @@ const fieldCar = [[1.03, -.075, 2.18, .43, .47], [.96, -.06, 2.10, 1.48, .78]];
 const cached = new WeakMap();
 const skin = .055;
 export const vehicleLocalBoxes = kind => SCAV_PROFILES[kind]?.boxes ?? (kind === 'command' || kind === 'raider' ? fieldCar : modular);
-// A retained wreck still occupies space. Only removed/cancelled objects cease
-// to collide; HP alone is no longer a proxy for existence in the world.
-export const vehicleObstacle = unit => unit.hp > 0 || !!unit.damage?.wreck;
+const radiusBounds=new WeakMap();
+export function vehicleRadiusBound(kind,scale){
+  const boxes=vehicleLocalBoxes(kind);let radius=radiusBounds.get(boxes);
+  if(radius===undefined){
+    // Projection can combine extrema from different authored boxes. sqrt(2)
+    // also encloses the corners of that projected bounding rectangle, for
+    // any ground pitch, roll and heading, including long buses/trucks.
+    radius=Math.SQRT2*Math.max(...boxes.map(([hx,y,hy,z,hz])=>Math.hypot(hx,Math.abs(y)+hy,Math.abs(z)+hz)));
+    radiusBounds.set(boxes,radius);
+  }
+  return radius*scale;
+}
+// Death releases the driving space immediately. A retained visual wreck and
+// collectible parts have their own lifetimes, but are never traffic obstacles.
+export const vehicleObstacle = unit => unit.hp > 0&&unit.factoryVisit?.phase!=='inside';
 
 // Local dimensions follow the C01/B01 GLB bounds. Project both the lower
 // running gear and the higher body onto the ground using the render pose.
@@ -20,7 +32,7 @@ export function vehicleEnvelope(unit, scale, field) {
   const entry = cached.get(unit);
   if (entry && entry.x === unit.x && entry.y === unit.y && entry.heading === heading
       && entry.scale === scale && entry.field === field && entry.kind === kind) return entry.envelope;
-  const pose = field ? vehiclePose({...unit, heading}, field, scale) : {pitch: 0, roll: 0};
+  const pose = field ? vehiclePose(unit, field, scale) : {pitch: 0, roll: 0};
   const cp = Math.cos(pose.pitch), sp = Math.sin(pose.pitch), cr = Math.cos(pose.roll), sr = Math.sin(pose.roll);
   let xmin = Infinity, xmax = -Infinity, ymin = Infinity, ymax = -Infinity;
   for (const [hx, y, hy, z, hz] of vehicleLocalBoxes(kind)) {
@@ -46,15 +58,13 @@ export function footprintSupport(shape, x, y) {
     shape.depth * Math.abs(shape.c * y - shape.s * x);
 }
 
-function axesOf(shape) {
-  return [[shape.c, shape.s], [-shape.s, shape.c]];
-}
-
-function poseGap(a, b) {
+function poseGap(a, b, separation = Infinity) {
   const dx = b.x - a.x, dy = b.y - a.y;
   let gap = -Infinity;
-  for (const [x, y] of [...axesOf(a), ...axesOf(b)]) {
+  for(let axis=0;axis<4;axis++){
+    const shape=axis<2?a:b,x=axis%2?-shape.s:shape.c,y=axis%2?shape.c:shape.s;
     gap = Math.max(gap, Math.abs(dx * x + dy * y) - footprintSupport(a, x, y) - footprintSupport(b, x, y));
+    if(gap>=separation)return gap;
   }
   return gap;
 }
@@ -77,16 +87,20 @@ export function vehicleSweep(from, to, scale, field) {
   return {start, middle, end, padding: .012 + radius * turn * turn / 24};
 }
 
-function sweepGap(sweep, obstacle) {
+function sweepGap(sweep, obstacle, separation = Infinity) {
   const {start, middle, end, padding} = sweep;
   let gap = -Infinity;
-  for (const [x, y] of [...axesOf(start), ...axesOf(middle), ...axesOf(end), ...axesOf(obstacle)]) {
+  for(let axis=0;axis<8;axis++){
+    const shape=axis<2?start:axis<4?middle:axis<6?end:obstacle,x=axis%2?-shape.s:shape.c,y=axis%2?shape.c:shape.s;
     const sa = footprintSupport(start, x, y), sm = footprintSupport(middle, x, y), sb = footprintSupport(end, x, y);
     const a = (start.x - obstacle.x) * x + (start.y - obstacle.y) * y;
     const m = (middle.x - obstacle.x) * x + (middle.y - obstacle.y) * y;
     const b = (end.x - obstacle.x) * x + (end.y - obstacle.y) * y;
     const min = Math.min(a - sa, m - sm, b - sb), max = Math.max(a + sa, m + sm, b + sb);
     gap = Math.max(gap, Math.max(min, -max) - footprintSupport(obstacle, x, y) - padding);
+    // One separating axis already proves the sweep clear. Full maximum gaps
+    // are still computed for penetration recovery and reported clearances.
+    if(gap>=separation)return gap;
   }
   return gap;
 }
@@ -95,7 +109,7 @@ export function sweepAvoidsFootprint(sweep, obstacle, minimum = .1) {
   const box = {
     x: obstacle.x, y: obstacle.y, width: obstacle.halfWidth, depth: obstacle.halfDepth, c: 1, s: 0
   };
-  if (sweepGap(sweep, box) >= minimum) return true;
+  if (sweepGap(sweep, box, minimum) >= minimum) return true;
   // Saves made with the former capsule can start in penetration. Permit only
   // movement which releases that penetration and never deepens it.
   const start = poseGap(sweep.start, box);
@@ -103,32 +117,41 @@ export function sweepAvoidsFootprint(sweep, obstacle, minimum = .1) {
     && poseGap(sweep.end, box) > start + .002;
 }
 
+// Used when the caller already owns a prepared sweep and one exact envelope.
+// Keep penetration recovery identical to the general multi-vehicle query.
+export function sweepClearsVehicle(sweep,obstacle,minimum){
+  if(sweepGap(sweep,obstacle,minimum)>=minimum)return true;
+  const initial=poseGap(sweep.start,obstacle),middle=poseGap(sweep.middle,obstacle),final=poseGap(sweep.end,obstacle);
+  if(initial<minimum+sweep.padding&&middle>=initial-.000001&&final>initial+.000001)return true;
+  // Legacy parallel interpenetration may retain its side gap until the ends
+  // clear. Ground-following pitch and roll slightly vary the projected gap.
+  const tolerance=initial<0?.0005:.000001;
+  return initial<minimum+sweep.padding&&middle>=initial-tolerance&&final>=initial-tolerance
+    &&Math.abs(sweep.start.c*sweep.end.s-sweep.start.s*sweep.end.c)<.000001;
+}
+
 export function clearOfVehicles(unit, next, units, scale, strict = false, previous = unit, field, blockers, prepared) {
   const minimum = skin * scale;
   const current = next.kind || !unit?.kind ? next : {...next, kind: unit.kind};
   const before = previous?.kind || !unit?.kind ? previous : {...previous, kind: unit.kind};
+  const broadFrom=!strict&&before?before:current;
+  const ownRadius=Math.max(vehicleRadiusBound(current.kind,scale),vehicleRadiusBound(broadFrom.kind,scale));
+  const angle=(current.heading??0)-(broadFrom.heading??0),turn=Math.atan2(Math.sin(angle),Math.cos(angle));
+  const padding=minimum+(prepared?.padding??(.012+Math.SQRT2*ownRadius*turn*turn/24));
+  const xmin=Math.min(broadFrom.x,current.x),xmax=Math.max(broadFrom.x,current.x),ymin=Math.min(broadFrom.y,current.y),ymax=Math.max(broadFrom.y,current.y);
   let sweep = prepared, end;
   let clear = true;
   for (const other of units) {
-    if (other === unit || !vehicleObstacle(other) || Math.abs(next.x - other.x) > 7 * scale
-        || Math.abs(next.y - other.y) > 7 * scale) continue;
+    if (other === unit || !vehicleObstacle(other))continue;
+    const range=ownRadius+vehicleRadiusBound(other.kind,scale)+padding;
+    if(other.x<xmin-range||other.x>xmax+range||other.y<ymin-range||other.y>ymax+range)continue;
     const obstacle = vehicleEnvelope(other, scale, field);
     end ??= sweep?.end ?? vehicleEnvelope(current, scale, field);
     if (strict || !before || before === current) {
-      if (poseGap(end, obstacle) >= minimum) continue;
+      if (poseGap(end, obstacle, minimum) >= minimum) continue;
     } else {
       sweep ??= vehicleSweep(before, current, scale, field);
-      if (sweepGap(sweep, obstacle) >= minimum) continue;
-      const initial = poseGap(sweep.start, obstacle);
-      const middle = poseGap(sweep.middle, obstacle), final = poseGap(end, obstacle);
-      if (initial < minimum + sweep.padding && middle >= initial - .000001
-          && final > initial + .000001) continue;
-      // A legacy save may contain two parallel, interpenetrating vans. A
-      // straight exit can keep their side gap constant before the ends clear.
-      const straightTolerance = initial < 0 ? .00018 : .000001;
-      if (initial < minimum + sweep.padding && middle >= initial - straightTolerance
-          && final >= initial - straightTolerance
-          && Math.abs(sweep.start.c * end.s - sweep.start.s * end.c) < .000001) continue;
+      if(sweepClearsVehicle(sweep,obstacle,minimum))continue;
     }
     clear = false;
     if (!blockers) return false;

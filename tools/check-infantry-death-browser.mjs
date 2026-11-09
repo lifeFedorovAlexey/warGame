@@ -33,7 +33,7 @@ try{
     w.camera.position.set(p.x+22,p.y+34,w.field.heightAt(p.x,p.y)+30);w.controls.update();w.update(m,new Set(),1/60);
     for(const unit of dead)m.damage(unit,unit.hp+10,{id:'review-attacker',kind:'bukhanka',owner:'rai',x:unit.x,y:unit.y-30});
     w.update(m,new Set(),1/60);
-    document.querySelector('#labels').hidden=true;document.querySelector('#mission-hud').hidden=true;
+    w.scene.getObjectByName('unit_health_bars').layers.disableAll();document.querySelector('#mission-hud').hidden=true;
     window.deathReview={p,ids:dead.map(u=>u.id)};
     return{dead:dead.map(u=>({kind:u.kind,hp:u.hp,wreck:u.damage.wreck})),alive:m.state.units.filter(u=>u.owner==='scavs'&&u.hp>0).length};
   });

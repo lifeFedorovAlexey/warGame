@@ -1,0 +1,130 @@
+import {storyFacts,storyRules} from './story-events.js';
+import {parkRadioStory} from './radio-save.js';
+import {updateStoryConstruction,migrateStoryOpening} from './story-construction.js';
+import {openingConstructionReady} from './opening-construction.js';
+
+const terminal = status => ['done','skipped','cancelled'].includes(status);
+const sceneSignal = {r01:'intro',r14:'first-contact',r18:'raid-won',r36:'camp3-sighted',r41:'last-camp',r50:'outro'};
+const finalScene = id => ['r48','r49','r50','r54','u01','u02','u04'].includes(id);
+const prologueScenes=['p01','p02','p03','p04'];
+
+export class StoryDirector {
+  constructor(script) {
+    this.script=script;
+    this.scenes=new Map(script.scenes.map(scene=>[scene.id,scene]));
+    this.lines=new Map(script.dialogue.map(cue=>[cue.id,cue]));
+  }
+  bind(mission) {
+    const state=mission.state.radioStory ??= {
+      version:2,clock:0,scenes:{},facts:{},journal:[],lastEnd:-30000,lastCombat:-30000,
+    };
+    if(this.data!==state){
+      this.data=state;this.lastNow=null;
+      parkRadioStory(state);
+      migrateStoryOpening(mission,state);
+      // A revised exchange may have fewer lines than the saved version.
+      for(const [id,record] of Object.entries(state.scenes)){
+        if(!terminal(record.status)&&record.cursor>=(this.scenes.get(id)?.cues.length??Infinity))record.cursor=0;
+      }
+    }
+    this.mission=mission;
+    return state;
+  }
+  beginStory(mission,{enabled=true}={}) {
+    // New games include the opening; a loaded game keeps its saved place.
+    this.bind(mission).includeOpening=enabled;
+  }
+  record(id){return this.data.scenes[id]??={status:'pending',cursor:0};}
+  finished(id){return terminal(this.data.scenes[id]?.status);}
+  heard(id){return this.data.scenes[id]?.status==='done';}
+  get openingFinished(){return !this.data?.includeOpening||prologueScenes.every(id=>this.finished(id));}
+  anyFinished(ids){return ids.some(id=>['done','skipped'].includes(this.data.scenes[id]?.status));}
+  ended(id){return this.data.scenes[id]?.endedAt??-Infinity;}
+  note(event,mission) {
+    const d=this.bind(mission),f=d.facts;
+    if(event.type==='unit-produced'&&event.kind==='bukhanka')f.firstVan=true;
+    if(event.type==='field-modification')f.modernized=true;
+    if(event.type==='lab-testing-accident')f.labAccident=true;
+    if(event.type==='trophy-food-received')f.food=true;
+    if(event.type==='unit-damaged')d.lastCombat=d.clock;
+    if(event.type==='generator-breakdown')f.generatorBroken=true;
+    if(event.type==='unit-damaged'&&mission.entity(event.target)?.campId===mission.state.camps[3]?.id)f.chiefAssault=true;
+  }
+  facts(mission) {return storyFacts(mission,this.data);}
+  rules(f) {return storyRules(this,f);}
+  suspend() {
+    if(this.data?.active)parkRadioStory(this.data);
+  }
+  interrupt() {
+    // A combat interruption must return to the question, not an isolated reply.
+    // Explicit pause/mute and save restoration keep their existing cursor semantics.
+    if(this.data?.active)this.record(this.data.active).cursor=0;
+    this.suspend();
+  }
+  end(status='done') {
+    const d=this.data,id=d.active;if(!id)return;
+    const record=this.record(id);record.status=status;record.endedAt=d.clock;
+    d.active=null;d.lastEnd=d.clock;
+    if(id==='r19'&&status==='done'&&!d.journal.some(item=>item.id==='outcasts'))
+      d.journal.push({id:'outcasts',title:'Отбросы',text:'Местные вооружённые формирования. Живут на свалках и используют восстановленную технику.'});
+  }
+  completeLine() {
+    const id=this.data?.active;if(!id)return;
+    const record=this.record(id);record.cursor++;
+    if(record.cursor>=this.scenes.get(id).cues.length)this.end();
+  }
+  skip(){this.end('skipped');}
+  update(mission,now,{enabled=true}={}) {
+    const d=this.bind(mission);
+    updateStoryConstruction(mission,{radioEnabled:enabled});
+    if(this.lastNow!==null)d.clock+=Math.max(0,Math.min(2000,now-this.lastNow));
+    this.lastNow=now;
+    const f=this.facts(mission),rules=this.rules(f);
+    const opening=d.includeOpening&&prologueScenes.find(id=>!this.finished(id));
+    if(opening)rules[opening]={priority:1,trigger:opening!=='p04'||openingConstructionReady(mission),valid:true};
+    if(!enabled||mission.state.status==='defeat'){this.suspend();return null;}
+    if(d.active){
+      const rule=rules[d.active];
+      // Ordinary progress changes the next exchange, not a sentence already on air.
+      // Death, diplomacy overtaken by battle and the mission ending are different.
+      if(!rule||rule.continueValid===false||f.victory&&!finalScene(d.active))this.end('cancelled');
+      else if(rule.priority>0&&f.battle)this.interrupt();
+    }
+    const eligible=[];
+    for(const [id,rule] of Object.entries(rules)){
+      if(!this.scenes.has(id)||this.finished(id)||id===d.active)continue;
+      if(opening&&id!==opening&&rule.priority>0&&!f.victory)continue;
+      if(!rule.valid){
+        if(this.data.scenes[id]){const record=this.record(id);record.status='cancelled';record.endedAt=d.clock;}
+        continue;
+      }
+      if(!rule.trigger||rule.priority>0&&f.battle||rule.priority>=2&&(f.quiet<8000||d.clock-d.lastEnd<rule.gap*1000))continue;
+      if(rule.priority===3&&d.clock-(d.facts.lastChatterAt??-Infinity)<45000)continue;
+      if(f.victory&&!finalScene(id))continue;
+      eligible.push({id,...rule});
+    }
+    eligible.sort((a,b)=>a.priority-b.priority);
+    const next=eligible[0];
+    if(next&&(!d.active||next.priority===0&&rules[d.active].priority>0)){
+      this.interrupt();d.active=next.id;this.record(next.id).status='playing';
+      if(next.priority===3)d.facts.lastChatterAt=d.clock;
+    }
+    return this.cue(rules);
+  }
+  cue(rules={}) {
+    const d=this.data,id=d.active;if(!id)return null;
+    const record=this.record(id),cueId=this.scenes.get(id).cues[record.cursor],line=this.lines.get(cueId);
+    const order={r01:2,r02:0,r05:1,r21:0,r23:1};
+    if(record.cursor>=order[id])(d.announced??={})[id]=true;
+    return {...line,storyScene:id,story:true,dialogue:true,chapter:sceneSignal[id]??'story-'+id,
+      token:`${id}:${record.cursor}`,priority:4-(rules[id]?.priority??2),station:this.script.speakers[line.speaker].name,
+      portrait:line.speaker==='commander'?(finalScene(id)?'relaxed':'radio'):line.speaker==='warrant'?(finalScene(id)?'tea':'neutral'):'radio'};
+  }
+}
+
+export async function loadMissionStory() {
+  const base=new URL('../assets/campaign/alpha/mission01/',import.meta.url);
+  const load=async file=>{const response=await fetch(new URL(file,base));if(!response.ok)throw new Error(file+': '+response.status);return response.json();};
+  const [story,audio,service]=await Promise.all([load('story-v2.json'),load('audio-v2.json'),load('factory-service-voice.json')]);
+  return {...story,dialogue:story.dialogue.map(line=>({...line,clip:audio.clips[line.id]})),barks:[...story.barks.map(line=>({...line,clip:audio.clips[line.id]})),...service.barks]};
+}

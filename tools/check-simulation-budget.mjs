@@ -40,6 +40,7 @@ for(let i=0;i<12;i++){
  assert.deepEqual(first,expected);if(first?.length)first[0].x+=10000;
  assert.deepEqual(navigator.findPath(origin,target,options),expected,'Cached waypoint mutation must not leak');
 }
-navigator.rebuild(full.state.buildings);assert.equal(navigator.pathCache.size,0,'Building changes invalidate navigation results');
+const cachedCount=navigator.pathCache.size;navigator.rebuild(full.state.buildings);
+assert.equal(navigator.pathCache.size,cachedCount,'An unchanged footprint set preserves navigation results; changed-region invalidation has its own regression test');
 assert(pathYields>0,'The fixture must suspend inside pathfinding');
 console.log(JSON.stringify({passed:true,slices,pathYields,units:full.state.units.length,identicalFixedSteps:31,saveFlush:true,loadReset:true}));

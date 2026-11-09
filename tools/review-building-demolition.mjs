@@ -1,0 +1,48 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {createRequire} from 'node:module';
+const require=createRequire(import.meta.url),{chromium}=require('C:/Users/Алексей/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const dir='campaign/previews/building-demolition';fs.mkdirSync(dir,{recursive:true});
+const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true,args:['--use-angle=d3d11']});
+try{
+ const page=await browser.newPage({viewport:{width:1440,height:900}}),errors=[];
+ page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
+ await page.addInitScript(()=>{for(const k of ['fieldSound','fieldRadio','fieldStoryVoice'])localStorage.setItem('warGame.'+k,'off');});
+ await page.goto('http://127.0.0.1:8766/review/building-demolition/campaign/');await page.waitForFunction(()=>window.campaign?.ready,null,{timeout:90000});
+ await page.locator('#begin').click();const skip=page.locator('[data-dream=skip]');if(await skip.isVisible())await skip.click();
+ await page.evaluate(()=>{const m=campaign.mission;campaign.radio.setEnabled(false);const sign=m.entity(m.state.openingScene.signId);sign.completed=true;sign.progress=1;});
+ await page.waitForFunction(()=>campaign.state.active,null,{timeout:25000});await page.locator('#pause').click();
+ await page.evaluate(()=>{
+  const c=campaign,m=c.mission,w=c.world;c.renderSuspended=true;m.state.units=[];m.state.buildings=[];m.state.salvage.items=[];m.state.storyConstruction={enabled:false};m.state.energy=600;m.updateMission=()=>{};
+  m.explored.fill(255);m.visible.fill(255);m.visionSources.push({x:63.5,y:63.5,radius:200});m.fogRevision++;
+  const p=m.placement('generator',-1424,240),b=m.addStructure('generator','rai',p,{...p,groundHeight:p.height,completed:true,progress:1}),u=m.addUnit('builder','rai',{x:b.x,y:b.y-110});u.heading=0;
+  c.demolitionTest={building:b.id,builder:u.id};m.rebuildNavigation();c.select([u.id],false,false);document.querySelector('#toast').hidden=true;
+  w.fixedRenderScale=1;w.controls.enableDamping=false;w.controls.target.set(b.x,b.y-24,3);w.camera.position.copy(w.controls.target).add({x:25,y:-210,z:280});w.controls.update();w.update(m,new Set([u.id]),0);c.advance(0);
+  window.fxNow=performance.now();Object.defineProperty(performance,'now',{configurable:true,value:()=>window.fxNow});
+ });
+ const select=kind=>page.evaluate(kind=>{const c=campaign;c.select([c.demolitionTest[kind]],false,false);c.advance(0);c.world.update(c.mission,new Set(c.selected),0);},kind);
+ const step=seconds=>page.evaluate(seconds=>{const c=campaign;for(let t=0;t<seconds-.001;t+=.1){window.fxNow+=100;c.mission.advance(.1);c.mission.finishPendingStep();c.world.update(c.mission,new Set(c.selected),.1);}c.advance(0);},seconds);
+ const point=()=>page.evaluate(()=>{const c=campaign;return c.world.screen(c.mission.entity(c.demolitionTest.building),5);});
+ const targetButton=page.locator('#actions [data-demolish=target]'),buildingButton=page.locator('#actions [data-demolish=building]'),cancelButton=page.locator('#actions [data-demolish=cancel]');
+ assert.equal(await targetButton.getAttribute('data-icon'),'close');assert((await targetButton.locator('use').getAttribute('href')).endsWith('#close'));
+ await page.screenshot({path:dir+'/builder.png'});
+ await targetButton.click();assert.equal(await page.evaluate(()=>campaign.state.orderMode),'demolish');let p=await point();await page.mouse.click(p.x,p.y);
+ assert.equal(await page.evaluate(()=>campaign.state.orderMode),null,'Left click cancels demolition targeting');assert.equal(await page.evaluate(()=>campaign.mission.entity(campaign.demolitionTest.building).demolitionProgress??0),0);
+ await targetButton.click();p=await point();await page.mouse.click(p.x,p.y,{button:'right'});
+ assert.equal(await page.evaluate(()=>campaign.mission.entity(campaign.demolitionTest.builder).task.type),'demolish');await step(4);
+ await select('building');assert(await cancelButton.isVisible());assert(await cancelButton.locator('progress').evaluate(p=>p.value>0&&p.value<1));
+ await page.screenshot({path:dir+'/working.png'});
+ await cancelButton.click();assert.equal(await page.evaluate(()=>campaign.mission.entity(campaign.demolitionTest.builder).task),null);await step(9);
+ assert(await page.evaluate(()=>!!campaign.mission.entity(campaign.demolitionTest.building)),'Cancellation preserves the building');
+ assert.equal(await buildingButton.getAttribute('data-icon'),'close');
+ await page.screenshot({path:dir+'/building.png'});
+ await page.setViewportSize({width:390,height:844});await page.waitForTimeout(300);
+ await page.evaluate(()=>{const w=campaign.world,offset=w.camera.position.clone().sub(w.controls.target).multiplyScalar(1.6);w.camera.position.copy(w.controls.target).add(offset);w.controls.update();w.update(campaign.mission,new Set(campaign.selected),0);});
+ const bounds=await buildingButton.boundingBox();assert(bounds.x>=0&&bounds.x+bounds.width<=390&&bounds.y+bounds.height<=844);await page.screenshot({path:dir+'/building-narrow.png'});
+ await buildingButton.click();await step(4);assert(await cancelButton.isVisible());
+ await step(15);assert.equal(await page.evaluate(()=>campaign.mission.entity(campaign.demolitionTest.building)),undefined);assert(await page.evaluate(()=>campaign.mission.placement('generator',-1424,240).ok));
+ await page.setViewportSize({width:1440,height:900});await page.waitForTimeout(300);
+ await page.evaluate(()=>{const w=campaign.world,offset=w.camera.position.clone().sub(w.controls.target).divideScalar(1.6);w.camera.position.copy(w.controls.target).add(offset);w.controls.update();w.update(campaign.mission,new Set(),0);});
+ await page.screenshot({path:dir+'/cleared.png'});assert.deepEqual(errors,[]);
+ console.log('PASS: simple cross on builder/building, right-click order and left-click cancel, real demolition progress, cancel/resume, cleared reusable site, narrow layout, no browser errors');
+}finally{await browser.close();}

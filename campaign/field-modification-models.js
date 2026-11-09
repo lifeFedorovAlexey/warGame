@@ -1,8 +1,9 @@
 import {mergeGeometries} from '../demo/vendor/utils/BufferGeometryUtils.js';
+import {FIELD_RECIPES} from './vehicle-salvage.js';
 // Optional bolt-on parts in the existing B01 assembly coordinate system.
 // Original vehicle geometry and materials are untouched.
 export function createFieldModification(T,id){
-  const root=new T.Group(),geometries=[],part=id==='hood-guard'?22:23;
+  const root=new T.Group(),geometries=[],part=FIELD_RECIPES[id].part;
   function bar(a,b,r=.025){
     const start=new T.Vector3(...a),end=new T.Vector3(...b),delta=end.clone().sub(start),length=delta.length();
     const geometry=new T.CylinderGeometry(r,r,length,6,Math.max(1,Math.ceil(length/.18)));
@@ -13,6 +14,13 @@ export function createFieldModification(T,id){
     for(const x of [-.70,.70])bar([x,2.23,1.25],[x,2.23,1.88],.035);
     for(const z of [1.27,1.47,1.67,1.87])bar([-.70,2.23,z],[.70,2.23,z],.032);
     for(const x of [-.70,.70])bar([x,2.23,1.25],[x,2.04,1.13],.035);
+  }else if(id==='tube-bumper'){
+    // Cut from the 15 cm street-light tube; short brackets keep it off the body.
+    for(const z of [.74,1.05])bar([-1.03,2.53,z],[1.03,2.53,z],.075);
+    for(const x of [-.72,.72]){
+      bar([x,2.53,.74],[x,2.53,1.05],.06);
+      bar([x,2.53,.82],[x,2.12,.82],.06);
+    }
   }else{
     // Twin sloping windscreen grilles: protection only where a ray hits a bar.
     const y=z=>2.15-(z-1.99)*.53;

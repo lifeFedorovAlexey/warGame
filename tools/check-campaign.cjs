@@ -1,5 +1,6 @@
 const fs = require('node:fs');
 const assert = require('node:assert/strict');
+const {createHash} = require('node:crypto');
 const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
 
 (async () => {
@@ -13,17 +14,38 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   try{await page.waitForFunction(()=>window.campaign?.ready||document.querySelector('#loading-status').textContent.startsWith('Ошибка'),{},{timeout:90000});}
   catch(error){throw new Error(errors.join('\n')||await page.locator('#loading-status').textContent(),{cause:error});}
   assert(await page.evaluate(()=>window.campaign?.ready),errors.join('\n')||await page.locator('#loading-status').textContent());
+  const fieldRadioDir='assets/campaign/alpha/mission01/';
+  const story=JSON.parse(fs.readFileSync(fieldRadioDir+'story-v2.json'));
+  const line=story.dialogue.find(cue=>cue.id==='m01-v3-general-coffee');
+  const intro={...JSON.parse(fs.readFileSync(fieldRadioDir+'audio-v2.json')).clips[line.id],text:line.text};
+  assert.equal(createHash('sha256').update(fs.readFileSync(fieldRadioDir+intro.file)).digest('hex'),intro.sha256);
+  const introUrl=new URL('../'+fieldRadioDir+intro.file,page.url()).href;
+  const introResponse=page.waitForResponse(response=>response.url()===introUrl&&response.ok(),{timeout:90000});
   await page.locator('#begin').click();
+  const initialView=await page.evaluate(()=>({x:campaign.world.controls.target.x,y:campaign.world.controls.target.y}));
+  // The main button includes the opening. This general control smoke skips it
+  // through the UI; the story browser suite listens to every line naturally.
+  await page.locator('[data-dream="skip"]').click();
+  for(const scene of ['p02','p03','p04']){
+   if(scene==='p04')await page.evaluate(()=>campaign.advance(45));
+   await page.waitForFunction(id=>campaign.radio.entry?.storyScene===id,scene,{timeout:60000});
+   await page.locator('#radio [data-dismiss]').click();
+  }
+  await introResponse;
+  // This general gameplay smoke exercises free construction; the story suite
+  // separately verifies every progressive unlock and its dialogue.
+  await page.evaluate(()=>{delete campaign.mission.state.storyConstruction;const r=campaign.radio;r.present(r.entry,campaign.mission,performance.now());});
   await page.waitForFunction(()=>window.campaign.drivingAudio.running&&window.campaign.drivingAudio.recordings);
   await page.waitForFunction(()=>window.campaign.mission.state.time>.2&&!document.querySelector('#radio').hidden);
-  await page.waitForFunction(()=>window.campaign.storyAudio.playing);
+  await page.waitForFunction(()=>window.campaign.storyAudio.playing&&window.campaign.storyAudio.chapter==='intro');
+  assert.equal(await page.locator('#radio p').textContent(),intro.text);
   assert.equal(await page.evaluate(()=>window.campaign.mission.state.units.filter(u=>u.owner==='rai').length),5);
   const briefing=await page.evaluate(()=>{
    const c=window.campaign,{field,controls,storySignals}=c.world;
    const start=field.gridToWorld(c.mission.config.startGrid);
    return {target:{x:controls.target.x,y:controls.target.y},start,signal:storySignals.current};
   });
-  assert.deepEqual(briefing.target,briefing.start,'Briefing leaves the camera under player control');
+  assert.deepEqual(briefing.target,initialView,'Dialogue keeps the initial view of the base and hillside');
   assert.equal(briefing.signal.kind,'guidance');
   assert.equal(await page.locator('#objective-focus').isVisible(),false,'Only the radio shows the oil shortcut during the briefing');
   await page.locator('[data-focus]').click();
@@ -34,44 +56,60 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   const warning=await page.evaluate(()=>{
    const c=window.campaign,{mission,radio}=c;
    const seen=mission.state.seenCinematics.slice(),until=radio.until;
-   mission.cinematic('artifact-mg-ammo-1');c.advance(0);
+   mission.state.artifactKeys.push('mg-ammo-1');c.advance(0);
    const before=radio.entry.chapter;
-   mission.cinematic('first-contact');c.advance(0);
+   const point=mission.field.gridToWorld(mission.config.startGrid);
+   const enemy=mission.addUnit('raider','scavs',{x:point.x+20,y:point.y-40});
+   mission.state.flags.contact=true;mission.state.flags.raidStarted=true;mission.state.flags.raidIds=[enemy.id];
+   mission.effects.push({type:'shot',from:enemy.id,to:{x:enemy.x+10,y:enemy.y,z:mission.field.heightAt(enemy.x,enemy.y)+1},weapon:'mg'});
+   mission.updateFog();c.advance(0);
    radio.until=Infinity;
    mission.state.seenCinematics=seen;
    return {before,chapter:radio.entry.chapter,interrupted:performance.now()<until,
     queued:radio.queue.map(entry=>entry.chapter),signal:c.world.storySignals.current?.kind};
   });
-  assert.deepEqual(warning,{before:'intro',chapter:'first-contact',interrupted:true,queued:['artifact-mg-ammo-1'],signal:'threat'});
+  assert.deepEqual(warning,{before:'intro',chapter:'first-contact',interrupted:true,queued:[],signal:'threat'});
   await page.waitForFunction(()=>{
    const audio=window.campaign.storyAudio;
    return audio.playing&&audio.chapter==='first-contact'&&audio.urgent;
   });
   const minimapWithRadio=await page.locator('#minimap').boundingBox();
+  await page.evaluate(()=>{
+   const {mission,radio}=campaign;
+   for(const id of mission.state.flags.raidIds)mission.entity(id).hp=0;
+   mission.state.flags.contact=false;mission.state.flags.raidStarted=false;mission.state.artifactKeys=[];
+   radio.director.data.scenes.r01={status:'done',cursor:0,endedAt:0};campaign.advance(0);
+  });
   await page.locator('.settings summary').click();
+  assert(await page.locator('#objectives').isVisible());
+  assert.equal(await page.locator('#objective-hint').textContent(),'Постройте АЭС и вышку.');
+  assert(await page.locator('#radio-toggle').isHidden());
+  await page.locator('[aria-controls="operation-audio"]').click();
   await page.locator('#radio-toggle').click();
   assert.equal(await page.evaluate(()=>localStorage.getItem('warGame.fieldRadio')),'off');
   assert.equal(await page.evaluate(()=>window.campaign.world.storySignals.current),null);
   assert.equal(await page.evaluate(()=>window.campaign.storyAudio.playing),false);
   assert.equal(await page.evaluate(()=>window.campaign.radio.queue.length),0,'Skipping radio also drops queued transmissions');
   assert.deepEqual(await page.locator('#minimap').boundingBox(),minimapWithRadio,'Dismissing the radio does not move the minimap');
-  if(!await page.locator('#home').isVisible())await page.locator('.settings > summary').click();
   assert(await page.locator('#control-hints').isHidden());
   await page.locator('#controls-help').click();
   assert(await page.locator('#control-hints').isVisible());
-  await page.locator('#controls-help').click();
+  assert(await page.locator('#radio-toggle').isHidden());
+  await page.locator('[aria-controls="operation-actions"]').click();
+  assert(await page.locator('#control-hints').isHidden());
   await page.locator('#home').click();
   assert.equal(await page.locator('.settings').getAttribute('open'),null);
   await page.locator('#pause').click();
   const idleShadows=await page.evaluate(()=>{
    const {mission,world,advance}=window.campaign;
    const render=()=>world.update(mission,new Set(),1/60);
-   advance(.25);render();
+   // The opening builder must finish folding its projector before testing idle casters.
+   advance(6);render();
    const before=world.statistics.shadowUpdates;
    for(let i=0;i<4;i++){advance(.125);render();}
    return world.statistics.shadowUpdates-before;
   });
-  assert.equal(idleShadows,0,'Simulation ticks with identical casters reuse the shadow map');
+  assert.equal(idleShadows,0,'Simulation ticks with stationary casters reuse the shadow map');
   await page.getByRole('button',{name:'Строитель 2',exact:true}).click({modifiers:['Shift']});
   await page.locator('#build-toggle').click();
   try{await page.waitForFunction(()=>document.querySelectorAll('#build-cards .atlas-icon').length===5,{},{timeout:10000});
@@ -96,10 +134,22 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
    'The compact controls fit without reserving an opaque strip below the map');
   await page.setViewportSize(viewport);
   await page.getByRole('button',{name:/^АЭС/}).click();
+  assert(await page.locator('#placement').isVisible());
+  await page.getByRole('button',{name:'К нефти',exact:true}).click();
+  assert(await page.locator('#placement').isVisible(),'Oil focus preserves the placement mode');
+  assert.equal(await page.evaluate(()=>window.campaign.state.buildKind),'generator');
+  const oilDuringPlacement=await page.evaluate(()=>{
+   const w=window.campaign.world;
+   return w.screen(w.storySignals.current,2);
+  });
+  await page.mouse.move(oilDuringPlacement.x,oilDuringPlacement.y);
+  assert.equal(await page.locator('#world canvas').getAttribute('title'),'');
+  await page.keyboard.press('Home');
   await page.locator('#suggest-site').click();
   const position=await page.evaluate(()=>{const w=window.campaign.world;return w.screen(w.controls.target,0);});
   await page.mouse.click(position.x,position.y);
   await page.waitForFunction(()=>window.campaign.mission.state.buildings.some(b=>b.owner==='rai'&&b.kind==='generator'));
+  assert.equal(await page.locator('#objective-hint').textContent(),'Поставьте вышку на нефти.');
   await page.getByRole('button',{name:'К нефти',exact:true}).click();
   assert.equal(await page.locator('.settings').getAttribute('open'),null,'Oil focus is available with the operation menu closed');
   const oil=await page.evaluate(()=>{
@@ -113,6 +163,7 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   assert.equal(await page.locator('#world canvas').getAttribute('title'),'Построить вышку');
   await page.mouse.click(oil.position.x,oil.position.y);
   await page.waitForFunction(()=>window.campaign.mission.state.buildings.some(b=>b.owner==='rai'&&b.kind==='derrick'));
+  assert.match(await page.locator('#objective-hint').textContent(),/^Достройте /);
   assert.equal(await page.locator('#objective-focus').isVisible(),false);
   assert.equal(await page.evaluate(()=>window.campaign.world.storySignals.current),null);
   assert.equal(await page.evaluate(()=>window.campaign.mission.state.energy),530);
@@ -122,13 +173,14 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
    let simultaneous=0;
    for(let i=0;i<180;i++){
     c.advance(.3);
+    if(b.completed)break;
     const active=m.state.units.filter(u=>u.builderWorking&&u.task?.targetId===b.id);
     simultaneous=Math.max(simultaneous,active.length);
     for(const worker of active){
      const aim=workProjection(worker,b,m.config,m.field);
      if(!aim||!projectorHasSight(aim,worker,b,m.state.units,m.field,m.config.worldScale))throw new Error('Projector overlaps another vehicle');
     }
-    if(b.progress>.32&&b.progress<.8&&simultaneous===2){c.world.centre(b,170);break;}
+    if(b.progress>.32&&b.progress<1&&active.length===2){c.world.centre(b,170);break;}
    }
    return {simultaneous,progress:b.progress};
   });
@@ -167,9 +219,10 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   const base=await page.evaluate(()=>{
    const c=window.campaign,m=c.mission,b=m.state.buildings.find(b=>b.kind==='derrick'&&b.owner==='rai');
    c.world.centre(b,165);
-   return{power:m.state.powered,complete:b.completed,progress:m.state.buildings.filter(b=>b.owner==='rai').map(b=>b.progress)};
+   return{power:m.state.powered,complete:b.completed,progress:m.state.buildings.filter(b=>b.owner==='rai'&&!m.config.buildings[b.kind]?.storyOnly).map(b=>b.progress)};
   });
   assert.deepEqual(base,{power:true,complete:true,progress:[1,1]});
+  assert.equal(await page.locator('#objective-hint').textContent(),'Постройте завод и НИИ.');
   await page.waitForFunction(()=>{const c=window.campaign,b=c.mission.state.buildings.find(b=>b.kind==='derrick');return !!c.world.buildingObjects.get(b.id)?.getObjectByName('oil_beam');});
   const getBeam=()=>page.evaluate(()=>{const c=window.campaign,b=c.mission.state.buildings.find(b=>b.kind==='derrick');return c.world.buildingObjects.get(b.id).getObjectByName('oil_beam').rotation.y;});
   const angles=[await getBeam()];
@@ -197,13 +250,13 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   await page.screenshot({path:'campaign/previews/field-soft-fog.png'});
   await page.evaluate(()=>{const c=window.campaign,b=c.mission.state.buildings.find(b=>b.kind==='derrick');c.world.centre(b,165);return new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));});
   const light=await page.evaluate(()=>{
-   const c=window.campaign,lit=c.world.scene.getObjectsByProperty('type','SpotLight').filter(l=>l.intensity>0),canvas=document.querySelector('#labels');
-   return{realSpotlights:lit.length,range:lit[0]?.distance,labelRect:canvas.getBoundingClientRect().width,labelBacking:canvas.width,frame:c.world.statistics};
+   const c=window.campaign,lit=c.world.scene.getObjectsByProperty('type','SpotLight').filter(l=>l.intensity>0),bars=c.world.scene.getObjectByName('unit_health_bars');
+   return{realSpotlights:lit.length,range:lit[0]?.distance,healthInMap:!!bars?.isMesh,separateHealthCanvas:!!document.querySelector('#labels'),frame:c.world.statistics};
   });
   assert(light.realSpotlights>=2);
   assert.equal(light.range,81);
-  assert.equal(light.labelRect,1120);
-  assert.equal(light.labelBacking,1680);
+  assert(light.healthInMap);
+  assert.equal(light.separateHealthCanvas,false);
   await page.getByRole('button',{name:'Пулемёт 1',exact:true}).dblclick();
   const destination=await page.evaluate(()=>{
    const c=window.campaign,u=c.mission.entity(c.selected[0]);
@@ -215,7 +268,7 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   assert(destination);
   await page.locator('#move-order').click();
   await page.mouse.click(destination.x,destination.y);
-  assert.equal(await page.evaluate(()=>{const c=window.campaign;return c.mission.entity(c.selected[0])?.task?.type;}),'move','Click in the scene must issue a move order');
+  assert.equal(await page.evaluate(()=>{const c=window.campaign,u=c.mission.entity(c.selected[0]);return u?.pendingOrder?.type??u?.task?.type;}),'move','Click in the scene must issue a move order');
   const workStart=await page.evaluate(()=>{const c=window.campaign,u=c.mission.entity(c.selected[0]);return{x:u.x,y:u.y,shadowUpdates:c.world.statistics.shadowUpdates};});
   for(let i=0;i<52;i++){
    const arrived=await page.evaluate(()=>{

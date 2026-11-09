@@ -1,0 +1,32 @@
+[
+  {
+    "count": 10,
+    "cpuMs": 79.03119999999998,
+    "order": {
+      "ok": true,
+      "assigned": 10,
+      "unassigned": []
+    },
+    "pathCount": 10
+  },
+  {
+    "count": 100,
+    "cpuMs": 14.61269999999999,
+    "order": {
+      "ok": true,
+      "assigned": 100,
+      "unassigned": []
+    },
+    "pathCount": 100
+  },
+  {
+    "count": 500,
+    "cpuMs": 48.913700000000006,
+    "order": {
+      "ok": true,
+      "assigned": 500,
+      "unassigned": []
+    },
+    "pathCount": 500
+  }
+]

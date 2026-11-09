@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
 import {Mission} from '../campaign/mission.js';
-import {raidApproachSignal, waterTower, waterTowerSignal} from '../campaign/threat-guidance.js';
+import {raidApproachSignal, southernApproachSignal, warehouseAdvanceHint, waterTower, waterTowerSignal} from '../campaign/threat-guidance.js';
 import {vehicleClearance} from '../campaign/vehicle-motion.js';
 import {createHeightfield} from '../demo/map-route.js';
 import {shapeMesaRims} from '../demo/mesa-shaping.js';
@@ -23,8 +23,14 @@ reveal(tower);
 scout.updateMission();
 assert(scout.state.pendingCinematics.includes('camp3-sighted'));
 assert.deepEqual([waterTowerSignal(scout).x,waterTowerSignal(scout).y],[tower.x,tower.y]);
+assert.equal(warehouseAdvanceHint(scout),'');
+scout.state.camps[0].cleared=true;
+assert.match(warehouseAdvanceHint(scout),/Башня держит дорогу/);
 tower.hp=0;
 assert.equal(waterTowerSignal(scout),null,'A destroyed tower leaves no threat marker');
+assert.match(warehouseAdvanceHint(scout),/К складу по северной дороге/);
+scout.state.camps[1].cleared=true;
+assert.equal(warehouseAdvanceHint(scout),'');
 assert.equal(raidApproachSignal(scout),null,'The approach is quiet before first contact');
 scout.state.flags.contact=true;
 const approach=field.gridToWorld(config.raidApproachGrid);
@@ -34,14 +40,53 @@ reveal(approach);
 assert.deepEqual([raidApproachSignal(scout).x,raidApproachSignal(scout).y],[approach.x,approach.y]);
 scout.state.flags.raidWon=true;
 assert.equal(raidApproachSignal(scout),null,'Clear the warning once the raid is over');
+assert.equal(southernApproachSignal(scout),null,'Keep the southern approach locked');
+scout.state.flags.lastRevealed=true;
+scout.state.bounds=config.finalMapBounds.slice();
+const finalCamp=config.camps[3],southRally=field.gridToWorld(finalCamp.approachGrid);
+const approachRoad=field.roadNetwork.paths.find(road=>road.to===finalCamp.id);
+const roadEntry=approachRoad.points[0];
+scout.explored.fill(0);
+assert.equal(southernApproachSignal(scout),null,'Do not focus the camera on a fully uncharted road');
+reveal(roadEntry);
+const knownRoad=southernApproachSignal(scout);
+assert.equal(knownRoad.kind,'recon');
+assert(scout.exploredAt(knownRoad.x,knownRoad.y));
+assert(scout.nav.roads.coverage(knownRoad.x,knownRoad.y)>.9);
+assert(scout.nav.roads.coverage(southRally.x,southRally.y)>.9,'The rally lies on the actual highway');
+const southernTowers=scout.state.buildings.filter(b=>b.campId===finalCamp.id&&b.kind==='mg-tower');
+for(const arrival of [roadEntry,scout.state.camps[3].gate]){
+ const formation=scout.nav.roads.formation(southRally,arrival,12,config.worldScale);
+ assert(formation?.slots.length>=12,'The highway fits a whole column from either direction');
+ for(const slot of formation.slots.slice(0,12)){
+  assert(scout.inBounds(slot.x,slot.y)&&scout.nav.roads.coverage(slot.x,slot.y)>.58);
+  assert(southernTowers.every(b=>Math.hypot(slot.x-b.x,slot.y-b.y)>scout.buildingSpec(b).range+12));
+ }
+}
+reveal(southRally);
+const rallySignal=southernApproachSignal(scout);
+assert.equal(rallySignal.kind,'intel');
+assert.deepEqual([rallySignal.x,rallySignal.y],[southRally.x,southRally.y]);
+scout.state.camps[3].cleared=true;
+assert.equal(southernApproachSignal(scout),null,'Remove the approach after clearing the headquarters');
+const oilFirst=new Mission(config,field);
+oilFirst.advance(2.7);
+const oilPoint=field.gridToWorld(config.oilFields[0]);
+const oilOrder=oilFirst.build(['u4'],'derrick',oilPoint.x,oilPoint.y);
+assert(oilOrder.ok,oilOrder.reason);
+oilFirst.advance(65);
+assert(oilFirst.entity(oilOrder.id).completed,'The first builder can park within reach and finish the first derrick alone');
 const traffic=new Mission(config,field);
 const stalledPair=[
  {x:-1391.9818,y:783.6999,heading:1.33193,waypoint:{x:-1392,y:800},goal:{x:-794.54,y:1077.31}},
  {x:-1375.9505,y:795.6683,heading:1.05886,waypoint:{x:-1360,y:784},goal:{x:-805.46,y:1098.69}},
 ];
 const vans=stalledPair.map(({waypoint,goal,...pose})=>traffic.addUnit('bukhanka','rai',pose,{
- heading:pose.heading,path:[waypoint,...traffic.nav.findPath(waypoint,goal)],task:{type:'move',...goal},
+ heading:pose.heading,path:[waypoint],task:{type:'move',...goal},
 }));
+// These saved poses are inside an original cliff cell. A stale route through
+// that cell is no longer legal; a replacement order must physically evacuate.
+for(const [index,van] of vans.entries())assert(traffic.order([van.id],'move',stalledPair[index].goal).ok,'Saved cliff pose receives a bounded exit route');
 const firstMotion=[null,null];
 for(let step=0;step<300;step++){
  traffic.advance(.1);
@@ -50,6 +95,7 @@ for(let step=0;step<300;step++){
 }
 for(const [index,van] of vans.entries()){
  const origin=stalledPair[index];
+ if(process.argv.includes('--diagnose'))console.log(JSON.stringify({case:'old cliff pose',firstMotion:firstMotion[index],van}));
  assert(firstMotion[index]!==null&&firstMotion[index]<=7,`Van ${van.id} waited ${firstMotion[index]} seconds before moving`);
  assert(Math.hypot(van.x-origin.x,van.y-origin.y)>12,`Van ${van.id} must leave the mutual deadlock`);
 }
@@ -83,6 +129,16 @@ assert(Math.hypot(turningVan.x-turningStart.x,turningVan.y-turningStart.y)>60
  &&emptyPass.nav.allowed(...emptyPass.nav.grid(turningVan.x,turningVan.y)),`The arc must reach the route (${turningVan.x}, ${turningVan.y})`);
 function dismiss(){for(const key of [...mission.state.pendingCinematics]){seen.push({key,time:mission.state.time});mission.finishCinematic(key);}}
 const mechanics={workSteps:0,constructionGated:true,repairGated:true,interruptProjection:false,movingRepair:false,builderHandoff:false};
+// Combat casualties are not a deterministic repair fixture: a successful
+// playthrough may muster only fresh vehicles. Exercise the moving-target
+// invariant separately without changing the campaign playthrough's HP.
+{
+ const repair=new Mission(config,field),worker=repair.state.units.find(u=>u.kind==='builder'),target=repair.state.units.find(u=>u.kind==='bukhanka');
+ repair.damage(target,80,null);assert(repair.order([worker.id],'repair',target).ok);
+ for(let tick=0;tick<300&&!worker.builderWorking;tick++)repair.advance(.1);
+ assert(worker.builderWorking&&target.hp<target.maxHp-4,'Dedicated fixture must actually weld a damaged vehicle');
+ testMovingRepair(worker,repair);mechanics.movingRepairFixture='isolated-damaged-vehicle';
+}
 function step(){
  const progress=new Map(mission.state.buildings.map(b=>[b.id,b.progress])),hp=new Map(mission.state.units.map(u=>[u.id,u.hp])),armor=new Map(mission.state.units.map(u=>[u.id,u.fieldHpBonus??0]));
  dismiss();mission.advance(.1);events.push(...mission.drainEvents());mission.drainEffects();
@@ -102,11 +158,12 @@ function step(){
  if(!mechanics.movingRepair){const worker=workers.find(u=>u.builderWorking&&u.task?.type==='repair'&&mission.entity(u.task.targetId)?.hp<mission.entity(u.task.targetId)?.maxHp-4);if(worker)testMovingRepair(worker);}
 }
 function orderNearby(m,unit){for(const [dx,dy] of [[64,0],[-64,0],[0,64],[0,-64],[48,48],[-48,-48]]){const p=m.nav.nearest(unit.x+dx,unit.y+dy,3);if(p&&Math.hypot(p.x-unit.x,p.y-unit.y)>30&&m.order([unit.id],'move',p).ok)return true;}return false;}
-function testMovingRepair(worker){
+function testMovingRepair(worker,source=mission){
  // Isolated save clone: array order must not permit healing before target movement.
- const m=new Mission(config,field);m.load(mission.save());for(const id of [...m.state.pendingCinematics])m.finishCinematic(id);
+ const m=new Mission(config,field);m.load(source.save());for(const id of [...m.state.pendingCinematics])m.finishCinematic(id);
  const target=m.entity(worker.task.targetId);m.state.units.sort((a,b)=>(a.id===target.id?1:0)-(b.id===target.id?1:0));assert(orderNearby(m,target),'Moving repair fixture needs an accessible destination');
- let moved=false;for(let i=0;i<20&&!moved;i++){const before=target.hp;m.advance(.1);moved=Math.hypot(target.x-target.previousX,target.y-target.previousY)>.05;if(moved){assert(target.hp<=before,'Moving target healed');assert(m.state.units.filter(u=>u.task?.type==='repair'&&u.task.targetId===target.id).every(u=>!u.builderWorking),'Moving target still welds');}}
+ // Parked neighbours may need a short manoeuvre to let the target leave.
+ let moved=false;for(let i=0;i<60&&!moved;i++){const before=target.hp;m.advance(.1);moved=Math.hypot(target.x-target.previousX,target.y-target.previousY)>.05;if(moved){assert(target.hp<=before,'Moving target healed');assert(m.state.units.filter(u=>u.task?.type==='repair'&&u.task.targetId===target.id).every(u=>!u.builderWorking),'Moving target still welds');}}
  assert(moved,'Repair target did not move');mechanics.movingRepair=true;
 }
 function testInterruptProjection(){
@@ -134,12 +191,12 @@ function testBuilderHandoff(point){
  assert(m.order([second.id],'build',building).ok,'Second builder can take over unfinished construction');
  for(let i=0;i<800&&!building.completed;i++)m.advance(.1);
  assert(building.completed,'Second builder finishes the same structure');
- assert.equal(m.state.energy,afterPurchase,'Taking over does not charge for the structure again');
+ assert.equal(m.state.energy,afterPurchase-building.cost,'Taking over does not charge for the structure again');
  mechanics.builderHandoff=true;
 }
 function until(predicate,seconds,label){let ticks=0;while(!predicate()&&ticks++<seconds*10)step();if(!predicate()){fs.mkdirSync('campaign/reports',{recursive:true});fs.writeFileSync('campaign/reports/mission-failure.json',mission.save());}assert(predicate(),label+' timed out: '+JSON.stringify({time:mission.state.time,status:mission.state.status,flags:mission.state.flags,energy:mission.state.energy}));}
 function site(kind){const points=[];for(let x=start.x-256;x<=start.x+256;x+=8)for(let y=start.y-240;y<=start.y+256;y+=8){const result=mission.placement(kind,x,y);if(result.ok)points.push(result);}points.sort((a,b)=>Math.hypot(a.x-start.x,a.y-start.y)-Math.hypot(b.x-start.x,b.y-start.y));return points[0];}
-function construct(kind,point=site(kind)){assert(point,'No buildable site: '+kind);const cost=config.buildings[kind].cost,energy=mission.state.energy,result=mission.build(builders(),kind,point.x,point.y);assert(result.ok,kind+': '+result.reason);assert.equal(mission.state.energy,energy-cost);until(()=>mission.entity(result.id)?.completed,180,'Build '+kind);console.log('built',kind,mission.state.time.toFixed(1),point.x,point.y);return mission.entity(result.id);}
+function construct(kind,point=site(kind)){assert(point,'No buildable site: '+kind);const cost=config.buildings[kind].cost,energy=mission.state.energy,result=mission.build(builders(),kind,point.x,point.y);assert(result.ok,kind+': '+result.reason);assert.equal(mission.state.energy,energy);until(()=>mission.entity(result.id)?.completed,180,'Build '+kind);console.log('built',kind,mission.state.time.toFixed(1),point.x,point.y);return mission.entity(result.id);}
 assert.equal(mission.advance(.1),1);assert.equal(mission.state.time,.1,'Field radio must leave simulation running');dismiss();
 const reservation=field.gridToWorld(config.oilFields[0]);assert(!mission.placement('generator',reservation.x,reservation.y).ok,'Oil reservation');
 const generatorSite=site('generator');
@@ -222,11 +279,17 @@ if(process.argv.includes('--full')){
  until(()=>mission.state.flags.raidWon,300,'Repel first raid');
  for(const camp of mission.state.camps){
   const ids=()=>army().map(u=>u.id);let iterations=0;
+  if(camp.index===1&&!camp.cleared){
+   // The northern road passes the eastern tower before it reaches the warehouse.
+   reportOrder(mission.order(ids(),'attack-move',camp.gate),'Advance through the northern road with combat');
+   until(()=>camp.cleared||!army().length,235,'Clear the warehouse with one attack-move order');
+  }
   const rally=camp.index===3?field.gridToWorld(config.camps[3].approachGrid):null;
   if(camp.index===3){
    const mustered=()=>army().filter(u=>Math.hypot(u.x-rally.x,u.y-rally.y)<100);
-   assert(mission.setRally(factory.id,rally).ok);
    reportOrder(mission.order(ids(),'move',rally),'Muster outside tower range');
+   until(()=>mission.exploredAt(rally.x,rally.y),220,'Scout the legal southern approach');
+   assert(mission.setRally(factory.id,rally).ok);
    const reinforcements=Math.max(0,12-army().length);
    for(let i=0;i<reinforcements;i++){
     until(()=>mission.canSpend(config.units.bukhanka.cost),100,'Reinforcement resources');
@@ -239,6 +302,11 @@ if(process.argv.includes('--full')){
     reportOrder(mission.order(builders(),'repair',damaged),'Repair at the rally point');
     until(()=>damaged.hp===damaged.maxHp,250,'Repair '+damaged.id);
    }
+   const westTower=towers.reduce((west,tower)=>tower.x<west.x?tower:west);
+   // Use the road beyond the bend to engage the western tower on its own.
+   reportOrder(mission.order(ids(),'attack-move',field.gridToWorld([9,75.1875])),'Advance to the western firing line');
+   until(()=>westTower.hp<=0||!army().length,90,'Disable the western tower first');
+   assert(westTower.hp<=0,'The column must disable the western tower before advancing');
   }
   while(!camp.cleared&&iterations++<160){
    const visible=[...mission.state.units,...mission.state.buildings].filter(e=>e.hp>0&&e.campId===camp.id&&mission.visibleAt(e.x,e.y)),centre=army().reduce((p,u)=>({x:p.x+u.x/army().length,y:p.y+u.y/army().length}),{x:0,y:0});visible.sort((a,b)=>Math.hypot(a.x-centre.x,a.y-centre.y)-Math.hypot(b.x-centre.x,b.y-centre.y));

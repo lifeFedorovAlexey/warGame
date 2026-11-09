@@ -6,7 +6,10 @@ export function createShadowCasters() {
     begin() { frame++; changed = false; },
     watch(id, ...pose) {
       const previous = casters.get(id);
-      if (previous?.pose.length === pose.length && pose.every((value, i) => value === previous.pose[i])) {
+      // Steering settles asymptotically after a drive. Sub-microscopic numeric
+      // drift must not redraw the shadow map forever once the vehicle is parked.
+      const same=(value,prior)=>value===prior||typeof value==='number'&&typeof prior==='number'&&Math.abs(value-prior)<1e-6;
+      if (previous?.pose.length === pose.length && pose.every((value, i) => same(value,previous.pose[i]))) {
         previous.frame = frame;
         return;
       }

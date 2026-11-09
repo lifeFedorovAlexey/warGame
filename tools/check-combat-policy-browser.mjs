@@ -1,0 +1,61 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {createRequire} from 'node:module';
+const require=createRequire(import.meta.url);
+const {chromium}=require('C:/Users/Алексей/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true,args:['--enable-unsafe-swiftshader','--use-angle=swiftshader']});
+const folder='campaign/previews/combat-policy';fs.mkdirSync(folder,{recursive:true});
+try{
+ const page=await browser.newPage({viewport:{width:1440,height:900}}),errors=[];
+ page.on('pageerror',e=>errors.push(e.stack??e.message));
+ await page.goto((process.env.WARGAME_URL??'http://127.0.0.1:8884')+'/campaign/');
+ await page.waitForFunction(()=>window.campaign?.ready,null,{timeout:90000});
+ await page.locator('#begin').click();await page.locator('#pause').click();
+ const ids=await page.evaluate(()=>{
+  const c=campaign,m=c.mission;c.radio.setEnabled(false);
+  const own=m.state.units.filter(u=>u.owner==='rai'&&u.kind==='bukhanka'),u=own[0];
+  m.stop(own.map(u=>u.id));m.setCombatPolicy(own.map(u=>u.id),{response:'ignore',retreat:'never'});
+  const a=m.addUnit('raider','scavs',{x:u.x-75,y:u.y-25},{raidReserve:true}),b=m.addUnit('raider','scavs',{x:u.x-65,y:u.y+50},{raidReserve:true});
+  b.hp=30;b.maxHp=100;a.maxHp=400;
+  m.updateFog();c.select([u.id]);c.advance(0);
+  if(!m.lineOfSight(u,a)||!m.lineOfSight(u,b))throw Error('The live-map fixture must have clear sight to both targets');
+  return {unit:u.id,a:a.id,b:b.id,members:own.map(u=>u.id)};
+ });
+ const choose=async(key,value)=>{if(await page.locator('#combat-menu').isHidden())await page.locator('#attack-order').click({button:'right'});await page.locator(`[data-policy=${key}][data-value=${value}]`).click();};
+ const tick=()=>page.evaluate(({unit,a,b})=>{
+  const m=campaign.mission,u=m.entity(unit);m.effects=[];u.cooldown=0;m.state.time+=.1;m.updateUnit(u,.1);
+  return {shots:m.effects.filter(e=>e.type==='shot'&&e.from===unit).map(e=>e.targetId),a:m.entity(a).hp,b:m.entity(b).hp,task:u.task?.type};
+ },ids);
+ await choose('response','free');
+ assert.equal(await page.evaluate(()=>campaign.state.orderMode),null);
+ await page.locator('#attack-order').click();
+ const target=await page.evaluate(id=>campaign.world.screen(campaign.mission.entity(id)),ids.a);
+ await page.mouse.click(target.x,target.y);
+ await page.waitForFunction(id=>{campaign.advance(0);return !campaign.mission.entity(id).pendingOrder;},ids.unit);
+ assert.equal(await page.evaluate(id=>campaign.mission.entity(id).task?.targetId,ids.unit),ids.a);
+ const direct=await tick();assert.deepEqual(direct.shots,[ids.a]);
+ await choose('response','ignore');const held=await tick();assert.deepEqual(held.shots,[]);assert.equal(held.a,direct.a);
+ await choose('response','return');assert.deepEqual((await tick()).shots,[],'Return fire waits for an actual attacker');
+ await page.evaluate(({unit,a})=>campaign.mission.damage(campaign.mission.entity(unit),1,campaign.mission.entity(a)),ids);
+ const returned=await tick();assert.deepEqual(returned.shots,[ids.a]);
+ await choose('response','free');await choose('priority','weakest');const weak=await tick();assert.deepEqual(weak.shots,[ids.b]);
+ await choose('priority','strongest');const strong=await tick();assert.deepEqual(strong.shots,[ids.a]);
+ // The menu reflects the same group that receives orders through its commander.
+ await page.keyboard.press('KeyF');
+ const commander=await page.evaluate(({unit,members})=>{const m=campaign.mission,u=m.entity(unit),leader=m.addUnit('command','rai',{x:u.x+80,y:u.y+70});m.configureGroup([leader.id,...members],{leaderId:leader.id});campaign.select([leader.id]);campaign.advance(0);return leader.id;},ids);
+ assert(await page.locator('#attack-order').isEnabled(),'An unarmed commander can command armed members');
+ await page.locator('#attack-order').click();assert.equal(await page.evaluate(()=>campaign.state.orderMode),'attack');
+ assert.deepEqual(await page.evaluate(()=>campaign.selected),[commander],'Attack mode keeps the selected commander');
+ await choose('response','ignore');
+ assert(await page.locator('[data-policy=response][data-value=ignore]').getAttribute('aria-checked')==='true');
+ assert.deepEqual(await page.evaluate(ids=>ids.map(id=>campaign.mission.entity(id).combatPolicy.response),ids.members),ids.members.map(()=>'ignore'));
+ await page.evaluate(id=>campaign.mission.setCombatPolicy([id],{response:'free'}),ids.members[1]);
+ await page.evaluate(()=>campaign.advance(0));assert.equal(await page.locator('[data-policy=response].mixed').count(),2);
+ await choose('response','ignore');await page.screenshot({path:folder+'/wide.png'});
+ await page.setViewportSize({width:390,height:844});
+ await page.waitForFunction(()=>{const r=document.querySelector('#combat-menu').getBoundingClientRect();return r.left>=0&&r.right<=innerWidth&&r.bottom<=innerHeight;});
+ await page.screenshot({path:folder+'/narrow.png'});
+ assert.deepEqual(errors,[]);
+ const result={direct,held,returned,weak,strong,group:true,errors};
+ fs.writeFileSync(folder+'/verification.json',JSON.stringify(result,null,2));console.log(JSON.stringify(result,null,2));
+}finally{await browser.close();}

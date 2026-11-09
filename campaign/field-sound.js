@@ -7,7 +7,9 @@ const driveFiles = {
 };
 const driveBase = '../assets/campaign/alpha/mission01/vehicle-sfx/';
 const radioBase = '../assets/campaign/alpha/mission01/unit-radio/';
+const warrantBase = '../assets/campaign/alpha/mission01/warrant-radio/';
 const storyBase = '../assets/campaign/alpha/mission01/field-radio/';
+const dialogueBase = '../assets/campaign/alpha/mission01/';
 const ambienceBase = '../assets/campaign/alpha/mission01/field-ambience/';
 const combatBase = '../assets/campaign/alpha/mission01/combat-sfx/';
 const combatFiles = {
@@ -17,6 +19,7 @@ const combatFiles = {
 const combatVoiceLimit = 10;
 const voiceKinds = ['select', 'move', 'attack', 'build', 'stop'];
 const voiceCooldown = 1250;
+const warrantStopCooldown = 45000;
 const voiceMaxAge = 1300;
 const storyMaxAge = 1500;
 
@@ -65,8 +68,10 @@ export class FieldSound {
     this.toggle.setAttribute('aria-pressed', String(this.enabled));
     setButtonIcon(this.storyToggle, this.storyEnabled ? 'voice' : 'voice-off', this.storyEnabled ? 'Голос радио: вкл.' : 'Голос радио: выкл.');
     this.storyToggle.setAttribute('aria-pressed', String(this.storyEnabled));
-    if (this.output) this.output.gain.setTargetAtTime(this.enabled ? .62 : 0, this.context.currentTime, .018);
+    if (this.output) this.output.gain.setTargetAtTime(this.enabled && !this.openingMix ? .62 : 0, this.context.currentTime, .018);
   }
+
+  setOpeningMix(active) { this.openingMix=active;this.refresh(); }
 
   async unlock() {
     if (!this.enabled) return;
@@ -82,12 +87,14 @@ export class FieldSound {
   setup() {
     const ctx = this.context = new AudioContext();
     this.output = ctx.createGain();
-    this.output.gain.value = .62;
+    this.output.gain.value = this.openingMix ? 0 : .62;
     const limiter = ctx.createDynamicsCompressor();
     limiter.threshold.value = -15;
     this.output.connect(limiter).connect(ctx.destination);
     this.effectsOutput = ctx.createGain();
     this.effectsOutput.connect(this.output);
+    this.combatOutput = ctx.createGain();
+    this.combatOutput.connect(this.output);
     this.commandOutput = ctx.createGain();
     this.commandOutput.connect(this.output);
     // Stream the full soundtrack; only short effects are decoded into buffers.
@@ -108,7 +115,10 @@ export class FieldSound {
     }
     this.loadRecordings();
     this.loadVoices();
-    if (this.storyEnabled) for (const chapter of ['intro', 'first-contact', 'camp3-sighted']) this.storyClip(chapter);
+    this.loadClip(warrantBase, 'stop.mp3')
+      .then(buffer => { this.warrantStop = buffer; })
+      .catch(error => console.warn('Реплика прапорщика недоступна:', error.message));
+    if (this.storyEnabled) for (const chapter of ['first-contact', 'camp3-sighted']) this.storyClip(chapter);
     this.loadProjector();
     for (const [kind, file] of Object.entries(combatFiles)) {
       this.loadClip(combatBase, file)
@@ -191,7 +201,17 @@ export class FieldSound {
     }
   }
 
-  storyClip(chapter) {
+  storyClip(chapter, cue) {
+    if (cue) {
+      const key = 'line:' + cue.id;
+      if (!this.storyClips.has(key)) this.storyClips.set(key,
+        this.loadClip(dialogueBase, cue.clip.file).catch(error => {
+          this.storyClips.delete(key);
+          console.warn('Реплика сюжета недоступна:', error.message);
+          return null;
+        }));
+      return this.storyClips.get(key);
+    }
     this.storyManifest ??= fetch(storyBase + 'manifest.json').then(response => {
       if (!response.ok) throw new Error('manifest.json · ' + response.status);
       return response.json();
@@ -213,15 +233,30 @@ export class FieldSound {
     return this.storyClips.get(chapter);
   }
 
-  playStory(chapter, keepCaptionUntil, urgent = false) {
+  playStory(chapter, keepCaptionUntil, urgent = false, cue = null) {
     this.stopStory();
+    if(this.storyVoices&&chapter)this.stopVoice();
     if (!chapter || !this.enabled || !this.storyEnabled || !this.context) return;
-    const request = {chapter, urgent, keepCaptionUntil, time:performance.now()};
+    const request = {chapter, urgent, cue, keepCaptionUntil, time:performance.now()};
     this.pendingStory = request;
-    this.storyClip(chapter).then(buffer => {
+    const scene=this.storyScenes?.get(cue?.storyScene),index=scene?.cues.indexOf(cue.id)??-1;
+    if(index>=0)for(const id of scene.cues.slice(index+1,index+3))this.storyClip(chapter,this.storyLines.get(id));
+    if (cue) {
+      keepCaptionUntil(Infinity);
+      request.releaseCaption = () => keepCaptionUntil(performance.now() + Math.max(2200, cue.text.length * 60));
+      // Slow or unavailable audio falls back to readable subtitles, without hanging the dialogue.
+      request.timeout = setTimeout(() => {
+        if (this.pendingStory !== request) return;
+        this.pendingStory = null;
+        request.releaseCaption();
+      }, 15000);
+    }
+    this.storyClip(chapter, cue).then(buffer => {
       if (this.pendingStory !== request) return;
       if (!buffer) {
         this.pendingStory = null;
+        clearTimeout(request.timeout);
+        request.releaseCaption?.();
         return;
       }
       request.buffer = buffer;
@@ -233,12 +268,15 @@ export class FieldSound {
     const request = this.pendingStory;
     if (!request?.buffer || !this.ready()) return;
     this.pendingStory = null;
-    if (performance.now() - request.time >= storyMaxAge) return;
+    clearTimeout(request.timeout);
+    if (!request.cue && performance.now() - request.time >= storyMaxAge) return;
     const ctx = this.context, now = ctx.currentTime, source = ctx.createBufferSource(), gain = ctx.createGain();
     source.buffer = request.buffer;
     gain.gain.value = 0;
     source.connect(gain).connect(this.output);
-    const playback = this.storyPlayback = {source, gain, chapter:request.chapter, urgent:request.urgent};
+    const playback = this.storyPlayback = {source, gain, chapter:request.chapter, cueId:request.cue?.id, urgent:request.urgent,
+      releaseCaption:request.releaseCaption};
+    const gap=Math.max(0,(request.cue?.pauseAfter??.18)-(request.cue?.clip?.trailingSilence??0));
     this.updateDialogueMix();
     source.onended = () => {
       source.disconnect();
@@ -246,24 +284,31 @@ export class FieldSound {
       if (this.storyPlayback !== playback) return;
       this.storyPlayback = null;
       this.updateDialogueMix();
+      request.keepCaptionUntil(performance.now()+gap*1000);
     };
     source.start(now);
-    request.keepCaptionUntil(performance.now() + (request.buffer.duration + .18) * 1000);
+    // Advance on AudioBuffer completion: a wall-clock deadline can cut the tail
+    // when the audio context starts late or is suspended by the browser.
+    request.keepCaptionUntil(request.cue?Infinity:performance.now()+(request.buffer.duration+gap)*1000);
   }
 
   updateDialogueMix() {
     const now = this.context.currentTime, story = this.storyPlayback, urgent = story?.urgent;
     this.effectsOutput.gain.setTargetAtTime(urgent ? .46 : story ? .67 : 1, now, story ? .045 : .16);
+    this.combatOutput.gain.setTargetAtTime(urgent ? .82 : 1, now, urgent ? .045 : .16);
     this.commandOutput.gain.setTargetAtTime(urgent ? .54 : 1, now, urgent ? .035 : .12);
     story?.gain.gain.setTargetAtTime(urgent ? .94 : this.voiceSource ? .51 : .88, now, .035);
     this.updateMusicMix(story || this.voiceSource ? .08 : .7);
   }
 
   stopStory() {
+    clearTimeout(this.pendingStory?.timeout);
+    this.pendingStory?.releaseCaption?.();
     this.pendingStory = null;
     const playback = this.storyPlayback;
     if (!playback) return;
     this.storyPlayback = null;
+    playback.releaseCaption?.();
     const now = this.context.currentTime;
     playback.gain.gain.setTargetAtTime(0, now, .012);
     playback.source.stop(now + .065);
@@ -271,18 +316,27 @@ export class FieldSound {
   }
 
   acknowledge(kind, ids) {
+    if(this.storyVoices)return this.storyAcknowledgement(kind,ids);
     if (!this.enabled || !ids.length || !voiceKinds.includes(kind)) return;
     const now = performance.now();
     const key = kind + ':' + JSON.stringify([...ids].sort());
     if (now - (this.lastVoice.get(key) ?? -Infinity) < voiceCooldown) return;
     const pending = this.pendingVoice;
     if (kind === 'select' && pending && pending.kind !== 'select' && now - pending.time < voiceMaxAge) return;
+    // A long idle remark must never hold up an acknowledgement of a new order.
+    if (this.voiceIsWarrant && this.voiceSource && kind !== 'select' && kind !== 'stop') {
+      const previous = this.voiceSource;
+      this.voiceSource = null;
+      this.voiceIsWarrant = false;
+      previous.stop();
+    }
     this.pendingVoice = {kind, key, time:now};
     if (this.ready()) this.playPendingVoice();
     else this.unlock();
   }
 
   playPendingVoice() {
+    if(this.storyVoices)return;
     if (!this.ready() || !this.voices || this.voiceSource || !this.pendingVoice) return;
     const {kind, key, time} = this.pendingVoice;
     this.pendingVoice = null;
@@ -292,17 +346,108 @@ export class FieldSound {
     const source = this.context.createBufferSource();
     this.voiceSource = source;
     this.updateDialogueMix();
-    source.buffer = this.voices[kind];
+    this.voiceIsWarrant = kind === 'stop' && !!this.warrantStop && !this.storyPlayback &&
+      now - (this.lastWarrantStop ?? -Infinity) >= warrantStopCooldown;
+    source.buffer = this.voiceIsWarrant ? this.warrantStop : this.voices[kind];
+    if (this.voiceIsWarrant) this.lastWarrantStop = now;
     source.connect(this.commandOutput);
     source.onended = () => {
       source.disconnect();
       if (this.voiceSource !== source) return;
       this.voiceSource = null;
+      this.voiceIsWarrant = false;
       this.playPendingVoice();
       this.updateDialogueMix();
     };
     source.start();
     this.lastVoice.set(key, now);
+  }
+
+  configureStoryVoices(script,mission,isBusy) {
+    this.storyVoices=new Map(script.barks.map(cue=>[cue.event,cue]));
+    this.storyScenes=new Map(script.scenes.map(scene=>[scene.id,scene]));
+    this.storyLines=new Map(script.dialogue.map(cue=>[cue.id,cue]));
+    this.storyMission=mission;this.storyBusy=isBusy;this.barkTimes=new Map();
+    this.seenHostiles=new Set();this.lastOrderAt=performance.now();
+  }
+
+  stopVoice() {
+    this.barkRequest=null;this.pendingVoice=null;
+    const source=this.voiceSource;this.voiceSource=null;this.voiceCueId=null;
+    this.voiceIsWarrant=false;source?.stop();
+    if(this.context)this.updateDialogueMix();
+  }
+
+  async bark(event,{cooldown=60000}={}) {
+    const cue=this.storyVoices?.get(event),id=cue?.id,now=performance.now(),story=this.storyMission.state.radioStory;
+    if(!cue||!this.ready()||!this.storyEnabled||this.storyBusy()||this.pendingStory||this.storyPlayback||this.voiceSource)return false;
+    if(story&&story.clock-story.lastCombat<8000)return false;
+    if(now-(this.lastBarkAt??-Infinity)<45000||now-(this.barkTimes.get(id)??-Infinity)<cooldown||story&&story.clock-(story.facts.lastChatterAt??-Infinity)<45000)return false;
+    const request=this.barkRequest={id,time:now};
+    const buffer=await this.storyClip('unit',cue);
+    // Low-priority responses expire instead of piling up behind a conversation.
+    if(this.barkRequest!==request)return false;
+    this.barkRequest=null;
+    if(!buffer||!this.ready()||!this.storyEnabled||this.storyBusy()||this.storyPlayback||this.pendingStory||performance.now()-now>1300||story&&story.clock-story.lastCombat<8000)return false;
+    const source=this.context.createBufferSource();source.buffer=buffer;source.connect(this.commandOutput);
+    this.voiceSource=source;this.voiceCueId=id;this.lastBarkAt=performance.now();this.barkTimes.set(id,this.lastBarkAt);
+    if(story)story.facts.lastChatterAt=story.clock;
+    source.onended=()=>{source.disconnect();if(this.voiceSource===source){this.voiceSource=null;this.voiceCueId=null;this.updateDialogueMix();}};
+    source.start();this.updateDialogueMix();return true;
+  }
+
+  storyAcknowledgement(kind,ids) {
+    const units=ids.map(id=>this.storyMission.entity(id)).filter(e=>e?.hp>0);
+    if(!units.length)return;
+    this.lastOrderAt=performance.now();this.idleIds=ids;
+    if(kind!=='select') {
+      this.stopVoice();
+      if(kind==='stop')this.bark('a14');
+    }
+  }
+
+  storyEvent(event) {
+    if(!this.storyVoices)return;
+    const mission=this.storyMission;
+    if(event.type==='factory-repair-start'){
+      const variant=(this.factoryBarkVariant??0)%2;this.factoryBarkVariant=variant+1;
+      this.bark(variant?'factory-repair-start-alt':'factory-repair-start');
+    }
+    if(event.type==='factory-repair-complete')this.bark('factory-repair-complete');
+    if(event.type==='research-start')this.bark('a07');
+    if(event.type==='research-complete'&&!['flamethrower','mg-ammo-1','mg-tower'].includes(event.key))this.bark('a08');
+    // A damage quip may use the first quiet moment, but never arrive minutes late.
+    if(event.type==='unit-damaged'&&mission.entity(event.target)?.kind!=='builder'&&this.afterCombatBark?.event!=='a11')
+      this.afterCombatBark={event:'a09',target:event.target,state:mission.state,expires:performance.now()+16000};
+    if(event.type==='destroyed'&&event.owner==='rai'&&event.kind==='command')
+      this.afterCombatBark={event:'a11',state:mission.state,expires:performance.now()+16000};
+    if(event.type==='unit-produced'&&!event.first&&event.kind!=='builder')this.bark('a12');
+  }
+
+  updateStoryVoices(field) {
+    if(!field||!this.storyVoices)return;
+    const now=performance.now();if(now-(this.lastBarkCheck??0)<1000)return;this.lastBarkCheck=now;
+    const mission=this.storyMission,visible=mission.state.units.filter(e=>e.owner==='scavs'&&e.hp>0&&mission.visibleAt(e.x,e.y));
+    const pending=this.afterCombatBark;
+    if(pending){
+      if(pending.expires<now||pending.state!==mission.state||pending.target&&!mission.entity(pending.target))this.afterCombatBark=null;
+      else this.bark(pending.event).then(played=>{if(played&&this.afterCombatBark===pending)this.afterCombatBark=null;});
+    }
+    const discovered=visible.some(e=>!this.seenHostiles.has(e.id));
+    for(const e of visible)this.seenHostiles.add(e.id);
+    if(discovered&&mission.state.flags.raidWon)this.bark('a13');
+    if(now-this.lastOrderAt>45000&&this.idleIds?.some(id=>{const unit=mission.entity(id);return unit?.hp>0&&unit.kind!=='builder'&&!unit.task&&!unit.path?.length;}))this.bark('a10',{cooldown:90000});
+    if(mission.state.energy<=0&&mission.state.buildings.some(b=>b.owner==='rai'&&(b.queue.length||b.research)))this.bark('a06',{cooldown:90000});
+    this.repairTargets??=new Map();
+    for(const [id,hp] of this.repairTargets){
+      const unit=mission.entity(id);
+      if(unit?.hp>hp&&unit.hp>=unit.maxHp)this.bark('a05');
+    }
+    this.repairTargets.clear();
+    for(const builder of mission.state.units.filter(e=>e.owner==='rai'&&e.task?.type==='repair')){
+      const unit=mission.entity(builder.task.targetId);
+      if(unit&&mission.config.units[unit.kind])this.repairTargets.set(unit.id,unit.hp);
+    }
   }
 
   playSkid(level, road) {
@@ -362,7 +507,7 @@ export class FieldSound {
     source.playbackRate.value = .96 + Math.random() * .08;
     gain.gain.value = level;
     stereo.pan.value = Number.isFinite(pan) ? Math.max(-1, Math.min(1, pan)) : 0;
-    source.connect(gain).connect(stereo).connect(this.effectsOutput);
+    source.connect(gain).connect(stereo).connect(this.combatOutput);
     this.combatVoices.add(source);
     source.onended = () => {
       this.combatVoices.delete(source);
@@ -393,6 +538,7 @@ export class FieldSound {
 
   update({engine = 0, rolling = 0, slip = 0, road = 0, welding = 0, field = false} = {}) {
     if (!this.ready()) return;
+    this.updateStoryVoices(field);
     const now = this.context.currentTime;
     if (now - this.drivingUpdated < 1 / 30) return;
     const dt = now - this.drivingUpdated;

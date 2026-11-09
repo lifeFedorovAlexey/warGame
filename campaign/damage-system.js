@@ -6,6 +6,7 @@ import {ATLAS_WIDTH,PART_OFFSET,MARK_OFFSET,META_OFFSET,attachDamageShader} from
 import {prepareDamageGeometry,createDamageCollider,collectDamageRegions} from './damage-geometry.js';
 import {createDamageDebris} from './damage-debris.js';
 import {createSalvageLayer} from './salvage-layer.js';
+import {contactRockAt} from './vehicle-contact-rock.js';
 
 export function createDamageSystem(T,scene,field,config){
   const capacity=1024,data=new Float32Array(ATLAS_WIDTH*capacity*4),atlas=new T.DataTexture(data,ATLAS_WIDTH,capacity,T.RGBAFormat,T.FloatType);
@@ -18,18 +19,23 @@ export function createDamageSystem(T,scene,field,config){
   const salvage=createSalvageLayer(T,scene,field,config.worldScale,getTemplate);
   const stats={hitCount:0,hitCpuMs:0,hitStateCpuMs:0,deformationCpuMs:0,geometryUpdates:0,instanceBufferUpdates:0,textureRows:0,textureBytes:0,visibleDamaged:0,deferred:0};
   function matrixFor(entity){
-    if(config.units[entity.kind]){const pose=vehiclePose(entity,field,config.worldScale);dummy.position.set(...pose.position);dummy.rotation.set(pose.pitch,pose.roll,entity.heading??0,'ZXY');}
+    if(config.units[entity.kind]){const pose=vehiclePose(entity,field,config.worldScale),rock=contactRockAt(entity,mission?.state.time??0);dummy.position.set(...pose.position);dummy.rotation.set(pose.pitch+rock.pitch,pose.roll+rock.roll,entity.heading??0,'ZXY');}
     else{dummy.position.set(entity.x,entity.y,entity.groundHeight??field.heightAt(entity.x,entity.y));dummy.rotation.set(0,0,entity.rotation??0);}
     dummy.scale.setScalar(config.worldScale);dummy.updateMatrix();return dummy.matrix;
   }
   function getTemplate(entity){
-    const key=(config.units[entity.kind]?'vehicle:':'building:')+entity.kind+(!config.units[entity.kind]?':'+entity.owner+':'+(entity.campId??''):'');
+    const key=(config.units[entity.kind]?'vehicle:':'building:')+entity.kind+(!config.units[entity.kind]?':'+entity.owner+':'+(entity.campId??'')+':'+(entity.scavVariant??'')+':'+(entity.fenceSpan??7)+':'+(entity.fenceProfile??null):'');
     if(!templates.has(key)&&templateProvider){const model=templateProvider(entity);if(model)templates.set(key,model);}
     const template=templates.get(key);if(template&&!template.collider)template.collider=createDamageCollider(T,template.bindings);
     if(template&&!template.regions)template.regions=collectDamageRegions(template.bindings);
     return template;
   }
-  function registerVehicle(kind,bindings,pose,options={}){templates.set('vehicle:'+kind,{bindings,parts:options.parts??VEHICLE_PARTS,pose});}
+  function registerVehicle(kind,bindings,pose,options={}){
+    // Registration runs while loading models, before the mission is ready.
+    // A first combat hit must not build the shared BVH inside its frame.
+    templates.set('vehicle:'+kind,{bindings,parts:options.parts??VEHICLE_PARTS,pose,
+      collider:createDamageCollider(T,bindings),regions:collectDamageRegions(bindings)});
+  }
   function buildingCeiling(entity){const spec=config.buildings[entity.kind];return entity.owner==='rai'&&!entity.completed&&spec?.realSizeMetres?buildLayerHeight({...entity,groundHeight:entity.groundHeight??field.heightAt(entity.x,entity.y)},spec,config.worldScale):Infinity;}
   function trace(entity,worldOrigin,worldDirection){
     const start=performance.now(),template=getTemplate(entity);if(!template)return null;
@@ -45,12 +51,19 @@ export function createDamageSystem(T,scene,field,config){
   function resolveContact(source,target,options={}){
     const approximate=options.contact??combatContact(source??{x:target.x,y:target.y-100},target,config,field);
     const from=source?[source.x,source.y,field.heightAt(source.x,source.y)+(source.kind==='mg-tower'?10.8:3.15)*config.worldScale]:[target.x,target.y-100,approximate.z];
-    // Deterministic small spread avoids every burst striking the identical texel.
-    const h=target.damage?.hits??0,spread=options.exact?0:.09*config.worldScale;
+    // Scatter across the visible surface, in a plane perpendicular to the
+    // shot. The previous 9 cm jitter made every burst draw a thin stripe.
+    // Seed by source and target so two vehicles do not acquire identical scars.
+    const h=target.damage?.hits??0,seed=[...(target.id??'')+':'+(source?.id??'')].reduce((s,c)=>(Math.imul(s,31)+c.charCodeAt(0))>>>0,17);
+    const angle=h*2.399963229728653+(seed%6283)*.001,radial=Math.sqrt(((h+.5)*.618033988749895)%1);
+    const dx=approximate.x-from[0],dy=approximate.y-from[1],length=Math.hypot(dx,dy)||1;
+    const spread=options.exact?0:config.worldScale,side=Math.cos(angle)*radial*.95*spread,height=Math.sin(angle)*radial*.56*spread;
     const ceiling=buildingCeiling(target),base=target.groundHeight??field.heightAt(target.x,target.y);
-    const to=[approximate.x+Math.sin(h*2.399)*spread,approximate.y+Math.cos(h*2.399)*spread,Math.min(approximate.z+Math.sin(h*1.73)*spread,base+(ceiling-base)*.7)];
+    const to=[approximate.x-dy/length*side,approximate.y+dx/length*side,Math.min(approximate.z+height,base+(ceiling-base)*.7)];
     const dir=new T.Vector3(...to).sub(new T.Vector3(...from)).normalize().toArray();
-    const hit=trace(target,from,dir);
+    // Combat already accepted a hit. If the scatter falls beyond a narrow
+    // silhouette, use its original aim ray rather than paint empty air.
+    const hit=trace(target,from,dir)??trace(target,from,new T.Vector3(approximate.x,approximate.y,approximate.z).sub(new T.Vector3(...from)).normalize().toArray());
     return hit?{...hit,type:options.type??(source?.kind==='flamer'?'fire':'bullet'),power:options.power}:null;
   }
   function prepare(node,category,lod,profile){const binding=prepareDamageGeometry(T,node,category,lod,profile),p=binding.geometry.attributes.position;geometryVersions.set(p,p.version);return binding;}
@@ -87,11 +100,15 @@ export function createDamageSystem(T,scene,field,config){
     if(entity.damage){
       if(visible){r.lastVisible=frame;upload(r);stats.visibleDamaged++;}
       else if(r.revision!==entity.damage.revision)stats.deferred++;
-      for(const [key,s] of Object.entries(entity.damage.parts))if(s.detached&&!r.detached.has(Number(key))){
+      // Interleave roofs, walls and fittings before the physics pool fills;
+      // numeric ID order otherwise spends every slot on the first facade.
+      const pending=Object.entries(entity.damage.parts).filter(([key,s])=>s.detached&&!r.detached.has(Number(key)));
+      if(entity.damage.wreck)pending.sort(([a],[b])=>(Number(a)*17%43)-(Number(b)*17%43));
+      for(const [key,s] of pending){
         const id=Number(key);r.detached.add(id);
-        if(visible&&r.lod===0&&enabled.value&&!s.salvageId){
+        if(visible&&r.lod<=1&&enabled.value&&!s.salvageId){
           const template=getTemplate(entity),impact=entity.damage.lastImpact;
-          if(template&&impact)debris.spawn(template.bindings,id,entity.damage,matrix,impact.direction,impact.power,template.pose?.(entity));
+          if(template&&impact)debris.spawn(template.bindings,id,entity.damage,matrix,impact.direction,impact.power,template.pose?.(entity),config.units[entity.kind]?entity:undefined,template.parts[id]);
         }
       }
     }
@@ -123,13 +140,15 @@ export function createDamageSystem(T,scene,field,config){
       return applyStructuralImpact(entity.damage,hit,template.regions,template.parts);
     };
     m.onDamageDestroyed=(entity,hit)=>{
-      if(config.units[entity.kind]||!hit)return;
+      if(!hit||config.units[entity.kind]?.infantry)return;
       const template=getTemplate(entity);if(!template)return;
       const point=hit.restPoint??hit.point;
       const candidates=template.regions.filter(r=>template.parts[r.id]?.detachable&&!entity.damage.parts[r.id]?.detached);
       const distance=r=>Math.hypot(...point.map((v,k)=>v-Math.max(r.min[k],Math.min(r.max[k],v))));
       candidates.sort((a,b)=>distance(a)-distance(b));
-      for(const r of candidates.slice(0,3))entity.damage.parts[r.id]={damage:1,detached:true};
+      const mobile=!!config.units[entity.kind];
+      const broken=mobile?candidates.filter(r=>!['glass'].includes(template.parts[r.id]?.material)).slice(0,3):candidates;
+      for(const r of broken)entity.damage.parts[r.id]={...entity.damage.parts[r.id],damage:1,detached:true};
       if(candidates.length)entity.damage.revision++;
     };
   }

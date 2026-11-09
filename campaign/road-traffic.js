@@ -62,8 +62,13 @@ export class RoadTraffic {
         const {a, b, path, ux, uy, length} = segment;
         const along = clamp((point.x - a.x) * ux + (point.y - a.y) * uy, 0, length);
         const px = a.x + ux * along, py = a.y + uy * along;
-        const distance = Math.hypot(point.x - px, point.y - py);
         const width = (a.width ?? path.width) + ((b.width ?? path.width) - (a.width ?? path.width)) * along / length;
+        const dx = point.x - px, dy = point.y - py, limit = Math.min(shortest, width / 2 + radius);
+        // Exact broad phase: a point outside either axis interval is also
+        // outside the circle. Keep hypot and the original strict tie rule for
+        // every surviving candidate; no approximate distance enters routing.
+        if (Math.abs(dx) > limit || Math.abs(dy) > limit) continue;
+        const distance = Math.hypot(dx, dy);
         if (distance >= shortest || distance > width / 2 + radius) continue;
         shortest = distance;
         nearest = {segment, along, x: px, y: py, distance, width};
@@ -162,11 +167,12 @@ export class RoadTraffic {
   }
 
   formationProgress(unit, layout, scale) {
-    const road = this.nearest(unit,scale*7);
-    if (!road || road.distance > road.width) return null;
+    const road = this.nearest(unit,scale*14);
+    if (!road) return null;
+    const nearLane = road.distance <= Math.min(scale * 7, road.width);
     const {segment} = road, progress = (segment.progress + road.along) * layout.direction;
     if (segment.pathId !== layout.path) {
-      if (this.coverage(unit.x, unit.y) < .4) return null;
+      if (!nearLane || this.coverage(unit.x, unit.y) < .4) return null;
       const {progress, length} = this.roadPosition(road);
       const remaining = Math.min(
         (layout.distances.get(segment.path.from) ?? Infinity) + progress,
@@ -175,9 +181,10 @@ export class RoadTraffic {
       const direct = Math.hypot(unit.x - layout.goal.x, unit.y - layout.goal.y);
       return remaining <= direct * 3 + 60 ? layout.targetProgress - remaining : null;
     }
-    if (this.coverage(unit.x,unit.y) >= .4) return progress;
-    const aligned = (-Math.sin(unit.heading) * segment.ux + Math.cos(unit.heading) * segment.uy) * layout.direction;
-    return aligned >= .62 && progress <= layout.targetProgress ? progress : null;
+    if (nearLane && this.coverage(unit.x,unit.y) >= .4) return progress;
+    // A group entering from an apron can use the same lane slots as vehicles
+    // already on the road. The navigation search still validates each approach.
+    return progress <= layout.targetProgress ? progress : null;
   }
 
   rightLane(unit, goal, scale) {

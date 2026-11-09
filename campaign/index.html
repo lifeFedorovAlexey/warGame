@@ -10,66 +10,96 @@
   <link rel="stylesheet" href="designer.css">
 <link rel="stylesheet" href="../assets/ui/icons.css">
 <link rel="stylesheet" href="hud-layout.css">
+<link rel="stylesheet" href="factory-production.css">
 <link rel="stylesheet" href="combat-menu.css">
+<link rel="stylesheet" href="opening-television.css">
+<link rel="stylesheet" href="main-menu.css">
 </head>
 <body>
 <main id="game">
   <div id="world" aria-label="Карта операции"></div>
-  <canvas id="labels" aria-hidden="true"></canvas>
   <div id="drag-box" hidden></div>
 
   <div id="mission-hud" hidden>
     <header class="top">
       <a href="../demo/" title="Вернуться к осмотру машины">РАЙ</a>
       <div class="resources">
-        <div class="resource resource-energy">
-          <span><span class="resource-icon" aria-hidden="true">⚡</span><b id="energy">760</b><small id="income"></small></span>
-          <meter id="energy-meter" aria-label="Запас энергии" min="0" max="2400" value="760"></meter>
+        <div id="oil-resource" class="resource resource-oil" title="Запас нефти">
+          <span><svg class="resource-icon" aria-hidden="true"><use href="hud-icons.svg#oil"/></svg><b id="energy">760</b><small id="income"></small></span>
+          <meter id="energy-meter" aria-label="Запас нефти" min="0" max="2400" value="760"></meter>
+        </div>
+        <div id="power-resource" class="resource resource-power" title="1 АЭС питает 4 вышки">
+          <span><svg class="resource-icon" aria-hidden="true"><use href="hud-icons.svg#power"/></svg><b id="power">0/0</b></span>
         </div>
         <div class="resource resource-fleet">
           <span><svg class="resource-icon" aria-hidden="true"><use href="hud-icons.svg#bukhanka"/></svg><b id="population">5 / 48</b></span>
           <meter id="fleet-meter" aria-label="Лимит техники" min="0" max="48" value="5"></meter>
         </div>
-        <span id="power" title="Питание от АЭС"></span>
         <button id="objective-focus" class="quiet" hidden data-icon="focus" aria-label="К цели"></button>
       </div>
       <button id="pause" title="Пауза · Пробел" data-icon="pause" aria-label="Пауза"></button>
       <details class="settings">
         <summary data-icon="menu" aria-label="Меню операции"></summary>
         <div class="operation-menu">
-          <header class="operation-heading">
-            <div><small>ОПЕРАЦИЯ «РАЙ» · АЛЬФА</small><h2>Освоение целины</h2></div>
-          </header>
-          <section class="settings-group" aria-labelledby="operation-controls">
-            <h3 id="operation-controls">Операция</h3>
+          <div class="operation-sections" role="group" aria-label="Разделы меню">
+            <button class="icon-button" type="button" title="Задачи" aria-label="Задачи" aria-pressed="true" aria-controls="operation-tasks">
+              <svg class="game-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m2.5 6 2 2 4-4m-6 9 2 2 4-4m-6 9 2 2 4-4" fill="none" stroke="#f3ae54" stroke-width="1.8"/><path d="M11 6h10m-10 7h10m-10 7h10" stroke="#d9c69b" stroke-width="2"/></svg>
+            </button>
+            <button class="icon-button" type="button" title="Операция" aria-label="Операция" aria-pressed="false" aria-controls="operation-actions">
+              <svg class="game-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h2v19H5z" fill="#d9c69b"/><path d="M7 4h14l-4 5 4 5H7z" fill="#8c9160"/><path d="M7 4h14l-2 2H7z" fill="#f3ae54"/></svg>
+            </button>
+            <button class="icon-button" type="button" title="Звук и связь" aria-label="Звук и связь" aria-pressed="false" aria-controls="operation-audio">
+              <svg class="game-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15v-3a8 8 0 0 1 16 0v3" fill="none" stroke="#d9c69b" stroke-width="2.2"/><path d="M3 12h5v7H5l-2-2zm13 0h5v5l-2 2h-3z" fill="#f3ae54"/></svg>
+            </button>
+            <button class="icon-button" type="button" title="Журнал" aria-label="Журнал" aria-pressed="false" aria-controls="operation-journal">
+              <svg class="game-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h7l2 2 2-2h7v17h-7l-2 1-2-1H3z" fill="none" stroke="#d9c69b" stroke-width="2"/><path d="M12 5v15M6 8h3m-3 4h3m6-4h3m-3 4h3" stroke="#f3ae54" stroke-width="1.5"/></svg>
+            </button>
+            <button id="controls-help" class="icon-button" type="button" title="Управление" aria-label="Управление" aria-pressed="false" aria-controls="control-hints">
+              <svg class="game-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 6h20v12H2z" fill="none" stroke="#d9c69b" stroke-width="1.6"/><path d="M5 9h2m2 0h2m2 0h2m2 0h2M5 12h2m2 0h2m2 0h2m2 0h2M7 15h10" stroke="#f3ae54" stroke-width="1.4"/></svg>
+            </button>
+          </div>
+          <section id="operation-tasks" class="operation-pane mission-tasks" aria-labelledby="operation-tasks-title">
+            <h2 id="operation-tasks-title">Задачи <span id="objective-count"></span></h2>
+            <ol id="objectives"></ol>
+            <p id="objective-hint" hidden></p>
+          </section>
+          <section id="operation-actions" class="operation-pane" aria-labelledby="operation-controls" hidden>
+            <h2 id="operation-controls">Операция</h2>
             <div class="settings-actions">
               <button id="save" data-icon="save" aria-label="Сохранить"></button>
               <button id="load" data-icon="load" aria-label="Загрузить"></button>
               <button id="tempo" title="Скорость симуляции" data-icon="speed-one" aria-label="Скорость симуляции"></button>
               <button id="home" title="К начальной базе · Home" data-icon="home" aria-label="К базе"></button>
+              <button id="main-menu-return" data-icon="menu" aria-label="Сохранить и выйти в главное меню"></button>
             </div>
           </section>
-          <section class="settings-group" aria-labelledby="communication-controls">
-            <h3 id="communication-controls">Связь</h3>
+          <section id="operation-audio" class="operation-pane" aria-labelledby="communication-controls" hidden>
+            <h2 id="communication-controls">Звук и связь</h2>
             <div class="settings-actions">
               <button id="radio-toggle" data-icon="radio" aria-label="Радио: вкл."></button>
               <button id="sound-toggle" data-icon="sound" aria-label="Звук: вкл."></button>
               <button id="story-voice-toggle" data-icon="voice" aria-label="Голос радио: вкл."></button>
             </div>
           </section>
-          <section class="mission-tasks">
-            <h2>Задачи <span id="objective-count"></span></h2>
-            <ol id="objectives"></ol>
+          <section id="operation-journal" class="operation-pane" aria-labelledby="journal-title" hidden>
+            <h2 id="journal-title">Журнал</h2>
+            <div id="journal-entries"></div>
           </section>
-          <div class="settings-help">
-            <button id="controls-help" class="icon-button" type="button" title="Управление" aria-label="Управление" aria-expanded="false" aria-controls="control-hints">
-              <svg class="game-icon" viewBox="0 0 32 24" aria-hidden="true">
-                <rect x="2" y="4" width="28" height="16" rx="2" fill="none" stroke="#d9c69b" stroke-width="2"/>
-                <path d="M7 9h2m3 0h2m3 0h2m3 0h3M7 13h2m3 0h2m3 0h2m3 0h3M11 17h10" stroke="#f3ae54" stroke-width="1.4"/>
-              </svg>
-            </button>
-            <p id="control-hints" hidden>ЛКМ — выбор, ПКМ — приказ.<br>Двойной ЛКМ — все машины этого типа на экране.<br>Колесо — масштаб, средняя кнопка — поворот.<br>WASD — камера, B — стройка, M — движение, F — атака.</p>
-          </div>
+          <section id="control-hints" class="operation-pane" aria-labelledby="control-hints-title" hidden>
+            <h2 id="control-hints-title">Управление</h2>
+            <dl class="key-guide">
+              <dt>ЛКМ</dt><dd>Выбрать</dd>
+              <dt>2× ЛКМ</dt><dd>Весь тип на экране</dd>
+              <dt>ПКМ</dt><dd>Отдать приказ</dd>
+              <dt>Колесо</dt><dd>Масштаб</dd>
+              <dt><abbr title="Средняя кнопка мыши">СКМ</abbr></dt><dd>Поворот камеры</dd>
+              <dt><kbd>WASD</kbd></dt><dd>Движение камеры</dd>
+              <dt><kbd>B</kbd> / <kbd>M</kbd> / <kbd>F</kbd></dt><dd>Стройка / ход / атака</dd>
+              <dt><kbd>Q</kbd> / <kbd>E</kbd></dt><dd>Поворот здания влево / вправо на 90°</dd>
+              <dt><kbd>Shift</kbd> + колесо</dt><dd>Повернуть здание</dd>
+              <dt><kbd>Alt</kbd></dt><dd>Разместить без привязки</dd>
+            </dl>
+          </section>
         </div>
       </details>
     </header>
@@ -79,14 +109,18 @@
       <div class="radio-copy"><strong></strong><p></p></div>
       <div class="radio-actions">
         <button class="quiet radio-focus" data-focus hidden data-icon="focus" aria-label=""></button>
-        <button data-dismiss title="Esc" data-icon="close" aria-label="Пропустить реплику"></button>
+        <button data-dismiss data-icon="close" aria-label="Пропустить разговор"></button>
       </div>
     </aside>
 
+    <aside id="field-tasks" aria-label="Текущие задачи" hidden><ol id="field-objectives"></ol></aside>
     <div class="command-deck">
     <section class="squad" aria-label="Выбранная техника">
       <div class="selection-title" hidden><strong id="selection"></strong><small id="details"></small></div>
-      <div id="roster" aria-label="Своя техника"></div>
+      <div class="army-roster">
+        <button id="select-army" data-icon="select-army" aria-label="Вся армия" title="F2 · Без отходящих и ремонта" aria-keyshortcuts="F2" aria-pressed="false" disabled></button>
+        <div id="roster" aria-label="Своя техника"></div>
+      </div>
     </section>
 
     <aside id="minimap-panel" class="panel">
@@ -99,9 +133,12 @@
         <div id="build-cards"></div>
       </div>
       <div id="placement" class="panel" hidden>
-        <div><strong id="placement-name"></strong><p id="placement-status"></p></div>
-        <button id="suggest-site" data-icon="focus" aria-label="К площадке"></button>
+        <strong id="placement-name"></strong>
+        <button id="suggest-site" data-icon="focus" aria-label="К площадке" title="Найти свободную площадку"></button>
+        <button id="rotate-building" data-icon="rotate-building" aria-label="Повернуть здание" title="Q — влево · E — вправо · Shift+колесо" aria-keyshortcuts="Q E R Shift+R"></button>
+        <button id="placement-snap" data-icon="placement-grid" aria-label="Привязка к сетке" title="Alt — временно без привязки" aria-pressed="true"></button>
         <button id="cancel-order" data-icon="close" aria-label="Отменить размещение"></button>
+        <p id="placement-status" role="status" hidden></p>
       </div>
       <div id="actions" class="panel" hidden></div>
       <div id="queue" hidden></div>
@@ -114,8 +151,8 @@
           <button id="production-toggle" title="Производство · Завод" data-icon="factory" aria-label="Производство"></button>
           <button id="lab-toggle" title="НИИ · Исследования" data-icon="lab" aria-label="НИИ"></button>
           <button id="design-toggle" aria-controls="designer" aria-expanded="false" data-icon="tools" aria-label="Конструктор"></button>
-          <button id="move-order" title="Движение · M" data-icon="move" aria-label="Маршрут"></button>
-          <button id="attack-order" title="ЛКМ / F — вкл./выкл. · ПКМ — настройки" data-icon="attack" aria-label="Атака" aria-keyshortcuts="F" aria-pressed="false" aria-controls="combat-menu" aria-expanded="false" aria-haspopup="dialog"></button>
+          <button id="move-order" title="Движение · M. Строй · Alt+1…4. Группа · Ctrl+G" data-icon="move" aria-label="Маршрут" aria-keyshortcuts="M Control+G Alt+1 Alt+2 Alt+3 Alt+4"></button>
+          <button id="attack-order" title="ЛКМ / F — режим атаки. По земле — движение с боем. ПКМ — настройки" data-icon="attack" aria-label="Атака" aria-keyshortcuts="F" aria-pressed="false" aria-controls="combat-menu" aria-expanded="false" aria-haspopup="dialog"></button>
           <button id="stop" data-icon="stop" aria-label="Стоп"></button>
         </div>
       </div>
@@ -159,6 +196,7 @@
           <div class="designer-filters" data-design-filters role="group" aria-label="Назначение деталей" hidden></div>
           <div class="designer-cards" data-design-cards role="group" aria-label="Доступные детали"></div>
           <p class="design-field-note" data-design-field-note hidden></p>
+          <div class="designer-paint-row"><span>Окраска</span><div data-design-paints role="group" aria-label="Окраска кузова"></div></div>
           <div class="designer-pagination" data-design-pages hidden>
             <button type="button" data-design-prev data-icon="previous" aria-label="Предыдущая страница деталей"></button>
             <output data-design-page aria-label="Страница деталей" aria-live="polite"></output>
@@ -170,7 +208,7 @@
           <div><dt>Скорость</dt><dd data-design-speed></dd></div>
           <div><dt>Дальность</dt><dd data-design-range></dd></div>
           <div><dt>Обзор</dt><dd data-design-vision></dd></div>
-          <div><dt>Энергия</dt><dd data-design-cost></dd></div>
+          <div><dt>Нефть</dt><dd data-design-cost></dd></div>
           <div><dt>Сборка</dt><dd data-design-time></dd></div>
           <div><dt title="Оценка по модулям">Масса</dt><dd data-design-mass></dd></div>
           <div><dt>Броня</dt><dd data-design-armor></dd></div>
@@ -190,12 +228,27 @@
     </div>
   </dialog>
   <div id="toast" role="status" hidden></div>
-  <section id="welcome" class="corner-card panel">
-    <p class="eyebrow">ОПЕРАЦИЯ «РАЙ» / АЛЬФА</p>
-    <h1>Освоение целины</h1>
-    <p id="loading-status">Подготовка карты…</p>
-    <button id="begin" class="primary" disabled data-icon="play" aria-label="Начать"></button>
-    <button id="resume-save" hidden data-icon="load" aria-label="Продолжить"></button>
+  <section id="welcome" class="main-menu" aria-label="Операция «Рай» — главное меню">
+    <div class="menu-art">
+      <img src="../assets/menu/desert-main-menu.png" alt="" draggable="false">
+      <button id="begin" class="menu-plate" disabled aria-label="Новая игра" title="Новая игра"></button>
+      <button id="resume-save" class="menu-plate" disabled aria-label="Продолжить" title="Сохранения ещё нет"></button>
+      <button id="menu-settings" class="menu-plate" disabled aria-label="Настройки" title="Настройки"></button>
+      <button id="menu-exit" class="menu-plate" aria-label="Выход" title="Выход"></button>
+    </div>
+    <section id="main-menu-settings" hidden aria-labelledby="main-menu-settings-title">
+      <h2 id="main-menu-settings-title">Настройки</h2>
+      <div class="menu-options">
+        <span>Звук и музыка</span><button id="menu-sound" data-icon="sound" aria-label="Звук"></button><output></output>
+        <span>Озвучка диалогов</span><button id="menu-voice" data-icon="voice" aria-label="Голос радио"></button><output></output>
+        <span>Радиопереговоры</span><button id="menu-radio" data-icon="radio" aria-label="Радио"></button><output></output>
+      </div>
+      <button id="menu-settings-close" data-icon="previous" aria-label="Назад в меню"></button>
+    </section>
+    <div id="loading" class="startup-loading">
+      <div class="loading-caption"><p id="loading-status" role="status">Загрузка ресурсов…</p><span id="loading-step" aria-hidden="true">1 / 6</span></div>
+      <progress id="loading-progress" max="6" value="0" aria-label="Загрузка игры" aria-describedby="loading-status"></progress>
+    </div>
   </section>
   <section id="result" class="corner-card panel" hidden>
     <h1 id="result-title"></h1>

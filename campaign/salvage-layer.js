@@ -2,10 +2,14 @@ import {extractDamagePart} from './damage-geometry.js';
 export function createSalvageLayer(T,scene,field,scale,getTemplate){
   const root=new T.Group();root.name='recoverable_parts';scene.add(root);
   const models=new Map(),cache=new Map(),point=new T.Vector3(),spin=new T.Quaternion();
+  let sceneryStock=0;
   function update(mission,camera){
     const items=mission?.state.salvage?.items??[],live=new Set(items.map(i=>i.id));
+    sceneryStock=items.filter(item=>item.sourceKind==='street-lamp').length;
     for(const [id,model] of models)if(!live.has(id)){root.remove(model);models.delete(id);}
     for(const item of items){
+      // The yard owns this exact pole, including its hinged fall and pickup.
+      if(item.sourceKind==='street-lamp')continue;
       let model=models.get(item.id);
       if(!model){
         const key=item.sourceKind+':'+item.sourcePart;
@@ -31,5 +35,5 @@ export function createSalvageLayer(T,scene,field,scale,getTemplate){
       model.visible=(!mission.exploredAt||mission.exploredAt(item.x,item.y))&&model.position.distanceToSquared(camera.position)<820**2;
     }
   }
-  return {root,update,reset(){for(const m of models.values())root.remove(m);models.clear();},get count(){return models.size;}};
+  return {root,update,reset(){for(const m of models.values())root.remove(m);models.clear();sceneryStock=0;},get count(){return models.size+sceneryStock;}};
 }

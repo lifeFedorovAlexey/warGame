@@ -1,5 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg">
   <!-- Flat stencil controls in the sand / olive / amber reference palette. -->
+  <symbol id="select-army" viewBox="0 0 64 64">
+    <g stroke="#30372a" stroke-width="2" stroke-linejoin="round">
+      <path fill="#8c9160" d="M8 14h17l4 7v17H4V21zm31 0h17l4 7v17H35V21z"/>
+      <path fill="#d9c69b" d="M22 30h20l5 9v21H17V39z"/>
+      <path fill="#30372a" d="M9 22h15v6H9zm31 0h15v6H40zM23 40h18v7H23z"/>
+      <path fill="#8c9160" d="M13 11h9v8h-9zm31 0h9v8h-9zM27 26h10v11H27z"/>
+      <path d="M17 5v9m31-9v9M32 18v12" stroke="#d9c69b" stroke-width="4"/>
+      <path d="M6 31v7m21-7v7m10-7v7m21-7v7M19 51v9m26-9v9" stroke-width="4"/>
+    </g>
+    <path d="M24 53h5m6 0h5" stroke="#f39a29" stroke-width="3"/>
+  </symbol>
+  <symbol id="rotate-building" viewBox="0 0 64 64"><path d="M47 20a21 21 0 1 0 5 24" fill="none" stroke="#d9c69b" stroke-width="8"/><path fill="#f39a29" d="m34 19 22-7-1 24z"/><path fill="#8c9160" d="M24 28h15v15H24z"/></symbol>
+  <symbol id="placement-grid" viewBox="0 0 64 64"><path d="M23 6v52M41 6v52M6 23h52M6 41h52" fill="none" stroke="#d9c69b" stroke-width="5"/><path fill="#f39a29" d="M28 28h8v8h-8z"/></symbol>
   <symbol id="previous" viewBox="0 0 64 64"><path fill="#d9c69b" d="m39 7 9 9-17 16 17 16-9 9-26-25z"/><path fill="#f39a29" d="m39 7 9 9-7 7-9-9z"/></symbol>
   <symbol id="next" viewBox="0 0 64 64"><path fill="#d9c69b" d="m25 7-9 9 17 16-17 16 9 9 26-25z"/><path fill="#f39a29" d="m25 7-9 9 7 7 9-9z"/></symbol>
   <symbol id="play" viewBox="0 0 64 64"><path fill="#8c9160" d="M15 10 56 34 15 57z"/><path fill="#d9c69b" d="M12 7 53 31 12 54z"/><path fill="#f39a29" d="m22 22 16 9-16 10z"/></symbol>

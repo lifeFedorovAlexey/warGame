@@ -10,11 +10,18 @@ export const canInstallRecipe=(mission,unit,recipe)=>unit.kind!=='command'&&!!mi
 export const FIELD_RECIPES={
   'hood-guard':{name:'Защита передка',part:22,stock:'guard-stock',body:'B01',strength:120,hpBonus:120,bulletMultiplier:.65},
   'window-grille':{name:'Решётки лобовых стёкол',part:23,stock:'guard-stock',body:'B01',strength:80,hpBonus:80,bulletMultiplier:.75},
+  'tube-bumper':{name:'Трубчатый бампер',icon:'armor-upgrade',part:26,stock:'tube-stock',body:'B01',strength:150,hpBonus:80,bulletMultiplier:.8},
 };
 export function ensureSalvage(mission){
   const state=mission.state.salvage??={enabled:true,recipes:[...(mission.config.salvage?.initialRecipes??[])],wanted:Object.keys(FIELD_RECIPES),items:[],serial:0};
   // Previous saves had an implicit off default. Keep explicit user choices.
   if(!state.preferenceVersion){if(!state.userConfigured)state.enabled=true;state.preferenceVersion=1;}
+  if(!state.recipeVersion){
+    for(const id of mission.config.salvage?.initialRecipes??[])if(!state.recipes.includes(id)){
+      state.recipes.push(id);if(!state.userConfigured&&!state.wanted.includes(id))state.wanted.push(id);
+    }
+    state.recipeVersion=1;
+  }
   return state;
 }
 export function availableFieldRecipes(mission){
@@ -22,6 +29,12 @@ export function availableFieldRecipes(mission){
   return Object.entries(FIELD_RECIPES).filter(([id])=>state.recipes.includes(id)).map(([id,r])=>({id,...r}));
 }
 export function modificationInstalled(unit,part){return !!unit.damage?.parts?.[part]?.installed&&!partMissing(unit.damage,part);}
+export function salvageRecipe(mission,unit,item){
+  const state=ensureSalvage(mission);
+  if(!state.enabled||unit.hp<=0||unit.owner!=='rai'||item.sourceUnit===unit.id)return null;
+  return availableFieldRecipes(mission).find(recipe=>state.wanted.includes(recipe.id)&&recipe.stock===item.stock
+    &&canInstallRecipe(mission,unit,recipe)&&!modificationInstalled(unit,recipe.part))??null;
+}
 export function syncFieldHp(mission,unit){
   const previous=unit.fieldHpBonus??0;
   const bonus=unit.hp>0&&!unit.damage?.wreck?Object.values(FIELD_RECIPES)
@@ -89,7 +102,11 @@ export function updateSalvage(mission){
   // Rebuilt only when the bounded item list changes, not once per vehicle.
   let index=indices.get(state);const key=state.items.map(i=>i.id).join('|'),scale=mission.config.worldScale,cell=SALVAGE_LIMITS.cellMetres*scale;
   if(!index||index.key!==key){index={key,buckets:new Map()};for(const item of state.items){const key=Math.floor(item.x/cell)+','+Math.floor(item.y/cell);if(!index.buckets.has(key))index.buckets.set(key,[]);index.buckets.get(key).push(item);}indices.set(state,index);}
-  const consumed=new Set(),radius=3.1*scale;
+  const consumed=new Set(),radius=3.1*scale,reservations=new Map();
+  for(const unit of mission.state.units)if(unit.task?.salvageId){
+    const item=state.items.find(item=>item.id===unit.task.salvageId);
+    if(item&&salvageRecipe(mission,unit,item)&&!unit.combatRetreat)reservations.set(item.id,unit.id);
+  }
   for(const unit of mission.state.units){
     if(unit.hp<=0||unit.owner!=='rai')continue;
     const compatible=recipes.filter(r=>canInstallRecipe(mission,unit,r)&&!modificationInstalled(unit,r.part));if(!compatible.length)continue;
@@ -97,6 +114,7 @@ export function updateSalvage(mission){
     for(let cy=Math.floor((Math.min(ay,unit.y)-radius)/cell);cy<=Math.floor((Math.max(ay,unit.y)+radius)/cell);cy++)for(let cx=Math.floor((Math.min(ax,unit.x)-radius)/cell);cx<=Math.floor((Math.max(ax,unit.x)+radius)/cell);cx++){
       for(const item of index.buckets.get(cx+','+cy)??[]){
         if(consumed.has(item.id)||item.readyAt>now||item.sourceUnit===unit.id)continue;
+        if(reservations.has(item.id)&&reservations.get(item.id)!==unit.id)continue;
         if(!touchesSalvage(unit,item,scale))continue;
         const recipe=compatible.find(r=>r.stock===item.stock&&!modificationInstalled(unit,r.part));if(!recipe)continue;
         syncFieldHp(mission,unit);

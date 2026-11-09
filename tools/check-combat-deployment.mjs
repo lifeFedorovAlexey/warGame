@@ -4,8 +4,20 @@ import {Mission} from '../campaign/mission.js';
 import {vehicleClearance} from '../campaign/vehicle-collision.js';
 const config=JSON.parse(fs.readFileSync('assets/campaign/alpha/mission01/gameplay.json'));
 const field={extent:4096,half:2048,cellMetres:32,heightAt:()=>0,gradientAt:()=>({x:0,y:0}),gridToWorld:([x,y])=>({x:x*32-2048,y:2048-y*32}),worldToGrid:(x,y)=>[(x+2048)/32,(2048-y)/32]};
-function fixture(){const m=new Mission(config,field);m.state.units=[];m.state.buildings=[];m.state.camps=[];m.state.bounds=[0,0,127,127];m.state.pendingCinematics=[];m.updateMission=()=>{};m.rebuildNavigation();m.visible.fill(1);m.explored.fill(1);return m;}
+function fixture(){const m=new Mission({...config,startGrid:[64,76]},field);m.state.units=[];m.state.buildings=[];m.state.camps=[];m.state.bounds=[0,0,127,127];m.state.pendingCinematics=[];m.updateMission=()=>{};m.rebuildNavigation();m.visible.fill(1);m.explored.fill(1);return m;}
 const results=[];
+{
+ const m=fixture(),units=Array.from({length:4},(_,i)=>m.addUnit('bukhanka','rai',{x:(i%2)*30,y:-Math.floor(i/2)*30}));
+ const first=m.addStructure('generator','scavs',{x:0,y:150},{hp:100000,completed:true,progress:1});
+ const second=m.addStructure('generator','scavs',{x:65,y:170},{hp:100000,completed:true,progress:1});m.rebuildNavigation();
+ assert(m.order(units.map(u=>u.id),'attack-move',{x:0,y:350}).ok);m.advance(.1);
+ assert(units.every(u=>u.combatDeployment?.targetId===first.id));
+ m.damage(first,100001,units[0]);
+ for(let i=0;i<5;i++)m.advance(.1);
+ assert(units.every(u=>u.combatDeployment?.targetId===second.id),'A second contact replaces the destroyed target');
+ assert(units.every(u=>!u.combatResume&&!u.combatParking),'The new deployment cancels stale march-planning state for every member');
+ assert(units.every(u=>u.combatDeployment.resume.type==='attack-move'),'Preserve the actual march behind the new deployment');
+}
 for(const action of ['attack-move','attack']){
  const m=fixture(),units=Array.from({length:10},(_,i)=>m.addUnit('bukhanka','rai',{x:0,y:-i*30}));
  const target=m.addStructure('generator','scavs',{x:0,y:190},{hp:100000,maxHp:100000,completed:true,progress:1});m.rebuildNavigation();
@@ -32,7 +44,7 @@ for(const action of ['attack-move','attack']){
 {
  const m=fixture(),units=Array.from({length:6},(_,i)=>m.addUnit('bukhanka','rai',{x:0,y:-i*30}));
  const target=m.addStructure('mg-tower','scavs',{x:0,y:200},{hp:100000,maxHp:100000,completed:true,progress:1});m.rebuildNavigation();
- const collisions=[],originalCollision=m.vehicleCollision.bind(m);m.vehicleCollision=(unit,speed,blockers)=>{collisions.push({time:m.state.time,id:unit.id,speed,retreat:unit.combatRetreat?.status,blockers:[...blockers].map(other=>({id:other.id,x:other.x,y:other.y,retreat:other.combatRetreat?.status}))});return originalCollision(unit,speed,blockers);};
+ const collisions=[],originalCollision=m.vehicleCollision.bind(m);m.vehicleCollision=(unit,speed,blockers)=>{collisions.push({time:m.state.time,id:unit.id,x:unit.x,y:unit.y,heading:unit.heading,path:unit.path,speed,retreat:unit.combatRetreat?.status,blockers:[...blockers].map(other=>({id:other.id,x:other.x,y:other.y,heading:other.heading,speed:other.driveSpeed,retreat:other.combatRetreat?.status}))});return originalCollision(unit,speed,blockers);};
  m.setCombatPolicy(units.map(u=>u.id),{retreat:'light'});
  assert(m.order(units.map(u=>u.id),'attack-move',{x:0,y:350}).ok);
  let started=null;
@@ -48,9 +60,11 @@ for(const action of ['attack-move','attack']){
  const m=fixture(),units=Array.from({length:6},(_,i)=>m.addUnit('bukhanka','rai',{x:0,y:-i*30}));
  const target=m.addStructure('generator','scavs',{x:0,y:190},{hp:100000,completed:true,progress:1});m.rebuildNavigation();
  const goal={x:0,y:350};m.order(units.map(u=>u.id),'attack-move',goal);m.advance(.1);m.finishPendingStep();
- const deployment=structuredClone(units[0].combatDeployment),path=structuredClone(units[0].path);
- m.order(units.map(u=>u.id),'attack-move',goal);assert.deepEqual(units[0].combatDeployment,deployment,'Repeated order preserves deployment');assert.deepEqual(units[0].path,path);
+ const deployment=structuredClone(units[0].combatDeployment);
  const copy=fixture();copy.load(m.save());assert.deepEqual(copy.entity(units[0].id).combatDeployment,deployment,'Deployment survives save/load');
+ copy.state.bounds=m.state.bounds.slice();copy.rebuildNavigation();
+ assert(copy.order(units.map(u=>u.id),'attack-move',goal).ok);
+ assert(!copy.entity(units[0].id).combatDeployment&&copy.entity(units[0].id).combatDisengage.includes(target.id),'A fresh ground order must release the old engagement, even at the same destination');
  m.stop([units[1].id]);m.advance(.1);assert(!units[1].combatDeployment&&!units[1].task,'Stop cancels deployment');
  assert(m.order([units[2].id],'move',{x:-150,y:-150}).ok);assert(!units[2].combatDeployment&&units[2].task.type==='move','New move overrides combat position');
  m.damage(target,100001,units[0]);m.advance(.1);assert(!units[0].combatDeployment&&units[0].task.type==='attack-move','Destroyed contact resumes original march');

@@ -1,0 +1,309 @@
+{
+  "environment": {
+    "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 (0x00002786) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "webgl": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+    "timerQuery": true,
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36 Edg/157.0.0.0",
+    "viewport": [
+      1280,
+      720
+    ],
+    "hardwareConcurrency": 24,
+    "browser": "157.0.4341.42",
+    "gpuDevices": [
+      {
+        "vendorId": 4318,
+        "deviceId": 10118,
+        "subSysId": 1089344600,
+        "revision": 161,
+        "vendorString": "",
+        "deviceString": "NVIDIA GeForce RTX 4070",
+        "driverVendor": "NVIDIA",
+        "driverVersion": "32.0.16.1742"
+      },
+      {
+        "vendorId": 4098,
+        "deviceId": 5710,
+        "subSysId": 2116424802,
+        "revision": 194,
+        "vendorString": "",
+        "deviceString": "AMD Radeon(TM) Graphics",
+        "driverVendor": "",
+        "driverVersion": "32.0.21036.18"
+      },
+      {
+        "vendorId": 5140,
+        "deviceId": 140,
+        "subSysId": 0,
+        "revision": 0,
+        "vendorString": "",
+        "deviceString": "Microsoft Basic Render Driver",
+        "driverVendor": "",
+        "driverVersion": "10.0.26100.9711"
+      }
+    ],
+    "date": "2026-11-07T12:15:22.077Z",
+    "damageLODOverride": null,
+    "node": "v24.22.0",
+    "sources": {
+      "campaign/damage-contact.js": "d9b5e71c90c3bbfa4512af3c19ad404fc211f5c9d2849e46f4fdd4c254c78f0c",
+      "campaign/damage-debris.js": "daba18afa775c57b7c1c4e6edab4bcfe823ad0edc9968028ed641741d6b3f5ef",
+      "campaign/damage-debug.js": "11279c1b500c7926128ad553b424ac0c1058b03c4fa7990a28fc6b54e9bed974",
+      "campaign/damage-geometry.js": "1c13898cc24b604c066347f69173bf70d1f11d1ba88237ef4c03cb5a0355be23",
+      "campaign/damage-shader.js": "65cc1dabf9cd9f13bef2816756b270296340fa9b58b7740792644bbfcf2bc18a",
+      "campaign/damage-state.js": "35fd0f01edf40a3aab230123bfa69e719e61774a9f2f27df0ae45943952d852e",
+      "campaign/damage-system.js": "059782e014c078c3e400b8748221880ca6c97bf018899849fcd36be10200f445",
+      "campaign/vehicle-layer.js": "07f0f766e38154ea1b8d4e382651d129e567182d35b43b84b9c1df2d2c5edfdd",
+      "campaign/world.js": "69d1cea6f2f40ec457778630693cccf3442e40cd0fad5aaa4767ee4b37070966",
+      "campaign/mission.js": "c0fbc0b873f4aadded6cc853d34050d274600b54b88b53cc9b4db2535c582689",
+      "tools/check-damage-browser.mjs": "a62bf45567ba280593b5d9c6089ac226458027ab0ac9a5f43fa214a77f5140ae"
+    }
+  },
+  "smoke": {
+    "single": {
+      "entityId": "u1",
+      "partId": 0,
+      "point": [
+        1.1368683701132431e-13,
+        2.1368750202271185,
+        1.7200000000000002
+      ],
+      "worldPoint": [
+        -1595.9982708115713,
+        284.6499085974885,
+        7.727538214041751
+      ],
+      "normal": [
+        0.00004144343944462477,
+        0.9836734187926642,
+        0.17996278349479114
+      ],
+      "type": "bullet",
+      "power": 8,
+      "hits": 1
+    },
+    "burst": {
+      "entityId": "u1",
+      "partId": 0,
+      "point": [
+        -0.9714999854571387,
+        0.09999999999999432,
+        1.7200000000000002
+      ],
+      "worldPoint": [
+        -1600.370020637028,
+        275.4840640740248,
+        7.768854652962503
+      ],
+      "normal": [
+        -0.9987410990210551,
+        0.00022076197743850634,
+        0.05016142332873397
+      ],
+      "type": "burst",
+      "power": 8,
+      "hits": 9
+    },
+    "dent": {
+      "entityId": "u1",
+      "partId": 0,
+      "point": [
+        0.9714999853055852,
+        0.10000000000000142,
+        1.7200000000000002
+      ],
+      "worldPoint": [
+        -1591.6265209867975,
+        275.48405547710126,
+        7.766901292191009
+      ],
+      "normal": [
+        0.9987634125732243,
+        0.00021880110307346526,
+        0.049715167013342484
+      ],
+      "type": "collision",
+      "power": 110,
+      "hits": 10
+    },
+    "marks": 3,
+    "cageMax": 0.1296355226497771,
+    "follows": true,
+    "idleUploads": 0,
+    "far": 2,
+    "near": 0,
+    "offscreen": 3,
+    "offscreenPose": true,
+    "deferred": true,
+    "restored": true,
+    "lamp": {
+      "entityId": "u1",
+      "partId": 5,
+      "point": [
+        -0.5443168381849547,
+        2.188166618347168,
+        1.5714375178019206
+      ],
+      "worldPoint": [
+        -1592.087581075391,
+        283.15914560132825,
+        7.057693997409588
+      ],
+      "normal": [
+        -0.3894124048992257,
+        0.9210469507089964,
+        -0.005522092018524305
+      ],
+      "type": "bullet",
+      "power": 24,
+      "hits": 13
+    },
+    "wheel": {
+      "entityId": "u1",
+      "partId": 1,
+      "point": [
+        -0.8561018815094754,
+        1.5187483606046448,
+        0.8179141851919933
+      ],
+      "worldPoint": [
+        -1592.208214846025,
+        279.8173297973788,
+        3.687447826153962
+      ],
+      "normal": [
+        -0.370736157727974,
+        0.42819135579053036,
+        0.8241400755814308
+      ],
+      "type": "bullet",
+      "power": 110,
+      "hits": 14
+    },
+    "bumper": {
+      "entityId": "u1",
+      "partId": 7,
+      "point": [
+        0.6280818184216871,
+        2.3741422494252498,
+        1.1740416685740154
+      ],
+      "worldPoint": [
+        -1587.5548797490565,
+        285.9733331971944,
+        5.250125398396694
+      ],
+      "normal": [
+        -0.009296397493234014,
+        0.998416643392783,
+        0.05547777203471892
+      ],
+      "type": "bullet",
+      "power": 170,
+      "hits": 15
+    },
+    "glass": {
+      "entityId": "u1",
+      "partId": 13,
+      "point": [
+        0.8746117834141565,
+        -0.08264322827261593,
+        2.062915924495813
+      ],
+      "worldPoint": [
+        -1582.2262395633268,
+        276.247348632897,
+        9.307941604398092
+      ],
+      "normal": [
+        0.8716781928283016,
+        0.4900548974610832,
+        -0.004829660649919328
+      ],
+      "type": "bullet",
+      "power": 22,
+      "hits": 16
+    },
+    "weapon": {
+      "entityId": "u1",
+      "partId": 9,
+      "point": [
+        0.03600382324932183,
+        -0.671752436482809,
+        3.6737479368845687
+      ],
+      "worldPoint": [
+        -1584.6667449540496,
+        272.38089194523513,
+        16.581700890321653
+      ],
+      "normal": [
+        0.11169919019682292,
+        -0.22770096871744885,
+        0.9673032408477236
+      ],
+      "type": "bullet",
+      "power": 1,
+      "hits": 12
+    },
+    "detached": true,
+    "physics": 1,
+    "persists": true,
+    "id": "u1"
+  },
+  "wreck": {
+    "retained": true,
+    "marks": 10,
+    "cage": true,
+    "missing": 8
+  },
+  "buildings": [
+    {
+      "kind": "factory",
+      "hit": true,
+      "part": 1,
+      "equipment": 59,
+      "equipmentExpected": 59,
+      "equipmentDetached": true,
+      "noCage": true,
+      "detached": true
+    },
+    {
+      "kind": "lab",
+      "hit": true,
+      "part": 1,
+      "equipment": 56,
+      "equipmentExpected": 56,
+      "equipmentDetached": true,
+      "noCage": true,
+      "detached": true
+    },
+    {
+      "kind": "generator",
+      "hit": true,
+      "part": 1,
+      "equipment": 13,
+      "equipmentExpected": 13,
+      "equipmentDetached": true,
+      "noCage": true,
+      "detached": true
+    },
+    {
+      "kind": "mg-tower",
+      "hit": true,
+      "part": 1,
+      "equipment": 9,
+      "equipmentExpected": 9,
+      "equipmentDetached": true,
+      "noCage": true,
+      "detached": true
+    }
+  ],
+  "buildingWreck": {
+    "hit": true,
+    "wreck": true,
+    "retained": true,
+    "parts": 3
+  },
+  "errors": []
+}

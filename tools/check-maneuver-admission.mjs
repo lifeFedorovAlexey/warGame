@@ -1,0 +1,24 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {Mission} from '../campaign/mission.js';
+import {maneuverAdmissionBlocker} from '../campaign/maneuver-admission.js';
+const config=JSON.parse(fs.readFileSync('assets/campaign/alpha/mission01/gameplay.json','utf8'));
+const field={extent:4096,half:2048,cellMetres:32,heightAt:()=>0,gradientAt:()=>({x:0,y:0}),
+ gridToWorld:([x,y])=>({x:x*32-2048,y:2048-y*32}),worldToGrid:(x,y)=>[(x+2048)/32,(2048-y)/32]};
+const m=new Mission(config,field);
+Object.assign(m.state,{units:[],buildings:[],camps:[],bounds:[0,0,127,127],pendingCinematics:[]});
+m.updateMission=()=>{};m.rebuildNavigation();
+const van=m.addUnit('bukhanka','rai',{x:0,y:0},{heading:0});
+const follower=m.addUnit('bukhanka','rai',{x:0,y:-24},{heading:0,driveSpeed:20,steering:0});
+const next={...van,y:-.14};
+assert(m.vehicleMotionClear(van,van,next),'The current poses alone permit the reverse');
+assert.equal(maneuverAdmissionBlocker(m,van,van,next,.1),follower,'A reverse cannot enter an unavoidable braking path');
+follower.driveSpeed=0;
+assert.equal(maneuverAdmissionBlocker(m,van,van,next,.1),null,'Admission resumes immediately after an actual safe stop');
+follower.driveSpeed=20;follower.heading=Math.PI;
+assert.equal(maneuverAdmissionBlocker(m,van,van,next,.1),null,'A departing vehicle does not hold the reverse');
+follower.heading=0;follower.x=30;
+assert.equal(maneuverAdmissionBlocker(m,van,van,next,.1),null,'A parallel independent lane does not hold the reverse');
+follower.x=0;follower.hp=0;
+assert.equal(maneuverAdmissionBlocker(m,van,van,next,.1),null,'A destroyed vehicle immediately releases admission');
+console.log(JSON.stringify({checks:5,obstruction:'predicted braking sweep',release:'actual next step'}));

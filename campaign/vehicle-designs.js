@@ -1,3 +1,5 @@
+import {vehiclePaint} from './vehicle-paint.js';
+
 const starterKinds = ['bukhanka', 'builder'];
 const componentNames = {C01:'Двор', B01:'Буханка', U01:'Корд', U25:'Проектор', 'mission-flamer':'Огнемёт'};
 const designationPattern = /^([\p{L}\p{N}]+)-([1-9]\d*)(М\d*)?$/iu;
@@ -9,8 +11,16 @@ export function vehicleComponentName(id, config) {
 export const designNameKey = name => name.trim().normalize('NFC').toLocaleLowerCase('ru');
 
 export function projectAssemblyKey({components, engineUpgradeLevel = 0}) {
+  // Paint and project names are cosmetic; only the assembly defines a type.
   const level = Number.isSafeInteger(engineUpgradeLevel) && engineUpgradeLevel > 0 ? engineUpgradeLevel : 0;
   return JSON.stringify([components, level]);
+}
+
+export function latestVehicleProject(projects, vehicle, config) {
+  const components = vehicle.components ?? config.units[vehicle.kind]?.components;
+  if (!components) return undefined;
+  const key = projectAssemblyKey({...vehicle, components});
+  return projects.findLast(project => projectAssemblyKey(project) === key);
 }
 
 export function latestVehicleProjects(projects) {
@@ -85,6 +95,7 @@ export function starterProjects(recipes) {
     id: kind,
     name: spec.name,
     components: [...components],
+    paint: vehiclePaint({kind, components}).id,
   }));
 }
 

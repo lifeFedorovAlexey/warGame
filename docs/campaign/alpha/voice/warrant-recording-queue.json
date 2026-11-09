@@ -1,0 +1,303 @@
+{
+  "speaker": "warrant",
+  "source": {
+    "path": "docs/campaign/alpha/mission01-script.md",
+    "sha256": "75fdf1b882500122168dac0ced3c0da446dd76fe2e91bb3de52d22e3323e24a9"
+  },
+  "lines": [
+    {
+      "id": "m01-s02-l002",
+      "file": "m01-s02-l002.mp3",
+      "scene": "Казарма",
+      "sceneNumber": 2,
+      "sourceLine": 57,
+      "text": "Товарищ командир, вы чего орёте?",
+      "prompt": "[Sleepy, low voice, unhurried] Товарищ командир, вы чего орёте?",
+      "status": "recorded",
+      "recording": "recordings/warrant/m01-s02-l002.mp3"
+    },
+    {
+      "id": "m01-s02-l004",
+      "file": "m01-s02-l004.mp3",
+      "scene": "Казарма",
+      "sceneNumber": 2,
+      "sourceLine": 65,
+      "text": "А приказ на это был?",
+      "prompt": "[Calm, matter-of-fact] А приказ на это был?",
+      "status": "recorded",
+      "recording": "recordings/warrant/m01-s02-l004.mp3"
+    },
+    {
+      "id": "m01-s02-l006",
+      "file": "m01-s02-l006.mp3",
+      "scene": "Казарма",
+      "sceneNumber": 2,
+      "sourceLine": 73,
+      "text": "На смерть личного состава.",
+      "prompt": "[Deadpan, completely serious] На смерть личного состава.",
+      "status": "recorded",
+      "recording": "recordings/warrant/m01-s02-l006.mp3"
+    },
+    {
+      "id": "m01-s02-l008",
+      "file": "m01-s02-l008.mp3",
+      "scene": "Казарма",
+      "sceneNumber": 2,
+      "sourceLine": 81,
+      "text": "Ну вот. Значит, сон. Спите дальше.",
+      "prompt": "[Calm, reassuring, unhurried] Ну вот. Значит, сон. Спите дальше.",
+      "status": "recorded",
+      "recording": "recordings/warrant/m01-s02-l008.mp3"
+    },
+    {
+      "id": "m01-s02-l010",
+      "file": "m01-s02-l010.mp3",
+      "scene": "Казарма",
+      "sceneNumber": 2,
+      "sourceLine": 93,
+      "text": "Шесть сорок.",
+      "prompt": "[Sleepy, matter-of-fact] Шесть сорок.",
+      "status": "recorded",
+      "recording": "recordings/warrant/m01-s02-l010.mp3"
+    },
+    {
+      "id": "m01-s02-l012",
+      "file": "m01-s02-l012.mp3",
+      "scene": "Казарма",
+      "sceneNumber": 2,
+      "sourceLine": 101,
+      "text": "Так точно.",
+      "prompt": "[Quiet, matter-of-fact] Так точно.",
+      "status": "recorded",
+      "recording": "recordings/warrant/m01-s02-l012.mp3"
+    },
+    {
+      "id": "m01-s03-l001",
+      "file": "m01-s03-l001.mp3",
+      "scene": "База «Рай»",
+      "sceneNumber": 3,
+      "sourceLine": 147,
+      "text": "Криво повесил.",
+      "prompt": "[Dry, matter-of-fact] Криво повесил.",
+      "status": "recorded",
+      "context": "У въезда на базу солдат прикручивает табличку «МЕСТ НЕТ». Прапорщик проходит мимо, замечает наклон и буднично делает замечание.",
+      "recording": "recordings/warrant/m01-s03-l001.mp3"
+    },
+    {
+      "id": "m01-s03-l003",
+      "file": "m01-s03-l003.mp3",
+      "scene": "База «Рай»",
+      "sceneNumber": 3,
+      "sourceLine": 155,
+      "text": "Тогда нормально.",
+      "prompt": "[Deadpan, calm] Тогда нормально.",
+      "status": "recorded",
+      "context": "Солдат отвечает: «Так стена кривая». Прапорщик смотрит на стену и спокойно принимает объяснение.",
+      "recording": "recordings/warrant/m01-s03-l003.mp3"
+    },
+    {
+      "id": "m01-s05-l003",
+      "file": "m01-s05-l003.mp3",
+      "scene": "Западный оперативный район",
+      "sceneNumber": 5,
+      "sourceLine": 215,
+      "text": "А это что такое?",
+      "prompt": "[Curious, low voice] А это что такое?",
+      "status": "recorded",
+      "context": "На инструктаже генерал упоминает технологию синаптической связи. Прапорщик действительно не знает, что это.",
+      "recording": "recordings/warrant/m01-s05-l003.mp3"
+    },
+    {
+      "id": "m01-s05-l005",
+      "file": "m01-s05-l005.mp3",
+      "scene": "Западный оперативный район",
+      "sceneNumber": 5,
+      "sourceLine": 223,
+      "text": "Так у нас в армии это давно. Я ещё подумать не успел, а уже виноват.",
+      "prompt": "[Deadpan, unhurried] Так у нас в армии это давно. Я ещё подумать не успел, а уже виноват.",
+      "status": "recorded",
+      "context": "Генерал объясняет: команды будут передаваться непосредственно из мозга в мозг. Прапорщик невозмутимо сравнивает это с армейской жизнью.",
+      "recording": "recordings/warrant/m01-s05-l005.mp3"
+    },
+    {
+      "id": "m01-s05-l007",
+      "file": "m01-s05-l007.mp3",
+      "scene": "Западный оперативный район",
+      "sceneNumber": 5,
+      "sourceLine": 233,
+      "text": "А если у начальства мозгов нет?",
+      "prompt": "[Curious, completely serious] А если у начальства мозгов нет?",
+      "status": "recorded",
+      "context": "Генерал говорит, что новая технология повысит эффективность управления. Прапорщик задаёт практический вопрос, совершенно серьёзно.",
+      "recording": "recordings/warrant/m01-s05-l007.mp3"
+    },
+    {
+      "id": "m01-s05-l016",
+      "file": "m01-s05-l016.mp3",
+      "scene": "Западный оперативный район",
+      "sceneNumber": 5,
+      "sourceLine": 273,
+      "text": "Ясно. Броня пока в научной разработке.",
+      "prompt": "[Dry, resigned] Ясно. Броня пока в научной разработке.",
+      "status": "recorded",
+      "context": "На вопрос о бронетехнике обещают обычные УАЗы и дополнительные стальные листы по мере поступления материалов.",
+      "recording": "recordings/warrant/m01-s05-l016.mp3"
+    },
+    {
+      "id": "m01-s07-l016",
+      "file": "m01-s07-l016.mp3",
+      "scene": "Появление отбросов",
+      "sceneNumber": 7,
+      "sourceLine": 455,
+      "text": "И потом, у нас мусор на балансе.",
+      "prompt": "[Matter-of-fact, completely serious] И потом, у нас мусор на балансе.",
+      "status": "recorded",
+      "context": "Штаб объясняет название «Отбросы»: они живут на свалках и используют мусор. Наши отличаются тем, что являются организованной структурой. Прапорщик добавляет уточнение.",
+      "recording": "recordings/warrant/m01-s07-l016.mp3"
+    },
+    {
+      "id": "m01-s11-l011",
+      "file": "m01-s11-l011.mp3",
+      "scene": "Последний опорный пункт",
+      "sceneNumber": 11,
+      "sourceLine": 793,
+      "text": "Товарищ командир, так у них электричество, вода, хозяйство своё. Даже огороды имеются.",
+      "prompt": "[Thoughtful, matter-of-fact] Товарищ командир, так у них электричество, вода, хозяйство своё. Даже огороды имеются.",
+      "status": "recorded",
+      "context": "Командир объявляет поселение противника лишённым признаков государственного управления. Прапорщик замечает работающую инфраструктуру.",
+      "recording": "recordings/warrant/m01-s11-l011.mp3"
+    },
+    {
+      "id": "m01-s11-l013",
+      "file": "m01-s11-l013.mp3",
+      "scene": "Последний опорный пункт",
+      "sceneNumber": 11,
+      "sourceLine": 801,
+      "text": "А у нас пока только три ангара и сортир без крыши.",
+      "prompt": "[Dry, mildly disappointed] А у нас пока только три ангара и сортир без крыши.",
+      "status": "recorded",
+      "context": "Командир спрашивает: «И?» Прапорщик сравнивает вражеское хозяйство с нашей базой.",
+      "recording": "recordings/warrant/m01-s11-l013.mp3"
+    },
+    {
+      "id": "m01-s12-l009",
+      "file": "m01-s12-l009.mp3",
+      "scene": "Доклад о победе",
+      "sceneNumber": 12,
+      "sourceLine": 851,
+      "text": "Товарищ командир, передайте, что до войны вкуснее делали.",
+      "prompt": "[Thoughtful, mildly dissatisfied] Товарищ командир, передайте, что до войны вкуснее делали.",
+      "status": "recorded",
+      "context": "После победы прапорщик проверяет трофейные консервы — ест их и оценивает вкус.",
+      "recording": "recordings/warrant/m01-s12-l009.mp3"
+    },
+    {
+      "id": "m01-s12-l012",
+      "file": "m01-s12-l012.mp3",
+      "scene": "Доклад о победе",
+      "sceneNumber": 12,
+      "sourceLine": 865,
+      "text": "Да нет, точно хуже стало.",
+      "prompt": "[Certain, matter-of-fact] Да нет, точно хуже стало.",
+      "status": "recorded",
+      "context": "Открывает следующую банку и убеждается в своём выводе.",
+      "recording": "recordings/warrant/m01-s12-l012.mp3"
+    },
+    {
+      "id": "m01-s12-l014",
+      "file": "m01-s12-l014.mp3",
+      "scene": "Доклад о победе",
+      "sceneNumber": 12,
+      "sourceLine": 873,
+      "text": "Вот теперь поздно.",
+      "prompt": "[Deadpan, calm] Вот теперь поздно.",
+      "status": "recorded",
+      "context": "По радио приказывают поставить трофейное продовольствие на учёт. Прапорщик уже успел его съесть.",
+      "recording": "recordings/warrant/m01-s12-l014.mp3"
+    },
+    {
+      "id": "m01-s13-l001",
+      "file": "m01-s13-l001.mp3",
+      "scene": "Восстановление цивилизации",
+      "sceneNumber": 13,
+      "sourceLine": 895,
+      "text": "Вот, товарищ командир. С нуля цивилизацию подняли.",
+      "prompt": "[Quietly pleased, low voice] Вот, товарищ командир. С нуля цивилизацию подняли.",
+      "status": "recorded",
+      "context": "Вечером на восстановленной базе пьёт чай с офицерами. Спокойно доволен результатом дня.",
+      "recording": "recordings/warrant/m01-s13-l001.mp3"
+    },
+    {
+      "id": "m01-s13-l003",
+      "file": "m01-s13-l003.mp3",
+      "scene": "Восстановление цивилизации",
+      "sceneNumber": 13,
+      "sourceLine": 903,
+      "text": "А нам зачем на Луну? Нам тут ещё работы непочатый край.",
+      "prompt": "[Matter-of-fact, unhurried] А нам зачем на Луну? Нам тут ещё работы непочатый край.",
+      "status": "recorded",
+      "context": "Командир вспоминает, что до войны люди летали на Луну. Прапорщик искренне не видит в этом необходимости.",
+      "recording": "recordings/warrant/m01-s13-l003.mp3"
+    },
+    {
+      "id": "m01-s14-l011",
+      "file": "m01-s14-l011.mp3",
+      "scene": "Энергетическая аномалия",
+      "sceneNumber": 14,
+      "sourceLine": 965,
+      "text": "Товарищ командир, а если там электростанция?",
+      "prompt": "[Curious, low voice] Товарищ командир, а если там электростанция?",
+      "status": "recorded",
+      "context": "Штаб сообщил об энергетической аномалии. Прапорщик предполагает, что обнаружили электростанцию.",
+      "recording": "recordings/warrant/m01-s14-l011.mp3"
+    },
+    {
+      "id": "m01-s14-l013",
+      "file": "m01-s14-l013.mp3",
+      "scene": "Энергетическая аномалия",
+      "sceneNumber": 14,
+      "sourceLine": 973,
+      "text": "А если чужая?",
+      "prompt": "[Calm, questioning] А если чужая?",
+      "status": "recorded",
+      "context": "Командир отвечает: «Будем восстанавливать». Прапорщик уточняет, чья она.",
+      "recording": "recordings/warrant/m01-s14-l013.mp3"
+    },
+    {
+      "id": "m01-s14-l015",
+      "file": "m01-s14-l015.mp3",
+      "scene": "Энергетическая аномалия",
+      "sceneNumber": 14,
+      "sourceLine": 981,
+      "text": "А если работает?",
+      "prompt": "[Calm, questioning] А если работает?",
+      "status": "recorded",
+      "context": "На вопрос о чужой станции командир отвечает: «Тем более». Прапорщик предлагает ещё один вариант.",
+      "recording": "recordings/warrant/m01-s14-l015.mp3"
+    },
+    {
+      "id": "m01-s14-l017",
+      "file": "m01-s14-l017.mp3",
+      "scene": "Энергетическая аномалия",
+      "sceneNumber": 14,
+      "sourceLine": 993,
+      "text": "Не верю.",
+      "prompt": "[Skeptical, low voice, deadpan] Не верю.",
+      "status": "recorded",
+      "context": "Командир говорит, что если станция работает, то впервые ничего чинить не придётся. Прапорщик спокойно и убеждённо сомневается.",
+      "recording": "recordings/warrant/m01-s14-l017.mp3"
+    }
+  ],
+  "nonverbal": [
+    {
+      "id": "m01-s14-warrant-sigh",
+      "file": "m01-s14-warrant-sigh.mp3",
+      "sourceLine": 1001,
+      "prompt": "[long weary sigh]",
+      "context": "After the soldier reports that the generator has stopped again",
+      "status": "recorded",
+      "afterCue": "m01-s14-l018",
+      "recording": "recordings/warrant/m01-s14-warrant-sigh.mp3"
+    }
+  ]
+}

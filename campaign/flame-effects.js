@@ -1,5 +1,5 @@
 export function createFlameEffects(T,scene,scale) {
-  const pulses=[],scorches=[],blasts=[],blastLimit=16,pulseLimit=14,scorchLimit=16,segments=6;
+  const pulses=[],scorches=[],blasts=[],dustHits=[],blastLimit=16,pulseLimit=14,scorchLimit=16,dustLimit=12,segments=6;
   const vertexShader=`
     attribute float diameter; attribute float opacity; attribute vec3 shade;
     uniform float viewportHeight; varying float vOpacity; varying vec3 vShade;
@@ -44,7 +44,7 @@ export function createFlameEffects(T,scene,scale) {
     };
   }
   const flame=batch('red_flame_particles',pulseLimit*32+blastLimit*12,false);
-  const smoke=batch('black_flame_smoke',pulseLimit*20+scorchLimit*6+blastLimit*16,true);
+  const smoke=batch('black_flame_smoke',pulseLimit*20+scorchLimit*6+blastLimit*16+dustLimit*3,true);
   const jetGeometry=new T.BufferGeometry(),jetCapacity=pulseLimit*segments*12;
   const jetPosition=new T.Float32BufferAttribute(new Float32Array(jetCapacity*3),3).setUsage(T.DynamicDrawUsage);
   const jetShape=new T.Float32BufferAttribute(new Float32Array(jetCapacity*3),3).setUsage(T.DynamicDrawUsage);
@@ -84,7 +84,11 @@ export function createFlameEffects(T,scene,scale) {
       if(scorches.length>scorchLimit)scorches.shift();
     },
     blast(point,now,radius){blasts.push({point:point.clone(),born:now,radius,seed:++serial});if(blasts.length>blastLimit)blasts.shift();},
-    reset(){pulses.length=scorches.length=blasts.length=0;},
+    dustImpact(point,now){
+      dustHits.push({point:point.clone(),born:now,seed:++serial});
+      if(dustHits.length>dustLimit)dustHits.shift();
+    },
+    reset(){pulses.length=scorches.length=blasts.length=dustHits.length=0;},
     update(now,viewportHeight){
       flame.start(viewportHeight);smoke.start(viewportHeight);
       jet.material.uniforms.clock.value=now;
@@ -154,6 +158,17 @@ export function createFlameEffects(T,scene,scale) {
           const t=(age-.04*j)/4.3;if(t<0||t>1)continue;
           const angle=j*2.399+seed,r=radius*(.25+1.1*t),shade=.10+random(seed,j)*.12;
           smoke.add(point.x+Math.cos(angle)*r+t*radius*.5,point.y+Math.sin(angle)*r,point.z+radius*(.15+t*1.5),radius*(.65+t*1.9),Math.sin(Math.PI*t)**.4*.72,shade,shade*.9,shade*.74);
+        }
+      }
+      for(let i=dustHits.length-1;i>=0;i--){
+        const {point,born,seed}=dustHits[i],age=now-born;
+        if(age>.47){dustHits.splice(i,1);continue;}
+        for(let j=0;j<3;j++){
+          const t=(age-j*.027)/.40;
+          if(t<0||t>1)continue;
+          const angle=j*2.4+seed,spread=(.08+.52*t)*scale;
+          smoke.add(point.x+Math.cos(angle)*spread,point.y+Math.sin(angle)*spread,
+            point.z+(.14+.57*t)*scale,(.78+.76*t)*scale,Math.min(1,t*11)*(1-t)*.72,.42,.30,.16);
         }
       }
       jetGeometry.setDrawRange(0,vertices);

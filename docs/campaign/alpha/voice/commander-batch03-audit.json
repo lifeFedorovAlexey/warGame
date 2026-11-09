@@ -1,0 +1,165 @@
+{
+  "date": "2026-11-07",
+  "batch": 3,
+  "method": {
+    "type": "local-automatic-transcription",
+    "model": "Qwen3-ASR-0.6B-Q4_K",
+    "language": "ru",
+    "scriptTextProvidedToRecognizer": false,
+    "note": "Автоматическая расшифровка может ошибаться; слова владельца имеют приоритет."
+  },
+  "summary": {
+    "files": 10,
+    "asrMatches": 6,
+    "needsListening": 0,
+    "pendingSpokenTextConfirmation": [],
+    "userConfirmedWordingApplied": 3,
+    "phoneticVariations": 1
+  },
+  "recordings": [
+    {
+      "id": "m01-s07-l015",
+      "number": 20,
+      "expectedText": "Понял. Разница существенная.",
+      "recognizedText": "Понял, разница существенная.",
+      "file": "recordings/commander/m01-s07-l015.mp3",
+      "sourceName": "m01-s07-l015.mp3.mp3",
+      "sha256": "75aa9cc0a59bf98e8a9773d675d7e01fbbe7a4fcf5bde9aa740342dd6588999c",
+      "duration": 2.847375,
+      "status": "asr-matches-script"
+    },
+    {
+      "id": "m01-s08-l002",
+      "number": 21,
+      "expectedText": "Докладывай.",
+      "recognizedText": "Докладывай.",
+      "file": "recordings/commander/m01-s08-l002.mp3",
+      "sourceName": "m01-s08-l002.mp3.mp3",
+      "sha256": "ea777725fc8d4d9b89dadd103651148070487383a028c4e9ef5f058e6a7cd95a",
+      "duration": 1.489,
+      "status": "asr-matches-script"
+    },
+    {
+      "id": "m01-s08-l004",
+      "number": 22,
+      "expectedText": "Снимайте. Разберёмся.",
+      "recognizedText": "Снимайте, разберемся.",
+      "file": "recordings/commander/m01-s08-l004.mp3",
+      "sourceName": "m01-s08-l004.mp3.mp3",
+      "sha256": "8a8d90257d75820881c2aff7f9c70acee5eebcfda83725d22b75c97d3fb2eb96",
+      "duration": 2.2726875,
+      "status": "asr-matches-script"
+    },
+    {
+      "id": "m01-s08-l006",
+      "number": 23,
+      "expectedText": "Отлично. Что за агрегат?",
+      "recognizedText": "Отлично. И что за агрегат?",
+      "file": "recordings/commander/m01-s08-l006.mp3",
+      "sourceName": "m01-s08-l006.mp3.mp3",
+      "sha256": "7b3a70a1f2e2d32acbebaeadc4ee2a7f49f3f260769003dd193e908d61a1000e",
+      "duration": 3.0040625,
+      "status": "user-confirmed-wording-applied",
+      "confirmedSpokenText": "Отлично. И что за агрегат?",
+      "userReportedText": "Отлично. И что за агрегат?",
+      "confirmedByUser": "2026-11-07",
+      "currentScriptText": "Отлично. И что за агрегат?"
+    },
+    {
+      "id": "m01-s08-l008",
+      "number": 24,
+      "expectedText": "Ну снимайте жёлтую.",
+      "recognizedText": "Но снимайте и желтую.",
+      "file": "recordings/commander/m01-s08-l008.mp3",
+      "sourceName": "m01-s08-l008.mp3.mp3",
+      "sha256": "548d347bc74fe2524a035e371fd1abfae07cb155cb8c73bc8ba2eb0daa2b772c",
+      "duration": 2.1159375,
+      "status": "user-confirmed-wording-applied",
+      "confirmedSpokenText": "Ну снимайте и жёлтую.",
+      "userReportedText": "Ну снимайте и жёлтую.",
+      "confirmedByUser": "2026-11-07",
+      "currentScriptText": "Ну снимайте и жёлтую."
+    },
+    {
+      "id": "m01-s08-l010",
+      "number": 25,
+      "expectedText": "Почему?",
+      "recognizedText": "Почему?",
+      "file": "recordings/commander/m01-s08-l010.mp3",
+      "sourceName": "m01-s08-l010.mp3.mp3",
+      "sha256": "2532b1c8a743116d2105c2812b58bb201c2bccca76d306a331b38dab517ecf73",
+      "duration": 1.149375,
+      "status": "asr-matches-script"
+    },
+    {
+      "id": "m01-s08-l012",
+      "number": 26,
+      "expectedText": "Передать в НИИ. Пусть учёные разбираются.",
+      "recognizedText": "Передать в нии, пусть ученые разбираются.",
+      "file": "recordings/commander/m01-s08-l012.mp3",
+      "sourceName": "m01-s08-l012.mp3.mp3",
+      "sha256": "9399115e364d86f9b9eceb7c3e2946f1a07eb9263b29ca10b8aa16a11718f568",
+      "duration": 3.5526875,
+      "status": "asr-matches-script"
+    },
+    {
+      "id": "m01-s08-l014",
+      "number": 27,
+      "expectedText": "И?",
+      "recognizedText": "И что обнаружили?",
+      "file": "recordings/commander/m01-s08-l014.mp3",
+      "sourceName": "m01-s08-l014.mp3.mp3",
+      "sha256": "6a3f4af02f8a81002f62f4140cc4ed895bdf186ed5e3cf05be0f9a1e7cbf7ada",
+      "duration": 1.8024375,
+      "status": "user-confirmed-wording-applied",
+      "confirmedSpokenText": "И что обнаружили?",
+      "userReportedText": "Да, «И что обнаружили?»",
+      "confirmedByUser": "2026-11-07",
+      "currentScriptText": "И что обнаружили?"
+    },
+    {
+      "id": "m01-s08-l016",
+      "number": 28,
+      "expectedText": "А почему жёлтая изолента?",
+      "recognizedText": "А почему желтое изолента?",
+      "file": "recordings/commander/m01-s08-l016.mp3",
+      "sourceName": "m01-s08-l016.mp3.mp3",
+      "sha256": "50f49e9a00c83aef4e491dc9deba5ab29604ef2de93c18121dd9d455b6334993",
+      "duration": 2.429375,
+      "status": "asr-phonetic-variation",
+      "reviewNote": "Содержание соответствует реплике. Распознано другое окончание слова «жёлтая»; это не принято за изменение авторского текста."
+    },
+    {
+      "id": "m01-s08-l018",
+      "number": 29,
+      "expectedText": "А зачем синяя?",
+      "recognizedText": "А зачем синяя?",
+      "file": "recordings/commander/m01-s08-l018.mp3",
+      "sourceName": "m01-s08-l018.mp3.mp3",
+      "sha256": "c7597953606c127f669d0c840123c04edac8afb53b4602fb38a1cc611b5c4d88",
+      "duration": 1.64575,
+      "status": "asr-matches-script"
+    }
+  ],
+  "reviewStatus": "complete",
+  "scriptRevisions": [
+    {
+      "cue": "m01-s08-l006",
+      "previousText": "Отлично. Что за агрегат?",
+      "approvedText": "Отлично. И что за агрегат?",
+      "confirmedByUser": "2026-11-07"
+    },
+    {
+      "cue": "m01-s08-l008",
+      "previousText": "Ну снимайте жёлтую.",
+      "approvedText": "Ну снимайте и жёлтую.",
+      "confirmedByUser": "2026-11-07"
+    },
+    {
+      "cue": "m01-s08-l014",
+      "previousText": "И?",
+      "approvedText": "И что обнаружили?",
+      "confirmedByUser": "2026-11-07"
+    }
+  ]
+}

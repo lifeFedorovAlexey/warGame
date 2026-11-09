@@ -38,7 +38,7 @@ export async function checkSalvageBrowser(page){
     const beforeGrilleHit=loaded.hp,grilleMaxHp=loaded.maxHp,grilleHit=d.hit(loaded.id,{partId:23,type:'bullet',power:8}),grilleHpLost=beforeGrilleHit-loaded.hp;
     m.state.time+=241;updateSalvage(m);w.update(m,new Set(),1/60);
     // Isolate the recipient for the inspection image; the pickup assertions
-    // above used both actual vehicles and the donor's retained wreck.
+    // above used the actual recipient and the donor's visual, non-solid wreck.
     m.state.units=[loaded];d.selectTarget(loaded.id);w.update(m,new Set(),1/60);const matrix=w.damage.matrixFor(loaded).clone();w.controls.enableDamping=false;w.controls.target.copy(new T.Vector3(0,0,1.4).applyMatrix4(matrix));w.camera.position.copy(new T.Vector3(5,7,4.5).applyMatrix4(matrix));w.controls.update();w.update(m,new Set(),1/60);document.querySelector('#welcome').hidden=true;d.panel.hidden=true;
     return {a:!!a,b:!!b,spawned,installed,ticks,travelled:Math.hypot(receiver.x-(drop.x+20),receiver.y-drop.y),hitPart:hit?.partId,beforeHP,hoodHp,hoodMaxHp,grilleMaxHp,hpLost,persisted,remaining,grilleInstalled,grilleTicks,grilleHitPart:grilleHit?.partId,grilleHpLost,expired:m.state.salvage.items.length,renderedRecoverable:w.damage.statistics.recoverableParts,unitId:loaded.id};
   });

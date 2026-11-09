@@ -1,5 +1,6 @@
 import {GLTFLoader} from '../demo/vendor/loaders/GLTFLoader.js';
 import {createConstructionProjector} from './construction-projector.js';
+import {createConstructionScanner} from './construction-scanner.js';
 import {vehiclePose,worldToVehicle} from './builder-kinematics.js';
 import {buildKord} from '../demo/kord.js';
 import {mgRecoil} from './mg-burst.js';
@@ -9,10 +10,12 @@ import {FIELD_RECIPES,modificationInstalled} from './vehicle-salvage.js';
 import {createVehicleContactShadows} from './vehicle-contact-shadows.js';
 import {createScavUnit,poseScavUnit} from './scav-units.js';
 import {SCAV_PROFILES,isInfantry} from './scav-unit-profiles.js';
+import {contactRockAt} from './vehicle-contact-rock.js';
+import {VEHICLE_PAINTS,vehiclePaint,vehiclePaintTint,isVehiclePaintMaterial,paintVehicleModel} from './vehicle-paint.js';
 
 // One instance stream per GLB primitive. More units do not add draw calls.
-class PoseBatch{
- constructor(T,parent,prototype,capacity,damage,category='body',lod=0,profile={}){this.T=T;this.prototype=prototype;this.parts=[];this.capacity=capacity;this.damage=damage;this.damageAttribute=new T.InstancedBufferAttribute(new Float32Array(capacity*2),2).setUsage(T.DynamicDrawUsage);prototype.updateMatrixWorld(true);prototype.traverse(node=>{
+export class PoseBatch{
+ constructor(T,parent,prototype,capacity,damage,category='body',lod=0,profile={}){this.T=T;this.prototype=prototype;this.parts=[];this.capacity=capacity;this.damage=damage;this.colorAttribute=new T.InstancedBufferAttribute(new Float32Array(capacity*3),3).setUsage(T.DynamicDrawUsage);this.damageAttribute=new T.InstancedBufferAttribute(new Float32Array(capacity*2),2).setUsage(T.DynamicDrawUsage);prototype.updateMatrixWorld(true);prototype.traverse(node=>{
   if(!node.isMesh)return;let geometry=node.geometry,material=node.material,emission=null,signal=null;
   if(['projector_optics','projector_emitter_core','flamer_igniter'].includes(material.name)){
    geometry=geometry.clone();material=material.clone();signal=material.name==='flamer_igniter'?'ignition':'projector';
@@ -34,10 +37,15 @@ class PoseBatch{
   if(emission)geometry.setAttribute('instanceEmission',emission);
   geometry.setAttribute('instanceDamage',this.damageAttribute);
   const mesh=new T.InstancedMesh(geometry,material,capacity);
+  // Painted metal has its own shared tint stream. All other primitives keep
+  // the general tint, so paint changes cannot tint glass, rubber or lights.
+  const painted=profile.paintable&&isVehiclePaintMaterial(material);
+  if(painted)this.paintAttribute??=new T.InstancedBufferAttribute(new Float32Array(capacity*3),3).setUsage(T.DynamicDrawUsage);
+  mesh.instanceColor=painted?this.paintAttribute:this.colorAttribute;
   if(baked)mesh.instanceMatrix=this.rigidMatrix??=new T.InstancedBufferAttribute(new Float32Array(capacity*16),16).setUsage(T.DynamicDrawUsage);
-  mesh.instanceMatrix.setUsage(T.DynamicDrawUsage);mesh.frustumCulled=false;mesh.castShadow=mesh.receiveShadow=true;mesh.count=0;damage.attach(mesh,binding,{instanced:true});parent.add(mesh);this.parts.push({node,mesh,emission,signal,binding,baked});
+  mesh.instanceMatrix.setUsage(T.DynamicDrawUsage);mesh.frustumCulled=false;mesh.castShadow=mesh.receiveShadow=true;mesh.count=0;damage.attach(mesh,binding,{instanced:true});parent.add(mesh);this.parts.push({node,mesh,emission,signal,binding,baked,painted});
  });this.staticPrototype=category==='body'&&this.parts.every(p=>!p.binding.dynamic);this.world=new T.Matrix4();this.combined=new T.Matrix4();this.index=0;}
- begin(){this.index=0;this.damageDirty=this.rigidDirty=false;for(const p of this.parts)p.matrixDirty=p.colorDirty=p.emissionDirty=false;}
+ begin(){this.index=0;this.damageDirty=this.rigidDirty=this.colorDirty=this.paintDirty=false;for(const p of this.parts)p.matrixDirty=p.emissionDirty=false;}
  motion(nodes){this.prototype.traverse(node=>{node.matrixAutoUpdate=false;});for(const node of nodes.filter(Boolean))node.matrixAutoUpdate=true;this.selectiveMotion=true;return this;}
  updatePose(key){
   const revision=this.prototype.userData.damagePoseRevision??0;
@@ -45,10 +53,16 @@ class PoseBatch{
   this.prototype.updateMatrixWorld(!this.selectiveMotion);this.poseKey=key;this.poseRevision=revision;
  }
  grow(){const T=this.T,capacity=this.capacity*2,attr=new T.InstancedBufferAttribute(new Float32Array(capacity*2),2).setUsage(T.DynamicDrawUsage);attr.array.set(this.damageAttribute.array);this.damageAttribute=attr;
+  const colors=new T.InstancedBufferAttribute(new Float32Array(capacity*3),3).setUsage(T.DynamicDrawUsage);colors.array.set(this.colorAttribute.array);this.colorAttribute=colors;
+  if(this.paintAttribute){const paints=new T.InstancedBufferAttribute(new Float32Array(capacity*3),3).setUsage(T.DynamicDrawUsage);paints.array.set(this.paintAttribute.array);this.paintAttribute=paints;}
   if(this.rigidMatrix){const grown=new T.InstancedBufferAttribute(new Float32Array(capacity*16),16).setUsage(T.DynamicDrawUsage);grown.array.set(this.rigidMatrix.array);this.rigidMatrix=grown;}
-  for(const part of this.parts){const mesh=part.mesh;mesh.dispose();const matrix=part.baked?this.rigidMatrix:new T.InstancedBufferAttribute(new Float32Array(capacity*16),16).setUsage(T.DynamicDrawUsage);if(!part.baked)matrix.array.set(mesh.instanceMatrix.array);mesh.instanceMatrix=matrix;if(mesh.instanceColor){const color=new T.InstancedBufferAttribute(new Float32Array(capacity*3),3);color.array.set(mesh.instanceColor.array);mesh.instanceColor=color;}mesh.geometry.setAttribute('instanceDamage',attr);if(part.emission){const emission=new T.InstancedBufferAttribute(new Float32Array(capacity),1);emission.array.set(part.emission.array);part.emission=emission;mesh.geometry.setAttribute('instanceEmission',emission);}}this.capacity=capacity;}
- add(transform,color,signals={},damageInfo={row:0,lod:2},poseKey=null){
+  for(const part of this.parts){const mesh=part.mesh;mesh.dispose();const matrix=part.baked?this.rigidMatrix:new T.InstancedBufferAttribute(new Float32Array(capacity*16),16).setUsage(T.DynamicDrawUsage);if(!part.baked)matrix.array.set(mesh.instanceMatrix.array);mesh.instanceMatrix=matrix;mesh.instanceColor=part.painted?this.paintAttribute:colors;mesh.geometry.setAttribute('instanceDamage',attr);if(part.emission){const emission=new T.InstancedBufferAttribute(new Float32Array(capacity),1);emission.array.set(part.emission.array);part.emission=emission;mesh.geometry.setAttribute('instanceEmission',emission);}}this.capacity=capacity;}
+ add(transform,color,signals={},damageInfo={row:0,lod:2},poseKey=null,paint=color){
   if(this.index>=this.capacity)this.grow();const index=this.index++;
+  const colors=this.colorAttribute;
+  if(colors.getX(index)!==Math.fround(color.r)||colors.getY(index)!==Math.fround(color.g)||colors.getZ(index)!==Math.fround(color.b)){colors.setXYZ(index,color.r,color.g,color.b);this.colorDirty=true;}
+  const paints=this.paintAttribute;
+  if(paints&&(paints.getX(index)!==Math.fround(paint.r)||paints.getY(index)!==Math.fround(paint.g)||paints.getZ(index)!==Math.fround(paint.b))){paints.setXYZ(index,paint.r,paint.g,paint.b);this.paintDirty=true;}
   if(this.damageAttribute.getX(index)!==damageInfo.row||this.damageAttribute.getY(index)!==damageInfo.lod){this.damageAttribute.setXY(index,damageInfo.row,damageInfo.lod);this.damageDirty=true;}
   if(!this.staticPrototype)this.updatePose(poseKey);
   let rigidWritten=false;
@@ -60,23 +74,22 @@ class PoseBatch{
    if(changed){part.mesh.setMatrixAt(index,combined);if(part.baked)this.rigidDirty=true;else part.matrixDirty=true;}
    if(part.baked)rigidWritten=true;
    }
-   const c=part.mesh.instanceColor;
-   if(!c||c.getX(index)!==Math.fround(color.r)||c.getY(index)!==Math.fround(color.g)||c.getZ(index)!==Math.fround(color.b)){part.mesh.setColorAt(index,color);part.colorDirty=true;}
    if(part.emission&&part.emission.getX(index)!==Math.fround(signals[part.signal]??0)){part.emission.setX(index,signals[part.signal]??0);part.emissionDirty=true;}
   }
  }
- end(){if(this.damageDirty)this.damageAttribute.needsUpdate=true;if(this.rigidDirty)this.rigidMatrix.needsUpdate=true;for(const p of this.parts){const {mesh,emission}=p;mesh.count=this.index;mesh.visible=this.index>0;if(p.matrixDirty)mesh.instanceMatrix.needsUpdate=true;if(p.colorDirty)mesh.instanceColor.needsUpdate=true;if(emission&&p.emissionDirty)emission.needsUpdate=true;}}
+ end(){if(this.paintDirty)this.paintAttribute.needsUpdate=true;if(this.damageDirty)this.damageAttribute.needsUpdate=true;if(this.rigidDirty)this.rigidMatrix.needsUpdate=true;if(this.colorDirty)this.colorAttribute.needsUpdate=true;for(const p of this.parts){const {mesh,emission}=p;mesh.count=this.index;mesh.visible=this.index>0;if(p.matrixDirty)mesh.instanceMatrix.needsUpdate=true;if(emission&&p.emissionDirty)emission.needsUpdate=true;}}
  visible(value){for(const {mesh} of this.parts)mesh.visible=value;}
 }
 
-export async function createVehicleLayer(T,scene,field,config,damage) {
+export async function createVehicleLayer(T,scene,field,config,damage,onLoaded=()=>{}) {
  const root=new T.Group();
  root.name='modular_vehicle_instances';
  scene.add(root);
  const scale=config.worldScale,loader=new GLTFLoader(),capacity=256;
+ let loadedCount=0;const load=url=>loader.loadAsync(url).then(asset=>{onLoaded(++loadedCount,7);return asset;});
  const [loaded,flamerAsset]=await Promise.all([
-  Promise.all([0,1,2].map(lod=>Promise.all(['C01','B01'].map(id=>loader.loadAsync('../assets/vehicles/'+id+'/'+id+'-lod'+lod+'.glb'))))),
-  loader.loadAsync('../assets/vehicles/'+config.units.flamer.model),
+  Promise.all([0,1,2].map(lod=>Promise.all(['C01','B01'].map(id=>load('../assets/vehicles/'+id+'/'+id+'-lod'+lod+'.glb'))))),
+  load('../assets/vehicles/'+config.units.flamer.model),
  ]);
  const lods=loaded.map((assets,lod)=>assets.map((asset,index)=>{
   const proto=asset.scene, id=index?'B01':'C01';
@@ -92,7 +105,7 @@ export async function createVehicleLayer(T,scene,field,config,damage) {
    if(node.isMesh&&node.material.name==='headlamp_lens'){node.material.emissiveIntensity=4;node.material.color.set('#ffeac0');}
   });
   const sprung=proto.getObjectByName('sprung_frame');
-  return{batch:new PoseBatch(T,group,proto,capacity,damage,index?'body':'chassis',lod).motion([...wheels,...steering,...suspension.map(p=>p.node),sprung]),wheels,steering,suspension,sprung};
+  return{batch:new PoseBatch(T,group,proto,capacity,damage,index?'body':'chassis',lod,{paintable:true}).motion([...wheels,...steering,...suspension.map(p=>p.node),sprung]),wheels,steering,suspension,sprung};
  }));
  const kit=vehicleKit(T);
  const palette={
@@ -103,7 +116,7 @@ export async function createVehicleLayer(T,scene,field,config,damage) {
   steel:new T.MeshStandardMaterial({color:'#717972',metalness:.85,roughness:.34}),
   glass:new T.MeshStandardMaterial({color:'#293e42',roughness:.25}),
  };
- const builder=createConstructionProjector(T);
+ const builder=createConstructionProjector(T),scanner=createConstructionScanner(T);
  builder.root.position.set(0,-.65,2.7);
  const builderBatch=new PoseBatch(T,root,builder.root,capacity,damage,'equipment');
  const gun=new T.Group();
@@ -164,10 +177,11 @@ export async function createVehicleLayer(T,scene,field,config,damage) {
  const transforms=new Map(),muzzles=new Map(),visible=[],workBeams=[],contacts=[];
  const contactShadows=createVehicleContactShadows(T,scene,field,scale);
  const dummy=new T.Object3D(),color=new T.Color(),matrix=new T.Matrix4(),contact=new T.Vector3();
+ const paintTints=new Map(VEHICLE_PAINTS.map(paint=>[paint.id,vehiclePaintTint(T,paint)]));
  const turnDelta=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
  let activeLod=1;
 
- function update(mission,cameraDistance,shotTimes,now,camera) {
+ function update(mission,cameraDistance,shotTimes,now,camera,buildingObjects,workTime=mission.state.time) {
   if(cameraDistance>725)activeLod=2;
   else if(cameraDistance<212)activeLod=0;
   else if(activeLod===0&&cameraDistance>255||activeLod===2&&cameraDistance<625)activeLod=1;
@@ -180,13 +194,16 @@ export async function createVehicleLayer(T,scene,field,config,damage) {
   const live=new Set();
   for(const unit of mission.state.units){
    const phase=unit.hp<=0?1:mission.renderUnitPhase?.(unit,now*1000)??T.MathUtils.clamp(mission.accumulator/config.simulationStep,0,1);
-   if(unit.hp<=0&&!unit.damage?.wreck||unit.owner!=='rai'&&!mission.visibleAt(unit.x,unit.y))continue;
+   if(unit.factoryVisit?.phase==='inside'||unit.hp<=0&&!unit.damage?.wreck||unit.owner!=='rai'&&!mission.visibleAt(unit.x,unit.y))continue;
    live.add(unit.id);
    const moving=unit.hp>0&&Math.hypot(unit.x-unit.previousX,unit.y-unit.previousY)>.008;
    const blend=moving?phase:1;
    const x=T.MathUtils.lerp(unit.previousX,unit.x,blend),y=T.MathUtils.lerp(unit.previousY,unit.y,blend);
    const previous=unit.previousHeading??unit.heading,heading=previous+turnDelta(unit.heading,previous)*(unit.builderWorking?1:phase);
    const pose=vehiclePose({kind:unit.kind,x,y,heading},field,scale);
+   if(unit.contactRock&&!isInfantry(unit)&&activeLod<2){
+    const rock=contactRockAt(unit,time+phase*config.simulationStep);pose.roll+=rock.roll;pose.pitch+=rock.pitch;
+   }
    dummy.position.set(...pose.position);
    dummy.rotation.set(pose.pitch,pose.roll,heading,'ZXY');
    dummy.scale.setScalar(scale);
@@ -222,7 +239,7 @@ export async function createVehicleLayer(T,scene,field,config,damage) {
      for(const node of entry.steering)node.rotation.z=steer;
      for(const {node,x,y,z} of entry.suspension)node.position.z=z+(unitLod===2?0:suspensionDelta(x,y));
      if(entry.sprung)entry.sprung.position.z=moving&&unitLod<2?Math.sin(time*6+x*.03)*.022:0;
-     entry.batch.add(matrix,color,{},damageInfo,unitLod===2?[0]:null);
+     entry.batch.add(matrix,color,{},damageInfo,unitLod===2?[0]:null,paintTints.get(vehiclePaint(unit).id));
     }
    }
    const aimPoint=unit.aimTarget;
@@ -236,9 +253,11 @@ export async function createVehicleLayer(T,scene,field,config,damage) {
     scavBatches.get(unit.kind).add(matrix,color,{},damageInfo);
     muzzles.set(unit.id,new T.Vector3().setFromMatrixPosition(custom.gun.muzzle.matrixWorld).applyMatrix4(matrix));
    }else if(unit.kind==='builder'){
-    builder.aim(unit.projector?.yaw??0,unit.projector?.pitch??0,false);
+    const target=unit.builderWorking&&unit.task?.type==='build'?mission.entity(unit.task.targetId):null;
+    const sweep=target&&scanner.scan(unit,target,buildingObjects?.get(target.id),pose,workTime);
+    builder.aim(sweep?.yaw??unit.projector?.yaw??0,sweep?.pitch??unit.projector?.pitch??0,false);
     builderBatch.add(matrix,color,{projector:unit.hp>0&&unit.builderWorking?1:.015},damageInfo);
-    if(unit.hp>0&&unit.builderWorking&&unit.builderContact)workBeams.push({from:new T.Vector3().setFromMatrixPosition(builder.emitter.matrixWorld).applyMatrix4(matrix),to:new T.Vector3(...unit.builderContact),targetId:unit.task?.targetId,mode:unit.task?.type});
+    if(unit.hp>0&&unit.builderWorking&&unit.builderContact)workBeams.push({from:new T.Vector3().setFromMatrixPosition(builder.emitter.matrixWorld).applyMatrix4(matrix),to:new T.Vector3(...(sweep?.world??unit.builderContact)),targetId:unit.task?.targetId,mode:unit.task?.type});
    }else if(unit.kind==='command'){
     commandBatch.add(matrix,color,{},damageInfo);
    }else if(unit.kind==='raider'){
@@ -262,7 +281,7 @@ export async function createVehicleLayer(T,scene,field,config,damage) {
   for(const batch of extras)batch.end();
   if(camera)contactShadows.update(contacts,camera);
  }
- function makeDesignModel(components){
+ function makeDesignModel(components,paint){
   const [chassisId,bodyId,upperId]=components;
   if(chassisId!=='C01'||bodyId!=='B01')return null;
   const source={U01:gun,U25:builder.root,'mission-flamer':flame}[upperId];
@@ -277,7 +296,8 @@ export async function createVehicleLayer(T,scene,field,config,damage) {
   const recoil=upper.getObjectByName('recoil_1');if(recoil)recoil.position.y=0;
   assembled.name='project_'+components.join('_');
   assembled.add(chassis,body,upper);
-  return {root:assembled,chassis,body,upper};
+  const dispose=paintVehicleModel(assembled,vehiclePaint({components,paint}));
+  return {root:assembled,chassis,body,upper,dispose};
  }
  return {root,update,transforms,muzzles,visible,workBeams,makeDesignModel,get lod(){return activeLod;},get drawCalls(){
   return [...lods.flatMap(entries=>entries.map(entry=>entry.batch)),...extras].reduce((sum,b)=>sum+(b.index?b.parts.length:0),0);

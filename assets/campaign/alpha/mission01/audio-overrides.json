@@ -1,0 +1,445 @@
+{
+  "schemaVersion": 1,
+  "clips": {
+    "m01-s02-l002": {
+      "file": "recordings/warrant/m01-s02-l002.mp3",
+      "speaker": "warrant",
+      "text": "Товарищ командир, вы чего орёте?",
+      "sha256": "126add19dc59951edfe36337a509941b1731a13540926e917bc431f85877e806",
+      "sourceName": "m01-s02-l002.mp3.mp3",
+      "received": "2026-11-07"
+    },
+    "m01-s02-l004": {
+      "file": "recordings/warrant/m01-s02-l004.mp3",
+      "speaker": "warrant",
+      "text": "А приказ на это был?",
+      "sha256": "8e529f614b943b2abc76458e67da77e7befed7d8bab3aeeae4f4df6251abd083",
+      "sourceName": "m01-s02-l004.mp3.mp3",
+      "received": "2026-11-07"
+    },
+    "m01-s02-l006": {
+      "file": "recordings/warrant/m01-s02-l006.mp3",
+      "speaker": "warrant",
+      "text": "На смерть личного состава.",
+      "sha256": "cca4df2cb10ae49847f38569a7921bd4f361cbc5d91be0ed48861645f3135561",
+      "sourceName": "m01-s02-l006.mp3.mp3",
+      "received": "2026-11-07"
+    },
+    "m01-s02-l008": {
+      "file": "recordings/warrant/m01-s02-l008.mp3",
+      "speaker": "warrant",
+      "text": "Ну вот. Значит, сон. Спите дальше.",
+      "sha256": "53ae5021d6b5f39bc7b5d26c3055d8e0e552b76fc25a92824d14529c50ff08f2",
+      "sourceName": "m01-s02-l008.mp3.mp3",
+      "received": "2026-11-07"
+    },
+    "m01-s02-l010": {
+      "file": "recordings/warrant/m01-s02-l010.mp3",
+      "speaker": "warrant",
+      "text": "Шесть сорок.",
+      "sha256": "dd5a6ca30da414e97f76895e7dc3bca20f81e24dde37b6bc486790915d3f2989",
+      "sourceName": "m01-s02-l010.mp3.mp3",
+      "received": "2026-11-07"
+    },
+    "m01-s02-l012": {
+      "file": "recordings/warrant/m01-s02-l012.mp3",
+      "speaker": "warrant",
+      "text": "Так точно.",
+      "sha256": "e5f4922870a0e49669791530d15090aa86a7ec3673d11b4e63036e2690f365dc",
+      "sourceName": "m01-s02-l012.mp3.mp3",
+      "received": "2026-11-07"
+    },
+    "m01-s03-l001": {
+      "file": "recordings/warrant/m01-s03-l001.mp3",
+      "speaker": "warrant",
+      "text": "Криво повесил.",
+      "sha256": "bd64fa8e549c91dffb9bfc35373ddc789e0b025ab75e7b5fb994e299dd64d5a6",
+      "sourceName": "m01-s03-l001.mp3.mp3",
+      "received": "2026-11-07"
+    },
+    "m01-s03-l003": {
+      "file": "recordings/warrant/m01-s03-l003.mp3",
+      "speaker": "warrant",
+      "text": "Тогда нормально.",
+      "sha256": "cba558655f22a008266c80c48e048ae6e6af7c8c232cb56a660705c7d46a3a73",
+      "sourceName": "m01-s03-l003.mp3.mp3",
+      "received": "2026-11-07"
+    },
+    "m01-s05-l003": {
+      "file": "recordings/warrant/m01-s05-l003.mp3",
+      "speaker": "warrant",
+      "text": "А это что такое?",
+      "sha256": "e20fb5377b7e7fb8ddc4ee1aadf071367831fc31adff70f89cb0b3ecf0285e58",
+      "sourceName": "m01-s05-l003.mp3.mp3",
+      "received": "2026-11-07"
+    },
+    "m01-s05-l005": {
+      "file": "recordings/warrant/m01-s05-l005.mp3",
+      "speaker": "warrant",
+      "text": "Так у нас в армии это давно. Я ещё подумать не успел, а уже виноват.",
+      "sha256": "d87253c9f21814b579eefefcfdd4b679419318e8b76a2d73714dc2f627d4cb52",
+      "sourceName": "m01-s05-l005.mp3.mp3",
+      "received": "2026-11-07"
+    },
+    "m01-s05-l007": {
+      "file": "recordings/warrant/m01-s05-l007.mp3",
+      "speaker": "warrant",
+      "text": "А если у начальства мозгов нет?",
+      "sha256": "d186e66cba67c8a16510021d4a58683719434f8c7339a5797633c9f42ba9825d",
+      "sourceName": "m01-s05-l007.mp3.mp3",
+      "received": "2026-11-07"
+    },
+    "m01-s05-l016": {
+      "file": "recordings/warrant/m01-s05-l016.mp3",
+      "speaker": "warrant",
+      "text": "Ясно. Броня пока в научной разработке.",
+      "sha256": "d5af2aee698135f2c0bfce571897afc63a6741b2e59508e97ac5ac69410233be",
+      "sourceName": "m01-s05-l016.mp3.mp3",
+      "received": "2026-11-07"
+    },
+    "m01-s07-l016": {
+      "file": "recordings/warrant/m01-s07-l016.mp3",
+      "speaker": "warrant",
+      "text": "И потом, у нас мусор на балансе.",
+      "sha256": "45c6e9df6e5538fae48cf845cc96e47ea07f2ab8bcb937e5195ada6aa0d4fca8",
+      "sourceName": "m01-s07-l016.mp3.mp3",
+      "received": "2026-11-07"
+    },
+    "m01-s11-l011": {
+      "file": "recordings/warrant/m01-s11-l011.mp3",
+      "speaker": "warrant",
+      "text": "Товарищ командир, так у них электричество, вода, хозяйство своё. Даже огороды имеются.",
+      "sha256": "1774a45afac4fefa5087ee8e98dea6646ed081adbe306878ec92294b060ff49d",
+      "sourceName": "m01-s11-l011.mp3.mp3",
+      "received": "2026-11-07"
+    },
+    "m01-s11-l013": {
+      "file": "recordings/warrant/m01-s11-l013.mp3",
+      "speaker": "warrant",
+      "sha256": "2d7308ac2dc7f350e8c85237d0841e1fd0ace20690e92c9ae8211c0ab36bcd68",
+      "sourceName": "m01-s11-l013.mp3.mp3",
+      "received": "2026-11-07",
+      "text": "А у нас пока только три ангара и сортир без крыши."
+    },
+    "m01-s12-l009": {
+      "file": "recordings/warrant/m01-s12-l009.mp3",
+      "speaker": "warrant",
+      "sha256": "7f5527897bd03e97eb7a0014b3f35d2d82cc30edf084e32b36e3774a1cf5b73e",
+      "sourceName": "m01-s12-l009.mp3.mp3",
+      "received": "2026-11-07",
+      "text": "Товарищ командир, передайте, что до войны вкуснее делали."
+    },
+    "m01-s12-l012": {
+      "file": "recordings/warrant/m01-s12-l012.mp3",
+      "speaker": "warrant",
+      "sha256": "0bbd87e53a4d7775162d7f18988600c2849da94cfe3f58a8164aa64fde96019d",
+      "sourceName": "m01-s12-l012.mp3.mp3",
+      "received": "2026-11-07",
+      "text": "Да нет, точно хуже стало."
+    },
+    "m01-s12-l014": {
+      "file": "recordings/warrant/m01-s12-l014.mp3",
+      "speaker": "warrant",
+      "sha256": "0203fa6896fdcea3dc8a6e79b250aad9c278b6c3cae3ec62152c7d939c2d15e0",
+      "sourceName": "m01-s12-l014.mp3.mp3",
+      "received": "2026-11-07",
+      "text": "Вот теперь поздно."
+    },
+    "m01-s13-l001": {
+      "file": "recordings/warrant/m01-s13-l001.mp3",
+      "speaker": "warrant",
+      "sha256": "2ea1365f45a57841b29744a2ee0159ba7179bf2752015a6239f7f887a5873cb8",
+      "sourceName": "m01-s13-l001.mp3.mp3",
+      "received": "2026-11-07",
+      "text": "Вот, товарищ командир. С нуля цивилизацию подняли."
+    },
+    "m01-s13-l003": {
+      "file": "recordings/warrant/m01-s13-l003.mp3",
+      "speaker": "warrant",
+      "sha256": "8d69011ea846834298f069aff658d34bb33e8f59c70e5f52440dfba0e4cd7472",
+      "sourceName": "m01-s13-l003.mp3.mp3",
+      "received": "2026-11-07",
+      "text": "А нам зачем на Луну? Нам тут ещё работы непочатый край."
+    },
+    "m01-s14-l011": {
+      "file": "recordings/warrant/m01-s14-l011.mp3",
+      "speaker": "warrant",
+      "sha256": "ad508d0fe01709c108caba4d95fdc3df224870056d3f9b90fa80db897647fc7b",
+      "sourceName": "m01-s14-l011.mp3 (2).mp3",
+      "received": "2026-11-07",
+      "text": "Товарищ командир, а если там электростанция?"
+    },
+    "m01-s14-l013": {
+      "file": "recordings/warrant/m01-s14-l013.mp3",
+      "speaker": "warrant",
+      "sha256": "0d5173c4793da6514bbc89bea256b6e76244f2eaa7298ee9b8be0259664c1ed0",
+      "sourceName": "m01-s14-l013.mp3.mp3",
+      "received": "2026-11-07",
+      "text": "А если чужая?"
+    },
+    "m01-s14-l015": {
+      "file": "recordings/warrant/m01-s14-l015.mp3",
+      "speaker": "warrant",
+      "sha256": "f1d2ae2f58d03e1e7be689dab67e44c49a1c5098fa54e3b0f4c5edfe39d98e48",
+      "sourceName": "m01-s14-l015.mp3.mp3",
+      "received": "2026-11-07",
+      "text": "А если работает?"
+    },
+    "m01-s14-l017": {
+      "file": "recordings/warrant/m01-s14-l017.mp3",
+      "speaker": "warrant",
+      "sha256": "dad219d72f4f2483a2ae7e64102835fc88683b25bcbd5fc8fb24ecf7cb9baebb",
+      "sourceName": "m01-s14-l017.mp3.mp3",
+      "received": "2026-11-07",
+      "text": "Не верю."
+    },
+    "m01-s02-l001": {
+      "file": "recordings/commander/m01-s02-l001.mp3",
+      "speaker": "commander",
+      "text": "Опять херня.",
+      "sha256": "86cfe2bcd1792ff2ebc6729999875100b24c3415da73df0c2f374796ad8e10e9",
+      "sourceName": "m01-s02-l001.mp3.mp3",
+      "received": "2026-11-07"
+    },
+    "m01-s02-l003": {
+      "file": "recordings/commander/m01-s02-l003.mp3",
+      "speaker": "commander",
+      "text": "Сон приснился. Будто все умерли.",
+      "sha256": "0ef4535fc76297db4a41b7ff5ed781ba747fe429fbd9b58ee0264bf910d734b9",
+      "sourceName": "m01-s02-l003.mp3.mp3",
+      "received": "2026-11-07"
+    },
+    "m01-s02-l005": {
+      "file": "recordings/commander/m01-s02-l005.mp3",
+      "speaker": "commander",
+      "text": "На что?",
+      "sha256": "4bdb9e75dd4cd34f1ea6d8c873fe63add641193dc5eb3e3224c479ba7bcab75f",
+      "sourceName": "m01-s02-l005.mp3.mp3",
+      "received": "2026-11-07"
+    },
+    "m01-s02-l007": {
+      "file": "recordings/commander/m01-s02-l007.mp3",
+      "speaker": "commander",
+      "text": "Не было.",
+      "sha256": "f4702a08562ef9c7482aaddecb62e4fc7085a76affe0f9e6c3d60caeb5e2e574",
+      "sourceName": "m01-s02-l007.mp3.mp3",
+      "received": "2026-11-07"
+    },
+    "m01-s02-l009": {
+      "file": "recordings/commander/m01-s02-l009.mp3",
+      "speaker": "commander",
+      "text": "А сколько времени?",
+      "sha256": "3361a22ab8dd8f9b2580829c573370b34ae6fe03e7cc234a5c571ae6cae74ad4",
+      "sourceName": "m01-s02-l009.mp3.mp3",
+      "received": "2026-11-07"
+    },
+    "m01-s02-l011": {
+      "file": "recordings/commander/m01-s02-l011.mp3",
+      "speaker": "commander",
+      "text": "Подъём в семь.",
+      "sha256": "2b64fdea46b545f36a043c2f2ebbd173353b4117466a8e8e78786587a5273c45",
+      "sourceName": "m01-s02-l011.mp3.mp3",
+      "received": "2026-11-07"
+    },
+    "m01-s02-l013": {
+      "file": "recordings/commander/m01-s02-l013.mp3",
+      "speaker": "commander",
+      "text": "Подъём! Родину восстанавливать будем!",
+      "sha256": "910c09c6d036ed2cc374f08cf0ecced9e6a8a97356b81e5aafd7d72591bcd6d1",
+      "sourceName": "m01-s02-l013.mp3.mp3",
+      "received": "2026-11-07"
+    },
+    "m01-s05-l012": {
+      "file": "recordings/commander/m01-s05-l012.mp3",
+      "speaker": "commander",
+      "text": "А бронетехника что?",
+      "sha256": "dee41084d7ebbb57f3820428bfa9f082046d21b2b3efc7e7e711b5b5b7d1aaba",
+      "sourceName": "m01-s05-l012.mp3.mp3",
+      "received": "2026-11-07"
+    },
+    "m01-s05-l014": {
+      "file": "recordings/commander/m01-s05-l014.mp3",
+      "speaker": "commander",
+      "text": "Я имею в виду защищённую.",
+      "sha256": "0666bd5a805836324ee32516c49c7306b3362ad9f08a467731769957c7c08cf7",
+      "sourceName": "m01-s05-l014.mp3.mp3",
+      "received": "2026-11-07"
+    },
+    "m01-s06-l002": {
+      "file": "recordings/commander/m01-s06-l002.mp3",
+      "speaker": "commander",
+      "text": "Вас понял. На месте.",
+      "sha256": "9d286f8f53b8b2ebdbab0baf4dae1cd52ef8d0568678bb931958faafc47d9302",
+      "sourceName": "m01-s06-l002.mp3.mp3",
+      "received": "2026-11-07"
+    },
+    "m01-s06-l004": {
+      "file": "recordings/commander/m01-s06-l004.mp3",
+      "speaker": "commander",
+      "text": "Тут электростанция рядом есть. Старая.",
+      "sha256": "ac1de0af5aacea970d97717c4b2d7dc1b8ead8b71f289f639fc36ec7420c9d14",
+      "sourceName": "m01-s06-l004.mp3.mp3",
+      "received": "2026-11-07"
+    },
+    "m01-s06-l006": {
+      "file": "recordings/commander/m01-s06-l008.mp3",
+      "speaker": "commander",
+      "text": "Нет.",
+      "sha256": "2cd019917984b7f9a4e9f4dfce907a990255cd8daec9f33e4e44ebcac9eb22cd",
+      "sourceName": "m01-s06-l008.mp3.mp3",
+      "received": "2026-11-07",
+      "mappingNote": "Содержание подтверждено владельцем; исправлена привязка присланного файла к реплике m01-s06-l006."
+    },
+    "m01-s06-l008": {
+      "file": "recordings/commander/m01-s07-l002.mp3",
+      "speaker": "commander",
+      "text": "Потому что электричества нет.",
+      "sha256": "3ddb97446f3b9e7db327117aec79f5c37d7ed2b226154a1e936dacb0c406ef2f",
+      "sourceName": "m01-s07-l002.mp3.mp3",
+      "received": "2026-11-07",
+      "mappingNote": "Владелец подтвердил текст и его изменение. Исходное имя m01-s07-l002 относится к реплике m01-s06-l008."
+    },
+    "m01-s07-l002": {
+      "file": "recordings/commander/m01-s07-l004.mp3",
+      "speaker": "commander",
+      "text": "Кто?",
+      "sha256": "597083bcf6cbb47a67b0df0e4079c55d12f17a7e18b45b2f4b3e174001126da9",
+      "sourceName": "m01-s07-l004.mp3.mp3",
+      "received": "2026-11-07",
+      "mappingNote": "Содержание подтверждено владельцем; исправлена привязка присланного файла к реплике m01-s07-l002."
+    },
+    "m01-s07-l004": {
+      "file": "recordings/commander/pending/m01-s07-l007.mp3",
+      "speaker": "commander",
+      "text": "Наши?",
+      "sha256": "62b98474be794dbf39ba089738c05c25fee408a8b4dd2995b1559e2d93a57cb4",
+      "sourceName": "m01-s07-l007.mp3.mp3",
+      "received": "2026-11-07",
+      "mappingNote": "Содержание подтверждено владельцем; исправлена привязка присланного файла к реплике m01-s07-l004."
+    },
+    "m01-s07-l009": {
+      "file": "recordings/commander/m01-s07-l009.mp3",
+      "speaker": "commander",
+      "text": "Значит, будете федеративным округом.",
+      "sha256": "dce3d422efdae6f89d023bef69ff95d2fd330237b6bd36e24c6524964221f410",
+      "sourceName": "m01-s07-l009.mp3.mp3",
+      "received": "2026-11-07"
+    },
+    "m01-s07-l011": {
+      "file": "recordings/commander/m01-s07-l011.mp3",
+      "speaker": "commander",
+      "text": "Почему отбросы?",
+      "sha256": "cd0b338885b5f2fe2bfbe344b1be07d5fb7b678e8714f4ec97e01e7204bc5e74",
+      "sourceName": "m01-s07-l011.mp3.mp3",
+      "received": "2026-11-07"
+    },
+    "m01-s07-l013": {
+      "file": "recordings/commander/m01-s07-l013.mp3",
+      "speaker": "commander",
+      "text": "А мы?",
+      "sha256": "96e1aca567864bfc64d4f330d569135b527bdc226f9e9b569f86735f7e33cf8c",
+      "sourceName": "m01-s07-l013.mp3.mp3",
+      "received": "2026-11-07"
+    },
+    "m01-s07-l007": {
+      "file": "recordings/commander/m01-s07-l007.mp3",
+      "speaker": "commander",
+      "text": "Спецназ Вооружённых сил Российской Федерации. Группа «Альфа». Предлагаю сложить оружие.",
+      "sha256": "f0ac73d691c1873747e7e1ba996ccae36592e693a821e03235bd612c9196bf75",
+      "sourceName": "m01-s07-l007.mp3",
+      "received": "2026-11-07"
+    },
+    "m01-s07-l015": {
+      "file": "recordings/commander/m01-s07-l015.mp3",
+      "speaker": "commander",
+      "text": "Понял. Разница существенная.",
+      "sha256": "75aa9cc0a59bf98e8a9773d675d7e01fbbe7a4fcf5bde9aa740342dd6588999c",
+      "sourceName": "m01-s07-l015.mp3.mp3",
+      "received": "2026-11-07"
+    },
+    "m01-s08-l002": {
+      "file": "recordings/commander/m01-s08-l002.mp3",
+      "speaker": "commander",
+      "text": "Докладывай.",
+      "sha256": "ea777725fc8d4d9b89dadd103651148070487383a028c4e9ef5f058e6a7cd95a",
+      "sourceName": "m01-s08-l002.mp3.mp3",
+      "received": "2026-11-07"
+    },
+    "m01-s08-l004": {
+      "file": "recordings/commander/m01-s08-l004.mp3",
+      "speaker": "commander",
+      "text": "Снимайте. Разберёмся.",
+      "sha256": "8a8d90257d75820881c2aff7f9c70acee5eebcfda83725d22b75c97d3fb2eb96",
+      "sourceName": "m01-s08-l004.mp3.mp3",
+      "received": "2026-11-07"
+    },
+    "m01-s08-l006": {
+      "file": "recordings/commander/m01-s08-l006.mp3",
+      "speaker": "commander",
+      "text": "Отлично. И что за агрегат?",
+      "sha256": "7b3a70a1f2e2d32acbebaeadc4ee2a7f49f3f260769003dd193e908d61a1000e",
+      "sourceName": "m01-s08-l006.mp3.mp3",
+      "received": "2026-11-07"
+    },
+    "m01-s08-l008": {
+      "file": "recordings/commander/m01-s08-l008.mp3",
+      "speaker": "commander",
+      "text": "Ну снимайте и жёлтую.",
+      "sha256": "548d347bc74fe2524a035e371fd1abfae07cb155cb8c73bc8ba2eb0daa2b772c",
+      "sourceName": "m01-s08-l008.mp3.mp3",
+      "received": "2026-11-07"
+    },
+    "m01-s08-l010": {
+      "file": "recordings/commander/m01-s08-l010.mp3",
+      "speaker": "commander",
+      "text": "Почему?",
+      "sha256": "2532b1c8a743116d2105c2812b58bb201c2bccca76d306a331b38dab517ecf73",
+      "sourceName": "m01-s08-l010.mp3.mp3",
+      "received": "2026-11-07"
+    },
+    "m01-s08-l012": {
+      "file": "recordings/commander/m01-s08-l012.mp3",
+      "speaker": "commander",
+      "text": "Передать в НИИ. Пусть учёные разбираются.",
+      "sha256": "9399115e364d86f9b9eceb7c3e2946f1a07eb9263b29ca10b8aa16a11718f568",
+      "sourceName": "m01-s08-l012.mp3.mp3",
+      "received": "2026-11-07"
+    },
+    "m01-s08-l014": {
+      "file": "recordings/commander/m01-s08-l014.mp3",
+      "speaker": "commander",
+      "text": "И что обнаружили?",
+      "sha256": "6a3f4af02f8a81002f62f4140cc4ed895bdf186ed5e3cf05be0f9a1e7cbf7ada",
+      "sourceName": "m01-s08-l014.mp3.mp3",
+      "received": "2026-11-07"
+    },
+    "m01-s08-l016": {
+      "file": "recordings/commander/m01-s08-l016.mp3",
+      "speaker": "commander",
+      "text": "А почему жёлтая изолента?",
+      "sha256": "50f49e9a00c83aef4e491dc9deba5ab29604ef2de93c18121dd9d455b6334993",
+      "sourceName": "m01-s08-l016.mp3.mp3",
+      "received": "2026-11-07"
+    },
+    "m01-s08-l018": {
+      "file": "recordings/commander/m01-s08-l018.mp3",
+      "speaker": "commander",
+      "text": "А зачем синяя?",
+      "sha256": "c7597953606c127f669d0c840123c04edac8afb53b4602fb38a1cc611b5c4d88",
+      "sourceName": "m01-s08-l018.mp3.mp3",
+      "received": "2026-11-07"
+    }
+  },
+  "reactions": {
+    "m01-s14-warrant-sigh": {
+      "file": "recordings/warrant/m01-s14-warrant-sigh.mp3",
+      "speaker": "warrant",
+      "sha256": "e6a5ae217ee6952741cede688873518af7384ab471dcea93d8017236779a741f",
+      "sourceName": "m01-s14-warrant-sigh.mp3.mp3",
+      "received": "2026-11-07",
+      "afterCue": "m01-s14-l018",
+      "sourceLine": 1001,
+      "description": "Прапорщик тяжело вздыхает после сообщения солдата о сломанном генераторе."
+    }
+  }
+}

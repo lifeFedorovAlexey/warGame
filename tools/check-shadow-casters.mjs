@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {createShadowCasters} from '../campaign/shadow-casters.js';
+const cache=createShadowCasters();
+const frame=(...pose)=>{cache.begin();cache.watch('builder',...pose);return cache.end();};
+assert(frame('builder',120,200,-7e-41));
+assert(!frame('builder',120,200,-1e-41),'A parked vehicle stops refreshing shadows while its steering settles');
+assert(frame('builder',120.1,200,0),'Real movement still updates shadows');
+assert(frame('builder',120.1,200,.01),'Visible steering still updates shadows');
+assert(frame('wreck',120.1,200,.01),'A changed model updates shadows');
+for(let i=1;i<=5;i++)assert(!frame('wreck',120.1+i*1e-7,200,.01));
+assert(frame('wreck',120.100002,200,.01),'Small accumulated movement is compared to the last rendered pose');
+cache.begin();assert(cache.end(),'Removed casters invalidate the map');
+console.log('PASS: parked steering, actual movement, accumulated movement, model changes and removed shadow casters');

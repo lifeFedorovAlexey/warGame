@@ -2,6 +2,7 @@ import {matchingRecipe, projectAssemblyKey, projectDesignation, vehicleComponent
 import {DesignPreview} from './design-preview.js';
 import {FIELD_RECIPES,ensureSalvage} from './vehicle-salvage.js';
 import {setButtonIcon} from '../assets/ui/icons.js';
+import {VEHICLE_PAINTS,vehiclePaint} from './vehicle-paint.js';
 
 const catalogue = {
   C01: {role:'wheeled', detail:'Полный привод', icon:'move', massKg:1120},
@@ -45,6 +46,19 @@ export class VehicleDesigner {
     this.choicePage = null;
     this.manualName = false;
     this.components = [];
+    this.paint = null;
+    this.paintChoicesRoot = panel.querySelector('[data-design-paints]');
+    for (const paint of VEHICLE_PAINTS) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'design-paint';
+      button.dataset.paint = paint.id;
+      button.title = paint.name;
+      button.setAttribute('aria-label', paint.name);
+      button.innerHTML = '<svg viewBox="0 0 32 32" aria-hidden="true"><path fill="'+paint.color+'" d="M7 4h21v21l-3 3H4V7z"/><path class="paint-check-shadow" d="m10 16 4 4 8-9"/><path class="paint-check" d="m10 16 4 4 8-9"/></svg>';
+      button.onclick = () => { this.paint = paint.id; this.status.textContent = ''; this.paintAssembly(); };
+      this.paintChoicesRoot.append(button);
+    }
     this.previewModules = new Set();
     this.fieldNote = panel.querySelector('[data-design-field-note]');
     this.recipes = [];
@@ -138,7 +152,7 @@ export class VehicleDesigner {
     this.salvageChoices.replaceChildren(...Object.entries(FIELD_RECIPES).map(([id,recipe])=>{
       const label=document.createElement('label'),input=document.createElement('input');input.type='checkbox';input.checked=state.wanted.includes(id);input.disabled=!state.enabled||!state.recipes.includes(id);
       label.append(input,document.createTextNode(' '+recipe.name+' · +'+recipe.hpBonus+' HP'+(state.recipes.includes(id)?'':' · нет чертежа')));
-      input.onchange=()=>{state.wanted=input.checked?[...new Set([...state.wanted,id])]:state.wanted.filter(key=>key!==id);this.paintSalvage();};return label;
+      input.onchange=()=>{state.userConfigured=true;state.wanted=input.checked?[...new Set([...state.wanted,id])]:state.wanted.filter(key=>key!==id);this.paintSalvage();};return label;
     }));
   }
 
@@ -229,17 +243,19 @@ export class VehicleDesigner {
 
   paintAssembly() {
     const recipe = matchingRecipe(this.recipes, this.components);
+    const paint = vehiclePaint({components:this.components,paint:this.paint}).id;
+    for (const button of this.paintChoicesRoot.children) button.setAttribute('aria-pressed', String(button.dataset.paint === paint));
     const modifications=this.fieldPreview();
     this.saveButton.disabled = !recipe;
     this.modelName.textContent = recipe?.spec.name ?? 'Нет доступных сочетаний';
     this.paintStats(recipe);
     this.paintFieldNote();
     this.syncName();
-    const modelKey = this.components.join('/')+'|'+modifications.map(r=>r.id).join('/');
+    const modelKey = this.components.join('/')+'|'+paint+'|'+modifications.map(r=>r.id).join('/');
     if (recipe && this.preview && modelKey !== this.modelKey) {
       this.modelKey = modelKey;
       try {
-        this.preview.setModel(this.makeModel(this.components),modifications.map(r=>r.id));
+        this.preview.setModel(this.makeModel(this.components,paint),modifications.map(r=>r.id));
         this.stageStatus.textContent = '';
       } catch (error) {
         this.preview.clearModel();
@@ -258,7 +274,7 @@ export class VehicleDesigner {
     const modifications=this.fieldPreview(),bonus=modifications.reduce((sum,r)=>sum+r.hpBonus,0);
     const values = {
       hp:spec ? spec.hp+bonus : null,
-      cost:spec && spec.cost + ' ⚡',
+      cost:spec && String(spec.cost),
       time:spec && spec.seconds + ' с',
       speed:spec && spec.speed + ' м/с',
       range:spec?.range ? spec.range + ' м' : null,
@@ -284,7 +300,7 @@ export class VehicleDesigner {
       const button=document.createElement('button');button.type='button';button.className='design-part';
       button.dataset.designModification=recipe.id;
       button.setAttribute('aria-pressed',String(this.previewModules.has(recipe.id)));
-      setButtonIcon(button,recipe.id==='hood-guard'?'armor-plate':'wall',recipe.name,'Показать на машине · +'+recipe.hpBonus+' HP');
+      setButtonIcon(button,recipe.icon??(recipe.id==='hood-guard'?'armor-plate':'wall'),recipe.name,'Показать на машине · +'+recipe.hpBonus+' HP');
       button.onclick=()=>{
         if(this.previewModules.has(recipe.id))this.previewModules.delete(recipe.id);else this.previewModules.add(recipe.id);
         this.paintFieldChoices();this.paintAssembly();
@@ -304,8 +320,8 @@ export class VehicleDesigner {
   syncName() {
     const {state, config} = this.mission;
     const assembly = projectAssemblyKey({components:this.components});
-    const current = state.designs.find(project => projectAssemblyKey(project) === assembly);
-    this.saveButton.title = current ? 'Заменит проект «' + current.name + '» для этого набора деталей' : 'Новый проект';
+    const current = state.designs.findLast(project => projectAssemblyKey(project) === assembly);
+    this.saveButton.title = current ? 'Обновит название и окраску проекта «' + current.name + '» для новых заказов' : 'Новый проект';
     this.autoName.disabled = !this.manualName || !this.components.length;
     if (!this.manualName) {
       this.name.value = this.components.length ? projectDesignation(this.components, state.designs, config, state.research) : '';
@@ -321,7 +337,7 @@ export class VehicleDesigner {
 
   submit(event) {
     event.preventDefault();
-    const result = this.mission.saveDesign(this.manualName ? this.name.value : '', this.components);
+    const result = this.mission.saveDesign(this.manualName ? this.name.value : '', this.components, this.paint);
     if (!result.ok) {
       this.status.textContent = result.reason;
       return;

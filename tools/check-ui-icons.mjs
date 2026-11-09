@@ -59,6 +59,7 @@ try {
   await audit('Build palette');
   await page.screenshot({path:'campaign/previews/icons/01-battle-build.png'});
   await page.locator('.settings summary').click();
+  await page.locator('[aria-controls="operation-audio"]').click();
   await page.locator('#sound-toggle').click();
   assert.equal(await page.locator('#sound-toggle').getAttribute('data-icon'), 'muted');
   await page.locator('#story-voice-toggle').click();

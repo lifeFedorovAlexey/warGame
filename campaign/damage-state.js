@@ -1,9 +1,9 @@
 // Renderer-independent, bounded, JSON-serializable damage. Metres in model space.
-export const DAMAGE_VERSION = 2;
+export const DAMAGE_VERSION = 3;
 export const CAGE = {size:[5,9,5], min:[-1.35,-2.7,0], max:[1.35,2.7,3.6]};
 export const CAGE_COUNT = 225;
 export const MAX_MARKS = 24;
-export const MAX_PARTS = 128;
+export const MAX_PARTS = 192;
 const cagePoints=new Float32Array(CAGE_COUNT*3);
 const customCagePoints=new WeakMap();
 for(let z=0;z<5;z++)for(let y=0;y<9;y++)for(let x=0;x<5;x++){
@@ -44,6 +44,7 @@ export const VEHICLE_PARTS = {
   23:{name:'window_grille',material:'metal',detachable:true,strength:80},
   24:{name:'cargo_rail_left',material:'metal',detachable:true,strength:75},
   25:{name:'cargo_rail_right',material:'metal',detachable:true,strength:75},
+  26:{name:'tube_bumper',material:'metal',detachable:true,strength:150},
 };
 export const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
 export const normalize = v=>{const l=Math.hypot(...v)||1;return v.map(x=>x/l);};
@@ -57,12 +58,15 @@ export function createDamageState(bounds=CAGE){
 }
 export function upgradeDamageState(state,vehicle=false){
   if(!state||state.version>=DAMAGE_VERSION)return state;
-  if(vehicle){
+  if(vehicle&&state.version<2){
     // Version 1 grouped all side panes. Preserve existing failures on loading
     // old saves; only new hits use the finer individual pane mapping.
     for(const id of [12,13])if(state.parts[id])for(const next of [id+6,id+8])state.parts[next]??={...state.parts[id]};
     for(const mark of state.marks)if(mark.part===12||mark.part===13){if(mark.point[1]>.55)mark.part+=8;else if(mark.point[1]<-.98)mark.part+=6;}
   }
+  // Older saves keep their contact locations and part failures. Enlarge only
+  // the presentation support of old tiny MG marks; do not invent lost impulses.
+  if(state.version<3)for(const mark of state.marks??[])if(mark.kind===0&&mark.material===MATERIAL.metal&&mark.radius<.10)mark.radius*=3;
   state.version=DAMAGE_VERSION;state.revision++;return state;
 }
 export function damageLOD(distance,previous=2,visible=true){
@@ -120,9 +124,14 @@ function admissibleCage(values,bounds){
   return true;
 }
 function dent(state,hit,profile){
-  if(hit.type==='fire'||hit.power<=profile.yield||!profile.compliance)return false;
-  const radius=clamp(hit.radius??(.55+Math.sqrt(hit.power)*.065),.5,2.2);
-  const depth=Math.min(hit.type==='collision'?.42:.22,(hit.power-profile.yield)*profile.compliance);
+  // Small arms gradually dish thin sheet metal. The old collision yield of
+  // 16 excluded every ordinary MG hit (3–12 HP), even a lethal burst.
+  // This remains a local impulse; hull HP never selects a damage shape.
+  const bullet=(hit.type??'bullet')==='bullet',sheet=profile===PROFILES.metal;
+  const yieldPower=bullet&&sheet?2:profile.yield;
+  if(hit.type==='fire'||hit.power<=yieldPower||!profile.compliance)return false;
+  const radius=clamp(hit.radius??((bullet&&sheet?.8:.55)+Math.sqrt(hit.power)*.065),.5,2.2);
+  const depth=Math.min(bullet?.065:hit.type==='collision'?.42:.32,(hit.power-yieldPower)*profile.compliance*(bullet&&sheet?3.5:1));
   const direction=normalize(hit.direction),point=hit.restPoint??hit.point;
   state.cage??=Array(CAGE_COUNT*3).fill(0);
   let changed=false;const candidate=state.cage.slice();
@@ -200,7 +209,8 @@ export function applyDamageHit(state,hit,part={material:'metal'},options={deform
   const deformationMs=deformed?performance.now()-dentStart:0;
   const type=hit.type??'bullet',fire=type==='fire',penetration=(type==='penetrator'||type==='shell')&&['metal','glass'].includes(material);
   if(fire)state.burn=clamp(state.burn+hit.power*.004,0,1);
-  const radius=hit.markRadius??(fire?.38:type==='shell'?.23:type==='collision'?.38:material==='concrete'?.10:.048);
+  // Radius describes chipped paint/spall, not the calibre of a through-hole.
+  const radius=hit.markRadius??(fire?.38:type==='shell'?.30:type==='collision'?.48:material==='concrete'?.14:material==='glass'?.07:clamp(.085+Math.sqrt(hit.power)*.025,.10,.23));
   const mark={point:restPoint,normal:normalize(hit.restNormal??hit.normal),radius,part:id,kind:fire?2:type==='collision'?3:penetration?1:0,material:MATERIAL[material]??0};
   // Merge overlapping bursts before replacing the oldest cosmetic mark. Cage/part damage is never evicted.
   const same=state.marks.find(m=>m.part===id&&m.kind===mark.kind&&m.normal.reduce((s,v,i)=>s+v*mark.normal[i],0)>.8&&Math.hypot(...m.point.map((v,i)=>v-restPoint[i]))<radius*.65);

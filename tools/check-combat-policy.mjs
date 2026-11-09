@@ -4,10 +4,40 @@ import {Mission} from '../campaign/mission.js';
 import {automaticCombatTarget,combatPolicy,DEFAULT_COMBAT_POLICY} from '../campaign/combat-policy.js';
 const config=JSON.parse(fs.readFileSync('assets/campaign/alpha/mission01/gameplay.json'));
 const field={extent:4096,half:2048,cellMetres:32,heightAt:()=>0,gradientAt:()=>({x:0,y:0}),gridToWorld:([x,y])=>({x:x*32-2048,y:2048-y*32}),worldToGrid:(x,y)=>[(x+2048)/32,(2048-y)/32]};
-function fixture(){const m=new Mission(config,field);m.state.units=[];m.state.buildings=[];m.state.camps=[];m.state.bounds=[0,0,127,127];m.state.pendingCinematics=[];m.updateMission=()=>{};m.rebuildNavigation();m.visible.fill(1);m.explored.fill(1);return m;}
+function fixture(){const m=new Mission({...config,startGrid:[64,56]},field);m.state.units=[];m.state.buildings=[];m.state.camps=[];m.state.bounds=[0,0,127,127];m.state.pendingCinematics=[];m.updateMission=()=>{};m.rebuildNavigation();m.visible.fill(1);m.explored.fill(1);return m;}
 const unit=(m,kind='bukhanka',owner='rai',x=0,y=0)=>m.addUnit(kind,owner,{x,y});
 const tick=(m,u)=>{m.state.time+=.1;m.updateUnit(u,.1);};
 const checks=[];
+{
+ const m=fixture(),u=unit(m),enemy=unit(m,'raider','scavs',0,65),weak=unit(m,'raider','scavs',55,45);weak.hp=20;
+ assert(m.order([u.id],'attack',enemy).ok);tick(m,u);assert(enemy.hp<enemy.maxHp);
+ m.setCombatPolicy([u.id],{response:'ignore'});u.cooldown=0;const held=enemy.hp;tick(m,u);
+ assert.equal(enemy.hp,held,'Changing to hold fire must stop an already-issued attack');
+ assert(m.order([u.id],'attack',enemy).ok);u.cooldown=0;tick(m,u);assert(enemy.hp<held,'A new explicit order may override hold fire');
+ m.setCombatPolicy([u.id],{response:'ignore'});u.cooldown=0;const reaffirmed=enemy.hp;tick(m,u);
+ assert.equal(enemy.hp,reaffirmed,'Clicking the already-selected hold-fire rule still cancels a newer attack');
+ m.setCombatPolicy([u.id],{response:'free'});assert(m.order([u.id],'attack',enemy).ok);
+ m.setCombatPolicy([u.id],{priority:'weakest'});u.cooldown=0;const old=enemy.hp;tick(m,u);
+ assert.equal(enemy.hp,old,'The old explicit target must not mask a changed priority');assert(weak.hp<20);
+ checks.push('live policy changes override an older explicit target; a new attack remains explicit');
+}
+{
+ const m=fixture(),leader=unit(m),member=unit(m,'bukhanka','rai',50,0),other=unit(m,'bukhanka','rai',100,0);
+ m.configureGroup([leader.id,member.id],{leaderId:leader.id});
+ assert.equal(m.setCombatPolicy([leader.id],{response:'ignore'}).changed,2,'Leader settings affect the same members as leader attack orders');
+ assert.equal(combatPolicy(member).response,'ignore');assert.equal(combatPolicy(other).response,'free');
+ assert.equal(m.setCombatPolicy([member.id],{response:'return'}).changed,1,'Selecting a non-leader only changes that member');
+ assert.equal(combatPolicy(leader).response,'ignore');
+ checks.push('commander selection applies policies to its live group only');
+}
+{
+ const m=fixture(),u=unit(m),enemy=unit(m,'raider','scavs',0,65);
+ assert(m.submitOrder([u.id],'attack',enemy).ok);assert(u.pendingOrder);
+ m.setCombatPolicy([u.id],{response:'ignore'});
+ for(let i=0;i<10;i++)m.advance(.1);
+ assert(!u.pendingOrder&&!u.task,'A queued attack cannot return after changing the firing rule');assert.equal(enemy.hp,enemy.maxHp);
+ checks.push('policy changes cancel pending explicit attack planning');
+}
 {
  const m=fixture(),u=unit(m),near=unit(m,'raider','scavs',0,48),weak=unit(m,'raider','scavs',-48,80),danger=unit(m,'flamer','scavs',65,70);
  const strong=m.addStructure('generator','scavs',{x:110,y:0});weak.hp=15;
@@ -46,6 +76,7 @@ for(const [retreat,damage] of [['light',70],['heavy',220]]){
  const end=u.combatRetreat.destination;
  for(let i=0;i<400&&u.combatRetreat.status!=='arrived';i++)tick(m,u);
  assert.equal(u.combatRetreat.status,'arrived',JSON.stringify({retreat,u}));
+ assert.equal(u.combatRetreat.phase,'home');assert(Math.hypot(u.x,u.y-256)<100,'Retreat reaches the actual base area');
  assert(Math.hypot(u.x-end.x,u.y-end.y)<8);assert.equal(u.hp,hp,'retreat does not cause collision damage');
  const parked={x:u.x,y:u.y};for(let i=0;i<20;i++)tick(m,u);
  assert.deepEqual({x:u.x,y:u.y},parked,'does not resume cancelled attack');
@@ -53,6 +84,19 @@ for(const [retreat,damage] of [['light',70],['heavy',220]]){
  assert.deepEqual(copy.entity(u.id).combatPolicy,u.combatPolicy);assert.deepEqual(copy.entity(u.id).combatRetreat,u.combatRetreat);
  assert(m.order([u.id],'move',{x:u.x+110,y:u.y}).ok);assert(!u.combatRetreat,'new order cancels retreat');
  checks.push(retreat+' retreat physically reaches destination, holds, saves, accepts new order');
+}
+{
+ const m=fixture(),u=unit(m),enemy=unit(m,'raider','scavs',0,-80);
+ const factory=m.addStructure('factory','rai',{x:260,y:200},{completed:true,progress:1});m.rebuildNavigation();
+ u.combatResume={group:'stale'};u.combatParking={anchor:{x:0,y:-150}};
+ m.setCombatPolicy([u.id],{retreat:'light',response:'ignore'});m.damage(u,70,enemy);tick(m,u);
+ assert.equal(u.combatRetreat.home.id,factory.id,'The built base takes priority over the initial landing point');
+ assert(!u.combatResume&&!u.combatParking,'An interrupted combat resume cannot restart an attack during withdrawal');
+ for(let i=0;i<500&&u.factoryVisit?.phase!=='inside';i++)tick(m,u);
+ assert.equal(u.combatRetreat.status,'servicing');assert.equal(u.factoryVisit.phase,'inside');
+ assert.equal(u.factoryVisit.factoryId,factory.id,'Retreat enters the friendly factory');
+ assert(Math.hypot(u.x-factory.x,u.y-factory.y)<20,'The car is stored inside the hall');
+ checks.push('retreat enters the built factory and clears interrupted attack state');
 }
 {
  const m=fixture(),u=unit(m),enemy=unit(m,'raider','scavs',0,-50);

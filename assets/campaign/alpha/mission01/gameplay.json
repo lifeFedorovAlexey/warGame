@@ -5,13 +5,24 @@
   "simulationStep": 0.1,
   "simulationCpuBudgetMs": 5,
   "unitLimit": 500,
-  "salvage": {"initialRecipes": ["hood-guard", "window-grille"]},
+  "salvage": {"initialRecipes": ["hood-guard", "window-grille", "tube-bumper"]},
   "initialEnergy": 760,
   "energyCapacity": 2400,
+  "oilTransferPerSecond": 25,
   "startGrid": [14.5, 53.5],
+  "openingSignGrid": [13.25, 45],
+  "openingSignRotationDegrees": -37,
+  "baseSites": [
+    {"kind": "generator", "grid": [9.5, 55], "rotationDegrees": 180},
+    {"kind": "factory", "grid": [12.25, 49.25]},
+    {"kind": "lab", "grid": [18.5, 50]}
+  ],
   "raidApproachGrid": [21, 52.25],
+  "raidStagingGrid": [29.5, 52.125],
   "raidRoster": ["raider", "scav-zaporozhets", "scav-rifleman", "scav-grenadier"],
   "initialUnits": ["bukhanka", "bukhanka", "bukhanka", "builder", "builder"],
+  "initialRow": {"offset": [-78, -60], "spacing": 28},
+  "openingSalvageLamp": "street-lamp-2",
   "initialMapBounds": [0, 0, 53, 66],
   "finalMapBounds": [0, 0, 53, 83],
   "buildingGridMetres": 8,
@@ -19,10 +30,10 @@
   "builderRangeMetres": 16,
   "oilFields": [[10.5, 52], [16.5, 56.5], [30, 42], [38, 30], [24.5, 71.5]],
   "camps": [
-    {"id": "nw-pocket", "name": "Первый лагерь", "grid": [31.5, 42.7], "gateGrid": [35.5, 42.5], "artifact": "flamethrower", "chapter": "first-artifact", "units": 3, "strength": 1},
-    {"id": "nw-west", "name": "Склад", "grid": [15.9, 30.5], "gateGrid": [18.5, 33.5], "artifact": "mg-ammo-1", "chapter": "second-artifact", "units": 4, "strength": 1.2},
-    {"id": "nw-east", "name": "Водонапорная башня", "grid": [39.6, 25.9], "gateGrid": [38.5, 29.5], "towerGrids": [[38.1, 26.8375]], "artifact": "mg-tower", "chapter": "third-artifact", "units": 4, "strength": 1.4},
-    {"id": "west-south", "name": "Штаб Петровича", "grid": [13.5, 71.75], "gateGrid": [14.5, 67.5], "approachGrid": [14.28125, 62.84375], "coreRotationDegrees": 180, "towerGrids": [[9.625, 71.625], [15.25, 70.8125]], "requiresCamps": 3, "chapter": "last-camp", "units": 6, "strength": 1.7}
+    {"id": "nw-pocket", "name": "Первый лагерь", "grid": [31.5, 42.7], "gateGrid": [35.5, 42.5], "artifact": "flamethrower", "chapter": "first-artifact", "units": 3, "strength": 1.12, "extraGuards": ["scav-rifleman", "raider"], "wave": {"seconds": 65, "units": ["scav-zaporozhets", "scav-rifleman"]}},
+    {"id": "nw-west", "name": "Склад", "grid": [15.9, 30.5], "gateGrid": [18.5, 33.5], "artifact": "mg-ammo-1", "chapter": "second-artifact", "units": 4, "strength": 1.38, "extraGuards": ["raider", "scav-grenadier"], "wave": {"seconds": 60, "units": ["raider", "scav-grenadier"]}},
+    {"id": "nw-east", "name": "Водонапорная башня", "grid": [39.6, 25.9], "gateGrid": [38.5, 29.5], "towerGrids": [[38.1, 26.8375]], "artifact": "mg-tower", "chapter": "third-artifact", "units": 4, "strength": 1.65, "extraGuards": ["scav-rifleman", "scav-grenadier", "scav-zaporozhets"], "wave": {"seconds": 55, "units": ["scav-firetruck", "scav-rifleman"]}},
+    {"id": "west-south", "name": "Штаб Петровича", "grid": [13.5, 71.75], "gateGrid": [14.5, 67.5], "approachGrid": [16, 80.5], "approachRoad": ["junction-6", "junction-1", "junction-7", "west-south"], "coreRotationDegrees": 180, "towerGrids": [[9.625, 71.625], [15.25, 70.8125]], "requiresCamps": 3, "chapter": "last-camp", "units": 6, "strength": 1.95, "extraGuards": ["scav-bus", "scav-rifleman", "scav-grenadier"], "wave": {"seconds": 50, "units": ["scav-zaporozhets", "scav-grenadier"]}}
   ],
   "units": {
     "bukhanka": {"name": "Пулемёт", "components": ["C01", "B01", "U01"], "cost": 130, "seconds": 18, "hp": 320, "speed": 30, "range": 145, "damage": 9, "cooldown": 0.55, "vision": 210, "role": "combat"},
@@ -37,10 +48,26 @@
     "scav-grenadier": {"name": "Гренадёр", "cost": 0, "seconds": 0, "hp": 70, "speed": 12, "range": 62, "damage": 32, "cooldown": 3.2, "vision": 150, "role": "combat", "weapon": "grenade", "splash": 16, "infantry": true}
   },
   "buildings": {
+    "scav-barracks": {"name":"Барак отбросов","enemyOnly":true,"realSizeMetres":[9.5,6.8,4.6],"footprintMetres":[10,7],"hp":620,"vision":150,"power":0,"seconds":1},
+    "scav-store": {"name":"Склад хлама","enemyOnly":true,"realSizeMetres":[5.9,5,2.8],"footprintMetres":[6,5],"hp":260,"vision":0,"power":0,"seconds":1},
+    "scav-fence": {"name":"Забор из металлолома","enemyOnly":true,"realSizeMetres":[7,0.7,2.7],"footprintMetres":[7,0.7],"hp":160,"vision":0,"power":0,"seconds":1},
+    "scav-gate": {"name":"Створка ворот","enemyOnly":true,"realSizeMetres":[1,5.6,4.8],"footprintMetres":[1,5.6],"hp":260,"vision":0,"power":0,"seconds":1},
+    "base-sign": {
+      "name": "Вывеска «РАЙ»",
+      "storyOnly": true,
+      "realSizeMetres": [8.2, 1.3, 4.3],
+      "footprintMetres": [9.5, 4],
+      "cost": 0,
+      "seconds": 6,
+      "hp": 300,
+      "vision": 0,
+      "power": 0,
+      "workAnchor": [0, -4, 0]
+    },
     "generator": {"name": "АЭС", "realSizeMetres": [12, 10, 5], "footprintMetres": [14, 12], "cost": 140, "seconds": 20, "hp": 950, "vision": 130, "power": 0, "oilSlots": 4, "workAnchor": [0, -8, 0]},
     "derrick": {"name": "Вышка", "realSizeMetres": [8, 8, 14], "footprintMetres": [10, 10], "cost": 90, "seconds": 16, "hp": 650, "vision": 100, "power": 0, "energyPerSecond": 5, "requiresOil": true, "workAnchor": [0, -6, 0]},
-    "factory": {"name": "Завод", "realSizeMetres": [26, 20, 9], "footprintMetres": [28, 24], "cost": 220, "seconds": 35, "hp": 1400, "vision": 150, "power": 1, "workAnchor": [0, -14, 0], "exitAnchor": [0, -18, 0], "production": ["bukhanka", "builder", "flamer"]},
-    "lab": {"name": "НИИ", "realSizeMetres": [16, 14, 7], "footprintMetres": [18, 16], "cost": 180, "seconds": 28, "hp": 1000, "vision": 150, "power": 0.7, "workAnchor": [0, -10, 0]},
+    "factory": {"name": "Завод", "realSizeMetres": [26, 20, 9], "footprintMetres": [28, 24], "cost": 220, "seconds": 35, "hp": 1400, "vision": 150, "power": 0, "workAnchor": [0, -14, 0], "exitAnchor": [0, -18, 0], "production": ["bukhanka", "builder", "flamer"]},
+    "lab": {"name": "НИИ", "realSizeMetres": [16, 14, 7], "footprintMetres": [18, 16], "cost": 180, "seconds": 28, "hp": 1000, "vision": 150, "power": 0, "workAnchor": [0, -10, 0]},
     "bunker": {"name": "ДОТ", "realSizeMetres": [4.6, 3.8, 2], "footprintMetres": [6.4, 5.6], "cost": 85, "seconds": 18, "hp": 800, "vision": 170, "power": 0, "range": 130, "damage": 9, "cooldown": 0.65, "workAnchor": [0, -5, 0]},
     "mg-tower": {"name": "Башня", "realSizeMetres": [7, 7, 12], "footprintMetres": [9, 9], "requires": "mg-tower", "cost": 150, "seconds": 25, "hp": 1000, "vision": 240, "power": 0, "range": 210, "damage": 12, "cooldown": 0.55, "workAnchor": [0, -6, 0]}
   },

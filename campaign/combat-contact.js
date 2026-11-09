@@ -8,14 +8,15 @@ function nearFace(dx,dy,width,depth) {
 
 export function combatContact(source,target,config,field) {
   const scale=config.worldScale;
-  if(config.units[target.kind]){
+  const unit=config.units[target.kind];
+  if(unit){
     const pose=vehiclePose(target,field,scale);
     const [width,centre,depth,z]=vehicleLocalBoxes(target.kind).at(-1);
     const [, , height]=vehicleToWorld([0,centre,z],pose);
     const [sx,sy]=worldToVehicle([source.x,source.y,height],pose);
     const [dx,dy]=nearFace(sx,sy-centre,width+.045,depth+.045);
     const [x,y,hitZ]=vehicleToWorld([dx,centre+dy,z],pose);
-    return {x,y,z:hitZ,surface:'armor'};
+    return {x,y,z:hitZ,surface:unit.infantry?'infantry':'armor'};
   }
   const spec=config.buildings[target.kind],base=target.groundHeight??field.heightAt(target.x,target.y);
   const [width,depth,height]=spec?.realSizeMetres??[target.halfWidth*2/scale,target.halfDepth*2/scale,3.2];

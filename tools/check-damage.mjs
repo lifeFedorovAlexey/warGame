@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import * as T from '../demo/vendor/three.module.js';
-import {createDamageState,applyDamageHit,applyStructuralImpact,upgradeDamageState,cageSample,damageLOD,partMissing,destroyDamage,MAX_MARKS,damageMobility,VEHICLE_PARTS,CAGE,PROFILES} from '../campaign/damage-state.js';
+import {createDamageState,applyDamageHit,applyStructuralImpact,upgradeDamageState,cageSample,damageLOD,partMissing,destroyDamage,MAX_MARKS,MAX_PARTS,damageMobility,VEHICLE_PARTS,CAGE,PROFILES} from '../campaign/damage-state.js';
 import {prepareDamageGeometry,createDamageCollider} from '../campaign/damage-geometry.js';
 import {createDamageDebris} from '../campaign/damage-debris.js';
 import {recordDamage} from '../campaign/damage-contact.js';
@@ -18,6 +18,17 @@ test('Local, directional, accumulated deformation and seam continuity',()=>{
   applyDamageHit(s,base);assert(cageSample(s,base.point)[0]<first[0]);
   const opposite=createDamageState();applyDamageHit(opposite,{...base,point:[-.97,1,1.7],normal:[-1,0,0],direction:[1,0,0]});assert(cageSample(opposite,[-.97,1,1.7])[0]>0);
   const p=[.3,.5,2],a=cageSample(s,p),b=cageSample(s,p.map((v,i)=>v+(i===1?1e-8:0)));assert(Math.hypot(...a.map((v,i)=>v-b[i]))<1e-7);
+});
+test('Ordinary MG bursts leave local sheet-metal deformation at half hull HP',()=>{
+  const s=createDamageState(),hit={...base,type:'bullet',power:6};
+  applyDamageHit(s,hit);const first=cageSample(s,hit.point)[0];assert(first<0);
+  for(let i=1;i<27;i++)applyDamageHit(s,hit);
+  assert.equal(s.total,162);assert(cageSample(s,hit.point)[0]<first*5);
+  assert.deepEqual(cageSample(s,[-.97,-2,1.7]),[0,0,0],'Unstruck opposite panel is not a half-HP preset');
+  assert(s.marks[0].radius>.12&&s.marks[0].radius<.3,'Paint spall has a bounded readable radius');
+  const concrete=createDamageState();applyDamageHit(concrete,hit,{material:'concrete'});assert.equal(concrete.cage,null);
+  const other=createDamageState();applyDamageHit(other,{...hit,point:[-.97,1,1.7],normal:[-1,0,0],direction:[1,0,0]});
+  assert(cageSample(other,[-.97,1,1.7])[0]>0);assert.deepEqual(cageSample(JSON.parse(JSON.stringify(s)),hit.point),cageSample(s,hit.point));
 });
 test('Bounded mark history does not erase structural damage',()=>{
   const s=createDamageState();applyDamageHit(s,base);const cage=s.cage.slice();
@@ -44,6 +55,12 @@ test('Invalid hits never mutate state',()=>{
   const s=createDamageState(),before=JSON.stringify(s);for(const power of [0,-1,NaN,Infinity])assert.equal(applyDamageHit(s,{...base,power}).changed,false);assert.equal(JSON.stringify(s),before);
   assert.throws(()=>applyDamageHit(s,{...base,point:[NaN,1,1]}));assert.equal(JSON.stringify(s),before);
 });
+test('Old small marks migrate without replaying unknown impacts or splitting panes twice',()=>{
+  const s=createDamageState();s.version=2;s.hits=10;s.total=60;s.parts[13]={damage:.5,detached:false};
+  s.marks=[{point:[.97,0,1.7],normal:[1,0,0],radius:.048,kind:0,material:0,part:0}];
+  upgradeDamageState(s,true);assert(Math.abs(s.marks[0].radius-.144)<1e-10);assert.equal(s.cage,null);assert.equal(s.total,60);
+  assert(!s.parts[19]&&!s.parts[21]);const before=JSON.stringify(s);upgradeDamageState(s,true);assert.equal(JSON.stringify(s),before);
+});
 test('BVH hits actual deformed surface and skips detached geometry',()=>{
   const mesh=new T.Mesh(new T.BoxGeometry(2,4,2,6,8,6),new T.MeshStandardMaterial({name:'paint_olive'}));mesh.position.z=1.5;mesh.updateMatrixWorld(true);
   const binding=prepareDamageGeometry(T,mesh,'body',1),collider=createDamageCollider(T,[binding]),s=createDamageState();
@@ -56,7 +73,7 @@ test('Original building prefabs have tagged windows and equipment within budget'
   const config=JSON.parse(fs.readFileSync('assets/campaign/alpha/mission01/gameplay.json'));
   for(const kind of ['factory','lab','generator','mg-tower']){
     const model=createBuildingPrefab(T,kind,config.buildings[kind]),parts=model.userData.damageParts;
-    assert(Object.keys(parts).length<128,kind);assert(Object.values(parts).some(p=>p.detachable),kind);
+    assert(Object.keys(parts).length<MAX_PARTS&&Object.keys(parts).every(id=>Number(id)<MAX_PARTS),kind);assert(Object.values(parts).some(p=>p.detachable),kind);
     if(kind!=='mg-tower')assert(Object.values(parts).some(p=>p.material==='glass'),kind);
     model.traverse(n=>{if(n.isMesh)assert(n.geometry.attributes.damagePart,kind);});
   }

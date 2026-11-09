@@ -1,9 +1,10 @@
 import {setButtonIcon} from '../assets/ui/icons.js';
 import {COMBAT_OPTIONS,combatPolicy} from './combat-policy.js';
+import {expandCommandIds} from './group-command.js';
 
 export class CombatMenu {
-  constructor({button,mission,selection,onOpen,onDeactivate,isActive,onChange}) {
-    this.button=button;this.mission=mission;this.selection=selection;this.onOpen=onOpen;this.onDeactivate=onDeactivate;this.isActive=isActive;this.onChange=onChange;
+  constructor({button,mission,selection,onToggle,onChange}) {
+    this.button=button;this.mission=mission;this.selection=selection;this.onToggle=onToggle;this.onChange=onChange;
     this.element=document.getElementById('combat-menu');this.controls=[];
     this.hint=document.createElement('div');this.hint.id='combat-hint';this.hint.setAttribute('role','tooltip');this.hint.hidden=true;
     this.hintTitle=document.createElement('strong');this.hintDetail=document.createElement('span');
@@ -34,14 +35,14 @@ export class CombatMenu {
       }
       this.element.append(group);
     }
-    button.onclick=()=>this.isActive()?this.onDeactivate():this.open();
+    button.onclick=()=>{this.close();this.onToggle();};
     button.addEventListener('contextmenu',event=>{event.preventDefault();this.open();});
     button.addEventListener('keydown',event=>{
       if(event.key!=='ArrowUp')return;
       event.preventDefault();event.stopPropagation();this.open();this.controls.find(({control})=>control.tabIndex===0)?.control.focus();
     });
     this.element.addEventListener('keydown',event=>{
-      if(event.key==='Escape'){event.preventDefault();event.stopPropagation();this.onDeactivate();button.focus();}
+      if(event.key==='Escape'){event.preventDefault();event.stopPropagation();this.close();button.focus();}
     });
     document.addEventListener('pointerdown',event=>{
       if(!this.element.hidden&&!this.element.contains(event.target)&&!button.contains(event.target))this.close();
@@ -51,8 +52,8 @@ export class CombatMenu {
     this.resizeObserver.observe(button.closest('.tactical-dock'));
     this.refresh();
   }
-  units(){return this.selection().filter(u=>u.owner==='rai'&&u.hp>0&&this.mission.config.units[u.kind]?.damage);}
-  open(){if(!this.units().length)return;this.onOpen();this.element.hidden=false;this.button.setAttribute('aria-expanded','true');this.refresh();}
+  units(){return expandCommandIds(this.mission,this.selection().map(u=>u.id)).map(id=>this.mission.entity(id)).filter(u=>u?.owner==='rai'&&u.hp>0&&this.mission.config.units[u.kind]?.damage);}
+  open(){if(!this.units().length)return;this.element.hidden=false;this.button.setAttribute('aria-expanded','true');this.refresh();}
   close(){this.element.hidden=true;this.button.setAttribute('aria-expanded','false');this.hideHint();}
   hideHint(){this.hint.hidden=true;this.hintOwner?.removeAttribute('aria-describedby');this.hintOwner=null;}
   showHint(control,group,option){
