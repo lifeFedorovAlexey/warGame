@@ -1,5 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg">
   <!-- Flat stencil controls in the sand / olive / amber reference palette. -->
+  <symbol id="rotate-building" viewBox="0 0 64 64"><path d="M47 20a21 21 0 1 0 5 24" fill="none" stroke="#d9c69b" stroke-width="8"/><path fill="#f39a29" d="m34 19 22-7-1 24z"/><path fill="#8c9160" d="M24 28h15v15H24z"/></symbol>
+  <symbol id="placement-grid" viewBox="0 0 64 64"><path d="M23 6v52M41 6v52M6 23h52M6 41h52" fill="none" stroke="#d9c69b" stroke-width="5"/><path fill="#f39a29" d="M28 28h8v8h-8z"/></symbol>
   <symbol id="previous" viewBox="0 0 64 64"><path fill="#d9c69b" d="m39 7 9 9-17 16 17 16-9 9-26-25z"/><path fill="#f39a29" d="m39 7 9 9-7 7-9-9z"/></symbol>
   <symbol id="next" viewBox="0 0 64 64"><path fill="#d9c69b" d="m25 7-9 9 17 16-17 16 9 9 26-25z"/><path fill="#f39a29" d="m25 7-9 9 7 7 9-9z"/></symbol>
   <symbol id="play" viewBox="0 0 64 64"><path fill="#8c9160" d="M15 10 56 34 15 57z"/><path fill="#d9c69b" d="M12 7 53 31 12 54z"/><path fill="#f39a29" d="m22 22 16 9-16 10z"/></symbol>

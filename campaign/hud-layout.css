@@ -55,9 +55,9 @@
 #actions [data-production-state=blocked] .production-time {color:#f0a04b;}
 #actions button.has-queue.cannot-produce .game-icon { opacity: .65; filter: saturate(.65); }
 #queue { padding: 0; margin-bottom: 6px; font-size: 10px; text-shadow: none; }
-#placement { margin-bottom: 6px; padding: 0; gap: 4px; }
+#placement { margin-bottom: 6px; padding: 0; gap: 4px; flex-wrap:wrap; max-width:304px; }
 #placement strong { font-size: 11px; }
-#placement p { font-size: 10px; }
+#placement p { font-size: 10px; flex-basis:100%; }
 #placement button.icon-button, #select-blocked.icon-button { --button-size: 32px; --icon-size: 26px; }
 #order-feedback { font-size: 10px; padding: 0; }
 #toast { top: auto; bottom: calc(var(--hud-bottom) + 12px); font-size: 12px; }

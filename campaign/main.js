@@ -32,6 +32,7 @@ let openingPlaying = false;
 let openingCamera=null;
 let pausedBeforeDesigner = false;
 let buildOpen = false, buildKind = null, rotation = 0, orderMode = null;
+let snapBuildings = true, freePlacement = false;
 let pointer = null, drag = null, site = null, placing = null;
 let last = performance.now(), lastUi = 0, lastMini = 0, toastUntil = 0;
 let actionKey = '', rosterKey = '', paletteKey = '', taskKey = '', queueKey = '';
@@ -369,12 +370,22 @@ function orderDerrick(point) {
 function updatePlacement() {
   if (!buildKind) return;
   const point = site ?? (pointer && world.ground(pointer.x, pointer.y));
-  const check = point && mission.placement(buildKind, point.x, point.y, rotation);
-  placing = point ? {...point, ...check, rotation: check?.rotation ?? rotation} : null;
-  world.setGhost(buildKind, placing);
+  const snap=snapBuildings&&!freePlacement;
+  const check = point && mission.placement(buildKind, point.x, point.y, rotation,{snap:snap&&!site});
+  placing = check ? {...check,snap} : null;
+  world.setGhost(buildKind, placing, mission);
+  $('placement-snap').setAttribute('aria-pressed',String(snap));
+  $('placement-snap').classList.toggle('active',snap);
   const label = $('placement-status');
-  label.textContent = !point ? 'Наведите курсор на карту' : check.ok ? (check.blockers.length ? 'ЛКМ — поставить. Машины освободят площадку.' : 'ЛКМ — поставить · R — повернуть · Esc — отменить') : check.reason;
+  label.textContent = check&&!check.ok ? check.reason : '';
+  label.hidden=!label.textContent;
   label.classList.toggle('invalid', !!check && !check.ok);
+}
+function rotatePlacement(direction=1){
+  if(!buildKind)return;
+  if(placing)site={x:placing.x,y:placing.y};
+  rotation=(rotation+direction*Math.PI/2+Math.PI*2)%(Math.PI*2);
+  updatePlacement();
 }
 function suggestSite() {
   if (!buildKind) return;
@@ -438,6 +449,13 @@ function installInput() {
     if (settings.open && !settings.contains(event.target) && !$('radio').contains(event.target)) settings.open = false;
   });
   canvas.addEventListener('contextmenu', event => event.preventDefault());
+  let lastPlacementWheel=-Infinity;
+  canvas.addEventListener('wheel',event=>{
+    if(!buildKind||!event.shiftKey)return;
+    event.preventDefault();event.stopImmediatePropagation();
+    if(performance.now()-lastPlacementWheel<120)return;
+    lastPlacementWheel=performance.now();rotatePlacement(event.deltaY>0?1:-1);
+  },{capture:true,passive:false});
   canvas.addEventListener('pointerdown', event => {
     if (!active || mission.state.status !== 'running') return;
     if(document.elementFromPoint(event.clientX,event.clientY)!==canvas)return;
@@ -455,6 +473,7 @@ function installInput() {
   });
   canvas.addEventListener('pointermove', event => {
     pointer = {x: event.clientX, y: event.clientY};
+    freePlacement=event.altKey;
     site = null;
     const oil = !buildKind && !orderMode && oilAt(pointer.x,pointer.y);
     canvas.title = oil ? 'Построить вышку' : '';
@@ -484,11 +503,11 @@ function installInput() {
     // or clear the current selection. Empty HUD gaps still hit the map.
     if (!active || mission.state.status!=='running' || document.elementFromPoint(x,y)!==canvas) return;
     if (buildKind) {
+      if(!pointer||pointer.x!==x||pointer.y!==y)site=null;
       pointer = {x,y};
-      site = null;
       updatePlacement();
       if (!placing?.ok) return;
-      const result = mission.build([...selected], buildKind, placing.x, placing.y, rotation);
+      const result = mission.build([...selected], buildKind, placing.x, placing.y, placing.rotation,{snap:false});
       if (report(result)) {
         world.commandMarker(placing);
         sound.acknowledge('build', selection().filter(unit => liveMobile(unit) && unit.kind === 'builder').map(unit => unit.id));
@@ -557,6 +576,10 @@ function installInput() {
       }
       return;
     }
+    if(buildKind&&!event.ctrlKey&&!event.metaKey){
+      if(['AltLeft','AltRight'].includes(code)){event.preventDefault();freePlacement=true;updatePlacement();return;}
+      if(code==='KeyR'){event.preventDefault();if(!event.repeat)rotatePlacement(event.shiftKey?-1:1);return;}
+    }
     if(event.altKey&&code==='KeyR'&&!event.repeat){
       event.preventDefault();const result=mission.retreat(selection().filter(liveMobile).map(u=>u.id));
       if(report(result))toast('Отходим к базе');
@@ -582,17 +605,14 @@ function installInput() {
     else if (code === 'KeyB' && !event.repeat) toggleBuild();
     else if (code === 'KeyM' && !event.repeat) beginOrder('move');
     else if (code === 'KeyF' && !event.repeat) toggleAttackOrder();
-    else if (code === 'KeyR' && buildKind) {
-      rotation = (rotation + Math.PI / 2) % (2 * Math.PI);
-      updatePlacement();
-    } else if (code === 'Home') $('home').click();
+    else if (code === 'Home') $('home').click();
     else if (['KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(code)) {
       event.preventDefault();
       world.keys.add(code);
     }
   });
-  document.addEventListener('keyup', event => world.keys.delete(event.code));
-  window.addEventListener('blur', () => { world.keys.clear(); cancelMapGesture(); lastSelectionClick=null; });
+  document.addEventListener('keyup', event => {world.keys.delete(event.code);if(['AltLeft','AltRight'].includes(event.code)){freePlacement=false;updatePlacement();}});
+  window.addEventListener('blur', () => { world.keys.clear(); freePlacement=false;updatePlacement();cancelMapGesture(); lastSelectionClick=null; });
   $('minimap').addEventListener('pointerdown', event => {
     const rect = $('minimap').getBoundingClientRect();
     const point = world.field.gridToWorld([(event.clientX-rect.left)/rect.width*127, (event.clientY-rect.top)/rect.height*127]);
@@ -1105,6 +1125,9 @@ try {
   $('production-toggle').ondblclick = () => openBuilding('factory', true);
   $('close-build').onclick = $('cancel-order').onclick = cancelMode;
   $('suggest-site').onclick = suggestSite;
+  $('rotate-building').onclick=()=>rotatePlacement();
+  $('rotate-building').oncontextmenu=event=>{event.preventDefault();rotatePlacement(-1);};
+  $('placement-snap').onclick=()=>{snapBuildings=!snapBuildings;updatePlacement();};
   $('move-order').onclick = () => beginOrder('move');
   combatMenu=new CombatMenu({button:$('attack-order'),mission,selection,onToggle:toggleAttackOrder,onChange:result=>{if(report(result))sound.signal('order');updateUi();}});
   $('home').onclick = () => {

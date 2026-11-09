@@ -14,6 +14,7 @@ import {updateOilPump} from './oil-pump.js';
 import {createHeadlightPair,setHeadlightPower} from '../demo/vehicle-effects.js';
 import {createCombatEffects} from './combat-effects.js';
 import {placeSelectionRing} from './selection-rings.js';
+import {createPlacementGrid} from './placement-grid.js';
 import {SCAV_PROFILES,isInfantry} from './scav-unit-profiles.js';
 import {createConstructionEffects} from './construction-effects.js';
 import {createFogMask} from './fog-mask.js';
@@ -82,7 +83,8 @@ export async function createCampaignWorld(host,config,sound){
  selectionRoot.name='selection_rings';
  for(let i=0;i<48;i++){const ring=new T.Mesh(ringGeometry.clone(),selectedMaterial);ring.visible=false;selectionRoot.add(ring);selectionRings.push(ring);}
  const marker=new T.Mesh(new T.RingGeometry(6,7,32),new T.MeshBasicMaterial({color:'#cfb473',transparent:true,opacity:.7,depthWrite:false,side:T.DoubleSide}));marker.visible=false;scene.add(marker);let markerUntil=0;
- let ghost=null,ghostKind=null,ghostMaterial=new T.MeshBasicMaterial({color:'#a7c899',transparent:true,opacity:.29,depthWrite:false,side:T.DoubleSide});
+ const placementGrid=createPlacementGrid(T,scene,field,config);
+ let ghost=null,ghostKind=null,ghostValid=null;const ghostMaterials=[];
  const footprint = new T.LineLoop(new T.BufferGeometry(), new T.LineBasicMaterial({color:'#d4edaa', depthTest:false}));
  footprint.geometry.setAttribute('position',new T.Float32BufferAttribute(new Float32Array(12),3));
  footprint.frustumCulled = false;
@@ -200,14 +202,29 @@ export async function createCampaignWorld(host,config,sound){
   }
   return result;
  }
- function setGhost(kind,placement){
-  if(kind!==ghostKind){if(ghost)scene.remove(ghost);ghostKind=kind;ghost=kind?getPrefab(kind).clone(true):null;if(ghost){ghost.traverse(o=>{if(o.isMesh){o.material=ghostMaterial;o.castShadow=false;}});scene.add(ghost);}}
+ function setGhost(kind,placement,mission){
+  placementGrid.update(kind,placement,mission);
+  if(kind!==ghostKind){
+   if(ghost)scene.remove(ghost);for(const {material} of ghostMaterials)material.dispose();ghostMaterials.length=0;ghostValid=null;
+   ghostKind=kind;ghost=kind?getPrefab(kind).clone(true):null;
+   if(ghost){
+    const copies=new Map(),copy=original=>{
+     if(copies.has(original))return copies.get(original);
+     const material=original.clone();material.transparent=true;material.opacity=Math.min(original.opacity,.72);material.depthWrite=true;
+     copies.set(original,material);ghostMaterials.push({material,color:original.color?.clone()});return material;
+    };
+    ghost.name='building_placement_ghost';ghost.traverse(o=>{if(o.isMesh){o.material=Array.isArray(o.material)?o.material.map(copy):copy(o.material);o.castShadow=false;}});scene.add(ghost);
+   }
+  }
   footprint.visible = !!(ghost && placement);
   if(!footprint.visible){if(ghost)ghost.visible=false;return;}
   const {x,y,ok,rotation=0} = placement;
   const z = placement.height ?? field.heightAt(x,y);
   ghost.visible=true;ghost.position.set(x,y,z);ghost.rotation.z=rotation;ghost.scale.setScalar(config.worldScale);
-  ghostMaterial.color.set(ok?'#b8d488':'#ed806b');
+  if(ghostValid!==ok){
+   ghostValid=ok;const tint=new T.Color(ok?'#b8d488':'#ed806b');
+   for(const {material,color} of ghostMaterials)if(color)material.color.copy(color).lerp(tint,ok?.12:.55);
+  }
   footprint.material.color.set(ok?'#e0f7b7':'#ff9c80');
   const [w,d]=config.buildings[kind].footprintMetres.map(value=>value*config.worldScale/2),c=Math.cos(rotation),s=Math.sin(rotation);
   const position=footprint.geometry.attributes.position;

@@ -1,5 +1,6 @@
 import {TerrainNavigator} from './navigation.js';
 import {waterTower} from './threat-guidance.js';
+import {checkBuildingPlacement} from './building-placement.js';
 import {constructionUnlocked,researchUnlocked,defenseReady} from './story-construction.js';
 import {driveStep,clearOfVehicles,vehicleClearance,planManeuver,planManeuverSteps,maneuverStep,checkManeuver} from './vehicle-motion.js';
 import {footprintSupport,vehicleEnvelope,vehicleSweep,vehicleGroundSafe,vehicleObstacle,vehicleRadiusBound} from './vehicle-collision.js';
@@ -170,26 +171,7 @@ export class Mission{
  constructionUnlocked(kind){return !this.config.buildings[kind]?.enemyOnly&&constructionUnlocked(this.state,kind);}
  researchUnlocked(){return researchUnlocked(this.state);}
  defenseReady(){return defenseReady(this.state);}
- placement(kind,x,y,rotation=0,{checkMoney=true}={}){
-  if(!this.constructionUnlocked(kind))return this.fail('Строительство ещё не открыто');
-  const spec=this.config.buildings[kind];if(!spec)return this.fail('Неизвестное здание');if(spec.requires&&!this.state.research[spec.requires])return this.fail('Требуется исследование: '+this.config.research[spec.requires].name);if(checkMoney&&!this.canSpend(spec.cost))return this.fail('Недостаточно нефти');if(!this.inBounds(x,y)||!this.exploredAt(x,y))return this.fail('Район ещё не разведан');
-  if(spec.requiresOil){const oil=this.config.oilFields.map(grid=>this.field.gridToWorld(grid)).find(p=>Math.hypot(p.x-x,p.y-y)<25);if(!oil)return this.fail('Нужна нефтяная точка');x=oil.x;y=oil.y;}
-  else{x=Math.round(x/this.config.buildingGridMetres)*this.config.buildingGridMetres;y=Math.round(y/this.config.buildingGridMetres)*this.config.buildingGridMetres;}
-  const [w,d]=halfFootprint(spec.footprintMetres,this.config.worldScale,rotation),heights=[];
-  for(const dx of [-w,0,w])for(const dy of [-d,0,d]){if(!this.inBounds(x+dx,y+dy)||!this.exploredAt(x+dx,y+dy))return this.fail('Пятно застройки выходит за разведанный район');const g=this.field.gradientAt(x+dx,y+dy);if(Math.hypot(g.x,g.y)>this.config.maxBuildingGrade)return this.fail('Слишком крутой склон');heights.push(this.field.heightAt(x+dx,y+dy));}
-  if(Math.max(...heights)-Math.min(...heights)>2.5)return this.fail('Нужна ровная площадка');
-  if(!spec.requiresOil)for(const grid of this.config.oilFields){const oil=this.field.gridToWorld(grid);if(Math.abs(x-oil.x)<w+this.config.worldScale*5+5&&Math.abs(y-oil.y)<d+this.config.worldScale*5+5)return this.fail('Нефтяной участок зарезервирован для вышки');}
-  for(const building of this.state.buildings)if((building.hp>0||building.damage?.wreck)&&Math.abs(x-building.x)<w+building.halfWidth+8&&Math.abs(y-building.y)<d+building.halfDepth+8)return this.fail('Пересечение с постройкой');
-  const exitBox=(bx,by,angle,source)=>{const local=source.exitAnchor,c=Math.cos(angle),s=Math.sin(angle),scale=this.config.worldScale,px=bx+(local[0]*c-local[1]*s)*scale,py=by+(local[0]*s+local[1]*c)*scale;return{x:px,y:py,halfWidth:Math.abs(c)*14+Math.abs(s)*24,halfDepth:Math.abs(s)*14+Math.abs(c)*24};};
-  for(const building of this.state.buildings){if(building.hp<=0)continue;const otherSpec=this.buildingSpec(building);if(otherSpec.exitAnchor){const exit=exitBox(building.x,building.y,building.rotation,otherSpec);if(Math.abs(x-exit.x)<w+exit.halfWidth&&Math.abs(y-exit.y)<d+exit.halfDepth)return this.fail('Нельзя перекрывать выезд завода');}if(spec.exitAnchor){const exit=exitBox(x,y,rotation,spec);if(Math.abs(building.x-exit.x)<building.halfWidth+exit.halfWidth&&Math.abs(building.y-exit.y)<building.halfDepth+exit.halfDepth)return this.fail('Для выезда завода нет места');}}
-  const blockers=this.siteUnits({kind,x,y,rotation,halfWidth:w,halfDepth:d});
-  if(blockers.some(unit=>unit.damage?.wreck))return this.fail('Площадку занимает остов машины');
-  if(blockers.some(unit=>unit.owner!=='rai'))return this.fail('На площадке противник');
-  const work=spec.workAnchor,c=Math.cos(rotation),s=Math.sin(rotation),wx=x+(work[0]*c-work[1]*s)*this.config.worldScale,wy=y+(work[0]*s+work[1]*c)*this.config.worldScale,[col,row]=this.nav.grid(wx,wy);let approach=false;
-  for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){const p=this.nav.position(col+dx,row+dy);if(this.nav.allowed(col+dx,row+dy)&&Math.hypot(p.x-wx,p.y-wy)<=this.config.builderRangeMetres&&(Math.abs(p.x-x)>=w+this.nav.clearance||Math.abs(p.y-y)>=d+this.nav.clearance))approach=true;}
-  if(!approach)return this.fail('Нет площадки для подъезда строителя');
-  return {ok:true,x,y,rotation:Math.round(rotation/(Math.PI/2))*Math.PI/2,halfWidth:w,halfDepth:d,height:Math.max(...heights),blockers:blockers.map(unit=>unit.id)};
- }
+ placement(kind,x,y,rotation=0,options={}){return checkBuildingPlacement(this,kind,x,y,rotation,options);}
  siteBounds(site){
   const margin=this.nav.clearance,work=this.workPoint(site),apron=this.config.builderRangeMetres+8;
   return {left:Math.min(site.x-site.halfWidth-margin,work.x-apron),right:Math.max(site.x+site.halfWidth+margin,work.x+apron),bottom:Math.min(site.y-site.halfDepth-margin,work.y-apron),top:Math.max(site.y+site.halfDepth+margin,work.y+apron)};
@@ -772,8 +754,8 @@ export class Mission{
   for(const other of this.state.units)for(const id of Object.keys(other.mergeTraffic??{}))
    if(changed.has(id))delete other.mergeTraffic[id];
  }
- build(ids,kind,x,y,rotation=0){this.finishPendingStep();
-  const builders=this.state.units.filter(u=>ids.includes(u.id)&&u.owner==='rai'&&u.hp>0&&this.unitSpec(u).role==='builder');if(!builders.length)return this.fail('Выберите строителя');const place=this.placement(kind,x,y,rotation);if(!place.ok)return place;
+ build(ids,kind,x,y,rotation=0,{snap=true}={}){this.finishPendingStep();
+  const builders=this.state.units.filter(u=>ids.includes(u.id)&&u.owner==='rai'&&u.hp>0&&this.unitSpec(u).role==='builder');if(!builders.length)return this.fail('Выберите строителя');const place=this.placement(kind,x,y,rotation,{snap});if(!place.ok)return place;
   const exits=[];
   for(const id of place.blockers){
    const exit=this.siteExit(this.entity(id),{...place,kind},exits.map(item=>item.goal));
