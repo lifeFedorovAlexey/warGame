@@ -1,4 +1,5 @@
 import {updateFactoryVisit} from './factory-garage.js';
+import {chooseRepairFactory,repairChoiceDue} from './factory-routing.js';
 import {rememberRetreatOrder} from './factory-repair.js';
 import {expandCommandIds} from './group-command.js';
 import {isCampPerimeter} from './camp-demolition.js';
@@ -123,7 +124,7 @@ function retreatHome(mission,unit){
   const rank={factory:0,lab:1,generator:2};
   const bases=mission.state.buildings.filter(b=>b.owner===unit.owner&&b.hp>0&&b.completed&&rank[b.kind]!=null)
     .sort((a,b)=>rank[a.kind]-rank[b.kind]||distance(unit,a)-distance(unit,b));
-  const base=bases[0];
+  const base=chooseRepairFactory(mission,unit)??bases[0];
   return base?{id:base.id,x:base.x,y:base.y,radius:Math.hypot(base.halfWidth,base.halfDepth)+mission.config.worldScale*9}
     :{...mission.field.gridToWorld(mission.config.startGrid),radius:mission.config.worldScale*10};
 }
@@ -210,10 +211,16 @@ export function* updateCombatRetreat(mission, unit, spec, dt) {
   const current=()=>unit.hp>0&&unit.combatRetreat===retreat&&!unit.pendingOrder;
   // Upgrade old saves whose retreat stopped at an arbitrary escape point.
   const existingBase=retreat.home?.id&&mission.entity(retreat.home.id);
-  if(!retreat.home||retreat.home.id&&(!existingBase||existingBase.hp<=0||!existingBase.completed)){
-    retreat.home=retreatHome(mission,unit);
+  const replacement=!retreat.home||!existingBase||existingBase.hp<=0||!existingBase.completed||existingBase.kind!=='factory'||repairChoiceDue(mission,unit)
+   ?retreatHome(mission,unit):retreat.home;
+  if(!retreat.home||replacement.id!==retreat.home.id||replacement.x!==retreat.home.x||replacement.y!==retreat.home.y){
+    // A destroyed factory (or a newly built one replacing the fallback base)
+    // changes the service destination, including while already en route.
+    if(unit.factoryVisit&&['approach','waiting'].includes(unit.factoryVisit.phase))delete unit.factoryVisit;
+    if(existingBase&&replacement.id!==existingBase.id)mission.emit('factory-repair-rerouted',{unit:unit.id,from:existingBase.id,to:replacement.id});
+    clearMotion(unit);retreat.home=replacement;retreat.status='planning';
+    delete retreat.destination;delete retreat.phase;delete retreat.service;
     delete retreat.failedSignature;
-    if(retreat.status==='arrived')retreat.status='planning';
   }
   const serviceBase=retreat.home?.id&&mission.entity(retreat.home.id);
   if(serviceBase?.kind==='factory'&&(unit.factoryVisit||retreat.service!=='complete'))return yield* updateFactoryVisit(mission,unit,serviceBase,dt);
