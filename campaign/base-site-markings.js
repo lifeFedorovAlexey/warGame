@@ -1,10 +1,12 @@
-// Lime survey lines on the soil: true building dimensions, no UI or collision.
-// All three plots share one static draw call and follow the terrain surface.
+import {roadIntersectsSite} from './factory-access.js';
+// Lime survey lines belong to empty, usable plots. Keep a single draw call,
+// and remove the whole hint once a building or a driveway occupies its site.
 export function createBaseSiteMarkings(T,field,config,addFog){
-  const positions=[],colors=[],scale=config.worldScale;
+  const plots=[],scale=config.worldScale;
   const material=new T.MeshStandardMaterial({color:'#e3d7b6',roughness:1,vertexColors:true,transparent:true,opacity:.86,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});
   addFog(material);
   for(const site of config.baseSites??[]){
+    const positions=[],colors=[];
     const centre=field.gridToWorld(site.grid),angle=(site.rotationDegrees??0)*Math.PI/180,c=Math.cos(angle),s=Math.sin(angle);
     const [width,depth]=config.buildings[site.kind].realSizeMetres;
     const w=(width/2+.30)*scale,d=(depth/2+.30)*scale,stroke=.30*scale,arm=2.6*scale;
@@ -28,11 +30,21 @@ export function createBaseSiteMarkings(T,field,config,addFog){
       for(let x=-w+arm+3*scale;x<w-arm-2*scale;x+=4.5*scale)strip(x,side*d,1.8*scale,stroke*.72);
       for(let y=-d+arm+3*scale;y<d-arm-2*scale;y+=4.5*scale)strip(side*w,y,stroke*.72,1.8*scale);
     }
+    plots.push({...centre,halfWidth:Math.abs(c)*w+Math.abs(s)*d,halfDepth:Math.abs(s)*w+Math.abs(c)*d,positions,colors});
   }
-  const geometry=new T.BufferGeometry();
-  geometry.setAttribute('position',new T.Float32BufferAttribute(positions,3));
-  geometry.setAttribute('color',new T.Float32BufferAttribute(colors,3));
-  geometry.computeVertexNormals();
-  const mesh=new T.Mesh(geometry,material);mesh.name='building_plot_markings';mesh.receiveShadow=true;
+  const mesh=new T.Mesh(new T.BufferGeometry(),material);mesh.name='building_plot_markings';mesh.receiveShadow=true;
+  let signature='',roads=[];
+  mesh.userData.setRoads=value=>{roads=value;};
+  mesh.userData.update=buildings=>{
+    const occupied=buildings.filter(b=>b.hp>0||b.damage?.wreck);
+    const visible=plots.map(p=>!occupied.some(b=>Math.abs(b.x-p.x)<b.halfWidth+p.halfWidth
+      &&Math.abs(b.y-p.y)<b.halfDepth+p.halfDepth)&&!roads.some(r=>roadIntersectsSite(r,p)));
+    const key=visible.map(Number).join('');if(key===signature)return;signature=key;
+    const active=plots.filter((_,i)=>visible[i]),geometry=new T.BufferGeometry();
+    geometry.setAttribute('position',new T.Float32BufferAttribute(active.flatMap(p=>p.positions),3));
+    geometry.setAttribute('color',new T.Float32BufferAttribute(active.flatMap(p=>p.colors),3));geometry.computeVertexNormals();
+    mesh.geometry.dispose();mesh.geometry=geometry;mesh.visible=active.length>0;
+  };
+  mesh.userData.update([]);
   return mesh;
 }
