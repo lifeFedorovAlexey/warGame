@@ -24,6 +24,8 @@ import {createFogMask} from './fog-mask.js';
 import {createStorySignals} from './story-signals.js';
 import {createRallyFlags} from './rally-flags.js';
 import {createBaseYard} from './base-yard.js';
+import {createDamEnvironment} from './dam-environment.js';
+import {createDesertDressing} from './desert-dressing.js';
 import {createFieldArtifact} from './field-artifacts.js';
 import {combatContact} from './combat-contact.js';
 import {vehicleLocalBoxes} from './vehicle-collision.js';
@@ -61,7 +63,9 @@ export async function createCampaignWorld(host,config,sound){
  gl_FragColor.rgb=mix(hidden,gl_FragColor.rgb,(visibility.g*.30+visibility.r*.70)*inside);
  `);};material.customProgramCacheKey=()=>cache()+'_mission_fog_v5';material.needsUpdate=true;}
  for(const material of terrain.terrainMaterials) addFog(material);
- const baseYard=createBaseYard(T,field,config,addFog);scene.add(baseYard.root);terrain.setLocalRoads(baseYard.roads);
+ const baseYard=createBaseYard(T,field,config,addFog);scene.add(baseYard.root);
+ const dam=createDamEnvironment(T,field,config,addFog,sound,terrain.terrainMaterials[1]);scene.add(dam.root);baseYard.roads.push(dam.road);terrain.setLocalRoads(baseYard.roads);
+ const dressing=createDesertDressing(T,field,config,[...terrain.roadPaths,...baseYard.roads],dam.layout,addFog);scene.add(dressing.root);
  const damage=createDamageSystem(T,scene,field,config);
  const vehicles=await createVehicleLayer(T,scene,field,config,damage),buildingRoot=new T.Group();scene.add(buildingRoot);const buildings=new Map(),prefabs=new Map(),selectionRoot=new T.Group();scene.add(selectionRoot);
  const healthBars=createHealthBars(T,scene,field,config,vehicles.transforms,buildings);
@@ -263,6 +267,7 @@ export async function createCampaignWorld(host,config,sound){
   controls.target.x=T.MathUtils.clamp(controls.target.x,-field.half,field.half);controls.target.y=T.MathUtils.clamp(controls.target.y,-field.half,field.half);controls.update();camera.position.z=Math.max(camera.position.z,field.heightAt(camera.position.x,camera.position.y)+minimumCameraHeight);
   sky.update(camera,false);
   if(baseYard.update(mission,time+(live?mission.accumulator:0)))renderer.shadowMap.needsUpdate=true;
+  if(dam.update(mission,camera,time+(live?mission.accumulator:0),live))renderer.shadowMap.needsUpdate=true;
   storySignals.update(mission,camera,now);
   rallyFlags.update(mission,selected,camera);
   const threshold=software?145:800;
