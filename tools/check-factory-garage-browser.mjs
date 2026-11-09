@@ -13,8 +13,9 @@ try{
  });
  page.on('pageerror',e=>{errors.push(e.message);console.error('Browser:',e.message);});page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
  await page.addInitScript(()=>{for(const k of ['fieldSound','fieldRadio','fieldStoryVoice'])localStorage.setItem('warGame.'+k,'off');});
- await page.goto('http://127.0.0.1:8766/review/factory-service/campaign/');await page.waitForFunction(()=>window.campaign?.ready,null,{timeout:90000});
- await page.locator('#begin').click();const skip=page.locator('[data-dream=skip]');if(await skip.isVisible())await skip.click();
+ await page.goto('http://127.0.0.1:8766/review/factory-service/campaign/');await page.waitForFunction(()=>window.campaign?.ready||document.getElementById('loading')?.dataset.phase==='error',null,{timeout:90000});
+ assert(await page.evaluate(()=>!!window.campaign?.ready),await page.locator('#loading-status').textContent());
+ await page.locator('#begin').click();await page.waitForFunction(()=>document.getElementById('welcome').hidden);const skip=page.locator('[data-dream=skip]');if(await skip.isVisible())await skip.click();
  await page.evaluate(()=>{const c=campaign,m=c.mission;c.radio.setEnabled(false);const s=m.entity(m.state.openingScene.signId);s.completed=true;s.progress=1;});
  await page.waitForFunction(()=>campaign.state.active,null,{timeout:25000});await page.locator('#pause').click();
  await page.evaluate(async()=>{
@@ -43,6 +44,20 @@ try{
    hidden:c.mission.state.units.filter(u=>u.factoryVisit).every(u=>!w.vehicles.transforms.has(u.id)),progress:f.queue[0].progress};});
  assert(view.open>3&&view.sparks===12&&view.smoke&&view.hidden,JSON.stringify(view));
  await page.screenshot({path:dir+'/wide.png'});
+ const signal=()=>page.evaluate(()=>{
+  const w=campaign.world,arrow=w.scene.getObjectByName('factory_gate_arrows'),lamp=w.scene.getObjectByName('factory_repair_lamps'),boards=w.scene.getObjectByName('factory_gate_boards');
+  return {arrows:arrow.count,lamps:lamp.count,boards:boards.count,arrowColor:Array.from(arrow.instanceColor.array.slice(0,3)),repairColor:Array.from(lamp.instanceColor.array.slice(0,3)),matrix:Array.from(arrow.instanceMatrix.array.slice(0,16))};
+ });
+ const repairing=await signal();assert.equal(repairing.lamps,1);assert.equal(repairing.arrows,0);assert.equal(repairing.boards,1);
+ await page.evaluate(()=>{const m=campaign.mission,f=m.entity(campaign.serviceFactory),u=m.state.units.find(u=>u.kind==='bukhanka'&&!u.factoryVisit);campaign.signalCar=u.id;u.factoryVisit={factoryId:f.id,phase:'gate'};f.garageGate=u.id;});
+ await page.waitForTimeout(150);const entering=await signal();assert.equal(entering.arrows,1);assert.equal(entering.lamps,1);assert(entering.matrix[10]>0);
+ await page.screenshot({path:dir+'/entry.png'});
+ await page.evaluate(()=>{const m=campaign.mission,f=m.entity(campaign.serviceFactory),u=m.entity(campaign.signalCar);u.factoryVisit.phase='leaving';u.hp=u.maxHp;u.x=f.x;u.y=f.y-45;u.heading=Math.PI;f.activeRepair=null;});
+ await page.waitForTimeout(150);const leaving=await signal();assert.equal(leaving.arrows,1);assert.equal(leaving.lamps,0);assert(leaving.matrix[10]<0);assert.notDeepEqual(leaving.arrowColor,entering.arrowColor);
+ await page.screenshot({path:dir+'/exit.png'});
+ await page.evaluate(()=>{const m=campaign.mission,f=m.entity(campaign.serviceFactory),u=m.entity(campaign.signalCar);u.hp=0;});
+ await page.waitForTimeout(100);assert.equal((await signal()).arrows,0,'A stale gate id for a destroyed car cannot show an arrow');
+ await page.evaluate(()=>{const m=campaign.mission,f=m.entity(campaign.serviceFactory);delete f.garageGate;f.activeRepair={unitId:m.state.units.find(u=>u.factoryVisit?.phase==='inside').id,progress:.35};});
  await control.click();assert.equal(await control.getAttribute('data-factory-priority'),'production');
  assert.equal(await page.evaluate(()=>campaign.mission.entity(campaign.serviceFactory).workPriority),'production');
  await control.click();assert.equal(await control.getAttribute('data-factory-priority'),'repair');
@@ -52,5 +67,5 @@ try{
  const clips=await page.evaluate(async()=>{const module=await import('./story-director.js'),story=await module.loadMissionStory(),context=new OfflineAudioContext(1,24000,24000),clips=[];
   for(const cue of story.barks.filter(c=>c.id.startsWith('factory-'))){const r=await fetch('../assets/campaign/alpha/mission01/'+cue.clip.file),buffer=await context.decodeAudioData(await r.arrayBuffer());clips.push({id:cue.id,seconds:buffer.duration});}
   return clips;});assert.equal(clips.length,3);assert(clips.every(c=>c.seconds>1));assert.deepEqual(errors,[]);
- console.log('PASS: open factory gate, welding/smoke, hidden internal vehicles, priority icon both ways, queue badge, narrow viewport, 3 decodable voice clips, no browser errors');
+ console.log('PASS: entry/exit arrows, amber repair lamp, stale gate suppression, open factory gate, welding/smoke, hidden internal vehicles, priority both ways, narrow viewport, voice clips, no browser errors');
 }finally{await browser.close();}

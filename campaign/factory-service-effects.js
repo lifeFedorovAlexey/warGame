@@ -1,3 +1,5 @@
+import {createFactoryGateSignals} from './factory-gate-signals.js';
+
 export function createFactoryShutter(T,depth,partId,parts){
  const root=new T.Group();root.name='factory_shutter';root.position.set(0,-depth*.79/2-.13,.35);
  root.userData.damageDynamic=true;
@@ -14,6 +16,7 @@ export function factoryShutterDamagePose(T,root,bindings){
  return factory=>{poseShutter(shutter,factory.garageDoorOpen??0);root.updateMatrixWorld(true);for(const b of moving)matrices.get(b).multiplyMatrices(b.node.matrixWorld,inverses.get(b));return matrices;};
 }
 export function createFactoryServiceEffects(T,scene,scale){
+ const gateSignals=createFactoryGateSignals(T,scene,scale);
  const states=new Map(),canvas=document.createElement('canvas');canvas.width=canvas.height=64;
  const ctx=canvas.getContext('2d'),g=ctx.createRadialGradient(32,32,2,32,32,30);g.addColorStop(0,'#ffffffcc');g.addColorStop(.45,'#ffffff77');g.addColorStop(1,'#ffffff00');ctx.fillStyle=g;ctx.fillRect(0,0,64,64);
  const smokeMap=new T.CanvasTexture(canvas),sparkGeo=new T.BufferGeometry(),positions=new T.Float32BufferAttribute(new Float32Array(16*12*3),3).setUsage(T.DynamicDrawUsage);
@@ -21,11 +24,13 @@ export function createFactoryServiceEffects(T,scene,scale){
  const sparks=new T.Points(sparkGeo,new T.PointsMaterial({color:'#ffe1a0',size:.09*scale,transparent:true,depthWrite:false,blending:T.AdditiveBlending}));sparks.frustumCulled=false;sparks.name='factory_welding_sparks';scene.add(sparks);
  let count=0,level=0;
  function update(mission,buildings,time,dt){
+  gateSignals.begin(mission.state.buildings.reduce((n,f)=>n+Number(f.kind==='factory'),0));
   let points=0,doorChanged=false;count=level=0;const live=new Set();
   for(const f of mission.state.buildings){
    if(f.kind!=='factory')continue;const object=buildings.get(f.id);if(!object)continue;live.add(f.id);
    const working=f.hp>0&&f.completed&&!!f.activeRepair,shutter=object.getObjectByName('factory_shutter');
    const gate=mission.state.units.find(u=>u.id===f.garageGate&&u.factoryVisit?.factoryId===f.id),opening=working||gate&&['gate','entering','leaving'].includes(gate.factoryVisit.phase);
+   if(f.owner==='rai'||mission.visibleAt(f.x,f.y))gateSignals.add(f,object,gate,mission.config.buildings.factory.realSizeMetres[1]);
    if(shutter){const target=opening?1:0,old=f.garageDoorOpen??0,open=old+Math.sign(target-old)*Math.min(Math.abs(target-old),dt*1.8);doorChanged||=old!==open;f.garageDoorOpen=open;poseShutter(shutter,open);}
    let state=states.get(f.id);
    if(!state&&working&&states.size<16){
@@ -52,6 +57,7 @@ export function createFactoryServiceEffects(T,scene,scale){
   }
   for(const [id,state] of states)if(!live.has(id)){scene.remove(state.root);state.root.traverse(n=>{if(n.isSprite)n.material.dispose();});states.delete(id);}
   sparkGeo.setDrawRange(0,points);if(points)positions.needsUpdate=true;
+  gateSignals.end();
   return doorChanged;
  }
  return {update,get active(){return count;},get soundLevel(){return Math.min(1,level);}};
