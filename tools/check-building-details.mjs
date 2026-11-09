@@ -32,7 +32,7 @@ try {
   await page.evaluate(()=>{
     const c=window.campaign,m=c.mission,w=c.world,p=w.field.gridToWorld(m.config.startGrid);
     c.renderSuspended=true;w.fixedRenderScale=true;w.renderer.setPixelRatio(1);w.minimumCameraHeight=3;w.controls.minDistance=10;w.controls.enableDamping=false;
-    document.querySelector('#welcome').hidden=true;document.querySelector('#labels').hidden=true;
+    document.querySelector('#welcome').hidden=true;w.scene.getObjectByName('unit_health_bars').layers.disableAll();
     m.state.units=[];
     const lab=m.addStructure('lab','rai',{x:p.x+130,y:p.y+80},{completed:true,progress:1});
     m.updateFog();window.detailsReview={labId:lab.id};

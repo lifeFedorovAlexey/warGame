@@ -20,7 +20,7 @@ try{
     }
     m.rebuildNavigation();m.updateFog();
     w.controls.target.set(p.x,p.y+70,w.field.heightAt(p.x,p.y+70)+5);w.camera.position.set(p.x+140,p.y+240,w.field.heightAt(p.x,p.y)+200);w.controls.update();
-    document.querySelector('#labels').hidden=true;document.querySelector('#mission-hud').hidden=true;
+    w.scene.getObjectByName('unit_health_bars').layers.disableAll();document.querySelector('#mission-hud').hidden=true;
     w.update(m,new Set(),1/60);window.aiReview={enemies,targets};
   });
   await page.screenshot({path:folder+'/before.png'});

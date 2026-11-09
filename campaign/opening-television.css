@@ -4,7 +4,7 @@
   display: grid; place-items: center; background: rgba(3, 5, 4, .94);
   isolation: isolate;
 }
-.television-playing #mission-hud, .television-playing #labels,
+.television-playing #mission-hud,
 .television-playing #toast { visibility: hidden; }
 .dream-set { position: relative; width: min(680px, 94vw, 90vh); aspect-ratio: 600 / 630; }
 .dream-television { position: absolute; inset: 0; transition: opacity .65s; }

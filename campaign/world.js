@@ -3,6 +3,7 @@ import {OrbitControls} from '../demo/vendor/OrbitControls.js';
 import {createAlphaMap} from '../demo/alpha-map.js';
 import {createDesertSky} from '../demo/sky.js';
 import {createVehicleLayer} from './vehicle-layer.js';
+import {createHealthBars} from './health-bars.js';
 import {createBuildingPrefab} from './prefabs.js';
 import {createScavPrefab} from './scav-prefabs.js';
 import {createScavBasePrefab} from './scav-base-prefabs.js';
@@ -62,6 +63,7 @@ export async function createCampaignWorld(host,config,sound){
  const baseYard=createBaseYard(T,field,config,addFog);scene.add(baseYard.root);terrain.setLocalRoads(baseYard.roads);
  const damage=createDamageSystem(T,scene,field,config);
  const vehicles=await createVehicleLayer(T,scene,field,config,damage),buildingRoot=new T.Group();scene.add(buildingRoot);const buildings=new Map(),prefabs=new Map(),selectionRoot=new T.Group();scene.add(selectionRoot);
+ const healthBars=createHealthBars(T,scene,field,config,vehicles.transforms,buildings);
  damage.setTemplateProvider(entity=>{
    const root=getPrefab(entity.kind,entity.owner,entity.campId,entity.scavVariant,entity.fenceSpan,entity.fenceProfile);root.updateMatrixWorld(true);
    const bindings=[];root.traverse(node=>{if(node.isMesh)bindings.push(damage.prepare(node,'building',0));});
@@ -237,7 +239,7 @@ export async function createCampaignWorld(host,config,sound){
   position.needsUpdate=true;
  }
  function commandMarker(point,hostile=false){marker.position.set(point.x,point.y,field.heightAt(point.x,point.y)+.4);marker.material.color.set(hostile?'#f4a081':'#cfb473');marker.visible=true;markerUntil=performance.now()+1000;}
- function update(mission,selected,dt,live=false){
+ function update(mission,selected,dt,live=false,showHealth=true){
   const time=mission.state.time,now=performance.now()/1000,shotsThisFrame=mission.drainEffects();
   if(time<lastWorldTime){groundEffects.reset();shotTimes.clear();combat.reset();damage.reset();dustTime=0;particles.length=0;}
   for(const event of shotsThisFrame)if(event.type==='shot')shotTimes.set(event.from,now);
@@ -393,6 +395,8 @@ export async function createCampaignWorld(host,config,sound){
   if(textureRows!==lastDamageRows){lastDamageRows=textureRows;renderer.shadowMap.needsUpdate=true;}
   if(shadowCasters.end()||time<lastWorldTime)renderer.shadowMap.needsUpdate=true;
   if(renderer.shadowMap.needsUpdate)shadowUpdates++;
+  const viewport=renderer.domElement.getBoundingClientRect();
+  healthBars.update(mission,selected,camera,viewport.width,viewport.height,showHealth);
   renderer.render(scene,camera);
   lastWorldTime=time;
  }

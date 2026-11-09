@@ -250,13 +250,13 @@ const {chromium} = require('C:/Users/Алексей/.cache/codex-runtimes/codex-
   await page.screenshot({path:'campaign/previews/field-soft-fog.png'});
   await page.evaluate(()=>{const c=window.campaign,b=c.mission.state.buildings.find(b=>b.kind==='derrick');c.world.centre(b,165);return new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));});
   const light=await page.evaluate(()=>{
-   const c=window.campaign,lit=c.world.scene.getObjectsByProperty('type','SpotLight').filter(l=>l.intensity>0),canvas=document.querySelector('#labels');
-   return{realSpotlights:lit.length,range:lit[0]?.distance,labelRect:canvas.getBoundingClientRect().width,labelBacking:canvas.width,frame:c.world.statistics};
+   const c=window.campaign,lit=c.world.scene.getObjectsByProperty('type','SpotLight').filter(l=>l.intensity>0),bars=c.world.scene.getObjectByName('unit_health_bars');
+   return{realSpotlights:lit.length,range:lit[0]?.distance,healthInMap:!!bars?.isMesh,separateHealthCanvas:!!document.querySelector('#labels'),frame:c.world.statistics};
   });
   assert(light.realSpotlights>=2);
   assert.equal(light.range,81);
-  assert.equal(light.labelRect,1120);
-  assert.equal(light.labelBacking,1680);
+  assert(light.healthInMap);
+  assert.equal(light.separateHealthCanvas,false);
   await page.getByRole('button',{name:'Пулемёт 1',exact:true}).dblclick();
   const destination=await page.evaluate(()=>{
    const c=window.campaign,u=c.mission.entity(c.selected[0]);

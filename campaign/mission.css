@@ -26,10 +26,9 @@ button:focus-visible, summary:focus-visible, a:focus-visible { outline: 2px soli
 button.primary { background: #ced99f; border-color: #e3eab9; color: #21281d; font-weight: 700; }
 button.primary:hover:enabled { background: #e4ecb5; }
 button.active { border-color: #e5db9d; box-shadow: inset 0 -2px #e5db9d; }
-#world, #labels { position: fixed; inset: 0; }
+#world { position: fixed; inset: 0; }
 #world canvas { display: block; width: 100%; height: 100%; }
-#labels, #drag-box { pointer-events: none; }
-#labels { width: 100%; height: 100%; }
+#drag-box { pointer-events: none; }
 #drag-box { position: fixed; border: 1px solid #e1e9b7; background: #b2ce732c; z-index: 7; }
 .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 5px; box-shadow: 0 4px 16px #0003; }
 .top {

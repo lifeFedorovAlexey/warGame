@@ -12,9 +12,7 @@ import {OpeningTelevision} from './opening-television.js';
 import {OpeningCamera} from './opening-camera.js';
 import {mainMenu} from './main-menu.js';
 import {storyObjectives} from './story-objectives.js';
-import {buildLayerHeight} from './builder-optics.js';
 import {VehicleDesigner} from './designer.js';
-import {SCAV_PROFILES} from './scav-unit-profiles.js';
 import {CombatMenu} from './combat-menu.js';
 import {pickupTarget} from './pickup-orders.js';
 import {expandCommandIds} from './group-command.js';
@@ -951,47 +949,6 @@ function minimap(){const canvas=$('minimap'),ctx=canvas.getContext('2d'),size=ca
   ctx.strokeStyle='#ffd0af';ctx.lineWidth=1.2;ctx.strokeRect(x/127*size-5,y/127*size-5,10,10);
  }
 }
-function labels() {
-  const canvas = $('labels'), dpr = Math.min(devicePixelRatio, 1.5);
-  const width = Math.round(innerWidth*dpr), height = Math.round(innerHeight*dpr);
-  if (canvas.width !== width || canvas.height !== height) {
-    canvas.width = width;
-    canvas.height = height;
-  }
-  const ctx = canvas.getContext('2d');
-  ctx.setTransform(dpr,0,0,dpr,0,0);
-  ctx.clearRect(0,0,innerWidth,innerHeight);
-  for (const entity of [...mission.state.units, ...mission.state.buildings]) {
-    if(config.buildings[entity.kind]?.storyOnly)continue;
-    if (entity.hp <= 0 || entity.owner !== 'rai' && !mission.visibleAt(entity.x,entity.y)) continue;
-    if (entity.hp === entity.maxHp && !selected.has(entity.id) && entity.completed !== false) continue;
-    const unit = config.units[entity.kind];
-    const spec = config.buildings[entity.kind];
-    const top = entity.completed===false&&spec
-      ? buildLayerHeight(entity,spec,config.worldScale)-world.field.heightAt(entity.x,entity.y)
-      : (unit ? (SCAV_PROFILES[entity.kind]?.height ?? (entity.kind === 'builder' ? 3.65 : 3.2)) : (spec?.realSizeMetres[2] ?? 4)) * config.worldScale;
-    const p = world.screen(entity,top), ground = world.screen(entity,0);
-    const visibleHeight = Math.hypot(p.x-ground.x,p.y-ground.y);
-    if (!p.visible || visibleHeight < 6 || p.x < 0 || p.x > innerWidth || p.y < 45 || p.y > innerHeight) continue;
-    const w=Math.round(Math.max(27,Math.min(53,visibleHeight*1.75))),h=visibleHeight>16?7:6;
-    const x=Math.round(p.x-w/2),y=Math.round(p.y-h-3),fraction=entity.hp/entity.maxHp,inside=w-2;
-    ctx.fillStyle='#151a16';ctx.fillRect(x,y,w,h);
-    ctx.fillStyle='#46372c';ctx.fillRect(x+1,y+1,inside,h-2);
-    ctx.fillStyle=hpColor(fraction);ctx.fillRect(x+1,y+1,Math.max(1,inside*fraction),h-2);
-    const step=inside*100/entity.maxHp>=2.3?50:100;
-    for(let hp=step;hp<entity.maxHp;hp+=step){
-      const marker=Math.round(x+1+inside*hp/entity.maxHp),major=hp%100===0;
-      ctx.fillStyle=major?'#161b16e8':'#1d241d99';
-      ctx.fillRect(marker,y+(major?1:3),major?1.25:1,h-(major?2:4));
-    }
-    if(entity.owner!=='rai'){ctx.fillStyle='#e9856a';ctx.fillRect(x,y+h,w,1);}
-    if (entity.completed === false) {
-      ctx.fillStyle = '#d4bd88';
-      ctx.fillRect(x,y+h+2,w*entity.progress,2);
-    }
-  }
-}
-
 function events() {
   for (const event of mission.drainEvents()) {
     radio?.director?.note(event,mission);
@@ -1029,7 +986,7 @@ function frame(now) {
   if(window.campaign?.renderSuspended)return;
   if(openingTelevision?.active){
     openingTelevision.update(dt);
-    world.update(mission,selected,dt,false);
+    world.update(mission,selected,dt,false,false);
     return;
   }
   if (designer?.visible) {
@@ -1050,10 +1007,9 @@ function frame(now) {
       saveGame(false);
     }
   }
-  world.update(mission, selected, dt, (active||openingPlaying) && !paused && mission.state.status==='running');
+  world.update(mission, selected, dt, (active||openingPlaying) && !paused && mission.state.status==='running',active);
   navigationDebug?.update();
   if (active) {
-    labels();
     if (now - lastMini > 200) { lastMini = now; minimap(); }
     if (now - lastUi > 220) {
       lastUi = now;
