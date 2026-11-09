@@ -34,6 +34,15 @@ export class CombatMenu {
       }
       this.element.append(group);
     }
+    const repairs=document.createElement('div');repairs.className='combat-options';
+    const repair=document.createElement('button');repair.type='button';repair.dataset.autoRepair='';
+    const repairOption={label:'Авторемонт',detail:'Свободные ремонтники чинят рядом'};
+    setButtonIcon(repair,'repair',repairOption.label,repairOption.detail);
+    repair.addEventListener('pointerenter',()=>this.showHint(repair,'Ремонтники',repairOption));
+    repair.addEventListener('focus',()=>this.showHint(repair,'Ремонтники',repairOption));
+    repair.addEventListener('pointerleave',()=>this.hideHint());repair.addEventListener('blur',()=>this.hideHint());
+    repair.onclick=()=>{const result=this.mission.setBuilderAutoRepair(!this.mission.state.builderAutoRepair);this.refresh();this.onChange(result);};
+    repairs.append(repair);this.element.append(repairs);this.repairControl=repair;
     button.onclick=()=>{if(this.element.hidden)this.open();else this.close();};
     button.addEventListener('contextmenu',event=>{event.preventDefault();this.open();});
     button.addEventListener('keydown',event=>{
@@ -77,6 +86,10 @@ export class CombatMenu {
   }
   refresh(){
     if(this.element.hidden)return;
+    const autoRepair=!!this.mission.state.builderAutoRepair;
+    this.repairControl.setAttribute('aria-pressed',String(autoRepair));
+    this.repairControl.setAttribute('aria-description',(autoRepair?'Включён':'Выключен')+' · Свободные ремонтники чинят рядом');
+    this.repairControl.removeAttribute('title');
     const policy=armyCombatPolicy(this.mission);
     for(const key of Object.keys(COMBAT_OPTIONS)) {
       const group=this.controls.filter(item=>item.key===key);let checked=false;

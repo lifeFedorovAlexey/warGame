@@ -46,7 +46,9 @@ export function createMinimap(canvas,{world,mission,selected,background,notify})
  let refreshed=-Infinity,boundsKey='';
  const position=p=>minimapPosition(world.field,p,canvas.width,canvas.height,mission.state.bounds);
  function rebuild(scale){
-  const size=canvas.width;cached.clearRect(0,0,size,size);cached.fillStyle='#171e1c';cached.fillRect(0,0,size,size);
+  // Square viewports may extend beyond the map. Match unexplored fog instead
+  // of exposing a green rectangle that looks like a straight water boundary.
+  const size=canvas.width;cached.clearRect(0,0,size,size);cached.fillStyle='#0b0e0f';cached.fillRect(0,0,size,size);
   const view=minimapViewport(mission.state.bounds),fullSize=size*127/view.span;
   cached.save();cached.translate(-view.left/view.span*size,-view.top/view.span*size);
   if(background.complete&&background.naturalWidth)cached.drawImage(background,0,0,fullSize,fullSize);

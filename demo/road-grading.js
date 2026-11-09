@@ -20,12 +20,23 @@ export function applyRoadGrades(field,roads){
  // visible ground and placement sampling use the same finished surface.
  let padVertices=0;
  for(const pad of field.preparedPads??[]){
-  const [left,bottom,right,top]=pad.rect,blend=pad.blendMetres;
+  const blend=pad.blendMetres,landform=pad.landform;
+  // The rectangle remains the construction reserve, not the silhouette of a
+  // cut into the hill. An authored rounded basin blends into existing relief.
+  const [cx,cy]=landform?.centre??[0,0],[rx,ry]=landform?.radii??[1,1];
+  const envelope=1.06+blend/Math.min(rx,ry);
+  const [left,bottom,right,top]=landform?[cx-rx*envelope+blend,cy-ry*envelope+blend,cx+rx*envelope-blend,cy+ry*envelope-blend]:pad.rect;
   const c0=Math.max(0,Math.floor((left-blend+field.half)/field.renderCell)),c1=Math.min(field.renderSize-1,Math.ceil((right+blend+field.half)/field.renderCell));
   const r0=Math.max(0,Math.floor((field.half-top-blend)/field.renderCell)),r1=Math.min(field.renderSize-1,Math.ceil((field.half-bottom+blend)/field.renderCell));
   for(let row=r0;row<=r1;row++)for(let col=c0;col<=c1;col++){
    const x=col*field.renderCell-field.half,y=field.half-row*field.renderCell,index=row*field.renderSize+col;
-   const outside=Math.hypot(Math.max(left-x,0,x-right),Math.max(bottom-y,0,y-top)),t=Math.min(1,outside/blend),weight=1-t*t*(3-2*t);
+   let outside=Math.hypot(Math.max(left-x,0,x-right),Math.max(bottom-y,0,y-top));
+   if(landform){
+    const nx=(x-cx)/rx,ny=(y-cy)/ry,angle=Math.atan2(ny,nx);
+    const contour=1+.04*Math.sin(angle*3+.7)+.02*Math.sin(angle*5-1.1);
+    outside=Math.max(0,Math.hypot(nx,ny)-contour)*Math.min(rx,ry);
+   }
+   const t=Math.min(1,outside/blend),weight=1-t*t*(3-2*t);
    if(weight<=0)continue;
    field.renderSamples[index]+=(pad.height-field.renderSamples[index])*weight;
    if(field.fineMask)field.fineMask[index]=1;padVertices++;

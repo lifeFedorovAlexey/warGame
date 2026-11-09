@@ -15,6 +15,7 @@ import {isCampPerimeter,updateCampPerimeters} from './camp-demolition.js';
 import {availableOil,oilFundingRemaining,oilRefund,beginOilFlow,finishOilFlow,transferOil,fundedWorkTime,repairWithOil} from './oil-economy.js';
 import {angleDelta} from './builder-kinematics.js';
 import {workProjection,projectorHasSight} from './builder-optics.js';
+import {setBuilderAutoRepair,assignAutomaticRepair,releaseMovingRepairTarget} from './builder-auto-repair.js';
 import {combatContact} from './combat-contact.js';
 import {clearCombatSight} from './combat-sight.js';
 import {recordDamage} from './damage-contact.js';
@@ -58,7 +59,7 @@ import {configureCommandGroup,refreshCommandGroups,expandCommandIds,commandGroup
 
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 const routeOrderRevision=2;
-const workArrivalTolerance=.08;
+const workArrivalTolerance=2;
 function selectedCommandIds(mission,ids,action,target){
  const tactical=['move','attack-move','attack'].includes(action);
  return tactical&&!(action==='move'&&target&&pickupTarget(mission,target))?expandCommandIds(mission,ids,{action}):ids;
@@ -428,7 +429,9 @@ export class Mission{
    const at={...unit,...parked};
    const aim=this.projectorAim(at,target);
    if(!aim||!projectorHasSight(aim,at,target,reservations,this.field,scale))return;
-   if(!repair&&!workProjection(at,{...target,progress:1},this.config,this.field))return;
+   // Leave room for the final chassis heading. A tall building's rising layer
+   // can request a nearer pose later; do not insist on its roof from the start.
+   if(!workProjection(at,target,this.config,this.field,{reachMargin:1}))return;
    candidates.push(p);
   };
   for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++)sample(col+dx,row+dy);
@@ -449,7 +452,7 @@ export class Mission{
     sample(...this.nav.grid(target.x+along,target.y+side*(d+gap)));
    }
   }
-  const cost=p=>distance(p,unit)+distance(p,goal)*(repair?.18:.31);
+  const cost=p=>distance(p,unit);
   candidates.sort((a,b)=>cost(a)-cost(b));
   for(const p of candidates.slice(0,24)){
    const path=(yield* this.vehiclePathSteps(unit,p,{maxGoalDistance:.01}));
@@ -773,6 +776,7 @@ export class Mission{
  }
  setCombatPolicy(ids,changes){const result=configureCombat(this,ids,changes);if(result.ok)this.trafficCoordinator.intentChanged();return result;}
  setArmyCombatPolicy(changes){const result=configureArmyCombat(this,changes);if(result.ok)this.trafficCoordinator.intentChanged();return result;}
+ setBuilderAutoRepair(enabled){return setBuilderAutoRepair(this,enabled);}
  stop(ids,{expandGroup=true}={}){
   if(expandGroup)ids=expandCommandIds(this,ids);
   ids=ids.filter(id=>{const unit=this.entity(id);return !unit||!inFactoryInterior(unit);});
@@ -2065,26 +2069,32 @@ export class Mission{
  }
  projectorAim(unit,target){
   const aim=workProjection(unit,target,this.config,this.field);
-  return aim&&projectorHasSight(aim,unit,target,this.state.units,this.field,this.config.worldScale)?aim:null;
+  return aim&&projectorHasSight(aim,unit,target,this.state.units,this.field,this.config.worldScale,this.state.buildings,this.config.buildings)?aim:null;
  }
  canWorkHere(unit,target){
   if(!target||!clearOfVehicles(unit,unit,this.state.units,this.config.worldScale,true))return false;
   if(!this.projectorAim(unit,target))return false;
-  return !!this.config.units[target.kind]||!!workProjection(unit,{...target,progress:1},this.config,this.field);
+  return true;
  }
  updateBuilder(...args){this.finishPendingStep();return completeSteps(this.updateBuilderSteps(...args));}
  *updateBuilderSteps(unit,dt){
   unit.builderWorking=false;
   unit.builderContact=null;
   unit.projector??={yaw:0,pitch:0};
+  releaseMovingRepairTarget(this,unit);
+  yield* assignAutomaticRepair(this,unit);
   let target=unit.task?.targetId?this.entity(unit.task.targetId):null;
   const job=unit.task?.type;
   if(unit.task?.targetId&&(!target||job==='build'&&target.completed||job==='repair'&&target.hp>=target.maxHp||job==='demolish'&&!canDemolish(this,target))){
    unit.task=null;unit.path=[];target=null;
   }
   const working=target&&['build','repair','demolish'].includes(job)&&!target.clearing;
-  const parked=working&&!unit.path.length&&this.canWorkHere(unit,target);
   const moving=working&&this.config.units[target.kind]&&Math.hypot(target.x-target.previousX,target.y-target.previousY)>.05;
+  const parked=working&&!moving&&this.canWorkHere(unit,target);
+  if(parked){
+   unit.path=[];unit.driveSpeed=0;
+   for(const key of ['detour','driveWatch','trafficHold','routeOrder','routeContinuation'])delete unit[key];
+  }
   const aim=parked&&!moving?this.projectorAim(unit,target):null;
   const requested=aim??{yaw:0,pitch:0};
   const yawError=angleDelta(requested.yaw,unit.projector.yaw), pitchError=requested.pitch-unit.projector.pitch;
@@ -2104,7 +2114,7 @@ export class Mission{
    }
    return;
   }
-  if(working&&!unit.path.length&&this.state.time-(unit.lastRepath??-10)>1){
+  if(working&&!unit.path.length&&this.state.time-(unit.lastRepath??-10)>=.4){
    unit.path=(yield* this.workPathSteps(unit,target))??[];unit.lastRepath=this.state.time;
   }
   (yield* this.moveSteps(unit,dt));

@@ -14,7 +14,7 @@ export function createConstructionScanner(T){
   return !(material.clippingPlanes??[]).some(p=>p.distanceToPoint(hit.point)<0);
  }
  function scan(unit,target,object,pose,time){
-  if(!object||target.completed||target.clearing)return null;
+  if(!object||target.clearing)return null;
   // Thirty surface queries per second; pause/repeated renders return exactly
   // the same contact. Separate units have different deterministic scan phases.
   const frame=Math.floor(time*30),previous=cache.get(unit);

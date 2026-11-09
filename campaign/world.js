@@ -68,8 +68,8 @@ export async function createCampaignWorld(host,config,sound,loading){
  const baseYard=createBaseYard(T,field,config,addFog);scene.add(baseYard.root);
  const dam=createDamEnvironment(T,field,config,addFog,sound,terrain);scene.add(dam.root);baseYard.roads.push(dam.road);terrain.setLocalRoads(baseYard.roads);
  field.localRoads=baseYard.roads;
- const factoryRoads=createFactoryRoadView(T,scene,field,terrain,baseYard.roads,addFog,baseYard.setAccessRoads);
  const dressing=createDesertDressing(T,field,config,[...terrain.roadPaths,...baseYard.roads],dam.layout,addFog);scene.add(dressing.root);
+ const factoryRoads=createFactoryRoadView(T,scene,field,terrain,baseYard.roads,addFog,roads=>{baseYard.setAccessRoads(roads);dressing.setAccessRoads(roads);});
  const damage=createDamageSystem(T,scene,field,config);
  await loading?.stage('vehicles');
  const vehicles=await createVehicleLayer(T,scene,field,config,damage,(completed,total)=>loading?.update('vehicles',completed,total)),buildingRoot=new T.Group();scene.add(buildingRoot);const buildings=new Map(),prefabs=new Map(),selectionRoot=new T.Group();scene.add(selectionRoot);

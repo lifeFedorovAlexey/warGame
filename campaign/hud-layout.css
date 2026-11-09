@@ -54,8 +54,6 @@
 #actions .production-progress::-moz-progress-bar {background:#eda33f;}
 #actions [data-production-state=paused] .production-progress::-webkit-progress-value {background:#c1b58f;}
 #actions [data-production-state=paused] .production-progress::-moz-progress-bar {background:#c1b58f;}
-#actions .production-time {position:absolute;right:0;top:calc(50% + 10px);width:18px;color:#f2dfb3;font:700 9px/10px Arial,sans-serif;font-variant-numeric:tabular-nums;pointer-events:none;}
-#actions [data-production-state=blocked] .production-time {color:#f0a04b;}
 #actions button.has-queue.cannot-produce .game-icon { opacity: .65; filter: saturate(.65); }
 #queue { padding: 0; margin-bottom: 6px; font-size: 10px; text-shadow: none; }
 #placement { margin-bottom: 6px; padding: 0; gap: 4px; flex-wrap:wrap; max-width:304px; }

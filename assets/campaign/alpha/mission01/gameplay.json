@@ -14,9 +14,9 @@
   "openingSignRotationDegrees": -37,
   "baseSites": [
     {"kind": "generator", "grid": [9.5, 55], "rotationDegrees": 180},
-    {"kind": "factory", "grid": [12.25, 49.25]},
+    {"kind": "factory", "grid": [13.5, 50.75]},
     {"kind": "lab", "grid": [18.5, 50]},
-    {"kind": "factory", "grid": [13.5, 56.5], "approachRoad": false}
+    {"kind": "factory", "grid": [12.75, 56.25], "approachRoad": false}
   ],
   "raidApproachGrid": [21, 52.25],
   "raidStagingGrid": [29.5, 52.125],
