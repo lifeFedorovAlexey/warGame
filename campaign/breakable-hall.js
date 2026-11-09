@@ -5,11 +5,11 @@ export function breakableHall(T,{box,mesh,structuralPart},name,[w,d,h],[x,y,bott
  box([w-t*2,d-t*2,.12],[x,y,bottom+.06],m.dark);
  for(const side of [-1,1]){
   for(const axis of ['x','y'])for(let row=0;row<2;row++)for(let col=0;col<2;col++){
-   if(name==='factory'&&axis==='y'&&side===-1){
+   if(name==='factory'&&axis==='y'){
     const left=x-w/2,right=x+w/2,doorLeft=-2.95,doorRight=2.95,doorH=3.48;
     const a=row===0?(col===0?left:doorRight):(col===0?left:x),b=row===0?(col===0?doorLeft:right):(col===0?x:right);
     const low=row===0?0:doorH,high=row===0?doorH:h;
-    structuralPart(name+'_wall_'+axis+'_'+side+'_'+(row*2+col),{material:'concrete',strength:190},()=>box([b-a,t,high-low],[(a+b)/2,y-d/2+t/2,bottom+(low+high)/2],m.concrete));
+    structuralPart(name+'_wall_'+axis+'_'+side+'_'+(row*2+col),{material:'concrete',strength:190},()=>box([b-a,t,high-low],[(a+b)/2,y+side*(d-t)/2,bottom+(low+high)/2],m.concrete));
     continue;
    }
    const width=axis==='y'?w:d-t*2;

@@ -66,9 +66,12 @@ export function buildIndustrialStructure(T, kind, size, kit) {
       for(const y of [front+.12,-depth*.19,depth*.19,back-.14])box([.38,.34,wall+.09],[sx,y,.35+wall/2],trim);
     }
     const doorX=0,doorW=5.9,doorH=3.48;
-    for(const side of [-1,1])box([.39,.48,doorH+.22],[doorX+side*(doorW/2+.09),front-.24,.35+doorH/2],steel);
-    box([doorW+.65,.52,.40],[doorX,front-.24,.35+doorH+.17],trim);
-    for(let j=0;j<9;j++)box([.18,.12,.09],[doorX-doorW*.42+j*.55,front-.37,.39],j%2?dark:caution);
+    for(const face of [-1,1]){
+     const edge=face*(depth/2+.24);
+     for(const side of [-1,1])box([.39,.48,doorH+.22],[doorX+side*(doorW/2+.09),edge,.35+doorH/2],steel);
+     box([doorW+.65,.52,.40],[doorX,edge,.35+doorH+.17],trim);
+     for(let j=0;j<9;j++)box([.18,.12,.09],[doorX-doorW*.42+j*.55,edge+face*.13,.39],j%2?dark:caution);
+    }
     // Roof monitors have sloped glazing, a ridge and sheet-metal backs.
     const profile=new T.Shape().moveTo(-1.44,0).lineTo(1.40,0).lineTo(.83,.84).lineTo(-.50,.84).closePath();
     const monitorWidth=width*.81, slope=Math.atan2(.84,.94), panePitch=monitorWidth/8;

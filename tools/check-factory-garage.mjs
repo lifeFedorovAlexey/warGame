@@ -13,7 +13,8 @@ function progressMission(){
 function step(m,cars,seconds=.1){
  m.advance(seconds);m.finishPendingStep();m.effects=[];
  const visible=cars.filter(u=>u.hp>0&&!insideFactory(u));
- assert(visible.filter(u=>['gate','entering','leaving','departure'].includes(u.factoryVisit?.phase)).length<=1,'One vehicle owns the doorway');
+ assert(visible.filter(u=>['gate','entering'].includes(u.factoryVisit?.phase)).length<=1,'One vehicle owns the entrance');
+ assert(visible.filter(u=>['leaving','departure'].includes(u.factoryVisit?.phase)).length<=1,'One vehicle owns the exit');
  for(let i=0;i<visible.length;i++)for(let j=0;j<i;j++)assert(vehicleClearance(visible[i],visible[j],m.config.worldScale,m.field)>0,'Cars outside never overlap');
 }
 const m=progressMission();m.state.energy=2000;
@@ -22,15 +23,19 @@ assert.equal(factoryPriority(f),'repair','Old and new factories default to repai
 const cars=Array.from({length:3},(_,i)=>m.addUnit('bukhanka','rai',{x:(i-1)*65,y:-210},{heading:0}));
 m.rebuildNavigation();m.visible.fill(255);m.explored.fill(255);m.updateMission=()=>{};
 for(const u of cars){u.hp=100;u.combatRetreat={status:'planning',started:m.state.time,resume:{action:'move',target:{x:u.x,y:-250},origin:{x:u.x,y:-250}}};}
-f.queue.push({kind:'bukhanka',cost:130,progress:.2,funding:{paid:130}});
+// Keep production queued while all three arrive. With a single short order,
+// the first repaired car may already leave before the third enters (correct).
+f.queue.push({kind:'bukhanka',cost:130,progress:.2,funding:{paid:130}},{kind:'bukhanka',cost:130,progress:0,funding:{paid:130}});
 setFactoryPriority(m,f.id,'production');
-const start=performance.now();let admitted=false;
+const start=performance.now();let admitted=false,productionPriorityChecks=0;
 for(let i=0;i<2500&&performance.now()-start<55000;i++){
+ const before= cars.map(u=>u.hp),producing=f.queue.length>0;
  step(m,cars);
+ if(producing&&f.queue.length){assert.deepEqual(cars.map(u=>u.hp),before,'Production priority defers repairs while production remains queued');productionPriorityChecks++;}
  if(cars.every(insideFactory)){admitted=true;break;}
 }
 assert(admitted,'All cars must drive inside the factory');
-assert(cars.every(u=>u.hp===100),'Production priority keeps repair queue inside');
+assert(productionPriorityChecks>0,'Production priority must be exercised before the order finishes');
 const productionCopy=progressMission();productionCopy.load(m.save());
 const pf=productionCopy.entity(f.id);let sawFinishedProduction=false;
 for(let i=0;i<1000&&productionCopy.state.units.some(u=>u.factoryVisit);i++){

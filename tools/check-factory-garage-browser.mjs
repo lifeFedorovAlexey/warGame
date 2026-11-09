@@ -13,7 +13,8 @@ try{
  });
  page.on('pageerror',e=>{errors.push(e.message);console.error('Browser:',e.message);});page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
  await page.addInitScript(()=>{for(const k of ['fieldSound','fieldRadio','fieldStoryVoice'])localStorage.setItem('warGame.'+k,'off');});
- await page.goto('http://127.0.0.1:8766/review/factory-service/campaign/');await page.waitForFunction(()=>window.campaign?.ready||document.getElementById('loading')?.dataset.phase==='error',null,{timeout:90000});
+ const url=process.argv.find(arg=>arg.startsWith('--url='))?.slice(6)??'http://127.0.0.1:8766/review/factory-service/campaign/';
+ await page.goto(url);await page.waitForFunction(()=>window.campaign?.ready||document.getElementById('loading')?.dataset.phase==='error',null,{timeout:90000});
  assert(await page.evaluate(()=>!!window.campaign?.ready),await page.locator('#loading-status').textContent());
  await page.locator('#begin').click();await page.waitForFunction(()=>document.getElementById('welcome').hidden);const skip=page.locator('[data-dream=skip]');if(await skip.isVisible())await skip.click();
  await page.evaluate(()=>{const c=campaign,m=c.mission;c.radio.setEnabled(false);const s=m.entity(m.state.openingScene.signId);s.completed=true;s.progress=1;});
@@ -48,12 +49,13 @@ try{
   const w=campaign.world,arrow=w.scene.getObjectByName('factory_gate_arrows'),lamp=w.scene.getObjectByName('factory_repair_lamps'),boards=w.scene.getObjectByName('factory_gate_boards');
   return {arrows:arrow.count,lamps:lamp.count,boards:boards.count,arrowColor:Array.from(arrow.instanceColor.array.slice(0,3)),repairColor:Array.from(lamp.instanceColor.array.slice(0,3)),matrix:Array.from(arrow.instanceMatrix.array.slice(0,16))};
  });
- const repairing=await signal();assert.equal(repairing.lamps,1);assert.equal(repairing.arrows,0);assert.equal(repairing.boards,1);
+ const repairing=await signal();assert.equal(repairing.lamps,2);assert.equal(repairing.arrows,0);assert.equal(repairing.boards,2);
  await page.evaluate(()=>{const m=campaign.mission,f=m.entity(campaign.serviceFactory),u=m.state.units.find(u=>u.kind==='bukhanka'&&!u.factoryVisit);campaign.signalCar=u.id;u.factoryVisit={factoryId:f.id,phase:'gate'};f.garageGate=u.id;});
- await page.waitForTimeout(150);const entering=await signal();assert.equal(entering.arrows,1);assert.equal(entering.lamps,1);assert(entering.matrix[10]>0);
+ await page.waitForTimeout(150);const entering=await signal();assert.equal(entering.arrows,1);assert.equal(entering.lamps,2);assert(entering.matrix[10]>0);
  await page.screenshot({path:dir+'/entry.png'});
- await page.evaluate(()=>{const m=campaign.mission,f=m.entity(campaign.serviceFactory),u=m.entity(campaign.signalCar);u.factoryVisit.phase='leaving';u.hp=u.maxHp;u.x=f.x;u.y=f.y-45;u.heading=Math.PI;f.activeRepair=null;});
+ await page.evaluate(()=>{const m=campaign.mission,f=m.entity(campaign.serviceFactory),u=m.entity(campaign.signalCar);u.factoryVisit.phase='leaving';u.hp=u.maxHp;u.x=f.x;u.y=f.y+45;u.heading=0;delete f.garageGate;f.garageExit=u.id;f.activeRepair=null;const w=campaign.world;w.camera.position.copy(w.controls.target).add({x:100,y:215,z:180});w.controls.update();for(let i=0;i<30;i++)w.update(m,new Set(campaign.selected),.05);});
  await page.waitForTimeout(150);const leaving=await signal();assert.equal(leaving.arrows,1);assert.equal(leaving.lamps,0);assert(leaving.matrix[10]<0);assert.notDeepEqual(leaving.arrowColor,entering.arrowColor);
+ assert(await page.evaluate(()=>campaign.world.buildingObjects.get(campaign.serviceFactory).getObjectByName('factory_exit_shutter').position.z>3),'Rear shutter opens for departing cars');
  await page.screenshot({path:dir+'/exit.png'});
  await page.evaluate(()=>{const m=campaign.mission,f=m.entity(campaign.serviceFactory),u=m.entity(campaign.signalCar);u.hp=0;});
  await page.waitForTimeout(100);assert.equal((await signal()).arrows,0,'A stale gate id for a destroyed car cannot show an arrow');

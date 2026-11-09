@@ -2147,7 +2147,7 @@ export class Mission{
   const point={x:building.x+(x*c-y*s)*scale,y:building.y+(x*s+y*c)*scale};
   const exit=this.nav.nearest(point.x,point.y,2);
   if(!exit)return false;
-  const heading=angleDelta(building.rotation+Math.PI,0);
+  const heading=angleDelta(building.rotation+(y>0?0:Math.PI),0);
   const departure={...exit,heading,owner:'rai',kind:item.kind};
   const door={...departure,...point};
   const solids=this.nav.nearbySolids(door,scale*4.8+distance(door,departure));
@@ -2165,7 +2165,7 @@ export class Mission{
   }
 
   const slot=building.producedCount??0;
-  const side=(slot%3-1)*24,forward=-42-Math.floor(slot/3)%3*24;
+  const side=(slot%3-1)*24,forward=(y>0?1:-1)*(42+Math.floor(slot/3)%3*24);
   const rally=building.rally??{x:point.x+side*c-forward*s,y:point.y+side*s+forward*c};
   const reservations=[exit];
   for(const other of this.state.units){
