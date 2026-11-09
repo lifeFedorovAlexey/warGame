@@ -78,6 +78,10 @@ export class FieldSound {
       if (!this.storyEnabled) this.stopStory();
       this.refresh();
     };
+    this.menu=document.getElementById('welcome');
+    if(this.menu)new MutationObserver(()=>{
+      if(this.menu.hidden)this.playMusic();else this.music?.pause();
+    }).observe(this.menu,{attributes:true,attributeFilter:['hidden']});
   }
 
   refresh() {
@@ -152,7 +156,7 @@ export class FieldSound {
   }
 
   playMusic() {
-    if (!this.enabled || !this.music.paused) return;
+    if (!this.enabled || !this.music || this.menu&&!this.menu.hidden || !this.music.paused) return;
     const now = this.context.currentTime;
     this.musicOutput.gain.cancelScheduledValues(now);
     this.musicOutput.gain.setValueAtTime(0, now);

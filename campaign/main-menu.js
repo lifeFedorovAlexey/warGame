@@ -5,6 +5,28 @@ import {createLoadingProgress} from './loading-progress.js';
 const root=document.getElementById('welcome'),stage=root.querySelector('.menu-art');
 const settings=document.getElementById('main-menu-settings'),status=document.getElementById('loading-status');
 const loading=createLoadingProgress(root);
+const music=document.getElementById('menu-music'),soundToggle=document.getElementById('sound-toggle');
+music.volume=.28;
+let musicStarting=false;
+function syncMusic(){
+  let enabled=soundToggle.getAttribute('aria-pressed')!=='false';
+  try{enabled=enabled&&localStorage.getItem('warGame.fieldSound')!=='off';}catch{}
+  if(root.hidden||document.hidden||!enabled){music.pause();return;}
+  if(!music.paused||musicStarting)return;
+  musicStarting=true;
+  music.play().catch(error=>{
+    // Browsers may require a first click/key before allowing audible playback.
+    if(!['NotAllowedError','AbortError'].includes(error.name))console.warn('Музыка меню недоступна:',error.message);
+  }).finally(()=>{musicStarting=false;});
+}
+new MutationObserver(syncMusic).observe(root,{attributes:true,attributeFilter:['hidden']});
+new MutationObserver(syncMusic).observe(soundToggle,{attributes:true,attributeFilter:['aria-pressed']});
+root.addEventListener('pointerdown',syncMusic,{capture:true});
+root.addEventListener('keydown',syncMusic,{capture:true});
+document.addEventListener('visibilitychange',syncMusic);
+window.addEventListener('pagehide',()=>music.pause());
+window.addEventListener('pageshow',syncMusic);
+syncMusic();
 const plates=[
   ['begin',176,290,511,157,'3% 0%,100% 39%,99% 100%,0% 70%'],
   ['resume-save',237,421,422,120,'0% 0%,100% 20%,99% 100%,0% 81%'],
