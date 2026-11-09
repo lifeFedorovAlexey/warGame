@@ -47,18 +47,19 @@ export function createDamEnvironment(T,field,config,addFog,sound,terrain){
   `+s.fragmentShader;s.fragmentShader=s.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
    vec2 q=vFoamXY*vec2(1.,.77);float r=length(q);float bubbles=smoothstep(.3,.8,foamNoise(q*19.+vec2(damTime*.7,-damTime*1.3)));diffuseColor.a*= (1.-smoothstep(.2,.76,r))*(.2+.8*bubbles);
   `);};addFog(material);};
+ const discharge={length:3.3,drop:1.98,lift:.2};
  const streams=DAM_OUTLETS.map((p,index)=>{
   const geometry=new T.BufferGeometry(),vertices=[],uv=[];
   for(let j=0;j<16;j++)for(let side=0;side<8;side++)for(const [q,k] of [[j,side],[j+1,side],[j,side+1],[j,side+1],[j+1,side],[j+1,side+1]]){
-   const t=q/16,a=k/8*Math.PI*2,r=.27+t*.045,fall=t*t*1.98;vertices.push(p.x+Math.cos(a)*r,p.y-t*3.3,p.z+.2-fall+Math.sin(a)*r*(1-t*.7));uv.push(k/8,t);
+   const t=q/16,a=k/8*Math.PI*2,r=.27+t*.045,fall=t*t*discharge.drop;vertices.push(p.x+Math.cos(a)*r,p.y-t*discharge.length,p.z+discharge.lift-fall+Math.sin(a)*r*(1-t*.7));uv.push(k/8,t);
   }
   geometry.setAttribute('position',new T.Float32BufferAttribute(vertices,3));geometry.setAttribute('uv',new T.Float32BufferAttribute(uv,2));geometry.computeVertexNormals();
   const stream=new T.Mesh(geometry,streamMaterial);stream.name='water_discharge_'+index;root.add(stream);
   const patch=new T.Shape();for(let i=0;i<20;i++){const a=i/20*Math.PI*2,r=.7+Math.sin(i*7.1)*.16;const x=Math.cos(a)*r,y=Math.sin(a)*r*1.3;i?patch.lineTo(x,y):patch.moveTo(x,y);}patch.closePath();
-  const foam=new T.Mesh(new T.ShapeGeometry(patch),foamMaterial.clone());prepareFoam(foam.material);foam.position.set(p.x,p.y-3.3,.225);root.add(foam);return {stream,foam};
+  const foam=new T.Mesh(new T.ShapeGeometry(patch),foamMaterial.clone());prepareFoam(foam.material);foam.position.set(p.x,p.y-discharge.length,.225);root.add(foam);return {stream,foam};
  });
  const particleGeometry=new T.BufferGeometry(),particles=new T.Float32BufferAttribute(new Float32Array(288*3),3).setUsage(T.DynamicDrawUsage);particleGeometry.setAttribute('position',particles);particleGeometry.setDrawRange(0,0);
- const particleMaterial=new T.PointsMaterial({color:'#d2e1d2',size:.65,transparent:true,opacity:.65,depthWrite:false});addFog(particleMaterial);
+ const particleMaterial=new T.PointsMaterial({color:'#d2e1d2',size:.35,transparent:true,opacity:.65,depthWrite:false});addFog(particleMaterial);
  const spray=new T.Points(particleGeometry,particleMaterial);spray.name='dam_spray';spray.frustumCulled=false;root.add(spray);
  // The next mission can remove the named gate/monoliths and lower this same
  // reservoir; the surge outlet uses the retained opening, not a second model.
@@ -76,8 +77,11 @@ export function createDamEnvironment(T,field,config,addFog,sound,terrain){
    if(!stream.visible)continue;active++;total+=power;
    stream.scale.x=1;foam.scale.setScalar(.65+((time*.7+index*.3)%1)*1.2);foam.material.opacity=.26*power;
    for(let i=0;i<96;i++){
-    const age=((time*1.6+i*.618)%1),angle=i*2.399,spread=age*.9;
-    particles.setXYZ(count++,p.x+Math.cos(angle)*spread,p.y-age*3.8+Math.sin(i*13)*.10,p.z+.2-age*age*2.0+Math.sin(angle)*spread*.6);
+    // One mesh carries the outflow. Droplets rise from its impact point,
+    // rather than drawing a second, differently curved jet from the pipe.
+    const age=((time*1.6+i*.618)%1),angle=i*2.399,spread=.08+age*.58;
+    particles.setXYZ(count++,foam.position.x+Math.cos(angle)*spread,
+      foam.position.y+Math.sin(angle)*spread*.8,foam.position.z+1.65*age*(1-age));
    }
   }
   particleGeometry.setDrawRange(0,count);if(count)particles.needsUpdate=true;stats.particles=count;stats.discharging=active;
