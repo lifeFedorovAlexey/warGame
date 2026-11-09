@@ -227,9 +227,9 @@
     </div>
   </dialog>
   <div id="toast" role="status" hidden></div>
-  <section id="welcome" class="main-menu" aria-label="Операция «Рай» — главное меню">
-    <audio id="menu-music" src="../assets/music/wasteland-menu.mp3" loop preload="metadata"></audio>
-    <div class="menu-art">
+  <section id="welcome" class="main-menu is-loading" aria-busy="true" aria-label="Операция «Рай» — главное меню">
+    <audio id="menu-music" data-src="../assets/music/wasteland-menu.mp3" loop preload="auto"></audio>
+    <div class="menu-art" inert>
       <img src="../assets/menu/desert-main-menu.png" alt="" draggable="false">
       <button id="begin" class="menu-plate" disabled aria-label="Новая игра" title="Новая игра"></button>
       <button id="resume-save" class="menu-plate" disabled aria-label="Продолжить" title="Сохранения ещё нет"></button>
@@ -246,8 +246,10 @@
       <button id="menu-settings-close" data-icon="previous" aria-label="Назад в меню"></button>
     </section>
     <div id="loading" class="startup-loading">
-      <div class="loading-caption"><p id="loading-status" role="status">Загрузка ресурсов…</p><span id="loading-step" aria-hidden="true">1 / 6</span></div>
-      <progress id="loading-progress" max="6" value="0" aria-label="Загрузка игры" aria-describedby="loading-status"></progress>
+      <p class="loading-title">Операция «Рай»</p>
+      <div class="loading-caption"><p id="loading-status" role="status">Загрузка ресурсов…</p><span id="loading-step" aria-hidden="true">1 / 7</span></div>
+      <progress id="loading-progress" max="7" value="0" aria-label="Загрузка игры" aria-describedby="loading-status"></progress>
+      <button id="loading-retry" data-icon="restart" aria-label="Повторить загрузку" hidden></button>
     </div>
   </section>
   <section id="result" class="corner-card panel" hidden>

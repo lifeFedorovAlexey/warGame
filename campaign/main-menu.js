@@ -1,17 +1,19 @@
 import {setButtonIcon} from '../assets/ui/icons.js';
 import {createLoadingProgress} from './loading-progress.js';
+import {preloadMenuMedia} from './menu-media.js';
 
 // Hotspots follow the painted signs without overlaying a second copy of the art.
 const root=document.getElementById('welcome'),stage=root.querySelector('.menu-art');
 const settings=document.getElementById('main-menu-settings'),status=document.getElementById('loading-status');
 const loading=createLoadingProgress(root);
 const music=document.getElementById('menu-music'),soundToggle=document.getElementById('sound-toggle');
+const media=preloadMenuMedia(stage.querySelector('img'),music);
 music.volume=.28;
-let musicStarting=false;
+let musicStarting=false,menuReady=false;
 function syncMusic(){
   let enabled=soundToggle.getAttribute('aria-pressed')!=='false';
   try{enabled=enabled&&localStorage.getItem('warGame.fieldSound')!=='off';}catch{}
-  if(root.hidden||document.hidden||!enabled){music.pause();return;}
+  if(!menuReady||root.classList.contains('is-loading')||root.hidden||document.hidden||!enabled){music.pause();return;}
   if(!music.paused||musicStarting)return;
   musicStarting=true;
   music.play().catch(error=>{
@@ -19,10 +21,10 @@ function syncMusic(){
     if(!['NotAllowedError','AbortError'].includes(error.name))console.warn('Музыка меню недоступна:',error.message);
   }).finally(()=>{musicStarting=false;});
 }
-new MutationObserver(syncMusic).observe(root,{attributes:true,attributeFilter:['hidden']});
+new MutationObserver(syncMusic).observe(root,{attributes:true,attributeFilter:['hidden','class']});
 new MutationObserver(syncMusic).observe(soundToggle,{attributes:true,attributeFilter:['aria-pressed']});
-root.addEventListener('pointerdown',syncMusic,{capture:true});
-root.addEventListener('keydown',syncMusic,{capture:true});
+root.addEventListener('click',syncMusic,{capture:true});
+document.addEventListener('keydown',syncMusic,{capture:true});
 document.addEventListener('visibilitychange',syncMusic);
 window.addEventListener('pagehide',()=>music.pause());
 window.addEventListener('pageshow',syncMusic);
@@ -64,6 +66,7 @@ document.getElementById('menu-settings-close').onclick=closeSettings;
 for(const [target,source] of mirrors)document.getElementById(target).onclick=()=>{document.getElementById(source).click();refresh();};
 document.getElementById('menu-exit').onclick=()=>location.assign('about:blank');
 root.addEventListener('keydown',event=>{
+  if(root.classList.contains('is-loading'))return;
   if(event.code==='Escape'&&!settings.hidden){event.preventDefault();closeSettings();return;}
   const scope=settings.hidden?stage:settings,buttons=[...scope.querySelectorAll('button:not(:disabled)')];
   const index=buttons.indexOf(document.activeElement);
@@ -77,13 +80,15 @@ root.addEventListener('keydown',event=>{
 
 export const mainMenu={
   loading,
+  prepareMedia(){return media.ready(fraction=>loading.update('audio',fraction));},
   ready(hasSave){
+    menuReady=true;
     loading.hide();
     document.getElementById('begin').disabled=false;
     document.getElementById('resume-save').disabled=!hasSave;
     document.getElementById('resume-save').title=hasSave?'Продолжить операцию':'Сохранения ещё нет';
     document.getElementById('menu-settings').disabled=false;
-    status.hidden=true;refresh();
+    status.hidden=true;refresh();syncMusic();
   },
   error(text){loading.error(text);},
 };

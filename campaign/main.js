@@ -1044,6 +1044,8 @@ try {
   world.damage.bindMission(mission);
   await mainMenu.loading.stage('graphics');
   await world.prepareRendering?.(mission);
+  await mainMenu.loading.stage('audio');
+  await mainMenu.prepareMedia();
   await mainMenu.loading.stage('interface');
   designer = new VehicleDesigner($('designer'), $('design-toggle'), mission, {
     makeModel: (components, paint) => world.vehicles.makeDesignModel(components, paint),

@@ -19,8 +19,8 @@ try{
  await page.locator('#menu-settings').hover();await page.screenshot({path:folder+'/menu-hover.png'});
  await page.locator('#menu-settings').click();assert(await page.locator('#main-menu-settings').isVisible());
  await page.waitForFunction(()=>{const a=document.getElementById('menu-music');return !a.paused&&a.currentTime>.1&&Number.isFinite(a.duration);});
- const track=await page.evaluate(()=>{const a=document.getElementById('menu-music');return {src:a.currentSrc,duration:a.duration,loop:a.loop};});
- assert(track.src.endsWith('/assets/music/wasteland-menu.mp3')&&track.duration>30&&track.loop);
+ const track=await page.evaluate(()=>{const a=document.getElementById('menu-music');return {src:a.currentSrc,file:a.dataset.src,duration:a.duration,loop:a.loop};});
+ assert(track.src.startsWith('blob:')&&track.file.endsWith('/assets/music/wasteland-menu.mp3')&&track.duration>30&&track.loop);
  await page.evaluate(()=>{const a=document.getElementById('menu-music');a.currentTime=a.duration-.2;});
  await page.waitForFunction(()=>{const a=document.getElementById('menu-music');return !a.paused&&a.currentTime<2;});
  for(const [id,key] of [['menu-sound','fieldSound'],['menu-voice','fieldStoryVoice'],['menu-radio','fieldRadio']]){
