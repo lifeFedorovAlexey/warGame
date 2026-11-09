@@ -52,6 +52,10 @@ export function commandPathFromLive(mission,unit,source,path,relativePlan=false)
  const moved=Math.hypot(unit.x-source.x,unit.y-source.y);
  if(moved<1e-6&&Math.abs(unit.heading-source.heading)<1e-6)return path;
  if(relativePlan)return null;
+ // An in-range attack can legitimately return no movement. After the owner
+ // moves there is no segment to rejoin: let the existing rest/retry handoff
+ // check that command from its current position instead of reading path[0].
+ if(!path?.length)return null;
  let best=0,bestDistance=Infinity,from=source;
  for(let i=0;i<Math.min(path.length,8);i++){
   const to=path[i],dx=to.x-from.x,dy=to.y-from.y,length=dx*dx+dy*dy;

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {fixture} from './check-start-latency-coordinator.mjs';
 import {vehicleClearance} from '../campaign/vehicle-collision.js';
+import {commandPathFromLive} from '../campaign/command-motion.js';
 
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const pose=u=>({x:u.x,y:u.y,heading:u.heading});
@@ -78,5 +79,16 @@ for(const target of [{x:120,y:400},{x:120,y:-400}]){
  const loaded=units.map(u=>copy.entity(u.id)),before=loaded.map(pose);copy.tick(.1);
  assert.deepEqual(loaded.map(pose),before,'Loading an old pending cohort cannot release independent turns');
  results.push({case:'legacy pending saves preserve coordinated departure',passed:true});
+}
+{
+ const source={x:0,y:0,heading:0},empty=[];
+ const mission={nav:{lineClear(){assert.fail('An empty route has no segment to validate');}}};
+ assert.equal(commandPathFromLive(mission,{...source},source,empty),empty,'An in-range stationary attack needs no movement');
+ for(const unit of [{...source,x:1},{...source,heading:.1}]){
+  const before={...unit};
+  assert.equal(commandPathFromLive(mission,unit,source,empty),null,'A moved or turned attacker must recheck its empty route');
+  assert.deepEqual(unit,before,'Rejecting an old empty route must not rewind the live pose');
+ }
+ results.push({case:'empty attack route after translation or rotation replans without reading path[0]',passed:true});
 }
 console.log(JSON.stringify(results,null,2));

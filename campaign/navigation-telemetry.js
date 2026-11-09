@@ -208,7 +208,7 @@ export function installNavigationTelemetry(mission,context){
  window.addEventListener('pagehide',()=>{
   record('pagehide');navigator.sendBeacon(endpoint,new Blob([JSON.stringify({session,events:queue.slice(-50)})],{type:'text/plain'}));
  });
- record('session-start',{build:'live-navigation-2026-11-09-r51-recovery-motion-owner',collisionModel:'ellipse-model-extrema',offscreenAlliesPassThrough:true,bukhankaSizeScale:vehicleSizeScale('bukhanka'),vehicleSizeScales:Object.fromEntries(['bukhanka','flamer','builder'].map(kind=>[kind,vehicleSizeScale(kind)])),steeringDamage:STEERING_DAMAGE,terrainPolicy:mission.nav.terrainAllowed.version,controller:mission.trafficCoordinator.constructor.name,
+ record('session-start',{build:'live-navigation-2026-11-09-r51.1-empty-command-route',collisionModel:'ellipse-model-extrema',offscreenAlliesPassThrough:true,bukhankaSizeScale:vehicleSizeScale('bukhanka'),vehicleSizeScales:Object.fromEntries(['bukhanka','flamer','builder'].map(kind=>[kind,vehicleSizeScale(kind)])),steeringDamage:STEERING_DAMAGE,terrainPolicy:mission.nav.terrainAllowed.version,controller:mission.trafficCoordinator.constructor.name,
   simulationStep:mission.config.simulationStep,cpuBudget:mission.config.simulationCpuBudgetMs});void flush();
  return {session,record,flush,frame(now){maximumFrameGap=Math.max(maximumFrameGap,now-lastFrame);lastFrame=now;},
   frameWork(timings){for(const [stage,ms] of Object.entries(timings)){
