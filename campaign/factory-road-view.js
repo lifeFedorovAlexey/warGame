@@ -1,4 +1,4 @@
-export function createFactoryRoadView(T,scene,field,terrain,baseRoads,addFog){
+export function createFactoryRoadView(T,scene,field,terrain,baseRoads,addFog,updateJunctions){
  let signature='';
  const paintMaterial=new T.MeshStandardMaterial({color:'#d2cbb5',roughness:1,transparent:true,opacity:.7,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});
  addFog?.(paintMaterial);
@@ -6,9 +6,10 @@ export function createFactoryRoadView(T,scene,field,terrain,baseRoads,addFog){
  const preview=new T.Mesh(new T.BufferGeometry(),new T.MeshBasicMaterial({color:'#adc67c',transparent:true,opacity:.28,depthWrite:false}));
  preview.name='factory_access_preview';preview.visible=false;preview.frustumCulled=false;scene.add(preview);
  function update(mission){
-  const factories=mission.state.buildings.filter(b=>b.kind==='factory'&&b.hp>0&&b.accessRoads?.length),key=factories.map(f=>f.id+':'+f.x+':'+f.y+':'+f.rotation+':'+f.accessRoads.flatMap(r=>r.points.map(p=>p.x+','+p.y)).join(';')).join('|');
+  const factories=mission.state.buildings.filter(b=>b.kind==='factory'&&b.hp>0&&b.accessRoads?.length),key=factories.map(f=>f.id+':'+f.x+':'+f.y+':'+f.rotation+':'+JSON.stringify(f.accessRoads)).join('|');
   if(key===signature)return;signature=key;
-  terrain.setLocalRoads([...baseRoads,...factories.flatMap(f=>f.accessRoads)]);
+  const accessRoads=factories.flatMap(f=>f.accessRoads);
+  terrain.setLocalRoads([...baseRoads,...accessRoads]);updateJunctions?.(accessRoads);
   const vertices=[];
   const strip=(a,b,offset,width)=>{
    const length=Math.hypot(b.x-a.x,b.y-a.y),nx=-(b.y-a.y)/length,ny=(b.x-a.x)/length;
