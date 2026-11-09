@@ -30,8 +30,8 @@ for(const kind of ['factory','lab','generator','derrick'])for(const completed of
  results.push({kind,completed,side:[dx,dy],travel:distance(u,before)});
 }
 {
- const m=fixture(),workers=[[-1600,360],[-1500,360],[-1560,320]].map(([x,y])=>m.addUnit('builder','rai',{x,y}));
- const targets=[[-1600,400],[-1500,400]].map(([x,y])=>m.addUnit('bukhanka','rai',{x,y}));
+ const m=fixture(),workers=[[-1600,340],[-1450,340],[-1540,290]].map(([x,y])=>m.addUnit('builder','rai',{x,y}));
+ const targets=[[-1600,400],[-1450,400]].map(([x,y])=>m.addStructure('generator','rai',{x,y},{completed:true,progress:1,groundHeight:field.heightAt(x,y)}));m.rebuildNavigation();
  for(const t of targets)t.hp=t.maxHp*.2;
  run(m,.5);assert(workers.every(u=>!u.task),'Automatic repair starts disabled');
  assert(m.setBuilderAutoRepair(true).ok);run(m,.1);
@@ -40,6 +40,14 @@ for(const kind of ['factory','lab','generator','derrick'])for(const completed of
  const hp=targets.map(t=>t.hp);run(m,3);assert(targets.every((t,i)=>t.hp>hp[i]),'Both repair targets gain real HP');
  const save=m.save();m.load(save);assert.equal(m.state.builderAutoRepair,true,'Setting persists in saves');
  m.setBuilderAutoRepair(false);assert(m.state.units.every(u=>!u.task?.autoRepair&&!u.builderWorking),'Disable cancels only autonomous work');
+}
+for(const autoRepair of [false,true]){
+ const m=fixture(),u=m.addUnit('builder','rai',{x:-1600,y:360}),car=m.addUnit('bukhanka','rai',{x:-1600,y:400});car.hp=100;
+ m.setBuilderAutoRepair(autoRepair);assert(!m.order([u.id],'repair',car).ok);assert(!m.submitOrder([u.id],'repair',car).ok);
+ run(m,3);assert.equal(car.hp,100);assert(!u.task,'Damaged vehicles are never automatic repair targets');
+ u.task={type:'repair',targetId:car.id,x:car.x,y:car.y,autoRepair};u.builderWorking=true;u.path=[{x:car.x,y:car.y}];
+ m.load(m.save());const restored=m.entity(u.id);assert.equal(restored.task,null);assert.deepEqual(restored.path,[]);assert(!restored.builderWorking,'Old vehicle repair orders are retired on load');
+ run(m,1);assert.equal(m.entity(car.id).hp,100);
 }
 {
  const m=fixture(),u=m.addUnit('builder','rai',{x:-1600,y:360}),target=m.addUnit('bukhanka','rai',{x:-1600,y:400});target.hp=100;

@@ -128,19 +128,17 @@ for(let step=0;step<140;step++){
 assert(Math.hypot(turningVan.x-turningStart.x,turningVan.y-turningStart.y)>60
  &&emptyPass.nav.allowed(...emptyPass.nav.grid(turningVan.x,turningVan.y)),`The arc must reach the route (${turningVan.x}, ${turningVan.y})`);
 function dismiss(){for(const key of [...mission.state.pendingCinematics]){seen.push({key,time:mission.state.time});mission.finishCinematic(key);}}
-const mechanics={workSteps:0,constructionGated:true,repairGated:true,interruptProjection:false,movingRepair:false,builderHandoff:false};
-// Combat casualties are not a deterministic repair fixture: a successful
-// playthrough may muster only fresh vehicles. Exercise the moving-target
-// invariant separately without changing the campaign playthrough's HP.
+const mechanics={workSteps:0,constructionGated:true,repairGated:true,interruptProjection:false,buildingsOnlyRepair:false,builderHandoff:false};
+// Builders cannot repair vehicles, including an explicitly requested repair.
 {
  const repair=new Mission(config,field),worker=repair.state.units.find(u=>u.kind==='builder'),target=repair.state.units.find(u=>u.kind==='bukhanka');
- repair.damage(target,80,null);assert(repair.order([worker.id],'repair',target).ok);
- for(let tick=0;tick<300&&!worker.builderWorking;tick++)repair.advance(.1);
- assert(worker.builderWorking&&target.hp<target.maxHp-4,'Dedicated fixture must actually weld a damaged vehicle');
- testMovingRepair(worker,repair);mechanics.movingRepairFixture='isolated-damaged-vehicle';
+ repair.damage(target,80,null);const hp=target.hp;assert(!repair.order([worker.id],'repair',target).ok);
+ repair.setBuilderAutoRepair(true);repair.advance(1);assert.equal(target.hp,hp);assert(!worker.builderWorking);
+ mechanics.buildingsOnlyRepair=true;
 }
 function step(){
  const progress=new Map(mission.state.buildings.map(b=>[b.id,b.progress])),hp=new Map(mission.state.units.map(u=>[u.id,u.hp])),armor=new Map(mission.state.units.map(u=>[u.id,u.fieldHpBonus??0]));
+ const servicing=new Set(mission.state.units.filter(u=>u.factoryVisit?.phase==='inside').map(u=>u.id));
  dismiss();mission.advance(.1);events.push(...mission.drainEvents());mission.drainEffects();
  const workers=mission.state.units.filter(u=>u.hp>0&&u.kind==='builder');
  for(const unit of workers){
@@ -153,19 +151,10 @@ function step(){
  for(const b of mission.state.buildings)if(b.progress>(progress.get(b.id)??b.progress))assert(workers.some(u=>u.builderWorking&&u.task?.type==='build'&&u.task.targetId===b.id),'Construction progresses without contact');
  for(const u of mission.state.units)if(u.hp>(hp.get(u.id)??u.hp)){
   const addedArmor=Math.max(0,(u.fieldHpBonus??0)-(armor.get(u.id)??0));
-  assert(u.hp-hp.get(u.id)<=addedArmor+1e-8||workers.some(w=>w.builderWorking&&w.task?.type==='repair'&&w.task.targetId===u.id),'Healing without contact');
+  assert(u.hp-hp.get(u.id)<=addedArmor+1e-8||servicing.has(u.id)||u.factoryVisit?.phase==='inside','Vehicle healing outside the factory');
  }
- if(!mechanics.movingRepair){const worker=workers.find(u=>u.builderWorking&&u.task?.type==='repair'&&mission.entity(u.task.targetId)?.hp<mission.entity(u.task.targetId)?.maxHp-4);if(worker)testMovingRepair(worker);}
 }
 function orderNearby(m,unit){for(const [dx,dy] of [[64,0],[-64,0],[0,64],[0,-64],[48,48],[-48,-48]]){const p=m.nav.nearest(unit.x+dx,unit.y+dy,3);if(p&&Math.hypot(p.x-unit.x,p.y-unit.y)>30&&m.order([unit.id],'move',p).ok)return true;}return false;}
-function testMovingRepair(worker,source=mission){
- // Isolated save clone: array order must not permit healing before target movement.
- const m=new Mission(config,field);m.load(source.save());for(const id of [...m.state.pendingCinematics])m.finishCinematic(id);
- const target=m.entity(worker.task.targetId);m.state.units.sort((a,b)=>(a.id===target.id?1:0)-(b.id===target.id?1:0));assert(orderNearby(m,target),'Moving repair fixture needs an accessible destination');
- // Parked neighbours may need a short manoeuvre to let the target leave.
- let moved=false;for(let i=0;i<60&&!moved;i++){const before=target.hp;m.advance(.1);moved=Math.hypot(target.x-target.previousX,target.y-target.previousY)>.05;if(moved){assert(target.hp<=before,'Moving target healed');assert(m.state.units.filter(u=>u.task?.type==='repair'&&u.task.targetId===target.id).every(u=>!u.builderWorking),'Moving target still welds');}}
- assert(moved,'Repair target did not move');mechanics.movingRepair=true;
-}
 function testInterruptProjection(){
  const m=new Mission(config,field);m.load(mission.save());
  const worker=m.state.units.find(u=>u.kind==='builder'&&u.builderWorking);
@@ -299,7 +288,7 @@ if(process.argv.includes('--full')){
    const damaged=mustered().find(u=>u.hp<u.maxHp);
    if(damaged){
     mission.stop([damaged.id]);
-    reportOrder(mission.order(builders(),'repair',damaged),'Repair at the rally point');
+    reportOrder(mission.retreat([damaged.id]),'Vehicle service at the factory');
     until(()=>damaged.hp===damaged.maxHp,250,'Repair '+damaged.id);
    }
    const westTower=towers.reduce((west,tower)=>tower.x<west.x?tower:west);
@@ -321,6 +310,6 @@ if(process.argv.includes('--full')){
   if(camp.artifact){const artifact=mission.state.artifacts.find(a=>a.key===camp.artifact);reportOrder(mission.order(ids(),'move',artifact),camp.id+' artifact');until(()=>mission.state.artifactKeys.includes(camp.artifact),150,'Collect '+camp.artifact);until(()=>mission.canSpend(config.research[camp.artifact].cost),100,'Research funds');assert(mission.research(lab.id,camp.artifact).ok);until(()=>mission.state.research[camp.artifact],100,'Research '+camp.artifact);}
  }
  until(()=>mission.state.status==='victory',5,'Victory');dismiss();assert(mission.objectives().every(o=>o.done),'All five objectives');const finalSave=mission.save();loaded.load(finalSave);assert.equal(loaded.save(),finalSave,'Completed mission restores exactly');assert.equal(new Set(seen.map(s=>s.key)).size,seen.length,'Story events play once');
- assert(mechanics.movingRepair,'Moving repair regression fixture ran');const full={seconds:mission.state.time,status:mission.state.status,research:mission.state.research,artifactKeys:mission.state.artifactKeys,camps:mission.state.camps.map(c=>({id:c.id,cleared:c.cleared})),statistics:mission.state.statistics,raidWon:mission.state.flags.raidWon,objectives:mission.objectives(),survivors:army().length,cinematics:seen,mechanics,saveRoundTrip:true};fs.writeFileSync('campaign/reports/mission-full.json',JSON.stringify(full,null,2));fs.writeFileSync('campaign/reports/mission-completed-save.json',finalSave);console.log(JSON.stringify(full));
+ assert(mechanics.buildingsOnlyRepair,'Building-only repair regression fixture ran');const full={seconds:mission.state.time,status:mission.state.status,research:mission.state.research,artifactKeys:mission.state.artifactKeys,camps:mission.state.camps.map(c=>({id:c.id,cleared:c.cleared})),statistics:mission.state.statistics,raidWon:mission.state.flags.raidWon,objectives:mission.objectives(),survivors:army().length,cinematics:seen,mechanics,saveRoundTrip:true};fs.writeFileSync('campaign/reports/mission-full.json',JSON.stringify(full,null,2));fs.writeFileSync('campaign/reports/mission-completed-save.json',finalSave);console.log(JSON.stringify(full));
 }
 function reportOrder(result,label){if(!result.ok)fs.writeFileSync('campaign/reports/mission-failure.json',mission.save());assert(result.ok,label+': '+result.reason);}

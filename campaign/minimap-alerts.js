@@ -60,7 +60,7 @@ export class MinimapAlerts{
   if(this.attacks.some(a=>Math.hypot(a.x-event.x,a.y-event.y)<100))return;
   if(this.attacks.length>=32)this.attacks.shift();
   this.attacks.push({x:event.x,y:event.y,born:now});
-  this.ping('attack',event,now);this.message('attack',event.building?'Здание под огнём':'Наши под огнём',now);
+  this.ping('attack',event,now);
  }
  signal(signal,chapter,now){
   if(!point(signal)||!chapter||signal.kind==='anomaly')return;

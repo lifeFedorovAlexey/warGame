@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+  <symbol id="upload" viewBox="0 0 24 24"><path d="M12 17V3M6 9l6-6 6 6" fill="none" stroke="#e4a054" stroke-width="2"/><path d="M4 16v5h16v-5" fill="none" stroke="#d9c69b" stroke-width="2"/></symbol>
+  <symbol id="download" viewBox="0 0 24 24"><path d="M12 3v14M6 11l6 6 6-6" fill="none" stroke="#e4a054" stroke-width="2"/><path d="M4 17v4h16v-4" fill="none" stroke="#d9c69b" stroke-width="2"/></symbol>
+  <symbol id="plus" viewBox="0 0 24 24"><path d="M12 4v16M4 12h16" stroke="#d9c69b" stroke-width="2"/></symbol>
+  <symbol id="up" viewBox="0 0 24 24"><path d="M12 21V4M5 11l7-7 7 7" fill="none" stroke="#a2ad79" stroke-width="2"/></symbol>
+  <symbol id="down" viewBox="0 0 24 24"><path d="M12 3v17M5 13l7 7 7-7" fill="none" stroke="#a2ad79" stroke-width="2"/></symbol>
+  <symbol id="eye" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z" fill="none" stroke="#a2ad79" stroke-width="1.5"/><circle cx="12" cy="12" r="3" fill="#d9c69b"/></symbol>
+  <symbol id="eye-off" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z" fill="none" stroke="#727b68" stroke-width="1.5"/><path d="M3 21 21 3" stroke="#e4a054" stroke-width="2"/></symbol>
+</svg>

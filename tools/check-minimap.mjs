@@ -16,11 +16,12 @@ assert.equal(alerts.active(3099).length,1);assert.equal(alerts.active(3100).leng
 const tasks=[{id:'generator',name:'Построить электростанцию'}];alerts.observe(mission,tasks,4000);
 assert.deepEqual(objectiveLocation(mission,tasks[0]),{x:320,y:320,key:'generator:320:320'});
 assert.equal(alerts.active(4000)[0].kind,'objective');alerts.observe(mission,[{...tasks[0],progress:'1/2'}],4100);assert.equal(alerts.pings.length,1,'Progress does not restart the goal ping');
+const beforeAttackMessages=messages.length;
 alerts.event({type:'under-attack',x:800,y:800,building:false},5000);
 for(let t=5001;t<7500;t+=10)alerts.event({type:'under-attack',x:805,y:805,building:true},t);
 assert.equal(alerts.pings.filter(p=>p.kind==='attack').length,1,'Burst fire is coalesced');assert.equal(alerts.active(8000).length,0,'Repeated hits do not extend the ping');
 alerts.event({type:'under-attack',x:805,y:805,building:true},11000);assert.equal(alerts.active(11000).length,1);
-assert.equal(messages.at(-1),'Здание под огнём');
+assert.equal(messages.length,beforeAttackMessages,'Attacks use the existing visual ping without an extra announcement');
 const restored=new MinimapAlerts(()=>assert.fail('Saved discoveries must not replay'));restored.reset(true);restored.observe({...mission,state:JSON.parse(JSON.stringify(mission.state))},tasks,12000);assert.equal(restored.pings.length,0);
 const rect={left:20,top:30,width:132,height:132},centre=minimapPoint(field,rect,86,96);
 assert.deepEqual(centre,{x:2032,y:2032});assert.deepEqual(minimapPoint(field,rect,-20,400),{x:0,y:4064});

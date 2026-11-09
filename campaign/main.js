@@ -334,7 +334,7 @@ function ordersAt(point, target, mode) {
     destination = target;
   } else if (mode === 'attack') {
     action='attack-move';
-  } else if (!mode && target?.owner === 'rai' && chosen.some(entity => entity.kind === 'builder')) {
+  } else if (!mode && target?.owner === 'rai' && config.buildings[target.kind] && chosen.some(entity => entity.kind === 'builder')) {
     if (target.completed === false) action = 'build';
     else if (target.hp < target.maxHp) action = 'repair';
     if (action !== 'move') destination = target;

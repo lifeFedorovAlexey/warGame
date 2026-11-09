@@ -46,7 +46,7 @@ try{
  await page.evaluate(()=>{const c=campaign,m=c.mission;m.state.oilLinked=1;m.state.powered=true;c.advance(0);});await page.waitForTimeout(350);
  assert.match(await page.locator('#toast').textContent(),/Новая цель/);await page.screenshot({path:folder+'/03-objective-desktop.png'});
  await page.evaluate(()=>{const c=campaign,m=c.mission;m.damage(m.entity(miniFixture.building),1,m.entity(miniFixture.enemy));c.advance(0);});await page.waitForTimeout(350);
- assert.equal(await page.locator('#toast').textContent(),'Здание под огнём');await page.screenshot({path:folder+'/04-attack-desktop.png'});
+ assert(!/под огнём/.test(await page.locator('#toast').textContent()));await page.screenshot({path:folder+'/04-attack-desktop.png'});
  const at=async grid=>page.evaluate(async grid=>{const {minimapPosition}=await import('./minimap.js'),r=document.getElementById('minimap').getBoundingClientRect(),[x,y]=minimapPosition(campaign.world.field,campaign.world.field.gridToWorld(grid),r.width,r.height,campaign.mission.state.bounds);return {x:r.left+x,y:r.top+y};},grid);
  const click=async(grid,button='right')=>{const p=await at(grid);await page.mouse.click(p.x,p.y,{button});};
  await page.evaluate(()=>{const c=campaign,u=c.mission.state.units.find(u=>u.owner==='rai'&&u.kind==='bukhanka');c.select([u.id]);});

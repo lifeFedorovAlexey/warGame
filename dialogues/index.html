@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#20241e">
+  <title>Диалоги — Операция «Рай»</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="./workshop.css">
+</head>
+<body>
+  <header class="masthead">
+    <div><a class="brand" href="/campaign/">ОПЕРАЦИЯ «РАЙ»</a><h1>Диалоги<span class="title-dot">.</span></h1></div>
+    <div class="workshop-caption">СЦЕНАРНАЯ МАСТЕРСКАЯ<br><span>Слова. Голоса. Характеры.</span></div>
+    <div class="header-tools">
+      <p id="save-status" role="status" aria-live="polite">Загрузка…</p>
+      <div class="actions">
+        <button id="undo" title="Отменить последнее изменение" aria-label="Отменить последнее изменение" disabled></button>
+        <button id="save" title="Сохранить черновик · Ctrl+S" aria-label="Сохранить черновик"></button>
+        <button id="export" title="Скачать слепок с текстами, записями и изображениями" aria-label="Скачать слепок"></button>
+        <a id="game-link" href="/campaign/" title="Открыть игру" aria-label="Открыть игру"></a>
+      </div>
+    </div>
+  </header>
+  <p id="error" role="alert" hidden></p>
+  <div class="workspace">
+    <aside class="mission-rail" aria-label="Миссии">
+      <p class="eyebrow">МИССИИ <span id="mission-count"></span></p>
+      <nav id="missions"></nav>
+      <p class="rail-note">Твой вариант сценария.<br>Правки сохраняются автоматически.</p>
+      <p class="draft-note">Черновик для следующей редакции игры.</p>
+    </aside>
+    <aside class="scene-rail" aria-label="Список диалогов">
+      <label class="search-label"><span class="sr-only">Найти диалог или реплику</span><input id="search" type="search" placeholder="Найти диалог или реплику…" autocomplete="off"></label>
+      <nav class="modes" aria-label="Группировка диалогов">
+        <a href="#sequence" data-mode="sequence" aria-current="page">По порядку</a>
+        <a href="#situation" data-mode="situation">По ситуации</a>
+        <a href="#portraits" data-mode="portraits">Персонажи</a>
+        <a href="#archive" data-mode="archive">Архив</a>
+      </nav>
+      <div class="list-heading"><span id="scene-count" class="eyebrow"></span><button id="add-scene" title="Добавить диалог" aria-label="Добавить диалог"></button></div>
+      <nav id="scenes" aria-label="Диалоги миссии"></nav>
+    </aside>
+    <main id="editor" tabindex="-1"><p class="empty">Собираем сценарий…</p></main>
+  </div>
+  <input id="file-input" type="file" hidden>
+  <script type="module" src="./workshop.js"></script>
+</body>
+</html>

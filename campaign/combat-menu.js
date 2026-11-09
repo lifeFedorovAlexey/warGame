@@ -36,7 +36,7 @@ export class CombatMenu {
     }
     const repairs=document.createElement('div');repairs.className='combat-options';
     const repair=document.createElement('button');repair.type='button';repair.dataset.autoRepair='';
-    const repairOption={label:'Авторемонт',detail:'Свободные ремонтники чинят рядом'};
+    const repairOption={label:'Авторемонт построек',detail:'Свободные строители чинят повреждённые постройки рядом'};
     setButtonIcon(repair,'repair',repairOption.label,repairOption.detail);
     repair.addEventListener('pointerenter',()=>this.showHint(repair,'Ремонтники',repairOption));
     repair.addEventListener('focus',()=>this.showHint(repair,'Ремонтники',repairOption));
@@ -88,7 +88,7 @@ export class CombatMenu {
     if(this.element.hidden)return;
     const autoRepair=!!this.mission.state.builderAutoRepair;
     this.repairControl.setAttribute('aria-pressed',String(autoRepair));
-    this.repairControl.setAttribute('aria-description',(autoRepair?'Включён':'Выключен')+' · Свободные ремонтники чинят рядом');
+    this.repairControl.setAttribute('aria-description',(autoRepair?'Включён':'Выключен')+' · Свободные строители чинят повреждённые постройки рядом');
     this.repairControl.removeAttribute('title');
     const policy=armyCombatPolicy(this.mission);
     for(const key of Object.keys(COMBAT_OPTIONS)) {

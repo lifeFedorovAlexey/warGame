@@ -15,7 +15,7 @@ import {isCampPerimeter,updateCampPerimeters} from './camp-demolition.js';
 import {availableOil,oilFundingRemaining,oilRefund,beginOilFlow,finishOilFlow,transferOil,fundedWorkTime,repairWithOil} from './oil-economy.js';
 import {angleDelta} from './builder-kinematics.js';
 import {workProjection,projectorHasSight} from './builder-optics.js';
-import {setBuilderAutoRepair,assignAutomaticRepair,releaseMovingRepairTarget} from './builder-auto-repair.js';
+import {setBuilderAutoRepair,assignAutomaticRepair,releaseInvalidRepairTarget,repairableBuilding} from './builder-auto-repair.js';
 import {combatContact} from './combat-contact.js';
 import {clearCombatSight} from './combat-sight.js';
 import {recordDamage} from './damage-contact.js';
@@ -511,6 +511,7 @@ export class Mission{
   if(action==='attack'&&(target.owner==='rai'||!this.entity(target.id)||!this.visibleAt(target.x,target.y)))return this.fail('Цель не обнаружена');
   if(action==='build'&&target.clearing)return this.fail('Техника освобождает площадку');
   if(action==='demolish'&&!canDemolish(this,target))return this.fail('Выберите своё готовое здание');
+  if(action==='repair'&&!repairableBuilding(this,target))return this.fail('Строители ремонтируют только готовые постройки');
   if(['build','repair','demolish'].includes(action)&&(target.owner!=='rai'||!this.entity(target.id)))return this.fail('Нужна своя техника или постройка');
   const units=this.state.units.filter(u=>ids.includes(u.id)&&u.owner==='rai'&&u.hp>0&&!inFactoryInterior(u)&&(!['build','repair','demolish'].includes(action)||this.unitSpec(u).role==='builder')&&(!combat||this.unitSpec(u).damage));if(!units.length)return this.fail('Не выбрана подходящая техника');const assigned=new Set();
   const pickup=action==='move'?pickupTarget(this,target):null;
@@ -2083,7 +2084,7 @@ export class Mission{
   unit.builderWorking=false;
   unit.builderContact=null;
   unit.projector??={yaw:0,pitch:0};
-  releaseMovingRepairTarget(this,unit);
+  releaseInvalidRepairTarget(this,unit);
   yield* assignAutomaticRepair(this,unit);
   let target=unit.task?.targetId?this.entity(unit.task.targetId):null;
   const job=unit.task?.type;
@@ -2138,7 +2139,7 @@ export class Mission{
    if(unit.task.type==='build'&&!target.completed){
     target.progress=Math.min(1,target.progress+(oilFundingRemaining(target)>0?0:dt)/this.buildingSpec(target).seconds);
     if(target.progress>=1){target.completed=true;this.state.statistics.buildingsCompleted++;this.emit('construction-complete',{kind:target.kind,building:target.id});}
-   }else if(unit.task.type==='repair'&&target.hp<target.maxHp){
+   }else if(unit.task.type==='repair'&&repairableBuilding(this,target)&&target.hp<target.maxHp){
     repairWithOil(this,target,dt);
    }else if(unit.task.type==='demolish'){
     unit.builderWorking=advanceDemolition(this,unit,target,dt);
@@ -2222,7 +2223,7 @@ export class Mission{
   const working=target&&['build','repair','demolish'].includes(unit.task?.type)&&!unit.path.length&&distance(unit,this.workPoint(target,unit.task.workOffset??0))<=this.config.builderRangeMetres;
   if(working){unit.path=[];unit.tool=Math.min(1,unit.tool+dt/2.6);unit.aimTarget={x:target.x,y:target.y};if(unit.tool<.99)return;
    if(unit.task.type==='build'&&!target.completed){target.progress=Math.min(1,target.progress+(oilFundingRemaining(target)>0?0:dt)/this.buildingSpec(target).seconds);if(target.progress>=1){target.completed=true;this.state.statistics.buildingsCompleted++;this.emit('construction-complete',{kind:target.kind,building:target.id});}}
-   else if(unit.task.type==='repair'&&target.hp<target.maxHp){repairWithOil(this,target,dt);}
+   else if(unit.task.type==='repair'&&repairableBuilding(this,target)&&target.hp<target.maxHp){repairWithOil(this,target,dt);}
    if((unit.task.type==='build'&&target.completed)||(unit.task.type==='repair'&&target.hp>=target.maxHp)){unit.task=null;unit.foldTime=2.6;}
   }else{
    if(unit.tool>0){unit.foldTime=2.6;return;}
@@ -2551,6 +2552,7 @@ export class Mission{
   this.oilSpent=0;this.oilWorkTime=null;
   this.commandPlanner=null;this.scavJob=null;this.pendingStops=null;
   this.pendingTick=null;this.unitFrameTimes=new WeakMap();this.unitIndexActive=false;this.collisionPairs=new Map();this.contactRockPairs=new Map();this.trafficCoordinator=new PredictiveTraffic();
+  for(const unit of this.state.units)if(this.unitSpec(unit).role==='builder')releaseInvalidRepairTarget(this,unit);
   ensureSalvage(this);
   this.state.projectiles??=[];
   if(!this.state.scavRosterVersion){

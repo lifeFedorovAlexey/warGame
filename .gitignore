@@ -9,6 +9,7 @@ assets/campaign/**/audio-source-v*/
 .codex-attachments/
 campaign/previews/
 campaign/reports/
+docs/campaign/dialogue-drafts/**/.history/
 # Local Windows permission recovery; contains machine-specific ACL backups.
 .dsh-acl-recovery/
 # Legacy generated full-map runs. Curated regression fixtures remain tracked.
