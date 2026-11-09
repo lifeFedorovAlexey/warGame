@@ -21,6 +21,8 @@ export class TerrainNavigator{
  grid(x,y){return [Math.max(0,Math.min(this.size-1,Math.round((x+this.field.half)/this.cell))),Math.max(0,Math.min(this.size-1,Math.round((this.field.half-y)/this.cell)))];}
  allowed(col,row){const gx=col*this.cell/32,gy=row*this.cell/32,b=this.bounds;return col>=0&&row>=0&&col<this.size&&row<this.size&&gx>=b[0]&&gy>=b[1]&&gx<=b[2]&&gy<=b[3]&&this.walkable[row*this.size+col]&&!this.occupied[row*this.size+col];}
  rebuild(structures){
+  const access=structures.filter(b=>b.hp>0&&b.accessRoads?.length),roadKey=JSON.stringify([this.field.localRoads??[],access.map(b=>b.accessRoads)]);
+  if(roadKey!==this.factoryRoadKey){this.factoryRoadKey=roadKey;this.roads=new RoadTraffic(this.field,[...(this.field.localRoads??[]),...access.flatMap(b=>b.accessRoads)]);this.surfaceCosts.fill(0);this.pavedTripCosts.fill(0);this.pathCache?.clear();this.pathCacheRegions?.clear();this.pathCachePoints=0;}
   const previous=this.staticFootprints,next=new Map(),changed=new Set(),counts=this.footprintCounts;
   this.solids=structures.filter(item=>item.hp>0||item.damage?.wreck);
   const mark=cells=>{for(const id of cells)changed.add(Math.floor((id%this.size)/16)+','+Math.floor(Math.floor(id/this.size)/16));};

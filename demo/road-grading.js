@@ -16,5 +16,20 @@ export function applyRoadGrades(field,roads){
   if(roadWeight>1e-8)target=weightedTarget/roadWeight;if(nearest>half+20&&!padBlend)continue;if(field.fineMask)field.fineMask[index]=1;const u=Math.max(0,Math.min(1,(nearest-half)/20)),blend=1-u*u*(3-2*u),roadTarget=original[index]+(target-original[index])*blend,desired=padBlend?roadTarget+(padTarget/padBlend-roadTarget)*Math.min(1,padBlend):roadTarget,change=Math.max(-maxChange,Math.min(maxChange,desired-original[index]));
   const applied=Math.max(0,original[index]+change)-original[index];field.renderSamples[index]=original[index]+applied;if(Math.abs(applied)>.001){changedVertices++;maxChangeMetres=Math.max(maxChangeMetres,Math.abs(applied));}
  }
- return {changedVertices,maxChangeMetres,maxAllowedChangeMetres:maxChange};
+ // Authored construction pads are levelled after the road grading, so the
+ // visible ground and placement sampling use the same finished surface.
+ let padVertices=0;
+ for(const pad of field.preparedPads??[]){
+  const [left,bottom,right,top]=pad.rect,blend=pad.blendMetres;
+  const c0=Math.max(0,Math.floor((left-blend+field.half)/field.renderCell)),c1=Math.min(field.renderSize-1,Math.ceil((right+blend+field.half)/field.renderCell));
+  const r0=Math.max(0,Math.floor((field.half-top-blend)/field.renderCell)),r1=Math.min(field.renderSize-1,Math.ceil((field.half-bottom+blend)/field.renderCell));
+  for(let row=r0;row<=r1;row++)for(let col=c0;col<=c1;col++){
+   const x=col*field.renderCell-field.half,y=field.half-row*field.renderCell,index=row*field.renderSize+col;
+   const outside=Math.hypot(Math.max(left-x,0,x-right),Math.max(bottom-y,0,y-top)),t=Math.min(1,outside/blend),weight=1-t*t*(3-2*t);
+   if(weight<=0)continue;
+   field.renderSamples[index]+=(pad.height-field.renderSamples[index])*weight;
+   if(field.fineMask)field.fineMask[index]=1;padVertices++;
+  }
+ }
+ return {changedVertices,maxChangeMetres,maxAllowedChangeMetres:maxChange,padVertices};
 }

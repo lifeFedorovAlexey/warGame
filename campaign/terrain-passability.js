@@ -15,6 +15,7 @@ export function buildTerrainPassability(field,roads=new RoadTraffic(field)){
   return (x,y)=>{
     const col=Math.floor((x+half)/cell),row=Math.floor((half-y)/cell);
     if(col<0||row<0||col>=count||row>=count)return false;
+    if(field.preparedPads?.some(({rect:[left,bottom,right,top]})=>x>=left&&x<=right&&y>=bottom&&y<=top))return true;
     return !!allowed[row*count+col]||!!roads.nearest({x,y});
   };
 }

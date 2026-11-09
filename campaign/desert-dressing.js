@@ -40,6 +40,7 @@ export function createDesertDressing(T,field,config,roads,dam,addFog){
  const segments=[];for(const road of roads)for(let i=1;i<road.points.length;i++)segments.push({a:road.points[i-1],b:road.points[i],width:road.width??24});
  function roadDistance(p,{a,b,width}){const dx=b.x-a.x,dy=b.y-a.y,t=Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/(dx*dx+dy*dy||1)));return Math.hypot(p.x-a.x-dx*t,p.y-a.y-dy*t)-width/2;}
  function reserved(p,r){
+  if(field.preparedPads?.some(({rect:[left,bottom,right,top]})=>p.x>left-r&&p.x<right+r&&p.y>bottom-r&&p.y<top+r))return true;
   if(Math.hypot(p.x-sign.x,p.y-sign.y)<30+r)return true;
   if(sites.some(s=>Math.abs(s.x-p.x)<s.size[0]*config.worldScale/2+25+r&&Math.abs(s.y-p.y)<s.size[1]*config.worldScale/2+36+r))return true;
   if(oil.some(s=>Math.hypot(s.x-p.x,s.y-p.y)<32+r)||camps.some(s=>Math.hypot(s.x-p.x,s.y-p.y)<95+r))return true;

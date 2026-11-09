@@ -26,6 +26,7 @@ export function createBaseYard(T,field,config,addFog){
     }
   }
   for(const site of sites){
+    if(site.kind==='factory')continue; // The built factory supplies its actual driveway.
     const [w,d]=config.buildings[site.kind].realSizeMetres;
     const cols=site.kind==='factory'?3:2,rows=site.kind==='factory'?3:2;
     const direction=site.rotationDegrees===180?-1:1;

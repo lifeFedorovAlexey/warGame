@@ -24,6 +24,7 @@ import {createFogMask} from './fog-mask.js';
 import {createStorySignals} from './story-signals.js';
 import {createRallyFlags} from './rally-flags.js';
 import {createBaseYard} from './base-yard.js';
+import {createFactoryRoadView} from './factory-road-view.js';
 import {createDamEnvironment} from './dam-environment.js';
 import {createDesertDressing} from './desert-dressing.js';
 import {createFieldArtifact} from './field-artifacts.js';
@@ -66,6 +67,8 @@ export async function createCampaignWorld(host,config,sound,loading){
  for(const material of terrain.terrainMaterials) addFog(material);
  const baseYard=createBaseYard(T,field,config,addFog);scene.add(baseYard.root);
  const dam=createDamEnvironment(T,field,config,addFog,sound,terrain);scene.add(dam.root);baseYard.roads.push(dam.road);terrain.setLocalRoads(baseYard.roads);
+ field.localRoads=baseYard.roads;
+ const factoryRoads=createFactoryRoadView(T,scene,field,terrain,baseYard.roads,addFog);
  const dressing=createDesertDressing(T,field,config,[...terrain.roadPaths,...baseYard.roads],dam.layout,addFog);scene.add(dressing.root);
  const damage=createDamageSystem(T,scene,field,config);
  await loading?.stage('vehicles');
@@ -214,6 +217,7 @@ export async function createCampaignWorld(host,config,sound,loading){
   return result;
  }
  function setGhost(kind,placement,mission){
+  factoryRoads.setPreview(kind==='factory'?placement:null);
   placementGrid.update(kind,placement,mission);
   if(kind!==ghostKind){
    if(ghost)scene.remove(ghost);for(const {material} of ghostMaterials)material.dispose();ghostMaterials.length=0;ghostValid=null;
@@ -248,6 +252,7 @@ export async function createCampaignWorld(host,config,sound,loading){
  }
  function commandMarker(point,hostile=false){marker.position.set(point.x,point.y,field.heightAt(point.x,point.y)+.4);marker.material.color.set(hostile?'#f4a081':'#cfb473');marker.visible=true;markerUntil=performance.now()+1000;}
  function update(mission,selected,dt,live=false,showHealth=true){
+  factoryRoads.update(mission);
   const time=mission.state.time,now=performance.now()/1000,shotsThisFrame=mission.drainEffects();
   if(time<lastWorldTime){groundEffects.reset();shotTimes.clear();combat.reset();damage.reset();dustTime=0;particles.length=0;}
   for(const event of shotsThisFrame)if(event.type==='shot')shotTimes.set(event.from,now);
