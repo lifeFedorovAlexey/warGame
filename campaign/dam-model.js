@@ -34,8 +34,6 @@ export function createDamModel(T,addFog){
    monolith(a,b);
    // Projecting buttress feet give the wall its retaining structure and scale.
    box([.42,1,19.8],[a+.1,bow(a)-1.45,h/2],edge,[-Math.atan(3/h),0,0]);
-   // Dark vertical runoff and narrow construction joints, following the batter.
-   for(let n=0;n<3;n++){const x=a+.7+n*1.8,z=4+n*2.3;box([.16,.035,7+n],[x,bow(x)-3+z*3/h-.035,z],edge,[-Math.atan(3/h),0,0]);}
   });
  }
  section('spillway_gate',()=>{
@@ -89,8 +87,6 @@ export function createDamModel(T,addFog){
   }
   shape(new T.CircleGeometry(.76,16),dark,[p.x,-19.83,2.2],[Math.PI/2,0,0]);
   for(const y of [-14.5,-18])box([2.3,1.2,1.5],[p.x,y,.7],edge);
-  box([4.6,8,.25],[p.x,-23,.03],edge);
-  for(const side of [-2.3,2.3])box([.35,8,.75],[p.x+side,-23,.25],concrete);
  });
  finish();return root;
 }

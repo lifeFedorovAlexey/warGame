@@ -1,18 +1,6 @@
 import {damBow,DAM_HEIGHT} from './dam-layout.js';
 
 export function addDamDetails(T,root,addFog){
- const canvas=document.createElement('canvas');canvas.width=512;canvas.height=160;
- const ctx=canvas.getContext('2d');ctx.fillStyle='#383c31';ctx.font='bold 104px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
- const text='ЦОЙ ЖИВ';for(let i=0;i<text.length;i++){ctx.save();ctx.translate(48+i*68,82+Math.sin(i*4)*3);ctx.rotate(Math.sin(i*6)*.035);ctx.fillText(text[i],0,0);ctx.restore();}
- ctx.globalCompositeOperation='destination-out';for(let i=0;i<1300;i++){const x=(i*73.37)%512,y=(i*41.19)%160;ctx.fillRect(x,y,.5+i%3,.5+i%2);}
- const map=new T.CanvasTexture(canvas);map.colorSpace=T.SRGBColorSpace;
- const material=new T.MeshStandardMaterial({map,transparent:true,opacity:.68,roughness:1,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});addFog(material);
- const positions=[],uv=[];const left=-29,right=-15,bottom=5.2,top=9.5;
- for(let i=0;i<7;i++)for(const [col,row] of [[i,0],[i+1,0],[i+1,1],[i,0],[i+1,1],[i,1]]){
-  const x=left+(right-left)*col/7,z=bottom+(top-bottom)*row;positions.push(x,damBow(x)-3+z*3/DAM_HEIGHT-.035,z);uv.push(col/7,row);
- }
- const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(positions,3));g.setAttribute('uv',new T.Float32BufferAttribute(uv,2));g.computeVertexNormals();
- const graffiti=new T.Mesh(g,material);graffiti.name='tsoi_graffiti';root.add(graffiti);
  const glowCanvas=document.createElement('canvas');glowCanvas.width=glowCanvas.height=64;
  const gc=glowCanvas.getContext('2d'),gradient=gc.createRadialGradient(32,32,1,32,32,31);gradient.addColorStop(0,'rgba(255,255,255,.9)');gradient.addColorStop(.18,'rgba(255,255,255,.36)');gradient.addColorStop(1,'rgba(255,255,255,0)');gc.fillStyle=gradient;gc.fillRect(0,0,64,64);
  const glowMap=new T.CanvasTexture(glowCanvas),lampGlows=new T.Group();lampGlows.name='dam_lamp_glows';root.add(lampGlows);
