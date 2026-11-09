@@ -1,0 +1,2293 @@
+{
+  "description": "19 factory visitors reconstructed from gameplay telemetry; original positions and queues, no saved designs or combat orders.",
+  "sim": 1450.2,
+  "bounds": [
+    0,
+    0,
+    53,
+    66
+  ],
+  "buildings": [
+    {
+      "id": "b10",
+      "kind": "camp-core",
+      "x": -1523.2,
+      "y": 1056,
+      "hp": 1035,
+      "halfWidth": 28,
+      "halfDepth": 22
+    },
+    {
+      "id": "b15",
+      "kind": "camp-core",
+      "x": -764.8,
+      "y": 1203.2,
+      "hp": 1237.5,
+      "halfWidth": 28,
+      "halfDepth": 22
+    },
+    {
+      "id": "b16",
+      "kind": "mg-tower",
+      "x": -812.8,
+      "y": 1173.2,
+      "hp": 1159.5,
+      "halfWidth": 11.475,
+      "halfDepth": 11.475
+    },
+    {
+      "id": "b21",
+      "kind": "camp-core",
+      "x": -1600,
+      "y": -264,
+      "hp": 1462.5,
+      "halfWidth": 28,
+      "halfDepth": 22
+    },
+    {
+      "id": "b22",
+      "kind": "mg-tower",
+      "x": -1724,
+      "y": -260,
+      "hp": 1657.5,
+      "halfWidth": 11.475,
+      "halfDepth": 11.475
+    },
+    {
+      "id": "b23",
+      "kind": "mg-tower",
+      "x": -1544,
+      "y": -234,
+      "hp": 1657.5,
+      "halfWidth": 11.475,
+      "halfDepth": 11.475
+    },
+    {
+      "id": "b60",
+      "kind": "scav-barracks",
+      "x": -1432.2,
+      "y": 1099,
+      "hp": 620,
+      "halfWidth": 22.5,
+      "halfDepth": 15.75
+    },
+    {
+      "id": "b61",
+      "kind": "scav-store",
+      "x": -1566.2,
+      "y": 1121,
+      "hp": 260,
+      "halfWidth": 13.5,
+      "halfDepth": 11.25
+    },
+    {
+      "id": "b62",
+      "kind": "mg-tower",
+      "x": -1582.2,
+      "y": 967,
+      "hp": 510.59999999999997,
+      "halfWidth": 11.475,
+      "halfDepth": 11.475
+    },
+    {
+      "id": "b63",
+      "kind": "mg-tower",
+      "x": -1422.2,
+      "y": 967,
+      "hp": 510.59999999999997,
+      "halfWidth": 11.475,
+      "halfDepth": 11.475
+    },
+    {
+      "id": "b64",
+      "kind": "scav-fence",
+      "x": -1593.533,
+      "y": 940,
+      "hp": 160,
+      "halfWidth": 13.666666666666666,
+      "halfDepth": 1.575
+    },
+    {
+      "id": "b65",
+      "kind": "scav-fence",
+      "x": -1566.2,
+      "y": 940,
+      "hp": 160,
+      "halfWidth": 13.666666666666666,
+      "halfDepth": 1.575
+    },
+    {
+      "id": "b66",
+      "kind": "scav-fence",
+      "x": -1538.867,
+      "y": 940,
+      "hp": 160,
+      "halfWidth": 13.666666666666666,
+      "halfDepth": 1.575
+    },
+    {
+      "id": "b67",
+      "kind": "scav-fence",
+      "x": -1441.7,
+      "y": 940,
+      "hp": 160,
+      "halfWidth": 15.5,
+      "halfDepth": 1.575
+    },
+    {
+      "id": "b68",
+      "kind": "scav-fence",
+      "x": -1410.7,
+      "y": 940,
+      "hp": 160,
+      "halfWidth": 15.5,
+      "halfDepth": 1.575
+    },
+    {
+      "id": "b69",
+      "kind": "scav-fence",
+      "x": -1395.2,
+      "y": 954.063,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 14.0625
+    },
+    {
+      "id": "b70",
+      "kind": "scav-fence",
+      "x": -1395.2,
+      "y": 982.188,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 14.0625
+    },
+    {
+      "id": "b71",
+      "kind": "scav-fence",
+      "x": -1395.2,
+      "y": 1010.313,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 14.0625
+    },
+    {
+      "id": "b72",
+      "kind": "scav-fence",
+      "x": -1395.2,
+      "y": 1038.438,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 14.0625
+    },
+    {
+      "id": "b73",
+      "kind": "scav-fence",
+      "x": -1395.2,
+      "y": 1066.563,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 14.0625
+    },
+    {
+      "id": "b74",
+      "kind": "scav-fence",
+      "x": -1395.2,
+      "y": 1094.688,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 14.0625
+    },
+    {
+      "id": "b75",
+      "kind": "scav-fence",
+      "x": -1395.2,
+      "y": 1122.813,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 14.0625
+    },
+    {
+      "id": "b76",
+      "kind": "scav-fence",
+      "x": -1395.2,
+      "y": 1150.938,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 14.0625
+    },
+    {
+      "id": "b77",
+      "kind": "scav-fence",
+      "x": -1594.2,
+      "y": 1165,
+      "hp": 160,
+      "halfWidth": 13,
+      "halfDepth": 1.575
+    },
+    {
+      "id": "b78",
+      "kind": "scav-fence",
+      "x": -1568.2,
+      "y": 1165,
+      "hp": 160,
+      "halfWidth": 13,
+      "halfDepth": 1.575
+    },
+    {
+      "id": "b79",
+      "kind": "scav-fence",
+      "x": -1542.2,
+      "y": 1165,
+      "hp": 160,
+      "halfWidth": 13,
+      "halfDepth": 1.575
+    },
+    {
+      "id": "b80",
+      "kind": "scav-fence",
+      "x": -1450.2,
+      "y": 1165,
+      "hp": 160,
+      "halfWidth": 11,
+      "halfDepth": 1.575
+    },
+    {
+      "id": "b81",
+      "kind": "scav-fence",
+      "x": -1428.2,
+      "y": 1165,
+      "hp": 160,
+      "halfWidth": 11,
+      "halfDepth": 1.575
+    },
+    {
+      "id": "b82",
+      "kind": "scav-fence",
+      "x": -1406.2,
+      "y": 1165,
+      "hp": 160,
+      "halfWidth": 11,
+      "halfDepth": 1.575
+    },
+    {
+      "id": "b83",
+      "kind": "scav-fence",
+      "x": -1607.2,
+      "y": 954.063,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 14.0625
+    },
+    {
+      "id": "b84",
+      "kind": "scav-fence",
+      "x": -1607.2,
+      "y": 982.188,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 14.0625
+    },
+    {
+      "id": "b85",
+      "kind": "scav-fence",
+      "x": -1607.2,
+      "y": 1010.313,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 14.0625
+    },
+    {
+      "id": "b86",
+      "kind": "scav-fence",
+      "x": -1607.2,
+      "y": 1038.438,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 14.0625
+    },
+    {
+      "id": "b87",
+      "kind": "scav-fence",
+      "x": -1607.2,
+      "y": 1066.563,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 14.0625
+    },
+    {
+      "id": "b88",
+      "kind": "scav-fence",
+      "x": -1607.2,
+      "y": 1094.688,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 14.0625
+    },
+    {
+      "id": "b89",
+      "kind": "scav-fence",
+      "x": -1607.2,
+      "y": 1122.813,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 14.0625
+    },
+    {
+      "id": "b90",
+      "kind": "scav-fence",
+      "x": -1607.2,
+      "y": 1150.938,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 14.0625
+    },
+    {
+      "id": "b91",
+      "kind": "scav-gate",
+      "x": -1525.2,
+      "y": 930,
+      "hp": 260,
+      "halfWidth": 2.25,
+      "halfDepth": 12.6
+    },
+    {
+      "id": "b92",
+      "kind": "scav-gate",
+      "x": -1457.2,
+      "y": 930,
+      "hp": 260,
+      "halfWidth": 2.25,
+      "halfDepth": 12.6
+    },
+    {
+      "id": "b93",
+      "kind": "scav-gate",
+      "x": -1461.2,
+      "y": 1175,
+      "hp": 260,
+      "halfWidth": 2.25,
+      "halfDepth": 12.6
+    },
+    {
+      "id": "b94",
+      "kind": "scav-gate",
+      "x": -1529.2,
+      "y": 1175,
+      "hp": 260,
+      "halfWidth": 2.25,
+      "halfDepth": 12.6
+    },
+    {
+      "id": "b95",
+      "kind": "scav-barracks",
+      "x": -704.8,
+      "y": 1264.2,
+      "hp": 620,
+      "halfWidth": 22.5,
+      "halfDepth": 15.75
+    },
+    {
+      "id": "b96",
+      "kind": "scav-store",
+      "x": -799.8,
+      "y": 1268.2,
+      "hp": 260,
+      "halfWidth": 13.5,
+      "halfDepth": 11.25
+    },
+    {
+      "id": "b97",
+      "kind": "mg-tower",
+      "x": -808.8,
+      "y": 1223.2,
+      "hp": 610.5,
+      "halfWidth": 11.475,
+      "halfDepth": 11.475
+    },
+    {
+      "id": "b98",
+      "kind": "mg-tower",
+      "x": -678.8,
+      "y": 1168.2,
+      "hp": 232.5,
+      "halfWidth": 11.475,
+      "halfDepth": 11.475
+    },
+    {
+      "id": "b99",
+      "kind": "scav-fence",
+      "x": -819.8,
+      "y": 1138.2,
+      "hp": 160,
+      "halfWidth": 15,
+      "halfDepth": 1.575
+    },
+    {
+      "id": "b100",
+      "kind": "scav-fence",
+      "x": -789.8,
+      "y": 1138.2,
+      "hp": 160,
+      "halfWidth": 15,
+      "halfDepth": 1.575
+    },
+    {
+      "id": "b101",
+      "kind": "scav-fence",
+      "x": -693.3,
+      "y": 1138.2,
+      "hp": 160,
+      "halfWidth": 13.5,
+      "halfDepth": 1.575
+    },
+    {
+      "id": "b102",
+      "kind": "scav-fence",
+      "x": -666.3,
+      "y": 1138.2,
+      "hp": 160,
+      "halfWidth": 13.5,
+      "halfDepth": 1.575
+    },
+    {
+      "id": "b103",
+      "kind": "scav-fence",
+      "x": -652.8,
+      "y": 1152.283,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 14.083333333333334
+    },
+    {
+      "id": "b104",
+      "kind": "scav-fence",
+      "x": -652.8,
+      "y": 1180.45,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 14.083333333333334
+    },
+    {
+      "id": "b105",
+      "kind": "scav-fence",
+      "x": -652.8,
+      "y": 1208.617,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 14.083333333333334
+    },
+    {
+      "id": "b106",
+      "kind": "scav-fence",
+      "x": -652.8,
+      "y": 1236.783,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 14.083333333333334
+    },
+    {
+      "id": "b107",
+      "kind": "scav-fence",
+      "x": -652.8,
+      "y": 1264.95,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 14.083333333333334
+    },
+    {
+      "id": "b108",
+      "kind": "scav-fence",
+      "x": -652.8,
+      "y": 1293.117,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 14.083333333333334
+    },
+    {
+      "id": "b109",
+      "kind": "scav-fence",
+      "x": -819.633,
+      "y": 1307.2,
+      "hp": 160,
+      "halfWidth": 15.166666666666666,
+      "halfDepth": 1.575
+    },
+    {
+      "id": "b110",
+      "kind": "scav-fence",
+      "x": -789.3,
+      "y": 1307.2,
+      "hp": 160,
+      "halfWidth": 15.166666666666666,
+      "halfDepth": 1.575
+    },
+    {
+      "id": "b111",
+      "kind": "scav-fence",
+      "x": -758.967,
+      "y": 1307.2,
+      "hp": 160,
+      "halfWidth": 15.166666666666666,
+      "halfDepth": 1.575
+    },
+    {
+      "id": "b112",
+      "kind": "scav-fence",
+      "x": -728.633,
+      "y": 1307.2,
+      "hp": 160,
+      "halfWidth": 15.166666666666666,
+      "halfDepth": 1.575
+    },
+    {
+      "id": "b113",
+      "kind": "scav-fence",
+      "x": -698.3,
+      "y": 1307.2,
+      "hp": 160,
+      "halfWidth": 15.166666666666666,
+      "halfDepth": 1.575
+    },
+    {
+      "id": "b114",
+      "kind": "scav-fence",
+      "x": -667.967,
+      "y": 1307.2,
+      "hp": 160,
+      "halfWidth": 15.166666666666666,
+      "halfDepth": 1.575
+    },
+    {
+      "id": "b115",
+      "kind": "scav-fence",
+      "x": -834.8,
+      "y": 1152.283,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 14.083333333333334
+    },
+    {
+      "id": "b116",
+      "kind": "scav-fence",
+      "x": -834.8,
+      "y": 1180.45,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 14.083333333333334
+    },
+    {
+      "id": "b117",
+      "kind": "scav-fence",
+      "x": -834.8,
+      "y": 1208.617,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 14.083333333333334
+    },
+    {
+      "id": "b118",
+      "kind": "scav-fence",
+      "x": -834.8,
+      "y": 1236.783,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 14.083333333333334
+    },
+    {
+      "id": "b119",
+      "kind": "scav-fence",
+      "x": -834.8,
+      "y": 1264.95,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 14.083333333333334
+    },
+    {
+      "id": "b120",
+      "kind": "scav-fence",
+      "x": -834.8,
+      "y": 1293.117,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 14.083333333333334
+    },
+    {
+      "id": "b121",
+      "kind": "scav-gate",
+      "x": -774.8,
+      "y": 1128.2,
+      "hp": 260,
+      "halfWidth": 2.25,
+      "halfDepth": 12.6
+    },
+    {
+      "id": "b122",
+      "kind": "scav-gate",
+      "x": -706.8,
+      "y": 1128.2,
+      "hp": 215,
+      "halfWidth": 2.25,
+      "halfDepth": 12.6
+    },
+    {
+      "id": "b123",
+      "kind": "scav-barracks",
+      "x": -1533,
+      "y": -325,
+      "hp": 620,
+      "halfWidth": 15.75,
+      "halfDepth": 22.5
+    },
+    {
+      "id": "b124",
+      "kind": "scav-store",
+      "x": -1677,
+      "y": -234,
+      "hp": 260,
+      "halfWidth": 13.5,
+      "halfDepth": 11.25
+    },
+    {
+      "id": "b125",
+      "kind": "mg-tower",
+      "x": -1680,
+      "y": -175,
+      "hp": 721.5,
+      "halfWidth": 11.475,
+      "halfDepth": 11.475
+    },
+    {
+      "id": "b126",
+      "kind": "mg-tower",
+      "x": -1506,
+      "y": -175,
+      "hp": 721.5,
+      "halfWidth": 11.475,
+      "halfDepth": 11.475
+    },
+    {
+      "id": "b127",
+      "kind": "scav-fence",
+      "x": -1748,
+      "y": -370,
+      "hp": 160,
+      "halfWidth": 2,
+      "halfDepth": 1.575
+    },
+    {
+      "id": "b128",
+      "kind": "scav-fence",
+      "x": -1639.25,
+      "y": -370,
+      "hp": 160,
+      "halfWidth": 14.75,
+      "halfDepth": 1.575
+    },
+    {
+      "id": "b129",
+      "kind": "scav-fence",
+      "x": -1609.75,
+      "y": -370,
+      "hp": 160,
+      "halfWidth": 14.75,
+      "halfDepth": 1.575
+    },
+    {
+      "id": "b130",
+      "kind": "scav-fence",
+      "x": -1580.25,
+      "y": -370,
+      "hp": 160,
+      "halfWidth": 14.75,
+      "halfDepth": 1.575
+    },
+    {
+      "id": "b131",
+      "kind": "scav-fence",
+      "x": -1550.75,
+      "y": -370,
+      "hp": 160,
+      "halfWidth": 14.75,
+      "halfDepth": 1.575
+    },
+    {
+      "id": "b132",
+      "kind": "scav-fence",
+      "x": -1521.25,
+      "y": -370,
+      "hp": 160,
+      "halfWidth": 14.75,
+      "halfDepth": 1.575
+    },
+    {
+      "id": "b133",
+      "kind": "scav-fence",
+      "x": -1491.75,
+      "y": -370,
+      "hp": 160,
+      "halfWidth": 14.75,
+      "halfDepth": 1.575
+    },
+    {
+      "id": "b134",
+      "kind": "scav-fence",
+      "x": -1477,
+      "y": -354.071,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 15.928571428571427
+    },
+    {
+      "id": "b135",
+      "kind": "scav-fence",
+      "x": -1477,
+      "y": -322.214,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 15.928571428571427
+    },
+    {
+      "id": "b136",
+      "kind": "scav-fence",
+      "x": -1477,
+      "y": -290.357,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 15.928571428571427
+    },
+    {
+      "id": "b137",
+      "kind": "scav-fence",
+      "x": -1477,
+      "y": -258.5,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 15.928571428571427
+    },
+    {
+      "id": "b138",
+      "kind": "scav-fence",
+      "x": -1477,
+      "y": -226.643,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 15.928571428571427
+    },
+    {
+      "id": "b139",
+      "kind": "scav-fence",
+      "x": -1477,
+      "y": -194.786,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 15.928571428571427
+    },
+    {
+      "id": "b140",
+      "kind": "scav-fence",
+      "x": -1477,
+      "y": -162.929,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 15.928571428571427
+    },
+    {
+      "id": "b141",
+      "kind": "scav-fence",
+      "x": -1734.5,
+      "y": -147,
+      "hp": 160,
+      "halfWidth": 15.5,
+      "halfDepth": 1.575
+    },
+    {
+      "id": "b142",
+      "kind": "scav-fence",
+      "x": -1703.5,
+      "y": -147,
+      "hp": 160,
+      "halfWidth": 15.5,
+      "halfDepth": 1.575
+    },
+    {
+      "id": "b143",
+      "kind": "scav-fence",
+      "x": -1672.5,
+      "y": -147,
+      "hp": 160,
+      "halfWidth": 15.5,
+      "halfDepth": 1.575
+    },
+    {
+      "id": "b144",
+      "kind": "scav-fence",
+      "x": -1641.5,
+      "y": -147,
+      "hp": 160,
+      "halfWidth": 15.5,
+      "halfDepth": 1.575
+    },
+    {
+      "id": "b145",
+      "kind": "scav-fence",
+      "x": -1544.5,
+      "y": -147,
+      "hp": 160,
+      "halfWidth": 13.5,
+      "halfDepth": 1.575
+    },
+    {
+      "id": "b146",
+      "kind": "scav-fence",
+      "x": -1517.5,
+      "y": -147,
+      "hp": 160,
+      "halfWidth": 13.5,
+      "halfDepth": 1.575
+    },
+    {
+      "id": "b147",
+      "kind": "scav-fence",
+      "x": -1490.5,
+      "y": -147,
+      "hp": 160,
+      "halfWidth": 13.5,
+      "halfDepth": 1.575
+    },
+    {
+      "id": "b148",
+      "kind": "scav-fence",
+      "x": -1750,
+      "y": -354.071,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 15.928571428571427
+    },
+    {
+      "id": "b149",
+      "kind": "scav-fence",
+      "x": -1750,
+      "y": -322.214,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 15.928571428571427
+    },
+    {
+      "id": "b150",
+      "kind": "scav-fence",
+      "x": -1750,
+      "y": -290.357,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 15.928571428571427
+    },
+    {
+      "id": "b151",
+      "kind": "scav-fence",
+      "x": -1750,
+      "y": -258.5,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 15.928571428571427
+    },
+    {
+      "id": "b152",
+      "kind": "scav-fence",
+      "x": -1750,
+      "y": -226.643,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 15.928571428571427
+    },
+    {
+      "id": "b153",
+      "kind": "scav-fence",
+      "x": -1750,
+      "y": -194.786,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 15.928571428571427
+    },
+    {
+      "id": "b154",
+      "kind": "scav-fence",
+      "x": -1750,
+      "y": -162.929,
+      "hp": 160,
+      "halfWidth": 1.575,
+      "halfDepth": 15.928571428571427
+    },
+    {
+      "id": "b155",
+      "kind": "scav-gate",
+      "x": -1558,
+      "y": -137,
+      "hp": 260,
+      "halfWidth": 2.25,
+      "halfDepth": 12.6
+    },
+    {
+      "id": "b156",
+      "kind": "scav-gate",
+      "x": -1626,
+      "y": -137,
+      "hp": 260,
+      "halfWidth": 2.25,
+      "halfDepth": 12.6
+    },
+    {
+      "id": "b157",
+      "kind": "scav-gate",
+      "x": -1746,
+      "y": -380,
+      "hp": 260,
+      "halfWidth": 2.25,
+      "halfDepth": 12.6
+    },
+    {
+      "id": "b158",
+      "kind": "scav-gate",
+      "x": -1654,
+      "y": -380,
+      "hp": 260,
+      "halfWidth": 2.25,
+      "halfDepth": 12.6
+    },
+    {
+      "id": "b173",
+      "kind": "base-sign",
+      "x": -1608,
+      "y": 592,
+      "hp": 300,
+      "halfWidth": 21.375,
+      "halfDepth": 9
+    },
+    {
+      "id": "b177",
+      "kind": "generator",
+      "x": -1728,
+      "y": 272,
+      "hp": 950,
+      "halfWidth": 31.5,
+      "halfDepth": 27
+    },
+    {
+      "id": "b196",
+      "kind": "derrick",
+      "x": -1696,
+      "y": 368,
+      "hp": 650,
+      "halfWidth": 22.5,
+      "halfDepth": 22.5
+    },
+    {
+      "id": "b198",
+      "kind": "derrick",
+      "x": -1504,
+      "y": 224,
+      "hp": 650,
+      "halfWidth": 22.5,
+      "halfDepth": 22.5
+    },
+    {
+      "id": "b215",
+      "kind": "factory",
+      "x": -1640,
+      "y": 456,
+      "hp": 1400,
+      "halfWidth": 63,
+      "halfDepth": 54
+    },
+    {
+      "id": "b217",
+      "kind": "factory",
+      "x": -1600,
+      "y": 248,
+      "hp": 1400,
+      "halfWidth": 63,
+      "halfDepth": 54
+    },
+    {
+      "id": "b361",
+      "kind": "lab",
+      "x": -1440,
+      "y": 432,
+      "hp": 1000,
+      "halfWidth": 40.5,
+      "halfDepth": 36
+    },
+    {
+      "id": "b576",
+      "kind": "bunker",
+      "x": -1192,
+      "y": 312,
+      "hp": 800,
+      "halfWidth": 12.6,
+      "halfDepth": 14.4
+    },
+    {
+      "id": "b585",
+      "kind": "bunker",
+      "x": -1192,
+      "y": 344,
+      "hp": 794,
+      "halfWidth": 12.6,
+      "halfDepth": 14.4
+    },
+    {
+      "id": "b1356",
+      "kind": "derrick",
+      "x": -1072,
+      "y": 688,
+      "hp": 650,
+      "halfWidth": 22.5,
+      "halfDepth": 22.5
+    },
+    {
+      "id": "b1545",
+      "kind": "generator",
+      "x": -1144,
+      "y": 704,
+      "hp": 950,
+      "halfWidth": 31.5,
+      "halfDepth": 27
+    },
+    {
+      "id": "b2036",
+      "kind": "bunker",
+      "x": -768,
+      "y": 752,
+      "hp": 800,
+      "halfWidth": 14.4,
+      "halfDepth": 12.6
+    },
+    {
+      "id": "b2040",
+      "kind": "bunker",
+      "x": -656,
+      "y": 760,
+      "hp": 800,
+      "halfWidth": 14.4,
+      "halfDepth": 12.6
+    }
+  ],
+  "units": [
+    {
+      "id": "u1",
+      "kind": "bukhanka",
+      "owner": "rai",
+      "x": -1681.26,
+      "y": 290.09,
+      "heading": -2.257,
+      "hp": 165.816,
+      "maxHp": 600,
+      "factoryVisit": {
+        "factoryId": "b215",
+        "phase": "waiting",
+        "slot": 12,
+        "queued": 1290.9999999999213,
+        "factory": {
+          "id": "b215",
+          "x": -1640,
+          "y": 456,
+          "rotation": 0,
+          "halfWidth": 63,
+          "halfDepth": 54,
+          "kind": "factory",
+          "owner": "rai",
+          "completed": true
+        },
+        "waitGeometry": "2:-1640:456:0",
+        "waitingPoint": {
+          "x": -1680.5,
+          "y": 289.5
+        },
+        "waitOccupancy": null
+      },
+      "retreat": {
+        "status": "servicing",
+        "resume": {
+          "action": "attack",
+          "target": {
+            "x": -756.8914324809645,
+            "y": 1155.9996053970399,
+            "id": "u2755"
+          },
+          "origin": {
+            "x": -694.8037113866695,
+            "y": 1038.1454737247711
+          }
+        },
+        "threat": {
+          "id": "u2755",
+          "x": -733.763455149079,
+          "y": 1076.2213942469587,
+          "time": 1297.2999999999156,
+          "range": 72
+        },
+        "started": 1290.9999999999213,
+        "home": {
+          "id": "b215",
+          "x": -1640,
+          "y": 456,
+          "radius": 123.47590011563598
+        },
+        "phase": "home",
+        "destination": {
+          "x": -1680.5,
+          "y": 289.5
+        },
+        "service": "waiting-entry"
+      }
+    },
+    {
+      "id": "u2",
+      "kind": "bukhanka",
+      "owner": "rai",
+      "x": -1640,
+      "y": 442.5,
+      "heading": 0,
+      "hp": 600,
+      "maxHp": 600,
+      "factoryVisit": {
+        "factoryId": "b215",
+        "phase": "inside",
+        "slot": 1,
+        "queued": 1277.9999999999332,
+        "factory": {
+          "id": "b215",
+          "x": -1640,
+          "y": 456,
+          "rotation": 0,
+          "halfWidth": 63,
+          "halfDepth": 54,
+          "kind": "factory",
+          "owner": "rai",
+          "completed": true
+        },
+        "waitGeometry": "2:-1640:456:0",
+        "waitingPoint": {
+          "x": -1599.5,
+          "y": 352.5
+        },
+        "waitOccupancy": null,
+        "arrived": 1346.9999999998704,
+        "repairStartHp": 449.6
+      },
+      "retreat": {
+        "status": "servicing",
+        "resume": {
+          "action": "move",
+          "target": {
+            "x": -729.4590926771914,
+            "y": 933.209500043481
+          },
+          "origin": {
+            "x": -730.4013621379249,
+            "y": 932.9406299273137
+          }
+        },
+        "threat": {
+          "id": "b98",
+          "x": -678.8,
+          "y": 1168.2,
+          "time": 1280.8999999999305,
+          "range": 210
+        },
+        "started": 1277.9999999999332,
+        "home": {
+          "id": "b215",
+          "x": -1640,
+          "y": 456,
+          "radius": 123.47590011563598
+        },
+        "phase": "home",
+        "destination": {
+          "x": -1640,
+          "y": 375
+        },
+        "service": "repairing"
+      }
+    },
+    {
+      "id": "u3",
+      "kind": "bukhanka",
+      "owner": "rai",
+      "x": -1711.866,
+      "y": 225.632,
+      "heading": 0.169,
+      "hp": 315.472,
+      "maxHp": 400,
+      "factoryVisit": {
+        "factoryId": "b215",
+        "phase": "waiting",
+        "slot": 26,
+        "queued": 1385.5999999998353,
+        "factory": {
+          "id": "b215",
+          "x": -1640,
+          "y": 456,
+          "rotation": 0,
+          "halfWidth": 63,
+          "halfDepth": 54,
+          "kind": "factory",
+          "owner": "rai",
+          "completed": true
+        },
+        "waitGeometry": "2:-1640:456:0",
+        "waitingPoint": {
+          "x": -1712,
+          "y": 226.5
+        },
+        "waitOccupancy": null
+      },
+      "retreat": {
+        "status": "servicing",
+        "resume": {
+          "action": "move",
+          "target": {
+            "x": -669.4034027469003,
+            "y": 855.5922778645081
+          },
+          "origin": {
+            "x": -669.5428772026647,
+            "y": 854.7370969693134
+          }
+        },
+        "threat": {
+          "id": "u2645",
+          "x": -749.117303763668,
+          "y": 935.843859057891,
+          "time": 1385.4999999998354,
+          "range": 115
+        },
+        "started": 1385.5999999998353,
+        "home": {
+          "id": "b215",
+          "x": -1640,
+          "y": 456,
+          "radius": 123.47590011563598
+        },
+        "phase": "home",
+        "destination": {
+          "x": -1712,
+          "y": 226.5
+        },
+        "service": "waiting-entry"
+      }
+    },
+    {
+      "id": "u4",
+      "kind": "builder",
+      "owner": "rai",
+      "x": -704.585,
+      "y": 764.379,
+      "heading": 0.645,
+      "hp": 73.864,
+      "maxHp": 280
+    },
+    {
+      "id": "u303",
+      "kind": "bukhanka",
+      "owner": "rai",
+      "x": -1680.878,
+      "y": 257.171,
+      "heading": -0.413,
+      "hp": 409,
+      "maxHp": 520,
+      "factoryVisit": {
+        "factoryId": "b215",
+        "phase": "waiting",
+        "slot": 18,
+        "queued": 1367.4999999998518,
+        "factory": {
+          "id": "b215",
+          "x": -1640,
+          "y": 456,
+          "rotation": 0,
+          "halfWidth": 63,
+          "halfDepth": 54,
+          "kind": "factory",
+          "owner": "rai",
+          "completed": true
+        },
+        "waitGeometry": "2:-1640:456:0",
+        "waitingPoint": {
+          "x": -1680.5,
+          "y": 258
+        },
+        "waitOccupancy": null
+      },
+      "retreat": {
+        "status": "servicing",
+        "resume": {
+          "action": "move",
+          "target": {
+            "x": -716.7716150513171,
+            "y": 863.3545238721852
+          },
+          "origin": {
+            "x": -716.2548784275047,
+            "y": 863.1240104058727
+          }
+        },
+        "threat": {
+          "id": "u2821",
+          "x": -752.6530122900033,
+          "y": 970.3574719658901,
+          "time": 1367.4999999998518,
+          "range": 115
+        },
+        "started": 1367.4999999998518,
+        "home": {
+          "id": "b215",
+          "x": -1640,
+          "y": 456,
+          "radius": 123.47590011563598
+        },
+        "phase": "home",
+        "destination": {
+          "x": -1680.5,
+          "y": 258
+        },
+        "service": "waiting-entry"
+      }
+    },
+    {
+      "id": "u305",
+      "kind": "bukhanka",
+      "owner": "rai",
+      "x": -1567.585,
+      "y": 351.717,
+      "heading": 0.504,
+      "hp": 323.104,
+      "maxHp": 520,
+      "factoryVisit": {
+        "factoryId": "b215",
+        "phase": "waiting",
+        "slot": 3,
+        "queued": 1278.3999999999328,
+        "factory": {
+          "id": "b215",
+          "x": -1640,
+          "y": 456,
+          "rotation": 0,
+          "halfWidth": 63,
+          "halfDepth": 54,
+          "kind": "factory",
+          "owner": "rai",
+          "completed": true
+        },
+        "waitGeometry": "2:-1640:456:0",
+        "waitingPoint": {
+          "x": -1568,
+          "y": 352.5
+        },
+        "waitOccupancy": null
+      },
+      "retreat": {
+        "status": "servicing",
+        "resume": {
+          "action": "move",
+          "target": {
+            "x": -643.2764540810402,
+            "y": 849.7076868619387
+          },
+          "origin": {
+            "x": -707.8159978685882,
+            "y": 623.2429129244767
+          }
+        },
+        "threat": null,
+        "started": 1278.3999999999328,
+        "home": {
+          "id": "b215",
+          "x": -1640,
+          "y": 456,
+          "radius": 123.47590011563598
+        },
+        "phase": "home",
+        "destination": {
+          "x": -1568,
+          "y": 352.5
+        },
+        "service": "waiting-entry"
+      }
+    },
+    {
+      "id": "u327",
+      "kind": "bukhanka",
+      "owner": "rai",
+      "x": -1743.951,
+      "y": 351.734,
+      "heading": -0.509,
+      "hp": 356.2,
+      "maxHp": 520,
+      "factoryVisit": {
+        "factoryId": "b215",
+        "phase": "waiting",
+        "slot": 4,
+        "queued": 1278.3999999999328,
+        "factory": {
+          "id": "b215",
+          "x": -1640,
+          "y": 456,
+          "rotation": 0,
+          "halfWidth": 63,
+          "halfDepth": 54,
+          "kind": "factory",
+          "owner": "rai",
+          "completed": true
+        },
+        "waitGeometry": "2:-1640:456:0",
+        "waitingPoint": {
+          "x": -1743.5,
+          "y": 352.5
+        },
+        "waitOccupancy": null
+      },
+      "retreat": {
+        "status": "servicing",
+        "resume": {
+          "action": "move",
+          "target": {
+            "x": -681.8402131628529,
+            "y": 927.1727530884638
+          },
+          "origin": {
+            "x": -684.1719854242367,
+            "y": 887.9617327915944
+          }
+        },
+        "threat": null,
+        "started": 1278.3999999999328,
+        "home": {
+          "id": "b215",
+          "x": -1640,
+          "y": 456,
+          "radius": 123.47590011563598
+        },
+        "phase": "home",
+        "destination": {
+          "x": -1743.5,
+          "y": 352.5
+        },
+        "service": "waiting-entry"
+      }
+    },
+    {
+      "id": "u364",
+      "kind": "bukhanka",
+      "owner": "rai",
+      "x": -1535.921,
+      "y": 351.767,
+      "heading": 0.684,
+      "hp": 133.95,
+      "maxHp": 440,
+      "factoryVisit": {
+        "factoryId": "b215",
+        "phase": "waiting",
+        "slot": 5,
+        "queued": 1278.3999999999328,
+        "factory": {
+          "id": "b215",
+          "x": -1640,
+          "y": 456,
+          "rotation": 0,
+          "halfWidth": 63,
+          "halfDepth": 54,
+          "kind": "factory",
+          "owner": "rai",
+          "completed": true
+        },
+        "waitGeometry": "2:-1640:456:0",
+        "waitingPoint": {
+          "x": -1536.5,
+          "y": 352.5
+        },
+        "waitOccupancy": null
+      },
+      "retreat": {
+        "status": "servicing",
+        "resume": {
+          "action": "move",
+          "target": {
+            "x": -667.0858938382095,
+            "y": 852.7260603394473
+          },
+          "origin": {
+            "x": -746.1075761655363,
+            "y": 546.0563204483101
+          }
+        },
+        "threat": null,
+        "started": 1278.3999999999328,
+        "home": {
+          "id": "b215",
+          "x": -1640,
+          "y": 456,
+          "radius": 123.47590011563598
+        },
+        "phase": "home",
+        "destination": {
+          "x": -1536.5,
+          "y": 352.5
+        },
+        "service": "waiting-entry"
+      }
+    },
+    {
+      "id": "u401",
+      "kind": "bukhanka",
+      "owner": "rai",
+      "x": -1600,
+      "y": 261.5,
+      "heading": 3.142,
+      "hp": 520,
+      "maxHp": 520,
+      "factoryVisit": {
+        "factoryId": "b217",
+        "phase": "inside",
+        "slot": 0,
+        "queued": 1278.3999999999328,
+        "factory": {
+          "id": "b217",
+          "x": -1600,
+          "y": 248,
+          "rotation": 3.141592653589793,
+          "halfWidth": 63,
+          "halfDepth": 54,
+          "kind": "factory",
+          "owner": "rai",
+          "completed": true
+        },
+        "waitGeometry": "2:-1600:248:3.141592653589793",
+        "waitingPoint": {
+          "x": -1559.5,
+          "y": 351.5
+        },
+        "waitOccupancy": null,
+        "arrived": 1325.6999999998898,
+        "repairStartHp": 379.30000000000007
+      },
+      "retreat": {
+        "status": "servicing",
+        "resume": {
+          "action": "move",
+          "target": {
+            "x": -717.7231468300566,
+            "y": 834.9533675372953
+          },
+          "origin": {
+            "x": -781.4993125975018,
+            "y": 438.0189132443412
+          }
+        },
+        "threat": null,
+        "started": 1278.3999999999328,
+        "home": {
+          "id": "b217",
+          "x": -1600,
+          "y": 248,
+          "radius": 123.47590011563598
+        },
+        "phase": "home",
+        "destination": {
+          "x": -1600,
+          "y": 329
+        },
+        "service": "repairing"
+      }
+    },
+    {
+      "id": "u605",
+      "kind": "bukhanka",
+      "owner": "rai",
+      "x": -1640.069,
+      "y": 350.695,
+      "heading": 0.51,
+      "hp": 410,
+      "maxHp": 520,
+      "factoryVisit": {
+        "factoryId": "b217",
+        "phase": "waiting",
+        "slot": 1,
+        "queued": 1278.3999999999328,
+        "factory": {
+          "id": "b217",
+          "x": -1600,
+          "y": 248,
+          "rotation": 3.141592653589793,
+          "halfWidth": 63,
+          "halfDepth": 54,
+          "kind": "factory",
+          "owner": "rai",
+          "completed": true
+        },
+        "waitGeometry": "2:-1600:248:3.141592653589793",
+        "waitingPoint": {
+          "x": -1640.5,
+          "y": 351.5
+        },
+        "waitOccupancy": null
+      },
+      "retreat": {
+        "status": "servicing",
+        "resume": {
+          "action": "move",
+          "target": {
+            "x": -762.3236528668866,
+            "y": 864.7995542494818
+          },
+          "origin": {
+            "x": -784.6748811695238,
+            "y": 370.57154528927884
+          }
+        },
+        "threat": null,
+        "started": 1278.3999999999328,
+        "home": {
+          "id": "b217",
+          "x": -1600,
+          "y": 248,
+          "radius": 123.47590011563598
+        },
+        "phase": "home",
+        "destination": {
+          "x": -1640.5,
+          "y": 351.5
+        },
+        "service": "waiting-entry"
+      }
+    },
+    {
+      "id": "u609",
+      "kind": "bukhanka",
+      "owner": "rai",
+      "x": -1681.134,
+      "y": 225.948,
+      "heading": -0.835,
+      "hp": 402.1,
+      "maxHp": 520,
+      "factoryVisit": {
+        "factoryId": "b215",
+        "phase": "waiting",
+        "slot": 24,
+        "queued": 1379.6999999998407,
+        "factory": {
+          "id": "b215",
+          "x": -1640,
+          "y": 456,
+          "rotation": 0,
+          "halfWidth": 63,
+          "halfDepth": 54,
+          "kind": "factory",
+          "owner": "rai",
+          "completed": true
+        },
+        "waitGeometry": "2:-1640:456:0",
+        "waitingPoint": {
+          "x": -1680.5,
+          "y": 226.5
+        },
+        "waitOccupancy": null
+      },
+      "retreat": {
+        "status": "servicing",
+        "resume": {
+          "action": "move",
+          "target": {
+            "x": -693.0875088991087,
+            "y": 859.4734008683466
+          },
+          "origin": {
+            "x": -692.3016793639268,
+            "y": 859.8436734160606
+          }
+        },
+        "threat": {
+          "id": "u2645",
+          "x": -753.5989009722849,
+          "y": 943.9881444272133,
+          "time": 1383.1999999998375,
+          "range": 115
+        },
+        "started": 1379.6999999998407,
+        "home": {
+          "id": "b215",
+          "x": -1640,
+          "y": 456,
+          "radius": 123.47590011563598
+        },
+        "phase": "home",
+        "destination": {
+          "x": -1680.5,
+          "y": 226.5
+        },
+        "service": "waiting-entry"
+      }
+    },
+    {
+      "id": "u666",
+      "kind": "bukhanka",
+      "owner": "rai",
+      "x": -1679.725,
+      "y": 321.032,
+      "heading": 1.612,
+      "hp": 377.5,
+      "maxHp": 520,
+      "factoryVisit": {
+        "factoryId": "b215",
+        "phase": "waiting",
+        "slot": 6,
+        "queued": 1278.3999999999328,
+        "factory": {
+          "id": "b215",
+          "x": -1640,
+          "y": 456,
+          "rotation": 0,
+          "halfWidth": 63,
+          "halfDepth": 54,
+          "kind": "factory",
+          "owner": "rai",
+          "completed": true
+        },
+        "waitGeometry": "2:-1640:456:0",
+        "waitingPoint": {
+          "x": -1680.5,
+          "y": 321
+        },
+        "waitOccupancy": null
+      },
+      "retreat": {
+        "status": "servicing",
+        "resume": {
+          "action": "move",
+          "target": {
+            "x": -759.305279389378,
+            "y": 888.6089940066511
+          },
+          "origin": {
+            "x": -760.9791685541055,
+            "y": 568.1592231696734
+          }
+        },
+        "threat": null,
+        "started": 1278.3999999999328,
+        "home": {
+          "id": "b215",
+          "x": -1640,
+          "y": 456,
+          "radius": 123.47590011563598
+        },
+        "phase": "home",
+        "destination": {
+          "x": -1680.5,
+          "y": 321
+        },
+        "service": "waiting-entry"
+      }
+    },
+    {
+      "id": "u669",
+      "kind": "bukhanka",
+      "owner": "rai",
+      "x": -1527.554,
+      "y": 350.662,
+      "heading": 0.501,
+      "hp": 308.45,
+      "maxHp": 520,
+      "factoryVisit": {
+        "factoryId": "b217",
+        "phase": "waiting",
+        "slot": 2,
+        "queued": 1278.3999999999328,
+        "factory": {
+          "id": "b217",
+          "x": -1600,
+          "y": 248,
+          "rotation": 3.141592653589793,
+          "halfWidth": 63,
+          "halfDepth": 54,
+          "kind": "factory",
+          "owner": "rai",
+          "completed": true
+        },
+        "waitGeometry": "2:-1600:248:3.141592653589793",
+        "waitingPoint": {
+          "x": -1528,
+          "y": 351.5
+        },
+        "waitOccupancy": null
+      },
+      "retreat": {
+        "status": "servicing",
+        "resume": {
+          "action": "move",
+          "target": {
+            "x": -714.704773352548,
+            "y": 858.7628072944646
+          },
+          "origin": {
+            "x": -723.2558848971818,
+            "y": 451.324149239904
+          }
+        },
+        "threat": null,
+        "started": 1278.3999999999328,
+        "home": {
+          "id": "b217",
+          "x": -1600,
+          "y": 248,
+          "radius": 123.47590011563598
+        },
+        "phase": "home",
+        "destination": {
+          "x": -1528,
+          "y": 351.5
+        },
+        "service": "waiting-entry"
+      }
+    },
+    {
+      "id": "u699",
+      "kind": "bukhanka",
+      "owner": "rai",
+      "x": -1598.722,
+      "y": 321.043,
+      "heading": 1.626,
+      "hp": 301.648,
+      "maxHp": 520,
+      "factoryVisit": {
+        "factoryId": "b215",
+        "phase": "waiting",
+        "slot": 7,
+        "queued": 1278.3999999999328,
+        "factory": {
+          "id": "b215",
+          "x": -1640,
+          "y": 456,
+          "rotation": 0,
+          "halfWidth": 63,
+          "halfDepth": 54,
+          "kind": "factory",
+          "owner": "rai",
+          "completed": true
+        },
+        "waitGeometry": "2:-1640:456:0",
+        "waitingPoint": {
+          "x": -1599.5,
+          "y": 321
+        },
+        "waitOccupancy": null
+      },
+      "retreat": {
+        "status": "servicing",
+        "resume": {
+          "action": "move",
+          "target": {
+            "x": -684.8585866403615,
+            "y": 903.3633133312944
+          },
+          "origin": {
+            "x": -674.8863080971956,
+            "y": 875.78560487809
+          }
+        },
+        "threat": null,
+        "started": 1278.3999999999328,
+        "home": {
+          "id": "b215",
+          "x": -1640,
+          "y": 456,
+          "radius": 123.47590011563598
+        },
+        "phase": "home",
+        "destination": {
+          "x": -1599.5,
+          "y": 321
+        },
+        "service": "waiting-entry"
+      }
+    },
+    {
+      "id": "u868",
+      "kind": "bukhanka",
+      "owner": "rai",
+      "x": -1640,
+      "y": 375,
+      "heading": 3.142,
+      "hp": 520,
+      "maxHp": 520,
+      "factoryVisit": {
+        "factoryId": "b215",
+        "phase": "departure",
+        "slot": 8,
+        "queued": 1278.3999999999328,
+        "factory": {
+          "id": "b215",
+          "x": -1640,
+          "y": 456,
+          "rotation": 0,
+          "halfWidth": 63,
+          "halfDepth": 54,
+          "kind": "factory",
+          "owner": "rai",
+          "completed": true
+        },
+        "waitGeometry": "2:-1640:456:0",
+        "waitingPoint": {
+          "x": -1712,
+          "y": 321
+        },
+        "waitOccupancy": null,
+        "arrived": 1337.6999999998789,
+        "repairStartHp": 400.8599999999994,
+        "retryAt": 1451.1999999997765
+      },
+      "retreat": {
+        "status": "servicing",
+        "resume": {
+          "action": "move",
+          "target": {
+            "x": -732.4774661547,
+            "y": 909.4000602863117
+          },
+          "origin": {
+            "x": -734.5634946727274,
+            "y": 644.9401832926555
+          }
+        },
+        "threat": null,
+        "started": 1278.3999999999328,
+        "home": {
+          "id": "b215",
+          "x": -1640,
+          "y": 456,
+          "radius": 123.47590011563598
+        },
+        "phase": "home",
+        "destination": {
+          "x": -1640,
+          "y": 375
+        },
+        "service": "leaving"
+      }
+    },
+    {
+      "id": "u949",
+      "kind": "bukhanka",
+      "owner": "rai",
+      "x": -1600,
+      "y": 329,
+      "heading": -0.157,
+      "hp": 520,
+      "maxHp": 520,
+      "factoryVisit": {
+        "factoryId": "b217",
+        "phase": "departure",
+        "slot": 4,
+        "queued": 1278.3999999999328,
+        "factory": {
+          "id": "b217",
+          "x": -1600,
+          "y": 248,
+          "rotation": 3.141592653589793,
+          "halfWidth": 63,
+          "halfDepth": 54,
+          "kind": "factory",
+          "owner": "rai",
+          "completed": true
+        },
+        "waitGeometry": "2:-1600:248:3.141592653589793",
+        "waitingPoint": {
+          "x": -1496.5,
+          "y": 351.5
+        },
+        "waitOccupancy": null,
+        "arrived": 1315.8999999998987,
+        "repairStartHp": 190.75,
+        "retryAt": 1350.699999999868
+      },
+      "retreat": {
+        "status": "servicing",
+        "resume": {
+          "action": "move",
+          "target": {
+            "x": -741.532586587226,
+            "y": 837.9717410148039
+          },
+          "origin": {
+            "x": -815.674392712394,
+            "y": 362.8685770743302
+          }
+        },
+        "threat": null,
+        "started": 1278.3999999999328,
+        "home": {
+          "id": "b217",
+          "x": -1600,
+          "y": 248,
+          "radius": 123.47590011563598
+        },
+        "phase": "home",
+        "destination": {
+          "x": -1600,
+          "y": 329
+        },
+        "service": "leaving"
+      }
+    },
+    {
+      "id": "u999",
+      "kind": "bukhanka",
+      "owner": "rai",
+      "x": -1558.972,
+      "y": 382.189,
+      "heading": 0.6,
+      "hp": 194.6,
+      "maxHp": 520,
+      "factoryVisit": {
+        "factoryId": "b217",
+        "phase": "waiting",
+        "slot": 6,
+        "queued": 1278.3999999999328,
+        "factory": {
+          "id": "b217",
+          "x": -1600,
+          "y": 248,
+          "rotation": 3.141592653589793,
+          "halfWidth": 63,
+          "halfDepth": 54,
+          "kind": "factory",
+          "owner": "rai",
+          "completed": true
+        },
+        "waitGeometry": "2:-1600:248:3.141592653589793",
+        "waitingPoint": {
+          "x": -1559.5,
+          "y": 383
+        },
+        "waitOccupancy": null
+      },
+      "retreat": {
+        "status": "servicing",
+        "resume": {
+          "action": "move",
+          "target": {
+            "x": -690.8953335953788,
+            "y": 855.744433816956
+          },
+          "origin": {
+            "x": -703.1748318788199,
+            "y": 515.7110396963792
+          }
+        },
+        "threat": null,
+        "started": 1278.3999999999328,
+        "home": {
+          "id": "b217",
+          "x": -1600,
+          "y": 248,
+          "radius": 123.47590011563598
+        },
+        "phase": "home",
+        "destination": {
+          "x": -1559.5,
+          "y": 383
+        },
+        "service": "waiting-entry"
+      }
+    },
+    {
+      "id": "u1362",
+      "kind": "bukhanka",
+      "owner": "rai",
+      "x": -1567.194,
+      "y": 321.407,
+      "heading": 2.031,
+      "hp": 394,
+      "maxHp": 520,
+      "factoryVisit": {
+        "factoryId": "b215",
+        "phase": "waiting",
+        "slot": 9,
+        "queued": 1278.3999999999328,
+        "factory": {
+          "id": "b215",
+          "x": -1640,
+          "y": 456,
+          "rotation": 0,
+          "halfWidth": 63,
+          "halfDepth": 54,
+          "kind": "factory",
+          "owner": "rai",
+          "completed": true
+        },
+        "waitGeometry": "2:-1640:456:0",
+        "waitingPoint": {
+          "x": -1568,
+          "y": 321
+        },
+        "waitOccupancy": null
+      },
+      "retreat": {
+        "status": "servicing",
+        "resume": {
+          "action": "move",
+          "target": {
+            "x": -687.8769601178701,
+            "y": 879.5538735741252
+          },
+          "origin": {
+            "x": -715.3449987085565,
+            "y": 688.6896266699458
+          }
+        },
+        "threat": null,
+        "started": 1278.3999999999328,
+        "home": {
+          "id": "b215",
+          "x": -1640,
+          "y": 456,
+          "radius": 123.47590011563598
+        },
+        "phase": "home",
+        "destination": {
+          "x": -1568,
+          "y": 321
+        },
+        "service": "waiting-entry"
+      }
+    },
+    {
+      "id": "u1394",
+      "kind": "bukhanka",
+      "owner": "rai",
+      "x": -1742.529,
+      "y": 321.035,
+      "heading": 1.607,
+      "hp": 315.316,
+      "maxHp": 520,
+      "factoryVisit": {
+        "factoryId": "b215",
+        "phase": "waiting",
+        "slot": 10,
+        "queued": 1278.3999999999328,
+        "factory": {
+          "id": "b215",
+          "x": -1640,
+          "y": 456,
+          "rotation": 0,
+          "halfWidth": 63,
+          "halfDepth": 54,
+          "kind": "factory",
+          "owner": "rai",
+          "completed": true
+        },
+        "waitGeometry": "2:-1640:456:0",
+        "waitingPoint": {
+          "x": -1743.5,
+          "y": 321
+        },
+        "waitOccupancy": null
+      },
+      "retreat": {
+        "status": "servicing",
+        "resume": {
+          "action": "move",
+          "target": {
+            "x": -756.2869059118693,
+            "y": 912.4184337638204
+          },
+          "origin": {
+            "x": -738.0824560321142,
+            "y": 735.6623479008309
+          }
+        },
+        "threat": null,
+        "started": 1278.3999999999328,
+        "home": {
+          "id": "b215",
+          "x": -1640,
+          "y": 456,
+          "radius": 123.47590011563598
+        },
+        "phase": "home",
+        "destination": {
+          "x": -1743.5,
+          "y": 321
+        },
+        "service": "waiting-entry"
+      }
+    },
+    {
+      "id": "u1484",
+      "kind": "bukhanka",
+      "owner": "rai",
+      "x": -1535.514,
+      "y": 321.139,
+      "heading": -2.312,
+      "hp": 194,
+      "maxHp": 320,
+      "factoryVisit": {
+        "factoryId": "b215",
+        "phase": "waiting",
+        "slot": 11,
+        "queued": 1287.2999999999247,
+        "factory": {
+          "id": "b215",
+          "x": -1640,
+          "y": 456,
+          "rotation": 0,
+          "halfWidth": 63,
+          "halfDepth": 54,
+          "kind": "factory",
+          "owner": "rai",
+          "completed": true
+        },
+        "waitGeometry": "2:-1640:456:0",
+        "waitingPoint": {
+          "x": -1536.5,
+          "y": 321
+        },
+        "waitOccupancy": null
+      },
+      "retreat": {
+        "status": "servicing",
+        "resume": {
+          "action": "attack",
+          "target": {
+            "x": -706.8,
+            "y": 1128.2,
+            "id": "b122"
+          },
+          "origin": {
+            "x": -739.0447970568353,
+            "y": 995.77943466255
+          }
+        },
+        "threat": {
+          "id": "u2732",
+          "x": -735.9615691470649,
+          "y": 1041.832181456766,
+          "time": 1289.3999999999228,
+          "range": 88
+        },
+        "started": 1287.2999999999247,
+        "home": {
+          "id": "b215",
+          "x": -1640,
+          "y": 456,
+          "radius": 123.47590011563598
+        },
+        "phase": "home",
+        "destination": {
+          "x": -1536.5,
+          "y": 321
+        },
+        "service": "waiting-entry"
+      }
+    }
+  ]
+}

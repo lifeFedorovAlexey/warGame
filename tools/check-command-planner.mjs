@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {fixture} from './check-start-latency-coordinator.mjs';
+import {CommandPlanner} from '../campaign/command-planner.js';
 
 const results=[];
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
@@ -79,7 +80,11 @@ function settle(m,max=2000){
  results.push({case:'50 incremental starts',submitMs,firstMotion,pendingAtFirst,planner:m.commandPlanner.stats});
 }
 {
- const m=fixture(),units=cars(m,500);m.submitOrder(units.map(u=>u.id),'move',{x:0,y:700});
+ const m=fixture(),units=cars(m,500);
+ // Isolate the unit-assignment guard. Prefix/tail staging requires simulation
+ // ticks and has separate actual-movement checks in check-route-continuation.
+ m.commandPlanner=new CommandPlanner(m,{prefixThreshold:Infinity});
+ m.submitOrder(units.map(u=>u.id),'move',{x:0,y:700});
  for(let step=0;step<4000&&(m.state.commandOrders[0].assigned.length<250);step++)m.commandPlanner.advance(0);
  assert(m.commandPlanner.active&&m.state.commandOrders[0].assigned.length>=250,'The large job is halfway through its real unit assignments');
  const lookup=m.entity;let calls=0;m.entity=function(id){calls++;return lookup.call(this,id);};

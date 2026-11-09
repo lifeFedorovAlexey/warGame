@@ -15,7 +15,6 @@ export function connectedSpawnFilter(mission,goal){
    if(!dx&&!dy)continue;
    const x=col+dx,y=row+dy,next=y*size+x;
    if(!nav.allowed(x,y)||seen[next]||dx&&dy&&(!nav.allowed(col+dx,row)||!nav.allowed(col,row+dy)))continue;
-   if(Math.abs(nav.heights[next]-nav.heights[id])/(nav.cell*Math.hypot(dx,dy))>.52)continue;
    if(!nav.lineClear(a,nav.position(x,y),true))continue;
    seen[next]=1;queue[tail++]=next;
   }

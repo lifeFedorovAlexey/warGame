@@ -5,8 +5,32 @@ import {vehicleClearance} from '../campaign/vehicle-collision.js';
 const config=JSON.parse(fs.readFileSync('assets/campaign/alpha/mission01/gameplay.json'));
 const field={extent:4096,half:2048,cellMetres:32,heightAt:()=>0,gradientAt:()=>({x:0,y:0}),gridToWorld:([x,y])=>({x:x*32-2048,y:2048-y*32}),worldToGrid:(x,y)=>[(x+2048)/32,(2048-y)/32]};
 function fixture(){const m=new Mission(config,field);Object.assign(m.state,{units:[],buildings:[],camps:[],bounds:[0,0,127,127],pendingCinematics:[]});m.updateMission=()=>{};m.rebuildNavigation();m.explored.fill(255);return m;}
-function car(m,x,y,heading,goal){const u=m.addUnit('bukhanka','rai',{x,y},{heading,previousHeading:heading});if(goal){u.path=[goal];u.task={type:'move',...goal};}return u;}
-function run(m,units,ticks=600){let minimum=Infinity,firstDamage=null;for(let i=0;i<ticks&&units.some(u=>u.task);i++){m.advance(.1);for(let a=0;a<units.length;a++)for(let b=a+1;b<units.length;b++)if(Math.abs(units[a].x-units[b].x)<32&&Math.abs(units[a].y-units[b].y)<32)minimum=Math.min(minimum,vehicleClearance(units[a],units[b],config.worldScale,field));if(!firstDamage&&units.some(u=>u.hp<u.maxHp))firstDamage={time:m.state.time,units:units.map(u=>({id:u.id,hp:u.hp,x:u.x,y:u.y}))};}return {seconds:m.state.time,minimum:Number.isFinite(minimum)?minimum:null,firstDamage,unfinished:units.filter(u=>u.task).map(u=>({id:u.id,x:u.x,y:u.y,path:u.path,traffic:u.traffic,detour:u.detour,queue:m.trafficCoordinator.queueing(u)}))};}
+const requestedGoals=new WeakMap();
+function car(m,x,y,heading,goal){
+ const u=m.addUnit('bukhanka','rai',{x,y},{heading,previousHeading:heading});
+ if(goal){requestedGoals.set(u,{...goal});assert(m.submitOrder([u.id],'move',goal).ok);}
+ return u;
+}
+function run(m,units,ticks=600){
+ let minimum=Infinity,firstDamage=null,maxWait=0,submitted=0,frames=0;
+ const start=m.state.time,seconds=ticks/10,wall=performance.now(),contacts=[],collision=m.vehicleCollision.bind(m);
+ const active=u=>u.pendingOrder||u.task||u.path.length||u.detour||u.yieldReturn;
+ const missed=u=>{const goal=requestedGoals.get(u);return goal&&Math.hypot(u.x-goal.x,u.y-goal.y)>=2.01;};
+ m.vehicleCollision=(u,s,b)=>{if(b.size)contacts.push({id:u.id,time:m.state.time,blockers:[...b].map(v=>v.id)});return collision(u,s,b);};
+ while((m.pendingTick||m.state.time-start<seconds-1e-6)&&units.some(active)&&frames++<200000&&performance.now()-wall<90000){
+  const delta=Math.min(1/80,Math.max(0,seconds-submitted));submitted+=delta;m.advance(delta,{budgetMs:5});
+  for(const u of units)maxWait=Math.max(maxWait,u.navigation?.waitSeconds??0);
+  if(!m.pendingTick)for(let a=0;a<units.length;a++)for(let b=a+1;b<units.length;b++)
+   minimum=Math.min(minimum,vehicleClearance(units[a],units[b],config.worldScale,field));
+  if(!firstDamage&&units.some(u=>u.hp<u.maxHp))firstDamage={time:m.state.time,units:units.map(u=>({id:u.id,hp:u.hp,x:u.x,y:u.y}))};
+ }
+ m.vehicleCollision=collision;
+ return {seconds:m.state.time,minimum:Number.isFinite(minimum)?minimum:null,firstDamage,contacts,maxWait,
+  // Two-car encounters have no long external queue to justify a 5.7 s stop.
+  waitLimit:units.length<=4?5:30,
+  unfinished:units.filter(u=>active(u)||missed(u)).map(u=>({id:u.id,x:u.x,y:u.y,path:u.path,pendingOrder:u.pendingOrder,
+   traffic:u.traffic,detour:u.detour,yieldReturn:u.yieldReturn,queue:m.trafficCoordinator.queueing(u)}))};
+}
 const result={angles:[],fourWay:[],stopLeader:[]};
 if(process.argv.includes('--timeline')){
  const m=fixture(),units=[],trace=[],size=Number(process.argv.find(x=>x.startsWith('--size='))?.split('=')[1]??5),seconds=Number(process.argv.find(x=>x.startsWith('--seconds='))?.split('=')[1]??13);
@@ -33,12 +57,14 @@ for(const size of [1,5,10]){
 for(const separation of [32,50,70,100]){
  const m=fixture(),a=car(m,0,0,0,{x:0,y:300}),b=car(m,0,-separation,0,{x:0,y:260});
  for(let i=0;i<40;i++)m.advance(.1);
- m.stop([a.id]);result.stopLeader.push({separation,...run(m,[a,b],600)});
+ m.stop([a.id]);requestedGoals.delete(a);result.stopLeader.push({separation,...run(m,[a,b],600)});
 }
 fs.mkdirSync('campaign/reports',{recursive:true});fs.writeFileSync('campaign/reports/navigation-review-counterexamples.json',JSON.stringify(result,null,2));
 console.log(JSON.stringify(result));
 if(process.argv.includes('--verify'))for(const [family,cases] of Object.entries(result))for(const test of cases){
  assert.equal(test.firstDamage,null,`${family} ${test.degrees??test.size??test.separation}: friendly traffic damaged vehicles`);
+ assert.equal(test.contacts.length,0,`${family}: vehicle contact`);
+ assert(test.maxWait<=test.waitLimit,`${family}: ${test.maxWait.toFixed(1)} s stationary exceeds ${test.waitLimit} s`);
  assert.equal(test.unfinished.length,0,`${family} ${test.degrees??test.size??test.separation}: traffic did not finish`);
  assert(test.minimum===null||test.minimum>=0,`${family}: overlap`);
 }

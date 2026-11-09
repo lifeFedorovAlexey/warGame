@@ -16,8 +16,10 @@ const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),round=n=>Number.isFinite(n)?+n
 const done=u=>!u.pendingOrder&&!u.task&&!u.path.length&&!u.detour&&!u.yieldReturn;
 const sources=['campaign/mission.js','campaign/vehicle-motion.js','campaign/traffic-coordinator.js','campaign/traffic-start.js',
  'campaign/turning-headway.js','campaign/maneuver-admission.js','campaign/navigation.js','campaign/command-planner.js','campaign/road-merge.js',
- 'campaign/vehicle-dynamics.js','campaign/arrival-planner.js'];
+ 'campaign/vehicle-dynamics.js','campaign/arrival-planner.js','campaign/traffic-cycle.js','campaign/traffic-shortcut.js',
+ 'campaign/traffic-corridor.js','campaign/navigation-state.js','campaign/route-continuation.js','assets/campaign/alpha/mission01/gameplay.json'];
 const hashes=()=>Object.fromEntries(sources.map(p=>[p,createHash('sha256').update(fs.readFileSync(p)).digest('hex')]));
+const loadedHashes=hashes();
 let field;
 function realMission(){
  if(!field){const raw=createHeightfield(JSON.parse(fs.readFileSync('assets/maps/alpha/heightfield.json')));shapeMesaRims(raw);
@@ -48,8 +50,8 @@ export function createUserCase(name){
  return {m,units,requested,commands,initial,centre:centre?.id,group:name.startsWith('heap'),real};
 }
 export function runUserCase(name){
- const before=hashes(),c=createUserCase(name),{m,units,initial}=c,start=new Map(units.map(u=>[u.id,{x:u.x,y:u.y,heading:u.heading}]));
- const goals=new Map(),first=new Map(),idle=new Map(),longest=new Map(),travel=new Map(),turn=new Map();
+ const before=loadedHashes,c=createUserCase(name),{m,units,initial}=c,start=new Map(units.map(u=>[u.id,{x:u.x,y:u.y,heading:u.heading}]));
+ const goals=new Map(),first=new Map(),idle=new Map(),longest=new Map(),longestSim=new Map(),travel=new Map(),turn=new Map();
  for(const u of units){first.set(u.id,null);idle.set(u.id,0);longest.set(u.id,0);travel.set(u.id,0);turn.set(u.id,0);
   if(!u.pendingOrder&&!c.requested.has(u.id)&&!c.group)goals.set(u.id,{...start.get(u.id)});}
  const contacts=[],terrainBlocks=[],hit=m.vehicleCollision.bind(m);m.vehicleCollision=(u,speed,blockers)=>{
@@ -59,15 +61,22 @@ export function runUserCase(name){
  let gap=Infinity,lastTick=-1;const history=[],passSide=new Map();
  for(let i=0;i<units.length;i++)for(let j=0;j<i;j++)gap=Math.min(gap,vehicleClearance(units[i],units[j],config.worldScale,m.field));
  assert(gap>0,'The fixture must start with separate physical bodies');
- for(let frame=0;frame<90*80;frame++){
+ const wall=performance.now();let frames=0,maxAdvanceMs=0,submittedSeconds=0;
+ // A budgeted frame may only resume a suspended tick. Count actual game
+ // time, and impose a separate wall limit instead of calling 7200 frames
+ // "90 seconds" even when the simulation has barely advanced.
+ while((m.pendingTick||m.state.time<90-1e-6)&&performance.now()-wall<90000&&frames<200000){
   const poses=new Map(units.map(u=>[u.id,{x:u.x,y:u.y,heading:u.heading}]));
-  m.advance(1/80,{budgetMs:config.simulationCpuBudgetMs});m.effects=[];
+  const delta=Math.min(1/80,Math.max(0,90-submittedSeconds));submittedSeconds+=delta;
+  const previousTime=m.state.time,frameStarted=performance.now();m.advance(delta,{budgetMs:config.simulationCpuBudgetMs});
+  maxAdvanceMs=Math.max(maxAdvanceMs,performance.now()-frameStarted);frames++;m.effects=[];
   for(const u of units){
    if(!goals.has(u.id)&&!u.pendingOrder&&u.routeOrder?.destination)goals.set(u.id,{...u.routeOrder.destination});
    const moved=distance(u,poses.get(u.id));travel.set(u.id,travel.get(u.id)+moved);
    turn.set(u.id,turn.get(u.id)+Math.abs(Math.atan2(Math.sin(u.heading-poses.get(u.id).heading),Math.cos(u.heading-poses.get(u.id).heading))));
-   if(first.get(u.id)===null&&distance(u,start.get(u.id))>=.5)first.set(u.id,(frame+1)/80);
-   const waiting=!done(u)&&moved<1e-6?idle.get(u.id)+1/80:0;idle.set(u.id,waiting);longest.set(u.id,Math.max(longest.get(u.id),waiting));
+   if(first.get(u.id)===null&&distance(u,start.get(u.id))>=.5)first.set(u.id,m.state.time);
+   const waiting=!done(u)&&moved<1e-6?idle.get(u.id)+m.state.time-previousTime:0;idle.set(u.id,waiting);longest.set(u.id,Math.max(longest.get(u.id),waiting));
+   longestSim.set(u.id,Math.max(longestSim.get(u.id)??0,u.navigation?.waitSeconds??0));
   }
   for(let i=0;i<units.length;i++)for(let j=0;j<i;j++)gap=Math.min(gap,vehicleClearance(units[i],units[j],config.worldScale,m.field));
   if(name.startsWith('opposing'))for(const u of units){
@@ -79,19 +88,26 @@ export function runUserCase(name){
   if(units.every(u=>done(u)&&goals.has(u.id)&&distance(u,goals.get(u.id))<2.5))break;
  }
  const failures=[],rows=units.map(u=>({id:u.id,centre:u.id===c.centre,firstMotion:first.get(u.id),longestIdle:round(longest.get(u.id)),
+  longestSimIdle:round(longestSim.get(u.id)??0),
   travelled:round(travel.get(u.id)),turnRadians:round(turn.get(u.id)),goal:goals.get(u.id),goalError:goals.has(u.id)?round(distance(u,goals.get(u.id))):null,
   requested:c.requested.get(u.id),requestError:c.requested.has(u.id)?round(distance(u,c.requested.get(u.id))):null,
   done:done(u),hp:u.hp,passing:passSide.get(u.id),navigation:u.navigation}));
  const arrived=rows.filter(r=>r.done&&r.goalError!==null&&r.goalError<2.5).length;
  if(arrived!==units.length)failures.push(`${arrived}/${units.length} reached the original accepted destination (uncommanded neighbours must return home)`);
+ if(m.state.time>90+1e-6)failures.push('Simulation exceeded its permitted time horizon');
+ if(rows.some(r=>r.longestSimIdle>5))failures.push('An active order remained stationary for more than 5 simulation seconds');
+ if(performance.now()-wall>=90000)failures.push('Simulation exceeded 90 seconds of CPU/wall execution');
+ if(maxAdvanceMs>250)failures.push(`Budgeted simulation blocked a frame for ${maxAdvanceMs.toFixed(1)} ms`);
  if(rows.some(r=>r.requestError!==null&&r.requestError>=2.5))failures.push('An individual requested destination was not reached');
  if(contacts.length)failures.push(`${contacts.length} actual vehicle contacts`);if(gap<0)failures.push('Hull overlap');
  if(units.some(u=>u.hp!==u.maxHp))failures.push('Unexpected vehicle damage');
  if(name.startsWith('opposing')&&rows.some(r=>!r.passing||r.passing.along>5||r.passing.right<.5))failures.push('Opposing cars did not physically pass on their own right');
  if(terrainBlocks.length)failures.push(`${terrainBlocks.length} blocked terrain/structure steps`);
  if(JSON.stringify(before)!==JSON.stringify(hashes()))failures.push('Sources changed; repeat before acceptance');
- const result={name,passed:!failures.length,seconds:round(m.state.time),arrived,total:units.length,gap:round(gap),failures,contacts,terrainBlocks,units:rows,commands:c.commands,sourceHashes:before};
- fs.writeFileSync(`tools/fixtures/user-navigation-${name}.json`,JSON.stringify({initial,history,final:JSON.parse(m.save()),result},null,2));
+ const result={name,passed:!failures.length,seconds:round(m.state.time),frames,wallSeconds:(performance.now()-wall)/1000,maxAdvanceMs,
+  arrived,total:units.length,gap:round(gap),failures,contacts,terrainBlocks,units:rows,commands:c.commands,sourceHashes:before};
+ fs.mkdirSync('campaign/reports/navigation-user-cases',{recursive:true});
+ fs.writeFileSync(`campaign/reports/navigation-user-cases/${name}.json`,JSON.stringify({initial,history,final:JSON.parse(m.save()),result},null,2));
  return result;
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){

@@ -66,7 +66,10 @@ for(const count of counts){
  const snapshot={
   completedPlanning:!m.state.commandOrders.some(r=>['queued','planning'].includes(r.status)),assigned:units.filter(u=>u.hp>0&&!u.pendingOrder&&u.routeOrder).length,
   pending:units.filter(u=>u.hp>0&&u.pendingOrder?.status==='planning').length,blocked:units.filter(u=>u.hp>0&&u.pendingOrder?.status==='blocked').length,
-  destroyed:units.filter(u=>u.hp<=0).length};
+  destroyed:units.filter(u=>u.hp<=0).length,
+  continuations:units.filter(u=>u.hp>0&&u.routeContinuation).length,
+  continuationFailures:units.filter(u=>u.hp>0&&u.routeContinuation?.failure).length,
+  prefixReleased:m.state.commandOrders.find(r=>r.revision===response.revision)?.prefixReleased??0};
  const result={count,fixtureMode,fixtureFile,fixtureInput,connectivity:connectivity?.metadata??null,submitMs,response,firstApplied,firstMotion,
   firstMotionThresholdWorld:.5,firstDisplacement,firstPhysicalSpeed,pendingAtFirstMotion,
   wallMs:performance.now()-started,frameCount:frame+1,simulatedSeconds:m.state.time,
@@ -76,7 +79,7 @@ for(const count of counts){
    exactCostCacheEntries:t.segmentCosts.size,exactCostCacheHits:t.costCacheHits,
    clearanceCacheEntries:t.segmentClearance.size,clearanceCacheHits:t.clearanceCacheHits,mapOverheadBytes:null})),frameCpuMs:distribution(frames),plannerCpuMs:distribution(planning),
   heapDeltaBytes:process.memoryUsage().heapUsed-beforeHeap,contacts,terrainStops,damage:units.reduce((sum,u,i)=>sum+Math.max(0,starts[i].hp-u.hp),0),profile,
-  ...(process.argv.includes('--diagnose')?{searches,activeUnit:planner.active?.runtime.currentUnit,active:units.filter(u=>u.pendingOrder).slice(0,5).map(u=>({id:u.id,x:u.x,y:u.y,pending:structuredClone(u.pendingOrder)}))}:{} )};
+  ...(process.argv.includes('--diagnose')?{searches,activeUnit:planner.active?.runtime.currentUnit,active:units.filter(u=>u.pendingOrder||u.routeContinuation).slice(0,5).map(u=>({id:u.id,x:u.x,y:u.y,pending:structuredClone(u.pendingOrder),continuation:structuredClone(u.routeContinuation),path:u.path,task:u.task,navigation:u.navigation}))}:{} )};
  const before=computes,repeatedAt=performance.now(),repeat=m.submitOrder(ids,'move',goal),repeatMs=performance.now()-repeatedAt;
  Object.assign(result,{repeatMs,repeat,repeatedSyncSearches:computes-before});
  report.results.push(result);fs.writeFileSync(outputBase+'.json',JSON.stringify(report,null,2));
