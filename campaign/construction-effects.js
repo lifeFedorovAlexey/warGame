@@ -103,19 +103,29 @@ export function createConstructionEffects(T,scene,scale) {
     beamPosition.setXYZ(vertex+4,to.x+ex,to.y+ey,to.z+ez);
     beamPosition.setXYZ(vertex+5,to.x-ex,to.y-ey,to.z-ez);
   }
-  function update(beams,time){
-    count=Math.min(beams.length,limit);
-    beam.material.uniforms.beamTime.value=time;
-    activeTargets.clear();
-    let point=0;
+  // Vehicle links are independent of deduplicated dust and surface scanning.
+  // An early return in a target effect must never hide a working builder.
+  function projectLinks(beams){
     for(let i=0;i<count;i++){
-      const {from,to,mode,targetId}=beams[i],dx=to.x-from.x,dy=to.y-from.y,dz=to.z-from.z;
+      const {from,to,mode}=beams[i],dx=to.x-from.x,dy=to.y-from.y,dz=to.z-from.z;
       const span=Math.max(.01,Math.hypot(dx,dy)),length=Math.hypot(span,dz);
       const rx=-dy/span,ry=dx/span,width=(mode==='build'?.34:.19)*scale;
       const vx=-ry*dz/length,vy=rx*dz/length,vz=span/length;
       const vertex=i*verticesPerBeam,nearWidth=width*.59;
       ribbon(vertex,from,to,rx,ry,0,nearWidth,width);
       ribbon(vertex+6,from,to,vx,vy,vz,nearWidth,width);
+    }
+    beamGeometry.setDrawRange(0,count*verticesPerBeam);
+    if(count)beamPosition.needsUpdate=true;
+  }
+  function update(beams,time){
+    count=Math.min(beams.length,limit);
+    beam.material.uniforms.beamTime.value=time;
+    projectLinks(beams);
+    activeTargets.clear();
+    let point=0;
+    for(let i=0;i<count;i++){
+      const {to,mode,targetId}=beams[i],width=(mode==='build'?.34:.19)*scale;
       if(mode==='build'){
         if(!activeTargets.has(targetId))activeTargets.set(targetId,[]);
         const points=activeTargets.get(targetId);
@@ -126,8 +136,8 @@ export function createConstructionEffects(T,scene,scale) {
         grainPosition.setXYZ(point++,to.x+Math.sin(t)*r,to.y+Math.cos(t)*r,to.z+Math.sin(Math.PI*phase)*scale*.48);
       }
     }
-    beamGeometry.setDrawRange(0,count*verticesPerBeam);grainGeometry.setDrawRange(0,point);
-    if(count){beamPosition.needsUpdate=true;grainPosition.needsUpdate=true;}
+    grainGeometry.setDrawRange(0,point);
+    if(point)grainPosition.needsUpdate=true;
   }
   return{building,release,update,get active(){return count;}};
 }

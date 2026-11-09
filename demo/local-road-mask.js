@@ -6,7 +6,9 @@ export function createLocalRoadMask(T){
   let pixels,size=256,area;
   function setRoads(paths){
     const segments=[];
-    for(const road of paths)for(let i=1;i<road.points.length;i++)segments.push({a:road.points[i-1],b:road.points[i],radius:road.width/2});
+    for(const road of paths)for(let i=1;i<road.points.length;i++){
+      const a=road.points[i-1],b=road.points[i];segments.push({a,b,ra:(a.width??road.width)/2,rb:(b.width??road.width)/2});
+    }
     if(!segments.length){enabled.value=0;return;}
     const padding=32,minX=Math.min(...segments.flatMap(s=>[s.a.x,s.b.x]))-padding,minY=Math.min(...segments.flatMap(s=>[s.a.y,s.b.y]))-padding;
     const maxX=Math.max(...segments.flatMap(s=>[s.a.x,s.b.x]))+padding,maxY=Math.max(...segments.flatMap(s=>[s.a.y,s.b.y]))+padding;
@@ -18,14 +20,14 @@ export function createLocalRoadMask(T){
       pixels[(iy*size+ix)*4+1]=Math.round(Math.max(0,Math.min(1,distance/18))*255);
     }
     const clamp=(v)=>Math.max(0,Math.min(size-1,v));
-    for(const {a,b,radius} of segments){
-      const margin=radius+12,dx=b.x-a.x,dy=b.y-a.y,length2=dx*dx+dy*dy;
+    for(const {a,b,ra,rb} of segments){
+      const margin=Math.max(ra,rb)+12,dx=b.x-a.x,dy=b.y-a.y,length2=dx*dx+dy*dy;
       const x0=clamp(Math.floor((Math.min(a.x,b.x)-margin-minX)/area.w*size)),x1=clamp(Math.ceil((Math.max(a.x,b.x)+margin-minX)/area.w*size));
       const y0=clamp(Math.floor((Math.min(a.y,b.y)-margin-minY)/area.h*size)),y1=clamp(Math.ceil((Math.max(a.y,b.y)+margin-minY)/area.h*size));
       for(let iy=y0;iy<=y1;iy++)for(let ix=x0;ix<=x1;ix++){
         const x=minX+(ix+.5)/size*area.w,y=minY+(iy+.5)/size*area.h;
         const t=length2?Math.max(0,Math.min(1,((x-a.x)*dx+(y-a.y)*dy)/length2)):0;
-        const inward=radius-Math.hypot(x-a.x-t*dx,y-a.y-t*dy),value=Math.round(Math.max(0,Math.min(1,inward/24+.5))*255),index=(iy*size+ix)*4;
+        const inward=ra+(rb-ra)*t-Math.hypot(x-a.x-t*dx,y-a.y-t*dy),value=Math.round(Math.max(0,Math.min(1,inward/24+.5))*255),index=(iy*size+ix)*4;
         pixels[index]=Math.max(pixels[index],value);
       }
     }

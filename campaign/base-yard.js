@@ -48,9 +48,10 @@ export function createBaseYard(T,field,config,addFog){
     for(const side of [-1,1])for(let y=start.y+25;y<end.y;y+=6)tile(end.x+side*(road.width/2+5),y,6.4,5.92,.94);
   }
   const markings=[],markColors=[],markUvs=[];
-  function marking(x,y,w,d){
+  function marking(x,y,w,d,angle=0){
+    const c=Math.cos(angle),s=Math.sin(angle);
     for(const [dx,dy] of [[-w/2,-d/2],[w/2,-d/2],[w/2,d/2],[-w/2,-d/2],[w/2,d/2],[-w/2,d/2]]){
-      const px=x+dx,py=y+dy,tint=.86+random(px,py)*.12;
+      const px=x+dx*c-dy*s,py=y+dx*s+dy*c,tint=.86+random(px,py)*.12;
       markings.push(px,py,field.heightAt(px,py)+.19);markUvs.push(0,0);markColors.push(tint,tint,tint);
     }
   }
@@ -71,6 +72,18 @@ export function createBaseYard(T,field,config,addFog){
     if(!junction&&!nearCrossing(x))marking(x,start.y+side*12.6,5.96,.42);
   }
   for(const crossing of crossings)crosswalk(crossing,start.y,street.width-4);
+  // Continue the same lane markings along the tapered road, not the old path.
+  let travelled=east-west-12;
+  for(let i=2;i<street.points.length;i++){
+    const a=street.points[i-1],b=street.points[i],dx=b.x-a.x,dy=b.y-a.y,length=Math.hypot(dx,dy),angle=Math.atan2(dy,dx),steps=Math.ceil(length/1.5);
+    for(let j=0;j<steps;j++){
+      const t=(j+.5)/steps,x=a.x+dx*t,y=a.y+dy*t;if(x>street.markUntilX)continue;
+      const width=(a.width??street.width)+((b.width??street.width)-(a.width??street.width))*t;
+      if((travelled+length*t)%14<7.5)marking(x,y,length/steps+.015,.5,angle);
+      const edge=width/2-2-(width-24)/6*.4;
+      for(const side of [-1,1])marking(x-side*Math.sin(angle)*edge,y+side*Math.cos(angle)*edge,length/steps+.015,.42,angle);
+    }travelled+=length;
+  }
   for(const road of roads.slice(1).filter(r=>r.points[1].y>start.y)){
     const x=road.points[0].x;
     // Zebra crossings continue the pavement across the entrances.
