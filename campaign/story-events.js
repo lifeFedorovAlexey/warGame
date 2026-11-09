@@ -88,7 +88,7 @@ export function storyRules(director,f) {
     r08:p(1,f.ready('factory')&&done('r06')),
     r09:p(1,!!d.facts.firstVan&&done('r08')),
     r10:p(2,f.ammoStudied&&after('r33',2),true,2),
-    r11:p(2,!!f.building('lab')),
+    r11:p(2,f.ready('factory')&&done('r08')),
     r13:p(2,f.ready('lab')&&heard('r11')),
     r14:p(0,!!f.contact,f.contactAlive),
     r16:p(0,heard('r14')&&!!f.contact,!f.contact?.fired&&f.contactAlive&&!f.battle),

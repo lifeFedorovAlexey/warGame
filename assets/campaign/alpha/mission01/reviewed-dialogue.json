@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "draftRevision": 70,
-  "draftSha256": "a9d73029fbfb23ee877ded3cae633849b7aefe3ee609d8fb05888f4026e727dd",
-  "throughScene": "r10",
-  "appliedAt": "2026-11-09T19:03:59.787757+00:00",
+  "draftRevision": 86,
+  "draftSha256": "6f93344e51b1bf47e8fd28b83fb1088aec68275fc77d2e0742fe872bc9b70b90",
+  "throughScene": "r13",
+  "appliedAt": "2026-11-09T20:51:24.711841+00:00",
   "scenes": [
     {
       "id": "p01",
@@ -239,9 +239,99 @@
       "triggerDescription": "исследованы боеприпасы из второго артефакта (mg-ammo-1), завершён доклад 33–34, прошло 2 секунды спокойного эфира. Выпуск первой машины и выезд с базы этот монолог не запускают.",
       "notes": "",
       "enabled": true
+    },
+    {
+      "id": "r11",
+      "title": "Научное обеспечение",
+      "cues": [
+        "m01-s05-l002",
+        "m01-s05-l003",
+        "m01-s05-l004",
+        "m01-s05-l005"
+      ],
+      "sourceLine": 231,
+      "sections": [
+        "r11",
+        "r12"
+      ],
+      "triggerDescription": "Завод готов; разговор о запуске производства завершён. Приказ строить НИИ звучит до начала его строительства.",
+      "notes": "",
+      "enabled": true
+    },
+    {
+      "id": "r13",
+      "title": "Эффективность командования",
+      "cues": [
+        "m01-s05-l006",
+        "m01-s05-l007",
+        "m01-s05-l008"
+      ],
+      "sourceLine": 257,
+      "sections": [
+        "r13"
+      ],
+      "triggerDescription": "НИИ построен; спокойный эфир. Сцены 11–12 завершены.",
+      "notes": "",
+      "enabled": true
     }
   ],
   "dialogue": [
+    {
+      "id": "m01-s05-l002",
+      "speaker": "general",
+      "text": "Завод есть. Теперь НИИ стройте.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s05-l003",
+      "speaker": "warrant",
+      "text": "А это, зачем ... а главное на...ху-... ...ой - куда, нам эти дармоеды?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s05-l004",
+      "speaker": "general",
+      "text": "Учёные будут изучать находки. пОЛУЧАТ новые чертежи — смоГУТ другую технику собирать.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s05-l005",
+      "speaker": "warrant",
+      "text": "Пусть сначала детали из бардачка посмотрят. Может, всё-таки надо было их куда-то поставить.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s05-l006",
+      "speaker": "general",
+      "text": "Всё непонятное, что найдёте, отправляйте в ИНСТИТУТ. Пусть учёные разбираются.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s05-l007",
+      "speaker": "warrant",
+      "text": "Ваши приказы тоже?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s05-l008",
+      "speaker": "general",
+      "text": "Приказы - выполнять! Железки. - им везите!",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
     {
       "id": "m01-s02-l003",
       "speaker": "commander",
@@ -484,6 +574,104 @@
     }
   ],
   "clips": {
+    "m01-s05-l002": {
+      "file": "recordings/reviewed/m01-s05-l002-cfeed48a6de6.mp3",
+      "duration": 2.925708333333333,
+      "leadingSilence": 0.04,
+      "trailingSilence": 0.3557083333333333,
+      "speaker": "general",
+      "sha256": "cfeed48a6de68d330a8c44a5b02718d8d53fdc638d90aaea3545ca74d5fb14ac",
+      "bytes": 63748,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T20_09_45_Artem Lebedev - Captivating and Engaging_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 86,
+      "transcriptSource": "owner-workshop",
+      "text": "Завод есть. Теперь НИИ стройте."
+    },
+    "m01-s05-l003": {
+      "file": "recordings/reviewed/m01-s05-l003-6dda1675f252.mp3",
+      "duration": 5.720833333333333,
+      "leadingSilence": 0.23,
+      "trailingSilence": 0.3608333333333329,
+      "speaker": "warrant",
+      "sha256": "6dda1675f25270d19501ee75642c9177c0275a87dccf03b4dddcc0d9f065aa33",
+      "bytes": 108470,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T20_14_28_Egor Gadzhiyev - Clear and Commanding_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 86,
+      "transcriptSource": "owner-workshop",
+      "text": "А это, зачем ... а главное на...ху-... ...ой - куда, нам эти дармоеды?"
+    },
+    "m01-s05-l004": {
+      "file": "recordings/reviewed/m01-s05-l004-f72d2f650537.mp3",
+      "duration": 6.034291666666666,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.4042916666666665,
+      "speaker": "general",
+      "sha256": "f72d2f65053746f1041516a2da3367be076ddb0397a560f85268692982f23079",
+      "bytes": 113485,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T20_17_12_Artem Lebedev - Captivating and Engaging_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 86,
+      "transcriptSource": "owner-workshop",
+      "text": "Учёные будут изучать находки. пОЛУЧАТ новые чертежи — смоГУТ другую технику собирать."
+    },
+    "m01-s05-l005": {
+      "file": "recordings/reviewed/m01-s05-l005-4adf21ab7f7b.mp3",
+      "duration": 5.250625,
+      "leadingSilence": 0.08,
+      "trailingSilence": 0.2006250000000005,
+      "speaker": "warrant",
+      "sha256": "4adf21ab7f7b2841f7c5dd05020cf8d74f23667661ddf8d90bf8b7165acb3c98",
+      "bytes": 100946,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T20_18_04_Egor Gadzhiyev - Clear and Commanding_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 86,
+      "transcriptSource": "owner-workshop",
+      "text": "Пусть сначала детали из бардачка посмотрят. Может, всё-таки надо было их куда-то поставить."
+    },
+    "m01-s05-l006": {
+      "file": "recordings/reviewed/m01-s05-l006-dcbcf9a5112d.mp3",
+      "duration": 5.06775,
+      "leadingSilence": 0.11,
+      "trailingSilence": 0.22775000000000034,
+      "speaker": "general",
+      "sha256": "dcbcf9a5112d18f3ffefc78a6bad5c139a28b97868f6f794904eb19dcad12af8",
+      "bytes": 98021,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T20_25_36_Artem Lebedev - Captivating and Engaging_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 86,
+      "transcriptSource": "owner-workshop",
+      "text": "Всё непонятное, что найдёте, отправляйте в ИНСТИТУТ. Пусть учёные разбираются."
+    },
+    "m01-s05-l007": {
+      "file": "recordings/reviewed/m01-s05-l007-91a3a65e5c13.mp3",
+      "duration": 1.8808333333333334,
+      "leadingSilence": 0.35000000000000003,
+      "trailingSilence": 0.36083333333333334,
+      "speaker": "warrant",
+      "sha256": "91a3a65e5c13588a52d3dea71166bf0608977514f1c3b6692c58a76554770743",
+      "bytes": 47030,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T20_26_14_Egor Gadzhiyev - Clear and Commanding_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 86,
+      "transcriptSource": "owner-workshop",
+      "text": "Ваши приказы тоже?"
+    },
+    "m01-s05-l008": {
+      "file": "recordings/reviewed/m01-s05-l008-688286cbc05a.mp3",
+      "duration": 3.970625,
+      "leadingSilence": 0.12,
+      "trailingSilence": 0.20062500000000005,
+      "speaker": "general",
+      "sha256": "688286cbc05a42807e28bb5331cbbad3276e8d0c75334e858bfd8addc5d1c861",
+      "bytes": 80466,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T20_27_13_Artem Lebedev - Captivating and Engaging_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 86,
+      "transcriptSource": "owner-workshop",
+      "text": "Приказы - выполнять! Железки. - им везите!"
+    },
     "m01-s02-l003": {
       "file": "recordings/commander/m01-s02-l003.mp3",
       "duration": 3.6310416666666665,

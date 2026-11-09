@@ -7,6 +7,7 @@ const {chromium}=require('C:/Users/Алексей/.cache/codex-runtimes/codex-pr
 const base='assets/campaign/alpha/mission01/',read=file=>JSON.parse(fs.readFileSync(base+file));
 const {story}=applyStoryEdits(read('story-v2.json'),read('audio-v2.json'),read('reviewed-dialogue.json'));
 const stageThreeOnly=process.argv.includes('--through-stage-three');
+const stageFourOnly=process.argv.includes('--stage-four');
 const folder='campaign/previews/radio-flow-review';fs.mkdirSync(folder,{recursive:true});
 const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true,args:['--enable-unsafe-swiftshader','--use-angle=swiftshader']});
 try{
@@ -49,7 +50,7 @@ try{
    if(check)await check(i);
    if(snap&&i===scene.cues.length-1)await screenshot(snap);
    if(natural){
-    await page.waitForFunction(id=>campaign.radio.testTransmissions.some(line=>line.id===id&&line.finished),cueId);
+     await page.waitForFunction(id=>campaign.radio.testTransmissions.findLast(line=>line.id===id)?.finished,cueId);
     await page.evaluate(id=>{
      const r=campaign.radio,line=r.testTransmissions.findLast(line=>line.id===id);
      line.inspectedUntil=performance.now();r.testHeldCue=null;r.until=line.releaseAt??Infinity;
@@ -65,6 +66,20 @@ try{
   mission.updateEconomy(0);mission.updateFog();campaign.advance(0);return e.id;
  },{kind,dx,dy});
  const unlocked=kind=>page.evaluate(k=>campaign.mission.constructionUnlocked(k),kind);
+ if(stageFourOnly){
+  // Start a real saved mission at the factory milestone for focused voice QA.
+  await page.evaluate(()=>{
+   const m=campaign.mission,p=m.field.gridToWorld(m.config.startGrid);
+   for(const [kind,dx,dy] of [['generator',140,100],['factory',-170,120]])m.addStructure(kind,'rai',{x:p.x+dx,y:p.y+dy},{completed:true,progress:1});
+   m.addStructure('derrick','rai',m.field.gridToWorld(m.config.oilFields[0]),{completed:true,progress:1});
+   m.state.storyConstruction={enabled:true,unlocked:['generator','derrick','factory','lab'],research:false,requiredBunkers:2};
+   const d=campaign.radio.director.bind(m);d.includeOpening=false;d.facts.firstVan=true;m.state.statistics.produced=1;
+   for(const id of ['p01','p02','p03','p04','r01','r01a','r01b','r02','r03','r04','r05','r06','r08','r09'])d.scenes[id]={status:'done',cursor:0,endedAt:0};
+   m.updateEconomy(0);m.updateFog();localStorage.setItem('warGame.alpha.mission01.v1',m.save());
+   document.getElementById('resume-save').disabled=false;
+  });
+  await page.locator('#resume-save').click();await waitCue('m01-s05-l002');await page.locator('#pause').click();
+ }else{
  assert.equal(await page.locator('#prologue').count(),0);
  await screenshot('start-desktop');await screenshot('start-narrow',true);await page.setViewportSize({width:1440,height:900});
  await page.locator('#begin').click();
@@ -130,18 +145,29 @@ try{
  assert.equal(await unlocked('lab'),true);
  await page.evaluate(()=>{const m=campaign.mission;m.state.statistics.produced++;campaign.radio.director.note({type:'unit-produced',kind:'bukhanka'},m);campaign.advance(0);});
  await playScene('r09',{natural:true,snap:'first-van-desktop'});
+ }
  await page.evaluate(()=>{const d=campaign.radio.director.data;d.clock+=13000;campaign.advance(0);});
  assert.notEqual(await page.evaluate(()=>campaign.radio.entry?.storyScene),'r10','First van production does not announce an upgrade');
+ const stageCue=await page.evaluate(()=>campaign.radio.entry?.id);
+ assert.equal(stageCue,'m01-s05-l002','The next order is the NII, while no laboratory exists');
  const stageSave=await page.evaluate(()=>campaign.mission.save());
  await page.evaluate(saved=>{campaign.radio.reset();campaign.mission.load(saved);campaign.advance(0);},stageSave);
  assert.equal(await page.evaluate(()=>campaign.mission.state.radioStory.scenes.r09.status),'done');
- assert.equal(await page.evaluate(()=>campaign.radio.entry),null,'Loading keeps completed factory dialogue finished');
+ assert.equal(await page.evaluate(()=>campaign.radio.entry?.id),stageCue,'Loading resumes the NII order without replaying completed factory dialogue');
  if(!stageThreeOnly){
+ await waitCue('m01-s05-l002');
+ assert.equal(await page.evaluate(()=>campaign.mission.state.buildings.some(b=>b.kind==='lab'&&b.hp>0)),false,'The NII construction order starts before a laboratory exists');
  const lab=await addBuilding('lab',40,160);
  const raidDuringSpeech=await page.evaluate(()=>{const m=campaign.mission;m.updateMission();return{started:m.state.flags.raidStarted,scene:campaign.radio.entry.storyScene};});
  assert.deepEqual(raidDuringSpeech,{started:true,scene:'r11'},'The raid starts from the base state while the NII exchange is still running');
- await playScene('r11');await playScene('r13',{snap:'original-science-dialogue'});
+ await playScene('r11',{natural:true,check:async i=>{if(i===1){await screenshot('nii-order-desktop');await screenshot('nii-order-narrow',true);}}});
+ await playScene('r13',{natural:true,check:async i=>{if(i===2){await screenshot('nii-ready-desktop');await screenshot('nii-ready-narrow',true);}}});
+ const science=await page.evaluate(ids=>ids.map(id=>campaign.radio.testTransmissions.findLast(line=>line.id===id)),story.scenes.filter(s=>['r11','r13'].includes(s.id)).flatMap(s=>s.cues));
+ for(const line of science)assert(line.finished-line.presented>=(line.duration-.12)*1000,JSON.stringify(line));
+ assert(science[4].presented-Math.max(science[3].finished,science[3].inspectedUntil)>=1950,'The NII scenes keep two seconds of silence');
+ fs.writeFileSync(folder+'/nii-timeline.json',JSON.stringify(science,null,2));
  assert.equal(await page.evaluate(()=>campaign.mission.researchUnlocked()),true);
+ if(!stageFourOnly){
  const result=await page.evaluate(id=>{const m=campaign.mission;m.state.artifactKeys.push('flamethrower');m.state.energy=2400;const result=m.research(id,'flamethrower');m.entity(id).research.progress=.99999;m.updateEconomy(.2);campaign.advance(0);return{ok:result.ok,unlocked:m.state.research.flamethrower};},lab);
  assert.deepEqual(result,{ok:true,unlocked:true});await playScene('r30-alt',{snap:'research-desktop'});
  const ammo=await page.evaluate(id=>{const m=campaign.mission;m.state.artifactKeys.push('mg-ammo-1');m.state.energy=2400;const result=m.research(id,'mg-ammo-1');m.entity(id).research.progress=.99999;m.updateEconomy(.2);campaign.advance(0);return{ok:result.ok,unlocked:m.state.research['mg-ammo-1']};},lab);
@@ -168,6 +194,7 @@ try{
  await page.waitForFunction(()=>campaign.unitVoice.cueId==='warrant:stop');
  await page.locator('#stop').click();assert.equal(await page.evaluate(()=>campaign.unitVoice.playing),false);
  }
+ }
  // Decode every record and render every portrait, including optional later scenes.
  const verification=await page.evaluate(async()=>{
   const {loadMissionStory}=await import('./story-director.js'),script=await loadMissionStory(),context=new AudioContext(),clips=[];
@@ -182,5 +209,5 @@ try{
  assert(verification.portraits.every(([,ok])=>ok));assert.equal(verification.portraits.length,12);
  assert(verification.layout.left>=0&&verification.layout.right<=verification.layout.width);assert.equal(verification.layout.border,'0px');assert.equal(verification.layout.background,'rgba(0, 0, 0, 0)');
  assert.deepEqual(errors,[]);fs.writeFileSync(folder+'/verification.json',JSON.stringify({...verification,errors},null,2));
- console.log('PASS: radio v3 prologue, original recordings in game, '+(stageThreeOnly?'stage III progression':'full base progression and uninterrupted combat dialogue')+', scene gaps, saves, '+verification.clips.length+' decoded clips, desktop and narrow screenshots');
+ console.log('PASS: '+(stageFourOnly?'stage IV recordings from a factory save and NII progression':stageThreeOnly?'radio v3 prologue and stage III progression':'full base progression and uninterrupted combat dialogue')+', scene gaps, saves, '+verification.clips.length+' decoded clips, desktop and narrow screenshots');
 }finally{await browser.close();}

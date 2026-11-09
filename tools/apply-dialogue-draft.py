@@ -43,15 +43,22 @@ def measured(path):
             'trailingSilence':max(0,duration-(audible[-1]+1)*.01)}
 
 
-def apply(through_scene, expected_revision=None):
+def apply(through_scene, expected_revision=None, from_scene=None, report_name='applied-stage-iii.json'):
+    if not re.fullmatch(r'[a-zA-Z0-9_-]+\.json', report_name):
+        raise ValueError('Report must be a JSON filename')
     raw = DRAFT.read_bytes()
     snapshot = json.loads(raw)
     if expected_revision is not None and snapshot['revision'] != expected_revision:
         raise ValueError('Draft revision changed; inspect the new edits before applying')
     document = snapshot['document']
     selected = []
+    in_scope = from_scene is None
     for scene in document['scenes']:
         if scene['kind'] != 'sequence':
+            continue
+        if scene['id'] == from_scene:
+            in_scope = True
+        if not in_scope:
             continue
         selected.append(scene)
         if scene['id'] == through_scene:
@@ -118,7 +125,7 @@ def apply(through_scene, expected_revision=None):
                 **({'portraitState':line['portraitState']} if line.get('portraitState') else {})})
     selected_ids = {scene['id'] for scene in selected}
     preserved = [scene for scene in previous['scenes'] if scene['id'] not in selected_ids]
-    result['scenes'] += preserved
+    result['scenes'] = sorted(result['scenes'] + preserved, key=lambda scene: scene.get('sourceLine', 0))
     preserved_keys = {key for scene in preserved for key in scene['cues']} - promoted
     result['dialogue'] += [line for line in previous['dialogue'] if line['id'] in preserved_keys]
     result['clips'].update({key:value for key,value in previous['clips'].items() if key in preserved_keys})
@@ -135,7 +142,9 @@ def apply(through_scene, expected_revision=None):
               'importedRecordings':uploads,'removedActiveCues':removed,
               'textEditedAfterUpload':stale_transcripts,
               'note':'Original audio bytes preserved. Earlier recordings remain available to archived scripts.'}
-    write(ROOT/'docs/campaign/alpha/voice/applied-stage-iii.json',report)
+    if from_scene:
+        report['fromScene'] = from_scene
+    write(ROOT/'docs/campaign/alpha/voice'/report_name,report)
     print(json.dumps({key:report[key] for key in ['draftRevision','throughScene','activeLines','removedActiveCues']}))
     print('Imported recordings:',len(uploads),'Text edited after upload:',len(stale_transcripts))
 
@@ -144,5 +153,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--through-scene', required=True)
     parser.add_argument('--revision',type=int)
+    parser.add_argument('--from-scene')
+    parser.add_argument('--report',default='applied-stage-iii.json')
     args = parser.parse_args()
-    apply(args.through_scene,args.revision)
+    apply(args.through_scene,args.revision,args.from_scene,args.report)

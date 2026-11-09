@@ -23,7 +23,7 @@ for(const cue of [...source.dialogue,...source.barks]){
  assert(clip.duration>0);
  if(cue.speaker!=='past')assert(portraits.characters[cue.speaker],cue.speaker);
 }
-assert.equal(userCount,56);
+assert.equal(userCount,60);
 assert.equal(source.dialogue.find(c=>c.id==='m01-s07-l016').text,'У нас это склад называется.');
 assert.equal(audio.clips['m01-s07-l016'].origin,'temporary-synthesis');
 // Mislabeled takes use the owner's confirmed spoken words, not their filenames.
@@ -71,9 +71,10 @@ function fixture(startImmediately=true){
  f.building('factory');assert.equal(f.tick().storyScene,'r06');assert(f.unlocked('lab'));f.finish();
  assert.equal(f.tick().storyScene,'r08');f.finish();
  f.director.note({type:'unit-produced',kind:'bukhanka'},f.mission);assert.equal(f.tick().storyScene,'r09');f.finish();
- assert.equal(f.tick(13),null,'Producing the first van does not announce an upgrade');
- f.building('lab');assert.equal(f.tick().storyScene,'r11');assert(researchUnlocked(s));f.finish();
- assert.equal(f.tick().storyScene,'r13');f.finish();
+ assert.equal(f.tick(13).storyScene,'r11','The factory prompts the NII order before construction starts, without announcing an upgrade');
+ assert(!s.buildings.some(b=>b.kind==='lab'));assert(!researchUnlocked(s));f.finish();
+ assert.equal(f.tick(3),null,'The second science exchange waits for the completed NII');
+ f.building('lab');assert.equal(f.tick().storyScene,'r13');assert(researchUnlocked(s));f.finish();
  s.units.push({id:'raid',owner:'scavs',hp:100,x:20,y:0});s.flags.raidIds=['raid'];s.flags.contact=true;
  assert.equal(f.tick().storyScene,'r14');f.finish();assert.equal(f.tick().storyScene,'r16');
  f.mission.effects=[{type:'shot',from:'raid'}];assert.equal(f.tick().storyScene,'r16','Combat does not cut off a started exchange');f.finish();
