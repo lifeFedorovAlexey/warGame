@@ -276,5 +276,5 @@ export function extractDamagePart(T,bindings,id,state,transforms=null){
   const scores=directions.map(()=>-Infinity),supports=directions.map(()=>new T.Vector3()),v=new T.Vector3();
   for(const mesh of root.children){const p=mesh.geometry.attributes.position;for(let i=0;i<p.count;i++){v.fromBufferAttribute(p,i);directions.forEach((d,j)=>{const dot=d.dot(v);if(dot>scores[j]){scores[j]=dot;supports[j].copy(v);}});}}
   const size=bounds.getSize(new T.Vector3()),thin=size.x<=size.y&&size.x<=size.z?new T.Vector3(1,0,0):size.y<=size.z?new T.Vector3(0,1,0):new T.Vector3(0,0,1);
-  return {root,centre,radius:size.length()/2,supports,restAxis:thin};
+  return {root,centre,size,radius:size.length()/2,supports,restAxis:thin};
 }

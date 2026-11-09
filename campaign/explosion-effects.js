@@ -1,5 +1,6 @@
 // Short hot core, rolling smoke, ground-hugging dust and bounded solid debris.
 // All batches share geometry; no texture downloads or per-particle draw calls.
+import {blastShards} from './debris-motion.js';
 export function createExplosionEffects(T,scene,scale,field){
  const limit=16,bursts=[],remains=[],burns=[];let serial=0;
  const rand=(a,b)=>{const v=Math.sin(a*127.1+b*311.7)*43758.5453;return v-Math.floor(v);};
@@ -30,13 +31,14 @@ export function createExplosionEffects(T,scene,scale,field){
  const fire=batch('explosion_fire',limit*14+32*6,true),smoke=batch('explosion_smoke',limit*32+32*6,false);
  const object=new T.Object3D(),colour=new T.Color();
  const fragments=new T.InstancedMesh(new T.IcosahedronGeometry(1,0),new T.MeshStandardMaterial({color:0xffffff,roughness:1,flatShading:true}),24*16);
+ const fragmentVertices=fragments.geometry.attributes.position;
  fragments.name='explosion_fragments';fragments.count=0;fragments.frustumCulled=false;fragments.instanceMatrix.setUsage(T.DynamicDrawUsage);scene.add(fragments);
  const scorchGeo=new T.CircleGeometry(1,24),positions=scorchGeo.attributes.position;
  for(let i=1;i<positions.count;i++){const k=.8+rand(i,9)*.2;positions.setXY(i,positions.getX(i)*k,positions.getY(i)*k);}
  const scorches=new T.InstancedMesh(scorchGeo,new T.MeshBasicMaterial({color:'#302a20',transparent:true,opacity:.48,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2}),24);
  scorches.name='blast_scorches';scorches.count=0;scorches.frustumCulled=false;scene.add(scorches);
  const flash=new T.PointLight('#ffba65',0,1);scene.add(flash);
- function spawn(point,radius,now){const b={point:point.clone(),radius,born:now,seed:++serial,ground:ground(point.x,point.y,point.z)};bursts.push(b);remains.push(b);if(bursts.length>limit)bursts.shift();if(remains.length>24)remains.shift();}
+ function spawn(point,radius,now){const seed=++serial,b={point:point.clone(),radius,born:now,seed,shards:blastShards(seed,radius,scale),ground:ground(point.x,point.y,point.z)};bursts.push(b);remains.push(b);if(bursts.length>limit)bursts.shift();if(remains.length>24)remains.shift();}
  function setBurning(mission,transforms){
   burns.length=0;
   for(const e of [...mission.state.units,...mission.state.buildings]){
@@ -78,12 +80,18 @@ export function createExplosionEffects(T,scene,scale,field){
    const b=remains[i],age=now-b.born,{point:p,radius:r,seed}=b;if(age>40){remains.splice(i,1);continue;}
    const fade=Math.min(1,(40-age)/4);
    object.position.set(p.x,p.y,b.ground+1);object.rotation.set(0,0,seed);object.scale.set(r*.95,r*.78,1);object.updateMatrix();scorches.setMatrixAt(marks++,object.matrix);
-   for(let j=0;j<16;j++){
-    const angle=j*2.399+seed,speed=r*(.7+rand(seed,j)*1.3),vz=scale*(2.1+rand(j,seed)*3.2),gravity=9.8*scale;
-    const land=(vz+Math.sqrt(vz*vz+2*gravity*Math.max(.4,p.z-b.ground)))/gravity,t=Math.min(age,land),roll=Math.max(0,Math.min(1,age-land));
-    const x=p.x+Math.cos(angle)*speed*(t+roll*.18),y=p.y+Math.sin(angle)*speed*(t+roll*.18),size=scale*(.07+rand(seed+6,j)*.18);
-    object.position.set(x,y,Math.max(ground(x,y,b.ground)+size*.35,p.z+vz*t-.5*gravity*t*t));object.rotation.set(t*(3+j%3),t*2.5,angle);object.scale.set(size*1.8*fade,size*.6*fade,size*.4*fade);object.updateMatrix();fragments.setMatrixAt(count,object.matrix);
-    colour.set(j%3===0?'#9b8d72':j%3===1?'#414338':'#6b5540');fragments.setColorAt(count++,colour);
+   for(const shard of b.shards){
+    const {angle,speed,vz,size,start,spin,rotation,shape}=shard,gravity=9.8*scale,z0=p.z+start[2];
+    const land=(vz+Math.sqrt(vz*vz+2*gravity*Math.max(.4,z0-b.ground)))/gravity,t=Math.min(age,land),after=Math.max(0,age-land);
+    const bounceV=(gravity*land-vz)*shard.bounce,bounceTime=Math.min(after,2*bounceV/gravity),roll=1-Math.exp(-after*3);
+    const travel=speed*(t+roll*shard.slide),x=p.x+start[0]+Math.cos(angle)*travel,y=p.y+start[1]+Math.sin(angle)*travel;
+    const turn=t+bounceTime*.4;
+    object.position.set(0,0,0);object.rotation.set(...rotation.map((a,k)=>a+spin[k]*turn));object.scale.set(...shape.map(s=>size*s*fade));object.updateMatrix();
+    const e=object.matrix.elements;let bottom=Infinity;
+    for(let v=0;v<fragmentVertices.count;v++)bottom=Math.min(bottom,e[2]*fragmentVertices.getX(v)+e[6]*fragmentVertices.getY(v)+e[10]*fragmentVertices.getZ(v));
+    const floor=ground(x,y,b.ground)-bottom+.008*scale,z=age<land?z0+vz*t-.5*gravity*t*t:floor+bounceV*bounceTime-.5*gravity*bounceTime*bounceTime;
+    object.position.set(x,y,Math.max(floor,z));object.updateMatrix();fragments.setMatrixAt(count,object.matrix);
+    colour.set(['#9b8d72','#414338','#6b5540'][shard.colour]);fragments.setColorAt(count++,colour);
    }
   }
   fragments.count=count;scorches.count=marks;if(count){fragments.instanceMatrix.needsUpdate=true;fragments.instanceColor.needsUpdate=true;}if(marks)scorches.instanceMatrix.needsUpdate=true;

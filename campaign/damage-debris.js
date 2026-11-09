@@ -1,5 +1,6 @@
 import {extractDamagePart} from './damage-geometry.js';
 import {vehiclePaint,vehiclePaintTint,isVehiclePaintMaterial} from './vehicle-paint.js';
+import {debrisLaunch} from './debris-motion.js';
 
 export function createDamageDebris(T,scene,field,scale,{activeLimit=24,capacity=64}={}){
   const root=new T.Group();root.name='damage_debris_pool';scene.add(root);
@@ -20,7 +21,7 @@ export function createDamageDebris(T,scene,field,scale,{activeLimit=24,capacity=
     if(slot.model){const materials=new Set();slot.model.traverse(n=>{if(n.isMesh){n.geometry.dispose();materials.add(n.material);}});for(const m of materials)m.dispose();root.remove(slot.model);}
     slot.model=null;slot.active=false;
   }
-  function spawn(bindings,id,state,matrix,direction,power,transforms,vehicle){
+  function spawn(bindings,id,state,matrix,direction,power,transforms,vehicle,profile={}){
     if(slots.filter(s=>s.active).length>=activeLimit)return false;
     const slot=slots.find(s=>!s.model)??slots.filter(s=>!s.active).sort((a,b)=>b.age-a.age)[0];
     if(!slot)return false;
@@ -31,15 +32,18 @@ export function createDamageDebris(T,scene,field,scale,{activeLimit=24,capacity=
     }
     clear(slot);slot.model=part.root;slot.age=0;slot.active=true;slot.serial=serial++;
     matrix.decompose(slot.model.position,slot.model.quaternion,slot.model.scale);
-    slot.model.position.copy(part.centre.applyMatrix4(matrix));
+    slot.model.position.copy(part.centre).applyMatrix4(matrix);
     slot.supports=part.supports;slot.restAxis=part.restAxis;
-    slot.velocity.fromArray(direction).multiplyScalar(Math.min(4,Math.sqrt(power)*.22)*scale/Math.sqrt(Math.max(1,part.radius)));slot.velocity.z+=scale*.8;
-    if(state.wreck){
-      const centre=new T.Vector3().setFromMatrixPosition(matrix),out=slot.model.position.clone().sub(centre);out.z=0;
-      if(out.lengthSq()<.1)out.set(Math.cos(id*2.399),Math.sin(id*2.399),0);out.normalize();
-      slot.velocity.addScaledVector(out,scale*(1.6+(id%5)*.3)/Math.sqrt(Math.max(1,part.radius)));slot.velocity.z+=scale*(1.1+(id%3)*.4);
-    }
-    slot.spin.set((id%3-1)*2.4,1.2+(id%4)*.5,.6+(id%2));root.add(slot.model);return true;
+    // Bias the blast towards the struck side, while far-side pieces still
+    // break outwards. A local break uses the actual contact as its origin.
+    const origin=new T.Vector3().fromArray(state.lastImpact?.point??[0,0,0]);
+    if(state.wreck)origin.multiplyScalar(.3);
+    origin.applyMatrix4(matrix);
+    const offset=slot.model.position.clone().sub(origin),p=slot.model.position;
+    const seed=Math.imul(slot.serial+1,73856093)^Math.imul(id+1,19349663)^Math.round(p.x*97+p.y*193+p.z*53);
+    slot.motion=debrisLaunch({seed,size:part.size.toArray(),material:profile.material,offset:offset.toArray(),direction,power,wreck:state.wreck});
+    slot.velocity.fromArray(slot.motion.velocity).multiplyScalar(scale);slot.spin.fromArray(slot.motion.spin);
+    root.add(slot.model);return true;
   }
   function update(dt,camera){
     accumulator+=Math.min(dt,.15);let steps=0;
@@ -49,11 +53,12 @@ export function createDamageDebris(T,scene,field,scale,{activeLimit=24,capacity=
         if(!slot.model)continue;slot.age+=1/30;
         if(slot.age>55){clear(slot);continue;}
         if(!slot.active)continue;
-        const p=slot.model.position;slot.velocity.z-=9.8*scale/30;p.addScaledVector(slot.velocity,1/30);
+        const p=slot.model.position,motion=slot.motion;slot.velocity.multiplyScalar(Math.exp(-motion.drag/30));slot.velocity.z-=9.8*scale/30;p.addScaledVector(slot.velocity,1/30);
+        slot.spin.multiplyScalar(Math.exp(-motion.drag*.5/30));
         slot.model.rotateX(slot.spin.x/30);slot.model.rotateY(slot.spin.y/30);slot.model.rotateZ(slot.spin.z/30);
         const gap=clearance(slot);
-        if(gap<.008*scale){p.z+=.008*scale-gap;slot.velocity.z=Math.abs(slot.velocity.z)*.12;slot.velocity.x*=.52;slot.velocity.y*=.52;slot.spin.multiplyScalar(.48);
-          settleRotation(slot,.2);
+        if(gap<.008*scale){p.z+=.008*scale-gap;slot.velocity.z=Math.abs(slot.velocity.z)*motion.bounce;slot.velocity.x*=motion.friction;slot.velocity.y*=motion.friction;slot.spin.multiplyScalar(motion.angularRetention);
+          settleRotation(slot,motion.settle);
           if(slot.velocity.length()<scale*.5&&slot.age>.35||slot.age>4){settleRotation(slot,1);slot.active=false;slot.velocity.set(0,0,0);}
           p.z+=.008*scale-clearance(slot);
         }

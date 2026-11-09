@@ -108,7 +108,7 @@ export function createDamageSystem(T,scene,field,config){
         const id=Number(key);r.detached.add(id);
         if(visible&&r.lod<=1&&enabled.value&&!s.salvageId){
           const template=getTemplate(entity),impact=entity.damage.lastImpact;
-          if(template&&impact)debris.spawn(template.bindings,id,entity.damage,matrix,impact.direction,impact.power,template.pose?.(entity),config.units[entity.kind]?entity:undefined);
+          if(template&&impact)debris.spawn(template.bindings,id,entity.damage,matrix,impact.direction,impact.power,template.pose?.(entity),config.units[entity.kind]?entity:undefined,template.parts[id]);
         }
       }
     }

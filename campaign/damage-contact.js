@@ -29,7 +29,7 @@ export function recordDamage(mission,target,amount,source,contact){
     if(type==='fire')ignite(target,{...hit,power},mission.state?.time??0,source?.id);
     else if(mobile&&!isInfantry(target))kickWeaponRock(target,{...hit,type,power},mission.state?.time??0,mission.config.units[source?.kind]?.weapon??'mg');
   }
-  state.lastImpact={direction:hit.worldDirection??hit.direction,power,partId:hit.partId};
+  state.lastImpact={direction:hit.worldDirection??hit.direction,point:hit.point,power,partId:hit.partId};
   result.secondaryFailures=mission.onDamageImpact?.(target,{...hit,type,power})??[];
   salvageFromImpact(mission,target,{...hit,type,power},result);
   mission.onDamageMeasured?.(performance.now()-start,result.deformationMs);
