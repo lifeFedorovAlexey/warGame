@@ -80,14 +80,15 @@ export class PoseBatch{
  visible(value){for(const {mesh} of this.parts)mesh.visible=value;}
 }
 
-export async function createVehicleLayer(T,scene,field,config,damage) {
+export async function createVehicleLayer(T,scene,field,config,damage,onLoaded=()=>{}) {
  const root=new T.Group();
  root.name='modular_vehicle_instances';
  scene.add(root);
  const scale=config.worldScale,loader=new GLTFLoader(),capacity=256;
+ let loadedCount=0;const load=url=>loader.loadAsync(url).then(asset=>{onLoaded(++loadedCount,7);return asset;});
  const [loaded,flamerAsset]=await Promise.all([
-  Promise.all([0,1,2].map(lod=>Promise.all(['C01','B01'].map(id=>loader.loadAsync('../assets/vehicles/'+id+'/'+id+'-lod'+lod+'.glb'))))),
-  loader.loadAsync('../assets/vehicles/'+config.units.flamer.model),
+  Promise.all([0,1,2].map(lod=>Promise.all(['C01','B01'].map(id=>load('../assets/vehicles/'+id+'/'+id+'-lod'+lod+'.glb'))))),
+  load('../assets/vehicles/'+config.units.flamer.model),
  ]);
  const lods=loaded.map((assets,lod)=>assets.map((asset,index)=>{
   const proto=asset.scene, id=index?'B01':'C01';

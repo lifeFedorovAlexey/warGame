@@ -33,7 +33,8 @@ import {buildLayerHeight} from './builder-optics.js';
 import {createDamageSystem} from './damage-system.js';
 import {partMissing} from './damage-state.js';
 
-export async function createCampaignWorld(host,config,sound){
+export async function createCampaignWorld(host,config,sound,loading){
+ await loading?.stage('terrain');
  const renderer=new T.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
  const gl=renderer.getContext(),debug=gl.getExtension('WEBGL_debug_renderer_info');
  const software=!!debug&&/swiftshader|llvmpipe|softpipe|software|basic render/i.test(gl.getParameter(debug.UNMASKED_RENDERER_WEBGL));
@@ -67,7 +68,8 @@ export async function createCampaignWorld(host,config,sound){
  const dam=createDamEnvironment(T,field,config,addFog,sound,terrain);scene.add(dam.root);baseYard.roads.push(dam.road);terrain.setLocalRoads(baseYard.roads);
  const dressing=createDesertDressing(T,field,config,[...terrain.roadPaths,...baseYard.roads],dam.layout,addFog);scene.add(dressing.root);
  const damage=createDamageSystem(T,scene,field,config);
- const vehicles=await createVehicleLayer(T,scene,field,config,damage),buildingRoot=new T.Group();scene.add(buildingRoot);const buildings=new Map(),prefabs=new Map(),selectionRoot=new T.Group();scene.add(selectionRoot);
+ await loading?.stage('vehicles');
+ const vehicles=await createVehicleLayer(T,scene,field,config,damage,(completed,total)=>loading?.update('vehicles',completed,total)),buildingRoot=new T.Group();scene.add(buildingRoot);const buildings=new Map(),prefabs=new Map(),selectionRoot=new T.Group();scene.add(selectionRoot);
  const healthBars=createHealthBars(T,scene,field,config,vehicles.transforms,buildings);
  damage.setTemplateProvider(entity=>{
    const root=getPrefab(entity.kind,entity.owner,entity.campId,entity.scavVariant,entity.fenceSpan,entity.fenceProfile);root.updateMatrixWorld(true);

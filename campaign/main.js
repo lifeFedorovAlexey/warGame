@@ -12,6 +12,7 @@ import {startOpeningConstruction,restoreOpeningConstruction,openingCanHandOver} 
 import {OpeningTelevision} from './opening-television.js';
 import {OpeningCamera} from './opening-camera.js';
 import {mainMenu} from './main-menu.js';
+import {ENTRY_STAGES} from './loading-progress.js';
 import {storyObjectives} from './story-objectives.js';
 import {createMinimap,installMinimapInput} from './minimap.js';
 import {VehicleDesigner} from './designer.js';
@@ -239,7 +240,12 @@ function saveGame(notify = true) {
     return false;
   }
 }
-function start(restore = false) {
+let loadingGame=false;
+async function start(restore = false) {
+  if(loadingGame)return;
+  loadingGame=true;
+  sound.unlock();
+  try {
   if (restore) {
     try {
       const data = localStorage.getItem(saveKey);
@@ -251,6 +257,11 @@ function start(restore = false) {
       return $('welcome').hidden?toast(message):mainMenu.error(message);
     }
   }
+  $('welcome').hidden=false;
+  mainMenu.loading.begin(ENTRY_STAGES);
+  await mainMenu.loading.stage('graphics');
+  await world.prepareRendering?.(mission);
+  await mainMenu.loading.stage('entry');
   if(!restore)mission.state.storyConstruction={enabled:true,unlocked:['generator'],research:false,requiredBunkers:2};
   designer.close(false);
   paused = false;
@@ -268,7 +279,6 @@ function start(restore = false) {
   minimapView.reset(restore);
   blockedOrders.clear();
   $('order-feedback').hidden=true;
-  $('welcome').hidden = true;
   $('result').hidden = true;
   $('mission-hud').hidden = false;
   document.querySelector('.settings').open = false;
@@ -280,9 +290,13 @@ function start(restore = false) {
   openingCamera?.dispose();
   openingCamera=openingPlaying?new OpeningCamera(world,mission):null;
   select(worker&&!openingPlaying ? [worker.id] : [], false, false);
-  sound.unlock();
+  await mainMenu.loading.finish();
+  mainMenu.loading.hide();
+  $('welcome').hidden = true;
   if(!openingTelevision.start(mission,radio.director,{enabled:radio.enabled}))radio.consume(mission, performance.now());
   if (restore) toast('Операция загружена');
+  } catch(error) {mainMenu.error('Ошибка подготовки игры. '+error.message);}
+  finally {loadingGame=false;last=performance.now();}
 }
 function ordersAt(point, target, mode) {
   const chosen = selection();
@@ -986,7 +1000,7 @@ function frame(now) {
   navigationTelemetry?.frame(now);
   const dt = Math.min(.65, (now - last) / 1000);
   last = now;
-  if (!world || !mission || !$('welcome').hidden) return;
+  if (loadingGame || !world || !mission || !$('welcome').hidden) return;
   if(window.campaign?.renderSuspended)return;
   if(openingTelevision?.active){
     openingTelevision.update(dt);
@@ -1034,16 +1048,22 @@ function frame(now) {
 }
 requestAnimationFrame(frame);
 try {
+  mainMenu.loading.begin();
+  await mainMenu.loading.stage('resources');
   const response = await fetch(dataUrl);
   if (!response.ok) throw new Error('Конфигурация миссии ' + response.status);
   config = await response.json();
   const story = await loadMissionStory();
   sound = new FieldSound($('sound-toggle'), $('story-voice-toggle'));
   openingTelevision = new OpeningTelevision(sound);
-  world = await createCampaignWorld($('world'), config, sound);
+  world = await createCampaignWorld($('world'), config, sound, mainMenu.loading);
+  await mainMenu.loading.stage('simulation');
   mission = new Mission(config, world.field);
   minimapView=createMinimap($('minimap'),{world,mission,selected,background:miniBackground,notify:toast});
   world.damage.bindMission(mission);
+  await mainMenu.loading.stage('graphics');
+  await world.prepareRendering?.(mission);
+  await mainMenu.loading.stage('interface');
   designer = new VehicleDesigner($('designer'), $('design-toggle'), mission, {
     makeModel: (components, paint) => world.vehicles.makeDesignModel(components, paint),
     onActiveChange(open) {
@@ -1091,6 +1111,7 @@ try {
   installInput();
   let hasSave=false;
   try { hasSave=!!localStorage.getItem(saveKey); } catch {}
+  await mainMenu.loading.finish();
   mainMenu.ready(hasSave);
   $('begin').onclick = () => start();
   $('resume-save').onclick = $('load').onclick = () => start(true);

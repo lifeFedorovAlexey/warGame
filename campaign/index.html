@@ -241,7 +241,10 @@
       </div>
       <button id="menu-settings-close" data-icon="previous" aria-label="Назад в меню"></button>
     </section>
-    <p id="loading-status" role="status">Подготовка карты…</p>
+    <div id="loading" class="startup-loading">
+      <div class="loading-caption"><p id="loading-status" role="status">Загрузка ресурсов…</p><span id="loading-step" aria-hidden="true">1 / 6</span></div>
+      <progress id="loading-progress" max="6" value="0" aria-label="Загрузка игры" aria-describedby="loading-status"></progress>
+    </div>
   </section>
   <section id="result" class="corner-card panel" hidden>
     <h1 id="result-title"></h1>

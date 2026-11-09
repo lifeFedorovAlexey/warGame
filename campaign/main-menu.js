@@ -1,8 +1,10 @@
 import {setButtonIcon} from '../assets/ui/icons.js';
+import {createLoadingProgress} from './loading-progress.js';
 
 // Hotspots follow the painted signs without overlaying a second copy of the art.
 const root=document.getElementById('welcome'),stage=root.querySelector('.menu-art');
 const settings=document.getElementById('main-menu-settings'),status=document.getElementById('loading-status');
+const loading=createLoadingProgress(root);
 const plates=[
   ['begin',176,290,511,157,'3% 0%,100% 39%,99% 100%,0% 70%'],
   ['resume-save',237,421,422,120,'0% 0%,100% 20%,99% 100%,0% 81%'],
@@ -52,12 +54,14 @@ root.addEventListener('keydown',event=>{
 });
 
 export const mainMenu={
+  loading,
   ready(hasSave){
+    loading.hide();
     document.getElementById('begin').disabled=false;
     document.getElementById('resume-save').disabled=!hasSave;
     document.getElementById('resume-save').title=hasSave?'Продолжить операцию':'Сохранения ещё нет';
     document.getElementById('menu-settings').disabled=false;
     status.hidden=true;refresh();
   },
-  error(text){status.hidden=false;status.textContent=text;},
+  error(text){loading.error(text);},
 };
