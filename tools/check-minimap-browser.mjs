@@ -17,17 +17,25 @@ try{
   const own=m.addUnit('bukhanka','rai',f.gridToWorld([45,55]));
   const building=m.addStructure('generator','rai',f.gridToWorld([45,46]),{completed:true,progress:1});
   const enemy=m.addUnit('raider','scavs',f.gridToWorld([35,55]));
-  const base=m.addStructure('camp-core','scavs',f.gridToWorld([49,20]),{completed:true,progress:1});
-  window.miniFixture={own:own.id,building:building.id,enemy:enemy.id,base:base.id};
+  window.miniFixture={own:own.id,building:building.id,enemy:enemy.id};
   c.select([]);c.advance(0);return miniFixture;
  });
  await page.waitForTimeout(3300);
+ await page.evaluate(async()=>{
+  const {minimapPosition}=await import('./minimap.js'),m=campaign.mission,canvas=document.getElementById('minimap'),p=m.field.gridToWorld([49,20]),[x,y]=minimapPosition(m.field,p,canvas.width,canvas.height,m.state.bounds);
+  window.miniBaseBackground=Array.from(canvas.getContext('2d').getImageData(Math.floor(x),Math.floor(y),1,1).data);
+  miniFixture.base=m.addStructure('camp-core','scavs',p,{completed:true,progress:1}).id;
+ });await page.waitForTimeout(250);
  const colors=await page.evaluate(async()=>{
   const {MINIMAP_COLORS}=await import('./minimap-alerts.js'),{minimapPosition}=await import('./minimap.js'),canvas=document.getElementById('minimap'),ctx=canvas.getContext('2d');
   const result={};for(const [key,id] of Object.entries(miniFixture)){
    const e=campaign.mission.entity(id),[x,y]=minimapPosition(campaign.world.field,e,canvas.width,canvas.height,campaign.mission.state.bounds),p=ctx.getImageData(Math.floor(x),Math.floor(y),1,1).data;
    result[key]='#'+Array.from(p).slice(0,3).map(v=>v.toString(16).padStart(2,'0')).join('');
-  }return {actual:result,expected:{own:MINIMAP_COLORS.friendlyUnit,building:MINIMAP_COLORS.friendlyBuilding,enemy:MINIMAP_COLORS.enemyUnit,base:MINIMAP_COLORS.enemyBuilding}};
+  }
+  const sample=document.createElement('canvas');sample.width=sample.height=1;const blend=sample.getContext('2d');
+  blend.fillStyle='rgb('+miniBaseBackground.slice(0,3).join(',')+')';blend.fillRect(0,0,1,1);blend.fillStyle=MINIMAP_COLORS.enemyBuilding;blend.fillRect(0,0,1,1);
+  const base='#'+Array.from(blend.getImageData(0,0,1,1).data).slice(0,3).map(v=>v.toString(16).padStart(2,'0')).join('');
+  return {actual:result,expected:{own:MINIMAP_COLORS.friendlyUnit,building:MINIMAP_COLORS.friendlyBuilding,enemy:MINIMAP_COLORS.enemyUnit,base},enemyBuildingOpacity:parseInt(MINIMAP_COLORS.enemyBuilding.slice(7),16)/255};
  });await page.screenshot({path:folder+'/01-colors-desktop.png'});assert.deepEqual(colors.actual,colors.expected);
  const artifact=await page.evaluate(()=>{const c=campaign,m=c.mission,a={id:m.id('a'),key:'flamethrower',...m.field.gridToWorld([30,60]),collected:false};m.state.artifacts.push(a);c.advance(0);return a;});
  await page.waitForTimeout(350);assert.match(await page.locator('#toast').textContent(),/Обнаружен артефакт/);await page.screenshot({path:folder+'/02-artifact-desktop.png'});await page.locator('#minimap').screenshot({path:folder+'/artifact-closeup.png'});

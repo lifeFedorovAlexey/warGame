@@ -1,4 +1,4 @@
-export const MINIMAP_COLORS={friendlyUnit:'#43c768',friendlyBuilding:'#adeba2',enemyUnit:'#e34c43',enemyBuilding:'#ffa69f',artifact:'#62b7ff',objective:'#64ed84',attack:'#ff514b'};
+export const MINIMAP_COLORS={friendlyUnit:'#43c768',friendlyBuilding:'#adeba2',enemyUnit:'#e34c43',enemyBuilding:'#e34c4399',artifact:'#62b7ff',objective:'#64ed84',attack:'#ff514b'};
 export const MINIMAP_PING_MS=3000;
 const point=p=>p&&Number.isFinite(p.x)&&Number.isFinite(p.y);
 

@@ -52,7 +52,7 @@ export function createMinimap(canvas,{world,mission,selected,background,notify})
   if(background.complete&&background.naturalWidth)cached.drawImage(background,0,0,fullSize,fullSize);
   world.drawMinimapFog(cached,fullSize);cached.restore();
   for(const grid of mission.config.oilFields){const p=world.field.gridToWorld(grid);if(!mission.exploredAt(p.x,p.y))continue;const [x,y]=position(p);cached.fillStyle='#d5b869';cached.fillRect(x-scale,y-scale,2*scale,2*scale);}
-  // Larger, lighter structures are drawn first; units remain visible over them.
+  // Structures are drawn first; units remain visible over them.
   for(const [group,isBuilding] of [[mission.state.buildings,true],[mission.state.units,false]])for(const e of group){
    if(!visibleEntity(mission,e))continue;
    const [x,y]=position(e),r=(isBuilding?2:1.3)*scale;
@@ -78,9 +78,13 @@ export function createMinimap(canvas,{world,mission,selected,background,notify})
   // Background/fog only update at 5 Hz; light pulse and camera overlays are cheap.
   ctx.clearRect(0,0,size,size);ctx.drawImage(base,0,0);
   const [cx,cy]=position(world.controls.target);ctx.strokeStyle='#e3d4a3';ctx.lineWidth=scale*.7;ctx.strokeRect(cx-5*scale,cy-4*scale,10*scale,8*scale);
-  for(const p of pings){const [x,y]=position(p),age=(now-p.born)/MINIMAP_PING_MS,wave=(1-Math.cos(age*Math.PI*8))/2,r=(5+wave*5)*scale,gap=2*scale;
-   ctx.save();ctx.globalAlpha=.5+wave*.5;ctx.lineCap='square';ctx.strokeStyle=colors[p.kind];ctx.lineWidth=1.8*scale;
-   ctx.beginPath();ctx.moveTo(x-r,y);ctx.lineTo(x-gap,y);ctx.moveTo(x+gap,y);ctx.lineTo(x+r,y);ctx.moveTo(x,y-r);ctx.lineTo(x,y-gap);ctx.moveTo(x,y+gap);ctx.lineTo(x,y+r);ctx.stroke();ctx.restore();
+  for(const p of pings){const [x,y]=position(p),age=(now-p.born)/MINIMAP_PING_MS,wave=(1-Math.cos(age*Math.PI*8))/2,r=(5+wave*3)*scale,arm=3*scale;
+   ctx.save();ctx.globalAlpha=.5+wave*.5;ctx.lineCap='square';ctx.strokeStyle=colors[p.kind];ctx.lineWidth=1.6*scale;
+   ctx.beginPath();
+   for(const sx of [-1,1])for(const sy of [-1,1]){
+    ctx.moveTo(x+sx*(r-arm),y+sy*r);ctx.lineTo(x+sx*r,y+sy*r);ctx.lineTo(x+sx*r,y+sy*(r-arm));
+   }
+   ctx.stroke();ctx.restore();
   }
  }
  return {alerts,render,observe:(tasks,now)=>alerts.observe(mission,tasks,now),reset(silent){alerts.reset(silent);refreshed=-Infinity;},invalidate(){refreshed=-Infinity;}};
