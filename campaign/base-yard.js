@@ -2,10 +2,11 @@ import {baseApproachRoads} from './base-roads.js';
 import {createBaseSiteMarkings} from './base-site-markings.js';
 import {createStreetLampLayer} from './street-lamp-layer.js';
 import {createRoadJunctionCutout} from './road-junction-cutout.js';
+import {CROSSWALK,planRoadCrossings} from './road-crossings.js';
 // Physical scenery only. Nothing here is registered as an entity or navigation obstacle.
 export function createBaseYard(T,field,config,addFog){
   const root=new T.Group();root.name='base_yard';root.userData.decorative=true;
-  root.add(createBaseSiteMarkings(T,field,config,addFog));
+  const plots=createBaseSiteMarkings(T,field,config,addFog);root.add(plots);
   const scale=config.worldScale,loader=new T.TextureLoader(),lamps=createStreetLampLayer(T,field,config,addFog);root.add(lamps.root);
   const texture=name=>{const map=loader.load(new URL('../assets/maps/alpha/materials/'+name,import.meta.url).href);map.wrapS=map.wrapT=T.RepeatWrapping;map.colorSpace=T.SRGBColorSpace;return map;};
   const concrete=new T.MeshStandardMaterial({color:'#d4ccae',map:texture('weathered-concrete.jpg'),vertexColors:true,roughness:1,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1});
@@ -59,42 +60,49 @@ export function createBaseYard(T,field,config,addFog){
       markCuttable.push(cuttable?1:0);
     }
   }
-  const crossings=[start.x-205,start.x-28];
-  function crosswalk(x,y,span,turned=false){
-    const stripeWidth=2.1,pitch=4.2,stripeLength=18.9,count=Math.max(2,Math.floor(span/pitch));
+  function crosswalk({x,y,angle},span){
+    const {stripe:stripeWidth,pitch,length:stripeLength}=CROSSWALK,count=Math.max(2,Math.floor(span/pitch));
     // Long axes follow traffic; stripes repeat across the carriageway.
     for(let i=0;i<count;i++){
       const across=(i-(count-1)/2)*pitch;
-      if(turned)marking(x+across,y,stripeWidth,stripeLength);
-      else marking(x,y+across,stripeLength,stripeWidth);
+      marking(x-Math.sin(angle)*across,y+Math.cos(angle)*across,stripeLength,stripeWidth,angle);
     }
   }
-  const nearCrossing=x=>crossings.some(c=>Math.abs(x-c)<15);
-  for(let x=west+12;x<east-12;x+=14)if(!nearCrossing(x))marking(x,start.y,7.5,.50);
-  for(const side of [-1,1])for(let x=west+10;x<east-4;x+=6){
-    const junction=roads.slice(1).some(r=>Math.sign(r.points[1].y-start.y)===side&&Math.abs(x-r.points[0].x)<r.width/2+3);
-    if(!junction&&!nearCrossing(x))marking(x,start.y+side*12.6,5.96,.42,0,true);
+  let accessRoads=[];
+  function paintRoads(){
+    markings.length=markColors.length=markUvs.length=markCuttable.length=0;
+    const network=[...roads,...accessRoads],crossings=planRoadCrossings(street,network,[start.x-205-west,start.x-28-west]);
+    const nearCrossing=x=>crossings.some(c=>Math.abs(x-c.x)<15);
+    for(let x=west+12;x<east-12;x+=14)if(!nearCrossing(x))marking(x,start.y,7.5,.50);
+    for(const side of [-1,1])for(let x=west+10;x<east-4;x+=6){
+      const junction=roads.slice(1).some(r=>Math.sign(r.points[1].y-start.y)===side&&Math.abs(x-r.points[0].x)<r.width/2+3);
+      if(!junction&&!nearCrossing(x))marking(x,start.y+side*12.6,5.96,.42,0,true);
+    }
+    for(const crossing of crossings)crosswalk(crossing,street.width-4);
+    // Continue the same lane markings along the tapered road, not the old path.
+    let travelled=east-west-12;
+    for(let i=2;i<street.points.length;i++){
+      const a=street.points[i-1],b=street.points[i],dx=b.x-a.x,dy=b.y-a.y,length=Math.hypot(dx,dy),angle=Math.atan2(dy,dx),steps=Math.ceil(length/1.5);
+      for(let j=0;j<steps;j++){
+        const t=(j+.5)/steps,x=a.x+dx*t,y=a.y+dy*t;if(x>street.markUntilX)continue;
+        const width=(a.width??street.width)+((b.width??street.width)-(a.width??street.width))*t;
+        if((travelled+length*t)%14<7.5)marking(x,y,length/steps+.015,.5,angle);
+        const edge=width/2-2-(width-24)/6*.4;
+        for(const side of [-1,1])marking(x-side*Math.sin(angle)*edge,y+side*Math.cos(angle)*edge,length/steps+.015,.42,angle,true);
+      }travelled+=length;
+    }
+    for(const road of roads.slice(1).filter(r=>r.points[1].y>start.y)){
+      const x=road.points[0].x;
+      const crossing=planRoadCrossings(road,network,[32])[0];
+      if(crossing){
+        crosswalk(crossing,road.width-4);
+        const stop=crossing.y+CROSSWALK.length/2+4;
+        if(stop<road.points[1].y-3)marking(x,stop,road.width-3,.65);
+        for(let y=stop+6;y<road.points[1].y-7;y+=14)marking(x,y,.42,7);
+      }
+    }
   }
-  for(const crossing of crossings)crosswalk(crossing,start.y,street.width-4);
-  // Continue the same lane markings along the tapered road, not the old path.
-  let travelled=east-west-12;
-  for(let i=2;i<street.points.length;i++){
-    const a=street.points[i-1],b=street.points[i],dx=b.x-a.x,dy=b.y-a.y,length=Math.hypot(dx,dy),angle=Math.atan2(dy,dx),steps=Math.ceil(length/1.5);
-    for(let j=0;j<steps;j++){
-      const t=(j+.5)/steps,x=a.x+dx*t,y=a.y+dy*t;if(x>street.markUntilX)continue;
-      const width=(a.width??street.width)+((b.width??street.width)-(a.width??street.width))*t;
-      if((travelled+length*t)%14<7.5)marking(x,y,length/steps+.015,.5,angle);
-      const edge=width/2-2-(width-24)/6*.4;
-      for(const side of [-1,1])marking(x-side*Math.sin(angle)*edge,y+side*Math.cos(angle)*edge,length/steps+.015,.42,angle,true);
-    }travelled+=length;
-  }
-  for(const road of roads.slice(1).filter(r=>r.points[1].y>start.y)){
-    const x=road.points[0].x;
-    // Zebra crossings continue the pavement across the entrances.
-    crosswalk(x,start.y+26,road.width-4,true);
-    marking(x,start.y+40,road.width-3,.65);
-    for(let y=start.y+46;y<road.points[1].y-7;y+=14)marking(x,y,.42,7);
-  }
+  paintRoads();
   function surface(name,vertices,uv,material,attributes){
     const geo=new T.BufferGeometry();geo.setAttribute('position',new T.Float32BufferAttribute(vertices,3));geo.setAttribute('uv',new T.Float32BufferAttribute(uv,2));
     for(const [key,[values,size]] of Object.entries(attributes))geo.setAttribute(key,new T.Float32BufferAttribute(values,size));
@@ -142,5 +150,12 @@ export function createBaseYard(T,field,config,addFog){
     }
     const mesh=new T.Mesh(geometry,mat);mesh.castShadow=mesh.receiveShadow=true;root.add(mesh);for(const g of geometries)g.dispose();
   }
-  return {root,sites,roads,lamps,setAccessRoads:junctions.setRoads,update(mission,time){return lamps.update(mission,time);}};
+  function setAccessRoads(value){
+    accessRoads=value;junctions.setRoads(value);plots.userData.setRoads(value);paintRoads();
+    const mesh=root.getObjectByName('street_markings'),geometry=new T.BufferGeometry();
+    for(const [key,values,size] of [['position',markings,3],['uv',markUvs,2],['color',markColors,3],['roadCuttable',markCuttable,1]])
+      geometry.setAttribute(key,new T.Float32BufferAttribute(values,size));
+    geometry.computeVertexNormals();mesh.geometry.dispose();mesh.geometry=geometry;
+  }
+  return {root,sites,roads,lamps,setAccessRoads,update(mission,time){plots.userData.update(mission.state.buildings);return lamps.update(mission,time);}};
 }
