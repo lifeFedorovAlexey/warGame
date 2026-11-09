@@ -97,7 +97,7 @@ function generate(m,seed,count){
  }
  return {mode,rejected,failure:'No legal complete starting group found in the fixed candidate limit; seed retained without replacement'};
 }
-export function runMapSample(seed,count,{seconds=180,directory='tools/fixtures/navigation-map-samples',replay=null,navigationOnly=false}={}){
+export function runMapSample(seed,count,{seconds=180,directory='campaign/reports/navigation-map-samples',replay=null,navigationOnly=false}={}){
  const sources=loadedSources,begin=performance.now(),m=setup(replay?.config??config),selection=replay?.selection??generate(m,seed,count),
   profile=navigationOnly?'navigation-only':'campaign-stress';
  fs.mkdirSync(directory,{recursive:true});const file=`${directory}/seed-${seed}-n${count}.json`;
@@ -167,7 +167,7 @@ if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
  const pauseFile=option('--pause-file','campaign/reports/navigation-map-samples.pause');
  const seeds=replay?[replay.result.seed]:option('--seeds',Array.from({length:12},(_,i)=>20261108+i).join(',')).split(',').map(Number),
   counts=replay?[replay.result.count]:option('--counts','6,20,50').split(',').map(Number),seconds=Number(option('--seconds',180)),
-  runId=profile+'-'+new Date().toISOString().replace(/[:.]/g,'-')+'-'+digest(loadedSources),directory=`tools/fixtures/navigation-map-samples/${runId}`,results=[];
+  runId=profile+'-'+new Date().toISOString().replace(/[:.]/g,'-')+'-'+digest(loadedSources),directory=`campaign/reports/navigation-map-samples/${runId}`,results=[];
  fs.mkdirSync('campaign/reports',{recursive:true});
  cases:for(const seed of seeds)for(const count of counts){const result=runMapSample(seed,count,{seconds,directory,replay,navigationOnly});results.push(result);
   console.log(JSON.stringify({seed,count,mode:result.mode,passed:result.passed,failures:result.failures,arrived:result.arrived,contacts:result.collisionCount,fixture:result.fixture}));

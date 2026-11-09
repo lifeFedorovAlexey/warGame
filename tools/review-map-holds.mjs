@@ -24,7 +24,7 @@ Mission.prototype.continueTick=function(...args){
  }
  return result;
 };
-const directory=`tools/fixtures/navigation-map-samples/hold-audit-${seed}-${Date.now()}`;
+const directory=`campaign/reports/navigation-map-samples/hold-audit-${seed}-${Date.now()}`;
 const result=runMapSample(seed,6,{replay,navigationOnly:true,directory});
 fs.writeFileSync(`campaign/reports/map-holds-${seed}${firstBlock?'-first-block':''}.json`,JSON.stringify({config:replay.config,result,captures}));
 console.log(JSON.stringify({seed,result:result.fixture,arrived:result.arrived,captures:captures.length,
