@@ -64,7 +64,7 @@ export async function createCampaignWorld(host,config,sound){
  `);};material.customProgramCacheKey=()=>cache()+'_mission_fog_v5';material.needsUpdate=true;}
  for(const material of terrain.terrainMaterials) addFog(material);
  const baseYard=createBaseYard(T,field,config,addFog);scene.add(baseYard.root);
- const dam=createDamEnvironment(T,field,config,addFog,sound,terrain.terrainMaterials[1]);scene.add(dam.root);baseYard.roads.push(dam.road);terrain.setLocalRoads(baseYard.roads);
+ const dam=createDamEnvironment(T,field,config,addFog,sound,terrain);scene.add(dam.root);baseYard.roads.push(dam.road);terrain.setLocalRoads(baseYard.roads);
  const dressing=createDesertDressing(T,field,config,[...terrain.roadPaths,...baseYard.roads],dam.layout,addFog);scene.add(dressing.root);
  const damage=createDamageSystem(T,scene,field,config);
  const vehicles=await createVehicleLayer(T,scene,field,config,damage),buildingRoot=new T.Group();scene.add(buildingRoot);const buildings=new Map(),prefabs=new Map(),selectionRoot=new T.Group();scene.add(selectionRoot);

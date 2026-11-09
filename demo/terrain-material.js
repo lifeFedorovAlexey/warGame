@@ -94,13 +94,15 @@ export async function createTerrainMaterials(T,extent,{lightweightOverview=false
  if(detailFade>.002){
   vec3 selected=texture2D(detailSelection,vMapUv).rgb;
   float first=pbrKind(floor(selected.r*255.+.5)),second=pbrKind(floor(selected.g*255.+.5));
-  vec3 p=vTerrainPosition,n=vTerrainNormal;
-  vec2 uv=abs(n.z)<.55?(abs(n.x)>abs(n.y)?p.yz:p.xz):p.xy;
+  vec3 p=vTerrainPosition,weights=terrainProjectionWeights(vTerrainNormal);
   float scaleA=first==1.?10.:pbrScale(first),scaleB=second==1.?10.:pbrScale(second);
-  vec3 a=texture(pbrAlbedo,vec3(uv/scaleA,first)).rgb,b=a;
-  if(first!=second&&selected.b>.005)b=texture(pbrAlbedo,vec3(uv/scaleB,second)).rgb;
   vec3 average=mix(pbrMeanColor[int(first)],pbrMeanColor[int(second)],selected.b);
-  vec3 grain=clamp(mix(a,b,selected.b)/max(vec3(.015),average),vec3(.48),vec3(1.72));
+  vec3 grain=vec3(0.);
+  for(int axis=0;axis<3;axis++){float weight=weights[axis];if(weight<.001)continue;vec2 uv=axis==0?p.yz:(axis==1?p.xz:p.xy);
+   vec3 a=texture(pbrAlbedo,vec3(uv/scaleA,first)).rgb,b=a;
+   if(first!=second&&selected.b>.005)b=texture(pbrAlbedo,vec3(uv/scaleB,second)).rgb;
+   grain+=clamp(mix(a,b,selected.b)/max(vec3(.015),average),vec3(.48),vec3(1.72))*weight;
+  }
   ground*=mix(vec3(1.),grain,.63*detailFade);
  }
  ground=roadSurface(ground,(texture2D(roadDetail,vMapUv).g-.5)*24.);

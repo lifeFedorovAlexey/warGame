@@ -1,3 +1,10 @@
+const shadeDirections=Array.from({length:8},(_,i)=>[Math.cos(i*Math.PI/4),Math.sin(i*Math.PI/4)]);
+export function terrainShadeAt(field,x,y){
+ const h=field.heightAt(x,y),g=field.gradientAt(x,y);let occlusion=0;
+ for(const [dx,dy] of shadeDirections){let horizon=0;for(const radius of [48,112])horizon=Math.max(horizon,(field.heightAt(x+dx*radius,y+dy*radius)-h)/radius);occlusion+=Math.min(.65,Math.max(0,horizon-.035));}
+ return (1-Math.min(.15,Math.hypot(g.x,g.y)*.16))*(1-occlusion/8*.34);
+}
+
 // Refine road cells and stitch their neighbours; distant ground retains its
 // original triangles. All chunks share compacted attributes and smooth normals.
 export function createTerrainGeometry(T,field,material){
@@ -15,10 +22,7 @@ export function createTerrainGeometry(T,field,material){
  const vertices=new Float32Array(gridIds.length*3),uv=new Float32Array(gridIds.length*2),colors=new Float32Array(gridIds.length*3);
  // Broad horizon occlusion is baked once into vertex colour. It gives valleys
  // depth without a screen-space pass or extra texture reads during rendering.
- const directions=Array.from({length:8},(_,i)=>[Math.cos(i*Math.PI/4),Math.sin(i*Math.PI/4)]);
- gridIds.forEach((id,i)=>{const x=id%n,y=Math.floor(id/n),wx=x*field.renderCell-field.half,wy=field.half-y*field.renderCell,h=field.renderSamples[id],g=field.gradientAt(wx,wy);let occlusion=0;
-  for(const [dx,dy] of directions){let horizon=0;for(const radius of [48,112])horizon=Math.max(horizon,(field.heightAt(wx+dx*radius,wy+dy*radius)-h)/radius);occlusion+=Math.min(.65,Math.max(0,horizon-.035));}
-  const shade=(1-Math.min(.15,Math.hypot(g.x,g.y)*.16))*(1-occlusion/8*.34);
+ gridIds.forEach((id,i)=>{const x=id%n,y=Math.floor(id/n),wx=x*field.renderCell-field.half,wy=field.half-y*field.renderCell,h=field.renderSamples[id],shade=terrainShadeAt(field,wx,wy);
   vertices.set([wx,wy,h+.03],i*3);uv.set([x/(n-1),1-y/(n-1)],i*2);colors.set([shade,shade,shade],i*3);});
  const geometry=new T.BufferGeometry();geometry.setAttribute('position',new T.BufferAttribute(vertices,3));geometry.setAttribute('uv',new T.BufferAttribute(uv,2));geometry.setAttribute('color',new T.BufferAttribute(colors,3));geometry.setIndex(indices);geometry.computeVertexNormals();
  const meshes=[];for(const [key,list] of chunkIndices){const part=new T.BufferGeometry();for(const [name,attribute] of Object.entries(geometry.attributes))part.setAttribute(name,attribute);part.setIndex(list);const bounds=new T.Box3();for(const index of list)bounds.expandByPoint(new T.Vector3(vertices[index*3],vertices[index*3+1],vertices[index*3+2]));part.boundingBox=bounds;part.boundingSphere=bounds.getBoundingSphere(new T.Sphere());const mesh=new T.Mesh(part,material);mesh.name='alpha_terrain_chunk_'+key;mesh.receiveShadow=true;meshes.push(mesh);}

@@ -4,7 +4,7 @@ import {createDamAudio} from './dam-audio.js';
 import {addDamDetails} from './dam-details.js';
 import {createDamBanks} from './dam-banks.js';
 
-export function createDamEnvironment(T,field,config,addFog,sound,terrainMaterial){
+export function createDamEnvironment(T,field,config,addFog,sound,terrain){
  const layout=damLayout(field,config),root=new T.Group();root.name='western_dam';root.userData.decorative=true;
  root.position.set(layout.x,layout.y,layout.z);root.rotation.z=layout.rotation;root.scale.setScalar(layout.scale);
  const structure=createDamModel(T,addFog);root.add(structure);
@@ -26,7 +26,7 @@ export function createDamEnvironment(T,field,config,addFog,sound,terrainMaterial
  const outline=[...shore];for(let x=39;x>=-42;x-=3)outline.push([x,damBow(x)+2.5]);
  const shape=new T.Shape();outline.forEach(([x,y],i)=>i?shape.lineTo(x,y):shape.moveTo(x,y));shape.closePath();
  const reservoir=new T.Mesh(new T.ShapeGeometry(shape),water);reservoir.name='reservoir_surface';reservoir.position.z=layout.reservoir.level;root.add(reservoir);
- root.add(createDamBanks(T,field,layout,shore,terrainMaterial));
+ const banks=createDamBanks(T,field,layout,shore,terrain.terrainMaterials[1]);root.add(banks);terrain.registerSurface(banks,banks.userData.materialForTerrain);
  const streamMaterial=new T.MeshStandardMaterial({color:'#8daaa0',transparent:true,opacity:.58,roughness:.34,metalness:.08,side:T.DoubleSide,depthWrite:false});addFog(streamMaterial);
  const foamMaterial=new T.MeshBasicMaterial({color:'#cad6bb',transparent:true,opacity:.36,depthWrite:false,side:T.DoubleSide});addFog(foamMaterial);
  const streams=DAM_OUTLETS.map((p,index)=>{
