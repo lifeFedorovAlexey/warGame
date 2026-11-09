@@ -1,9 +1,8 @@
 import {setButtonIcon, speedIcon} from '../assets/ui/icons.js';
 import {createCampaignWorld} from './world.js';
 import {Mission} from './mission.js';
-import {factoryPriority,factoryVisitors,setFactoryPriority} from './factory-garage.js';
 import {productionFactories} from './factory-production.js';
-import {createFactoryRows,updateFactoryRows,updateProductionButtons} from './factory-queues.js';
+import {createFactoryRows,updateFactoryRows} from './factory-queues.js';
 import {canDemolish,demolitionWorkers,requestDemolition,cancelDemolition} from './building-demolition.js';
 import {FieldRadio, missionSignal} from './field-radio.js';
 import {raidApproachSignal, visibleRaidContact, warehouseAdvanceHint, waterTowerSignal} from './threat-guidance.js';
@@ -757,34 +756,6 @@ function updateContext(first) {
       items.push(item);
       return item;
     };
-    if (factory) {
-      if(factories.length===1){
-      const priority=factoryPriority(first),control=add('Приоритет: '+(priority==='repair'?'ремонт':'производство'),
-        priority==='repair'?'Ремонт приостанавливает выпуск. Нажмите для приоритета производства':'Машины ждут ремонта внутри завода. Нажмите для приоритета ремонта',
-        ()=>setFactoryPriority(mission,first.id,priority==='repair'?'production':'repair'),false,priority==='repair'?'repair-depot':'produce');
-      control.dataset.factoryPriority=priority;
-      const count=document.createElement('span');count.className='production-count';count.hidden=true;control.append(count);
-      const progress=document.createElement('progress');progress.className='production-progress';progress.max=1;progress.hidden=true;progress.setAttribute('aria-label','Ремонт машины');control.append(progress);
-      }
-      for (const {id, kind, name, spec} of projects) {
-        const label=name;
-        const control=add(label, spec.cost + ' нефти · ' + spec.seconds + ' с', () => {
-          const result=mission.produce(first.id,id,{distributed:true});
-          if(result.ok)sound.signal('order');
-          return result;
-        }, false, kind);
-        control.dataset.production=id;control.dataset.baseTitle=control.title+(factories.length>1?' · Автораспределение':'');
-        control.oncontextmenu=event=>{
-          event.preventDefault();
-          if(!productionFactories(mission).some(f=>f.queue.some(job=>mission.productionProjectId(job)===id)))return;
-          const result=mission.cancelProduction(first.id,id,{distributed:true});
-          report(result);if(result.ok)sound.signal('order');updateUi();
-        };
-        const count=document.createElement('span');count.className='production-count';count.hidden=true;count.setAttribute('aria-hidden','true');control.append(count);
-        const progress=document.createElement('progress');progress.className='production-progress';progress.max=1;progress.hidden=true;progress.setAttribute('aria-label','Выпуск · '+label);control.append(progress);
-        const time=document.createElement('span');time.className='production-time';time.hidden=true;time.setAttribute('aria-hidden','true');control.append(time);
-      }
-    }
     if (first?.owner === 'rai' && first.completed && first.kind === 'lab'&&mission.researchUnlocked()) {
       for (const [id,spec] of Object.entries(config.research)) {
         const done = s.research[id], known = s.artifactKeys.includes(id);
@@ -814,7 +785,7 @@ function updateContext(first) {
       control.dataset.demolish=running?'cancel':'building';
       if(running||first.demolitionProgress){const progress=document.createElement('progress');progress.className='production-progress';progress.dataset.demolitionProgress='';progress.max=1;progress.setAttribute('aria-label','Снос здания');control.append(progress);}
     }
-    if(factory&&factories.length>1)items.push(createFactoryRows(mission,factories,projects,{
+    if(factory)items.unshift(createFactoryRows(mission,factories,projects,{
       act:action=>{const result=action();report(result);if(result.ok)sound.signal('order');updateUi();},
       focus:id=>{const f=mission.entity(id);if(f){select([id],false,false);world.centre(f,360);}},
     }));
@@ -826,14 +797,7 @@ function updateContext(first) {
   if(demolitionProgress){demolitionProgress.value=first?.demolitionProgress??0;demolitionProgress.setAttribute('aria-valuetext',Math.round(demolitionProgress.value*100)+'%');}
   const queue=$('queue');
   if(factory){
-    const control=$('actions').querySelector(':scope > [data-factory-priority]'),visits=factoryVisitors(mission,first);
-    if(control){
-      const count=control.querySelector('.production-count'),progress=control.querySelector('progress');
-      count.hidden=!visits.length;count.textContent=String(visits.length);progress.hidden=!first.activeRepair;progress.value=first.activeRepair?.progress??0;
-      control.setAttribute('aria-description',visits.length?'На обслуживании: '+visits.length:'Очередь ремонта пуста');
-    }
     queue.hidden=true;queue.replaceChildren();queueKey='';
-    updateProductionButtons($('actions'),mission,factories,projects,paused);
     updateFactoryRows($('actions'),mission,projects,paused);
     return;
   }

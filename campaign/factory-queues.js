@@ -11,6 +11,7 @@ function indicators(control,label){
 export function createFactoryRows(mission,factories,projects,{act,focus}){
  const root=document.createElement('div');root.className='factory-queues';
  root.style.setProperty('--factory-projects',projects.length);
+ root.style.setProperty('--factory-short-rows',Math.min(factories.length,5));
  for(const [index,factory] of factories.entries()){
   const row=document.createElement('div');row.className='factory-line';row.dataset.factoryRow=factory.id;row.setAttribute('role','group');row.setAttribute('aria-label','Завод '+(index+1));
   const location=document.createElement('button');setButtonIcon(location,'factory','Завод '+(index+1));location.title='Завод '+(index+1)+' · Показать';location.onclick=()=>focus(factory.id);
@@ -19,7 +20,7 @@ export function createFactoryRows(mission,factories,projects,{act,focus}){
   priority.onclick=()=>act(()=>{const f=mission.entity(factory.id);return f?.hp>0?setFactoryPriority(mission,factory.id,factoryPriority(f)==='repair'?'production':'repair'):mission.fail('Завод недоступен');});
   indicators(priority,'Ремонт · Завод '+(index+1));row.append(priority);
   for(const {id,kind,name,spec} of projects){
-   const control=document.createElement('button');setButtonIcon(control,kind,name);control.dataset.factoryProduction=id;
+   const control=document.createElement('button');setButtonIcon(control,kind,name);control.dataset.factoryProduction=control.dataset.production=id;
    control.dataset.baseTitle=name+' · Завод '+(index+1)+' · '+spec.cost+' нефти';
    control.onclick=()=>act(()=>mission.produce(factory.id,id));
    control.oncontextmenu=event=>{event.preventDefault();act(()=>mission.cancelProduction(factory.id,id));};
