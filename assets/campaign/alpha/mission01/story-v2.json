@@ -4,7 +4,7 @@
   "edition": "owner-radio-v3",
   "source": {
     "path": "docs/campaign/alpha/mission01-radio-v3.md",
-    "sha256": "2ce5c3d0ebf05c89caba40a5c07624f32be063341b3f753b3cc2e2b33ce197bb"
+    "sha256": "08b2737adba4a086179f3ca583a6a56bbc67355edc3e835348f6d4f139115f19"
   },
   "speakers": {
     "narrator": {
@@ -1285,10 +1285,10 @@
     {
       "id": "m01-s07-l016",
       "speaker": "warrant",
-      "text": "И потом, у нас мусор на балансе.",
+      "text": "У нас это склад называется.",
       "pauseAfter": 0.2,
       "sourceLine": 373,
-      "recordingStatus": "Т"
+      "recordingStatus": "Н"
     },
     {
       "id": "m01-v3-r21-l001",

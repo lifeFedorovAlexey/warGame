@@ -21,7 +21,9 @@ for(const cue of [...source.dialogue,...source.barks]){
  assert(clip.duration>0);
  if(cue.speaker!=='past')assert(portraits.characters[cue.speaker],cue.speaker);
 }
-assert.equal(userCount,39);
+assert.equal(userCount,38);
+assert.equal(source.dialogue.find(c=>c.id==='m01-s07-l016').text,'У нас это склад называется.');
+assert.equal(audio.clips['m01-s07-l016'].origin,'temporary-synthesis');
 // Mislabeled takes use the owner's confirmed spoken words, not their filenames.
 assert.equal(audio.clips['m01-s06-l008'].file,'recordings/commander/m01-s07-l002.mp3');
 assert.equal(audio.clips['m01-s07-l002'].file,'recordings/commander/m01-s07-l004.mp3');
@@ -222,4 +224,4 @@ for(const enabled of [false,true]){
  assert.equal(f.tick().id,'m01-v3-nuclear-power-ready','Old saves resume the revised report safely');
  assert(!source.dialogue.some(c=>c.text==='Почему электричества нет?'));
 }
-console.log('PASS: integrated opening, complete exchanges through construction/research, 39 original recordings, alternate routes, interruptions, native and old saves, finale');
+console.log(`PASS: integrated opening, complete exchanges through construction/research, ${userCount} original recordings, alternate routes, interruptions, native and old saves, finale`);
