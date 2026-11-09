@@ -10,7 +10,7 @@ const letters={
  'в':['M.17 .86 C.43 .34 .88 -.39 .48 -.15 C.16 .08 .1 .6 .17 .88 C.29 1.14 .83 .88 .75 .62 C.69 .41 .33 .53 .21 .65'],
  'р':['M.27 .18 L.04 1.36','M.26 .38 C.77 -.2 1.03 .25 .72 .69 Q.51 .99 .21 .79'],
  'а':['M.68 .22 C.3 -.03 -.03 .46 .13 .78 C.3 1.09 .68 .61 .79 .13 L.58 .83 Q.57 1.03 .93 .75'],
- '?':['M.12 .12 C.27 -.12 .81 -.1 .75 .25 C.71 .47 .45 .45 .39 .68','M.32 .96 L.35 .98'],
+ '?':['M.10 .17 C.22 -.12 .86 -.10 .80 .25 C.76 .49 .43 .47 .41 .71','M.40 .96 L.41 .97'],
 };
 
 export function addDamWeathering(T,structure,addFog){
@@ -56,7 +56,7 @@ export function addDamWeathering(T,structure,addFog){
    if(letter===' '){ctx.translate(.55,0);continue;}
    ctx.save();ctx.translate(0,(random()-.5)*.07);ctx.rotate((random()-.5)*.10);
    for(const stroke of letters[letter]){
-    const p=new Path2D(stroke);ctx.globalAlpha=opacity;ctx.lineWidth=.085+random()*.045;ctx.stroke(p);
+    const p=new Path2D(stroke);ctx.globalAlpha=opacity;ctx.lineWidth=letter==='?'?.14+random()*.025:.085+random()*.045;ctx.stroke(p);
     // Individual bristles leave dry streaks and torn edges inside the paint.
     for(let bristle=0;bristle<6;bristle++){ctx.save();ctx.translate((random()-.5)*.10,(random()-.5)*.045);ctx.globalAlpha=opacity*.16;ctx.lineWidth=.006+random()*.006;ctx.stroke(p);ctx.restore();}
    }
@@ -65,7 +65,9 @@ export function addDamWeathering(T,structure,addFog){
   }ctx.restore();
  }
  brushText('цой жив',-29,9.1,2.45,'#30382c',.76);
- brushText('рай?',8.2,10.4,1.65,'#7a422f',.52);
+ // Keep the whole phrase inside the 6..12 m panel: the buttress at x=12
+ // used to cover the question mark. Stronger dry paint survives distant mips.
+ brushText('рай?',6.65,10.6,1.85,'#613c2c',.92);
  // Old chalk tally marks and worn maintenance marks, kept secondary.
  ctx.strokeStyle='rgba(213,202,168,.38)';ctx.lineWidth=.04;
  for(let i=0;i<4;i++){ctx.beginPath();ctx.moveTo(-34+i*.35,7.1);ctx.lineTo(-34.1+i*.35,5.6);ctx.stroke();}
