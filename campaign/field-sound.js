@@ -1,6 +1,23 @@
 import {setButtonIcon} from '../assets/ui/icons.js';
 const clampLevel = value => Number.isFinite(value) ? Math.max(0, Math.min(1, value)) : 0;
 
+// Dry sand movement and short irregular scanning passes, generated once
+// when audio unlocks rather than a sustained projector tone.
+export function constructionSoundBuffer(ctx){
+  const buffer=ctx.createBuffer(1,ctx.sampleRate*8,ctx.sampleRate),samples=buffer.getChannelData(0);
+  let seed=173,low=0,soft=0,begin=0,end=0,rest=0;
+  const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
+  for(let i=0;i<samples.length;i++){
+    const t=i/ctx.sampleRate;
+    if(t>=rest){begin=t;end=t+.07+random()*.12;rest=end+.025+random()*.11;}
+    const white=random()*2-1;low+=.035*(white-low);soft+=.28*(white-soft);
+    const pulse=t<end?Math.sin(Math.PI*(t-begin)/(end-begin))**2:0;
+    const seam=Math.min(1,t/.08,(8-t)/.08);
+    samples[i]=((soft-low)*(.045+.17*pulse)+low*.16)*seam;
+  }
+  return buffer;
+}
+
 const driveFiles = {
   idle:'engine-idle.ogg', load:'engine-drive.ogg', asphalt:'tire-asphalt.ogg',
   gravel:'tire-gravel.ogg', skid:'tire-skid.ogg',
@@ -120,6 +137,7 @@ export class FieldSound {
       .catch(error => console.warn('Реплика прапорщика недоступна:', error.message));
     if (this.storyEnabled) for (const chapter of ['first-contact', 'camp3-sighted']) this.storyClip(chapter);
     this.loadProjector();
+    this.construction=this.startLoop(constructionSoundBuffer(ctx));
     for (const [kind, file] of Object.entries(combatFiles)) {
       this.loadClip(combatBase, file)
         .then(buffer => this.combatClips.set(kind, buffer))
@@ -536,7 +554,7 @@ export class FieldSound {
     }
   }
 
-  update({engine = 0, rolling = 0, slip = 0, road = 0, welding = 0, field = false} = {}) {
+  update({engine = 0, rolling = 0, slip = 0, road = 0, welding = 0, construction = 0, field = false} = {}) {
     if (!this.ready()) return;
     this.updateStoryVoices(field);
     const now = this.context.currentTime;
@@ -548,6 +566,7 @@ export class FieldSound {
     slip = clampLevel(slip);
     road = clampLevel(road);
     welding = clampLevel(welding);
+    construction = field ? clampLevel(construction) : 0;
     const acceleration = dt < .25 ? clampLevel((rolling - this.previousRolling) / dt * .28) : 0;
     this.previousRolling = rolling;
     const load = clampLevel(.68 * rolling + .52 * slip + .32 * acceleration);
@@ -569,6 +588,7 @@ export class FieldSound {
       this.playSkid(slip,road);
     }
     this.projector?.gain.gain.setTargetAtTime(.56*welding, now, .12);
+    this.construction?.gain.gain.setTargetAtTime(.7*construction, now, .08);
     this.wind?.gain.gain.setTargetAtTime(field ? .16 * (1 - .5*engine) : 0, now, .28);
   }
 

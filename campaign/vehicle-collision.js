@@ -1,5 +1,5 @@
-import {vehiclePose} from './builder-kinematics.js';
 import {SCAV_PROFILES} from './scav-unit-profiles.js';
+import {vehicleSizeScale} from './vehicle-dynamics.js';
 
 const modular = [
   [1.177, -.008, 2.417, .75, .75],
@@ -7,113 +7,181 @@ const modular = [
 ];
 const fieldCar = [[1.03, -.075, 2.18, .43, .47], [.96, -.06, 2.10, 1.48, .78]];
 const cached = new WeakMap();
+export const collisionStatistics={queries:0,axisSeparated:0,penetrationQueries:0,poseGapCacheHits:0,radiusSeparated:0};
+const exactPoseGaps=new WeakMap(),solidEnvelopes=new WeakMap();
 const skin = .055;
 export const vehicleLocalBoxes = kind => SCAV_PROFILES[kind]?.boxes ?? (kind === 'command' || kind === 'raider' ? fieldCar : modular);
-const radiusBounds=new WeakMap();
+// XY extrema measured from the rendered LOD0 chassis/body meshes, before the
+// instance scale. Turret aim, suspension animation and damage do not resize traffic.
+const modelBounds={
+ modular:[-1.161099911,-2.410000086,1.161099911,2.394432306],
+ command:[-.94,-2.255500078,.94,2.108999968],raider:[-.94,-2.095000029,.94,2.108999968],
+ 'scav-zaporozhets':[-.865,-1.860000014,.865,2.010000001],
+ 'scav-firetruck':[-1.350000024,-3.664999962,1.350000024,3.75],
+ 'scav-bus':[-1.375,-3.759999991,1.375,3.775000095]
+};
+const dimensions=new Map();
+function localFootprint(kind){
+ let result=dimensions.get(kind);if(result)return result;
+ let bounds=modelBounds[kind]??modelBounds.modular;
+ const ellipse=!SCAV_PROFILES[kind]?.infantry;
+ if(!ellipse){const boxes=vehicleLocalBoxes(kind);bounds=[-Math.max(...boxes.map(b=>b[0])),Math.min(...boxes.map(b=>b[1]-b[2])),Math.max(...boxes.map(b=>b[0])),Math.max(...boxes.map(b=>b[1]+b[2]))];}
+ const factor=vehicleSizeScale(kind),[left,back,right,front]=bounds;
+ result={ellipse,x:(left+right)*factor/2,y:(back+front)*factor/2,width:(right-left)*factor/2,depth:(front-back)*factor/2};
+ dimensions.set(kind,result);return result;
+}
 export function vehicleRadiusBound(kind,scale){
-  const boxes=vehicleLocalBoxes(kind);let radius=radiusBounds.get(boxes);
-  if(radius===undefined){
-    // Projection can combine extrema from different authored boxes. sqrt(2)
-    // also encloses the corners of that projected bounding rectangle, for
-    // any ground pitch, roll and heading, including long buses/trucks.
-    radius=Math.SQRT2*Math.max(...boxes.map(([hx,y,hy,z,hz])=>Math.hypot(hx,Math.abs(y)+hy,Math.abs(z)+hz)));
-    radiusBounds.set(boxes,radius);
-  }
-  return radius*scale;
+ const p=localFootprint(kind);
+ return (Math.hypot(p.x,p.y)+(p.ellipse?Math.max(p.width,p.depth):Math.hypot(p.width,p.depth)))*scale;
 }
-// Death releases the driving space immediately. A retained visual wreck and
-// collectible parts have their own lifetimes, but are never traffic obstacles.
+// Death releases driving space; retained visual wrecks are not traffic obstacles.
 export const vehicleObstacle = unit => unit.hp > 0&&unit.factoryVisit?.phase!=='inside';
+// Explicit owner rule: only two allied vehicles wholly outside the camera
+// may pass through each other. Unknown visibility keeps collision enabled.
+export const trafficCollisionRequired=(a,b)=>a?.factoryVisit?.phase!=='inside'&&b?.factoryVisit?.phase!=='inside'&&!(a?.owner==='rai'&&b?.owner==='rai'
+ &&a.trafficOnScreen===false&&b.trafficOnScreen===false&&!SCAV_PROFILES[a.kind]?.infantry&&!SCAV_PROFILES[b.kind]?.infantry);
 
-// Local dimensions follow the C01/B01 GLB bounds. Project both the lower
-// running gear and the higher body onto the ground using the render pose.
 export function vehicleEnvelope(unit, scale, field) {
-  const heading = unit.heading ?? 0, kind = unit.kind;
-  const entry = cached.get(unit);
-  if (entry && entry.x === unit.x && entry.y === unit.y && entry.heading === heading
-      && entry.scale === scale && entry.field === field && entry.kind === kind) return entry.envelope;
-  const pose = field ? vehiclePose(unit, field, scale) : {pitch: 0, roll: 0};
-  const cp = Math.cos(pose.pitch), sp = Math.sin(pose.pitch), cr = Math.cos(pose.roll), sr = Math.sin(pose.roll);
-  let xmin = Infinity, xmax = -Infinity, ymin = Infinity, ymax = -Infinity;
-  for (const [hx, y, hy, z, hz] of vehicleLocalBoxes(kind)) {
-    const x = z * sr, forward = y * cp - z * sp * cr;
-    const wx = hx * Math.abs(cr) + hz * Math.abs(sr);
-    const wy = hx * Math.abs(sp * sr) + hy * Math.abs(cp) + hz * Math.abs(sp * cr);
-    xmin = Math.min(xmin, x - wx); xmax = Math.max(xmax, x + wx);
-    ymin = Math.min(ymin, forward - wy); ymax = Math.max(ymax, forward + wy);
+ const heading=unit.heading??0,kind=unit.kind,entry=cached.get(unit);
+ if(entry&&entry.x===unit.x&&entry.y===unit.y&&entry.heading===heading&&entry.scale===scale&&entry.kind===kind)return entry.envelope;
+ const p=localFootprint(kind),c=Math.cos(heading),s=Math.sin(heading);
+ const envelope={x:unit.x+(p.x*c-p.y*s)*scale,y:unit.y+(p.x*s+p.y*c)*scale,
+  width:p.width*scale,depth:p.depth*scale,c,s,ellipse:p.ellipse,pitch:0,roll:0};
+ cached.set(unit,{x:unit.x,y:unit.y,heading,scale,kind,envelope});return envelope;
+}
+export function footprintSupport(shape,x,y){
+ if(shape.radius!==undefined)return shape.radius*Math.hypot(x,y);
+ const a=shape.c*x+shape.s*y,b=shape.c*y-shape.s*x;
+ return shape.ellipse?Math.hypot(shape.width*a,shape.depth*b):shape.width*Math.abs(a)+shape.depth*Math.abs(b);
+}
+// Exact support of an ellipse (not the four axes of its enclosing rectangle).
+// A swept shape is the convex hull of sampled poses plus the arc allowance.
+export function footprintPoint(shape,x,y){
+ if(shape.start){
+  let best,projection=-Infinity;
+  for(const pose of [shape.start,shape.middle,shape.end]){const p=footprintPoint(pose,x,y),d=p.x*x+p.y*y;if(d>projection){projection=d;best=p;}}
+  const length=Math.hypot(x,y)||1;return {x:best.x+x*shape.padding/length,y:best.y+y*shape.padding/length};
+ }
+ if(shape.radius!==undefined){const length=Math.hypot(x,y)||1;return {x:shape.x+shape.radius*x/length,y:shape.y+shape.radius*y/length};}
+ let a=shape.c*x+shape.s*y,b=shape.c*y-shape.s*x;
+ if(shape.ellipse){const r=Math.hypot(shape.width*a,shape.depth*b)||1;a=shape.width*shape.width*a/r;b=shape.depth*shape.depth*b/r;}
+ else{a=Math.sign(a)*shape.width;b=Math.sign(b)*shape.depth;}
+ return {x:shape.x+shape.c*a-shape.s*b,y:shape.y+shape.s*a+shape.c*b};
+}
+const cross=(a,b,c)=>(b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x);
+function penetration(simplex,support){
+ collisionStatistics.penetrationQueries++;
+ // EPA supplies a signed gap for releasing an overlap from an old save.
+ const points=[...simplex,...[[1,0],[0,1],[-1,0],[0,-1]].map(([x,y])=>support(x,y))].sort((a,b)=>a.x-b.x||a.y-b.y);
+ const lower=[],upper=[];
+ for(const p of points){while(lower.length>1&&cross(lower.at(-2),lower.at(-1),p)<=1e-12)lower.pop();lower.push(p);}
+ for(const p of points.slice().reverse()){while(upper.length>1&&cross(upper.at(-2),upper.at(-1),p)<=1e-12)upper.pop();upper.push(p);}
+ const polygon=lower.slice(0,-1).concat(upper.slice(0,-1));let best={gap:-Infinity,nx:1,ny:0};
+ if(polygon.length<3)return {gap:0,nx:1,ny:0};
+ for(let iteration=0;iteration<32;iteration++){
+  let edge=-1,distance=Infinity,nx=1,ny=0;
+  for(let i=0;i<polygon.length;i++){
+   const a=polygon[i],b=polygon[(i+1)%polygon.length],dx=b.x-a.x,dy=b.y-a.y,length=Math.hypot(dx,dy);if(length<1e-12)continue;
+   const x=dy/length,y=-dx/length,d=a.x*x+a.y*y;
+   if(d<distance){edge=i;distance=d;nx=x;ny=y;}
   }
-  const c = Math.cos(heading), s = Math.sin(heading);
-  const x = (xmin + xmax) * scale / 2, y = (ymin + ymax) * scale / 2;
-  const envelope = {
-    x: unit.x + x * c - y * s, y: unit.y + x * s + y * c,
-    width: (xmax - xmin) * scale / 2, depth: (ymax - ymin) * scale / 2,
-    c, s, pitch: pose.pitch, roll: pose.roll
-  };
-  cached.set(unit, {x: unit.x, y: unit.y, heading, scale, field, kind, envelope});
-  return envelope;
+  if(edge<0)return {gap:0,nx:1,ny:0};
+  const point=support(nx,ny),extent=point.x*nx+point.y*ny;
+  if(-extent>best.gap)best={gap:-extent,nx:-nx,ny:-ny};
+  if(extent-distance<1e-5||polygon.some(p=>Math.hypot(p.x-point.x,p.y-point.y)<1e-9))return best;
+  polygon.splice(edge+1,0,point);
+ }
+ return best;
 }
-
-export function footprintSupport(shape, x, y) {
-  return shape.width * Math.abs(shape.c * x + shape.s * y) +
-    shape.depth * Math.abs(shape.c * y - shape.s * x);
-}
-
-function poseGap(a, b, separation = Infinity) {
-  const dx = b.x - a.x, dy = b.y - a.y;
-  let gap = -Infinity;
-  for(let axis=0;axis<4;axis++){
-    const shape=axis<2?a:b,x=axis%2?-shape.s:shape.c,y=axis%2?shape.c:shape.s;
-    gap = Math.max(gap, Math.abs(dx * x + dy * y) - footprintSupport(a, x, y) - footprintSupport(b, x, y));
-    if(gap>=separation)return gap;
+export function footprintContact(a,b,separation=Infinity){
+ collisionStatistics.queries++;
+ const ac=a.middle??a,bc=b.middle??b;
+ const support=(x,y)=>{const p=footprintPoint(b,x,y),q=footprintPoint(a,-x,-y);return {x:p.x-q.x,y:p.y-q.y};};
+ let dx=bc.x-ac.x,dy=bc.y-ac.y,length=Math.hypot(dx,dy);if(length<1e-9){dx=1;dy=0;length=1;}
+ let simplex=[support(-dx/length,-dy/length)],closest=simplex[0];
+ let best={gap:(closest.x*dx+closest.y*dy)/length,nx:dx/length,ny:dy/length};
+ if(best.gap>=separation){collisionStatistics.axisSeparated++;return best;}
+ // Bounded GJK. A positive returned gap is always a separating-plane proof.
+ // Exhausting the numerical iteration budget never admits an unproved gap.
+ for(let iteration=0;iteration<24;iteration++){
+  const distance=Math.hypot(closest.x,closest.y);
+  if(distance<1e-8)return Number.isFinite(separation)?{gap:-Infinity,nx:best.nx,ny:best.ny}:penetration(simplex,support);
+  const nx=closest.x/distance,ny=closest.y/distance,p=support(-nx,-ny),gap=p.x*nx+p.y*ny;
+  if(gap>best.gap)best={gap,nx,ny};
+  if(best.gap>=separation||distance-gap<1e-6||simplex.some(q=>Math.hypot(q.x-p.x,q.y-p.y)<1e-10))return best;
+  simplex.push(p);
+  if(simplex.length===3){
+   const [u,v,w]=simplex,origin={x:0,y:0},d=cross(u,v,w);
+   if(Math.abs(d)>1e-14&&cross(u,v,origin)*d>=0&&cross(v,w,origin)*d>=0&&cross(w,u,origin)*d>=0)return Number.isFinite(separation)?{gap:-Infinity,nx,ny}:penetration(simplex,support);
   }
-  return gap;
-}
-
-export function vehicleClearance(a, b, scale, field) {
-  return poseGap(vehicleEnvelope(a, scale, field), vehicleEnvelope(b, scale, field));
-}
-
-export function vehicleSweep(from, to, scale, field) {
-  const start = vehicleEnvelope(from, scale, field), end = vehicleEnvelope(to, scale, field);
-  const difference = (to.heading ?? 0) - (from.heading ?? 0);
-  const turn = Math.atan2(Math.sin(difference), Math.cos(difference));
-  const middle = vehicleEnvelope({
-    x: (from.x + to.x) / 2, y: (from.y + to.y) / 2,
-    kind: to.kind ?? from.kind, heading: (from.heading ?? 0) + turn / 2
-  }, scale, field);
-  // The union of three support intervals includes the projected corners. The
-  // rotational sagitta allowance covers the small arc between checked poses.
-  const radius = Math.max(start.width + start.depth, end.width + end.depth);
-  return {start, middle, end, padding: .012 + radius * turn * turn / 24};
-}
-
-function sweepGap(sweep, obstacle, separation = Infinity) {
-  const {start, middle, end, padding} = sweep;
-  let gap = -Infinity;
-  for(let axis=0;axis<8;axis++){
-    const shape=axis<2?start:axis<4?middle:axis<6?end:obstacle,x=axis%2?-shape.s:shape.c,y=axis%2?shape.c:shape.s;
-    const sa = footprintSupport(start, x, y), sm = footprintSupport(middle, x, y), sb = footprintSupport(end, x, y);
-    const a = (start.x - obstacle.x) * x + (start.y - obstacle.y) * y;
-    const m = (middle.x - obstacle.x) * x + (middle.y - obstacle.y) * y;
-    const b = (end.x - obstacle.x) * x + (end.y - obstacle.y) * y;
-    const min = Math.min(a - sa, m - sm, b - sb), max = Math.max(a + sa, m + sm, b + sb);
-    gap = Math.max(gap, Math.max(min, -max) - footprintSupport(obstacle, x, y) - padding);
-    // One separating axis already proves the sweep clear. Full maximum gaps
-    // are still computed for penetration recovery and reported clearances.
-    if(gap>=separation)return gap;
+  let nearest=Infinity,keep,next;
+  for(let i=0;i<simplex.length-1;i++)for(let j=i+1;j<simplex.length;j++){
+   const u=simplex[i],v=simplex[j],x=v.x-u.x,y=v.y-u.y,den=x*x+y*y,t=den?Math.max(0,Math.min(1,-(u.x*x+u.y*y)/den)):0;
+   const point={x:u.x+t*x,y:u.y+t*y},squared=point.x*point.x+point.y*point.y;
+   if(squared<nearest){nearest=squared;next=point;keep=t<=0?[u]:t>=1?[v]:[u,v];}
   }
-  return gap;
+  simplex=keep;closest=next;
+ }
+ return best;
+}
+export const footprintGap=(a,b,separation=Infinity)=>footprintContact(a,b,separation).gap;
+// These pose envelopes are immutable: movement creates a new envelope. Only
+// cache the full signed-distance result, never a threshold-only search result.
+// Both keys are weak so completed search poses cannot accumulate here.
+function poseGap(a,b,separation=Infinity){
+ if(separation!==Infinity)return footprintGap(a,b,separation);
+ let pairs=exactPoseGaps.get(a);const known=pairs?.get(b);
+ if(known!==undefined){collisionStatistics.poseGapCacheHits++;return known;}
+ const gap=footprintGap(a,b);
+ if(!pairs){pairs=new WeakMap();exactPoseGaps.set(a,pairs);}pairs.set(b,gap);return gap;
+}
+export function envelopeClearance(a,b,separation=Infinity){
+ if(Number.isFinite(separation)){
+  const ar=a.ellipse?Math.max(a.width,a.depth):Math.hypot(a.width,a.depth);
+  const br=b.ellipse?Math.max(b.width,b.depth):Math.hypot(b.width,b.depth);
+  const bound=Math.hypot(a.x-b.x,a.y-b.y)-ar-br;
+  if(bound>=separation){collisionStatistics.radiusSeparated++;return bound;}
+ }
+ return poseGap(a,b,separation);
+}
+export function vehicleClearance(a,b,scale,field,separation=Infinity){
+ return envelopeClearance(vehicleEnvelope(a,scale,field),vehicleEnvelope(b,scale,field),separation);
+}
+export function vehicleSweep(from,to,scale,field){
+ const start=vehicleEnvelope(from,scale,field),end=vehicleEnvelope(to,scale,field),delta=(to.heading??0)-(from.heading??0),turn=Math.atan2(Math.sin(delta),Math.cos(delta));
+ const middle=vehicleEnvelope({x:(from.x+to.x)/2,y:(from.y+to.y)/2,kind:to.kind??from.kind,heading:(from.heading??0)+turn/2},scale,field);
+ const radius=Math.max(vehicleRadiusBound(from.kind,scale),vehicleRadiusBound(to.kind??from.kind,scale));
+ // Cover centre curvature and each body's arc between the three samples.
+ const padding=.012+.5*Math.hypot(to.x-from.x,to.y-from.y)*Math.tan(Math.abs(turn)/4)+radius*(1-Math.cos(turn/4));
+ return {start,middle,end,padding};
+}
+export const sweepGap=(sweep,obstacle,separation=Infinity)=>footprintGap(sweep,obstacle,separation);
+// Translate a pose against a finite reserved sweep. Conservative advancement
+// uses the same ellipse distance and returns early on numerical uncertainty.
+export function footprintCast(shape,course,length,obstacle,skin=0){
+ let travelled=0;
+ for(let iteration=0;iteration<24;iteration++){
+  const pose={...shape,x:shape.x+course.x*travelled,y:shape.y+course.y*travelled};
+  const {gap,nx,ny}=footprintContact(pose,obstacle);
+  if(gap<=skin+1e-5)return travelled;
+  const closing=course.x*nx+course.y*ny;if(closing<=1e-10)return Infinity;
+  travelled+=(gap-skin)/closing;if(travelled>length)return Infinity;
+ }
+ return travelled;
 }
 
 export function sweepAvoidsFootprint(sweep, obstacle, minimum = .1) {
-  const box = {
-    x: obstacle.x, y: obstacle.y, width: obstacle.halfWidth, depth: obstacle.halfDepth, c: 1, s: 0
-  };
+  let box=solidEnvelopes.get(obstacle);
+  if(!box||box.x!==obstacle.x||box.y!==obstacle.y||box.width!==obstacle.halfWidth||box.depth!==obstacle.halfDepth){
+    box={x:obstacle.x,y:obstacle.y,width:obstacle.halfWidth,depth:obstacle.halfDepth,c:1,s:0};
+    solidEnvelopes.set(obstacle,box);
+  }
   if (sweepGap(sweep, box, minimum) >= minimum) return true;
-  // Saves made with the former capsule can start in penetration. Permit only
+  // Saves made with a different footprint can start in penetration. Permit only
   // movement which releases that penetration and never deepens it.
+  if(poseGap(sweep.start,box,minimum+sweep.padding)>=minimum+sweep.padding)return false;
   const start = poseGap(sweep.start, box);
-  return start < minimum + sweep.padding && poseGap(sweep.middle, box) >= start - .001
+  return start < minimum + sweep.padding && sweepGap(sweep,box)>=start-sweep.padding-.001 && poseGap(sweep.middle, box) >= start - .001
     && poseGap(sweep.end, box) > start + .002;
 }
 
@@ -121,7 +189,10 @@ export function sweepAvoidsFootprint(sweep, obstacle, minimum = .1) {
 // Keep penetration recovery identical to the general multi-vehicle query.
 export function sweepClearsVehicle(sweep,obstacle,minimum){
   if(sweepGap(sweep,obstacle,minimum)>=minimum)return true;
-  const initial=poseGap(sweep.start,obstacle),middle=poseGap(sweep.middle,obstacle),final=poseGap(sweep.end,obstacle);
+  if(poseGap(sweep.start,obstacle,minimum+sweep.padding)>=minimum+sweep.padding)return false;
+  const initial=poseGap(sweep.start,obstacle);
+  if(initial>=minimum+sweep.padding||sweepGap(sweep,obstacle)<initial-sweep.padding-.0005)return false;
+  const middle=poseGap(sweep.middle,obstacle),final=poseGap(sweep.end,obstacle);
   if(initial<minimum+sweep.padding&&middle>=initial-.000001&&final>initial+.000001)return true;
   // Legacy parallel interpenetration may retain its side gap until the ends
   // clear. Ground-following pitch and roll slightly vary the projected gap.
@@ -137,12 +208,15 @@ export function clearOfVehicles(unit, next, units, scale, strict = false, previo
   const broadFrom=!strict&&before?before:current;
   const ownRadius=Math.max(vehicleRadiusBound(current.kind,scale),vehicleRadiusBound(broadFrom.kind,scale));
   const angle=(current.heading??0)-(broadFrom.heading??0),turn=Math.atan2(Math.sin(angle),Math.cos(angle));
-  const padding=minimum+(prepared?.padding??(.012+Math.SQRT2*ownRadius*turn*turn/24));
+  const padding=minimum+(prepared?.padding??(.012+ownRadius*(1-Math.cos(turn/4))+
+    .5*Math.hypot(current.x-broadFrom.x,current.y-broadFrom.y)*Math.tan(Math.abs(turn)/4)));
   const xmin=Math.min(broadFrom.x,current.x),xmax=Math.max(broadFrom.x,current.x),ymin=Math.min(broadFrom.y,current.y),ymax=Math.max(broadFrom.y,current.y);
   let sweep = prepared, end;
   let clear = true;
   for (const other of units) {
-    if (other === unit || !vehicleObstacle(other))continue;
+    // Search poses retain the physical vehicle ID. A projected copy of that
+    // same car is not an obstacle to its own return from a yielding position.
+    if (other === unit || unit?.id&&other.id===unit.id || !vehicleObstacle(other)||!trafficCollisionRequired(unit??current,other))continue;
     const range=ownRadius+vehicleRadiusBound(other.kind,scale)+padding;
     if(other.x<xmin-range||other.x>xmax+range||other.y<ymin-range||other.y>ymax+range)continue;
     const obstacle = vehicleEnvelope(other, scale, field);

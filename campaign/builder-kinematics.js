@@ -1,4 +1,5 @@
 import {SCAV_PROFILES} from './scav-unit-profiles.js';
+import {vehicleSizeScale} from './vehicle-dynamics.js';
 // Metres and radians. Shared by the authoritative simulation and the renderer.
 const rad=degrees=>degrees*Math.PI/180;
 export const BUILDER={
@@ -19,6 +20,7 @@ export function forwardBuilder(q){
  return Object.fromEntries(Object.entries({shoulder,elbow,boomEnd,wrist,tip}).map(([key,p])=>[key,rz(p,q.yaw)]));
 }
 export function vehiclePose(unit,field,scale=4.5){
+ scale*=vehicleSizeScale(unit);
  const custom=SCAV_PROFILES[unit.kind],heading=unit.heading??0;
  if(custom?.infantry)return{position:[unit.x,unit.y,field.heightAt(unit.x,unit.y)],heading,pitch:0,roll:0,scale};
  const c=Math.cos(heading),s=Math.sin(heading),fieldCar=unit.kind==='command'||unit.kind==='raider';

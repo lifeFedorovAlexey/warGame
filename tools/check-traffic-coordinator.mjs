@@ -6,22 +6,30 @@ import {vehicleClearance} from '../campaign/vehicle-collision.js';
 const config=JSON.parse(fs.readFileSync('assets/campaign/alpha/mission01/gameplay.json'));
 const field={extent:4096,half:2048,cellMetres:32,heightAt:()=>0,gradientAt:()=>({x:0,y:0}),gridToWorld:([x,y])=>({x:x*32-2048,y:2048-y*32}),worldToGrid:(x,y)=>[(x+2048)/32,(2048-y)/32]};
 function fixture(){const m=new Mission(config,field);m.state.units=[];m.state.buildings=[];m.state.camps=[];m.state.bounds=[0,0,127,127];m.state.pendingCinematics=[];m.updateMission=()=>{};m.rebuildNavigation();m.explored.fill(255);return m;}
-function car(m,x,y,heading,goal){const u=m.addUnit('bukhanka','rai',{x,y},{heading,previousHeading:heading});if(goal){u.path=[goal];u.task={type:'move',...goal};}return u;}
+const requested=new WeakMap();
+const active=u=>!!(u.pendingOrder||u.task||u.path.length||u.detour||u.yieldReturn);
+function car(m,x,y,heading,goal){
+ const u=m.addUnit('bukhanka','rai',{x,y},{heading,previousHeading:heading});
+ if(goal){requested.set(u,{...goal});assert(m.submitOrder([u.id],'move',goal).ok);}
+ return u;
+}
 const tests=[];
 {
  const m=fixture(),a=car(m,-45,0,-Math.PI/2,{x:90,y:0}),b=car(m,0,-45,0,{x:0,y:90});
- m.advance(.1);assert(m.state.trafficControl.leases.length>0);
+ for(let i=0;i<50&&!m.state.trafficControl?.leases.length;i++)m.advance(.1);
+ assert(m.state.trafficControl.leases.length>0);
  const saved=m.save(),restored=fixture();restored.load(saved);
  // The fixture uses the whole flat map; the production loader restores the
  // campaign sector from its progression flags.
  restored.state.bounds=m.state.bounds.slice();restored.rebuildNavigation();
- assert.deepEqual(restored.state.trafficControl,m.state.trafficControl);
+ assert.deepEqual(restored.state.trafficControl,JSON.parse(JSON.stringify(m.state.trafficControl)));
  for(let i=0;i<120;i++){m.advance(.1);restored.advance(.1);}
- assert.deepEqual(restored.state.trafficControl,m.state.trafficControl,'Right of way survives save/load');
+ assert.deepEqual(restored.state.trafficControl,JSON.parse(JSON.stringify(m.state.trafficControl)),'Right of way survives save/load');
  for(const u of [a,b]){const copy=restored.entity(u.id);assert.deepEqual([copy.x,copy.y,copy.hp],[u.x,u.y,u.hp]);assert.equal(u.hp,u.maxHp);assert(!u.task);}
  tests.push({mode:'save-during-queue',passed:true});
 }
-for(const streamSize of [10,50]){
+const streamOption=process.argv.indexOf('--stream-size');
+for(const streamSize of streamOption<0?[10,50]:[Number(process.argv[streamOption+1])]){
  const m=fixture(),units=[],goals=[],collisions=[],original=m.vehicleCollision.bind(m);
  m.vehicleCollision=(unit,speed,blockers)=>{if(collisions.length<10)collisions.push({time:m.state.time,id:unit.id,x:unit.x,y:unit.y,speed,decision:m.trafficCoordinator.decisions.get(unit.id),blockers:[...blockers].map(b=>({id:b.id,x:b.x,y:b.y,speed:b.driveSpeed,path:b.path[0]}))});return original(unit,speed,blockers);};
  for(let i=0;i<streamSize;i++)for(const axis of [0,1]){
@@ -29,7 +37,7 @@ for(const streamSize of [10,50]){
   units.push(axis?car(m,0,-80-i*30,0,goal):car(m,-80-i*30,0,-Math.PI/2,goal));goals.push(goal);
  }
  let minimum=Infinity,yields=0;
- for(let step=0;step<streamSize*120&&units.some(u=>u.task);step++){
+ for(let step=0;step<streamSize*120&&units.some(active);step++){
   m.advance(.1);yields+=m.trafficCoordinator.statistics.yielding;
   for(let i=0;i<units.length;i++)for(let j=i+1;j<units.length;j++)if(Math.abs(units[i].x-units[j].x)<30&&Math.abs(units[i].y-units[j].y)<30)minimum=Math.min(minimum,vehicleClearance(units[i],units[j],config.worldScale,field));
  }
@@ -39,8 +47,8 @@ for(const streamSize of [10,50]){
 }
 for(const mode of ['crossing','opposing']){
  const m=fixture(),a=car(m,-65,0,-Math.PI/2,{x:90,y:0}),b=mode==='crossing'?car(m,0,-65,0,{x:0,y:90}):car(m,65,0,Math.PI/2,{x:-90,y:0});
- const goals=[a.task,b.task];let clearance=Infinity,yields=0;
- for(let step=0;step<600&&(a.task||b.task);step++){
+ const goals=[requested.get(a),requested.get(b)];let clearance=Infinity,yields=0;
+ for(let step=0;step<600&&(active(a)||active(b));step++){
   m.advance(.1);yields+=m.trafficCoordinator.statistics.yielding;
   clearance=Math.min(clearance,vehicleClearance(a,b,config.worldScale,field));
  }

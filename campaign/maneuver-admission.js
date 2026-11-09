@@ -1,6 +1,6 @@
 import {checkManeuver} from './vehicle-motion.js';
-import {vehicleDynamics} from './vehicle-dynamics.js';
-import {vehicleSweep,vehicleRadiusBound,vehicleEnvelope,sweepClearsVehicle} from './vehicle-collision.js';
+import {vehicleDynamics,steeringResponse} from './vehicle-dynamics.js';
+import {vehicleSweep,vehicleRadiusBound,vehicleEnvelope,sweepClearsVehicle,trafficCollisionRequired} from './vehicle-collision.js';
 
 // A neighbour's unavoidable stopping path is identical for every point of
 // our candidate arc until its physical state changes. Retain only one lazy
@@ -26,10 +26,12 @@ function stoppingPath(mission,other,dt,scale){
  let path=stoppingPaths.get(other);
  if(!path||path.x!==other.x||path.y!==other.y||path.heading!==other.heading||path.speed0!==other.driveSpeed
    ||path.steering!==other.steering||path.reversing!==other.reversing||path.kind!==other.kind||path.dt!==dt
-   ||path.scale!==scale||path.field!==mission.field||path.topology!==mission.nav.topologyRevision){
+   ||path.scale!==scale||path.field!==mission.field||path.topology!==mission.nav.topologyRevision
+   ||path.fault!==other.steeringFault||other.steeringFault&&path.faultTime!==mission.state.time){
   path={x:other.x,y:other.y,heading:other.heading,speed0:other.driveSpeed,steering:other.steering,
    reversing:other.reversing,kind:other.kind,dt,scale,field:mission.field,topology:mission.nav.topologyRevision,
-   speed:other.driveSpeed,pose:{x:other.x,y:other.y,heading:other.heading,kind:other.kind},segments:[],complete:false};
+   fault:other.steeringFault,faultTime:mission.state.time,elapsed:0,
+   speed:other.driveSpeed,pose:{x:other.x,y:other.y,heading:other.heading,kind:other.kind,steering:other.steering},segments:[],complete:false};
   stoppingPaths.set(other,path);
  }
  return path;
@@ -46,8 +48,8 @@ export function maneuverAdmissionBlocker(mission,unit,from,to,dt){
  // even a fast legacy save, and only grows during sequential tick updates.
  const radius=maneuverAdmissionRadius(mission,unit,dt);
  for(const other of mission.nearbyUnits(to,radius)){
-  if(other===unit||other.hp<=0||(other.driveSpeed??0)<.01)continue;
-  const braking=vehicleDynamics(other).braking,direction=other.reversing?-1:1,curve=Math.tan(other.steering??0)*direction;
+  if(other===unit||unit.id&&other.id===unit.id||other.hp<=0||!trafficCollisionRequired(unit,other)||(other.driveSpeed??0)<.01)continue;
+  const braking=vehicleDynamics(other).braking,direction=other.reversing?-1:1;
   const speed=other.driveSpeed;
   const distance=Math.hypot(other.x-to.x,other.y-to.y);
   if(distance>speed*speed/(2*braking)+speed*dt+ownRadius+vehicleRadiusBound(other.kind,scale)+skin)continue;
@@ -62,11 +64,13 @@ export function maneuverAdmissionBlocker(mission,unit,from,to,dt){
     if(step)path.speed=Math.max(0,path.speed-braking*interval);
     const length=path.speed*interval;
     if(!length){path.complete=true;break;}
-    const next=checkManeuver(path.pose,[{direction,curve,remaining:length}],scale,()=>true);
+    const steering=steeringResponse(path.pose,other.steeringRequested??other.steering??0,interval,path.faultTime+path.elapsed,path.fault);
+    const next=checkManeuver(path.pose,[{direction,curve:Math.tan(steering)*direction,remaining:length}],scale,()=>true);
+    next.steering=steering;path.elapsed+=interval;
     segment={from:path.pose,to:next,sweep:vehicleSweep(path.pose,next,scale,mission.field)};
     path.segments.push(segment);path.pose=next;
    }
-   if(!sweepClearsVehicle(segment.sweep,obstacle,scale*.055))return other;
+   if(!sweepClearsVehicle(segment.sweep,obstacle,scale*.055)){mission.trafficPlanningBlocker?.(other);return other;}
   }
  }
  return null;

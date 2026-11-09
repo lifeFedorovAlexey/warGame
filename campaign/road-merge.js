@@ -3,17 +3,19 @@ import {roadTrafficRank,compareRoadTrafficRanks} from './traffic-priority.js';
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 
 export function roadDrivingLane(mission,unit,point,scale){
- const roads=mission.nav.roads,lane=roads.rightLane(unit,point,scale);
- if(lane)return lane;
- // A formation can start on the apron beside its road. Its short grid
- // connector must not make neighbouring cars disagree about the merge.
- const goal=unit.path.at(-1)??point;
- if(!unit.routeOrder||distance(unit,goal)<40||roads.coverage(goal.x,goal.y)<.4)return null;
- const road=roads.nearest(unit,scale*7),destination=roads.nearest(goal);
- if(!road||!destination||road.segment.pathId!==destination.segment.pathId)return null;
- const direction=Math.sign((goal.x-unit.x)*road.segment.ux+(goal.y-unit.y)*road.segment.uy);
- if((-Math.sin(unit.heading)*road.segment.ux+Math.cos(unit.heading)*road.segment.uy)*direction<.9)return null;
- return roads.rightLane({x:road.x,y:road.y},goal,scale);
+ const roads=mission.nav.roads,start=roads.nearest(unit);
+ if(!start||!roads.nearest(point))return null;
+ let target=point;
+ // A short intermediate centre-line point must not switch lane keeping off.
+ // Look along this accepted road leg only; an explicit exit into the field
+ // ends the lookahead and retains the player's off-road route.
+ if(start)for(const next of unit.path){
+  const at=roads.nearest(next);
+  if(!at||at.segment.pathId!==start.segment.pathId)break;
+  target=next;if(distance(unit,next)>=40)break;
+ }
+ const lane=roads.rightLane(unit,target,scale);
+ return lane;
 }
 
 export function deferRoadMerge(mission,unit,intent,scale){
@@ -53,12 +55,12 @@ export function deferRoadMerge(mission,unit,intent,scale){
   const first=unit.path[0],next=unit.path[1];
   if((first.x-unit.x)*lane.ux+(first.y-unit.y)*lane.uy>=0
    ||(next.x-unit.x)*lane.ux+(next.y-unit.y)*lane.uy<=0
-   ||!mission.nav.lineClear(unit,next,false,true,.52,true))break;
+   ||!mission.nav.lineClear(unit,next,false,true))break;
   unit.path.shift();
  }
  if(!separating)return intent;
  const waypoint={x:unit.x+lane.ux*39,y:unit.y+lane.uy*39};
- if(!mission.nav.lineClear(unit,waypoint,false,true,.52,true))return intent;
+ if(!mission.nav.lineClear(unit,waypoint,false,true))return intent;
  // Keep the current lateral track while the higher-priority car opens a
  // real longitudinal gap. Following still brakes against actual bodies.
  return {...intent,waypoint,roadLane:null,course:{x:lane.ux,y:lane.uy},mergeSeparating:true,mergeYieldTo:leader?.id??null,

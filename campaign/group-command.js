@@ -1,5 +1,6 @@
 import {vehicleEnvelope} from './vehicle-collision.js';
 import {assignFormation} from './formation-assignment.js';
+import {isAutomaticRepair,inFactoryInterior} from './combat-retreat-state.js';
 
 /** @typedef {'auto'|'column'|'line'|'dispersed'|'concentrate'} Formation */
 export const FORMATIONS=Object.freeze(['auto','column','line','dispersed','concentrate']);
@@ -11,7 +12,7 @@ const liveMembers=(mission,group,byId)=>group.members.map(id=>byId?byId.get(id):
 // and combat positions retain authority over actual movement.
 export function configureCommandGroup(mission,ids,{leaderId,formation='auto'}={}){
  if(!FORMATIONS.includes(formation))return mission.fail('Неизвестное построение');
- const selected=new Set(ids),members=mission.state.units.filter(u=>selected.has(u.id)&&u.owner==='rai'&&u.hp>0);
+ const selected=new Set(ids),members=mission.state.units.filter(u=>selected.has(u.id)&&u.owner==='rai'&&u.hp>0&&!inFactoryInterior(u));
  if(!members.length)return mission.fail('Выберите машины');
  const groups=mission.state.commandGroups??=[],old=groups.find(g=>g.members.length===members.length&&g.members.every(id=>selected.has(id)));
  const leader=leaderId?members.find(u=>u.id===leaderId):members.find(u=>u.id===old?.leaderId)??members.find(u=>u.kind==='command')??members[0];
@@ -23,7 +24,8 @@ export function configureCommandGroup(mission,ids,{leaderId,formation='auto'}={}
   return {ok:true,groupId:old.id,leaderId:leader.id,members:members.map(u=>u.id),formation};
  }
  // Moving members to another group never changes their current orders.
- for(const group of groups){group.members=group.members.filter(id=>!selected.has(id));delete group.slots;delete group.slotSignature;}
+ const reassigned=new Set(members.map(u=>u.id));
+ for(const group of groups){group.members=group.members.filter(id=>!reassigned.has(id));delete group.slots;delete group.slotSignature;}
  const group={id:'group-'+(mission.state.commandGroupSerial=(mission.state.commandGroupSerial??0)+1),owner:leader.owner,
   leaderId:leader.id,virtual:leader.kind!=='command',formation,members:members.map(u=>u.id)};
  groups.push(group);
@@ -48,10 +50,19 @@ export function refreshCommandGroups(mission){
  mission.state.commandGroups=retained;
 }
 
-export function expandCommandIds(mission,ids){
- const expanded=new Set(ids),byId=new Map(mission.state.units.map(u=>[u.id,u]));
- for(const group of mission.state.commandGroups??[])if(expanded.has(group.leaderId))
-  for(const member of liveMembers(mission,group,byId))expanded.add(member.id);
+export function expandCommandIds(mission,ids,{includeRepairing=false,action=null}={}){
+ const byId=new Map(mission.state.units.map(u=>[u.id,u]));
+ const available=id=>{const u=byId.get(id);return includeRepairing||!u||!isAutomaticRepair(u,mission.unitSpec(u));};
+ // Reissuing the army's attack must not recall its damaged repair visitors.
+ // A selection containing only repair visitors is an explicit manual override.
+ const keepRepairing=!includeRepairing&&['attack','attack-move'].includes(action)&&ids.some(id=>{
+  const u=byId.get(id);return u?.hp>0&&u.owner==='rai'&&mission.unitSpec(u).damage&&!isAutomaticRepair(u,mission.unitSpec(u));
+ });
+ // Explicitly selected cars outside the garage obey the player. Expanding
+ // a healthy leader's group must not recall unselected repair visitors.
+ const expanded=new Set(ids.filter(id=>includeRepairing||!inFactoryInterior(byId.get(id))&&(!keepRepairing||available(id))));
+ for(const group of mission.state.commandGroups??[])if(expanded.has(group.leaderId)&&available(group.leaderId))
+  for(const member of liveMembers(mission,group,byId))if(available(member.id))expanded.add(member.id);
  return [...expanded];
 }
 
@@ -60,7 +71,8 @@ export function commandGroupFor(mission,units){
  const id=units[0].commandGroupId;
  if(!id||units.some(u=>u.commandGroupId!==id))return null;
  const group=mission.state.commandGroups?.find(g=>g.id===id);
- return group&&group.members.filter(id=>mission.entity(id)?.hp>0).length===units.length?group:null;
+ const explicit=new Set(units.map(u=>u.id));
+ return group&&group.members.filter(id=>{const u=mission.entity(id);return u?.hp>0&&(explicit.has(id)||!isAutomaticRepair(u,mission.unitSpec(u)));}).length===units.length?group:null;
 }
 
 export function formationRequest(mission,units,target){
@@ -83,7 +95,7 @@ export function formationRequest(mission,units,target){
  const offsets=Array.from({length:n},(_,i)=>({side:(i%columns-(Math.min(columns,n-Math.floor(i/columns)*columns)-1)/2)*spacing,
   back:Math.floor(i/columns)*spacing}));
  const points=offsets.map(p=>({x:target.x+right.x*p.side-forward.x*p.back,y:target.y+right.y*p.side-forward.y*p.back}));
- const signature=group.formation+'|'+group.members.join(',');
+ const signature=group.formation+'|'+units.map(u=>u.id).join(',');
  if(group.slotSignature!==signature){
   if(n<=100){
    const assignment=assignFormation(units.map(unit=>points.map(p=>(unit.x-p.x)**2+(unit.y-p.y)**2)));

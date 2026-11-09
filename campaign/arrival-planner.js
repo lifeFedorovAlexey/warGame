@@ -13,7 +13,9 @@ export class ArrivalPlanner{
   this.target=target;this.forward=forward;this.right=right;this.spacing=spacing;
   this.radius=Math.ceil(Math.sqrt(units.length))+5;this.points=new Map();this.staticCache=new Map();
   this.obstruction=this.nav.solids.find(s=>Math.abs(target.x-s.x)<s.halfWidth&&Math.abs(target.y-s.y)<s.halfDepth);
-  this.anchor=this.nav.terrainAllowed(target.x,target.y)?this.nav.nearest(target.x,target.y,3):null;
+  // A click on a steep cell can have usable parking immediately beside it.
+  // Connect to that nearby walkable cell before checking individual slots.
+  this.anchor=this.nav.nearest(target.x,target.y,3);
   this.connected=new Set();
   this.shared=units.length>=128;
   this.claims=new UnitSpatialIndex(64);this.claimedCoordinates=new Set();this.bodies=new UnitSpatialIndex(64);this.time=null;
@@ -23,11 +25,22 @@ export class ArrivalPlanner{
  refresh(){
   const m=this.mission;if(this.time===m.state.time)return;
   this.time=m.state.time;const bodies=[];
-  for(const unit of m.state.units){
+  for(const unit of m.commandJob?.mission.state.units??m.state.units){
    if(!vehicleObstacle(unit))continue;
-   bodies.push(unit);
-   if(!this.units.has(unit.id)&&unit.routeOrder?.destination&&distance(unit,unit.routeOrder.destination)>1)
-    bodies.push({...unit,...unit.routeOrder.destination});
+   // A borrowed space remains owned until the car returns. Its temporary
+   // yielding pose is an obstacle for execution, not a new parking claim.
+   // Reserving only that temporary body can assign another car to its home
+   // and make both accepted destinations physically incompatible.
+   const borrowed=!this.units.has(unit.id)&&!unit.pendingOrder&&unit.yieldReturn?.home;
+   const departing=unit.hp>0&&!unit.yieldReturn&&(
+    ['move','attack-move'].includes(unit.pendingOrder?.type)&&unit.pendingOrder.status!=='blocked'
+    ||!unit.pendingOrder&&unit.path.length&&['move','attack-move'].includes(unit.task?.type)&&unit.routeOrder?.destination);
+   // Arrival reserves the final parking pose. A body with an active departure
+   // still blocks driving, but must not push an exact click to another cell.
+   // Stop, blocked commands and borrowed homes retain their occupied space.
+   if(borrowed||!departing)bodies.push(borrowed?{...unit,...borrowed}:unit);
+   const destination=unit.routeContinuation?.destination??unit.routeOrder?.destination;
+   if(!this.units.has(unit.id)&&destination&&distance(unit,destination)>1)bodies.push({...unit,...destination});
   }
   this.bodies.rebuild(bodies);
  }
@@ -42,7 +55,7 @@ export class ArrivalPlanner{
   const key=[point.x,point.y,heading,unit.kind].join(',');if(this.staticCache.has(key))return this.staticCache.get(key);
   const m=this.mission,pose={...point,heading,kind:unit.kind,owner:unit.owner};
   const allowed=this.nav.allowed(...this.nav.grid(point.x,point.y))&&this.nav.terrainAllowed(point.x,point.y)
-   &&m.vehicleMotionClear(pose,pose,pose,.52,undefined,[]);
+   &&m.vehicleTerrainSweep(pose,pose,pose)!==false;
   this.staticCache.set(key,allowed);return allowed;
  }
  point(col,row){

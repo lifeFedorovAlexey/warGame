@@ -19,13 +19,14 @@
 #combat-hint strong, #combat-hint span { display: block; }
 #combat-hint strong { color: #f3cf8c; font-size: 12px; margin-bottom: 3px; }
 #combat-menu [aria-checked=true]::after {
-  content: ''; position: absolute; bottom: 0; left: 14px; right: 14px; height: 3px; background: #f39a29;
+  content: '✓'; position: absolute; bottom: -3px; right: -1px;
+  color: #ffb447; font: bold 24px/1 Arial, sans-serif;
+  text-shadow: 0 1px 2px #262517, 0 0 2px #262517; pointer-events: none;
 }
-#combat-menu .mixed::after {
-  content: ''; position: absolute; bottom: 0; left: 12px; width: 5px; height: 3px; background: #d9c69b; box-shadow: 13px 0 #d9c69b;
-}
-#combat-menu [aria-checked=true] .game-icon { filter: brightness(1.15); }
-#attack-order[aria-expanded=true]::before {
+#combat-menu [aria-checked=false] .game-icon { opacity: .42; }
+#combat-menu [aria-checked=true] .game-icon { opacity: 1; filter: brightness(1.25); }
+#combat-menu button:hover .game-icon, #combat-menu button:focus-visible .game-icon { opacity: 1; }
+#combat-modes[aria-expanded=true]::before {
   content: ''; position: absolute; top: -4px; left: calc(50% - 4px); width: 8px; height: 4px;
   background: #f39a29; clip-path: polygon(50% 0,100% 100%,0 100%);
 }

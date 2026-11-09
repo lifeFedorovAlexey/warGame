@@ -164,9 +164,21 @@ def main():
     length=sum(math.dist(a,b)*CELL for a,b in zip(route,route[1:]+route[:1]))
     print(json.dumps({'reachable':len(reached),'routeLengthMetres':round(length),'turnarounds':turnarounds,'stops':stops},ensure_ascii=False,indent=2))
     OUT.mkdir(parents=True, exist_ok=True)
-    prepared_path=OUT/'heightfield.json'
-    prepared=json.loads(prepared_path.read_text(encoding='utf-8')).get('preparedPads', []) if prepared_path.exists() else []
-    (OUT/'heightfield.json').write_text(json.dumps({'preparedPads':prepared,'id':'alpha','size':size,'cellMetres':CELL,'heightUnitMetres':HEIGHT_UNIT,'extentMetres':(size-1)*CELL,'sourceSha256':hashlib.sha256(SOURCE.read_bytes()).hexdigest(),'samples':samples},separators=(',',':'))+'\n',encoding='utf-8')
+    height_path=OUT/'heightfield.json'
+    # Level boundaries and crossings are authored gameplay data. Rebuilding
+    # the visual heightfield must not erase or regenerate that topology.
+    authored=json.loads(height_path.read_text(encoding='utf-8')) if height_path.exists() else {}
+    navigation=authored.get('navigation')
+    height_data={'id':'alpha','size':size,'cellMetres':CELL,'heightUnitMetres':HEIGHT_UNIT,'extentMetres':(size-1)*CELL,'sourceSha256':hashlib.sha256(SOURCE.read_bytes()).hexdigest(),'samples':samples}
+    if navigation:
+        if navigation['size']*navigation['cellMetres']!=height_data['extentMetres']:
+            raise ValueError('Authored navigation extent differs from rebuilt map')
+        height_data['navigation']=navigation
+    if authored.get('terrainProfiles'):
+        height_data['terrainProfiles']=authored['terrainProfiles']
+    if authored.get('preparedPads'):
+        height_data['preparedPads']=authored['preparedPads']
+    height_path.write_text(json.dumps(height_data,separators=(',',':'))+'\n',encoding='utf-8')
     (OUT/'route.json').write_text(json.dumps({'closed':True,'planner':'A* on navigable terrain cells; no diagonal cliff cutting','maxCellGradient':.30,'rawLengthMetres':round(length,3),'pointsGrid':route,'stops':stops,'baseFootprint':{'gridCenter':[14,53.5],'widthMetres':400,'depthMetres':256}},ensure_ascii=False,separators=(',',':'))+'\n',encoding='utf-8')
 
 

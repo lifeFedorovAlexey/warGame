@@ -1,5 +1,6 @@
 import {automaticCombatTarget,combatPolicy} from './combat-policy.js';
-import {assignFormation,assignFormationSteps} from './formation-assignment.js';
+import {assignFormationSteps} from './formation-assignment.js';
+import {commandPathFromLive} from './command-motion.js';
 import {checkManeuver} from './vehicle-motion.js';
 import {navigationDecision} from './navigation-state.js';
 import {movementCombatTarget} from './combat-orders.js';
@@ -62,15 +63,15 @@ function slotCost(unit,point,scale){
   return d*d+turn*turn*scale*scale*12;
 }
 
-// One contact turns a marching group into reserved firing positions. The state
-// is serializable; searches yield through the existing simulation budget.
+// Only members with their own nearby contact leave an attack-move route.
+// A front car must not halt a distant column to reorganize around its enemy.
 function* beginDeployment(mission,unit,target){
   const members=mission.state.units.filter(other=>other.owner===unit.owner&&other.hp>0
     &&other.combatGroup===unit.combatGroup&&combatTask(other.task)&&!other.pendingOrder&&!other.combatRetreat&&!other.combatDeployment
     &&!checkedCycleActive(mission,other)
     &&(other.task.type==='attack'||combatPolicy(other).response!=='ignore')
     &&(other.task.type==='attack'||!other.combatDisengage?.includes(target.id))
-    &&distance(other,unit)<mission.unitSpec(unit).vision*3)
+    &&(other.task.type==='attack'||distance(other,target)<=mission.unitSpec(other).vision&&mission.lineOfSight(other,target)))
     .sort((a,b)=>distance(a,target)-distance(b,target)||a.id.localeCompare(b.id)).slice(0,100);
   const existing=mission.state.units.filter(other=>other.hp>0&&other.combatDeployment?.group===unit.combatGroup&&other.combatDeployment.targetId===target.id);
   if(members.length<2&&!existing.length)return false;
@@ -83,7 +84,8 @@ function* beginDeployment(mission,unit,target){
     // as if it were the player's arrival destination on the next update.
     delete member.combatResume;
     const deployment=member.combatDeployment={targetId:target.id,group,angle,index:null,slot:null,anchor:{x:target.x,y:target.y},
-      resume:{...member.task},retryAt:0,status:'reserve'};
+      resume:{...member.task},marchPath:member.path.map(point=>({...point})),
+      marchOrigin:{x:member.x,y:member.y,heading:member.heading},marchTopology:mission.nav.topologyRevision,retryAt:0,status:'reserve'};
     // A vehicle already in a sound firing position need not drive circles
     // merely to satisfy a formation template.
     const spec=mission.unitSpec(member);
@@ -111,7 +113,7 @@ function* beginDeployment(mission,unit,target){
   }
   return true;
 }
-function validPosition(mission,unit,target,point,reserved){
+export function validPosition(mission,unit,target,point,reserved){
   const scale=mission.config.worldScale,spec=mission.unitSpec(unit);
   if(!mission.inBounds(point.x,point.y)||!mission.exploredAt(point.x,point.y)
     ||distance(point,target)>spec.range*.97||distance(point,target)<spec.range*.36
@@ -119,25 +121,66 @@ function validPosition(mission,unit,target,point,reserved){
   const pose={...unit,...point,heading:Math.atan2(point.x-target.x,target.y-point.y)};
   return mission.lineOfSight(pose,target)&&mission.vehicleMotionClear(unit,pose,pose);
 }
+// Pure proposal: no vehicle state is changed while the search is suspended.
+// The dispatcher can run this outside the physical simulation step and
+// recheck the endpoint against current reservations before publication.
+export function* findFiringApproach(mission,unit,deployment,target){
+  if(!deployment.slot)return null;
+  const reserved=mission.state.units.filter(other=>other.id!==unit.id&&other.hp>0&&other.combatDeployment?.group===deployment.group)
+    .map(other=>other.combatDeployment.goal??other.combatDeployment.slot).filter(Boolean);
+  const scale=mission.config.worldScale,candidates=[{...deployment.slot}];
+  for(const radius of [scale*5.5,scale*10])for(let sector=0;sector<8;sector++){
+    const a=sector*Math.PI/4;candidates.push({x:deployment.slot.x+Math.cos(a)*radius,y:deployment.slot.y+Math.sin(a)*radius});
+  }
+  if(deployment.relocateAt)candidates.sort((a,b)=>slotCost(unit,a,scale)-slotCost(unit,b,scale));
+  for(const goal of candidates){
+    yield;
+    if(!validPosition(mission,unit,target,goal,reserved))continue;
+    const path=yield* mission.vehiclePathSteps(unit,goal,{fallback:false,maxGoalDistance:4});
+    const end=path?.at(-1);
+    if(end&&validPosition(mission,unit,target,end,reserved))return path;
+  }
+  return null;
+}
 function resumeMarch(mission,unit,all){
   const deployment=unit.combatDeployment;
   const members=all?mission.state.units.filter(other=>other.hp>0&&other.combatDeployment?.group===deployment.group
     &&other.combatDeployment.targetId===deployment.targetId):[unit];
-  const marching=members.filter(other=>other.combatDeployment.resume.type==='attack-move');
-  const destinations=marching.map(other=>({...other.combatDeployment.resume}));
-  const assignment=assignFormation(marching.map(other=>destinations.map(goal=>distance(other,goal)**2)));
-  for(const [index,member] of marching.entries())member.combatDeployment.resume=destinations[assignment[index]];
   // Release the whole group before path searches: vehicles about to leave
   // must not be mistaken for permanent parked obstacles by the first search.
   for(const member of members){
-    const resume=member.combatDeployment.resume;
+    const previous=member.combatDeployment,resume=previous.resume;
     delete member.combatDeployment;resetMotion(member);member.path=[];
     member.task=resume.type==='attack'&&!mission.entity(resume.targetId)?null:resume;
     if(member.task?.type==='attack-move'){
       member.combatResume={group:deployment.group};
       if(member.routeOrder)member.routeOrder.destination={x:resume.x,y:resume.y};
+      // Contact temporarily interrupts a march; it does not revoke its route
+      // or arrival slot. Rejoin the retained route without another search.
+      if(previous.marchTopology===mission.nav.topologyRevision&&previous.marchPath?.length){
+        const path=commandPathFromLive(mission,member,previous.marchOrigin,previous.marchPath);
+        if(path)applyMarchResume(mission,member,path);
+      }
     }
   }
+}
+export function* findMarchResume(mission,unit){
+  // The original command already owns this destination. Moving allies are
+  // local traffic, just as for a new player command, not permanent A* walls.
+  // Recomputing parking for the whole group here made every resuming car
+  // wait for its neighbours to leave before any of them had a route.
+  return yield* mission.vehiclePathSteps(unit,{x:unit.task.x,y:unit.task.y},
+    {obstacles:mission.state.units.filter(other=>other.hp<=0||other.damage?.wreck),fallback:false,maxGoalDistance:.01});
+}
+export function applyMarchResume(mission,unit,path,conditions){
+  if(!path?.length){
+    unit.path=[];unit.driveSpeed=0;unit.combatResume.failedConditions=conditions;
+    navigationDecision(unit,'BLOCKED','march-route-unavailable',null,'retry-on-obstacle-change');return false;
+  }
+  unit.path=path;Object.assign(unit.task,path.at(-1));
+  if(unit.routeOrder)unit.routeOrder.destination={...path.at(-1)};
+  delete unit.combatParking;
+  delete unit.combatResume;return true;
 }
 export function* updateCombatDeployment(mission,unit,spec,dt){
   if(unit.owner!=='rai'||!unit.combatGroup)return false;
@@ -153,21 +196,12 @@ export function* updateCombatDeployment(mission,unit,spec,dt){
       navigationDecision(unit,'BLOCKED','march-route-unavailable',null,'retry-on-obstacle-change');return true;
     }
     navigationDecision(unit,'GLOBAL_REPLAN','resuming-march',null,'apply-route');
-    const ignoreUnits=new Set(mission.state.units.filter(other=>other.combatResume?.group===unit.combatResume.group));
-    const reserved=mission.state.units.filter(other=>other!==unit&&other.hp>0&&other.combatGroup===unit.combatGroup)
-      .map(other=>other.task?.type==='attack-move'?other.task:other);
-    const requested={x:unit.task.x,y:unit.task.y},radius=mission.config.worldScale*6;
-    // A generic path search can end at a distant fallback cell. Committing
-    // that path but retaining the old task made units replan the same missing
-    // final segment forever. Reserve one bounded, reachable parking place.
-    const path=yield* mission.movePathSteps(unit,requested,reserved,radius,false,
-      point=>distance(point,requested)<=radius,{ignoreUnits,fallback:false,maxGoalDistance:4,compareDetours:true});
+    if(mission.trafficCoordinator.requestMarchResume){
+      mission.trafficCoordinator.requestMarchResume(mission,unit,conditions);return true;
+    }
+    const path=yield* findMarchResume(mission,unit);
     if(unit.combatResume!==resume||unit.task!==task||unit.pendingOrder)return true;
-    if(!path?.length){unit.path=[];unit.driveSpeed=0;unit.combatResume.failedConditions=conditions;navigationDecision(unit,'BLOCKED','march-route-unavailable',null,'retry-on-obstacle-change');return true;}
-    unit.path=path;Object.assign(unit.task,path.at(-1));
-    if(unit.routeOrder)unit.routeOrder.destination={...path.at(-1)};
-    unit.combatParking={anchor:{...path.at(-1)},goal:{...path.at(-1)},best:distance(unit,path.at(-1)),progressAt:mission.state.time,retryAt:0,failed:[]};
-    delete unit.combatResume;
+    if(!applyMarchResume(mission,unit,path,conditions))return true;
   }
   let deployment=unit.combatDeployment;
   if(!deployment){
@@ -181,6 +215,12 @@ export function* updateCombatDeployment(mission,unit,spec,dt){
     if(!deployment||unit.pendingOrder)return true;
   }
   const target=mission.entity(deployment.targetId);
+  // Existing saves may contain far-away members recruited by the former
+  // group-wide contact radius. Release those cars back to their march too.
+  if(target&&deployment.resume.type==='attack-move'&&distance(unit,target)>spec.vision){
+    resumeMarch(mission,unit,false);
+    return yield* updateCombatDeployment(mission,unit,spec,dt);
+  }
   if(!target||target.hp<=0||!mission.visibleAt(target.x,target.y)
     ||deployment.resume.type==='attack-move'&&combatPolicy(unit).response==='ignore'){
     resumeMarch(mission,unit,!target||!mission.visibleAt(target.x,target.y));
@@ -227,6 +267,9 @@ export function* updateCombatDeployment(mission,unit,spec,dt){
   }
   if(!unit.path.length){
     navigationDecision(unit,'LOCAL_REPLAN','seeking-firing-position',null,'check-approach');
+    if(mission.trafficCoordinator.requestFiringApproach){
+      mission.trafficCoordinator.requestFiringApproach(mission,unit,deployment,target);return true;
+    }
     const reserved=mission.state.units.filter(other=>other!==unit&&other.hp>0&&other.combatDeployment?.group===deployment.group)
       .map(other=>other.combatDeployment.goal??other.combatDeployment.slot).filter(Boolean);
     const scale=mission.config.worldScale,candidates=[deployment.slot];

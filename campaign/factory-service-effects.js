@@ -22,10 +22,17 @@ export function createFactoryServiceEffects(T,scene,scale){
  const smokeMap=new T.CanvasTexture(canvas),sparkGeo=new T.BufferGeometry(),positions=new T.Float32BufferAttribute(new Float32Array(16*12*3),3).setUsage(T.DynamicDrawUsage);
  sparkGeo.setAttribute('position',positions);sparkGeo.setDrawRange(0,0);
  const sparks=new T.Points(sparkGeo,new T.PointsMaterial({color:'#ffe1a0',size:.09*scale,transparent:true,depthWrite:false,blending:T.AdditiveBlending}));sparks.frustumCulled=false;sparks.name='factory_welding_sparks';scene.add(sparks);
+ // Keep the light count constant: adding/removing a point light recompiles
+ // every lit material. Two nearest welding lights cover the visible work;
+ // all factories retain their own glow, smoke and sparks.
+ const lights=Array.from({length:2},()=>{const light=new T.PointLight('#91dfff',0,scale*11,1.6);scene.add(light);return light;});
+ const glowMaterial=new T.SpriteMaterial({map:smokeMap,color:'#8ce4ff',transparent:true,depthWrite:false,blending:T.AdditiveBlending});
+ const smokeMaterial=new T.SpriteMaterial({map:smokeMap,color:'#858b85',transparent:true,opacity:0,depthWrite:false});
+ const lightPosition=new T.Vector3();
  let count=0,level=0;
- function update(mission,buildings,time,dt){
+ function update(mission,buildings,time,dt,camera){
   gateSignals.begin(mission.state.buildings.reduce((n,f)=>n+Number(f.kind==='factory'),0));
-  let points=0,doorChanged=false;count=level=0;const live=new Set();
+  let points=0,doorChanged=false;count=level=0;const live=new Set(),lit=[];for(const light of lights)light.intensity=0;
   for(const f of mission.state.buildings){
    if(f.kind!=='factory')continue;const object=buildings.get(f.id);if(!object)continue;live.add(f.id);
    const working=f.hp>0&&f.completed&&!!f.activeRepair,shutter=object.getObjectByName('factory_shutter');
@@ -37,18 +44,21 @@ export function createFactoryServiceEffects(T,scene,scale){
    let state=states.get(f.id);
    if(!state&&working&&states.size<16){
     const root=new T.Group();root.name='factory_service_'+f.id;
-    const light=new T.PointLight('#91dfff',0,scale*11,1.6);light.position.set(0,-7.9*scale,1.7*scale);root.add(light);
-    const glow=new T.Sprite(new T.SpriteMaterial({map:smokeMap,color:'#8ce4ff',transparent:true,depthWrite:false,blending:T.AdditiveBlending}));glow.position.copy(light.position);glow.position.y-=.5*scale;glow.scale.setScalar(1.05*scale);root.add(glow);
-    const smoke=Array.from({length:5},()=>{const puff=new T.Sprite(new T.SpriteMaterial({map:smokeMap,color:'#858b85',transparent:true,opacity:0,depthWrite:false}));root.add(puff);return puff;});
-    scene.add(root);state={root,light,glow,smoke,last:-Infinity};states.set(f.id,state);
+    const glow=new T.Sprite(glowMaterial.clone());glow.position.set(0,-8.4*scale,1.7*scale);glow.scale.setScalar(1.05*scale);root.add(glow);
+    const smoke=Array.from({length:5},()=>{const puff=new T.Sprite(smokeMaterial.clone());root.add(puff);return puff;});
+    scene.add(root);state={root,glow,smoke,last:-Infinity};states.set(f.id,state);
    }
    if(!state)continue;
-   const {root,light,glow,smoke}=state;root.position.set(f.x,f.y,object.position.z);root.rotation.z=f.rotation??0;
+   const {root,glow,smoke}=state;root.position.set(f.x,f.y,object.position.z);root.rotation.z=f.rotation??0;
    if(working)state.last=time;const fade=Math.max(0,1-(time-state.last)/2);
    root.visible=f.hp>0&&fade>0&&(f.owner==='rai'||mission.visibleAt(f.x,f.y));
    if(!root.visible){scene.remove(root);root.traverse(n=>{if(n.isSprite)n.material.dispose();});states.delete(f.id);continue;}
    const flicker=working?(.5+.5*Math.sin(time*47)*Math.sin(time*71)):0;
-   light.intensity=flicker*20;glow.material.opacity=flicker*.8;
+   glow.material.opacity=flicker*.8;
+   if(flicker>0){
+    lightPosition.set(0,-7.9*scale,1.7*scale).applyAxisAngle(new T.Vector3(0,0,1),root.rotation.z).add(root.position);
+    lit.push({position:lightPosition.clone(),intensity:flicker*20,distance:camera?lightPosition.distanceToSquared(camera.position):0});
+   }
    smoke.forEach((puff,i)=>{const phase=(time*.3+i/5)%1;puff.position.set(Math.sin(i*7+time*.3)*(.2+phase*.7)*scale,(-8.2-phase*1.2)*scale,(1.7+phase*3.4)*scale);puff.scale.setScalar((.45+phase*1.8)*scale);puff.material.opacity=Math.sin(phase*Math.PI)*.26*fade;});
    if(!working)continue;count++;level+=.3;
    for(let i=0;i<12&&points<192;i++){
@@ -58,9 +68,11 @@ export function createFactoryServiceEffects(T,scene,scale){
    }
   }
   for(const [id,state] of states)if(!live.has(id)){scene.remove(state.root);state.root.traverse(n=>{if(n.isSprite)n.material.dispose();});states.delete(id);}
+  lit.sort((a,b)=>a.distance-b.distance);
+  for(let i=0;i<Math.min(lights.length,lit.length);i++){lights[i].position.copy(lit[i].position);lights[i].intensity=lit[i].intensity;}
   sparkGeo.setDrawRange(0,points);if(points)positions.needsUpdate=true;
   gateSignals.end();
   return doorChanged;
  }
- return {update,get active(){return count;},get soundLevel(){return Math.min(1,level);}};
+ return {update,preloadMaterials(parent){parent.add(new T.Sprite(glowMaterial),new T.Sprite(smokeMaterial));},get active(){return count;},get soundLevel(){return Math.min(1,level);}};
 }

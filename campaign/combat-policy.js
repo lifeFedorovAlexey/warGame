@@ -1,10 +1,12 @@
-import {updateFactoryVisit} from './factory-garage.js';
-import {chooseRepairFactory,repairChoiceDue} from './factory-routing.js';
-import {rememberRetreatOrder} from './factory-repair.js';
 import {expandCommandIds} from './group-command.js';
 import {isCampPerimeter} from './camp-demolition.js';
+import {rememberRetreatOrder,factoryCanRepair} from './factory-repair.js';
+import {updateFactoryVisit} from './factory-garage.js';
+import {chooseRepairFactory,repairChoiceDue} from './factory-routing.js';
+import {shouldAutoRetreat,isAutomaticRepair,inFactoryInterior} from './combat-retreat-state.js';
+export {shouldAutoRetreat} from './combat-retreat-state.js';
 
-// Per-unit, serializable rules. Defaults preserve the existing aggressive AI.
+// Units carry a serializable copy of the army's rules, including factory output.
 export const DEFAULT_COMBAT_POLICY = Object.freeze({retreat:'never', response:'free', priority:'nearest'});
 export const COMBAT_OPTIONS = Object.freeze({
   retreat: [
@@ -25,19 +27,37 @@ export const COMBAT_OPTIONS = Object.freeze({
   ],
 });
 export const combatPolicy = unit => unit.combatPolicy ?? DEFAULT_COMBAT_POLICY;
-export function shouldAutoRetreat(unit,spec){
- const threshold={light:.8,heavy:.35}[combatPolicy(unit).retreat];
- return unit.owner==='rai'&&unit.hp>0&&!!spec.damage&&!!threshold&&!unit.retreatSuppressed
-  &&unit.hp<=unit.maxHp*threshold;
-}
 export function normalizeCombatPolicy(value) {
   return Object.fromEntries(Object.keys(COMBAT_OPTIONS).map(key=>[key,
     COMBAT_OPTIONS[key].some(option=>option.value===value?.[key]) ? value[key] : DEFAULT_COMBAT_POLICY[key]]));
 }
+export function armyCombatPolicy(mission){
+ if(!mission.state.armyCombatPolicy){
+  // Old saves held rules on selected units. Preserve the most common explicit
+  // choice rather than silently resetting a configured retreat threshold.
+  const counts=new Map();
+  for(const unit of mission.state.units)if(unit.owner==='rai'&&unit.hp>0&&unit.combatPolicy){
+   const key=JSON.stringify(normalizeCombatPolicy(unit.combatPolicy));counts.set(key,(counts.get(key)??0)+1);
+  }
+  const chosen=[...counts].sort((a,b)=>b[1]-a[1])[0]?.[0];
+  mission.state.armyCombatPolicy=chosen?JSON.parse(chosen):{...DEFAULT_COMBAT_POLICY};
+ }
+ return mission.state.armyCombatPolicy;
+}
+export function configureArmyCombat(mission,changes){
+ const keys=Object.keys(changes??{});
+ if(!keys.length||keys.some(key=>!COMBAT_OPTIONS[key]?.some(o=>o.value===changes[key])))return mission.fail('Недопустимый режим боя');
+ const policy={...armyCombatPolicy(mission),...changes};
+ const ids=mission.state.units.filter(u=>u.hp>0&&u.owner==='rai'&&mission.unitSpec(u).damage).map(u=>u.id);
+ // Changing modes while the army is empty still configures future production.
+ const result=ids.length?configureCombat(mission,ids,changes):{ok:true,changed:0};
+ if(result.ok)mission.state.armyCombatPolicy=policy;
+ return result;
+}
 export function configureCombat(mission, ids, changes) {
   const keys=Object.keys(changes??{});
   if(!keys.length||keys.some(key=>!COMBAT_OPTIONS[key]?.some(o=>o.value===changes[key])))return mission.fail('Недопустимая настройка атаки');
-  const selected=new Set(expandCommandIds(mission,ids)),urgent=[];let changed=0;
+  const selected=new Set(expandCommandIds(mission,ids,{includeRepairing:true})),urgent=[];let changed=0;
   for(const unit of mission.state.units) {
     if(!selected.has(unit.id)||unit.hp<=0||unit.owner!=='rai'||!mission.unitSpec(unit).damage)continue;
     const previous=combatPolicy(unit);
@@ -46,10 +66,10 @@ export function configureCombat(mission, ids, changes) {
     // its old target; a subsequent direct attack remains a deliberate override.
     const changedFireRule=keys.some(key=>key==='response'||key==='priority');
     const explicit=unit.pendingOrder?.type==='attack'||unit.task?.type==='attack'||unit.combatDeployment?.resume.type==='attack';
-    if(changedFireRule&&explicit){urgent.push(unit.id);clearMotion(unit);unit.driveSpeed=0;}
+    if(changedFireRule&&explicit&&!isAutomaticRepair(unit,mission.unitSpec(unit))){urgent.push(unit.id);clearMotion(unit);unit.driveSpeed=0;}
     if(changes.retreat==='never'&&unit.combatRetreat&&!unit.combatRetreat.forced){clearMotion(unit);cancelCombatRetreat(unit);unit.driveSpeed=0;}
     if(changes.retreat)unit.retreatSuppressed=false;
-    if(changes.retreat&&unit.pendingOrder&&shouldAutoRetreat(unit,mission.unitSpec(unit)))urgent.push(unit.id);
+    if(changes.retreat&&unit.pendingOrder&&shouldAutoRetreat(unit,mission.unitSpec(unit))){startAutomaticRetreat(mission,unit,mission.unitSpec(unit));urgent.push(unit.id);}
     changed++;
   }
   if(urgent.length)mission.commandPlanner?.cancel(urgent);
@@ -59,7 +79,7 @@ const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 export function rememberHostileHit(mission, unit, source) {
   const unitSpec=mission.config.units[unit.kind];
   if(!unitSpec)return;
-  const invalidate=()=>{if(unit.pendingOrder&&shouldAutoRetreat(unit,unitSpec)){delete unit.pendingOrder;delete unit.commandRevision;}};
+  const invalidate=()=>{if(unit.pendingOrder&&shouldAutoRetreat(unit,unitSpec))startAutomaticRetreat(mission,unit,unitSpec);};
   if(!source?.id||source.owner===unit.owner){invalidate();return;}
   const spec=mission.config.units[source.kind]??mission.buildingSpec(source);
   unit.lastHostileHit={id:source.id,x:source.x,y:source.y,time:mission.state.time,range:spec.range??0};
@@ -69,6 +89,7 @@ export function rememberHostileHit(mission, unit, source) {
 }
 export function cancelCombatRetreat(unit, suppress=true) {
   delete unit.combatRetreat;
+  if(!inFactoryInterior(unit))delete unit.factoryVisit;
   unit.retreatSuppressed=suppress;
 }
 export function automaticCombatTarget(mission, unit, spec, excludedIds=null) {
@@ -105,7 +126,13 @@ function retreatThreat(mission, unit, spec) {
 function clearMotion(unit) {
   unit.path=[];unit.task=null;
   delete unit.combatDeployment;delete unit.combatGroup;delete unit.combatResume;delete unit.combatParking;
-  for(const key of ['detour','traffic','trafficHold','passage','passingLane','driveWatch','routeOrder','failedArcs','reverseDebt','yieldReturn','pendingOrder','commandRevision','resumeConstructionId','combatDisengage'])delete unit[key];
+  for(const key of ['detour','traffic','trafficHold','passage','passingLane','driveWatch','routeOrder','routeContinuation','failedArcs','reverseDebt','yieldReturn','pendingOrder','commandRevision','resumeConstructionId','combatDisengage'])delete unit[key];
+}
+export function startAutomaticRetreat(mission,unit,spec){
+ const resume=unit.combatRetreat?.resume??rememberRetreatOrder(mission,unit),threat=retreatThreat(mission,unit,spec);
+ clearMotion(unit);
+ unit.combatRetreat={status:'planning',resume,threat:threat?{...threat}:null,started:mission.state.time};
+ return unit.combatRetreat;
 }
 export function forceCombatRetreat(mission,ids){
  const selected=new Set(ids),units=mission.state.units.filter(unit=>selected.has(unit.id)&&unit.owner==='rai'&&unit.hp>0);
@@ -165,7 +192,9 @@ function* homePath(mission,unit,retreat,known){
    const lateral=(column-(columns-1)/2)*spacing,depth=home.radius+row*spacing;
    goals.unshift({x:home.x+fy*lateral-fx*depth,y:home.y-fx*lateral-fy*depth});
   }
+  const base=home.id&&mission.entity(home.id),service=base&&mission.buildingSpec(base).repair;
   const safe=p=>mission.inBounds(p.x,p.y)&&mission.exploredAt(p.x,p.y)
+    &&(!service||factoryCanRepair(mission,base,p))
     &&known.every(e=>distance(p,e)>e.range+scale*5)
     &&mission.state.units.every(other=>other===unit||other.hp<=0||distance(p,other.combatRetreat?.destination??other)>scale*5.3);
   for(const goal of goals){
@@ -204,9 +233,7 @@ export function* updateCombatRetreat(mission, unit, spec, dt) {
   let retreat=unit.combatRetreat;
   if(!retreat) {
     if(!shouldAutoRetreat(unit,spec))return false;
-    const resume=rememberRetreatOrder(mission,unit),threat=retreatThreat(mission,unit,spec);
-    clearMotion(unit);
-    retreat=unit.combatRetreat={status:'planning',resume,threat:threat?{...threat}:null,started:mission.state.time};
+    retreat=startAutomaticRetreat(mission,unit,spec);
   }
   const current=()=>unit.hp>0&&unit.combatRetreat===retreat&&!unit.pendingOrder;
   // Upgrade old saves whose retreat stopped at an arbitrary escape point.
@@ -223,6 +250,16 @@ export function* updateCombatRetreat(mission, unit, spec, dt) {
     delete retreat.failedSignature;
   }
   const serviceBase=retreat.home?.id&&mission.entity(retreat.home.id);
+  // Garage queues may extend beyond the repair radius. Their waiting spots
+  // are validated by factoryWaitingPoint against the apron and topology;
+  // applying the service radius here cancelled the same route every tick.
+  if(serviceBase?.kind!=='factory'&&retreat.phase==='home'&&retreat.destination&&serviceBase&&mission.buildingSpec(serviceBase).repair
+   &&!factoryCanRepair(mission,serviceBase,retreat.destination)){
+    const rejected={...retreat.destination};clearMotion(unit);retreat.status='planning';
+    delete retreat.destination;delete retreat.phase;delete retreat.service;delete retreat.failedSignature;
+    mission.emit('navigation-retreat-destination-rejected',{unit:unit.id,factory:serviceBase.id,
+     destination:rejected,reason:'outside-factory-apron'});
+  }
   if(serviceBase?.kind==='factory'&&(unit.factoryVisit||retreat.service!=='complete'))return yield* updateFactoryVisit(mission,unit,serviceBase,dt);
   if(retreat.status==='blocked'||retreat.status==='planning'){
     const home=retreatHome(mission,unit);
@@ -238,7 +275,6 @@ export function* updateCombatRetreat(mission, unit, spec, dt) {
     }
     if(retreat.destination&&distance(unit,retreat.destination)<2){
       retreat.status='arrived';unit.driveSpeed=0;
-      if(unit.cooldown<=0){const target=automaticCombatTarget(mission,unit,spec);if(target)mission.attack(unit,target,spec);}
       return true;
     }
     // Old saves used an eight-world-unit arrival radius. Finish their real
@@ -297,9 +333,6 @@ export function* updateCombatRetreat(mission, unit, spec, dt) {
   if(!current())return true;
   if(retreat.destination&&!unit.path.length&&!unit.detour&&!unit.yieldReturn&&distance(unit,retreat.destination)<2){
     retreat.status=retreat.phase==='home'?'arrived':'planning';delete retreat.failedSignature;unit.task=null;unit.driveSpeed=0;
-  }
-  if(retreat.status!=='arrived'&&unit.cooldown<=0) {
-    const target=automaticCombatTarget(mission,unit,spec);if(target)mission.attack(unit,target,spec);
   }
   return true;
 }

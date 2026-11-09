@@ -1,0 +1,742 @@
+{
+  "status": "WORK_IN_PROGRESS_NOT_APPROVED_FOR_MAIN",
+  "date": "2026-11-09",
+  "baseCommit": "983e641fba03698d0370edcf2e9cbb4bf6e329da",
+  "purpose": "Preserve accumulated source and curated regression cases during source-control cleanup; this is not a completed navigation fix.",
+  "generatedFiles": {
+    "legacyMapRuns": 62,
+    "bytes": 383890110,
+    "aclBackups": 11,
+    "action": "Retained locally and ignored; future map runs write to campaign/reports/navigation-map-samples."
+  },
+  "scope": [
+    "Cooperative navigation, immediate commands, traffic recovery and diagnostics",
+    "Authored terrain levels and vehicle envelopes",
+    "Army combat rules, automatic repair routing and controls",
+    "Shader preparation, vehicle scaling, construction and repair effects",
+    "Regression fixtures, test tools and diagnostic collectors"
+  ],
+  "checks": [
+    {
+      "command": "node tools/check-army-selection.mjs",
+      "passed": true,
+      "exitCode": 0
+    },
+    {
+      "command": "node tools/check-repair-distribution.mjs",
+      "passed": true,
+      "exitCode": 0
+    },
+    {
+      "command": "node tools/check-retreat-service.mjs",
+      "passed": false,
+      "exitCode": 1,
+      "finding": "The test still waits for combatRetreat.status=arrived instead of the factoryVisit phases. The observed unit repaired and returned; the remaining assertions have not executed."
+    },
+    {
+      "command": "node tools/check-combat-policy.mjs",
+      "passed": false,
+      "exitCode": 1,
+      "finding": "Loading applies armyCombatPolicy to every allied combat unit, overwriting the per-unit return-fire rule. Individual-rule save/load compatibility is unresolved."
+    },
+    {
+      "command": "node tools/check-building-terrain.mjs",
+      "passed": false,
+      "exitCode": 1,
+      "finding": "The old generator fixture at (-1424,240) now overlaps the relocated reserved oil site. Revalidate the fixture against the current authored map."
+    },
+    {
+      "command": "node tools/check-factory-garage.mjs",
+      "passed": true,
+      "exitCode": 0
+    },
+    {
+      "command": "node tools/check-factory-exit-priority.mjs",
+      "passed": true,
+      "exitCode": 0
+    },
+    {
+      "command": "node tools/check-building-placement.mjs",
+      "passed": true,
+      "exitCode": 0
+    },
+    {
+      "command": "node tools/check-factory-access.mjs",
+      "passed": true,
+      "exitCode": 0
+    },
+    {
+      "command": "node tools/check-factory-access-map.mjs",
+      "passed": true,
+      "exitCode": 0
+    },
+    {
+      "command": "node tools/check-body-overlap-recovery.mjs",
+      "passed": true,
+      "exitCode": 0
+    },
+    {
+      "command": "node tools/check-navigation-state.mjs",
+      "passed": true,
+      "exitCode": 0
+    },
+    {
+      "command": "node tools/check-traffic-planner.mjs",
+      "passed": false,
+      "exitCode": 1,
+      "finding": "The fixture expects a suspended recovery solver but does not create one with the current coordinator. The intended behavior is not proven by this failing test."
+    },
+    {
+      "command": "node tools/check-command-immediate-motion.mjs",
+      "passed": true,
+      "exitCode": 0
+    }
+  ],
+  "browser": {
+    "passed": true,
+    "viewports": [
+      [
+        1440,
+        900
+      ],
+      [
+        390,
+        844
+      ]
+    ],
+    "errors": [],
+    "verified": [
+      "Game initializes and prepares shaders",
+      "Saved game loads",
+      "Combat options open without changing orders"
+    ]
+  },
+  "limitations": [
+    "Four Node checks remain failing; no tests were weakened or disabled.",
+    "The r51 overlap/search ownership fix has no live player-session confirmation.",
+    "Complete arrival of all vehicles in the reported traffic jam is not established.",
+    "No FPS, GPU-time or 500-unit performance claim is made by these checks."
+  ],
+  "files": [
+    {
+      "file": "assets/maps/alpha/README.md",
+      "sha256": "281bc0c393a039d6d074c615bb7228bdf6d4549ddd61f63ebc25a44789f7f741"
+    },
+    {
+      "file": "assets/maps/alpha/heightfield.json",
+      "sha256": "9b80a65803051ce671c574d42e2304d36859d2a64d120cbcc908326d66f30432"
+    },
+    {
+      "file": "assets/ui/combat-symbols.svg",
+      "sha256": "116102d3d5ee4a6056ac7f2bf498f0fb47943709c04b130f047ca105585b4853"
+    },
+    {
+      "file": "campaign/arrival-planner.js",
+      "sha256": "68f45e5e9fa6f2542bb2c82495cb3357e271b8bf8db99b9cc62c7b023fd61a84"
+    },
+    {
+      "file": "campaign/builder-kinematics.js",
+      "sha256": "3b615242fff70c9a2597edc8ba53bbd156625c9d8cd4d03ebb1535a3b58a9e4b"
+    },
+    {
+      "file": "campaign/builder-optics.js",
+      "sha256": "7f42a443f133159897e667acf80bd56baa7fd1090171ca249cfff9295ebfd0f7"
+    },
+    {
+      "file": "campaign/combat-deployment.js",
+      "sha256": "1140413bb66406ea39919df4960430468f59df771266ef213d631779f6e1495c"
+    },
+    {
+      "file": "campaign/combat-menu.css",
+      "sha256": "05632b33ad11225ce145ac29eb16227cdd1e32b5755c3d613373b7159f39c66a"
+    },
+    {
+      "file": "campaign/combat-menu.js",
+      "sha256": "1eb5e5261bfb654fc5b56d596dbfb4e88f70ee8f73de4beebe8e37271c2982ca"
+    },
+    {
+      "file": "campaign/combat-policy.js",
+      "sha256": "0c1be861ad549937059e8004118c528792157da83fcb90de9c5acd708f0690bd"
+    },
+    {
+      "file": "campaign/command-planner.js",
+      "sha256": "a155d20f819a185c5e8f20118f9aaca4df2ef5540d520a1b019f7f21bf9f8975"
+    },
+    {
+      "file": "campaign/construction-effects.js",
+      "sha256": "1ddd2972dc29e0ec1013888f22c1a549ea146340fd89a48c86db59272910cab6"
+    },
+    {
+      "file": "campaign/explosion-effects.js",
+      "sha256": "decd20da97c53e74f179e32074cd837919cae5f16261520a88a623832988df7a"
+    },
+    {
+      "file": "campaign/factory-repair.js",
+      "sha256": "bce2f69cf2e85300d2018790a1d573aff8681d6e7ef27a75576b2991234f3570"
+    },
+    {
+      "file": "campaign/factory-service-effects.js",
+      "sha256": "649b4fc4f1c72ce79ff175f82cb4ee1fd3edab9aec72170ad29d45c617410942"
+    },
+    {
+      "file": "campaign/field-sound.js",
+      "sha256": "aaff01f376942d19e484407b835c3e806721f9d00a09f905c5aa8d5a91671a2b"
+    },
+    {
+      "file": "campaign/ground-effects.js",
+      "sha256": "746dc2393c9c40fa713db21e92990d64dd5af632867b14c2657aabb74d16bf84"
+    },
+    {
+      "file": "campaign/group-command.js",
+      "sha256": "08605558d18e7e9b6f0389d8dab61cb7175fd7417f56b2efcb36c695f0c86f8a"
+    },
+    {
+      "file": "campaign/hud-layout.css",
+      "sha256": "122e4eb722f0140ba8bae6d0e24e79922cf04292dcd940e85ef946584fdc0285"
+    },
+    {
+      "file": "campaign/index.html",
+      "sha256": "40d9e67012192d2b556fec9794a0fd0ad458d9ddb98ed2d92ab74cd0d808c519"
+    },
+    {
+      "file": "campaign/main.js",
+      "sha256": "ffb2bc1de1c4638fbbe4ef074164730108c67416cfbc646374b1047422aa74e5"
+    },
+    {
+      "file": "campaign/maneuver-admission.js",
+      "sha256": "5fcd7ac0ebd3236ba4010a4baee7372874e9a660deeb2f60534a0a56a5a8795e"
+    },
+    {
+      "file": "campaign/mission.js",
+      "sha256": "faadf87c7242cb3a1efbebc3b32cfbd41a6fba542992f5912c8305bde3c86d25"
+    },
+    {
+      "file": "campaign/navigation-debug.js",
+      "sha256": "045939ac6ecc69904394fb5946d86234a845d91bd0c0b022b94134dfefd84872"
+    },
+    {
+      "file": "campaign/navigation-state.js",
+      "sha256": "e89f55ea83b6454573fc9350f6cfcd8911353959424be51eb0dfec27df8eb69f"
+    },
+    {
+      "file": "campaign/navigation.js",
+      "sha256": "992e05406ebdf4c85b5adb77109a5e8fa30b802cb619b5ab6a461b44f798d81b"
+    },
+    {
+      "file": "campaign/passage-reservations.js",
+      "sha256": "dd75b09b9c88c01010ba1fd09403c4c891493869ed8a01a8c5f29bcedfb7744f"
+    },
+    {
+      "file": "campaign/road-merge.js",
+      "sha256": "a7b8e2fe09e0c555f7ef9e19ff878d8b84def3b839e2399b68c2d063fe03ba37"
+    },
+    {
+      "file": "campaign/road-traffic.js",
+      "sha256": "624c784fdd278458297e0062481523b6e1b61b5e7cc96c610124e82b23ed06b1"
+    },
+    {
+      "file": "campaign/shared-route-tree.js",
+      "sha256": "75a6a3a6f58ce9f2463e517be3a41c2a3ed588e2f011ff7b56fb07625c453be1"
+    },
+    {
+      "file": "campaign/street-furniture.js",
+      "sha256": "1407249f45484b0a4995d731923a1918c87159faa586ee9a62a1fe40f74c8e8b"
+    },
+    {
+      "file": "campaign/terrain-passability.js",
+      "sha256": "fd6fc6f6a9ea29bf02791dce3f3638be469eaf2b27172cc43dfaabc651534220"
+    },
+    {
+      "file": "campaign/traffic-coordinator.js",
+      "sha256": "a73ee03410fe67b6fd0ec3312024f2e27430f77cc192311fc4de13841336b962"
+    },
+    {
+      "file": "campaign/traffic-cycle.js",
+      "sha256": "8145908672dae16a92d860bb14aa1e5281b561096d30ccb79acfcd6ec504f757"
+    },
+    {
+      "file": "campaign/traffic-shortcut.js",
+      "sha256": "cf1bc5b0387f6d2cd2d854fee56cc09313125c1f9d94ce2722395f6a2e13c221"
+    },
+    {
+      "file": "campaign/traffic-start.js",
+      "sha256": "cadb6cb319df581496aa4983f6e8e67d5685fee7c5100be6b19c75f9727830fc"
+    },
+    {
+      "file": "campaign/turning-headway.js",
+      "sha256": "09430061dc481f72781683dedfecdf5e7708449f1122142f9ed8b1df89f2125b"
+    },
+    {
+      "file": "campaign/vehicle-collision.js",
+      "sha256": "44b994b1a0b84391f0bf5f4140f579d64b11082110d040f5c93ab050df01c132"
+    },
+    {
+      "file": "campaign/vehicle-contact-shadows.js",
+      "sha256": "806ed7b696a67bba3fd8b7fcab2249316655dddbbcbdadb6450c7c7a9c7f559b"
+    },
+    {
+      "file": "campaign/vehicle-dynamics.js",
+      "sha256": "766face64e18be50440a8ec9c5147938be5a90b09b2e774d05b75ad414c3d082"
+    },
+    {
+      "file": "campaign/vehicle-impact.js",
+      "sha256": "86843c0d86d5ee069c52fb28ade909752e3c252bb7049ea7f42222f6bd7312d0"
+    },
+    {
+      "file": "campaign/vehicle-layer.js",
+      "sha256": "220075c91ade3e403dedb811ddf94829b78ed43d8f97928b423da9f8468f14c9"
+    },
+    {
+      "file": "campaign/vehicle-motion.js",
+      "sha256": "483ef6a215271765f69d45f8eb476286cb893373c26b21964ae506c2b35871cd"
+    },
+    {
+      "file": "campaign/vehicle-salvage.js",
+      "sha256": "8080f2988dfcbec6d7b6d43d90f7609af8b55c1a78849ef5f27f352407033c88"
+    },
+    {
+      "file": "campaign/world.js",
+      "sha256": "b183cf79a51aa8ad12359706d93147f819f180023ca78baf0959d18dc2af5f74"
+    },
+    {
+      "file": "demo/mesa-shaping.js",
+      "sha256": "f82932ecbb9fd4ae710e721430fac16c45783d6b40f46f5b8df9405df7dca465"
+    },
+    {
+      "file": "package.json",
+      "sha256": "a717fae4425bfcd6d8de11e753eb649f53c3cb730d213b3694ad4b32b5675044"
+    },
+    {
+      "file": "tools/bench-command-planner.mjs",
+      "sha256": "2606fea114be4a8731736e473684cb7832dab443297f2200c2fbe4a8e534c85b"
+    },
+    {
+      "file": "tools/build-alpha-map.py",
+      "sha256": "6a582aeaa0af7e0105bebe8b2140761e8dcac413935c71c9f274203c65eac80e"
+    },
+    {
+      "file": "tools/check-collision-separation.mjs",
+      "sha256": "849e97116600d1139fec204bd6f206a7fbc78a8b2f6214b9200d8aee15658817"
+    },
+    {
+      "file": "tools/check-command-planner.mjs",
+      "sha256": "a0e3a105b719b70771bffea21796db3055e5a60e84d77b94956fefd4c9bcfe04"
+    },
+    {
+      "file": "tools/check-navigation-state.mjs",
+      "sha256": "ea72ecc0e8e47a8802a07f2727630da3476750cced4a72f7cd7bfe7ab57c6d27"
+    },
+    {
+      "file": "tools/check-navigation-user-cases.mjs",
+      "sha256": "1509adcef72431d78ea3212c9a3044c88f8c0e8ccc59d97da2a841bfc1852f47"
+    },
+    {
+      "file": "tools/check-traffic-coordinator.mjs",
+      "sha256": "4dbd193a674dfa0bd8b0e531b4d51575e6315004fec226dfb26cc98514a24544"
+    },
+    {
+      "file": "tools/check-yield-return.mjs",
+      "sha256": "527f09b364a9f3c562a86514bd939187858a0908b5bcafd46720da496948ed77"
+    },
+    {
+      "file": "tools/fixtures/combat-sight-20-failed.json",
+      "sha256": "c9917d35d0755b6d4eb55668d040dadaf133b83751ba4395a2c53d570e95c54c"
+    },
+    {
+      "file": "tools/fixtures/navigation-arrival-50-submit.json",
+      "sha256": "b068059361810050d3ca8a840ae9c0b4d14563baa3155026ec344e8e3c19f14d"
+    },
+    {
+      "file": "tools/fixtures/navigation-isolated-target-submit.json",
+      "sha256": "f7819d19bd57af7097841ad00a56e163600aac7e78a621b4d46e7b43692a454c"
+    },
+    {
+      "file": "tools/fixtures/navigation-retreat-30-submit.json",
+      "sha256": "b7efbee8678fa69b7540209fe48fe3195e246c166c374efe6620fd3ea7588f31"
+    },
+    {
+      "file": "tools/navigation-connected-fixture.mjs",
+      "sha256": "4ff753c56c3701f8a7d42e889efde7900302932314d9f925911a6ad12a67b5c0"
+    },
+    {
+      "file": "tools/review-contact-timeline.mjs",
+      "sha256": "105cd9c38afcdf08595fc6445c4cbc7bd96965a405bf0c0580f0d53f293ea8d0"
+    },
+    {
+      "file": "tools/review-navigation-counterexamples.mjs",
+      "sha256": "061a4ba49d0f12065c4d6747211669c8d73b2c8d045d7c6da22ff95b8929843b"
+    },
+    {
+      "file": "campaign/combat-retreat-state.js",
+      "sha256": "5db932023491aa601f553b7edfc01c43864a416fd315b53e551bc166ddd4dcc8"
+    },
+    {
+      "file": "campaign/command-motion.js",
+      "sha256": "c45f823b64429522f955a843540e3a3cd713392c977f0bfab24f9e1a79dbaf4d"
+    },
+    {
+      "file": "campaign/navigation-telemetry.js",
+      "sha256": "1aa44fe585849709b2b3335caeb193ba0b4cc1e5530d2a6b69481fcd9cbf73a8"
+    },
+    {
+      "file": "campaign/predictive-traffic.js",
+      "sha256": "06efcb1fff81276e6f3666501daf563193eb56a44a2c4b10a3e430a265121859"
+    },
+    {
+      "file": "campaign/route-continuation.js",
+      "sha256": "98e4a70f79ea3b8752f036b9c906a4ffcd2fe0de8cae32a1f6fefd98ba9a8f3f"
+    },
+    {
+      "file": "campaign/traffic-arrival-route.js",
+      "sha256": "b1dd6bc6435dee8923c9c78f49d583a9bdcbb6be650d903b81293c9862bef798"
+    },
+    {
+      "file": "campaign/traffic-context.js",
+      "sha256": "3ced74a9e3cb24e2f4de55ad9ba69e8aff44ad88347f83092e0f43c1c5cc7043"
+    },
+    {
+      "file": "campaign/traffic-corridor.js",
+      "sha256": "de02bf52cb1c5cce8eb0a211fa07fdee4a81d10aaa8ae11fdfd686e687a62624"
+    },
+    {
+      "file": "campaign/traffic-joint.js",
+      "sha256": "c18a4e1c357f82fd700819a48531f1b3fb6b6816bcc69ac4ac16c4cec065907c"
+    },
+    {
+      "file": "campaign/traffic-passage.js",
+      "sha256": "a7fdc4085db7c20896acdf69e8a3e67e4d678b19e38c6591fbc40684023fbb4c"
+    },
+    {
+      "file": "campaign/traffic-planner.js",
+      "sha256": "ee3c423c68f5b2901a4919052e5d2462d29f254f3c26be7676f724ef1a95fe1d"
+    },
+    {
+      "file": "tools/check-arrival-alternatives.mjs",
+      "sha256": "49fd97d01bc6f42a3d1a08ebed930cf83826a0059726764e0dcafbad54333a78"
+    },
+    {
+      "file": "tools/check-arrival-horizon.mjs",
+      "sha256": "612b9497411bdedcc7d44dc651cb85da03eb3b2d2429d2951db5b27c13b1571b"
+    },
+    {
+      "file": "tools/check-arrival-reservations.mjs",
+      "sha256": "0927a5d997851d7bacc588772a0e6cdea710da811e067ddc448fe9f93a7a32e0"
+    },
+    {
+      "file": "tools/check-arrival-route.mjs",
+      "sha256": "ec97dfcc66cec8a28649a619a49906b358f8fe5ae38343994a90edc28134c3ad"
+    },
+    {
+      "file": "tools/check-cancelled-search-retry.mjs",
+      "sha256": "000916886f21b0fac1b3400d0e286e2e6f1eb3bb9da72bb7f3015d76010dd023"
+    },
+    {
+      "file": "tools/check-click-arrival.mjs",
+      "sha256": "5053ef5c78cf0ec67717322d5ecafeb390b66b3d8a008b28d8df0ee8ef344e7b"
+    },
+    {
+      "file": "tools/check-command-immediate-motion.mjs",
+      "sha256": "e7023ad0e560b9257fc3c0182ac54a9efe7dee7203ebac18b64d3f0b2d55300e"
+    },
+    {
+      "file": "tools/check-cooperative-arrival.mjs",
+      "sha256": "70dbe54655d71d0b40d241edf6756975d4a57c4e560682057e66c040f6dc7569"
+    },
+    {
+      "file": "tools/check-cooperative-search-cache.mjs",
+      "sha256": "5fd14456e91ad8ad702591ad657d58aff1c1b9d2067e6497846381c79831f12f"
+    },
+    {
+      "file": "tools/check-crossing-progress.mjs",
+      "sha256": "eb93c1449211dd9e42393dc7885fd3f1afa7279e48ab4c6e19e0ba5266c722e8"
+    },
+    {
+      "file": "tools/check-cycle-search-invalidation.mjs",
+      "sha256": "98ec0f0dc5d69c1984d36fcf7ee5f39eb3b5d4ca1f510d96e6416fdd4183f4d3"
+    },
+    {
+      "file": "tools/check-factory-frame-budget.mjs",
+      "sha256": "0e179fc3ce77af35c30a14091e40acc4b0db339f5487dd9cbe32cc4e373e25b7"
+    },
+    {
+      "file": "tools/check-factory-live-queue.mjs",
+      "sha256": "369a733f6b1cb9bac07eb2a1391a32c4c4de7b35c21df5e0a3c59168c7631962"
+    },
+    {
+      "file": "tools/check-fast-start-nine.mjs",
+      "sha256": "097a249d95b3efce4dc0f0b036250f7ac476da21fdf53a84cdb49e88a45522cf"
+    },
+    {
+      "file": "tools/check-joint-arrival.mjs",
+      "sha256": "23d86291741b1363dcb4d9aa02485954ceedec84482ebf39504aaacb009c307f"
+    },
+    {
+      "file": "tools/check-joint-combat.mjs",
+      "sha256": "279d3a3d0ad88e76d5ae2f358cc18b5307c7ff235078c961c850d52e1ed716fb"
+    },
+    {
+      "file": "tools/check-joint-loan-history.mjs",
+      "sha256": "25c5e79a803d692a3bf3b069ca31df1d172dad0247b5db63b9510c63649e0557"
+    },
+    {
+      "file": "tools/check-joint-reservations.mjs",
+      "sha256": "97f936ebfb3987c6c9cb75d39cbe633211e52675f247bb13377e42508d62b5c8"
+    },
+    {
+      "file": "tools/check-junction-occupied-start.mjs",
+      "sha256": "5de1e9ad1e9fbaec9679db65cec9ec66d61d57918f181108ae8ff380c7f342c5"
+    },
+    {
+      "file": "tools/check-maneuver-sampling.mjs",
+      "sha256": "a612a6c41a6faa96fb50d13029239410e5fc0947bce05beed73f342e70ff1383"
+    },
+    {
+      "file": "tools/check-moving-passage.mjs",
+      "sha256": "84521ea6588082f6d01985914792e6047a34c6afc32440df3aac4a1a61061fe7"
+    },
+    {
+      "file": "tools/check-navigation-input-latency.mjs",
+      "sha256": "a2517071ceb920e9e951fb8919e04eb2c4a7557664e0c660569580719e60b751"
+    },
+    {
+      "file": "tools/check-navigation-public-progress.mjs",
+      "sha256": "8da616861e9a8659d33fe0f26d5126ae547f10992794021d0cfa1acd97e4085d"
+    },
+    {
+      "file": "tools/check-navigation-recovery-captures.mjs",
+      "sha256": "7b9045e5e736a124e69eaa15a15383b1a0f9a07c07609f4fb8e0071d0e06e9ab"
+    },
+    {
+      "file": "tools/check-passage-backoff.mjs",
+      "sha256": "1ac5d51d66c7aa9df15f75d1282ca61ea38127c7992e143d124a0251fbb5a6de"
+    },
+    {
+      "file": "tools/check-responsive-input.mjs",
+      "sha256": "009ad670a5227864f920aa8687b21c09875250ac1e4f779235782da3c3dac271"
+    },
+    {
+      "file": "tools/check-retreat-service.mjs",
+      "sha256": "5cfe4629336ddf225765ffc9e2acea8b82c2b37b0d37593e8e153c824b0c6ef4"
+    },
+    {
+      "file": "tools/check-route-continuation-passage.mjs",
+      "sha256": "09f740d2191ed6fb9800fc918c1fee2b7c68eed39509646727d986a73b6e5c5b"
+    },
+    {
+      "file": "tools/check-route-continuation.mjs",
+      "sha256": "3036febaa66d5cac229ab578bde4735b2a77beb65ce7e5a7b4f6ed5199c4c6bf"
+    },
+    {
+      "file": "tools/check-stopped-leader-progress.mjs",
+      "sha256": "81eb10b16653cd10990ee1e22acd3b5ad41e43b7a87c9888eb189fcc9d3d83d0"
+    },
+    {
+      "file": "tools/check-terminal-arrival.mjs",
+      "sha256": "0afccdb742b0e624b4aba72f559c13429296a1a34cff04d2d239f2ca1266cf49"
+    },
+    {
+      "file": "tools/check-traffic-active-dependencies.mjs",
+      "sha256": "cbb83cda8f04e3e30d2556665e554cdcbda3961f96f81c396e405976e2b84eb1"
+    },
+    {
+      "file": "tools/check-traffic-corridor.mjs",
+      "sha256": "4bd3d811c9d8f1792b41b7a1ba4cb9d6da5a1548c52d85b9804c3b0cb503a860"
+    },
+    {
+      "file": "tools/check-traffic-live-contracts.mjs",
+      "sha256": "b07c16f31e68639694bef52a69643201b16965ea61762650c828e60ede555b0e"
+    },
+    {
+      "file": "tools/check-traffic-planner.mjs",
+      "sha256": "740e3e978dca816b5a27a41db51b1aa2836be64ef17e2bd2ea2dc3d80b737725"
+    },
+    {
+      "file": "tools/check-yield-passage.mjs",
+      "sha256": "0bb1ef320ddc05b7e7fd95f06e734017b2ba640cf5ae361f7c3b070116f6d9d4"
+    },
+    {
+      "file": "tools/collect-navigation.py",
+      "sha256": "6289302a45c3fd5d913a5c00f3dd33a67cd19b72d9e2f53eaad7e1d4d3c8be9e"
+    },
+    {
+      "file": "tools/experiments/check-predictive-traffic.mjs",
+      "sha256": "00cfdcf644d8637a9cc5d16456fb4181a8fe91b0ce979cdd1d9b3bb9e3b4152d"
+    },
+    {
+      "file": "tools/fixtures/builder-independent-builder-leader-independent.json",
+      "sha256": "769034694335a0ad08c390686f20041884ae24a1aec0c303533c9f897174dc1d"
+    },
+    {
+      "file": "tools/fixtures/builder-independent-derrick-generator.json",
+      "sha256": "6f53f5819a117d0ad8ea4345b8aff08f1aee47e65f6a0ec0cf5d756b928d0e9d"
+    },
+    {
+      "file": "tools/fixtures/builder-independent-two-derricks-staggered.json",
+      "sha256": "bc8215314909819fdde7e8801ca8ed6eb1bc7d9dc7832ea28ad5e75f697bcc04"
+    },
+    {
+      "file": "tools/fixtures/builder-independent-two-derricks.json",
+      "sha256": "6f67023b7bf96d6463612b5040938bbf3b82a91590da8c9bfbcfeef7e2db0529"
+    },
+    {
+      "file": "tools/fixtures/builder-independent-two-obstacles-diagonal.json",
+      "sha256": "ddc7f9f8fa168f1bb6194f99437088de1f7e38209ec2531c6a79ca81c1f4a2f2"
+    },
+    {
+      "file": "tools/fixtures/builder-independent-two-obstacles-quarter.json",
+      "sha256": "661b10a2cd5835cb90b07375ac5b39adac5311e916b6414ba12437405ac44a76"
+    },
+    {
+      "file": "tools/fixtures/builder-independent-two-obstacles-reverse.json",
+      "sha256": "fef87d01e2930bb45f8ee7c667003b949d18b88d6b894be00ed100fabc6a72ce"
+    },
+    {
+      "file": "tools/fixtures/builder-independent-two-obstacles.json",
+      "sha256": "0419e7531d96bbc9b576acf20f8fbdc5f704bdd85bb5b8473d6c89db7a3a2eda"
+    },
+    {
+      "file": "tools/fixtures/combat-sight-6-failed.json",
+      "sha256": "6c10b4ba717e95b2d2ee4e0811cc0e46c274b394b6d0ff6ac22ec685eafb6240"
+    },
+    {
+      "file": "tools/fixtures/crossing-leases-failed.json",
+      "sha256": "30755920d6adc8ae1439946a11c6477bb6ca7441587ae4a6a7eea29bb07480f7"
+    },
+    {
+      "file": "tools/fixtures/crossing-physical-cycle-after.json",
+      "sha256": "dcfa0820acfdf0d2333e335f760726b6e6b9f1dbd0f4ee59425f5500276f01d5"
+    },
+    {
+      "file": "tools/fixtures/factory-queue-19.json",
+      "sha256": "b1faa25c649a281b66b2a0c23dc0219e8c969d5291be016e4baf287b8fee7a4b"
+    },
+    {
+      "file": "tools/fixtures/junction-occupied-start.json",
+      "sha256": "2f131ca3698de6b370ace86544a9d5fe5a4fffffcd3fe69c7338dc0df11841a9"
+    },
+    {
+      "file": "tools/fixtures/navigation-arrival-alternatives.json",
+      "sha256": "47fa72238788bd3f81550aa0d447681008c43b4c580f763044c27b10b67cb3fa"
+    },
+    {
+      "file": "tools/fixtures/navigation-arrival-horizon.json",
+      "sha256": "a6621af567ecb06b331bd7e910a6b23d43ff68e849ed9832f2827d642f77c5ec"
+    },
+    {
+      "file": "tools/fixtures/navigation-cooperative-arrival.json",
+      "sha256": "702082250995ac1a773bf16c0ae25efb99aabede5760df6798c0838358bf09f4"
+    },
+    {
+      "file": "tools/fixtures/navigation-cycle-search-witness.json",
+      "sha256": "7946fa151abc51e357007d1e7a7ea83d49e9dc35ce4e0762a53b646ba5f25763"
+    },
+    {
+      "file": "tools/fixtures/navigation-joint-arrival.json",
+      "sha256": "9afec3c061c05a74e178be94b3263bd00a897de000a98b742ae2368acee70d42"
+    },
+    {
+      "file": "tools/fixtures/navigation-moving-passage.json",
+      "sha256": "0cd466d5de61c2b3c6d4828d2d79ae2e1e397236ee498fbe96f1280e95cc6abd"
+    },
+    {
+      "file": "tools/fixtures/navigation-nine-search.json",
+      "sha256": "d91436f57d402ee6cd5c21581001027712f073f1c3903b3cdcffa166adf2dc50"
+    },
+    {
+      "file": "tools/fixtures/navigation-progress-captures.json",
+      "sha256": "effb5e9fac079caaf18ed32f8c10c51712e8003a1ce97ad757b28f240724e4b7"
+    },
+    {
+      "file": "tools/fixtures/navigation-slow-input.json",
+      "sha256": "b1babdb8a65d48a46e9381a8111c3cc1be8cc807781f2db94b4809dfaf7f0788"
+    },
+    {
+      "file": "tools/fixtures/navigation-terminal-arrival.json",
+      "sha256": "04c20424b69d6752555816de330987b0143424d4c1cb22b310a42cf90be99609"
+    },
+    {
+      "file": "tools/fixtures/navigation-u440-after.json",
+      "sha256": "f445fee15d3f2c7c18285201d5b80dfcc74ae1d1954ff6ea31246b9f8bc38e21"
+    },
+    {
+      "file": "tools/fixtures/navigation-u440-start.json",
+      "sha256": "487d51ec9d9c16bb6efc4ad56b40104237151b61b26aa64900d9203c218cfae5"
+    },
+    {
+      "file": "tools/fixtures/turning-admission-failed.json",
+      "sha256": "c6ad4f28acb39e66769b2757ad26c15e0eab8ba4e011232acf28094dd17ccb21"
+    },
+    {
+      "file": "tools/fixtures/user-navigation-centre-flat.json",
+      "sha256": "e11647401d18769f6c199eb39b390a4291f0c0b6599e209490e9222ac928d6c9"
+    },
+    {
+      "file": "tools/fixtures/user-navigation-centre-real.json",
+      "sha256": "472934648a45cc0cb28beed451aae6bebb9fcab1ec12419ca0d4506bb0a45523"
+    },
+    {
+      "file": "tools/fixtures/user-navigation-heap-flat.json",
+      "sha256": "61e79b4fdc48ae9757ccef1cae9dfc87fd8259ecac46665310204f4104a05dee"
+    },
+    {
+      "file": "tools/fixtures/user-navigation-heap-real.json",
+      "sha256": "61787af718c1779daa64452d2f148a936ce42e4c461fee6513874bf204aee34f"
+    },
+    {
+      "file": "tools/fixtures/user-navigation-opposing-flat.json",
+      "sha256": "e8a3f9959c526972d68f1a2043e96f94d493f421ed2249d522fb051d24565b0f"
+    },
+    {
+      "file": "tools/fixtures/user-navigation-opposing-real.json",
+      "sha256": "661cc1face66c46c9ad56b5501663d65987bda9a74506669d8872e3915156362"
+    },
+    {
+      "file": "tools/review-combat-waits.mjs",
+      "sha256": "ff1aa1aa1bca28a6c19080fe11cc85347a481e620840c877e80c3854842ce85c"
+    },
+    {
+      "file": "tools/review-curve-contention.mjs",
+      "sha256": "8c01c366ddddaf1e67162fe270435217701a97693b3920414bb07465ea1af995"
+    },
+    {
+      "file": "tools/review-cycle-braking.mjs",
+      "sha256": "4d59c8ec58a020512e54cbf16a256ff4280b4a1af84bdc4eb11700659ed569c1"
+    },
+    {
+      "file": "tools/review-interruption-contact.mjs",
+      "sha256": "29e04ba7ffff3017b487fd05c11dad5ed2799225dd36b1238eac780b65ad7589"
+    },
+    {
+      "file": "tools/review-live-traffic.py",
+      "sha256": "c91a556584233b79236a486c44190538cfd2ca1e94124f86456888140d83e224"
+    },
+    {
+      "file": "tools/review-mass-contacts.mjs",
+      "sha256": "e7532c5b2c64f261455da3caa7fb3a9f580357aad5ddeb3dbe23970097cdb895"
+    },
+    {
+      "file": "tools/review-mass-pair.mjs",
+      "sha256": "b0cc276d4e88fe72d836404feb9aa8c2cf5dfbd51cca7c9c356bf71e87d88939"
+    },
+    {
+      "file": "tools/review-mass-start-wait.mjs",
+      "sha256": "2df647ac6afcff864e5152b34c4104714916a93af082ff357cea7ddad99df208"
+    },
+    {
+      "file": "tools/review-route-continuation-combat.mjs",
+      "sha256": "b9db855a5878f1fce3509ca79a35009907f61cf4b286eef20ea0a789c17a188c"
+    },
+    {
+      "file": "tools/review-stopped-curve-baseline.mjs",
+      "sha256": "931df869a59e6ba2869bec68e7b3cbf872e94200ceeb541f7e779af5e4ee76ae"
+    },
+    {
+      "file": "tools/review-u440-reservation.mjs",
+      "sha256": "d6038b8d015744701d71ec547f8efab2436bcc877821a429a4684fc0a1a26366"
+    },
+    {
+      "file": "campaign/vehicle-overlap.js",
+      "sha256": "857825065689c9d59d63e567fe6c54cc695ec6bb0c5ba67f08e1965122d98d90"
+    }
+  ]
+}

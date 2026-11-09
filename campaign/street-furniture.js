@@ -1,4 +1,4 @@
-import {vehicleEnvelope,vehicleRadiusBound} from './vehicle-collision.js';
+import {vehicleSweep,vehicleRadiusBound,sweepGap} from './vehicle-collision.js';
 import {isInfantry} from './scav-unit-profiles.js';
 import {angleDelta} from './builder-kinematics.js';
 import {kickContactRock} from './vehicle-contact-rock.js';
@@ -20,30 +20,11 @@ function layout(mission){
   for(const site of sites){const key=Math.floor(site.x/cell)+','+Math.floor(site.y/cell);if(!buckets.has(key))buckets.set(key,[]);buckets.get(key).push(site);}
   cache={sites,cell,buckets};caches.set(mission,cache);return cache;
 }
-// Segment against the expanded vehicle rectangle. Translation is swept exactly;
-// turning is divided into short arcs, so fast cars cannot skip a narrow pole.
-function segmentHitsBox(ax,ay,bx,by,w,d){
-  let lo=0,hi=1;
-  for(const [a,b,size] of [[ax,bx,w],[ay,by,d]]){
-    const delta=b-a;
-    if(Math.abs(delta)<1e-9){if(Math.abs(a)>size)return false;continue;}
-    const t0=(-size-a)/delta,t1=(size-a)/delta;
-    lo=Math.max(lo,Math.min(t0,t1));hi=Math.min(hi,Math.max(t0,t1));if(lo>hi)return false;
-  }
-  return true;
-}
+// Poles use the same swept oval as vehicle traffic.
 export function vehicleHitsLamp(unit,lamp,field,scale){
-  const ax=unit.previousX??unit.x,ay=unit.previousY??unit.y,heading=unit.previousHeading??unit.heading??0;
-  const turn=angleDelta(unit.heading??0,heading),steps=Math.max(1,Math.ceil(Math.abs(turn)/.08));
-  for(let i=0;i<steps;i++){
-    const a=i/steps,b=(i+1)/steps,mid=(a+b)/2;
-    const envelope=vehicleEnvelope({kind:unit.kind,x:ax+(unit.x-ax)*mid,y:ay+(unit.y-ay)*mid,heading:heading+turn*mid},scale,field);
-    const dx=(unit.x-ax)/steps/2,dy=(unit.y-ay)/steps/2,c=envelope.c,s=envelope.s;
-    const x=lamp.x-envelope.x,y=lamp.y-envelope.y;
-    const padding=.075*scale+vehicleRadiusBound(unit.kind,scale)*Math.abs(turn)/steps/2;
-    if(segmentHitsBox((x+dx)*c+(y+dy)*s,-(x+dx)*s+(y+dy)*c,(x-dx)*c+(y-dy)*s,-(x-dx)*s+(y-dy)*c,envelope.width+padding,envelope.depth+padding))return true;
-  }
-  return false;
+  const from={...unit,x:unit.previousX??unit.x,y:unit.previousY??unit.y,heading:unit.previousHeading??unit.heading??0};
+  const sweep=vehicleSweep(from,unit,scale,field);
+  return sweepGap(sweep,{x:lamp.x,y:lamp.y,radius:.075*scale})<=0;
 }
 export function updateStreetFurniture(mission){
   const {sites,cell,buckets}=layout(mission);if(!sites.length)return;
@@ -52,9 +33,8 @@ export function updateStreetFurniture(mission){
     if(unit.hp<=0||isInfantry(unit))continue;
     const ax=unit.previousX??unit.x,ay=unit.previousY??unit.y,dx=unit.x-ax,dy=unit.y-ay,length=Math.hypot(dx,dy);
     if(length<.001)continue; // Parking nearby and loading a save are not impacts.
-    // The authored boxes fit in this sphere under any ground pitch/roll. Reject
-    // distant poles before allocating poses or sampling the heightfield.
-    const radius=vehicleRadiusBound(unit.kind,scale)/Math.SQRT2+.075*scale;
+    const turn=angleDelta(unit.heading??0,unit.previousHeading??unit.heading??0);
+    const radius=vehicleRadiusBound(unit.kind,scale)+.075*scale+.012+.5*length*Math.tan(Math.abs(turn)/4)+vehicleRadiusBound(unit.kind,scale)*(1-Math.cos(turn/4));
     for(let y=Math.floor((Math.min(ay,unit.y)-radius)/cell);y<=Math.floor((Math.max(ay,unit.y)+radius)/cell);y++){
       for(let x=Math.floor((Math.min(ax,unit.x)-radius)/cell);x<=Math.floor((Math.max(ax,unit.x)+radius)/cell);x++){
         for(const lamp of buckets.get(x+','+y)??[]){

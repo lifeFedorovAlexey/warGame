@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {Mission} from '../campaign/mission.js';
 import {checkManeuver} from '../campaign/vehicle-motion.js';
-import {rememberYieldHome} from '../campaign/traffic-start.js';
+import {rememberYieldHome,resumeYieldHome,borrowedHomeClear} from '../campaign/traffic-start.js';
 
 const config=JSON.parse(fs.readFileSync('assets/campaign/alpha/mission01/gameplay.json','utf8'));
 const field={extent:4096,half:2048,cellMetres:32,heightAt:()=>0,gradientAt:()=>({x:0,y:0}),
@@ -39,6 +39,31 @@ assert(!simple.u.yieldReturn);
 assert(Math.hypot(simple.u.x-home.x,simple.u.y-home.y)<1e-9);
 assert.equal(simple.u.hp,simple.u.maxHp);
 
+// A new public order must reserve the borrower's eventual home, rather than
+// shifting the clicked goal into that home to avoid its temporary yield pose.
+const corridorMission=fixture(),loaned=corridorMission.addUnit('bukhanka','rai',{x:0,y:0});
+rememberYieldHome(loaned,[],false,0,corridorMission);
+loaned.detour={legs:[{direction:1,curve:0,remaining:40}],parking:true,idleYield:true,blocked:0};
+while(loaned.detour)corridorMission.advance(.1);
+const arriving=corridorMission.addUnit('bukhanka','rai',{x:0,y:100},{heading:Math.PI});
+assert(!borrowedHomeClear(corridorMission,arriving,{x:0,y:0,heading:Math.PI}));
+assert(borrowedHomeClear(corridorMission,arriving,{x:45,y:30,heading:Math.PI}));
+assert(corridorMission.vehicleMotionClear(arriving,{...arriving,x:-40,y:15,heading:-Math.PI/2},
+ {...arriving,x:40,y:15,heading:-Math.PI/2}),'The inverse claim limits final parking, not safe temporary passage');
+assert(corridorMission.submitOrder([arriving.id],'move',{x:0,y:30}).ok);
+// Interleave command planning with the borrower's checked return. The
+// temporary reservation must not turn into a permanent parking exclusion.
+corridorMission.tick(.1);
+assert(arriving.pendingOrder&&loaned.detour?.yieldReturning&&loaned.detour?.reservedCorridor);
+for(let i=0;i<300&&(loaned.yieldReturn||arriving.pendingOrder||arriving.task);i++){
+ corridorMission.advance(.1);
+ if(arriving.routeOrder)assert.deepEqual(arriving.routeOrder.destination,{x:0,y:30},'The free future destination remains the exact clicked point');
+}
+assert(!loaned.yieldReturn&&!arriving.task&&!arriving.pendingOrder,JSON.stringify({loaned,arriving}));
+assert(Math.hypot(loaned.x,loaned.y)<1e-8&&Math.hypot(arriving.x,arriving.y-30)<.65);
+assert(borrowedHomeClear(corridorMission,arriving));
+assert.equal(loaned.hp,loaned.maxHp);assert.equal(arriving.hp,arriving.maxHp);
+
 const blocked=outgoing(),blocker=blocked.m.addUnit('bukhanka','rai',home,{heading:home.heading});
 const before={x:blocked.u.x,y:blocked.u.y};
 blocked.m.advance(.1);
@@ -57,6 +82,23 @@ for(const action of ['stop','move']){
   assert(Math.hypot(u.x-pose.x,u.y-pose.y)<1e-8);
  }
 }
+// Stop revokes the old destination. If this idle car later lends its space,
+// a temporarily blocked inverse may not resume that cancelled Move instead
+// of returning to the place where Stop left it.
+const revoked=fixture(),stopped=revoked.addUnit('bukhanka','rai',{x:0,y:0});
+assert(revoked.submitOrder([stopped.id],'move',{x:0,y:100}).ok);
+for(let i=0;i<100&&stopped.y<35;i++)revoked.advance(.1);
+revoked.stop([stopped.id],{expandGroup:false});
+const stoppedHome={x:stopped.x,y:stopped.y};
+rememberYieldHome(stopped,[],false,revoked.state.time,revoked);
+stopped.detour={legs:[{direction:1,curve:0,remaining:40}],parking:true,idleYield:true,blocked:0};
+while(stopped.detour)revoked.tick(.1);
+const occupiedHome=revoked.addUnit('bukhanka','rai',stoppedHome);
+for(let i=0;i<40;i++)revoked.tick(.1);
+assert(stopped.yieldReturn,'An occupied borrowed home must remain outstanding, not revive a cancelled goal');
+occupiedHome.hp=0;
+for(let i=0;i<200&&stopped.yieldReturn;i++)revoked.tick(.1);
+assert(!stopped.yieldReturn&&Math.hypot(stopped.x-stoppedHome.x,stopped.y-stoppedHome.y)<2);
 // B borrows A's already-vacated home on its way out. Returning A first
 // would block B forever, so these two actual corridors must unwind B, A.
 const nested=fixture(),a=nested.addUnit('bukhanka','rai',{x:0,y:0}),b=nested.addUnit('bukhanka','rai',{x:0,y:-30});
@@ -109,5 +151,16 @@ assert.equal(checkManeuver(n,back,config.worldScale,(a,b)=>narrow.vehicleMotionC
 for(let i=0;i<200&&n.yieldReturn;i++)narrow.advance(.1);
 assert(!n.yieldReturn&&Math.hypot(n.x,n.y-26)<1e-8,'Refined full sweeps return to the exact borrowed pose');
 assert(narrow.state.units.every(u=>u.hp===u.maxHp));
+// A newer public order can arrive between slices of a return proof. The old
+// inverse may not publish a detour or move the car after that command.
+const interrupted=outgoing(),origin={x:interrupted.u.x,y:interrupted.u.y};
+interrupted.m.nav.workDeadline=-Infinity;
+const returning=resumeYieldHome(interrupted.m,interrupted.u);
+assert.equal(returning.next().done,false);
+assert(interrupted.m.submitOrder([interrupted.u.id],'move',{x:150,y:100}).ok);
+interrupted.m.nav.workDeadline=Infinity;
+let step;do{step=returning.next();}while(!step.done);
+assert(interrupted.u.pendingOrder&&!interrupted.u.detour);
+assert.deepEqual({x:interrupted.u.x,y:interrupted.u.y},origin);
 console.log(JSON.stringify({roundtripError:Math.hypot(roundtrip.x-home.x,roundtrip.y-home.y),
- actualReturnError:Math.hypot(simple.u.x-home.x,simple.u.y-home.y),saveLoad:'identical',resumeAfterClear:.1,checks:10}));
+ actualReturnError:Math.hypot(simple.u.x-home.x,simple.u.y-home.y),saveLoad:'identical',resumeAfterClear:.1,checks:13}));

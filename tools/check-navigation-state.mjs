@@ -25,4 +25,20 @@ mission.state.units=[a,b];auditNavigationWaits(mission);
 assert.deepEqual(mission.navigationDiagnostics.cycles,[['a','b']]);assert(a.navigation.potentialDefect&&b.navigation.potentialDefect);
 const count=events.length;auditNavigationWaits(mission);assert.equal(events.length,count,'A known cycle is not repeatedly emitted');
 b.navigation.waitSeconds=0;auditNavigationWaits(mission);assert.deepEqual(mission.navigationDiagnostics.cycles,[],'A moving predecessor breaks the diagnosed wait cycle');
-console.log(JSON.stringify({passed:true,checks:11}));
+// A second physical blocker must participate even if the first dependency
+// is an acyclic reservation. Borrowers have a destination but no path yet.
+const moving={id:'moving',hp:320,path:[{x:100,y:0}],task:{type:'move',x:100,y:0},commandRevision:1,
+ navigation:{speed:0,waitSeconds:1,blockerId:'outside',blockerIds:['outside','borrower'],commandRevision:1}},
+ borrower={id:'borrower',hp:320,path:[],task:null,commandRevision:1,yieldReturn:{home:{x:0,y:0}},
+ navigation:{speed:0,waitSeconds:1,blockerId:'moving',blockerIds:['moving'],commandRevision:1}},
+ tail={id:'tail',hp:320,path:[{x:100,y:0}],navigation:{speed:0,waitSeconds:1,blockerId:'moving'}};
+mission.state.units=[moving,borrower,tail];auditNavigationWaits(mission);
+assert.deepEqual(mission.navigationDiagnostics.recoveryCycles,[['borrower','moving']]);
+assert(mission.navigationDiagnostics.deadlockedIds.has('tail'),'A tail behind a deadlock is not a healthy queue');
+moving.commandRevision=2;auditNavigationWaits(mission);
+assert.equal(mission.navigationDiagnostics.recoveryCycles.length,0,'A replacement order invalidates the previous physical dependency');
+const waiting={id:'named-wait',hp:320,x:0,y:0,path:[{x:100,y:0}],task:{type:'move',x:100,y:0}};
+beginNavigationStep(waiting);navigationDecision(waiting,'YIELDING','headway','leader');finishNavigationStep(mission,waiting,.1,0,0);
+mission.state.time+=31;beginNavigationStep(waiting);navigationDecision(waiting,'YIELDING','headway','leader');finishNavigationStep(mission,waiting,.1,0,0);
+assert(waiting.navigation.potentialDefect,'A named indefinite wait must remain visible');
+console.log(JSON.stringify({passed:true,checks:15}));

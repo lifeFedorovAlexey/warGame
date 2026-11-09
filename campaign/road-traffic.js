@@ -3,14 +3,12 @@ const bucketSize = 64;
 const clamp = (value, low, high) => Math.max(low, Math.min(high, value));
 
 export function gradeSpeed(grade) {
-  return clamp(1 - grade * 1.6, .57, 1.18);
+  return 1;
 }
 
 export function surfaceTravelCost(coverage, slope, pavedTrip) {
-  // A downhill shortcut can be fast and still have poor grip on a side slope.
-  const looseSlope = Math.max(0, slope - .07);
-  const sandCost = (pavedTrip ? 1.85 : .12) + 8 * looseSlope * looseSlope;
-  return (1 + (1 - coverage) * sandCost) / (1 + asphaltBonus * coverage);
+  // Surface speed only; visual hills do not penalize travel inside a level.
+  return 1 / (1 + asphaltBonus * coverage);
 }
 
 export class RoadTraffic {
@@ -22,6 +20,7 @@ export class RoadTraffic {
     this.intersections = (field.roadNetwork?.nodes ?? []).filter(node => node.degree > 2 || node.base);
     for (const [pathIndex,path] of [...(field.roadNetwork?.paths ?? []),...localRoads].entries()) {
       const pathId=path.id??pathIndex,segments=[];
+      segments.byIndex=[];
       this.routes.set(pathId,segments);
       let progress=0;
       for (let index = 0; index + 1 < path.points.length; index++) {
@@ -31,6 +30,7 @@ export class RoadTraffic {
         const half = Math.max(a.width ?? path.width, b.width ?? path.width) / 2;
         const segment = {a, b, path, index, pathId, progress, ux: dx / length, uy: dy / length, length};
         segments.push(segment);
+        segments.byIndex[index]=segment;
         progress+=length;
         const x0 = Math.floor((Math.min(a.x, b.x) - half) / bucketSize);
         const x1 = Math.floor((Math.max(a.x, b.x) + half) / bucketSize);
@@ -42,6 +42,11 @@ export class RoadTraffic {
           list.push(segment);
           this.buckets.set(key, list);
         }
+      }
+      for(let i=0;i<segments.length;i++){
+        const current=segments[i];current.curvature=0;
+        for(const other of [segments[i-1],segments[i+1]])if(other)
+          current.curvature=Math.max(current.curvature,Math.acos(clamp(current.ux*other.ux+current.uy*other.uy,-1,1))/((current.length+other.length)/2));
       }
       if (progress && path.from != null && path.to != null) {
         for (const [from, to] of [[path.from, path.to], [path.to, path.from]]) {
@@ -94,7 +99,6 @@ export class RoadTraffic {
   worthChecking(from, to, directCost, pavedTrip) {
     const length = Math.hypot(to.x - from.x, to.y - from.y);
     if (!this.buckets.size || directCost < length / (1 + asphaltBonus) * 1.035) return false;
-    if (pavedTrip) return true;
     if (length < 68) return false;
     const radius = Math.min(155, length * .32);
     const a = this.nearest(from, radius), b = this.nearest(to, radius);
@@ -187,7 +191,7 @@ export class RoadTraffic {
     return progress <= layout.targetProgress ? progress : null;
   }
 
-  rightLane(unit, goal, scale) {
+  rightLane(unit, goal, scale, lookahead=39) {
     const dx = goal.x - unit.x, dy = goal.y - unit.y, distance = Math.hypot(dx, dy);
     if (distance < 40 || this.coverage(unit.x, unit.y) < .40) return null;
     const road = this.nearest(unit);
@@ -196,10 +200,12 @@ export class RoadTraffic {
     const alignment = (dx * segment.ux + dy * segment.uy) / distance;
     if (Math.abs(alignment) < .73) return null;
     const direction = Math.sign(alignment), steps = segment.path.points;
-    let remaining = Math.min(distance * .80, 39);
-    let index = segment.index, along = road.along;
+    let remaining = Math.min(distance * .80, lookahead);
+    const preview=remaining;
+    let index = segment.index, along = road.along,curvature=0;
     while (index >= 0 && index < steps.length - 1) {
       const a = steps[index], b = steps[index + 1];
+      curvature=Math.max(curvature,this.routes.get(segment.pathId).byIndex[index]?.curvature??0);
       const length = Math.hypot(b.x - a.x, b.y - a.y);
       if (length < .001) { index += direction; continue; }
       const available = direction > 0 ? length - along : along;
@@ -213,7 +219,12 @@ export class RoadTraffic {
       }
       const x = a.x + (b.x - a.x) * (along + direction * remaining) / length;
       const y = a.y + (b.y - a.y) * (along + direction * remaining) / length;
-      if (this.intersections.some(node => Math.hypot(x - node.x, y - node.y) < 26)) return null;
+      // A long chord cuts across the oncoming lane on a tight bend. Bound
+      // that chord's sagitta while retaining the full preview on straights.
+      if(lookahead===39&&curvature>.0001){
+        const curvedPreview=Math.max(12,Math.min(preview,Math.sqrt(8/curvature*scale*.15)));
+        if(curvedPreview<preview-.1)return this.rightLane(unit,goal,scale,curvedPreview);
+      }
       const offset = Math.min(road.width * .25, road.width / 2 - scale * 1.30);
       const lane = {
         x: x + (b.y - a.y) / length * direction * offset,
