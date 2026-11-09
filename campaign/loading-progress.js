@@ -10,7 +10,7 @@ export function createLoadingProgress(root){
  const unlock=()=>{if(locked)for(const [button,disabled] of locked)button.disabled=disabled;locked=null;};
  function begin(next=STARTUP_STAGES){
   stages=next;active=true;panel.hidden=false;status.hidden=false;bar.hidden=false;count.hidden=false;
-  root.classList.add('is-loading');art.inert=true;retry.hidden=sound.hidden=true;
+  root.classList.add('is-loading');art.inert=true;retry.hidden=true;sound.hidden=next===ENTRY_STAGES;sound.disabled=true;
   bar.max=stages.length;bar.value=0;root.setAttribute('aria-busy','true');panel.classList.add('loading-active');
   locked??=controls().map(button=>[button,button.disabled]);for(const button of controls())button.disabled=true;
   update(stages[0][0]);
@@ -22,16 +22,16 @@ export function createLoadingProgress(root){
   if(value<bar.value)return;
   panel.dataset.phase=id;bar.value=value;
   status.textContent=stages[index][1]+(total>1?' · '+completed+'/'+total:'…');
-  count.textContent=(index+1)+' / '+stages.length;
+  count.textContent=Math.floor(value/stages.length*100)+'%';
   bar.setAttribute('aria-valuetext','Этап '+(index+1)+' из '+stages.length+': '+status.textContent);
  }
  async function stage(id){update(id);await loadingPaint();}
- async function finish(){if(!active)return;bar.value=bar.max;panel.dataset.phase='complete';status.textContent='Готово';bar.setAttribute('aria-valuetext','Загрузка завершена');await loadingPaint();}
+ async function finish(){if(!active)return;bar.value=bar.max;count.textContent='100%';panel.dataset.phase='complete';status.textContent='Готово к запуску';bar.setAttribute('aria-valuetext','Загрузка завершена');await loadingPaint();}
  function hide(){active=false;panel.hidden=true;root.classList.remove('is-loading');art.inert=false;root.setAttribute('aria-busy','false');panel.classList.remove('loading-active');unlock();}
  function awaitSound(){
   if(panel.dataset.phase==='activation')return;
-  active=false;panel.dataset.phase='activation';status.textContent='Готово. Нажмите, чтобы войти со звуком.';
-  bar.hidden=count.hidden=true;root.setAttribute('aria-busy','false');panel.classList.remove('loading-active');sound.hidden=false;sound.focus({preventScroll:true});
+  active=false;panel.dataset.phase='activation';status.textContent='Готово к запуску';
+  root.setAttribute('aria-busy','false');panel.classList.remove('loading-active');sound.hidden=false;sound.disabled=false;sound.focus({preventScroll:true});
  }
  function error(text){active=false;panel.hidden=false;status.hidden=false;status.textContent=text;bar.hidden=count.hidden=sound.hidden=true;panel.dataset.phase='error';root.setAttribute('aria-busy','false');panel.classList.remove('loading-active');retry.hidden=false;unlock();}
  retry.onclick=()=>location.reload();

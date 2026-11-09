@@ -16,19 +16,30 @@
 #welcome .menu-plate:hover:enabled::after { opacity:.035; }
 #welcome .menu-plate:focus-visible::after { opacity:.09; }
 #welcome .menu-plate:active:enabled::after { opacity:.055; }
-#welcome .startup-loading { position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(420px,calc(100% - 48px));color:#c8c5a6;font-size:13px; }
-.loading-title { margin:0 0 28px;color:#e0c9a3;font-size:28px;letter-spacing:.08em;text-transform:uppercase; }
-.loading-caption { display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:8px; }
-#welcome #loading-status { margin:0; }
-#loading-step { flex-shrink:0;color:#c6b58d;font-size:11px;font-variant-numeric:tabular-nums; }
-#loading-progress { display:block;width:100%;height:4px;border:0;border-radius:0;appearance:none;background:#2d2b1da6;color:#dca858; }
-#loading-progress::-webkit-progress-bar { background:#2d2b1da6; }
-#loading-progress::-webkit-progress-value { background:#dca858; }
-#loading-progress::-moz-progress-bar { background:#dca858; }
-#welcome :is(#loading-retry,#loading-sound) { --button-size:44px;--icon-size:32px;margin-top:20px;padding:0;background:none;border:0;border-radius:0;box-shadow:none; }
-.loading-active #loading-progress::-webkit-progress-value { animation:loading-breathe 1.2s ease-in-out infinite alternate; }
-.loading-active #loading-progress::-moz-progress-bar { animation:loading-breathe 1.2s ease-in-out infinite alternate; }
-@keyframes loading-breathe { from { opacity:.65; } to { opacity:1; } }
+#welcome .startup-loading { position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(380px,calc(100% - 48px));color:#c8c5a6;font-size:13px;text-align:center; }
+#welcome .loading-title { margin:0;color:#e0c9a3;font-size:92px;line-height:1;font-weight:700;letter-spacing:.12em;text-indent:.12em;text-transform:uppercase; }
+.loading-title > span { display:block;margin-bottom:18px;color:#9c9e81;font-size:12px;line-height:1.2;font-weight:500;letter-spacing:.42em;text-indent:.42em; }
+.loading-action { display:grid;place-items:center;height:100px;margin:26px 0 40px; }
+#welcome :is(#loading-retry,#loading-sound) { grid-area:1/1;--button-size:92px;--icon-size:76px;margin:0;padding:0;background:none;border:0;border-radius:0;box-shadow:none;outline:0;opacity:1; }
+#welcome :is(#loading-retry,#loading-sound)::after { display:none; }
+#welcome :is(#loading-retry,#loading-sound) .game-icon { filter:none;transition:opacity .25s ease,filter .15s ease; }
+#welcome #loading-sound:disabled { cursor:wait;opacity:1; }
+#welcome #loading-sound:disabled .game-icon { opacity:.22; }
+#welcome :is(#loading-retry,#loading-sound):is(:hover,:focus-visible):enabled .game-icon { filter:brightness(1.3); }
+.loading-caption { display:flex;align-items:baseline;justify-content:space-between;gap:16px;min-height:20px;margin-bottom:12px;text-align:left; }
+#welcome #loading-status { margin:0;line-height:1.5;color:#a8ab92;font-size:13px; }
+#loading-step { flex-shrink:0;color:#d9c69b;font:12px/1.5 Consolas,monospace;font-variant-numeric:tabular-nums; }
+#loading-progress { display:block;width:100%;height:3px;margin:0;border:0;border-radius:0;appearance:none;background:#373e30;color:#a6ae7b; }
+#loading-progress::-webkit-progress-bar { background:#373e30; }
+#loading-progress::-webkit-progress-value { background:#a6ae7b;transition:width .22s ease; }
+#loading-progress::-moz-progress-bar { background:#a6ae7b; }
+.loading-active #loading-progress::-webkit-progress-value { animation:loading-breathe 1.4s ease-in-out infinite alternate; }
+.loading-active #loading-progress::-moz-progress-bar { animation:loading-breathe 1.4s ease-in-out infinite alternate; }
+@keyframes loading-breathe { from { opacity:.6; } to { opacity:1; } }
+#loading[data-phase='activation'] #loading-status { color:#d9c69b; }
+#loading[data-phase='activation'] #loading-progress::-webkit-progress-value { background:#dca858; }
+#loading[data-phase='activation'] #loading-progress::-moz-progress-bar { background:#dca858; }
+#loading[data-phase='error'] #loading-status { color:#dca858; }
 #welcome.show-settings .menu-art { filter:brightness(.32); }
 #main-menu-settings { position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;color:#e0c9a3;text-shadow:0 2px 4px #24150f; }
 #main-menu-settings h2 { margin:0;font-size:28px;font-weight:600;letter-spacing:.08em;text-transform:uppercase; }
@@ -39,5 +50,9 @@
 #main-menu-settings button.icon-button:focus-visible { filter:brightness(1.55); }
 #main-menu-settings button.icon-button[aria-pressed='false'] { opacity:.55; }
 @media (max-width:500px) { .menu-options { gap:14px 10px; }.menu-options > span {font-size:15px;} }
-@media (max-width:500px) { #welcome .startup-loading { width:calc(100% - 48px); }.loading-title { font-size:24px; } }
-@media (prefers-reduced-motion:reduce) { #welcome .menu-plate::after { transition:none; }.loading-active #loading-progress::-webkit-progress-value,.loading-active #loading-progress::-moz-progress-bar {animation:none;} }
+@media (max-width:500px) { #welcome .loading-title { font-size:76px; }.loading-title > span { font-size:11px; }.loading-action { margin:22px 0 32px; } }
+@media (max-height:450px) { #welcome .loading-title { font-size:56px; }.loading-title > span { margin-bottom:10px; }.loading-action { height:72px;margin:12px 0 20px; }#welcome :is(#loading-retry,#loading-sound) { --button-size:72px;--icon-size:60px; } }
+@media (prefers-reduced-motion:reduce) {
+  #welcome .menu-plate::after,#welcome .loading-action .game-icon,#loading-progress::-webkit-progress-value { transition:none; }
+  .loading-active #loading-progress::-webkit-progress-value,.loading-active #loading-progress::-moz-progress-bar { animation:none; }
+}
