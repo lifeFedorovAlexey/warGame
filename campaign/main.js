@@ -13,6 +13,7 @@ import {OpeningTelevision} from './opening-television.js';
 import {OpeningCamera} from './opening-camera.js';
 import {mainMenu} from './main-menu.js';
 import {storyObjectives} from './story-objectives.js';
+import {createMinimap,installMinimapInput} from './minimap.js';
 import {VehicleDesigner} from './designer.js';
 import {CombatMenu} from './combat-menu.js';
 import {pickupTarget} from './pickup-orders.js';
@@ -26,6 +27,7 @@ const dataUrl = '../assets/campaign/alpha/mission01/gameplay.json';
 const selected = new Set();
 const miniBackground = new Image();
 let world, mission, config, radio, sound, designer, combatMenu, openingTelevision;
+let minimapView;
 let active = false, paused = false, speed = 1, resultShown = false;
 let openingPlaying = false;
 let openingCamera=null;
@@ -33,7 +35,7 @@ let pausedBeforeDesigner = false;
 let buildOpen = false, buildKind = null, rotation = 0, orderMode = null;
 let snapBuildings = true, freePlacement = false;
 let pointer = null, drag = null, site = null, placing = null;
-let last = performance.now(), lastUi = 0, lastMini = 0, toastUntil = 0;
+let last = performance.now(), lastUi = 0, toastUntil = 0;
 let actionKey = '', rosterKey = '', paletteKey = '', taskKey = '', queueKey = '';
 let blockedOrders = new Set(), blockedUntil = 0;
 let lastCommandRevision=null,lastCommandFeedback='';
@@ -263,6 +265,7 @@ function start(restore = false) {
   world.keys.clear();
   $('mission-hud').classList.toggle('opening-playing',openingPlaying);
   world.storySignals.show(null);
+  minimapView.reset(restore);
   blockedOrders.clear();
   $('order-feedback').hidden=true;
   $('welcome').hidden = true;
@@ -618,11 +621,8 @@ function installInput() {
   });
   document.addEventListener('keyup', event => {world.keys.delete(event.code);if(['AltLeft','AltRight'].includes(event.code)){freePlacement=false;updatePlacement();}});
   window.addEventListener('blur', () => { world.keys.clear(); freePlacement=false;updatePlacement();cancelMapGesture(); lastSelectionClick=null; });
-  $('minimap').addEventListener('pointerdown', event => {
-    const rect = $('minimap').getBoundingClientRect();
-    const point = world.field.gridToWorld([(event.clientX-rect.left)/rect.width*127, (event.clientY-rect.top)/rect.height*127]);
-    world.centre(point);
-  });
+  installMinimapInput($('minimap'),{mission,enabled:()=>active&&!designer.visible&&mission.state.status==='running',mode:()=>orderMode,building:()=>buildKind,
+    order:ordersAt,centre:point=>world.centre(point),cancel:cancelMode});
 }
 function button(label, detail, callback, disabled, icon = 'tools') {
   const item = document.createElement('button');
@@ -894,6 +894,7 @@ function updateUi() {
   setButtonIcon($('tempo'), speedIcon(speed), 'Скорость ×' + speed);
   const tasks = mission.objectives();
   const assigned=storyObjectives(mission,{radioEnabled:radio.enabled});
+  if(active)minimapView.observe(assigned,performance.now());
   $('objective-count').textContent = assigned.length || '';
   const nextTasks = JSON.stringify(assigned);
   if (nextTasks !== taskKey) {
@@ -950,19 +951,9 @@ function updateUi() {
   designer.refresh();
   combatMenu?.refresh();
 }
-function minimap(){const canvas=$('minimap'),ctx=canvas.getContext('2d'),size=canvas.width,field=world.field;ctx.fillStyle='#171e1c';ctx.fillRect(0,0,size,size);if(miniBackground.complete&&miniBackground.naturalWidth)ctx.drawImage(miniBackground,0,0,size,size);
- world.drawMinimapFog(ctx,size);
- for(const grid of config.oilFields){const p=field.gridToWorld(grid);if(!mission.exploredAt(p.x,p.y))continue;ctx.fillStyle='#d5b869';ctx.fillRect(grid[0]/127*size-2,grid[1]/127*size-2,4,4);}
- for(const e of [...mission.state.units,...mission.state.buildings]){if(config.buildings[e.kind]?.storyOnly)continue;if(e.factoryVisit?.phase==='inside'||e.hp<=0||e.owner!=='rai'&&!mission.visibleAt(e.x,e.y))continue;const [x,y]=field.worldToGrid(e.x,e.y);ctx.fillStyle=selected.has(e.id)?'#eff2c3':e.owner==='rai'?'#a8c28a':'#d77e60';ctx.fillRect(x/127*size-2,y/127*size-2,e.path?3:5,e.path?3:5);}for(const a of mission.state.artifacts)if(!a.collected&&mission.exploredAt(a.x,a.y)){const [x,y]=field.worldToGrid(a.x,a.y);ctx.fillStyle='#e8d891';ctx.fillRect(x/127*size-3,y/127*size-3,6,6);}if(mission.state.flags.lastRevealed&&!mission.state.camps[3].cleared){const camp=mission.state.camps[3],x=camp.grid[0]/127*size,y=camp.grid[1]/127*size;ctx.strokeStyle='#df997b';ctx.strokeRect(x-5,y-5,10,10);ctx.fillStyle='#edc6a2';ctx.font='10px Arial';ctx.fillText('4',x+7,y+3);}const [cx,cy]=field.worldToGrid(world.controls.target.x,world.controls.target.y);ctx.strokeStyle='#e3d4a3';ctx.lineWidth=1;ctx.strokeRect(cx/127*size-9,cy/127*size-7,18,14);
- world.storySignals.drawMap(ctx,size);
- const contact=visibleRaidContact(mission);
- if(contact){
-  const [x,y]=field.worldToGrid(contact.x,contact.y);
-  ctx.strokeStyle='#ffd0af';ctx.lineWidth=1.2;ctx.strokeRect(x/127*size-5,y/127*size-5,10,10);
- }
-}
 function events() {
   for (const event of mission.drainEvents()) {
+    if(active)minimapView.alerts.event(event,performance.now());
     radio?.director?.note(event,mission);
     if(event.type==='construction-complete'&&config.buildings[event.kind]?.storyOnly)continue;
     sound?.storyEvent?.(event);
@@ -978,7 +969,8 @@ function events() {
     if (event.type === 'camp-cleared') toast('Лагерь зачищен');
   }
 }
-function presentSignal(signal) {
+function presentSignal(signal,chapter) {
+  if(active)minimapView.alerts.signal(signal,chapter,performance.now());
   world.storySignals.show(signal?.kind==='recon'||signal?.kind==='artifact'?null:signal);
   if(signal?.kind==='anomaly')sound.anomaly?.();
 }
@@ -1022,7 +1014,7 @@ function frame(now) {
   world.update(mission, selected, dt, (active||openingPlaying) && !paused && mission.state.status==='running',active);
   navigationDebug?.update();
   if (active) {
-    if (now - lastMini > 200) { lastMini = now; minimap(); }
+    minimapView.render(now);
     if (now - lastUi > 220) {
       lastUi = now;
       if (buildKind) updatePlacement();
@@ -1050,6 +1042,7 @@ try {
   openingTelevision = new OpeningTelevision(sound);
   world = await createCampaignWorld($('world'), config, sound);
   mission = new Mission(config, world.field);
+  minimapView=createMinimap($('minimap'),{world,mission,selected,background:miniBackground,notify:toast});
   world.damage.bindMission(mission);
   designer = new VehicleDesigner($('designer'), $('design-toggle'), mission, {
     makeModel: (components, paint) => world.vehicles.makeDesignModel(components, paint),
@@ -1074,7 +1067,7 @@ try {
     onSignal(signal,chapter,keepCaptionUntil,urgent,cue) {
       if(chapter&&!cue&&signal?.kind!=='anomaly')sound.signal('radio');
       sound.playStory(chapter,keepCaptionUntil,urgent,cue);
-      presentSignal(signal);
+      presentSignal(signal,chapter);
     },
     onFocus:focusSignal,
   });

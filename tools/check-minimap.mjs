@@ -1,0 +1,42 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {MinimapAlerts,MINIMAP_PING_MS,objectiveLocation} from '../campaign/minimap-alerts.js';
+import {minimapPoint,minimapTarget,minimapPosition} from '../campaign/minimap.js';
+import {Mission} from '../campaign/mission.js';
+import {createHeightfield} from '../demo/map-route.js';
+const messages=[],alerts=new MinimapAlerts(text=>messages.push(text));
+const field={gridToWorld:([x,y])=>({x:x*32,y:y*32}),worldToGrid:(x,y)=>[x/32,y/32]};
+const mission={field,config:{baseSites:[{kind:'generator',grid:[10,10]}],oilFields:[],units:{car:{}},buildings:{factory:{}}},
+ state:{status:'running',artifacts:[{id:'a1',key:'sample',x:400,y:400,collected:false}],buildings:[],units:[],camps:[]},inBounds:()=>true,exploredAt:()=>false,visibleAt:()=>true};
+alerts.observe(mission,[],0);assert.equal(alerts.active(0).length,0,'Undiscovered artifacts do not leak through fog');
+mission.exploredAt=()=>true;alerts.observe(mission,[{id:'pickup-sample',name:'Подобрать образец'}],100);
+assert.equal(alerts.active(100).length,1);assert.equal(alerts.pings[0].kind,'artifact');assert.equal(messages[0],'Обнаружен артефакт');
+alerts.observe(mission,[],500);assert.equal(messages.length,1,'Discovery is only announced once');
+assert.equal(alerts.active(3099).length,1);assert.equal(alerts.active(3100).length,0,'Exactly three real seconds');
+const tasks=[{id:'generator',name:'Построить электростанцию'}];alerts.observe(mission,tasks,4000);
+assert.deepEqual(objectiveLocation(mission,tasks[0]),{x:320,y:320,key:'generator:320:320'});
+assert.equal(alerts.active(4000)[0].kind,'objective');alerts.observe(mission,[{...tasks[0],progress:'1/2'}],4100);assert.equal(alerts.pings.length,1,'Progress does not restart the goal ping');
+alerts.event({type:'under-attack',x:800,y:800,building:false},5000);
+for(let t=5001;t<7500;t+=10)alerts.event({type:'under-attack',x:805,y:805,building:true},t);
+assert.equal(alerts.pings.filter(p=>p.kind==='attack').length,1,'Burst fire is coalesced');assert.equal(alerts.active(8000).length,0,'Repeated hits do not extend the ping');
+alerts.event({type:'under-attack',x:805,y:805,building:true},11000);assert.equal(alerts.active(11000).length,1);
+assert.equal(messages.at(-1),'Здание под огнём');
+const restored=new MinimapAlerts(()=>assert.fail('Saved discoveries must not replay'));restored.reset(true);restored.observe({...mission,state:JSON.parse(JSON.stringify(mission.state))},tasks,12000);assert.equal(restored.pings.length,0);
+const rect={left:20,top:30,width:132,height:132},centre=minimapPoint(field,rect,86,96);
+assert.deepEqual(centre,{x:2032,y:2032});assert.deepEqual(minimapPoint(field,rect,-20,400),{x:0,y:4064});
+for(const bounds of [[0,0,53,66],[0,0,53,83]]){
+ const p={x:14.5*32,y:53.5*32},[x,y]=minimapPosition(field,p,rect.width,rect.height,bounds);
+ const restored=minimapPoint(field,rect,rect.left+x,rect.top+y,bounds);
+ assert(Math.hypot(restored.x-p.x,restored.y-p.y)<1e-8,'Orders use the same projection after sector expansion');
+}
+mission.state.units=[{id:'enemy',kind:'car',owner:'scavs',hp:100,...centre}];assert.equal(minimapTarget(mission,rect,86,96).id,'enemy');
+mission.visibleAt=()=>false;assert.equal(minimapTarget(mission,rect,86,96),null,'Minimap targeting never reveals hidden enemies');
+const config=JSON.parse(fs.readFileSync('assets/campaign/alpha/mission01/gameplay.json','utf8')),terrain=createHeightfield(JSON.parse(fs.readFileSync('assets/maps/alpha/heightfield.json','utf8')));
+const m=new Mission(config,terrain),unit=m.state.units.find(u=>u.owner==='rai'),enemy=m.state.units.find(u=>u.owner==='scavs');m.drainEvents();
+m.damage(unit,1,enemy);assert(m.drainEvents().some(e=>e.type==='under-attack'&&e.target===unit.id&&!e.building));
+m.damage(unit,1,enemy);assert(!m.drainEvents().some(e=>e.type==='under-attack'),'No event per bullet');
+const building=m.addStructure('generator','rai',{x:unit.x+90,y:unit.y},{completed:true});m.damage(building,1e6,enemy);
+assert(m.drainEvents().some(e=>e.type==='under-attack'&&e.building),'Fatal attacks on buildings still alert');
+m.state.time+=2;m.damage(unit,1,unit);assert(!m.drainEvents().some(e=>e.type==='under-attack'),'Friendly impacts do not announce enemy attacks');
+m.damage(unit,1,enemy,{type:'collision',point:[0,0,0],normal:[1,0,0],direction:[-1,0,0]});assert(!m.drainEvents().some(e=>e.type==='under-attack'),'Collisions do not announce gunfire');
+console.log('PASS: discovery/fog/save, objective location/deduplication, three-second pulses, burst throttling, unit/building/fatal attack events, click coordinates and hidden target filtering');

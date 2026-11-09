@@ -847,6 +847,10 @@ export class Mission{
   this.finishPendingStep();if(insideFactory(target)||target.hp<=0||!Number.isFinite(amount)||amount<=0)return;
   const hit=recordDamage(this,target,amount,source,contact);
   target.hp=Math.max(0,target.hp-amount*armorMultiplier(hit,target));
+  if(target.owner==='rai'&&source?.owner&&source.owner!=='rai'&&contact?.type!=='collision'&&this.state.time-(target.lastAttackNotice??-Infinity)>=1){
+   target.lastAttackNotice=this.state.time;
+   this.emit('under-attack',{target:target.id,x:target.x,y:target.y,building:!!this.config.buildings[target.kind]});
+  }
   syncFieldHp(this,target);
   rememberHostileHit(this,target,source);
   alertScavs(this,target,source);
