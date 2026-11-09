@@ -68,15 +68,14 @@ export function createConstructionEffects(T,scene,scale) {
             '#include <worldpos_vertex>','#include <worldpos_vertex>\nvConstructionPosition=(modelMatrix*vec4(transformed,1.)).xyz;');
           shader.fragmentShader=('uniform float buildLayer;uniform vec3 buildContacts['+contactLimit+'];uniform int buildContactCount;varying vec3 vConstructionPosition;\n')+shader.fragmentShader.replace(
             '#include <tonemapping_fragment>',`
-              float belowLayer=max(0.,buildLayer-vConstructionPosition.z);
-              float nearby=0.;
-              for(int i=0;i<${contactLimit};i++){
+              // Illuminate the real contact; the beam and its spot travel together.
+              float scan=0.;
+              for(int i=0;i<4;i++){
                 if(i>=buildContactCount)break;
-                float reach=length(buildContacts[i].xy-vConstructionPosition.xy);
-                nearby=max(nearby,1.-smoothstep(${(.7*scale).toFixed(3)},${(4.4*scale).toFixed(3)},reach));
+                float d=length(vConstructionPosition-buildContacts[i]);
+                scan=max(scan,exp(-d*d/${(.23*scale)**2})+.18*exp(-d*d/${(.65*scale)**2}));
               }
-              float layerLight=exp(-belowLayer*2.2)*(.18+.78*nearby);
-              gl_FragColor.rgb+=vec3(.035,.49,.78)*layerLight;
+              gl_FragColor.rgb+=vec3(.32,.65,.68)*scan;
               #include <tonemapping_fragment>
             `);
         };

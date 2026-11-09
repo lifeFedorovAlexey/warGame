@@ -1,5 +1,6 @@
 import {GLTFLoader} from '../demo/vendor/loaders/GLTFLoader.js';
 import {createConstructionProjector} from './construction-projector.js';
+import {createConstructionScanner} from './construction-scanner.js';
 import {vehiclePose,worldToVehicle} from './builder-kinematics.js';
 import {buildKord} from '../demo/kord.js';
 import {mgRecoil} from './mg-burst.js';
@@ -115,7 +116,7 @@ export async function createVehicleLayer(T,scene,field,config,damage,onLoaded=()
   steel:new T.MeshStandardMaterial({color:'#717972',metalness:.85,roughness:.34}),
   glass:new T.MeshStandardMaterial({color:'#293e42',roughness:.25}),
  };
- const builder=createConstructionProjector(T);
+ const builder=createConstructionProjector(T),scanner=createConstructionScanner(T);
  builder.root.position.set(0,-.65,2.7);
  const builderBatch=new PoseBatch(T,root,builder.root,capacity,damage,'equipment');
  const gun=new T.Group();
@@ -180,7 +181,7 @@ export async function createVehicleLayer(T,scene,field,config,damage,onLoaded=()
  const turnDelta=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
  let activeLod=1;
 
- function update(mission,cameraDistance,shotTimes,now,camera) {
+ function update(mission,cameraDistance,shotTimes,now,camera,buildingObjects,workTime=mission.state.time) {
   if(cameraDistance>725)activeLod=2;
   else if(cameraDistance<212)activeLod=0;
   else if(activeLod===0&&cameraDistance>255||activeLod===2&&cameraDistance<625)activeLod=1;
@@ -252,9 +253,11 @@ export async function createVehicleLayer(T,scene,field,config,damage,onLoaded=()
     scavBatches.get(unit.kind).add(matrix,color,{},damageInfo);
     muzzles.set(unit.id,new T.Vector3().setFromMatrixPosition(custom.gun.muzzle.matrixWorld).applyMatrix4(matrix));
    }else if(unit.kind==='builder'){
-    builder.aim(unit.projector?.yaw??0,unit.projector?.pitch??0,false);
+    const target=unit.builderWorking&&unit.task?.type==='build'?mission.entity(unit.task.targetId):null;
+    const sweep=target&&scanner.scan(unit,target,buildingObjects?.get(target.id),pose,workTime);
+    builder.aim(sweep?.yaw??unit.projector?.yaw??0,sweep?.pitch??unit.projector?.pitch??0,false);
     builderBatch.add(matrix,color,{projector:unit.hp>0&&unit.builderWorking?1:.015},damageInfo);
-    if(unit.hp>0&&unit.builderWorking&&unit.builderContact)workBeams.push({from:new T.Vector3().setFromMatrixPosition(builder.emitter.matrixWorld).applyMatrix4(matrix),to:new T.Vector3(...unit.builderContact),targetId:unit.task?.targetId,mode:unit.task?.type});
+    if(unit.hp>0&&unit.builderWorking&&unit.builderContact)workBeams.push({from:new T.Vector3().setFromMatrixPosition(builder.emitter.matrixWorld).applyMatrix4(matrix),to:new T.Vector3(...(sweep?.world??unit.builderContact)),targetId:unit.task?.targetId,mode:unit.task?.type});
    }else if(unit.kind==='command'){
     commandBatch.add(matrix,color,{},damageInfo);
    }else if(unit.kind==='raider'){

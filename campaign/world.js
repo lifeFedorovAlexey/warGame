@@ -276,7 +276,9 @@ export async function createCampaignWorld(host,config,sound,loading){
   const mode=distance>(terrainMode==='close'?threshold+22:threshold-22)?'overview':'close';
   if(mode!==terrainMode){terrain.setViewMode(mode);terrainMode=mode;}
   damage.begin(camera,dt);
-  vehicles.update(mission,distance,shotTimes,now,camera);
+  // Update rising/clipped geometry before the scanner finds its surface.
+  for(const b of mission.state.buildings){const object=buildings.get(b.id);if(object&&b.owner==='rai'&&b.hp>0&&!b.completed)construction.building(object,b,config.buildings[b.kind]);}
+  vehicles.update(mission,distance,shotTimes,now,camera,buildings,time+(live?mission.accumulator:0));
   construction.update(vehicles.workBeams,time);
   const texel=800/sun.shadow.mapSize.x,shadowX=controls.target.dot(lightRight),shadowY=controls.target.dot(lightUp);
   stableTarget.copy(controls.target).addScaledVector(lightRight,Math.round(shadowX/texel)*texel-shadowX).addScaledVector(lightUp,Math.round(shadowY/texel)*texel-shadowY);
