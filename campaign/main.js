@@ -2,6 +2,8 @@ import {setButtonIcon, speedIcon} from '../assets/ui/icons.js';
 import {createCampaignWorld} from './world.js';
 import {Mission} from './mission.js';
 import {factoryPriority,factoryVisitors,setFactoryPriority} from './factory-garage.js';
+import {productionFactories} from './factory-production.js';
+import {createFactoryRows,updateFactoryRows,updateProductionButtons} from './factory-queues.js';
 import {canDemolish,demolitionWorkers,requestDemolition,cancelDemolition} from './building-demolition.js';
 import {FieldRadio, missionSignal} from './field-radio.js';
 import {raidApproachSignal, visibleRaidContact, warehouseAdvanceHint, waterTowerSignal} from './threat-guidance.js';
@@ -742,10 +744,11 @@ function updateContext(first) {
   const demolishers=demolitionWorkers(mission,first?.id),canSelectDemolition=selection().some(u=>liveMobile(u)&&config.units[u.kind].role==='builder');
   const thresholds = [...Object.values(config.units), ...Object.values(config.research)].map(spec => Number(mission.canSpend(spec.cost))).join('');
   const factory = first?.owner === 'rai' && first.completed && first.kind === 'factory';
+  const factories = factory ? productionFactories(mission) : [];
   const projects = factory ? mission.factoryProjects() : [];
   const designs = factory ? s.designs.map(project => project.id + ':' + project.name).join(',') : '';
   const activeResearch = s.buildings.filter(b=>b.hp>0&&b.research).map(b=>b.research.key);
-  const key = [first?.id, first?.completed, first?.clearing, first?.research?.key, activeResearch.join(), s.artifactKeys.join(), Object.keys(s.research).join(), thresholds, designs, builders().length,mission.researchUnlocked(),first?.workPriority,canSelectDemolition,orderMode,demolishers.length,!!first?.demolitionProgress].join('|');
+  const key = [factories.map(f=>f.id).join(), first?.id, first?.completed, first?.clearing, first?.research?.key, activeResearch.join(), s.artifactKeys.join(), Object.keys(s.research).join(), thresholds, designs, builders().length,mission.researchUnlocked(),first?.workPriority,canSelectDemolition,orderMode,demolishers.length,!!first?.demolitionProgress].join('|');
   if (key !== actionKey) {
     actionKey = key;
     const items = [];
@@ -755,24 +758,26 @@ function updateContext(first) {
       return item;
     };
     if (factory) {
+      if(factories.length===1){
       const priority=factoryPriority(first),control=add('Приоритет: '+(priority==='repair'?'ремонт':'производство'),
         priority==='repair'?'Ремонт приостанавливает выпуск. Нажмите для приоритета производства':'Машины ждут ремонта внутри завода. Нажмите для приоритета ремонта',
         ()=>setFactoryPriority(mission,first.id,priority==='repair'?'production':'repair'),false,priority==='repair'?'repair-depot':'produce');
       control.dataset.factoryPriority=priority;
       const count=document.createElement('span');count.className='production-count';count.hidden=true;control.append(count);
       const progress=document.createElement('progress');progress.className='production-progress';progress.max=1;progress.hidden=true;progress.setAttribute('aria-label','Ремонт машины');control.append(progress);
+      }
       for (const {id, kind, name, spec} of projects) {
         const label=name;
         const control=add(label, spec.cost + ' нефти · ' + spec.seconds + ' с', () => {
-          const result=mission.produce(first.id,id);
+          const result=mission.produce(first.id,id,{distributed:true});
           if(result.ok)sound.signal('order');
           return result;
         }, false, kind);
-        control.dataset.production=id;control.dataset.baseTitle=control.title;
+        control.dataset.production=id;control.dataset.baseTitle=control.title+(factories.length>1?' · Автораспределение':'');
         control.oncontextmenu=event=>{
           event.preventDefault();
-          if(!first.queue.some(job=>mission.productionProjectId(job)===id))return;
-          const result=mission.cancelProduction(first.id,id);
+          if(!productionFactories(mission).some(f=>f.queue.some(job=>mission.productionProjectId(job)===id)))return;
+          const result=mission.cancelProduction(first.id,id,{distributed:true});
           report(result);if(result.ok)sound.signal('order');updateUi();
         };
         const count=document.createElement('span');count.className='production-count';count.hidden=true;count.setAttribute('aria-hidden','true');control.append(count);
@@ -809,6 +814,10 @@ function updateContext(first) {
       control.dataset.demolish=running?'cancel':'building';
       if(running||first.demolitionProgress){const progress=document.createElement('progress');progress.className='production-progress';progress.dataset.demolitionProgress='';progress.max=1;progress.setAttribute('aria-label','Снос здания');control.append(progress);}
     }
+    if(factory&&factories.length>1)items.push(createFactoryRows(mission,factories,projects,{
+      act:action=>{const result=action();report(result);if(result.ok)sound.signal('order');updateUi();},
+      focus:id=>{const f=mission.entity(id);if(f){select([id],false,false);world.centre(f,360);}},
+    }));
     $('actions').replaceChildren(...items);
     $('actions').classList.toggle('factory-actions', !!factory);
     $('actions').hidden = !items.length;
@@ -817,38 +826,15 @@ function updateContext(first) {
   if(demolitionProgress){demolitionProgress.value=first?.demolitionProgress??0;demolitionProgress.setAttribute('aria-valuetext',Math.round(demolitionProgress.value*100)+'%');}
   const queue=$('queue');
   if(factory){
-    const control=$('actions').querySelector('[data-factory-priority]'),visits=factoryVisitors(mission,first);
+    const control=$('actions').querySelector(':scope > [data-factory-priority]'),visits=factoryVisitors(mission,first);
     if(control){
       const count=control.querySelector('.production-count'),progress=control.querySelector('progress');
       count.hidden=!visits.length;count.textContent=String(visits.length);progress.hidden=!first.activeRepair;progress.value=first.activeRepair?.progress??0;
       control.setAttribute('aria-description',visits.length?'На обслуживании: '+visits.length:'Очередь ремонта пуста');
     }
     queue.hidden=true;queue.replaceChildren();queueKey='';
-    const jobs=first.queue,counts=new Map();
-    const projectId=job=>mission.productionProjectId(job,projects);
-    for(const job of jobs){const id=projectId(job);counts.set(id,(counts.get(id)??0)+1);}
-    const current=jobs[0]&&projectId(jobs[0]);
-    for(const control of $('actions').querySelectorAll('[data-production]')){
-      const id=control.dataset.production,count=counts.get(id)??0,badge=control.querySelector('.production-count'),running=count>0&&id===current;
-      const canProduce=mission.canSpend(projects.find(project=>project.id===id).spec.cost);
-      // A queued project stays interactive so it can be cancelled without oil.
-      control.disabled=!canProduce&&!count;
-      control.classList.toggle('cannot-produce',!canProduce);
-      badge.hidden=!count;badge.textContent=String(count);
-      const progress=control.querySelector('.production-progress'),time=control.querySelector('.production-time');
-      const servicing=running&&first.productionPaused,blocked=running&&first.exitBlocked&&!servicing,stopped=paused||servicing;
-      const flow=running?oilOrderProgress(jobs[0],config.units[jobs[0].kind].seconds,config):null;
-      const value=flow?.progress??0,remaining=Math.ceil(flow?.remaining??0);
-      progress.hidden=time.hidden=!running;progress.value=value;
-      time.textContent=running?(servicing?'Ⅱ':blocked?'!':remaining+'с'):'';
-      control.dataset.productionState=running?(blocked?'blocked':stopped?'paused':flow.funding?'funding':'running'):'waiting';
-      control.classList.toggle('has-queue',count>0);control.classList.toggle('is-producing',running&&!stopped&&!blocked);
-      const phase=flow?.funding?'Перечисление нефти '+Math.floor(jobs[0].funding.paid)+'/'+jobs[0].cost:'Выпуск '+Math.floor((jobs[0]?.progress??0)*100)+'%';
-      const status=count?'В очереди: '+count+(running?' · '+phase+' · Осталось '+remaining+' с'+(servicing?' · Обслуживание техники':blocked?' · Ждёт выезда':paused?' · Пауза':''):' · Ожидает очереди'):'';
-      progress.setAttribute('aria-valuetext',status);
-      control.title=control.dataset.baseTitle+' · ЛКМ — заказать · ПКМ — отменить один'+(status?' · '+status:'');
-      if(status)control.setAttribute('aria-description',status);else control.removeAttribute('aria-description');
-    }
+    updateProductionButtons($('actions'),mission,factories,projects,paused);
+    updateFactoryRows($('actions'),mission,projects,paused);
     return;
   }
   const job=first?.research;

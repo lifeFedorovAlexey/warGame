@@ -10,6 +10,7 @@ import {footprintSupport,vehicleEnvelope,vehicleSweep,vehicleGroundSafe,vehicleO
 import {passageStillOpen,preparePassageEgress} from './passage-egress.js';
 import {vehicleRecipes,starterProjects,matchingRecipe,projectDesignation,designNameKey,projectAssemblyKey,latestVehicleProjects,latestVehicleProject} from './vehicle-designs.js';
 import {vehiclePaint} from './vehicle-paint.js';
+import {chooseProductionFactory,productionCancellation,productionFactories} from './factory-production.js';
 import {isCampPerimeter,updateCampPerimeters} from './camp-demolition.js';
 import {availableOil,oilFundingRemaining,oilRefund,beginOilFlow,finishOilFlow,transferOil,fundedWorkTime,repairWithOil} from './oil-economy.js';
 import {angleDelta} from './builder-kinematics.js';
@@ -815,8 +816,8 @@ export class Mission{
   return projects.find(project=>project.id===job.projectId)?.id
    ??projects.find(project=>project.kind===job.kind&&(!job.components||projectAssemblyKey(project)===projectAssemblyKey(job)))?.id;
  }
- cancelProduction(id,projectId){this.finishPendingStep();
-  const factory=this.entity(id);
+ cancelProduction(id,projectId,{distributed=false}={}){this.finishPendingStep();
+  const factory=distributed?productionCancellation(this,projectId)?.factory:this.entity(id);
   if(!factory||factory.hp<=0||factory.owner!=='rai'||factory.kind!=='factory'||!factory.completed)return this.fail('Нужен построенный завод');
   const projects=this.factoryProjects();
   // Remove the newest matching order first, preserving work already in progress.
@@ -827,19 +828,19 @@ export class Mission{
   if(index===0){delete factory.exitBlocked;delete factory.exitRetryAt;}
   return {ok:true,refund};
  }
- produce(id,projectId){this.finishPendingStep();
-  const factory=this.entity(id);
-  if(!factory||factory.owner!=='rai'||factory.kind!=='factory'||!factory.completed)return this.fail('Нужен построенный завод');
+ produce(id,projectId,{distributed=false}={}){this.finishPendingStep();
+  const factory=distributed?chooseProductionFactory(this,id):this.entity(id);
+  if(!factory||factory.hp<=0||factory.owner!=='rai'||factory.kind!=='factory'||!factory.completed)return this.fail('Нужен построенный завод');
   const project=this.factoryProjects().find(candidate=>candidate.id===projectId);
   if(!project)return this.fail('Сначала сохраните проект в конструкторе');
   const {kind,spec,components,name}=project;
   if(!this.canSpend(spec.cost))return this.fail('Недостаточно нефти');
   const deployed=this.state.units.filter(unit=>unit.owner==='rai'&&unit.hp>0).length;
-  const queued=this.state.buildings.reduce((sum,building)=>sum+building.queue.length,0);
+  const queued=productionFactories(this).reduce((sum,building)=>sum+building.queue.length,0);
   if(deployed+queued>=(this.config.unitLimit??48))return this.fail('Достигнут предел техники');
 
-  factory.queue.push({kind,projectId,name,components:[...components],paint:vehiclePaint(project).id,progress:0,cost:spec.cost,funding:{paid:0}});
-  return {ok:true};
+  factory.queue.push({kind,projectId,name,components:[...components],paint:vehiclePaint(project).id,progress:0,cost:spec.cost,funding:{paid:0},orderSerial:this.serial++});
+  return {ok:true,factoryId:factory.id};
  }
  research(id,key){this.finishPendingStep();if(!this.researchUnlocked())return this.fail('НИИ ещё не принят в эксплуатацию');const lab=this.entity(id),spec=this.config.research[key];if(!lab||lab.kind!=='lab'||lab.owner!=='rai'||!lab.completed)return this.fail('Нужен исследовательский центр');if(!spec||!this.state.artifactKeys.includes(key))return this.fail('Сначала найдите артефакт');if(this.state.research[key]||this.state.buildings.some(b=>b.hp>0&&b.research?.key===key))return this.fail('Исследование уже выполнено или выполняется');if(lab.research)return this.fail('Лаборатория занята');if(!this.canSpend(spec.cost))return this.fail('Недостаточно нефти');lab.research={key,progress:0,cost:spec.cost,funding:{paid:0}};this.emit('research-start',{key});return {ok:true};}
  lineOfSight(from,to){return clearCombatSight(this,from,to);}

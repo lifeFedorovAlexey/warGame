@@ -13,7 +13,7 @@ try {
  await page.goto((process.env.WARGAME_URL??'http://127.0.0.1:8766/review/production-paint')+'/campaign/');
  await page.waitForFunction(()=>window.campaign?.ready||document.querySelector('#loading-status')?.textContent.startsWith('Ошибка'),null,{timeout:90000});
  assert(await page.evaluate(()=>window.campaign?.ready),errors.join('\n')||await page.locator('#loading-status').textContent());
- await page.locator('#begin').click();const skip=page.locator('[data-dream=skip]');if(await skip.isVisible())await skip.click();
+ await page.locator('#begin').click();await page.waitForFunction(()=>document.getElementById('welcome').hidden);const skip=page.locator('[data-dream=skip]');if(await skip.isVisible())await skip.click();
  await page.evaluate(()=>{const m=campaign.mission;campaign.radio.setEnabled(false);const sign=m.entity(m.state.openingScene.signId);sign.completed=true;sign.progress=1;});
  await page.waitForFunction(()=>campaign.state.active,null,{timeout:20000});await page.locator('#pause').click();
  const fixture=await page.evaluate(()=>{
