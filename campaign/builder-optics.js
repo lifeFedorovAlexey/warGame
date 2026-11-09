@@ -43,7 +43,9 @@ export function workProjection(unit,target,config,field) {
   for(const world of contacts){
     const [x,y,z]=worldToVehicle(world,pose),dx=x,dy=y+.65,dz=z-3.377;
     const radius=Math.hypot(dx,dy),yaw=Math.atan2(-dx,dy),pitch=Math.atan2(dz,radius-.21);
-    if(radius<1.1||Math.hypot(radius,dz)>reach||pitch<-.87||pitch>1.13)continue;
+    // Reach is a gameplay distance in metres, independent of chassis scale.
+    // Angles and emitter geometry remain in the scaled model's local space.
+    if(radius<1.1||Math.hypot(radius,dz)*pose.scale>reach*scale||pitch<-.87||pitch>1.13)continue;
     const along=.21+.511*Math.cos(pitch)-.003*Math.sin(pitch);
     const emitter=vehicleToWorld([-Math.sin(yaw)*along,-.65+Math.cos(yaw)*along,3.377+.511*Math.sin(pitch)+.003*Math.cos(pitch)],pose);
     let blocked=false;

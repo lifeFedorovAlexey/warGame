@@ -1,4 +1,5 @@
 import {SCAV_PROFILES,isInfantry} from './scav-unit-profiles.js';
+import {vehicleSizeScale} from './vehicle-dynamics.js';
 function treadTexture(T) {
   const canvas = document.createElement('canvas');
   canvas.width = 48;
@@ -35,13 +36,14 @@ export function createGroundEffects(T, scene, field, scale) {
   const forward = new T.Vector3(), normal = new T.Vector3(), right = new T.Vector3();
   let cursor=0, clock=0, count=0;
 
-  function stamp(x,y,heading) {
+  function stamp(x,y,heading,size) {
     const i=cursor++%trackLimit, g=field.gradientAt(x,y);
     normal.set(-g.x,-g.y,1).normalize();
     forward.set(-Math.sin(heading),Math.cos(heading),0).projectOnPlane(normal).normalize();
     right.crossVectors(forward,normal).normalize();
     dummy.position.set(x,y,field.heightAt(x,y)+.07);
     dummy.quaternion.setFromRotationMatrix(basis.makeBasis(right,forward,normal));
+    dummy.scale.set(size,size,1);
     dummy.updateMatrix();
     tracks.setMatrixAt(i,dummy.matrix);
     born[i]=clock;
@@ -58,7 +60,7 @@ export function createGroundEffects(T, scene, field, scale) {
         ids.add(unit.id);
         const old=previous.get(unit.id);
         if(!old){previous.set(unit.id,{x:unit.x,y:unit.y,heading:unit.heading});continue;}
-        const length=Math.hypot(unit.x-old.x,unit.y-old.y),stride=.35*scale;
+        const size=vehicleSizeScale(unit),unitScale=scale*size,length=Math.hypot(unit.x-old.x,unit.y-old.y),stride=.35*unitScale;
         if(length<stride)continue;
         if(length>95){previous.set(unit.id,{x:unit.x,y:unit.y,heading:unit.heading});continue;}
         const turn=Math.atan2(Math.sin(unit.heading-old.heading),Math.cos(unit.heading-old.heading));
@@ -66,7 +68,7 @@ export function createGroundEffects(T, scene, field, scale) {
         for(let i=1;i<=stamps;i++){
           const t=i*stride/length,h=old.heading+turn*t,c=Math.cos(h),s=Math.sin(h),x=old.x+(unit.x-old.x)*t,y=old.y+(unit.y-old.y)*t;
           const profile=SCAV_PROFILES[unit.kind],width=profile?.track??.73,rear=profile?.rear??-1.25;
-          for(const side of [-1,1])stamp(x+(c*side*width-s*rear)*scale,y+(s*side*width+c*rear)*scale,h);
+          for(const side of [-1,1])stamp(x+(c*side*width-s*rear)*unitScale,y+(s*side*width+c*rear)*unitScale,h,size);
         }
         const used=stamps*stride/length;
         previous.set(unit.id,{x:old.x+(unit.x-old.x)*used,y:old.y+(unit.y-old.y)*used,heading:old.heading+turn*used});

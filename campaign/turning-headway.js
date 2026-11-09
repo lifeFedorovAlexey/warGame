@@ -1,7 +1,8 @@
 import {checkManeuver} from './vehicle-motion.js';
-import {vehicleSweep,vehicleRadiusBound} from './vehicle-collision.js';
+import {vehicleSweep,vehicleRadiusBound,trafficCollisionRequired} from './vehicle-collision.js';
 import {vehicleDynamics} from './vehicle-dynamics.js';
 import {maneuverAdmissionBlocker,maneuverAdmissionRadius} from './maneuver-admission.js';
+import {corridorWithinReach} from './traffic-corridor.js';
 
 // A turning rear corner can hit a neighbour which is behind the centre's
 // forward corridor. Probe only the current Ackermann arc up to the braking
@@ -19,8 +20,8 @@ export function turningHeadway(mission,unit,point,dt,scale,blockers,grade=.52,ac
  const turning=Math.abs(curve)>1e-4,radius=horizon+vehicleRadiusBound(unit.kind,scale);
  const neighbours=turning?mission.nearbyUnits(unit,horizon+maneuverAdmissionRadius(mission,unit,dt))
   :mission.vehicleMotionNeighbours(unit,unit,{...unit,x:unit.x-Math.sin(unit.heading)*horizon,y:unit.y+Math.cos(unit.heading)*horizon});
- if(!neighbours.some(other=>other!==unit&&other.hp>0)
-  &&!mission.nav.nearbySolids(unit,radius).length)return Infinity;
+ if(!neighbours.some(other=>other!==unit&&other.hp>0&&trafficCollisionRequired(unit,other))
+  &&!mission.nav.nearbySolids(unit,radius).length&&!corridorWithinReach(mission,unit,radius))return Infinity;
  // A straight route intent does not describe a body still following a
  // curved approach. The selected physical arc cannot enter a neighbour's
  // unavoidable braking path, even after the nose faces its waypoint.

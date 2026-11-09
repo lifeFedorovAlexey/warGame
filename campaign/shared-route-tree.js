@@ -1,4 +1,3 @@
-import {gradeSpeed} from './road-traffic.js';
 
 // One lazy reverse Dijkstra tree per compatible destination/cost profile.
 // Physics and exact vehicle poses remain outside this static grid search.
@@ -59,16 +58,12 @@ export class SharedRouteTree{
     // open a shorter route and must invalidate this tree's settled distances.
     if(x>=0&&y>=0&&x<n&&y<n&&((x>>4)!==(col>>4)||(y>>4)!==(row>>4)))this.mark(x,y);
     if(!nav.allowed(x,y)||this.state[next]===2||dx&&dy&&(!nav.allowed(col+dx,row)||!nav.allowed(col,row+dy)))continue;
-    const length=nav.cell*Math.hypot(dx,dy),grade=(nav.heights[id]-nav.heights[next])/length;
-    if(Math.abs(grade)>.52)continue;
+    const length=nav.cell*Math.hypot(dx,dy);
     let direction=(dy+1)*3+dx+1;if(direction>4)direction--;
     const edge=id*8+direction;
     if(!nav.edgeCache[edge])nav.edgeCache[edge]=nav.lineClear(nav.position(col,row),nav.position(x,y),true)?1:2;
     if(nav.edgeCache[edge]!==1)continue;
-    // Reverse relaxation uses the FORWARD predecessor -> current grade.
-    // Uphill and downhill have different costs; reversing that sign is wrong.
-    const edgeCost=roads?length*(nav.surfaceCost(next,this.pavedTrip)+surface)*.5/gradeSpeed(grade)
-     :length*(1+grade*grade*18);
+    const edgeCost=roads?length*(nav.surfaceCost(next,this.pavedTrip)+surface)*.5:length;
     const cost=this.cost[id]+edgeCost;
     if(!this.state[next]||cost<this.cost[next]){this.state[next]=1;this.cost[next]=cost;this.next[next]=id;this.push(next,cost);}
    }
@@ -130,9 +125,7 @@ export class SharedRouteTree{
    // The target chain was settled for target -> root. Check root -> target
    // edges again: today's absolute-grade passability is symmetric, whereas
    // road/slope COST is directional and is recomputed below during smoothing.
-   const length=Math.hypot(point.x-previous.x,point.y-previous.y);
-   const grade=(this.nav.heights[right[index]]-this.nav.heights[right[index+1]])/length;
-   if(Math.abs(grade)>.52||!this.nav.lineClear(previous,point))return null;
+   if(!this.nav.lineClear(previous,point))return null;
    ids.push(right[index]);previous=point;
   }
   if(!this.nav.lineClear(previous,to))return null;

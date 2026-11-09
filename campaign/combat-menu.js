@@ -1,10 +1,9 @@
 import {setButtonIcon} from '../assets/ui/icons.js';
-import {COMBAT_OPTIONS,combatPolicy} from './combat-policy.js';
-import {expandCommandIds} from './group-command.js';
+import {COMBAT_OPTIONS,armyCombatPolicy} from './combat-policy.js';
 
 export class CombatMenu {
-  constructor({button,mission,selection,onToggle,onChange}) {
-    this.button=button;this.mission=mission;this.selection=selection;this.onToggle=onToggle;this.onChange=onChange;
+  constructor({button,mission,onOpen,onChange}) {
+    this.button=button;this.mission=mission;this.onOpen=onOpen;this.onChange=onChange;
     this.element=document.getElementById('combat-menu');this.controls=[];
     this.hint=document.createElement('div');this.hint.id='combat-hint';this.hint.setAttribute('role','tooltip');this.hint.hidden=true;
     this.hintTitle=document.createElement('strong');this.hintDetail=document.createElement('span');
@@ -20,7 +19,7 @@ export class CombatMenu {
         control.addEventListener('pointerenter',describe);control.addEventListener('focus',describe);
         control.addEventListener('pointerleave',()=>this.hideHint());control.addEventListener('blur',()=>this.hideHint());
         control.onclick=()=>{
-          const result=this.mission.setCombatPolicy(this.units().map(u=>u.id),{[key]:option.value});
+          const result=this.mission.setArmyCombatPolicy({[key]:option.value});
           this.refresh();this.onChange(result);
         };
         control.addEventListener('keydown',event=>{
@@ -35,7 +34,7 @@ export class CombatMenu {
       }
       this.element.append(group);
     }
-    button.onclick=()=>{this.close();this.onToggle();};
+    button.onclick=()=>{if(this.element.hidden)this.open();else this.close();};
     button.addEventListener('contextmenu',event=>{event.preventDefault();this.open();});
     button.addEventListener('keydown',event=>{
       if(event.key!=='ArrowUp')return;
@@ -52,8 +51,7 @@ export class CombatMenu {
     this.resizeObserver.observe(button.closest('.tactical-dock'));
     this.refresh();
   }
-  units(){return expandCommandIds(this.mission,this.selection().map(u=>u.id)).map(id=>this.mission.entity(id)).filter(u=>u?.owner==='rai'&&u.hp>0&&this.mission.config.units[u.kind]?.damage);}
-  open(){if(!this.units().length)return;this.element.hidden=false;this.button.setAttribute('aria-expanded','true');this.refresh();}
+  open(){this.onOpen?.();this.element.hidden=false;this.button.setAttribute('aria-expanded','true');this.refresh();}
   close(){this.element.hidden=true;this.button.setAttribute('aria-expanded','false');this.hideHint();}
   hideHint(){this.hint.hidden=true;this.hintOwner?.removeAttribute('aria-describedby');this.hintOwner=null;}
   showHint(control,group,option){
@@ -79,15 +77,15 @@ export class CombatMenu {
   }
   refresh(){
     if(this.element.hidden)return;
-    const units=this.units();if(!units.length)this.close();
+    const policy=armyCombatPolicy(this.mission);
     for(const key of Object.keys(COMBAT_OPTIONS)) {
       const group=this.controls.filter(item=>item.key===key);let checked=false;
       for(const {control,option} of group) {
-        const count=units.filter(u=>combatPolicy(u)[key]===option.value).length,all=units.length>0&&count===units.length;
-        control.disabled=!units.length;control.setAttribute('aria-checked',String(all));control.classList.toggle('mixed',count>0&&!all);
+        const all=policy[key]===option.value;
+        control.disabled=false;control.setAttribute('aria-checked',String(all));control.classList.remove('mixed');
         control.tabIndex=all?0:-1;checked ||= all;
         control.removeAttribute('title');
-        control.setAttribute('aria-description',option.detail+(count>0&&!all?' · '+count+'/'+units.length+' машин':''));
+        control.setAttribute('aria-description',(all?'Выбрано · ':'')+option.detail+' · Для всей армии, включая новые машины');
         if(this.hintOwner===control)this.hintDetail.textContent=control.getAttribute('aria-description');
       }
       if(!checked)group[0].control.tabIndex=0;

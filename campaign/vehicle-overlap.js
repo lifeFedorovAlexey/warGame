@@ -112,13 +112,19 @@ export function* resolveVehicleOverlapsSteps(mission,dt,onMoved=()=>{}){
   }
   if(safe){accepted=fraction;break;}
  }
- if(!accepted||!moved.length){stats.blocked++;account();return;}
+ if(!accepted||!moved.length){
+  // No correction will run: release movement ownership so an ordinary
+  // collision-checked exit can clear the contact instead of waiting forever.
+  for(const p of poses.values())if(p.unit.overlapRecovery)p.unit.overlapRecovery.active=false;
+  stats.blocked++;account();return;
+ }
  if(mission.state!==world||mission.nav.topologyRevision!==topology||world.units.length!==unitCount
   ||[...poses.values()].some(p=>p.unit.hp<=0||p.unit.kind!==p.kind||p.unit.x!==p.ox||p.unit.y!==p.oy
   ||p.unit.heading!==p.heading||p.unit.trafficOnScreen!==p.visible)){account();return;}
  for(const p of moved){
   const unit=p.unit,dx=(p.x-p.ox)*accepted,dy=(p.y-p.oy)*accepted;
   if(!unit.overlapRecovery){unit.overlapRecovery={since:mission.state.time};mission.emit('navigation-overlap-started',{unit:unit.id,x:unit.x,y:unit.y});}
+  unit.overlapRecovery.active=true;
   unit.x+=dx;unit.y+=dy;unit.driveSpeed=0;
   // Pose-relative borrowed arcs no longer describe the externally displaced
   // body. Keep its command/home; let the existing recovery rejoin it live.

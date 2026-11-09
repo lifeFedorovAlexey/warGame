@@ -1,7 +1,11 @@
 import {createDamageState,partMissing} from './damage-state.js';
 import {vehicleToWorld,vehiclePose,angleDelta} from './builder-kinematics.js';
 
-export const SALVAGE_LIMITS={items:24,lifetime:240,settleSeconds:2,pickupMarginMetres:.25,cellMetres:8};
+export const SALVAGE_LIMITS={items:24,lifetime:240,settleSeconds:2,pickupMarginMetres:2.5,cellMetres:8};
+export function salvagePickupReach(scale=1){
+  const side=(1.177+SALVAGE_LIMITS.pickupMarginMetres)*scale,front=(2.425+SALVAGE_LIMITS.pickupMarginMetres)*scale;
+  return {side,front,radius:Math.hypot(side,front)};
+}
 // Original model attachments, in metres. These are part anchors, not wreck meshes.
 const modularStock={7:[0,2.25,.96],8:[0,-2.25,.96]};
 const raiderStock={7:[0,2.024,.85],8:[0,-2.02,.85],24:[-.84,-1.4,1.95],25:[.84,-1.4,1.95]};
@@ -79,13 +83,13 @@ export function salvageFromWreck(mission,unit,hit){
   salvageFromImpact(mission,unit,hit,{detached:true,partId:part,secondaryFailures:[]});
 }
 
-// Swept oriented footprint: a bumper can touch stock beside a solid wreck
-// without requiring the recipient's centre to penetrate that wreck.
+// Sweep the pickup area around the hull, including stock beside a wreck.
+// Routing, arrival and collection share this reach; no exact parking is needed.
 export function touchesSalvage(unit,item,scale){
   const heading=unit.heading??0,oldHeading=unit.previousHeading??heading,turn=angleDelta(heading,oldHeading);
   const ax=unit.previousX??unit.x,ay=unit.previousY??unit.y,dx=unit.x-ax,dy=unit.y-ay;
   const length=Math.hypot(dx,dy),steps=Math.max(1,Math.ceil(length/(scale*.35)),Math.ceil(Math.abs(turn)/.10));
-  const margin=SALVAGE_LIMITS.pickupMarginMetres,halfWidth=1.177+margin,halfLength=2.425+margin;
+  const {side:halfWidth,front:halfLength}=salvagePickupReach();
   for(let i=0;i<=steps;i++){
     const t=i/steps,h=oldHeading+turn*t,c=Math.cos(h),s=Math.sin(h),x=(item.x-ax-dx*t)/scale,y=(item.y-ay-dy*t)/scale;
     if(Math.abs(x*c+y*s)<=halfWidth&&Math.abs(-x*s+y*c)<=halfLength)return true;
@@ -102,7 +106,7 @@ export function updateSalvage(mission){
   // Rebuilt only when the bounded item list changes, not once per vehicle.
   let index=indices.get(state);const key=state.items.map(i=>i.id).join('|'),scale=mission.config.worldScale,cell=SALVAGE_LIMITS.cellMetres*scale;
   if(!index||index.key!==key){index={key,buckets:new Map()};for(const item of state.items){const key=Math.floor(item.x/cell)+','+Math.floor(item.y/cell);if(!index.buckets.has(key))index.buckets.set(key,[]);index.buckets.get(key).push(item);}indices.set(state,index);}
-  const consumed=new Set(),radius=3.1*scale,reservations=new Map();
+  const consumed=new Set(),radius=salvagePickupReach(scale).radius,reservations=new Map();
   for(const unit of mission.state.units)if(unit.task?.salvageId){
     const item=state.items.find(item=>item.id===unit.task.salvageId);
     if(item&&salvageRecipe(mission,unit,item)&&!unit.combatRetreat)reservations.set(item.id,unit.id);
@@ -122,7 +126,8 @@ export function updateSalvage(mission){
         syncFieldHp(mission,unit);
         (unit.fieldModifications??={})[recipe.id]={source:item.id,installedAt:now};consumed.add(item.id);
         if(unit.task?.salvageId===item.id){unit.task=null;unit.path=[];unit.driveSpeed=0;delete unit.detour;}
-        mission.emit?.('field-modification',{unit:unit.id,recipe:recipe.id,name:recipe.name,hpBonus:recipe.hpBonus});
+        mission.emit?.('field-modification',{unit:unit.id,recipe:recipe.id,name:recipe.name,hpBonus:recipe.hpBonus,
+          item:item.id,pickupDistance:Math.hypot(unit.x-item.x,unit.y-item.y),pickupMarginMetres:SALVAGE_LIMITS.pickupMarginMetres});
       }
     }
   }

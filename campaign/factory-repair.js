@@ -2,6 +2,16 @@ import {availableOil,spendOil} from './oil-economy.js';
 import {insideFactory,factoryPriority,factoryVisitors} from './factory-garage.js';
 // Service uses the same simulation clock and oil stock as construction.
 // A bay is assigned once per economy step, never once per search/frame slice.
+export function factoryCanRepair(mission,factory,point){
+ const service=factory&&mission.buildingSpec(factory).repair;
+ return !!service&&factory.hp>0&&factory.completed
+  &&Math.hypot(Math.max(0,Math.abs(point.x-factory.x)-factory.halfWidth),
+   Math.max(0,Math.abs(point.y-factory.y)-factory.halfDepth))<=service.rangeMetres*mission.config.worldScale
+  // A radius alone allowed repair bays on the ridge above the factory.
+  // Service belongs to the factory's authored level and connected apron.
+  &&mission.nav.terrainAllowed.levelAt?.(point.x,point.y)===mission.nav.terrainAllowed.levelAt?.(factory.x,factory.y)
+  &&mission.nav.terrainAllowed.clearSegment(factory,point);
+}
 export function rememberRetreatOrder(mission,unit){
  const pending=unit.pendingOrder,task=unit.combatDeployment?.resume??unit.task;
  const origin=unit.yieldReturn?.home??unit;

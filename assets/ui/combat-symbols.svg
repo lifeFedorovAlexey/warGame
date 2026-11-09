@@ -6,6 +6,15 @@
     <g id="aim" fill="none" stroke="#d9c69b" stroke-width="4"><path d="M17 5H5v12M47 5h12v12M5 47v12h12m30 0h12V47"/></g>
     <g id="shield"><path fill="#8c9160" stroke="#d9c69b" stroke-width="3" d="m32 11 17 6v16c0 10-9 18-17 22-8-4-17-12-17-22V17z"/></g>
   </defs>
+  <symbol id="combat-modes" viewBox="0 0 64 64">
+    <g fill="none" stroke="#d9c69b" stroke-width="3.5">
+      <circle cx="21" cy="22" r="11"/>
+      <path d="M21 4v10m0 16v10M3 22h10m16 0h10M7 48h50M7 58h50"/>
+    </g>
+    <circle cx="21" cy="22" r="3" fill="#f39a29"/>
+    <path d="M44 8v25" stroke="#8c9160" stroke-width="4"/>
+    <path d="M40 15h8v9h-8zM17 43h7v10h-7zM39 53h7v10h-7z" fill="#f39a29"/>
+  </symbol>
   <symbol id="combat-retreat-light" viewBox="0 0 64 64"><use href="#car"/><path d="M53 11H12" stroke="#f39a29" stroke-width="6"/><path fill="#f39a29" d="m19 1-13 10 13 10z"/><path fill="#273322" d="M9 56h47v6H9z"/><path fill="#d9c69b" d="M9 56h38v6H9z"/></symbol>
   <symbol id="combat-retreat-heavy" viewBox="0 0 64 64"><use href="#car"/><path d="M53 11H12" stroke="#f39a29" stroke-width="6"/><path fill="#f39a29" d="m19 1-13 10 13 10z"/><path d="m36 24-6 10 6 6-5 10" stroke="#f39a29" stroke-width="4" fill="none"/><path fill="#273322" d="M9 56h47v6H9z"/><path fill="#f39a29" d="M9 56h16v6H9z"/></symbol>
   <symbol id="combat-hold-fire" viewBox="0 0 64 64"><use href="#gun"/><path d="M11 57 54 7" stroke="#273322" stroke-width="11"/><path d="M11 57 54 7" stroke="#f39a29" stroke-width="6"/></symbol>

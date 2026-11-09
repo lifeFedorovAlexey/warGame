@@ -1,9 +1,9 @@
 import {setButtonIcon, speedIcon} from '../assets/ui/icons.js';
 import {createCampaignWorld} from './world.js';
 import {Mission} from './mission.js';
+import {canDemolish,demolitionWorkers,requestDemolition,cancelDemolition} from './building-demolition.js';
 import {productionFactories} from './factory-production.js';
 import {createFactoryRows,updateFactoryRows} from './factory-queues.js';
-import {canDemolish,demolitionWorkers,requestDemolition,cancelDemolition} from './building-demolition.js';
 import {FieldRadio, missionSignal} from './field-radio.js';
 import {raidApproachSignal, visibleRaidContact, warehouseAdvanceHint, waterTowerSignal} from './threat-guidance.js';
 import {restoreRadioStory} from './radio-save.js';
@@ -21,8 +21,10 @@ import {CombatMenu} from './combat-menu.js';
 import {armySelectionIds} from './army-selection.js';
 import {pickupTarget} from './pickup-orders.js';
 import {expandCommandIds} from './group-command.js';
+import {isAutomaticRepair} from './combat-retreat-state.js';
 import {latestVehicleProject} from './vehicle-designs.js';
 import {oilPowerStatus,oilReserved,oilFundingRemaining,oilOrderProgress} from './oil-economy.js';
+import {installNavigationTelemetry} from './navigation-telemetry.js';
 
 const $ = id => document.getElementById(id);
 const saveKey = 'warGame.alpha.mission01.v1';
@@ -52,8 +54,11 @@ async function toggleNavigationDebug(force){
 
 const vehicles = () => mission.state.units.filter(unit => unit.owner === 'rai' && unit.hp > 0);
 const builders = () => vehicles().filter(unit => config.units[unit.kind].role === 'builder');
-const selection = () => [...selected].map(id => mission.entity(id)).filter(e=>e&&!e.factoryVisit);
-const commandSelection = () => expandCommandIds(mission,[...selected]).map(id=>mission.entity(id)).filter(Boolean);
+const repairing = unit => isAutomaticRepair(unit,unit&&config.units[unit.kind]&&mission.unitSpec(unit));
+const selectable = entity => !!entity&&entity.hp>0;
+const selection = () => [...selected].map(id => mission.entity(id)).filter(selectable);
+function pruneSelection(){for(const id of selected)if(!selectable(mission.entity(id)))selected.delete(id);}
+const commandSelection = () => expandCommandIds(mission,[...selected],{action:'attack'}).map(id=>mission.entity(id)).filter(Boolean);
 const unitType = unit => [unit.kind,...(unit.components??config.units[unit.kind].components??[]),unit.engineUpgradeLevel??0].join('/');
 function firstPowerSites(){
   const owned=mission.state.buildings.filter(b=>b.owner==='rai'&&b.hp>0);
@@ -172,7 +177,9 @@ function liveMobile(entity) {
 }
 function select(ids, append = false, speak = true) {
   if (!append) selected.clear();
-  for (const id of ids) if (mission.entity(id)&&!mission.entity(id).factoryVisit) selected.add(id);
+  pruneSelection();
+  for (const id of ids) if (selectable(mission.entity(id))) selected.add(id);
+  navigationTelemetry?.record('selection',{requested:ids,selected:[...selected],append});
   cancelMode({keepAttack:true});
   if (speak && active && ids.some(id => liveMobile(mission.entity(id)))) {
     sound.acknowledge('select', selection().filter(liveMobile).map(unit => unit.id));
@@ -238,9 +245,9 @@ function beginOrder(mode) {
 }
 function toggleAttackOrder(){if(orderMode==='attack')cancelMode();else beginOrder('attack');}
 function toggleDemolitionOrder(){if(orderMode==='demolish')return cancelMode();cancelMode();orderMode='demolish';updateUi();}
-function saveGame(notify = true) {
+async function saveGame(notify = true) {
   try {
-    localStorage.setItem(saveKey, mission.save());
+    localStorage.setItem(saveKey, await mission.saveAsync());
     if (notify) toast('Операция сохранена');
     return true;
   } catch {
@@ -495,7 +502,7 @@ function installInput() {
       ordersAt(world.ground(event.clientX, event.clientY), hitEntity(event.clientX, event.clientY), orderMode);
     }
     if (event.button === 0) {
-      if(orderMode==='demolish'){event.preventDefault();cancelMapGesture();lastSelectionClick=null;cancelMode();return;}
+      if(['attack','demolish'].includes(orderMode)){event.preventDefault();cancelMapGesture();lastSelectionClick=null;cancelMode();return;}
       canvas.setPointerCapture(event.pointerId);
       drag = {x: event.clientX, y: event.clientY, append: event.shiftKey, pointerId:event.pointerId};
     }
@@ -547,10 +554,9 @@ function installInput() {
       }
       return;
     }
-    if(orderMode==='demolish')return cancelMode();
     const selecting=Math.hypot(x - origin.x, y - origin.y)>6;
-    const ownTarget=orderMode==='attack'?hitEntity(x,y):null;
-    if (orderMode && !(orderMode==='attack'&&(selecting||ownTarget?.owner==='rai'))) return ordersAt(world.ground(x,y), ownTarget??hitEntity(x,y), orderMode);
+    if(['attack','demolish'].includes(orderMode))return cancelMode();
+    if(orderMode)return ordersAt(world.ground(x,y),hitEntity(x,y),orderMode);
     if (selecting) {
       const ids = vehicles().filter(unit => {
         const p = world.screen(unit);
@@ -692,29 +698,30 @@ function updateRoster() {
   const counts={};
   for(const unit of units){
     counts[unit.kind]=(counts[unit.kind]??0)+1;
-    const blocked=blockedOrders.has(unit.id),separate=blocked&&blockedOrders.size<=4;
+    const recovering=repairing(unit),blocked=!recovering&&blockedOrders.has(unit.id),separate=blocked&&blockedOrders.size<=4;
     const design=unitType(unit);
     if(!types.has(design))types.set(design,types.size);
-    const key=stack&&!separate?[blocked,design,selected.has(unit.id)].join(':'):unit.id;
+    const key=stack&&!separate?[recovering,blocked,design,selected.has(unit.id)].join(':'):unit.id;
     if(!groups.has(key)){
       const name=projectLabel(unit),label=name+(name===config.units[unit.kind].name&&(!stack||separate)?' '+counts[unit.kind]:'');
-      groups.set(key,{label,kind:unit.kind,design,units:[]});
+      groups.set(key,{label:recovering?label+' · Авторемонт':label,kind:unit.kind,design,recovering,units:[]});
     }
     groups.get(key).units.push(unit);
   }
-  const tiles=[...groups.values()].sort((a,b)=>types.get(a.design)-types.get(b.design));
+  const tiles=[...groups.values()].sort((a,b)=>Number(a.recovering)-Number(b.recovering)||types.get(a.design)-types.get(b.design));
   const visibleColumns=Math.min(tiles.length,columns);
   roster.style.setProperty('--roster-cols',Math.max(1,visibleColumns));
-  const tileKey=tile=>tile.units.map(unit=>unit.id).join('/');
+  const tileKey=tile=>(tile.recovering?'repair:':'')+tile.units.map(unit=>unit.id).join('/');
   const key=tiles.map(tileKey).join(',');
   if(key!==rosterKey){
     rosterKey=key;
-    const previous=new Map([...roster.children].map(b=>[b.dataset.units,b]));
+    const previous=new Map([...roster.children].map(b=>[b.dataset.rosterKey,b]));
     roster.replaceChildren(...tiles.map(tile=>{
       const existing=previous.get(tileKey(tile));
       if(existing)return existing;
       const b=document.createElement('button');
-      b.dataset.units=tileKey(tile);
+      b.dataset.rosterKey=tileKey(tile);
+      b.dataset.units=tile.units.map(unit=>unit.id).join('/');
       setButtonIcon(b,tile.kind,tile.label);
       b.append(document.createElement('i'));
       const ids=tile.units.map(unit=>unit.id);
@@ -736,17 +743,19 @@ function updateRoster() {
     }));
   }
   for(let i=0;i<tiles.length;i++){
-    const {units,label}=tiles[i],b=roster.children[i];
+    const {units,label,recovering}=tiles[i],b=roster.children[i];
     const active=units.every(unit=>selected.has(unit.id));
+    b.classList.toggle('repairing',recovering);
+    b.removeAttribute('aria-disabled');
     b.classList.toggle('active',active);
     b.setAttribute('aria-pressed',String(active));
     b.setAttribute('aria-label',units.length>1?label+' · '+units.length+' машин':label);
     const lowest=units.reduce((min,unit)=>unit.hp/unit.maxHp<min.hp/min.maxHp?unit:min);
     b.style.setProperty('--hp',100*lowest.hp/lowest.maxHp+'%');
     b.style.setProperty('--hp-color',hpColor(lowest.hp/lowest.maxHp));
-    const blocked=units.filter(unit=>blockedOrders.has(unit.id)).length;
+    const blocked=recovering?0:units.filter(unit=>blockedOrders.has(unit.id)).length;
     b.classList.toggle('order-blocked',blocked>0);
-    b.title=label+(units.length>1?' ×'+units.length+' · минимум ':' · ')+Math.ceil(lowest.hp)+'/'+lowest.maxHp+' HP'+(blocked?' · Без маршрута'+(blocked>1?' ×'+blocked:''):'');
+    b.title=label+(units.length>1?' ×'+units.length+' · минимум ':' · ')+Math.ceil(lowest.hp)+'/'+lowest.maxHp+' HP'+(recovering?' · Возвращаются в строй после полного ремонта':'')+(blocked?' · Без маршрута'+(blocked>1?' ×'+blocked:''):'');
   }
 }
 function updateContext(first) {
@@ -845,7 +854,7 @@ function updateUi() {
     }));
     if(!entries.length)journal.textContent='Записей пока нет.';
   }
-  for (const id of selected) if (!mission.entity(id)) selected.delete(id);
+  pruneSelection();
   const group = selection(), first = group[0], mobile = group.filter(isMobile);
   $('energy').textContent = Math.floor(s.energy);
   const oilRate=Math.round(s.energyRate*10)/10,income=$('income');
@@ -912,12 +921,9 @@ function updateUi() {
     ? ' · '+(first.powered?'Качает':s.powered?'Лимит АЭС':'Нет питания'):'';
   const buildingStatus=first?.completed===false?(oilFundingRemaining(first)>0?' · Нефть '+Math.floor(first.funding.paid)+'/'+first.cost:' · '+Math.floor(first.progress*100)+'%'):' HP';
   $('details').textContent = first?.clearing ? 'Освобождение площадки' : first?.awaitingWorkers ? 'В очереди строителей' : first ? Math.ceil(hp) + '/' + maxHp + buildingStatus+wellStatus : '';
-  $('move-order').classList.toggle('active', orderMode === 'move');
   $('attack-order').classList.toggle('active', orderMode === 'attack');
   $('attack-order').setAttribute('aria-pressed',String(orderMode==='attack'));
-  $('move-order').disabled = !vehicles().length;
   $('attack-order').disabled = orderMode!=='attack'&&!commandSelection().some(unit => liveMobile(unit)&&config.units[unit.kind].damage > 0);
-  $('stop').disabled = !mobile.length;
   $('placement').hidden = !buildKind;
   if (buildKind) $('placement-name').textContent = config.buildings[buildKind].name;
   updateRoster();
@@ -937,6 +943,7 @@ function events() {
       sound.signal('complete');
       saveGame(false);
     }
+    if (event.type === 'navigation-command-rejected') toast('Новый маршрут недоступен · прежний приказ сохранён');
     if (event.type === 'unit-produced') toast((event.name ?? config.units[event.kind].name) + ' · готово к выезду');
     if (event.type === 'field-modification') toast('Установлено · '+event.name+' · +'+event.hpBonus+' HP');
     if (event.type === 'construction-refused') toast(event.reason);
@@ -972,6 +979,8 @@ function frame(now) {
     sound.update();
     return;
   }
+  const frameWorkStarted=performance.now();
+  world.updateTrafficVisibility(mission);
   if (active || openingPlaying) {
     if (!paused) mission.advance(dt * speed,{budgetMs:mission.config.simulationCpuBudgetMs,rate:speed});
     events();
@@ -986,8 +995,13 @@ function frame(now) {
       saveGame(false);
     }
   }
+  pruneSelection();
+  const renderStarted=performance.now();
   world.update(mission, selected, dt, (active||openingPlaying) && !paused && mission.state.status==='running',active);
+  const debugStarted=performance.now();
+  navigationTelemetry?.rendered(world.vehicles.transforms);
   navigationDebug?.update();
+  const uiStarted=performance.now();
   if (active) {
     minimapView.render(now);
     if (now - lastUi > 220) {
@@ -1006,6 +1020,9 @@ function frame(now) {
     }
   }
   if (now >= toastUntil) $('toast').hidden = true;
+  const frameFinished=performance.now();
+  navigationTelemetry?.frameWork({simulationAndEvents:renderStarted-frameWorkStarted,render:debugStarted-renderStarted,
+   diagnostics:uiStarted-debugStarted,ui:frameFinished-uiStarted,total:frameFinished-frameWorkStarted});
 }
 requestAnimationFrame(frame);
 try {
@@ -1021,6 +1038,9 @@ try {
   await mainMenu.loading.stage('simulation');
   mission = new Mission(config, world.field);
   minimapView=createMinimap($('minimap'),{world,mission,selected,background:miniBackground,notify:toast});
+  navigationTelemetry=installNavigationTelemetry(mission,()=>({active,paused,speed,openingPlaying,
+   camera:{x:Math.round(world.controls.target.x),y:Math.round(world.controls.target.y),distance:Math.round(world.camera.position.distanceTo(world.controls.target))},
+   designerVisible:!!designer?.visible,renderSuspended:!!window.campaign?.renderSuspended,selected:[...selected],renderer:{programs:world.renderer.info.programs.length,...world.shaderPreparation}}));
   world.damage.bindMission(mission);
   await mainMenu.loading.stage('graphics');
   await world.prepareRendering?.(mission);
@@ -1077,7 +1097,7 @@ try {
   $('begin').onclick = () => start();
   $('resume-save').onclick = $('load').onclick = () => start(true);
   $('save').onclick = () => saveGame();
-  $('main-menu-return').onclick = () => {if(saveGame())location.reload();};
+  $('main-menu-return').onclick = async () => {if(await saveGame())location.reload();};
   $('pause').onclick = () => { paused = !paused; world.keys.clear(); updateUi(); };
   $('tempo').onclick = () => { speed = speed === 1 ? 2 : speed === 2 ? 4 : 1; updateUi(); };
   $('design-toggle').onclick = toggleDesigner;
@@ -1092,8 +1112,8 @@ try {
   $('rotate-building').onclick=()=>rotatePlacement();
   $('rotate-building').oncontextmenu=event=>{event.preventDefault();rotatePlacement(-1);};
   $('placement-snap').onclick=()=>{snapBuildings=!snapBuildings;updatePlacement();};
-  $('move-order').onclick = () => beginOrder('move');
-  combatMenu=new CombatMenu({button:$('attack-order'),mission,selection,onToggle:toggleAttackOrder,onChange:result=>{if(report(result))sound.signal('order');updateUi();}});
+  $('attack-order').onclick=toggleAttackOrder;
+  combatMenu=new CombatMenu({button:$('combat-modes'),mission,onOpen:()=>cancelMode(),onChange:result=>{if(report(result))sound.signal('order');updateUi();}});
   $('home').onclick = () => {
     document.querySelector('.settings').open = false;
     world.centre(world.field.gridToWorld(config.startGrid), 360);
@@ -1109,11 +1129,6 @@ try {
     const live=[...blockedOrders].map(id=>mission.entity(id)).filter(Boolean);
     if(live.length===1)focusUnit(live[0]);
     else if(live.length)select(live.map(unit=>unit.id));
-  };
-  $('stop').onclick = () => {
-    const ids = selection().filter(liveMobile).map(unit => unit.id);
-    if (report(mission.stop(ids))) sound.acknowledge('stop', ids);
-    cancelMode({keepAttack:true});
   };
   $('result-close').onclick = () => { $('result').hidden = true; };
   $('result-signal').onclick = () => {

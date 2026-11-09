@@ -1,4 +1,4 @@
-import {RoadTraffic, asphaltBonus, gradeSpeed, surfaceTravelCost} from './road-traffic.js';
+import {RoadTraffic, asphaltBonus, surfaceTravelCost} from './road-traffic.js';
 import {sweepAvoidsFootprint, vehicleSweep} from './vehicle-collision.js';
 import {buildTerrainPassability} from './terrain-passability.js';
 
@@ -11,11 +11,14 @@ const completeSteps=iterator=>{let step;do{step=iterator.next();}while(!step.don
 export class TerrainNavigator{
  constructor(field,{cell=8,bounds=[0,0,127,127],vehicleScale=4.5}={}){
   this.vehicleScale=vehicleScale;
-  this.field=field;this.cell=cell;this.clearance=11+cell/2;this.size=Math.round(field.extent/cell)+1;this.bounds=bounds;const count=this.size*this.size;this.heights=new Float32Array(count);this.walkable=new Uint8Array(count);this.occupied=new Uint8Array(count);this.edgeCache=new Uint8Array(count*8);this.searchId=0;this.closed=new Uint32Array(count);this.visited=new Uint32Array(count);this.cost=new Float32Array(count);this.parent=new Int32Array(count);
-  this.roads=new RoadTraffic(field);this.surfaceCosts=new Float32Array(count);this.pavedTripCosts=new Float32Array(count);this.slopes=new Float32Array(count);this.solids=[];
+  this.field=field;this.cell=cell;this.clearance=11+cell/2;this.size=Math.round(field.extent/cell)+1;this.bounds=bounds;const count=this.size*this.size;this.walkable=new Uint8Array(count);this.occupied=new Uint8Array(count);this.edgeCache=new Uint8Array(count*8);this.searchId=0;this.closed=new Uint32Array(count);this.visited=new Uint32Array(count);this.cost=new Float32Array(count);this.parent=new Int32Array(count);
+  this.roads=new RoadTraffic(field);this.surfaceCosts=new Float32Array(count);this.pavedTripCosts=new Float32Array(count);this.solids=[];
   this.topologyRevision=0;this.topologyBounds=bounds.join(',');this.regionVersions=new Map();this.footprintCounts=new Uint16Array(count);this.staticFootprints=new Map();
-  this.terrainAllowed=buildTerrainPassability(field,this.roads);
-  for(let row=0;row<this.size;row++)for(let col=0;col<this.size;col++){const p=this.position(col,row),id=row*this.size+col,g=field.gradientAt(p.x,p.y);this.heights[id]=field.heightAt(p.x,p.y);this.slopes[id]=Math.hypot(g.x,g.y);this.walkable[id]=this.slopes[id]<.55&&this.terrainAllowed(p.x,p.y)?1:0;}
+  this.terrainAllowed=buildTerrainPassability(field);
+  for(let row=0;row<this.size;row++)for(let col=0;col<this.size;col++){
+   const p=this.position(col,row),id=row*this.size+col;
+   this.walkable[id]=this.terrainAllowed.clearSegment(p,p,vehicleScale*1.3)?1:0;
+  }
  }
  position(col,row){return{x:col*this.cell-this.field.half,y:this.field.half-row*this.cell};}
  grid(x,y){return [Math.max(0,Math.min(this.size-1,Math.round((x+this.field.half)/this.cell))),Math.max(0,Math.min(this.size-1,Math.round((this.field.half-y)/this.cell)))];}
@@ -117,7 +120,8 @@ export class TerrainNavigator{
   return null;
  }
  nearbySolids(point,radius){
-  return this.solids.filter(item=>Math.abs(point.x-item.x)<item.halfWidth+radius&&Math.abs(point.y-item.y)<item.halfDepth+radius);
+  return [...this.solids.filter(item=>Math.abs(point.x-item.x)<item.halfWidth+radius&&Math.abs(point.y-item.y)<item.halfDepth+radius),
+   ...this.terrainAllowed.nearbyWalls(point,point,radius)];
  }
  clearSolidSweep(sweep,solids){
   return solids.every(item=>sweepAvoidsFootprint(sweep,item));
@@ -160,21 +164,18 @@ export class TerrainNavigator{
  nearest(x,y,maxRadius=12){const [cx,cy]=this.grid(x,y);for(let r=0;r<=maxRadius;r++){let best=null,distance=Infinity;for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(r&&Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const col=cx+dx,row=cy+dy;if(!this.allowed(col,row))continue;const p=this.position(col,row),d=Math.hypot(p.x-x,p.y-y);if(d<distance){distance=d;best={...p,col,row};}}if(best)return best;}return null;}
  terrainGridEdgeClear(a,b,maximumGrade){
   const field=this.field,half=field.half,cell=this.cell,dx=b.x-a.x,dy=b.y-a.y;
-  // On matching triangle/grid vertices, all eight neighbouring edges split
-  // only at t=.5. Retain exactly the old endpoint and interval-midpoint tests.
+  // Neighbouring grid vertices share cached planning-clearance checks.
   for(const t of edgeCheckTimes){
    const x=a.x+dx*t,y=a.y+dy*t;
    if(!this.terrainAllowed(x,y))return false;
    const col=Math.round((x+half)/cell),row=Math.round((half-y)/cell);
    if(!this.walkable[row*this.size+col])return false;
   }
-  const length=Math.max(1e-7,Math.hypot(dx,dy)/2),first=field.heightAt(a.x,a.y),middle=field.heightAt(a.x+dx*.5,a.y+dy*.5);
-  if(Math.abs(middle-first)/length>maximumGrade+.00001)return false;
-  return !(Math.abs(field.heightAt(b.x,b.y)-middle)/length>maximumGrade+.00001);
+  return this.terrainAllowed.clearSegment(a,b);
  }
  lineClear(a,b,terrainOnly=false,leaveGridEdge=false,maximumGrade=climbableGrade,physical=false,checkOccupancy=false,terrainEscape=null){
-  if(terrainOnly&&!leaveGridEdge&&!physical&&!checkOccupancy&&!terrainEscape&&this.field.renderCell===this.cell
-   &&this.field.renderSize===this.size&&this.field.extent===(this.size-1)*this.cell&&this.field.half===this.field.extent/2){
+  if(terrainOnly&&!leaveGridEdge&&!physical&&!checkOccupancy&&!terrainEscape
+   &&this.field.extent===(this.size-1)*this.cell&&this.field.half===this.field.extent/2){
    const half=this.field.half,cell=this.cell,ac=(a.x+half)/cell,ar=(half-a.y)/cell,bc=(b.x+half)/cell,br=(half-b.y)/cell;
    if(Number.isInteger(ac)&&Number.isInteger(ar)&&Number.isInteger(bc)&&Number.isInteger(br)
     &&ac>=0&&ar>=0&&bc>=0&&br>=0&&ac<this.size&&ar<this.size&&bc<this.size&&br<this.size
@@ -182,49 +183,47 @@ export class TerrainNavigator{
     &&a.x===ac*cell-half&&a.y===half-ar*cell&&b.x===bc*cell-half&&b.y===half-br*cell)
     return this.terrainGridEdgeClear(a,b,maximumGrade);
   }
-  const length=Math.hypot(b.x-a.x,b.y-a.y),times=[0,1],half=this.field.half,cell=this.field.renderCell??this.cell;
+  const times=[0,1],half=this.field.half;
   if([a,b].some(point=>Math.abs(point.x)>half||Math.abs(point.y)>half))return false;
-  // Height is affine within each heightfield triangle. Split exactly at its X,
-  // Y and diagonal boundaries: fixed-distance samples can miss a thin slope.
+  // Every level boundary is an explicit wall, with only authored openings.
+  // This checks the whole segment, including a crossing with both ends outside.
+  if(!this.terrainAllowed.clearSegment(a,b))return false;
+  // Physical sweeps do not use raster occupancy. The authored boundaries were
+  // checked along the complete segment above; the remaining map rectangle is
+  // convex, so checking its two endpoints replaces every crossed grid cell.
+  if(physical&&!terrainOnly&&!checkOccupancy){
+   const bounds=this.bounds;
+   for(const p of [a,b]){const x=(p.x+half)/32,y=(half-p.y)/32;
+    if(x<bounds[0]||x>bounds[2]||y<bounds[1]||y>bounds[3])return false;}
+   return true;
+  }
   const cross=(q0,q1)=>{if(Math.abs(q1-q0)<1e-10)return;for(let k=Math.ceil(Math.min(q0,q1));k<Math.max(q0,q1);k++){const t=(k-q0)/(q1-q0);if(t>1e-9&&t<1-1e-9)times.push(t);}};
-  cross((a.x+half)/cell,(b.x+half)/cell);cross((half-a.y)/cell,(half-b.y)/cell);cross((a.x-a.y+half*2)/cell,(b.x-b.y+half*2)/cell);
   cross((a.x+half)/this.cell+.5,(b.x+half)/this.cell+.5);cross((half-a.y)/this.cell+.5,(half-b.y)/this.cell+.5);times.sort((x,y)=>x-y);
   const [startCol,startRow]=this.grid(a.x,a.y),startId=startRow*this.size+startCol;
   const gx=(a.x+half)/32,gy=(half-a.y)/32,bounds=this.bounds;
   const mayLeave=leaveGridEdge&&(physical||!this.occupied[startId])&&gx>=bounds[0]&&gx<=bounds[2]&&gy>=bounds[1]&&gy<=bounds[3];
   const allowed=t=>{
    const x=a.x+(b.x-a.x)*t,y=a.y+(b.y-a.y)*t,[col,row]=this.grid(x,y);
-   // Applies to smoothing, road lanes, parking and physical recovery alike.
-   if(!this.terrainAllowed(x,y)){
-    // Explicit evacuation of an already-invalid saved pose. It cannot be
-    // started from legal ground or renewed along a ridge. A small fixed rise
-    // permits reversing to turn before descending from the old saved pose.
-    if(!terrainEscape||this.terrainAllowed(a.x,a.y)||Math.hypot(x-terrainEscape.x,y-terrainEscape.y)>terrainEscape.radius
-      ||this.field.heightAt(x,y)>terrainEscape.height+(terrainEscape.maxRise??.5))return false;
-   }
+   if(!this.terrainAllowed(x,y))return false;
    if(terrainOnly)return this.walkable[row*this.size+col];
    if(physical){
     if(checkOccupancy&&this.occupied[row*this.size+col])return false;
     const xg=(x+half)/32,yg=(half-y)/32;
     if(xg<bounds[0]||xg>bounds[2]||yg<bounds[1]||yg>bounds[3])return false;
-    const gradient=this.field.gradientAt(x,y);
-    return Math.hypot(gradient.x,gradient.y)<Math.max(.76,maximumGrade*1.38);
+    return true;
    }
    if(this.allowed(col,row))return true;
    if(!mayLeave||col!==startCol||row!==startRow)return false;
-   // A rounded grid sample can fall just outside drivable terrain even when the
-   // exact continuous position is flat. Let an existing vehicle leave that cell.
-   const gradient=this.field.gradientAt(x,y);
-   return Math.hypot(gradient.x,gradient.y)<Math.max(.60,maximumGrade*1.32);
+   return true;
   };
   if(!allowed(0)||!allowed(1))return false;
-  let previous=0,height=this.field.heightAt(a.x,a.y);for(const t of times){if(t-previous<1e-8)continue;if(!allowed((previous+t)/2))return false;const h=this.field.heightAt(a.x+(b.x-a.x)*t,a.y+(b.y-a.y)*t);if(Math.abs(h-height)/Math.max(1e-7,length*(t-previous))>maximumGrade+.00001)return false;previous=t;height=h;}return true;
+  let previous=0;for(const t of times){if(t-previous<1e-8)continue;if(!allowed(t)||!allowed((previous+t)/2))return false;previous=t;}return true;
  }
  surfaceCost(id,pavedTrip){
   const cache=pavedTrip?this.pavedTripCosts:this.surfaceCosts;
   if(!cache[id]){
    const p=this.position(id%this.size,Math.floor(id/this.size));
-   cache[id]=surfaceTravelCost(this.roads.coverage(p.x,p.y),this.slopes[id],pavedTrip);
+   cache[id]=surfaceTravelCost(this.roads.coverage(p.x,p.y),0,pavedTrip);
   }
   return cache[id];
  }
@@ -232,14 +231,10 @@ export class TerrainNavigator{
   const distance=Math.hypot(b.x-a.x,b.y-a.y);
   if(distance<.001)return 0;
   const steps=Math.ceil(distance/6),step=distance/steps;
-  let previous=this.field.heightAt(a.x,a.y),total=0;
+  let total=0;
   for(let index=1;index<=steps;index++){
-   const t=index/steps,middle=(index-.5)/steps;
-   const height=this.field.heightAt(a.x+(b.x-a.x)*t,a.y+(b.y-a.y)*t);
-   const x=a.x+(b.x-a.x)*middle,y=a.y+(b.y-a.y)*middle,gradient=this.field.gradientAt(x,y);
-   const surface=surfaceTravelCost(this.roads.coverage(x,y),Math.hypot(gradient.x,gradient.y),pavedTrip);
-   total+=step*surface/gradeSpeed((height-previous)/step);
-   previous=height;
+   const middle=(index-.5)/steps,x=a.x+(b.x-a.x)*middle,y=a.y+(b.y-a.y)*middle;
+   total+=step*surfaceTravelCost(this.roads.coverage(x,y),0,pavedTrip);
   }
   return total;
  }
@@ -298,10 +293,12 @@ export class TerrainNavigator{
   }
   let starts=entries.filter(point=>this.lineClear(from,point,false,true));
   const startId=cy*this.size+cx;
-  // A vehicle can have wheel support even when its centre is on a steep cell.
-  // Let it reach the nearby grid using the same grade limits as vehicle motion.
+  // A saved pose can be inside the planning margin of a level boundary.
+  // Leaving that margin requires the complete hull sweep to clear the wall.
   if(escapeSteepStart&&!starts.length&&!this.walkable[startId]&&!this.occupied[startId]){
-   starts=entries.filter(point=>this.lineClear(from,point,false,true,climbableGrade,true,true,terrainEscape));
+   const heading=from.heading??0,start={...from,heading};
+   starts=entries.filter(point=>this.lineClear(from,point,false,true,climbableGrade,true,true)
+    &&this.clearSolidSweep(vehicleSweep(start,{...point,heading,kind:from.kind},this.vehicleScale,this.field),this.nearbySolids(point,40)));
   }
   if(!starts.length&&this.occupied[startId]){
    // Building clearance is a planning margin, not a wall. A car parked in
@@ -344,13 +341,12 @@ export class TerrainNavigator{
     if(!dx&&!dy)continue;
     const x=col+dx,y=row+dy,next=y*n+x;
     if(!this.allowed(x,y)||this.closed[next]===stamp||dx&&dy&&(!this.allowed(col+dx,row)||!this.allowed(col,row+dy)))continue;
-    const distance=this.cell*Math.hypot(dx,dy),grade=(this.heights[next]-this.heights[id])/distance;
-    if(Math.abs(grade)>climbableGrade)continue;
+    const distance=this.cell*Math.hypot(dx,dy);
     let direction=(dy+1)*3+dx+1;if(direction>4)direction--;
     const edge=id*8+direction;
     if(!this.edgeCache[edge])this.edgeCache[edge]=this.lineClear(this.position(col,row),this.position(x,y),true)?1:2;
     if(this.edgeCache[edge]!==1)continue;
-    const edgeCost=roads?distance*(surface+this.surfaceCost(next,pavedTrip))*.5/gradeSpeed(grade):distance*(1+grade*grade*18);
+    const edgeCost=roads?distance*(surface+this.surfaceCost(next,pavedTrip))*.5:distance;
     const cost=this.cost[id]+edgeCost;
     if(this.visited[next]!==stamp||cost<this.cost[next]){this.visited[next]=stamp;this.cost[next]=cost;this.parent[next]=id;push(next,cost+heuristic(x,y));}
    }

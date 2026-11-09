@@ -31,6 +31,8 @@ export function createExplosionEffects(T,scene,scale,field){
  const fire=batch('explosion_fire',limit*14+32*6,true),smoke=batch('explosion_smoke',limit*32+32*6,false);
  const object=new T.Object3D(),colour=new T.Color();
  const fragments=new T.InstancedMesh(new T.IcosahedronGeometry(1,0),new T.MeshStandardMaterial({color:0xffffff,roughness:1,flatShading:true}),24*16);
+ // Allocate instance colours before shader preload, not on the first blast.
+ fragments.instanceColor=new T.InstancedBufferAttribute(new Float32Array(24*16*3).fill(1),3).setUsage(T.DynamicDrawUsage);
  const fragmentVertices=fragments.geometry.attributes.position;
  fragments.name='explosion_fragments';fragments.count=0;fragments.frustumCulled=false;fragments.instanceMatrix.setUsage(T.DynamicDrawUsage);scene.add(fragments);
  const scorchGeo=new T.CircleGeometry(1,24),positions=scorchGeo.attributes.position;

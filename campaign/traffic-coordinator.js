@@ -1,7 +1,20 @@
-import {vehicleEnvelope,footprintSupport,vehicleSweep} from './vehicle-collision.js';
+import {vehicleEnvelope,footprintSupport,vehicleSweep,footprintCast,trafficCollisionRequired} from './vehicle-collision.js';
 import {updatePassageReservations} from './passage-reservations.js';
 import {vehicleDynamics} from './vehicle-dynamics.js';
 import {checkManeuver} from './vehicle-motion.js';
+import {corridorSpeedLimit} from './traffic-corridor.js';
+import {navigationDecision} from './navigation-state.js';
+import {CommandPlanner} from './command-planner.js';
+import {shouldAutoRetreat,startAutomaticRetreat,updateCombatRetreat} from './combat-policy.js';
+import {retreatReturnOrder} from './factory-repair.js';
+import {TrafficPlanner} from './traffic-planner.js';
+import {recoverWaitCycle} from './traffic-cycle.js';
+import {stepJointTraffic,commitJointPlanSteps} from './traffic-joint.js';
+import {planMovingPassage} from './traffic-passage.js';
+import {rememberYieldHome,recordYieldStep,resumeYieldHome,checkedCooperativeArrival,cooperativeArrivalReady,prepareTrafficDeparture} from './traffic-start.js';
+import {waitingForContinuation} from './route-continuation.js';
+import {updateCombatParking} from './combat-deployment.js';
+import {immediateCommand,stepCommandIntent,commandSteeringTarget} from './command-motion.js';
 
 export const TRAFFIC_LIMITS={groupSize:100,zoneSize:256,horizon:3,leases:1024};
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
@@ -20,19 +33,38 @@ function crossingReleased(lease,byId,scale,field){
  }
  // A cancelled/replaced route outside the occupied crossing no longer owns
  // its old approach. Cancellation while a body is inside does not erase it.
- const goal=winner.path?.at(-1),waypoint=winner.path?.[0];
+ const goal=commandSteeringTarget(winner)??winner.path?.at(-1),waypoint=commandSteeringTarget(winner)??winner.path?.[0];
  const changed=!goal||goal.x!==zone.goalX||goal.y!==zone.goalY
   ||zone.waypointX!==undefined&&(waypoint?.x!==zone.waypointX||waypoint?.y!==zone.waypointY);
  return changed&&Math.abs(side)>clearance;
 }
 
 function grantCrossing(lease,winner,other,along,scale,now){
- const nx=-other.course.y,ny=other.course.x,goal=winner.unit.path.at(-1),waypoint=winner.unit.path[0];
+ const nx=-other.course.y,ny=other.course.x,goal=commandSteeringTarget(winner.unit)??winner.unit.path.at(-1),waypoint=commandSteeringTarget(winner.unit)??winner.unit.path[0];
  lease.grantedAt??=now;
  lease.zone={x:winner.unit.x+winner.course.x*along,y:winner.unit.y+winner.course.y*along,nx,ny,
   width:footprintSupport(other.shape,nx,ny)+scale*.45,exitSign:Math.sign(winner.course.x*nx+winner.course.y*ny),
   ux:winner.course.x,uy:winner.course.y,ownerWidth:footprintSupport(winner.shape,-winner.course.y,winner.course.x),
   goalX:goal.x,goalY:goal.y,waypointX:waypoint.x,waypointY:waypoint.y};
+}
+
+// A granted crossing remains binding even when a later ETA comparison or a
+// changing steering target no longer rediscovers the original pair. Clip the
+// loser's current approach against the saved finite crossing, expanded by its
+// complete body. An already entered car must finish clearing, not park inside.
+function retainedCrossingLimit(lease,plan,scale,dt){
+ const z=lease.zone;if(!z||z.ux===undefined)return Infinity;
+ const {shape,course}=plan;let enter=0,exit=Infinity;
+ for(const [x,y,half] of [[z.nx,z.ny,z.width],[-z.uy,z.ux,z.ownerWidth+scale*.45]]){
+  const offset=(shape.x-z.x)*x+(shape.y-z.y)*y,rate=course.x*x+course.y*y,
+   radius=half+footprintSupport(shape,x,y);
+  if(Math.abs(rate)<1e-7){if(Math.abs(offset)>radius)return Infinity;continue;}
+  const a=(-radius-offset)/rate,b=(radius-offset)/rate;
+  enter=Math.max(enter,Math.min(a,b));exit=Math.min(exit,Math.max(a,b));
+ }
+ if(exit<enter||enter<=0||enter>plan.length)return Infinity;
+ const braking=vehicleDynamics(plan.unit).braking,reaction=braking*dt;
+ return Math.max(0,Math.sqrt(2*braking*Math.max(0,enter-.02)+reaction**2)-reaction);
 }
 
 // A changed physical queue may invalidate a future crossing promise. It can
@@ -83,22 +115,15 @@ function crossingReschedule(lease,mission,byId,scale){
 
 // Nearly parallel routes can converge laterally. Following distance alone
 // only notices their bodies after the side clearance has nearly vanished.
-// Intersect the four translating OBB intervals over the same short horizon;
+// Cast the actual footprints over the same short horizon;
 // equal-speed independent lanes never acquire a conflict from this check.
 function parallelMerge(a,b,scale,horizon){
  const speedA=a.unit.driveSpeed??0,speedB=b.unit.driveSpeed??0;
  const vx=-Math.sin(b.unit.heading)*speedB+Math.sin(a.unit.heading)*speedA;
  const vy=Math.cos(b.unit.heading)*speedB-Math.cos(a.unit.heading)*speedA;
  const dx=b.shape.x-a.shape.x,dy=b.shape.y-a.shape.y;
- let enter=0,exit=Math.min(horizon,a.length/Math.max(1,speedA),b.length/Math.max(1,speedB));
- for(const shape of [a.shape,b.shape])for(const [x,y] of [[shape.c,shape.s],[-shape.s,shape.c]]){
-  const separation=dx*x+dy*y,relative=vx*x+vy*y;
-  const radius=footprintSupport(a.shape,x,y)+footprintSupport(b.shape,x,y)+scale*.055+.02;
-  if(Math.abs(relative)<1e-7){if(Math.abs(separation)>radius)return null;continue;}
-  const first=(-radius-separation)/relative,last=(radius-separation)/relative;
-  enter=Math.max(enter,Math.min(first,last));exit=Math.min(exit,Math.max(first,last));
-  if(enter>exit)return null;
- }
+ const duration=Math.min(horizon,a.length/Math.max(1,speedA),b.length/Math.max(1,speedB));
+ if(!Number.isFinite(footprintCast(a.shape,{x:-vx,y:-vy},duration,b.shape,scale*.055+.02)))return null;
  const length=Math.hypot(a.course.x+b.course.x,a.course.y+b.course.y);
  const course={x:(a.course.x+b.course.x)/length,y:(a.course.y+b.course.y)/length};
  return {along:dx*course.x+dy*course.y,
@@ -108,15 +133,140 @@ function parallelMerge(a,b,scale,horizon){
 // Shared right of way, decided before any unit moves. A coordinator is a role,
 // not a spawned vehicle. Pair leases cross zone boundaries and survive saves.
 export class TrafficCoordinator{
- constructor(){this.groups=[];this.decisions=new Map();this.passageDecisions=new Map();this.queues=new Set();this.intents=new Map();this.statistics={};}
- limit(unit){return Math.min(this.decisions.get(unit.id)?.limit??Infinity,this.intents.get(unit.id)?.trafficLimit??Infinity,this.passageDecisions.get(unit.id)?.limit??Infinity);}
+ constructor({backgroundRecovery=false}={}){this.groups=[];this.decisions=new Map();this.passageDecisions=new Map();this.queues=new Set();this.intents=new Map();this.statistics={};this.inputRevision=0;this.planner=backgroundRecovery?new TrafficPlanner():null;}
+ intentChanged(){this.inputRevision++;}
+ advancePlanning(mission,budgetMs){this.planner?.advance(mission,budgetMs);}
+ publishPlanning(mission,deadline){this.planner?.publish(mission,deadline);}
+ // Geometry helpers propose phases. Only this dispatcher can publish a
+ // shared movement, including ownership of every participant's return.
+ commitPassage(...args){
+  const iterator=this.commitPassageSteps(...args);let step;do{step=iterator.next();}while(!step.done);return step.value;
+ }
+ *commitPassageSteps(mission,owner,goal,phases,valid,options){
+  const members=[...new Set([owner,...phases.map(phase=>phase.body)])];
+  if(members.some(body=>body.jointTraffic))return null;
+  const plan=yield* commitJointPlanSteps(mission,owner,goal,phases,rememberYieldHome,valid,options);if(!plan)return null;
+  for(const body of members){
+   delete body.traffic;delete body.trafficHold;delete body.driveWatch;delete body.detour;delete body.cycleContinuation;delete body.passingLane;
+  }
+  owner.detour=plan;return plan;
+ }
+ *movingPassageSteps(mission,leader,follower,options){
+  const proposal=yield* planMovingPassage(mission,leader,follower,options);if(!proposal)return false;
+  const goal=leader.routeOrder?.destination??leader.path.at(-1);
+  if(options?.diagnostics)options.diagnostics.stage='corridor-admission';
+  const plan=yield* this.commitPassageSteps(mission,leader,goal,proposal.phases,proposal.valid,{preserveLoans:true});
+  if(!plan){if(options?.diagnostics)options.diagnostics.outcome=proposal.valid()?'BLOCKED_DYNAMIC':'STALE';return false;}
+  for(const {body,path} of proposal.continuations??[])body.path=path;
+  return true;
+ }
+ // Guard the owners of the suspended controller. Local geometric searches
+ // separately track their inspected area and revalidate before publication.
+ // An order to a distant, unrelated car must not cancel this controller.
+ *currentIntentSteps(mission,iterator,participants=[]){
+  try{
+   while(true){
+    const step=iterator.next();if(step.done)return step.value;
+    const world=mission.state,topology=mission.nav.topologyRevision;
+    const intents=participants.map(unit=>({unit,revision:unit.commandRevision,pending:unit.pendingOrder}));
+    yield step.value;
+    if(mission.state!==world||mission.nav.topologyRevision!==topology||intents.some(({unit,revision,pending})=>
+     mission.entity(unit.id)!==unit||unit.hp<=0||unit.commandRevision!==revision||unit.pendingOrder!==pending))return null;
+   }
+  }finally{iterator.return();}
+ }
+ limit(unit){
+  const applies=d=>!d?.yieldTo||trafficCollisionRequired(unit,this.liveMission?.entity(d.yieldTo));
+  const decision=this.decisions.get(unit.id),intent=this.intents.get(unit.id),passage=this.passageDecisions.get(unit.id);
+  return Math.min(applies(decision)?decision?.limit??Infinity:Infinity,applies(intent)?intent?.trafficLimit??Infinity:Infinity,applies(passage)?passage?.limit??Infinity:Infinity);
+ }
+ blockingVehicles(unit){
+  const limit=this.limit(unit);if(!Number.isFinite(limit))return [];
+  const intent=this.intents.get(unit.id);
+  // Include every binding source of the executed limit, including an
+  // opposing-lane approach. A looser junction promise is not its blocker.
+  return [...new Set([this.decisions.get(unit.id),this.passageDecisions.get(unit.id),
+   {limit:intent?.trafficLimit??Infinity,yieldTo:intent?.yieldTo}]
+   .filter(decision=>decision?.yieldTo&&decision.limit<=limit+1e-6
+    &&trafficCollisionRequired(unit,this.liveMission?.entity(decision.yieldTo))).map(decision=>decision.yieldTo))];
+ }
  queueing(unit){return this.queues.has(unit.id);}
+ continuousPassageAllowed(mission,requester,donor,reach){
+  // A two-car passage can run through its geometric samples continuously.
+  // Shared parking/return chains currently rely on their checked phase order;
+  // keep that execution there until their complete multi-car return is owned.
+  // Persist this permission on the plan; old saved plans retain their executor.
+  return !donor.yieldReturn&&mission.state.units.every(body=>body.hp<=0||body===requester||body===donor
+   ||distance(body,requester)>reach&&distance(body,donor)>reach);
+ }
+ // This is the common dispatch point for command, service and local traffic
+ // ownership. Geometry helpers only propose checked plans; they do not run
+ // independent per-frame controllers. A pending player order wins immediately.
+ *prepareUnitSteps(mission,unit,spec,dt){
+  if((unit.pendingOrder||!unit.combatRetreat)&&shouldAutoRetreat(unit,spec))startAutomaticRetreat(mission,unit,spec);
+  // A checked shared passage owns a healthy holder as well as the wounded
+  // requester. Run it before an arrived firing position can return early.
+  if(!unit.pendingOrder&&stepJointTraffic(mission,unit,dt,recordYieldStep))return true;
+  if(unit.pendingOrder){
+   if(stepCommandIntent(mission,unit,spec,dt))return true;
+   unit.driveSpeed=0;
+   const pending=unit.pendingOrder,blocked=pending.status==='blocked';
+   const unreachable=blocked&&['static-disconnected','route-unreachable','destination-terrain-forbidden'].includes(pending.reason);
+   navigationDecision(unit,unreachable?'UNREACHABLE':blocked?'BLOCKED':'GLOBAL_REPLAN',pending.reason??'command-route-pending',pending.blockerId??null,blocked?'await-changed-conditions':'apply-current-order-result');
+   return true;
+  }
+  if(unit.commandStartAfter!==undefined){
+   if(mission.state.time<=unit.commandStartAfter){unit.driveSpeed=0;navigationDecision(unit,'WAITING_RESERVATION','await-next-traffic-snapshot',null,'start-on-next-tick');return true;}
+   delete unit.commandStartAfter;
+  }
+  const retreat=unit.combatRetreat;
+  if(retreat&&!retreat.forced&&retreat.status==='arrived'&&unit.hp>=unit.maxHp&&!unit.detour&&!unit.yieldReturn){
+   const order=retreatReturnOrder(mission,unit);
+   if(order){
+    // Bypass group expansion: repairing a commander must not overwrite the
+    // newer orders of every healthy member when it rejoins its own slot.
+    const result=(mission.commandPlanner??=new CommandPlanner(mission)).submit([unit.id],order.action,order.target);
+    if(result.ok){delete unit.combatRetreat;return true;}
+   }
+  }
+  if(unit.foldTime>0){
+   if(!retreat?.forced)return false;
+   unit.foldTime=Math.max(0,unit.foldTime-dt);unit.tool=Math.max(0,unit.tool-dt/2.6);return true;
+  }
+  return yield* updateCombatRetreat(mission,unit,spec,dt);
+ }
+ *prepareMovementSteps(mission,unit,dt){
+  if(stepJointTraffic(mission,unit,dt,recordYieldStep))return true;
+  if(waitingForContinuation(unit))return false;
+  if(this.planner?.pendingFor(unit))return null;
+  if(!this.planner)yield* recoverWaitCycle(mission,unit);
+  if(unit.pendingOrder||unit.hp<=0)return false;
+  yield* resumeYieldHome(mission,unit);
+  if(unit.pendingOrder||unit.hp<=0)return false;
+  if(!unit.yieldReturn&&!unit.detour&&unit.routeOrder?.destination&&(unit.driveSpeed??0)<.01
+   &&['move','attack-move'].includes(unit.task?.type)&&cooperativeArrivalReady(mission,unit,unit.routeOrder.destination)){
+   const arrival=yield* checkedCooperativeArrival(mission,unit,unit.routeOrder.destination,{cooperate:true});
+   if(unit.pendingOrder||unit.hp<=0)return false;
+   if(arrival)unit.detour=arrival;
+  }
+  if(stepJointTraffic(mission,unit,dt,recordYieldStep))return true;
+  yield* updateCombatParking(mission,unit);
+  yield* prepareTrafficDeparture(mission,unit);
+  return null;
+ }
  update(mission){
+  this.liveMission=mission;
+  for(const unit of mission.state.units){
+   if(unit.trafficHold&&!trafficCollisionRequired(unit,mission.entity(unit.trafficHold)))delete unit.trafficHold;
+   if(unit.traffic?.leader&&!trafficCollisionRequired(unit,mission.entity(unit.traffic.leader))){
+    const leader=mission.entity(unit.traffic.leader);if(leader?.cycleContinuation===unit.id)delete leader.cycleContinuation;delete unit.traffic;
+   }
+  }
   const started=performance.now(),{state,config,field}=mission,now=state.time,scale=config.worldScale;
   const saved=state.trafficControl??={version:1,leases:[],waiting:{}};
   const living=state.units.filter(u=>u.hp>0&&u.factoryVisit?.phase!=='inside'),byId=new Map(living.map(u=>[u.id,u]));
   this.passageDecisions=updatePassageReservations(mission,living);
-  const leases=new Map(saved.leases.filter(l=>byId.has(l.a)&&byId.has(l.b)
+  const leases=new Map(saved.leases.filter(l=>byId.has(l.a)&&byId.has(l.b)&&trafficCollisionRequired(byId.get(l.a),byId.get(l.b))
    &&(l.zone?!crossingReleased(l,byId,scale,field):l.expires>now)).map(l=>[l.key,l]));
   this.decisions.clear();this.queues.clear();this.intents.clear();this.groups.length=0;
   const zones=new Map();
@@ -135,10 +285,13 @@ export class TrafficCoordinator{
   }
   const plans=new Map();
   for(const u of living){
-   if(!u.path?.length||u.builderWorking||u.detour||u.trafficHold||u.traffic?.cycle&&u.traffic.phase==='parked')continue;
-   const target=u.path[0],d=distance(target,u);if(d<.1)continue;
+   const pending=immediateCommand(u);
+   if(u.pendingOrder&&!pending)continue;
+   if(!pending&&(!u.path?.length||u.builderWorking||u.detour||u.trafficHold||u.traffic?.cycle&&u.traffic.phase==='parked'))continue;
+   const target=pending?commandSteeringTarget(u):u.path[0],d=distance(target,u);if(d<.1)continue;
    const direct={x:(target.x-u.x)/d,y:(target.y-u.y)/d};
-   const intent=mission.drivingIntent(u,target,direct,scale),course=intent.course;this.intents.set(u.id,intent);
+   const intent=pending?{point:target,waypoint:target,course:direct,revision:u.pendingOrder.revision}:mission.drivingIntent(u,target,direct,scale);
+   const course=intent.course;this.intents.set(u.id,intent);
    // Local turning/parking is handled by the swept manoeuvre solver. Do not
    // reserve a straight trajectory for a car which is currently reversing.
    if(u.reversing||dot({x:-Math.sin(u.heading),y:Math.cos(u.heading)},course)<.65)continue;
@@ -147,7 +300,7 @@ export class TrafficCoordinator{
   }
   let pairs=0,conflicts=0;const followers=new Map(),crossings=[];
   for(const a of plans.values())for(const other of mission.unitIndex.query(a.unit,110)){
-   if(other.owner!==a.unit.owner||other.id<=a.unit.id)continue;
+   if(other.owner!==a.unit.owner||other.id<=a.unit.id||!trafficCollisionRequired(a.unit,other))continue;
    const b=plans.get(other.id);if(!b)continue;pairs++;
    const admissionA=this.passageDecisions.get(a.unit.id),admissionB=this.passageDecisions.get(b.unit.id);
    // Admission already owns the shared throat and its exit. A waiting
@@ -194,8 +347,15 @@ export class TrafficCoordinator{
     const committedB=db<=cb+(b.unit.driveSpeed??0)**2/(2*vehicleDynamics(b.unit).braking);
     const waitA=now-(saved.waiting[a.unit.id]??now),waitB=now-(saved.waiting[b.unit.id]??now);
     const scoreA=(committedA?100:0)+waitA*2-Math.max(0,enterA),scoreB=(committedB?100:0)+waitB*2-Math.max(0,enterB);
-    const winner=scoreA===scoreB?(a.unit.id<b.unit.id?a:b):scoreA>scoreB?a:b;
-    lease={key,a:a.unit.id,b:b.unit.id,winner:winner.unit.id,expires:now+4};leases.set(key,lease);
+    const retreatA=!!a.unit.combatRetreat,retreatB=!!b.unit.combatRetreat;
+    // Grant an approaching evacuation passage before a healthy arrival, but
+    // never take precedence from a body already committed to the crossing.
+    // Existing occupied leases and physical dependency edges remain binding.
+    const evacuation=!committedA&&!committedB&&retreatA!==retreatB;
+    const winner=committedA!==committedB?(committedA?a:b):evacuation?(retreatA?a:b)
+     :scoreA===scoreB?(a.unit.id<b.unit.id?a:b):scoreA>scoreB?a:b;
+    lease={key,a:a.unit.id,b:b.unit.id,winner:winner.unit.id,expires:now+4,
+     reason:evacuation?'retreat-priority':committedA!==committedB?'committed-crossing':'waiting-order'};leases.set(key,lease);
    }
    crossings.push({a,b,da,db,ca,cb,lease});
   }
@@ -215,6 +375,11 @@ export class TrafficCoordinator{
   // promise would form a cycle with it. Dropping that edge only concealed
   // the real deadlock from the graph while headway still stopped the tail.
   for(const [leader,tail] of followers)for(const follower of tail)before(leader,follower);
+  // Headway on a curved approach and borrowed-space returns are just as
+  // binding as an aligned convoy. Use the preceding completed controllers'
+  // actual stopped-body dependencies, not merely their projected lanes.
+  for(const [follower,blockers] of mission.navigationDiagnostics?.dependencies??[])
+   for(const blocker of blockers)if(byId.has(blocker)&&byId.has(follower)&&trafficCollisionRequired(byId.get(blocker),byId.get(follower)))before(blocker,follower);
   const withdrawn=[],transferred=[];let occupiedCycles=0;
   for(const lease of [...leases.values()].filter(l=>l.zone).sort((a,b)=>a.grantedAt-b.grantedAt||a.key.localeCompare(b.key))){
    const loser=lease.winner===lease.a?lease.b:lease.a;
@@ -251,15 +416,36 @@ export class TrafficCoordinator{
    if(along<0&&!merge)continue;
    const braking=vehicleDynamics(loser.unit).braking,reaction=braking*(config.simulationStep??.1);
    const limit=Math.max(0,Math.sqrt(2*braking*Math.max(0,along-clearance)+reaction**2)-reaction);
-   if(limit<(this.decisions.get(loser.unit.id)?.limit??Infinity))this.decisions.set(loser.unit.id,{limit,yieldTo:lease.winner,coordinator:this.groups.find(g=>g.units.includes(loser.unit.id))?.leaderId});
+   if(limit<(this.decisions.get(loser.unit.id)?.limit??Infinity))this.decisions.set(loser.unit.id,{limit,yieldTo:lease.winner,reason:lease.reason,coordinator:this.groups.find(g=>g.units.includes(loser.unit.id))?.leaderId});
   }
   // A tail waiting behind a junction queue is not stuck. Propagate that fact
   // along the convoy, including across dispatcher-zone boundaries.
-  const queue=[...this.decisions.keys(),...[...this.passageDecisions].filter(([id,d])=>!d.admitted).map(([id])=>id)];for(const id of queue)this.queues.add(id);
+  for(const lease of leases.values())if(lease.zone){
+   const loser=lease.winner===lease.a?lease.b:lease.a,plan=plans.get(loser);if(!plan)continue;
+   const limit=retainedCrossingLimit(lease,plan,scale,config.simulationStep??.1);
+   if(limit<(this.decisions.get(loser)?.limit??Infinity))this.decisions.set(loser,{limit,yieldTo:lease.winner,retained:true});
+  }
+  for(const plan of plans.values()){
+   const reserved=corridorSpeedLimit(mission,plan);
+   if(reserved&&reserved.limit<(this.decisions.get(plan.unit.id)?.limit??Infinity))this.decisions.set(plan.unit.id,reserved);
+  }
+  // A car parked at its destination inside an old crossing still occupies
+  // that space, but cannot promise to clear it. Keep braking/occupancy rights
+  // and let the follower find a checked bypass instead of resetting its
+  // recovery clock forever as if this were an advancing queue.
+  const queue=[...[...this.decisions].filter(([id,decision])=>{
+   const leader=byId.get(decision.yieldTo);
+   return leader&&(leader.path?.length||leader.detour||leader.yieldReturn||leader.pendingOrder);
+  }).map(([id])=>id),...[...this.passageDecisions].filter(([id,d])=>!d.admitted).map(([id])=>id)];for(const id of queue)this.queues.add(id);
   for(let i=0;i<queue.length;i++)for(const id of followers.get(queue[i])??[])if(!this.queues.has(id)){this.queues.add(id);queue.push(id);}
   const waiting={};
   for(const [id,d] of this.decisions)if(d.limit<config.units[byId.get(id).kind].speed*.65)waiting[id]=saved.waiting[id]??now;
   saved.waiting=waiting;saved.leases=[...leases.values()].slice(-TRAFFIC_LIMITS.leases);
-  this.statistics={groups:this.groups.length,largestGroup:Math.max(0,...this.groups.map(g=>g.units.length)),controlled:living.length,pairs,conflicts,yielding:this.decisions.size,cyclesPrevented,withdrawn,transferred,occupiedCycles,cpuMs:performance.now()-started};
+  this.updatedState=state;this.updatedAt=now;
+  this.planner?.requestCycles(mission);
+  const waitCycles=mission.navigationDiagnostics?.recoveryCycles?.length??0;
+  // Physical cycles are exactly the components offered to recovery. Count
+  // reservation conflicts separately; they are not the whole wait graph.
+  this.statistics={groups:this.groups.length,largestGroup:Math.max(0,...this.groups.map(g=>g.units.length)),controlled:living.length,pairs,conflicts,yielding:this.decisions.size,cyclesPrevented,withdrawn,transferred,reservationCycles:occupiedCycles,occupiedCycles:waitCycles,waitCycles,cpuMs:performance.now()-started};
  }
 }

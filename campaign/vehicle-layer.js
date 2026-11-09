@@ -151,8 +151,8 @@ export async function createVehicleLayer(T,scene,field,config,damage,onLoaded=()
   const animated=bindings.filter(b=>b.dynamic),matrices=new Map(animated.map(b=>[b,new T.Matrix4()])),inverses=new Map(animated.map(b=>[b,b.bind.clone().invert()]));
   const poseDummy=new T.Object3D(),groundPoint=new T.Vector3();
   return unit=>{
-   const pose=vehiclePose(unit,field,scale),spin=-(unit.wheelDistance??0)/(.435*scale),steer=unit.steering??0;
-   poseDummy.position.set(...pose.position);poseDummy.rotation.set(pose.pitch,pose.roll,unit.heading??0,'ZXY');poseDummy.scale.setScalar(scale);poseDummy.updateMatrix();
+   const pose=vehiclePose(unit,field,scale),spin=-(unit.wheelDistance??0)/(.435*pose.scale),steer=unit.steering??0;
+   poseDummy.position.set(...pose.position);poseDummy.rotation.set(pose.pitch,pose.roll,unit.heading??0,'ZXY');poseDummy.scale.setScalar(pose.scale);poseDummy.updateMatrix();
    const suspensionDelta=(x,y)=>{groundPoint.set(x,y,0).applyMatrix4(poseDummy.matrix);return T.MathUtils.clamp((field.heightAt(groundPoint.x,groundPoint.y)-groundPoint.z)/Math.max(1,poseDummy.matrix.elements[10]),-.11,.11);};
    const custom=scavModels.get(kind)??(kind==='command'?command:kind==='raider'?raider:null);
    if(custom&&!custom.scav){for(const wheel of custom.wheels){wheel.wheel.rotation.x=spin;wheel.steer.rotation.z=wheel.front?steer:0;wheel.steer.position.z=.43+suspensionDelta(wheel.steer.position.x,wheel.steer.position.y);}}
@@ -206,7 +206,7 @@ export async function createVehicleLayer(T,scene,field,config,damage,onLoaded=()
    }
    dummy.position.set(...pose.position);
    dummy.rotation.set(pose.pitch,pose.roll,heading,'ZXY');
-   dummy.scale.setScalar(scale);
+   dummy.scale.setScalar(pose.scale);
    dummy.updateMatrix();
    matrix.copy(dummy.matrix);
    const damageInfo=damage.representation(unit,matrix,(SCAV_PROFILES[unit.kind]?.boxes[0][2]??4)*scale+4);
@@ -223,7 +223,7 @@ export async function createVehicleLayer(T,scene,field,config,damage,onLoaded=()
    const steer=unitLod===2?0:T.MathUtils.lerp(unit.previousSteering??unit.steering??0,unit.steering??0,phase);
    const travel=T.MathUtils.lerp(unit.previousWheelDistance??unit.wheelDistance??0,unit.wheelDistance??0,phase);
    if(unit.hp>0)visible.push({id:unit.id,kind:unit.kind,owner:unit.owner,x,y,heading,steering:steer,speed:moving?(unit.driveSpeed??0):0,working:unit.builderWorking});
-   const spin=unitLod===2?0:-travel/(.435*scale);
+   const spin=unitLod===2?0:-travel/(.435*pose.scale);
    const suspensionDelta=(x,y)=>{
     contact.set(x,y,0).applyMatrix4(matrix);
     return T.MathUtils.clamp((field.heightAt(contact.x,contact.y)-contact.z)/Math.max(1,matrix.elements[10]),-.11,.11);
@@ -299,7 +299,15 @@ export async function createVehicleLayer(T,scene,field,config,damage,onLoaded=()
   const dispose=paintVehicleModel(assembled,vehiclePaint({components,paint}));
   return {root:assembled,chassis,body,upper,dispose};
  }
- return {root,update,transforms,muzzles,visible,workBeams,makeDesignModel,get lod(){return activeLod;},get drawCalls(){
+ function preloadMaterials(parent){
+  // Detached pieces use the original, non-instanced surface materials.
+  for(const batch of [...lods.flatMap(entries=>entries.map(entry=>entry.batch)),...extras]){
+   for(const {binding} of batch.parts){
+    const mesh=new T.Mesh(binding.geometry,binding.material);mesh.castShadow=true;parent.add(mesh);
+   }
+  }
+ }
+ return {root,update,transforms,muzzles,visible,workBeams,makeDesignModel,preloadMaterials,get lod(){return activeLod;},get drawCalls(){
   return [...lods.flatMap(entries=>entries.map(entry=>entry.batch)),...extras].reduce((sum,b)=>sum+(b.index?b.parts.length:0),0);
  }};
 }

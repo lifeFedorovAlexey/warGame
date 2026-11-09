@@ -1,13 +1,12 @@
-import {factoryAccessVersion,refreshFactoryAccess} from './factory-access.js';
-import {updateFactoryRepairs} from './factory-repair.js';
-import {updateFactoryVisit,insideFactory,factoryProductionPaused} from './factory-garage.js';
 import {TerrainNavigator} from './navigation.js';
 import {waterTower} from './threat-guidance.js';
 import {checkBuildingPlacement} from './building-placement.js';
+import {factoryAccessVersion,refreshFactoryAccess} from './factory-access.js';
 import {canDemolish,advanceDemolition} from './building-demolition.js';
 import {constructionUnlocked,researchUnlocked,defenseReady} from './story-construction.js';
-import {driveStep,clearOfVehicles,vehicleClearance,planManeuver,planManeuverSteps,maneuverStep,checkManeuver} from './vehicle-motion.js';
-import {footprintSupport,vehicleEnvelope,vehicleSweep,vehicleGroundSafe,vehicleObstacle,vehicleRadiusBound} from './vehicle-collision.js';
+import {driveStep,clearOfVehicles,vehicleClearance,planManeuver,planManeuverSteps,maneuverStep,maneuverPlanStep,checkManeuver} from './vehicle-motion.js';
+import {commandPathFromLive,retryCommandFromRest} from './command-motion.js';
+import {footprintSupport,vehicleEnvelope,vehicleSweep,vehicleObstacle,vehicleRadiusBound,footprintGap,trafficCollisionRequired} from './vehicle-collision.js';
 import {passageStillOpen,preparePassageEgress} from './passage-egress.js';
 import {vehicleRecipes,starterProjects,matchingRecipe,projectDesignation,designNameKey,projectAssemblyKey,latestVehicleProjects,latestVehicleProject} from './vehicle-designs.js';
 import {vehiclePaint} from './vehicle-paint.js';
@@ -20,7 +19,7 @@ import {combatContact} from './combat-contact.js';
 import {clearCombatSight} from './combat-sight.js';
 import {recordDamage} from './damage-contact.js';
 import {destroyDamage,damageMobility,partMissing,upgradeDamageState} from './damage-state.js';
-import {ensureSalvage,updateSalvage,armorMultiplier,salvageFromWreck,availableFieldRecipes,modificationInstalled,touchesSalvage,canInstallRecipe,syncFieldHp} from './vehicle-salvage.js';
+import {ensureSalvage,updateSalvage,armorMultiplier,salvageFromWreck,availableFieldRecipes,modificationInstalled,touchesSalvage,salvagePickupReach,canInstallRecipe,syncFieldHp} from './vehicle-salvage.js';
 import {scheduleWreck,updateWrecks} from './wreck-lifecycle.js';
 import {updateBurning} from './burning.js';
 import {updateStreetFurniture} from './street-furniture.js';
@@ -30,26 +29,31 @@ const completeSteps=iterator=>{let step;do{step=iterator.next();}while(!step.don
 import {UnitSpatialIndex} from './unit-spatial-index.js';
 import {vehicleContact,impactPower,fallbackVehicleImpact,resolveVehicleOverlapsSteps} from './vehicle-impact.js';
 import {kickContactRock} from './vehicle-contact-rock.js';
-import {TrafficCoordinator} from './traffic-coordinator.js';
-import {prepareTrafficDeparture,departureSlotOrder,rememberYieldHome,recordYieldStep,resumeYieldHome,borrowedHomeClear} from './traffic-start.js';
-import {checkedRouteShortcut,checkedProgressTurn,checkedDetourAlternative,checkedRouteRejoin,recoveryConditions,unchangedRecoveryFailure,rememberRecoveryFailure} from './traffic-shortcut.js';
+import {PredictiveTraffic} from './predictive-traffic.js';
+import {departureSlotOrder,recordYieldStep,borrowedHomeClear,checkedPassageBackoff,checkedYieldPassage} from './traffic-start.js';
+import {checkedRouteShortcut,checkedProgressTurn,checkedDetourAlternative,checkedRouteRejoin,checkedGoalArrival,recoveryConditions,unchangedRecoveryFailure,rememberRecoveryFailure} from './traffic-shortcut.js';
 import {maneuverAdmissionBlocker} from './maneuver-admission.js';
-import {recoverWaitCycle,resumeCycleRoute} from './traffic-cycle.js';
-import {vehicleDynamics} from './vehicle-dynamics.js';
+import {resumeCycleRoute} from './traffic-cycle.js';
+import {corridorBlocker,reserveManeuverCorridor} from './traffic-corridor.js';
+import {vehicleDynamics,rollSteeringDamage,updateSteeringDamage} from './vehicle-dynamics.js';
 import {SCAV_PROFILES,SCAV_ROSTERS,isInfantry} from './scav-unit-profiles.js';
 import {placeExtraCampGuards,updateScavReinforcements} from './scav-reinforcements.js';
 import {alertScavs,updateScavCombat} from './scav-ai.js';
-import {configureCombat,normalizeCombatPolicy,rememberHostileHit,cancelCombatRetreat,automaticCombatTarget,updateCombatRetreat,shouldAutoRetreat,forceCombatRetreat} from './combat-policy.js';
+import {configureCombat,configureArmyCombat,armyCombatPolicy,normalizeCombatPolicy,rememberHostileHit,cancelCombatRetreat,automaticCombatTarget,forceCombatRetreat} from './combat-policy.js';
+import {updateFactoryRepairs} from './factory-repair.js';
+import {updateFactoryVisit,insideFactory,factoryProductionPaused} from './factory-garage.js';
+import {inFactoryInterior,shouldAutoRetreat} from './combat-retreat-state.js';
 import {interruptedCombatTargets,movementCombatTarget} from './combat-orders.js';
 import {cancelCombatDeployment,updateCombatDeployment,updateCombatParking,combatPositionConditions} from './combat-deployment.js';
 import {pickupTarget,orderPickup,updatePickupOrder} from './pickup-orders.js';
 import {roadTrafficRank,compareRoadTrafficRanks} from './traffic-priority.js';
-import {roadDrivingLane} from './road-merge.js';
+import {roadDrivingLane,deferRoadMerge} from './road-merge.js';
 import {turningHeadway} from './turning-headway.js';
 import {passageWaitClear} from './passage-reservations.js';
 import {beginNavigationStep,navigationDecision,finishNavigationStep,auditNavigationWaits} from './navigation-state.js';
 import {CommandPlanner,commandBoundary,activateCommand} from './command-planner.js';
 import {ArrivalPlanner} from './arrival-planner.js';
+import {followsContinuation,applyRouteContinuations,waitingForContinuation} from './route-continuation.js';
 import {configureCommandGroup,refreshCommandGroups,expandCommandIds,commandGroupFor,formationRequest} from './group-command.js';
 
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
@@ -57,7 +61,7 @@ const routeOrderRevision=2;
 const workArrivalTolerance=.08;
 function selectedCommandIds(mission,ids,action,target){
  const tactical=['move','attack-move','attack'].includes(action);
- return tactical&&!(action==='move'&&target&&pickupTarget(mission,target))?expandCommandIds(mission,ids):ids;
+ return tactical&&!(action==='move'&&target&&pickupTarget(mission,target))?expandCommandIds(mission,ids,{action}):ids;
 }
 function halfFootprint(footprint,scale,rotation){
  const [w,d]=footprint.map(length=>length*scale/2);
@@ -71,7 +75,7 @@ export class Mission{
   this.state={version:1,mission:config.id,time:0,status:'running',energy:config.initialEnergy,energyRate:0,powered:false,oilLinked:0,units:[],buildings:[],camps:[],artifacts:[],research:{},artifactKeys:[],seenCinematics:[],pendingCinematics:['intro','briefing','arrival'],flags:{},statistics:{produced:0,buildingsCompleted:0,enemiesDestroyed:0},bounds:config.initialMapBounds.slice()};
   this.vehicleRecipes=vehicleRecipes(config);
   this.unitIndex=new UnitSpatialIndex();this.unitIndexActive=false;
-  this.trafficCoordinator=new TrafficCoordinator();
+  this.trafficCoordinator=new PredictiveTraffic();
   this.pendingTick=null;this.unitFrameTimes=new WeakMap();
   this.nav.beforeSynchronousSearch=()=>this.finishPendingStep();
   ensureSalvage(this);
@@ -166,7 +170,9 @@ export class Mission{
  unitSpec(unit){return this.config.units[unit.kind];}
  buildingSpec(building){return this.config.buildings[building.kind]??{name:'Лагерь отбросов',seconds:1,hp:750,vision:180,power:0};}
  entity(id){return this.state.units.find(item=>item.id===id&&item.hp>0)??this.state.buildings.find(item=>item.id===id&&item.hp>0);}
- addUnit(kind,owner,point,extra={}){const spec=this.config.units[kind],unit={id:this.id('u'),kind,owner,x:point.x,y:point.y,previousX:point.x,previousY:point.y,hp:spec.hp,maxHp:spec.hp,heading:0,path:[],task:null,cooldown:0,tool:0,foldTime:0,...extra};this.state.units.push(unit);if(this.unitIndexActive)this.unitIndex.insert(unit,this.state.units.length-1);return unit;}
+ addUnit(kind,owner,point,extra={}){const spec=this.config.units[kind],unit={id:this.id('u'),kind,owner,x:point.x,y:point.y,previousX:point.x,previousY:point.y,hp:spec.hp,maxHp:spec.hp,heading:0,path:[],task:null,cooldown:0,tool:0,foldTime:0,...extra};
+  if(owner==='rai'&&spec.damage)unit.combatPolicy={...armyCombatPolicy(this)};
+  this.state.units.push(unit);if(this.unitIndexActive)this.unitIndex.insert(unit,this.state.units.length-1);return unit;}
  addStructure(kind,owner,point,extra={}){const spec=this.config.buildings[kind]??{},scale=this.config.worldScale,foot=spec.footprintMetres??[14,12],item={id:this.id('b'),kind,owner,x:point.x,y:point.y,rotation:0,hp:spec.hp??750,maxHp:spec.hp??750,halfWidth:foot[0]*scale/2,halfDepth:foot[1]*scale/2,progress:owner==='rai'?0:1,completed:owner!=='rai',queue:[],research:null,cooldown:0,...extra};item.maxHp=item.hp;this.state.buildings.push(item);return item;}
  rebuildNavigation(){this.finishPendingStep();this.nav.bounds=this.state.bounds.slice();this.nav.rebuild(this.state.buildings.filter(building=>!building.clearing));}
  fail(reason){return {ok:false,reason};}
@@ -189,23 +195,21 @@ export class Mission{
  }
  vehiclePath(...args){this.finishPendingStep();return completeSteps(this.vehiclePathSteps(...args));}
  terrainEscapeFor(unit){
-  if(this.nav.terrainAllowed(unit.x,unit.y)){delete unit.terrainEscape;return null;}
-  // Preserve the initial bounds until the car has physically left the old
-  // invalid pose. Repeated clicks cannot renew a licence to traverse a ridge.
-  return unit.terrainEscape??={x:unit.x,y:unit.y,height:this.field.heightAt(unit.x,unit.y),radius:this.field.cellMetres*2,maxRise:this.config.worldScale*1.5};
+  // Old saves may retain a slope exception. Level walls have no such bypass.
+  delete unit.terrainEscape;return null;
  }
- *vehiclePathSteps(unit,goal,{avoidMoving=false,avoidPoint=null,fallback=true,ignoreUnits=null,escapeSteepStart=unit.owner==='rai',...options}={}){
+ *vehiclePathSteps(unit,goal,{avoidMoving=false,avoidPoint=null,fallback=true,ignoreUnits=null,obstacles=this.state.units,escapeSteepStart=unit.owner==='rai',...options}={}){
   const terrainEscape=escapeSteepStart?this.terrainEscapeFor(unit):null;
   const occupied=this.nav.occupied,changed=[],scale=this.config.worldScale;
-  const own=vehicleEnvelope(unit,scale,this.field),padding=Math.hypot(own.width,own.depth)+.1*scale;
+  const padding=vehicleRadiusBound(unit.kind,scale)+.1*scale;
   // Commands share a terrain/building corridor. Temporary bodies are handled
   // by endpoint reservation and swept local avoidance, not baked into A*.
   const staticCommand=this.commandJob&&!avoidMoving&&!avoidPoint;
-  for(const other of staticCommand?[]:this.state.units){
-   if(other===unit||unit.id&&other.id===unit.id||ignoreUnits?.has(other)||!vehicleObstacle(other)||other.hp>0&&other.owner!==unit.owner&&!this.visibleAt(other.x,other.y))continue;
+  for(const other of staticCommand?[]:obstacles){
+   if(other===unit||unit.id&&other.id===unit.id||ignoreUnits?.has(other)||!vehicleObstacle(other)||!trafficCollisionRequired(unit,other)||other.hp>0&&other.owner!==unit.owner&&!this.visibleAt(other.x,other.y))continue;
    if(other.hp>0&&other.path.length&&(!avoidMoving||distance(unit,other)>56))continue;
-   const shape=vehicleEnvelope(other,scale,this.field),radius=Math.hypot(shape.width,shape.depth)+padding;
-   const gap=p=>{const dx=p.x-shape.x,dy=p.y-shape.y;return Math.hypot(Math.max(0,Math.abs(dx*shape.c+dy*shape.s)-shape.width),Math.max(0,Math.abs(-dx*shape.s+dy*shape.c)-shape.depth))-padding;};
+   const shape=vehicleEnvelope(other,scale,this.field),radius=vehicleRadiusBound(other.kind,scale)+padding;
+   const gap=p=>footprintGap({x:p.x,y:p.y,radius:0},shape)-padding;
    const startGap=gap(unit);
    const [col,row]=this.nav.grid(other.x,other.y),r=Math.ceil(radius/this.nav.cell),size=this.nav.size;
    for(let y=Math.max(0,row-r);y<=Math.min(size-1,row+r);y++)for(let x=Math.max(0,col-r);x<=Math.min(size-1,col+r);x++){
@@ -477,10 +481,10 @@ export class Mission{
  *salvagePathSteps(unit,item){
   const state=ensureSalvage(this),scale=this.config.worldScale;
   if(!state.enabled||!availableFieldRecipes(this).some(r=>state.wanted.includes(r.id)&&r.stock===item.stock&&canInstallRecipe(this,unit,r)&&!modificationInstalled(unit,r.part)))return null;
-  const candidates=[];
+  const candidates=[],pickupDistance=salvagePickupReach(scale).front-scale*.3;
   for(let i=0;i<12;i++){
    const angle=i*Math.PI/6,dx=Math.cos(angle),dy=Math.sin(angle),heading=Math.atan2(dx,-dy);
-   const end={x:item.x+dx*scale*2.2,y:item.y+dy*scale*2.2,heading,kind:unit.kind};
+   const end={x:item.x+dx*pickupDistance,y:item.y+dy*pickupDistance,heading,kind:unit.kind};
    const approach={...end,x:end.x+dx*scale*4,y:end.y+dy*scale*4};
    if(!clearOfVehicles(unit,end,this.state.units,scale,true,end,this.field)||!this.vehicleMotionClear(unit,approach,end))continue;
    candidates.push({end,approach,cost:distance(unit,approach)});
@@ -493,7 +497,7 @@ export class Mission{
   return null;
  }
  configureGroup(ids,options){this.finishPendingStep();return configureCommandGroup(this,ids,options);}
- retreat(ids){this.finishPendingStep();return forceCombatRetreat(this,expandCommandIds(this,ids));}
+ retreat(ids){const result=forceCombatRetreat(this,expandCommandIds(this,ids));if(result.ok)this.trafficCoordinator.intentChanged();return result;}
  submitOrder(ids,action,target){if(action==='retreat')return this.retreat(ids);return (this.commandPlanner??=new CommandPlanner(this)).submit(selectedCommandIds(this,ids,action,target),action,target);}
  order(ids,action,target){ids=selectedCommandIds(this,ids,action,target);this.finishPendingStep();const result=completeSteps(this.orderSteps(ids,action,target));if(result.ok)this.commandPlanner?.cancel(result.assignedIds??ids.filter(id=>!result.unassigned?.includes(id)));return result;}
  *orderSteps(ids,action,target){
@@ -503,13 +507,14 @@ export class Mission{
   if(action==='build'&&target.clearing)return this.fail('Техника освобождает площадку');
   if(action==='demolish'&&!canDemolish(this,target))return this.fail('Выберите своё готовое здание');
   if(['build','repair','demolish'].includes(action)&&(target.owner!=='rai'||!this.entity(target.id)))return this.fail('Нужна своя техника или постройка');
-  const units=this.state.units.filter(u=>ids.includes(u.id)&&u.owner==='rai'&&u.hp>0&&!u.factoryVisit&&(!['build','repair','demolish'].includes(action)||this.unitSpec(u).role==='builder')&&(!combat||this.unitSpec(u).damage));if(!units.length)return this.fail('Не выбрана подходящая техника');const assigned=new Set();
+  const units=this.state.units.filter(u=>ids.includes(u.id)&&u.owner==='rai'&&u.hp>0&&!inFactoryInterior(u)&&(!['build','repair','demolish'].includes(action)||this.unitSpec(u).role==='builder')&&(!combat||this.unitSpec(u).damage));if(!units.length)return this.fail('Не выбрана подходящая техника');const assigned=new Set();
   const pickup=action==='move'?pickupTarget(this,target):null;
   if(pickup)return orderPickup(this,units,pickup);
   const commandGroup=commandGroupFor(this,units),formationMode=commandGroup?.formation??'auto';
   const disengage=action==='attack-move'?(yield* interruptedCombatTargets(this,units)):[];
   const repeat=new Map();
   for(const unit of units){
+   if(unit.pendingOrder?.started)continue;
    const order=unit.routeOrder;
    const deployment=unit.combatDeployment;
    if(deployment&&(action==='attack'&&deployment.resume.targetId===target.id
@@ -541,22 +546,14 @@ export class Mission{
    for(const unit of units)yield* finishRepeat(this,unit);
    return {ok:true,assigned:units.length,unassigned:[]};
   }
-  const reserved=[...repeat.values()],changedTraffic=new Set();
+  const reserved=[...repeat.values(),...units.filter(u=>this.commandJob?.tailSources&&!repeat.has(u.id)&&u.routeContinuation?.ready)
+   .map(u=>u.routeContinuation.destination).filter(Boolean)],changedTraffic=new Set();
   const combatGroup=combat?'combat-'+(this.state.combatOrderSerial=(this.state.combatOrderSerial??0)+1):null;
   const groupCentre=units.reduce((centre,unit)=>({x:centre.x+unit.x/units.length,y:centre.y+unit.y/units.length}),{x:0,y:0});
   const requestedFormation=travel?formationRequest(this,units,target):null;
   const passage=travel?this.nav.passageBetween(units.length===1?units[0]:groupCentre,target,this.config.worldScale):null;
-  // Asphalt affects travel cost, but does not force an open-field group into
-  // one road-bound column. Only a real physical throat requires that layout.
-  const roadCandidate=passage&&!target.id?this.nav.roads.formation(target,groupCentre,units.length,this.config.worldScale):null;
-  const progress=new Map();
-  if(roadCandidate)for(const unit of units){
-   const position=this.nav.roads.formationProgress(unit,roadCandidate,this.config.worldScale);
-   if(position!==null)progress.set(unit,position);
-  }
-  const roadFormation=progress.size>=Math.max(2,Math.ceil(units.length/2))?roadCandidate:null;
-  const roadSlots=roadFormation?.slots;
-  let nextRoadSlot=0;
+  // A real narrow passage controls its entrance/exit, not where the whole
+  // group must park afterwards. Destination slots may use any legal ground.
   // A road can pass through a throat narrower than the conservative grid
   // clearance. Road parking does not replace the checked physical passage.
   const egress=passage?preparePassageEgress(this,passage,units,target):null;
@@ -566,7 +563,7 @@ export class Mission{
   let preceding=null;
   const direction=Math.atan2(groupCentre.x-target.x,target.y-groupCentre.y);
   const forward={x:-Math.sin(direction),y:Math.cos(direction)},right={x:forward.y,y:-forward.x};
-  const departureOrder=travel&&!requestedFormation&&!roadFormation&&!passage?departureSlotOrder(units,target,this.config.worldScale):null;
+  const departureOrder=travel&&!requestedFormation&&!passage?departureSlotOrder(units,target,this.config.worldScale):null;
   const columns=requestedFormation?.columns??departureOrder?.columns??(units.length>16?Math.ceil(Math.sqrt(units.length)):Math.min(3,units.length));
   const formationSpacing=requestedFormation?.spacing??(this.commandJob&&units.length>12
    ?Math.max(24,...units.map(unit=>{const box=vehicleEnvelope(unit,this.config.worldScale,this.field);return 2*Math.hypot(box.width,box.depth)+this.config.worldScale*.4;})):24);
@@ -575,13 +572,7 @@ export class Mission{
   const beyondPassage=point=>!passage||(point[passage.along]-departure[passage.along])*passage.direction>=parkingClearance;
   const tail=passage?Math.floor((units.length-1)/columns)*formationSpacing*Math.abs(forward[passage.along])+(columns-1)*formationSpacing/2*Math.abs(right[passage.along]):0;
   const passageShift=passage?Math.max(0,tail+parkingClearance-(target[passage.along]-departure[passage.along])*passage.direction):0;
-  if(roadFormation){
-   // The car which merges first also owns the furthest parking slot. Giving
-   // that slot to a yielding neighbour makes it pass a car that has parked.
-   const ranks=new Map(units.map(unit=>[unit,roadTrafficRank(unit,progress.get(unit),
-    this.nav.roads.nearest(unit,this.config.worldScale*14),roadFormation.direction,this.config.worldScale)]));
-   units.sort((a,b)=>compareRoadTrafficRanks(ranks.get(a),ranks.get(b)));
-  }else if(passage){
+  if(passage){
    units.sort((a,b)=>distance(a,passage.entrance)-distance(b,passage.entrance));
   }else if(departureOrder){
    const rank=new Map(departureOrder.orderedIds.map((id,index)=>[id,index]));
@@ -608,37 +599,29 @@ export class Mission{
   for(let index=0;index<units.length;index++){const unit=units[index],workOffset=(index-(units.length-1)/2)*18,goal=['build','repair','demolish'].includes(action)?this.workPoint(target,workOffset):target;
    if(performance.now()>=(this.nav.workDeadline??Infinity))yield;
    if(this.commandJob&&unit.pendingOrder?.revision!==this.commandJob.revision)continue;
+   this.commandJob?.prepareUnit?.(unit);
+   if(this.commandJob&&unit.pendingOrder?.revision!==this.commandJob.revision)continue;
    const planningUnit=this.commandJob?{...unit}:unit;
    if(this.commandJob)this.commandJob.currentUnit=unit.id;
    if(repeat.has(unit.id)){yield* finishRepeat(this,unit);if(unit.passage)preceding=unit.id;continue;}
    const side=(index%columns-(columns-1)/2)*formationSpacing, row=Math.floor(index/columns)*formationSpacing;
-   const formation={...(requestedFormation?.slots.get(unit.id)??{x:goal.x+right.x*side-forward.x*row,y:goal.y+right.y*side-forward.y*row})};
+   const heldDestination=(this.commandJob?.tailSources?.has(unit.id)?unit.routeContinuation?.destination:null)??unit.pendingOrder?.destination;
+   const formation={...(heldDestination??requestedFormation?.slots.get(unit.id)??{x:goal.x+right.x*side-forward.x*row,y:goal.y+right.y*side-forward.y*row})};
    if(passage)formation[passage.along]+=passageShift*passage.direction;
    const parkingRadius=units.length>1?this.config.worldScale*11:0;
-   let roadPath=null;
-   while(!passage&&roadSlots?.[nextRoadSlot]&&!roadPath){
-    const slot=roadSlots[nextRoadSlot++];
-    roadPath=arrivals?(yield* arrivals.path(planningUnit,slot,{roadOnly:true,pathOptions:formationOptions}))
-     :(yield* this.movePathSteps(planningUnit,slot,reserved,0,true));
-   }
    let viaPassage=null;
    if(passage){
     const approach=distance(planningUnit,passage.entrance)<.01?[{...passage.entrance}]
      :yield* this.vehiclePathSteps(planningUnit,passage.entrance,{maxGoalDistance:10,ignoreUnits:convoy});
     const departureRadius=egress?this.config.worldScale*18:parkingRadius;
-    let roadFar=null;
-    while(roadSlots?.[nextRoadSlot]&&!roadFar){
-     const slot=roadSlots[nextRoadSlot++];
-     roadFar=yield* this.movePathSteps(departure,slot,reserved,0,true,beyondPassage);
-    }
-    const far=roadFar??(yield* this.movePathSteps(departure,formation,reserved,departureRadius,false,beyondPassage))
+    const far=(yield* this.movePathSteps(departure,formation,reserved,departureRadius,false,beyondPassage))
      ??(yield* this.movePathSteps(departure,goal,reserved,departureRadius,false,beyondPassage));
     if(approach?.length&&far?.length&&distance(approach.at(-1),passage.entrance)<.1){
      viaPassage=[...approach,egress?.start??passage.exit,...far];
     }
    }
    if(egress&&!viaPassage){failUnit(unit);continue;}
-   let path=action==='attack'?(yield* this.attackPathSteps(planningUnit,target,reserved)):['build','repair','demolish'].includes(action)?(yield* this.workPathSteps(planningUnit,target,workOffset)):roadPath??viaPassage??(arrivals
+   let path=heldDestination?(yield* this.vehiclePathSteps(planningUnit,heldDestination,{maxGoalDistance:.01,fallback:false})):action==='attack'?(yield* this.attackPathSteps(planningUnit,target,reserved)):['build','repair','demolish'].includes(action)?(yield* this.workPathSteps(planningUnit,target,workOffset)):viaPassage??(arrivals
     ?(yield* arrivals.path(planningUnit,formation,{pathOptions:formationOptions}))
     :(yield* this.movePathSteps(planningUnit,formation,reserved,parkingRadius,false,()=>true,formationOptions))??(yield* this.movePathSteps(planningUnit,goal,reserved,parkingRadius,false,()=>true,formationOptions)));
    let remainingEscape=null;
@@ -673,6 +656,11 @@ export class Mission{
     while(!this.commandJob.copiedIds?.has(unit.id)&&!commandBoundary(this.commandJob.mission,!!(unit.passage||viaPassage))){this.commandJob.waitingTick=true;yield;}
     this.commandJob.waitingTick=false;
     if(unit.hp<=0||unit.pendingOrder?.revision!==this.commandJob.revision)continue;
+    if(!this.commandJob.copiedIds?.has(unit.id)){
+     const joined=commandPathFromLive(this.commandJob.mission,unit,planningUnit,path,!!remainingEscape||!!viaPassage);
+     if(!joined){retryCommandFromRest(this.commandJob,unit,path.at(-1));continue;}
+     path=joined;
+    }
    }
    const destination=travel?path.at(-1)??goal:goal;
    if(travel||action==='attack')reserved.push(path.at(-1)??unit);
@@ -716,7 +704,7 @@ export class Mission{
     }
    }
    else delete unit.routeOrder;
-   cancelCombatRetreat(unit,!combat);
+   cancelCombatRetreat(unit);
    cancelCombatDeployment(unit);
    if(disengage.length)unit.combatDisengage=[...disengage];
    if(combat&&units.length>1)unit.combatGroup=combatGroup;
@@ -783,8 +771,38 @@ export class Mission{
   if(!result.ok){this.state.buildings.pop();this.rebuildNavigation();return result;}
   return {ok:true,id:building.id,waiting:result.waiting};
  }
- setCombatPolicy(ids,changes){this.finishPendingStep();return configureCombat(this,ids,changes);}
- stop(ids,{expandGroup=true}={}){if(expandGroup)ids=expandCommandIds(this,ids);ids=ids.filter(id=>!this.entity(id)?.factoryVisit);this.commandPlanner?.cancel(ids);this.finishPendingStep();for(const unit of this.state.units)if(ids.includes(unit.id)&&unit.owner==='rai'&&unit.hp>0){delete unit.yieldReturn;unit.task=null;unit.path=[];unit.builderWorking=false;cancelCombatRetreat(unit);cancelCombatDeployment(unit);delete unit.detour;delete unit.traffic;delete unit.trafficHold;delete unit.resumeConstructionId;}return{ok:true};}
+ setCombatPolicy(ids,changes){const result=configureCombat(this,ids,changes);if(result.ok)this.trafficCoordinator.intentChanged();return result;}
+ setArmyCombatPolicy(changes){const result=configureArmyCombat(this,changes);if(result.ok)this.trafficCoordinator.intentChanged();return result;}
+ stop(ids,{expandGroup=true}={}){
+  if(expandGroup)ids=expandCommandIds(this,ids);
+  ids=ids.filter(id=>{const unit=this.entity(id);return !unit||!inFactoryInterior(unit);});
+  this.commandPlanner?.cancel(ids);
+  const selected=this.state.units.filter(unit=>ids.includes(unit.id)&&unit.owner==='rai'&&unit.hp>0);
+  // Stop is a new intent even for an idle car which never had a revision.
+  // Deleting undefined cannot invalidate a suspended proof that intends to
+  // borrow that car. Use the same monotonic intent sequence as new orders.
+  const revision=this.state.commandRevision=(this.state.commandRevision??0)+1;
+  for(const unit of selected){
+   unit.commandRevision=revision;delete unit.commandStartAfter;delete unit.routeContinuation;
+   unit.pendingOrder={revision,type:'stop',status:'queued',queuedAt:this.state.time};
+   (this.pendingStops??=new Map()).set(unit,revision);
+  }
+  this.applyPendingStops();
+  return {ok:true};
+ }
+ applyPendingStops(){
+  // Invalidate intent immediately, then clear controller state at the same
+  // safe boundary used by Move. Draining an unrelated recovery search in
+  // the input handler can block every browser event for several seconds.
+  if(!this.pendingStops?.size||!commandBoundary(this))return;
+  for(const [unit,revision] of this.pendingStops){
+   if(unit.commandRevision!==revision||unit.pendingOrder?.type!=='stop')continue;
+   delete unit.pendingOrder;unit.driveSpeed=0;
+   delete unit.yieldReturn;delete unit.routeOrder;unit.task=null;unit.path=[];unit.builderWorking=false;
+   cancelCombatRetreat(unit);cancelCombatDeployment(unit);delete unit.detour;delete unit.traffic;delete unit.trafficHold;delete unit.resumeConstructionId;
+  }
+  this.pendingStops.clear();
+ }
  setRally(id,point){const factory=this.entity(id);if(factory?.kind!=='factory'||factory.owner!=='rai'||!factory.completed)return this.fail('Выберите готовый завод');if(!this.inBounds(point.x,point.y)||!this.exploredAt(point.x,point.y))return this.fail('Точка сбора должна быть разведана');factory.rally={x:point.x,y:point.y};return{ok:true};}
  cancelBuilding(id){this.finishPendingStep();const building=this.entity(id);if(!building||building.owner!=='rai'||building.completed)return this.fail('Отменить можно только незавершённую стройку');this.state.energy=Math.min(this.config.energyCapacity,this.state.energy+oilRefund(building));building.hp=0;this.rebuildNavigation();this.releaseSite(building);for(const unit of this.state.units)if(unit.task?.targetId===id){unit.task=null;unit.path=[];unit.foldTime=2.6;}this.emit('construction-cancelled',{building:id});return {ok:true};}
  availableVehicleRecipes(){
@@ -847,6 +865,7 @@ export class Mission{
  lineOfSight(from,to){return clearCombatSight(this,from,to);}
  damage(target,amount,source,contact){
   this.finishPendingStep();if(insideFactory(target)||target.hp<=0||!Number.isFinite(amount)||amount<=0)return;
+  const previousFraction=target.hp/target.maxHp;
   const hit=recordDamage(this,target,amount,source,contact);
   target.hp=Math.max(0,target.hp-amount*armorMultiplier(hit,target));
   if(target.owner==='rai'&&source?.owner&&source.owner!=='rai'&&contact?.type!=='collision'&&this.state.time-(target.lastAttackNotice??-Infinity)>=1){
@@ -854,6 +873,7 @@ export class Mission{
    this.emit('under-attack',{target:target.id,x:target.x,y:target.y,building:!!this.config.buildings[target.kind]});
   }
   syncFieldHp(this,target);
+  rollSteeringDamage(this,target,previousFraction);
   rememberHostileHit(this,target,source);
   alertScavs(this,target,source);
   if(!target.hp){
@@ -924,8 +944,9 @@ export class Mission{
   for(const other of blockers){
    const holding=other.combatDeployment&&['arrived','reserve'].includes(other.combatDeployment.status);
    if(other.hp<=0||other.owner!==unit.owner||other.path.length||other.task&&!holding||other.detour||this.unitSpec(other).role==='builder'
-    ||other.trafficRest>this.state.time||distance(unit,other)>scale*7)continue;
+    ||other.jointTraffic||other.yieldReturn?.cooperativeRequester||other.trafficRest>this.state.time||distance(unit,other)>scale*7)continue;
    if(!other.routeOrder&&!holding&&!workOrder&&(!['move','attack-move','combat-position'].includes(unit.task?.type)||this.unitSpec(unit).role==='builder'))continue;
+   const world=this.state,requestRevision=unit.commandRevision,yieldRevision=other.commandRevision;
    other.trafficRest=this.state.time+5;
    const parkingBlockers=new Set();
    const park=yield* this.parkingManeuverSteps(other,unit,(from,to)=>this.vehicleMotionClear(other,from,to,.52,parkingBlockers));
@@ -935,6 +956,11 @@ export class Mission{
     // requester backs out, then the parked member clears the entire route.
     if(parkingBlockers.has(unit)){
      const budget=Math.max(0,scale*4-(unit.reverseDebt??0));
+     if(budget<scale*2){
+      const backoff=yield* checkedPassageBackoff(this,unit,other);
+      if(backoff){unit.detour=backoff;return true;}
+      if(this.state!==world||unit.pendingOrder||other.pendingOrder||unit.commandRevision!==requestRevision||other.commandRevision!==yieldRevision)return false;
+     }
      for(const length of [scale*2,scale*3,scale*4]){
       if(length>budget)continue;
       const legs=[{direction:-1,curve:0,remaining:length}];
@@ -949,10 +975,8 @@ export class Mission{
     }
     continue;
    }
-   rememberYieldHome(other,[unit],false,this.state.time,this);
-   other.detour={legs:park.legs,parking:true,idleYield:true,blocked:0};
-   unit.trafficHold=other.id;
-   return true;
+   if(yield* checkedYieldPassage(this,unit,other,park.legs))return true;
+   if(this.state!==world||unit.pendingOrder||other.pendingOrder||unit.commandRevision!==requestRevision||other.commandRevision!==yieldRevision)return false;
   }
   // Predictive braking may stop an opposing pair before a collision sweep
   // reports a blocker. It still needs a checked right-side reversing exit.
@@ -972,13 +996,8 @@ export class Mission{
   const other=candidates[0],higher=serial(unit)<serial(other);
   const leader=higher?unit:other, follower=higher?other:unit;
   if(follower.trafficRest>this.state.time)return false;
-  const park=yield* this.parkingManeuverSteps(follower,leader,(from,to)=>this.vehicleMotionClear(follower,from,to));
-  if(!park){follower.trafficRest=this.state.time+1.2;return false;}
-  // Reserve both sides after the sweep is checked, so neither starts a second manoeuvre.
-  follower.detour={legs:park.legs,parking:true,blocked:0};
-  follower.traffic={leader:leader.id,since:this.state.time,phase:'move',forward:park.forward};
-  leader.trafficHold=follower.id;
-  return true;
+  if(yield* this.trafficCoordinator.movingPassageSteps(this,leader,follower))return true;
+  follower.trafficRest=this.state.time+1.2;return false;
  }
  *workRouteExitSteps(unit,goal){
   const scale=this.config.worldScale;
@@ -1005,24 +1024,29 @@ export class Mission{
   const scale=this.config.worldScale,radius=Math.max(vehicleRadiusBound(from.kind??unit.kind,scale),vehicleRadiusBound(to.kind??unit.kind,scale));
   const angle=(to.heading??0)-(from.heading??0),turn=Math.atan2(Math.sin(angle),Math.cos(angle));
   const padding=scale*.055+.012+Math.SQRT2*radius*turn*turn/24;
-  return this.unitIndex.query(to,distance(from,to)+radius+this.unitIndex.maxBodyRadius*scale+padding);
+  return this.unitIndex.query(to,distance(from,to)+radius+this.unitIndex.maxBodyRadius*scale+padding).filter(other=>trafficCollisionRequired(unit,other));
  }
- vehicleMotionClear(unit,from,to,grade=.52,blockers,obstacles=this.state.units){
-  const field=this.field,scale=this.config.worldScale;
+ vehicleMotionClear(unit,from,to,grade=.52,blockers,obstacles=this.state.units,reservationWitness){
+  const reserved=corridorBlocker(this,unit,from,to,reservationWitness);
+  if(reserved){blockers?.add(reserved);return false;}
   if(!passageWaitClear(this,unit,from,to))return false;
   if(obstacles===this.state.units)obstacles=this.vehicleMotionNeighbours(unit,from,to);
+  const sweep=this.vehicleTerrainSweep(unit,from,to,grade);
+  return sweep!==false&&clearOfVehicles(unit,to,obstacles,this.config.worldScale,false,from,this.field,blockers,sweep);
+ }
+ // Static feasibility is also used for future arrival slots. A temporary
+ // traffic reservation is not a permanent obstacle at that destination.
+ // Return false for a blocked sweep, null when there are no nearby solids,
+ // or the prepared sweep so execution can reuse it for vehicle checks.
+ vehicleTerrainSweep(unit,from,to,grade=.52,regionSolids){
+  const field=this.field,scale=this.config.worldScale;
   const terrainEscape=unit.owner==='rai'?this.terrainEscapeFor(unit):null;
   if(!this.nav.lineClear(from,to,false,true,grade,true,false,terrainEscape))return false;
-  const envelope=vehicleEnvelope(to,scale,field);
-  if(!vehicleGroundSafe(envelope,grade)){
-   const previous=vehicleEnvelope(from,scale,field);
-   const tilt=pose=>Math.max(Math.abs(Math.tan(pose.pitch)),Math.abs(Math.tan(pose.roll))*1.24);
-   if(tilt(envelope)>=tilt(previous)-.00001)return false;
-  }
-  const solids=this.nav.nearbySolids(to,scale*4.8);
+  const reach=scale*4.8+distance(from,to);
+  const solids=regionSolids?regionSolids.filter(item=>Math.abs(to.x-item.x)<item.halfWidth+reach&&Math.abs(to.y-item.y)<item.halfDepth+reach)
+   :this.nav.nearbySolids(to,reach);
   const sweep=solids.length?vehicleSweep(from,to,scale,field):null;
-  return (!sweep||this.nav.clearSolidSweep(sweep,solids))
-   &&clearOfVehicles(unit,to,obstacles,scale,false,from,field,blockers,sweep);
+  return sweep&&!this.nav.clearSolidSweep(sweep,solids)?false:sweep;
  }
  passingLane(unit,point,course,scale){
   const admission=this.trafficCoordinator.passageDecisions.get(unit.id),throat=unit.passage?.throat;
@@ -1036,20 +1060,24 @@ export class Mission{
   }
   // A short intermediate waypoint is not the end of an encounter. Reserve
   // one stable right-hand corridor until both complete hulls have passed.
-  const goal=unit.path.at(-1)??point,length=distance(unit,goal),range=160;
+  // The final repair/attack destination may be behind a plateau while the
+  // current route goes the other way. Detect opposing traffic on the next
+  // local leg, skipping only a short corner for anticipation (not movement).
+  const localPoint=body=>body.path.find(p=>distance(body,p)>scale*4)??body.path.at(-1);
+  const goal=unit.path.at(-1)??point,next=localPoint(unit)??point,length=distance(unit,next),range=160;
   if(length<.1){delete unit.passingLane;return null;}
-  const ux=(goal.x-unit.x)/length,uy=(goal.y-unit.y)/length;
+  const ux=(next.x-unit.x)/length,uy=(next.y-unit.y)/length;
   let lane=unit.passingLane;
-  if(lane&&(lane.goalX!==goal.x||lane.goalY!==goal.y))lane=null;
+  if(lane&&(!lane.localCourse||lane.goalX!==goal.x||lane.goalY!==goal.y))lane=null;
   const eligible=other=>{
    if(!other||other===unit||other.hp<=0||other.owner!==unit.owner||!other.path.length)return false;
-   const next=other.path.at(-1),d=distance(other,next);if(d<.1)return false;
+   const next=localPoint(other),d=distance(other,next);if(d<.1)return false;
    const dx=other.x-unit.x,dy=other.y-unit.y,along=dx*ux+dy*uy;
    const opposing=((next.x-other.x)*ux+(next.y-other.y)*uy)/d;
    return along> -scale*6&&along<range&&Math.abs(dx*uy-dy*ux)<scale*4.5
-    &&(opposing<-.97||opposing<-.83&&Math.cos(unit.heading-other.heading)<-.97);
+    &&opposing<-.83;
   };
-  const neighbours=this.nearbyUnits(unit,range+scale*4);
+  const neighbours=this.nearbyUnits(unit,range+scale*4).filter(other=>trafficCollisionRequired(unit,other));
   let other=lane?neighbours.find(candidate=>candidate.id===lane.otherId):null;
   const otherGoal=other?.path.at(-1);
   if(lane&&otherGoal&&(lane.otherGoalX!==otherGoal.x||lane.otherGoalY!==otherGoal.y))lane=null;
@@ -1070,16 +1098,21 @@ export class Mission{
   if(!lane||lane.otherId!==other.id){
    const shared=other.passingLane;
    const otherGoal=other.path.at(-1);
-   if(shared?.otherId===unit.id&&shared.goalX===otherGoal.x&&shared.goalY===otherGoal.y)lane={x:shared.x,y:shared.y,ux:-shared.ux||0,uy:-shared.uy||0};
+   if(shared?.localCourse&&shared.otherId===unit.id&&shared.goalX===otherGoal.x&&shared.goalY===otherGoal.y)lane={x:shared.x,y:shared.y,ux:-shared.ux||0,uy:-shared.uy||0};
    else{
-    const next=other.path.at(-1),d=distance(other,next),dx=ux-(next.x-other.x)/d,dy=uy-(next.y-other.y)/d,l=Math.hypot(dx,dy);
+    const next=localPoint(other),d=distance(other,next),dx=ux-(next.x-other.x)/d,dy=uy-(next.y-other.y)/d,l=Math.hypot(dx,dy);
     lane={x:(unit.x+other.x)/2,y:(unit.y+other.y)/2,ux:dx/l,uy:dy/l};
    }
-   Object.assign(lane,{otherId:other.id,goalX:goal.x,goalY:goal.y,otherGoalX:otherGoal.x,otherGoalY:otherGoal.y});
+   Object.assign(lane,{localCourse:true,otherId:other.id,goalX:goal.x,goalY:goal.y,otherGoalX:otherGoal.x,otherGoalY:otherGoal.y});
   }
   const shape=vehicleEnvelope(unit,scale,this.field),obstacle=vehicleEnvelope(other,scale,this.field),rx=lane.uy,ry=-lane.ux;
   const otherAdmission=this.trafficCoordinator.passageDecisions.get(other.id);
-  const offset=(otherAdmission&&!otherAdmission.admitted?shape.width+obstacle.width:Math.max(shape.width,obstacle.width))+scale*.9;
+  // Both marching and retreating cars share the right-hand separation.
+  // Work approaches and denied passage admissions keep their fixed course.
+  const otherKeepsCourse=['build','repair','demolish','clear-site','combat-position'].includes(other.task?.type)
+   ||otherAdmission&&!otherAdmission.admitted;
+  const otherSide=(obstacle.x-lane.x)*rx+(obstacle.y-lane.y)*ry;
+  const offset=(otherKeepsCourse?otherSide+shape.width+footprintSupport(obstacle,rx,ry):Math.max(shape.width,obstacle.width))+scale*.9;
   const along=(unit.x-lane.x)*lane.ux+(unit.y-lane.y)*lane.uy+scale*3.6;
   const target={x:lane.x+lane.ux*along+rx*offset,y:lane.y+lane.uy*along+ry*offset};
   // Until lateral separation fits the actual oriented hulls, share the
@@ -1107,16 +1140,31 @@ export class Mission{
     ||!this.nav.lineClear(unit,next,false,true,.52,true))break;
    unit.path.shift();
   }
-  unit.passingLane=lane;return target;
+  unit.passingLane=lane;return {...target,passingCorridor:lane};
  }
  drivingIntent(unit,point,course,scale){
-  const cruising=!['build','repair','demolish','clear-site','combat-position'].includes(unit.task?.type)&&!unit.combatRetreat;
+  const roadLane=!['build','repair','demolish','clear-site','combat-position'].includes(unit.task?.type)?roadDrivingLane(this,unit,point,scale):null;
+  if(roadLane&&this.nav.lineClear(unit,roadLane,false,true)){
+   delete unit.passingLane;
+   // Passing a centre-line route point on its right must not cause a turn
+   // back to that point. Only a clear connector releases it, never the goal.
+   while(unit.path.length>1){
+    const first=unit.path[0],next=unit.path[1];
+    if((first.x-unit.x)*roadLane.ux+(first.y-unit.y)*roadLane.uy>=0
+     ||(next.x-unit.x)*roadLane.ux+(next.y-unit.y)*roadLane.uy<=0
+     ||!this.nav.lineClear(unit,next,false,true))break;
+    unit.path.shift();
+   }
+   const d=distance(unit,roadLane);
+   return deferRoadMerge(this,unit,{point,waypoint:roadLane,roadLane,trafficLimit:Infinity,
+    course:d>0?{x:(roadLane.x-unit.x)/d,y:(roadLane.y-unit.y)/d}:course},scale);
+  }
+  const cruising=!['build','repair','demolish','clear-site','combat-position'].includes(unit.task?.type);
   const passing=cruising?this.passingLane(unit,point,course,scale):null;
-  // Roads affect route cost, not a compulsory steering rail. Only an actual
-  // opposing vehicle creates a passing corridor; parallel cars need not merge.
+  // Away from a road leg, the accepted field route and local passing apply.
   delete unit.mergeTraffic;
   const waypoint=passing??point,d=distance(unit,waypoint);
-  return {point,waypoint,roadLane:null,trafficLimit:passing?.trafficLimit??Infinity,
+  return {point,waypoint,roadLane:null,passingLane:passing?.passingCorridor??null,trafficLimit:passing?.trafficLimit??Infinity,yieldTo:passing?unit.passingLane?.otherId:null,
    course:d>0?{x:(waypoint.x-unit.x)/d,y:(waypoint.y-unit.y)/d}:course};
  }
  trafficSpeed(unit,course,lane,scale,stoppedObstacles){
@@ -1136,6 +1184,7 @@ export class Mission{
   }
   let limit=this.trafficCoordinator.limit(unit);
   for(const other of this.nearbyUnits(unit,scale*13)){
+   if(!trafficCollisionRequired(unit,other))continue;
    if(other===unit||other.hp<=0||other.owner!==unit.owner||distance(unit,other)>scale*13)continue;
    // Actual bodies constrain every moving vehicle, regardless of route
    // alignment. A turning neighbour can cross this corridor while its next
@@ -1216,7 +1265,7 @@ export class Mission{
   return limit;
  }
  parkingManeuver(...args){this.finishPendingStep();return completeSteps(this.parkingManeuverSteps(...args));}
- *parkingManeuverSteps(unit,leader,allowed,{accept=()=>true}={}){
+ *parkingManeuverSteps(unit,leader,allowed,{accept=()=>true,acceptPlan=()=>true,requireInverse=true,fine=false}={}){
   const point=leader.path[0];
   const encounter=unit.passingLane?.otherId===leader.id?unit.passingLane:null;
   const angle=encounter?Math.atan2(-encounter.uy,-encounter.ux):point?Math.atan2(point.y-leader.y,point.x-leader.x):leader.heading+Math.PI/2;
@@ -1255,7 +1304,7 @@ export class Mission{
   const finalPose=final&&{...final,heading:Math.atan2(previous.x-final.x,final.y-previous.y),kind:leader.kind,hp:1};
   const borrowed=unit.yieldReturn,home=borrowed?.home??unit,history=borrowed?.legs??[];
   const reserveReturn=finalPose&&clearOfVehicles(null,home,[finalPose],scale,true,null,this.field);
-  const canReturn=(pose,legs)=>!reserveReturn||!!checkManeuver(pose,
+  const canReturn=(pose,legs)=>!requireInverse||!reserveReturn||!!checkManeuver(pose,
    [...history,...legs].reverse().map(leg=>({direction:-leg.direction,curve:-leg.curve,remaining:leg.remaining})),scale,
    (from,to)=>clearOfVehicles(null,to,[finalPose],scale,false,from,this.field));
   // In a head-on encounter the yielder's right is the leader's left. Never
@@ -1263,9 +1312,12 @@ export class Mission{
   for(const offset of encounter?[5]:[5,7,9])for(const sign of encounter?[-1]:[side,-side]){
    const goal={x:unit.x+right.x*scale*offset*sign,y:unit.y+right.y*scale*offset*sign};
    const path=yield* this.planManeuverSteps(unit,goal,{scale,allowed,attempts:2,
-    maximumLegs:encounter?12:offset===5?9:offset===7?12:15,reverseBudget:scale*(encounter?4:6),
+    // Tight parking may require sub-car-length shunts. Keep the same finite
+    // travel/reverse bounds while refining pose and heading resolution.
+    maximumLegs:Math.ceil((encounter?12:offset===5?9:offset===7?12:15)*(fine?1.2/.45:1)),
+    stride:fine?.45*scale:undefined,headingStep:fine?.1:undefined,reverseBudget:scale*(encounter?4:6),
     accept:(pose,legs)=>lateral(pose)*sign>scale*1.3&&distance(pose,unit)>scale*.6&&accept(pose)&&clearLane(pose)&&canReturn(pose,legs)
-     &&(!encounter||-Math.sin(pose.heading)*encounter.ux+Math.cos(pose.heading)*encounter.uy>.85)});
+     &&(!encounter||-Math.sin(pose.heading)*encounter.ux+Math.cos(pose.heading)*encounter.uy>.85)&&acceptPlan(pose,legs)});
    if(path)return {legs:path,forward};
   }
   return null;
@@ -1286,13 +1338,13 @@ export class Mission{
     if(sweptBlocker||vehicleClearance(current,other,scale,this.field)<scale*.52)cluster.push(other);
    }
   }
-  if(cluster.length<2||cluster.some(other=>other.detour||other.trafficHold||other.traffic))return false;
-  const yieldSpace=(vehicle,legs,rough=true)=>{
-   rememberYieldHome(vehicle,cluster.filter(other=>other!==vehicle&&other.path.length),rough,this.state.time,this);
-   vehicle.detour={legs,parking:true,rough,idleYield:true,blocked:0};
-   vehicle.trafficRest=this.state.time+6;
-   for(const other of cluster)if(other!==vehicle&&other.path.length)other.trafficHold=vehicle.id;
-   return true;
+  if(cluster.length<2||cluster.some(other=>other.detour||other.jointTraffic||other.trafficHold||other.traffic))return false;
+  const mission=this;
+  const yieldSpace=function*(vehicle,legs,rough=true){
+   if(idle(vehicle))return yield* checkedYieldPassage(mission,unit,vehicle,legs,{rough});
+   for(const leader of cluster.filter(other=>other!==vehicle&&other.path.length))
+    if(yield* mission.trafficCoordinator.movingPassageSteps(mission,leader,vehicle,{parkingLegs:legs,rough}))return true;
+   return false;
   };
   if(includeParked&&cluster.length>=4
    &&(aisleOnly||cluster.every(other=>other===unit||vehicleClearance(unit,other,scale,this.field)>=0))
@@ -1320,7 +1372,7 @@ export class Mission{
     if(includeParked)vehicle.trafficRest=this.state.time+4;
     continue;
    }
-   if(includeParked)return yieldSpace(vehicle,legs);
+   if(includeParked){if(yield* yieldSpace(vehicle,legs))return true;continue;}
    // Advancing the front of an aligned file is departure, not yielding to
    // the vehicle behind it. Parking here would recreate the obstruction and
    // hold the whole file until the unrelated nine-second lease expired.
@@ -1341,13 +1393,9 @@ export class Mission{
     // Once this manoeuvre clears a known blocker, both vans can resume.
     const normal=checkManeuver(vehicle,legs,scale,(from,to)=>this.vehicleMotionClear(vehicle,from,to));
     for(const other of cluster)other.trafficRecoveryUntil=this.state.time+32;
-    return yieldSpace(vehicle,legs,!normal);
+    return yield* yieldSpace(vehicle,legs,!normal);
    }
-   const leader=others.slice().sort((a,b)=>Number(a.id.slice(1))-Number(b.id.slice(1)))[0];
-   vehicle.detour={legs,parking:true,rough:true,blocked:0};
-   vehicle.traffic={leader:leader.id,since:this.state.time,phase:'move'};
-   for(const other of others)other.trafficHold=vehicle.id;
-   return true;
+   if(yield* yieldSpace(vehicle,legs,true))return true;
   }
   return false;
  }
@@ -1386,7 +1434,7 @@ export class Mission{
    const canMove=(from,to)=>this.vehicleMotionClear(other,from,to);
    for(const remaining of [clearance,scale*10]){
     const legs=[{direction,curve:0,remaining}];
-    if(checkManeuver(other,legs,scale,canMove))return yieldSpace(other,legs,false);
+    if(checkManeuver(other,legs,scale,canMove)&&(yield* yieldSpace(other,legs,false)))return true;
    }
   }
   return false;
@@ -1394,10 +1442,14 @@ export class Mission{
  move(...args){this.finishPendingStep();return completeSteps(this.moveSteps(...args));}
  *moveSteps(unit,dt){
   if(isInfantry(unit))return this.walk(unit,dt);
-  yield* recoverWaitCycle(this,unit);
-  yield* resumeYieldHome(this,unit);
-  yield* updateCombatParking(this,unit);
-  yield* prepareTrafficDeparture(this,unit);
+  const directed=yield* this.trafficCoordinator.prepareMovementSteps(this,unit,dt);
+  if(directed!==null)return directed;
+  const backgroundRecovery=this.trafficCoordinator.planner?.pendingFor(unit);
+  if(unit.detour?.cooperativeYield){
+   const other=this.entity(unit.detour.cooperativeYield);
+   if(!other||other.hp<=0||other.pendingOrder||other.commandRevision!==unit.detour.yieldingRevision
+    ||other.yieldReturn?.cooperativeRequester?.id!==unit.id){delete unit.detour;delete unit.trafficHold;}
+  }
   const stop=()=>{unit.driveSpeed=0;unit.steering=(unit.steering??0)*.68;};
   const idleYield=!unit.path.length&&unit.detour?.idleYield;
   if(!unit.path.length&&!idleYield){stop();delete unit.detour;delete unit.traffic;delete unit.trafficHold;delete unit.passingLane;delete unit.passage;return false;}
@@ -1428,7 +1480,14 @@ export class Mission{
    gate.preceding=null;
   }
   if(unit.trafficHold){
-   if(this.entity(unit.trafficHold)?.detour?.parking){navigationDecision(unit,'YIELDING','vehicle-clearing-passage',unit.trafficHold,'resume-when-clear');stop();return false;}
+   const yielding=this.entity(unit.trafficHold),cycle=yielding?.traffic;
+   if(unit.detour?.cooperativeYield===unit.trafficHold
+    &&(!yielding||yielding.hp<=0||yielding.pendingOrder||yielding.commandRevision!==unit.detour.yieldingRevision)){
+    delete unit.detour;delete unit.trafficHold;
+   }
+   if(unit.trafficHold&&(yielding?.detour?.parking||cycle?.cycle&&cycle.checkedPassage&&cycle.phase==='parked'&&cycle.leader!==unit.id)){
+    navigationDecision(unit,'YIELDING','vehicle-clearing-passage',unit.trafficHold,'resume-when-clear');stop();return false;
+   }
    delete unit.trafficHold;
   }
   const egress=gate?.egress;
@@ -1443,7 +1502,9 @@ export class Mission{
   const point=unit.path[0]??unit, next=unit.path[1], d=distance(unit,point);
   const atPivot=egress?.phase==='approach'&&point.x===egress.start.x&&point.y===egress.start.y;
   const precise=!next&&['build','repair','demolish'].includes(unit.task?.type);
-  const tolerance=atPivot?.45:(precise||unit.task?.salvageId)?.65:2;
+  const preciseMove=!next&&unit.routeOrder&&!unit.task?.yieldHome
+   &&['move','attack-move'].includes(unit.task?.type)&&!followsContinuation(unit);
+  const tolerance=atPivot?.45:(precise||preciseMove||unit.task?.salvageId)?.65:2;
   const blockers=new Set();
   const applyPose=pose=>{
    const travelled=distance(unit,pose),debt=unit.reverseDebt??0;
@@ -1454,6 +1515,20 @@ export class Mission{
   const canRoll=(from,to,grade)=>this.vehicleMotionClear(unit,from,to,grade,blockers);
   const allowed=(from,to)=>canRoll(from,to);
   const roughAllowed=(from,to)=>canRoll(from,to,.60);
+  // A nearby click beside/behind a stopped car is a parking manoeuvre, not
+  // a forward-only trip around its complete turning circle. Prove the whole
+  // endpoint before moving; ordinary following still handles aligned goals.
+  if(!backgroundRecovery&&!unit.detour&&!unit.traffic&&!gate&&unit.path.length===1&&unit.routeOrder
+   &&['move','attack-move'].includes(unit.task?.type)&&!followsContinuation(unit)
+   &&d<scale*6&&(unit.driveSpeed??0)<.01
+   &&Math.abs(angleDelta(Math.atan2(unit.x-point.x,point.y-unit.y),unit.heading))>vehicleDynamics(unit).steeringLimit
+   &&!(this.trafficCoordinator.queueing(unit)&&this.trafficCoordinator.limit(unit)<.01)){
+   const arrival=yield* checkedGoalArrival(this,unit,(from,to)=>this.vehicleMotionClear(unit,from,to)
+    &&!maneuverAdmissionBlocker(this,unit,from,to,dt),pose=>borrowedHomeClear(this,unit,pose));
+   if(unit.pendingOrder||unit.hp<=0)return false;
+   if(arrival)unit.detour={legs:arrival,parking:false,arrival:true,blocked:0,passedWaypoints:unit.path.map(p=>({...p})),
+    reservedCorridor:reserveManeuverCorridor(this,unit,arrival)};
+  }
 
   const advancingThroughExit=other=>{
    const otherExit=other?.passage?.egress;
@@ -1480,12 +1555,12 @@ export class Mission{
     // The previous sweep is still checked every tick. A failed alternative
     // search is reused only while its physical search region is unchanged;
     // an opening beside that sweep must not wait for a retry timer.
-    if(unchangedRecoveryFailure(egress,retryCondition)){navigationDecision(unit,'BLOCKED','exit-sweep-blocked',null,'retry-after-obstruction-changes');stop();return false;}
+    if(unchangedRecoveryFailure(egress,retryCondition,this.state.time)){navigationDecision(unit,'BLOCKED','exit-sweep-blocked',null,'retry-after-delay-or-change');stop();return false;}
     legs=yield* this.planManeuverSteps(unit,egress.end,{scale,allowed:exitClear,attempts:3,maximumLegs:25,reverseBudget:0,
      accept:pose=>distance(pose,egress.end)<scale*.65&&Math.cos(pose.heading-egress.end.heading)>.94
       &&this.nav.lineClear(pose,egress.end,false,true)});
    }
-   if(!legs){rememberRecoveryFailure(egress,retryCondition);navigationDecision(unit,'BLOCKED','no-local-exit',null,'retry-after-obstruction-changes');stop();return false;}
+   if(!legs){rememberRecoveryFailure(egress,retryCondition,this.state.time);navigationDecision(unit,'BLOCKED','no-local-exit',null,'retry-after-delay-or-change');stop();return false;}
    delete egress.retryAt;
    unit.detour={legs:legs.map(leg=>({...leg})),passageExit:true,blocked:0};
    egress.phase='turning';
@@ -1526,8 +1601,11 @@ export class Mission{
   }
   if(unit.detour){
    const plan=unit.detour,leg=plan.legs[0];
+   // A coordinated passage is one manoeuvre, even when its proof contains
+   // many short arcs. Brake at its end or a gear change, rather than nearly
+   // stopping at every same-direction sampling boundary of the shared plan.
    const throughSpeed=plan.departure?plan.departureSpeed??13:plan.legs[1]?.direction===leg.direction
-    ?plan.passageExit?16:plan.parking&&!plan.rough?8:0:0;
+    ?plan.passageExit?16:plan.cyclePassage||plan.cooperativeYield||plan.preciseArrival?vehicleDynamics(unit).maneuverForward:plan.parking&&!plan.rough?8:0:0;
    const detourAllowed=plan.rough?roughAllowed:allowed;
    const admitted=(from,to)=>{
     if(!detourAllowed(from,to))return false;
@@ -1537,36 +1615,58 @@ export class Mission{
     }
     return true;
    };
-   const step=maneuverStep(unit,leg,dt,{scale,allowed:admitted,crawl:!!plan.rough,
-    throughSpeed,forwardSpeed:plan.departure?plan.departureSpeed??13:plan.passageExit?18:vehicleDynamics(unit).maneuverForward});
+   const step=plan.continuousPassage&&!plan.rough?maneuverPlanStep(unit,plan.legs,dt,{scale,allowed:admitted})
+    :maneuverStep(unit,leg,dt,{scale,allowed:admitted,crawl:!!plan.rough,
+     throughSpeed,forwardSpeed:plan.departure?plan.departureSpeed??13:plan.passageExit?18:vehicleDynamics(unit).maneuverForward});
    if(step){
     applyPose(step.pose);
-    recordYieldStep(unit,plan,leg,step.length);
-    leg.remaining-=step.length;
+    for(const part of step.consumed??[{leg,length:step.length}]){
+     recordYieldStep(unit,plan,part.leg,part.length);
+     part.leg.remaining-=part.length;
+     if(part.leg.remaining<1e-6)plan.legs.shift();
+    }
     plan.blocked=0;
     if(leg.remaining<1e-6){
-     plan.legs.shift();
      if(plan.legs[0]?.direction!==leg.direction&&!(plan.departure&&!plan.legs.length&&unit.path.length))unit.driveSpeed=0;
     }
     if(!plan.legs.length){
+     if(plan.cooperativeBackoff){
+      const other=this.entity(plan.cooperativeYield),stages=plan.cooperativeBackoff,origin=stages.otherStart;
+      if(other?.hp>0&&!other.pendingOrder&&other.commandRevision===plan.yieldingRevision
+       &&other.x===origin.x&&other.y===origin.y&&other.heading===origin.heading
+       &&checkManeuver(other,stages.park,scale,(from,to)=>this.vehicleMotionClear(other,from,to)
+        &&!maneuverAdmissionBlocker(this,other,from,to,dt))){
+       other.detour={legs:stages.park,parking:true,idleYield:true,blocked:0};
+       unit.detour={...plan,legs:stages.arrival,cooperativeBackoff:null,preciseArrival:true,passedWaypoints:plan.passedWaypointsAfterBackoff};
+       delete unit.detour.passedWaypointsAfterBackoff;
+       unit.trafficHold=other.id;
+      }
+     }
+     if(plan.cyclePassage){
+      const yielding=this.entity(plan.cyclePassage);
+      if(yielding?.traffic?.leader===unit.id)yielding.traffic.passageComplete=true;
+     }
+      for(const passed of plan.passedWaypoints??[]){
+       if(unit.path[0]?.x!==passed.x||unit.path[0]?.y!==passed.y)break;
+       unit.path.shift();
+      }
      if(plan.yieldReturning)delete unit.yieldReturn;
      if(plan.yieldHandoff){
       const other=this.entity(plan.yieldHandoff.id),legs=plan.yieldHandoff.legs;
       if(other?.hp>0&&!other.path.length&&!other.task&&!other.detour
        &&checkManeuver(other,legs,scale,(from,to)=>this.vehicleMotionClear(other,from,to))){
-       rememberYieldHome(other,[unit],false,this.state.time,this);
-       other.detour={legs,parking:true,idleYield:true,blocked:0};
-       unit.trafficHold=other.id;
+       yield* checkedYieldPassage(this,unit,other,legs);
       }
      }
      if(plan.parking&&unit.traffic)unit.traffic.phase='parked';
      if(plan.passageExit&&gate)delete gate.egress;
-     delete unit.detour;delete unit.driveWatch;
+     if(unit.detour===plan)delete unit.detour;delete unit.driveWatch;
     }
     return true;
    }
    stop();
    navigationDecision(unit,'BLOCKED','manoeuvre-sweep-blocked',blockers.values().next().value?.id??null,'local-recovery');
+   if(backgroundRecovery)return false;
    if(leg.direction<0&&blockers.size&&!plan.parking&&!plan.idleYield&&!plan.yieldReturning
     &&!plan.departure&&!plan.passageExit&&!plan.progressRecovery&&unit.path.length
     &&(point.x-unit.x)*-Math.sin(unit.heading)+(point.y-unit.y)*Math.cos(unit.heading)>0
@@ -1613,9 +1713,9 @@ export class Mission{
    stop();
    return true;
   }
-  const finalTravel=!next&&['move','attack-move'].includes(unit.task?.type);
+  const finalTravel=!next&&!followsContinuation(unit)&&['move','attack-move'].includes(unit.task?.type);
   const fitsBorrowedHome=!finalTravel||borrowedHomeClear(this,unit);
-  if(finalTravel&&!fitsBorrowedHome&&d<scale*.7){
+  if(!backgroundRecovery&&finalTravel&&!fitsBorrowedHome&&d<scale*.7){
    const parking=yield* this.planManeuverSteps(unit,unit.task,{scale,allowed,attempts:2,
     tolerance:.5,maximumLegs:8,reverseBudget:scale*3,
     accept:pose=>distance(pose,unit.task)<1.95&&borrowedHomeClear(this,unit,pose)});
@@ -1633,9 +1733,7 @@ export class Mission{
   const planned=this.trafficCoordinator.intents.get(unit.id);
   const {waypoint,roadLane,course:motionCourse}=planned?.point===point?planned:this.drivingIntent(unit,point,course,scale);
   const remaining=distance(unit,waypoint);
-  const slope=this.field.gradientAt(unit.x,unit.y);
-  const slopeBlockers=Math.hypot(slope.x,slope.y)>=.42?blockers:undefined;
-  const grade=(slope.x*(waypoint.x-unit.x)+slope.y*(waypoint.y-unit.y))/Math.max(1,remaining);
+  const grade=0;
   const forward={x:-Math.sin(unit.heading),y:Math.cos(unit.heading)};
   const aligned=forward.x*motionCourse.x+forward.y*motionCourse.y>.72;
   // Braking for a parked van can stop us before a movement sweep ever hits it.
@@ -1676,12 +1774,16 @@ export class Mission{
   if((!pose||pose.driveSpeed<=.01)&&trafficLimit<=.01&&!blockers.size){
    const decision=this.trafficCoordinator.decisions.get(unit.id);
    const merge=Object.values(unit.mergeTraffic??{}).find(item=>item.leader!==unit.id&&this.entity(item.leader)?.hp>0);
-   const blocker=decision?.yieldTo??merge?.leader??stoppedObstacles.values().next().value?.id??unit.passingLane?.otherId??null;
-   navigationDecision(unit,'YIELDING',decision?'junction-reservation':merge?'road-merge':'headway',blocker,'resume-when-clear',speed);
+   const junctionStopped=decision?.limit<=.01;
+   const physical=[...stoppedObstacles].map(other=>other.id);
+   const dependencies=[...physical,...this.trafficCoordinator.blockingVehicles(unit),
+    ...(!physical.length&&!junctionStopped?[merge?.leader??unit.passingLane?.otherId].filter(Boolean):[])];
+   navigationDecision(unit,'YIELDING',physical.length?'headway':junctionStopped?'junction-reservation':merge?'road-merge':'headway',dependencies,'resume-when-clear',speed);
   }
   else if(!pose)navigationDecision(unit,'BLOCKED',blockers.size?'vehicle-sweep-blocked':'terrain-or-steering-blocked',blockers.values().next().value?.id??null,'local-recovery',speed);
   if(pose)applyPose(pose);else stop();
   if(impactSpeed){this.vehicleCollision(unit,impactSpeed,blockers);if(unit.hp<=0)return !!pose;}
+  if(backgroundRecovery)return !!pose;
   if(!pose&&commonTrafficLimit>0&&!gate&&!unit.combatParking
    &&['move','attack-move'].includes(unit.task?.type)
    &&[...blockers,...stoppedObstacles].some(other=>other.hp>0&&(other.driveSpeed??0)<.01)){
@@ -1726,16 +1828,18 @@ export class Mission{
   // A low speed limit is not itself a queue: the steering probe can also
   // fail on terrain. Only a live reservation/merge dependency suspends
   // recovery; otherwise a safe alternative arc must be attempted now.
-  const queued=waiting&&(this.trafficCoordinator.queueing(unit)||mergeQueue);
-  const resumedQueue=watch.queued&&!queued;
+  const queued=waiting&&!this.navigationDiagnostics?.deadlockedIds?.has(unit.id)
+   &&(commonTrafficLimit<speed*.3&&this.trafficCoordinator.queueing(unit)||mergeQueue);
   watch.queued=queued;
-  if(queued||resumedQueue){
-   // Waiting at a reservation is not failed progress. Start the stall clock
-   // from the release, so acceleration cannot trigger a spurious detour.
-   watch.distance=d;watch.elapsed=0;watch.blocked=0;watch.attempts=0;delete watch.stalledAt;
-   return !!pose;
-  }
-  const stoppedPair=()=>!pose&&!gate&&!unit.traffic&&slopeBlockers?.size===1&&[...slopeBlockers].some(other=>other.owner===unit.owner
+  if(queued){
+   // A named queue gets a short grace period. Only actual progress renews
+   // it; a stopped leader must not erase this car's recovery clock forever.
+   if(watch.queueSince===undefined||d<(watch.queueDistance??d)-scale*.5){
+    watch.queueSince=this.state.time;watch.queueDistance=d;
+   }
+   if(this.state.time-watch.queueSince<2.1)return !!pose;
+  }else{delete watch.queueSince;delete watch.queueDistance;}
+  const stoppedPair=()=>!pose&&!gate&&!unit.traffic&&blockers?.size===1&&[...blockers].some(other=>other.owner===unit.owner
    &&other.path.length&&!other.traffic&&!other.passage&&(other.driveSpeed??0)<scale*.18
    &&vehicleClearance(unit,other,scale,this.field)>=scale*.52);
   const nearbyStall=!pose&&!gate&&!unit.traffic&&(stoppedObstacles.size||[...blockers].some(other=>
@@ -1746,9 +1850,9 @@ export class Mission{
   watch.distance=d;watch.elapsed=0;watch.blocked=0;
   if(!jammed){watch.attempts=0;delete watch.stalledAt;return !!pose;}
   const recoveryCondition=!pose?recoveryConditions(this,unit):null;
-  if(recoveryCondition&&unchangedRecoveryFailure(unit,recoveryCondition)){
+  if(recoveryCondition&&unchangedRecoveryFailure(unit,recoveryCondition,this.state.time)){
    navigationDecision(unit,'BLOCKED','unchanged-local-obstruction',blockers.values().next().value?.id
-    ??stoppedObstacles.values().next().value?.id??null,'retry-after-obstruction-changes',speed);
+    ??stoppedObstacles.values().next().value?.id??null,'retry-after-delay-or-change',speed);
    return false;
   }
   const recoveryRoute=unit.path.map(point=>point.x+','+point.y).join(';');
@@ -1764,8 +1868,15 @@ export class Mission{
   }
   const target=unit.task?.targetId?this.entity(unit.task.targetId):null;
   const travel=['move','attack-move','combat-position'].includes(unit.task?.type);
-  const fixedGoal=travel&&unit.routeOrder&&!unit.combatParking;
-  if(travel&&stoppedPair()&&(yield* this.recoverTrafficClusterSteps(unit,false,slopeBlockers)))return !!pose;
+  const fixedGoal=travel&&(unit.routeOrder||followsContinuation(unit))&&!unit.combatParking;
+  if(fixedGoal&&!gate&&!followsContinuation(unit)){
+   const arrival=yield* checkedGoalArrival(this,unit,(from,to)=>this.vehicleMotionClear(unit,from,to)
+    &&!maneuverAdmissionBlocker(this,unit,from,to,dt),pose=>borrowedHomeClear(this,unit,pose));
+   if(unit.pendingOrder||unit.hp<=0)return false;
+   if(arrival){unit.detour={legs:arrival,parking:false,arrival:true,blocked:0,passedWaypoints:unit.path.map(p=>({...p})),
+    reservedCorridor:reserveManeuverCorridor(this,unit,arrival)};return !!pose;}
+  }
+  if(travel&&stoppedPair()&&(yield* this.recoverTrafficClusterSteps(unit,false,blockers)))return !!pose;
   for(const other of stoppedObstacles)blockers.add(other);
   // A parked yielder and the vehicle waiting for it form a temporary queue.
   // Give that queue time to clear before planning a detour around both hulls.
@@ -1781,7 +1892,8 @@ export class Mission{
    other.owner===unit.owner&&other.hp>0&&!other.path.length&&vehicleClearance(unit,other,scale,this.field)<0)
    &&(yield* this.recoverTrafficClusterSteps(unit,true,blockers,{aisleOnly:true})))return !!pose;
   if(yield* this.requestPassageSteps(unit,blockers))return !!pose;
-  const destination=travel||unit.task?.type==='clear-site'?unit.task:unit.path.at(-1);
+  const destination=followsContinuation(unit)?unit.path.at(-1)??unit.routeContinuation.frontier
+   :travel||unit.task?.type==='clear-site'?unit.task:unit.path.at(-1);
   const stalledNearParked=travel&&[...blockers].some(other=>!other.path.length);
   const routeStale=stalledNearParked&&unit.trafficReplan&&distance(unit,unit.trafficReplan)<scale*.7
    &&this.state.time-unit.trafficReplan.time<4;
@@ -1853,8 +1965,8 @@ export class Mission{
    }
   }
   if(blockers.size&&(watch.attempts>=2||travel&&stoppedPair())&&unit.task?.type!=='clear-site'){
-   if((yield* this.recoverTrafficClusterSteps(unit,false,slopeBlockers))
-    ||travel&&unit.owner==='rai'&&(yield* this.recoverTrafficClusterSteps(unit,true,slopeBlockers)))return !!pose;
+   if((yield* this.recoverTrafficClusterSteps(unit,false,blockers))
+    ||travel&&unit.owner==='rai'&&(yield* this.recoverTrafficClusterSteps(unit,true,blockers)))return !!pose;
   }
   if(!blockers.size&&watch.attempts>=2){
    const [col,row]=this.nav.grid(unit.x,unit.y),steepStart=!this.nav.walkable[row*this.nav.size+col];
@@ -1911,9 +2023,18 @@ export class Mission{
     unit.path=fixedGoal?[...parking,{x:destination.x,y:destination.y}]:parking;
     if(!fixedGoal)Object.assign(unit.task,parking.at(-1));
    }
-  }else unit.path=(yield* this.vehiclePathSteps(unit,destination,{avoidMoving:true,maxGoalDistance:precise||fixedGoal?.01:unit.combatParking?4:16,fallback:!unit.combatParking&&!fixedGoal}))??unit.path;
+  }else{
+   // Parked bodies can close the coarse occupancy grid around an otherwise
+   // valid accepted slot. Do not retain a route through a newly built wall
+   // just because the body-aware search failed. A terrain/building route
+   // keeps the same exact destination; live hull checks still govern travel.
+   const blockedStaticLeg=!this.nav.lineClear(unit,point,false,true);
+   unit.path=(yield* this.vehiclePathSteps(unit,destination,{avoidMoving:true,
+    maxGoalDistance:precise||fixedGoal?.01:unit.combatParking?4:16,
+    fallback:!unit.combatParking&&(!fixedGoal||blockedStaticLeg)}))??unit.path;
+  }
   if(recoveryCondition&&watch.attempts>=3&&!unit.detour&&unit.path.map(point=>point.x+','+point.y).join(';')===recoveryRoute)
-   rememberRecoveryFailure(unit,recoveryCondition);
+   rememberRecoveryFailure(unit,recoveryCondition,this.state.time);
   return !!pose;
  }
  nearbyParking(...args){this.finishPendingStep();return completeSteps(this.nearbyParkingSteps(...args));}
@@ -1987,7 +2108,7 @@ export class Mission{
    unit.path=(yield* this.workPathSteps(unit,target))??[];unit.lastRepath=this.state.time;
   }
   (yield* this.moveSteps(unit,dt));
-  if(unit.task?.type==='move'&&!unit.path.length){
+  if(unit.task?.type==='move'&&!unit.path.length&&!followsContinuation(unit)){
    if(distance(unit,unit.task)<(unit.routeOrder?2:24)&&borrowedHomeClear(this,unit)){
     unit.task=null;
     const building=unit.resumeConstructionId&&this.entity(unit.resumeConstructionId);
@@ -2015,47 +2136,33 @@ export class Mission{
  updateUnit(...args){this.finishPendingStep();return completeSteps(this.updateUnitSteps(...args));}
  *updateUnitSteps(unit,dt){
   const x=unit.x,y=unit.y;beginNavigationStep(unit);
-  try{return yield* this.executeUnitSteps(unit,dt);}
+  try{return yield* this.trafficCoordinator.currentIntentSteps(this,this.executeUnitSteps(unit,dt),[unit]);}
   finally{finishNavigationStep(this,unit,dt,x,y);}
  }
  *executeUnitSteps(unit,dt){
   if(unit.hp<=0)return;unit.previousX=unit.x;unit.previousY=unit.y;unit.previousHeading=unit.heading;unit.previousWheelDistance=unit.wheelDistance??0;unit.previousSteering=unit.steering??0;unit.cooldown=Math.max(0,unit.cooldown-dt);const spec=this.unitSpec(unit);
+  updateSteeringDamage(this,unit);
+  // Turret fire is independent of withdrawal movement. Factory approaches
+  // and shared passing manoeuvres can both return from the dispatcher early.
+  // Only select a target already in range; never replace the retreat route.
+  if(spec.damage&&unit.cooldown<=0&&!inFactoryInterior(unit)
+   &&(unit.combatRetreat||unit.factoryVisit||shouldAutoRetreat(unit,spec))){
+   const enemy=automaticCombatTarget(this,unit,spec);if(enemy)this.attack(unit,enemy,spec);
+  }
   if(unit.factoryVisit&&['entering','inside','leaving','departure'].includes(unit.factoryVisit.phase)){
    const factory=this.state.buildings.find(b=>b.id===unit.factoryVisit.factoryId)??{...unit.factoryVisit.factory,hp:0};
    yield* updateFactoryVisit(this,unit,factory,dt);return;
   }
-  if(unit.pendingOrder&&shouldAutoRetreat(unit,spec)){
-   // Invalidate only this member's queued command. The planner's revision
-   // checks discard its stale result; retreat search still uses this tick's
-   // normal yielding work budget below.
-   delete unit.pendingOrder;delete unit.commandRevision;
-  }
-  if(unit.pendingOrder){
-   unit.driveSpeed=0;
-   const pending=unit.pendingOrder,blocked=pending.status==='blocked';
-   const unreachable=blocked&&['static-disconnected','route-unreachable','destination-terrain-forbidden'].includes(pending.reason);
-   navigationDecision(unit,unreachable?'UNREACHABLE':blocked?'BLOCKED':'GLOBAL_REPLAN',pending.reason??'command-route-pending',pending.blockerId??null,blocked?'await-changed-conditions':'apply-current-order-result');
-   return;
-  }
-  if(unit.commandStartAfter!==undefined){
-   if(this.state.time<=unit.commandStartAfter){unit.driveSpeed=0;navigationDecision(unit,'WAITING_RESERVATION','await-next-traffic-snapshot',null,'start-on-next-tick');return;}
-   delete unit.commandStartAfter;
-  }
+  if(yield* this.trafficCoordinator.prepareUnitSteps(this,unit,spec,dt))return;
   if(unit.task?.artifactId||unit.task?.salvageId){
-   if(yield* updateCombatRetreat(this,unit,spec,dt))return;
    if(yield* updatePickupOrder(this,unit)){
     const enemy=spec.damage&&automaticCombatTarget(this,unit,spec);if(enemy)this.attack(unit,enemy,spec);
     return;
    }
   }
-  if(unit.combatRetreat?.forced){
-   if(unit.foldTime>0){unit.foldTime=Math.max(0,unit.foldTime-dt);unit.tool=Math.max(0,unit.tool-dt/2.6);return;}
-   if(yield* updateCombatRetreat(this,unit,spec,dt))return;
-  }
   if(spec.role==='builder'){(yield* this.updateBuilderSteps(unit,dt));return;}
   if(unit.foldTime>0){unit.foldTime=Math.max(0,unit.foldTime-dt);unit.tool=Math.max(0,unit.tool-dt/2.6);return;}
   if(yield* updateScavCombat(this,unit,spec,dt))return;
-  if(yield* updateCombatRetreat(this,unit,spec,dt))return;
   if(yield* updateCombatDeployment(this,unit,spec,dt))return;
   if(unit.task?.type==='attack-move'){
    const enemy=movementCombatTarget(this,unit,spec);
@@ -2070,6 +2177,7 @@ export class Mission{
    if(unit.combatDisengage){const target=automaticCombatTarget(this,unit,spec);if(target)this.attack(unit,target,spec);}
    yield* updateCombatParking(this,unit);
    if(unit.pendingOrder||unit.task?.type!=='attack-move')return;
+   if(waitingForContinuation(unit))return;
    if(!unit.path.length){
     if(distance(unit,unit.task)<(unit.routeOrder?2:unit.combatParking?this.config.worldScale*4:24)
       &&(!unit.combatParking||this.nav.lineClear(unit,unit.task,false,true))&&borrowedHomeClear(this,unit))unit.task=null;
@@ -2109,7 +2217,7 @@ export class Mission{
    if(target&&['build','repair','demolish'].includes(unit.task?.type)&&!unit.path.length&&this.state.time-(unit.lastRepath??-10)>1){
     unit.path=(yield* this.workPathSteps(unit,target));unit.lastRepath=this.state.time;
    }
-   if(unit.task?.type==='move'&&!unit.path.length){
+   if(unit.task?.type==='move'&&!unit.path.length&&!followsContinuation(unit)){
     if(distance(unit,unit.task)<(unit.routeOrder?2:24)&&borrowedHomeClear(this,unit))unit.task=null;
     else if(this.state.time-(unit.lastRepath??-10)>=.4){
      unit.path=(yield* this.vehiclePathSteps(unit,unit.task,unit.routeOrder?{fallback:false,maxGoalDistance:.01}:{}))??[];
@@ -2119,9 +2227,10 @@ export class Mission{
    yield* this.moveSteps(unit,dt);
   }
  }
- clearFactoryApron(building,departure,blockers){
-  const idle=other=>other.owner===building.owner&&!other.task&&!other.path.length&&!other.detour
-   &&this.unitSpec(other).role!=='builder';
+ clearFactoryApron(...args){this.finishPendingStep();return completeSteps(this.clearFactoryApronSteps(...args));}
+ *clearFactoryApronSteps(building,departure,blockers,current=()=>true){
+  const idle=other=>other.owner===building.owner&&!other.task&&!other.path.length&&!other.detour&&!other.jointTraffic
+   &&!other.pendingOrder&&!other.yieldReturn&&!other.combatRetreat&&this.unitSpec(other).role!=='builder';
   if(![...blockers].every(idle))return;
   const scale=this.config.worldScale;
   const leader={...departure,path:[{
@@ -2131,14 +2240,23 @@ export class Mission{
   for(const other of blockers){
    if(other.trafficRest>this.state.time)continue;
    other.trafficRest=this.state.time+4;
-   const parking=this.parkingManeuver(other,leader,(from,to)=>this.vehicleMotionClear(other,from,to));
+   const world=this.state,revision=other.commandRevision,topology=this.nav.topologyRevision,
+    pose={x:other.x,y:other.y,heading:other.heading};
+   const parking=yield* this.trafficCoordinator.currentIntentSteps(this,this.parkingManeuverSteps(other,leader,(from,to)=>this.vehicleMotionClear(other,from,to)),[other,leader]);
+   if(this.state!==world||!current()||this.nav.topologyRevision!==topology)return;
+   if(other.hp<=0||!idle(other)||other.commandRevision!==revision
+    ||other.x!==pose.x||other.y!==pose.y||other.heading!==pose.heading)continue;
    if(!parking)continue;
    other.detour={legs:parking.legs,parking:true,idleYield:true,blocked:0,factoryExit:building.id};
    building.exitYield=other.id;
    return;
   }
  }
- spawnProducedVehicle(building,item,spec){
+ spawnProducedVehicle(...args){this.finishPendingStep();return completeSteps(this.spawnProducedVehicleSteps(...args));}
+ *spawnProducedVehicleSteps(building,item,spec){
+  const world=this.state,topology=this.nav.topologyRevision,rallyKey=JSON.stringify(building.rally);
+  const current=()=>this.state===world&&building.hp>0&&building.queue[0]===item
+   &&this.nav.topologyRevision===topology&&JSON.stringify(building.rally)===rallyKey;
   if(building.exitYield){
    const yielding=this.entity(building.exitYield);
    if(yielding?.hp>0&&yielding.detour?.factoryExit===building.id)return false;
@@ -2154,14 +2272,13 @@ export class Mission{
   const solids=this.nav.nearbySolids(door,scale*4.8+distance(door,departure));
   const apron=vehicleSweep(door,departure,scale,this.field);
   if(!this.nav.lineClear(door,departure,false,true,.52,true)
-   ||!vehicleGroundSafe(apron.end,.52)
    ||!this.nav.clearSolidSweep(vehicleSweep(door,door,scale,this.field),solids)
    ||!this.nav.clearSolidSweep(apron,solids))return false;
   const blockers=new Set();
   const doorClear=clearOfVehicles(null,door,this.state.units,scale,true,null,this.field,blockers);
   const apronClear=clearOfVehicles(null,departure,this.state.units,scale,false,door,this.field,blockers,apron);
   if(!doorClear||!apronClear){
-   this.clearFactoryApron(building,door,blockers);
+   yield* this.clearFactoryApronSteps(building,door,blockers,current);
    return false;
   }
 
@@ -2173,8 +2290,8 @@ export class Mission{
    const end=other.path.at(-1);
    if(other.hp>0&&other.owner==='rai'&&end&&distance(end,rally)<scale*25)reservations.push(end);
   }
-  const path=this.movePath(departure,rally,reservations,scale*27);
-  if(!path)return false;
+  const path=yield* this.movePathSteps(departure,rally,reservations,scale*27);
+  if(!path||!current())return false;
   const project=latestVehicleProject(this.state.designs,item,this.config);
   const design=item.projectId?{projectId:project?.id??item.projectId,designName:project?.name??item.name,components:[...item.components],paint:vehiclePaint(item).id}:{};
   const unit=this.addUnit(item.kind,'rai',exit,design),destination=path.at(-1);
@@ -2202,7 +2319,8 @@ export class Mission{
   this.state.powered=slots>0;
   return generation;
  }
- updateEconomy(dt){
+ updateEconomy(dt){this.finishPendingStep();return completeSteps(this.updateEconomySteps(dt));}
+ *updateEconomySteps(dt){
   const structures=this.state.buildings.filter(b=>b.owner==='rai'&&b.hp>0&&b.completed);
   const generation=this.linkOilWells(structures,dt);
   beginOilFlow(this,generation,dt);
@@ -2214,7 +2332,7 @@ export class Mission{
     const item=building.queue[0],unitSpec=this.config.units[item.kind];
     item.progress=Math.min(1,item.progress+fundedWorkTime(this,item,dt)/unitSpec.seconds);
     if(item.progress>=1&&!(building.exitRetryAt>this.state.time)){
-     if(this.spawnProducedVehicle(building,item,spec)){
+     if(yield* this.spawnProducedVehicleSteps(building,item,spec)){
       delete building.exitBlocked;
       delete building.exitRetryAt;
      }else{
@@ -2258,10 +2376,12 @@ export class Mission{
   if(!s.units.some(u=>u.owner==='rai'&&u.hp>0&&this.unitSpec(u).role==='builder')&&!s.buildings.some(b=>b.owner==='rai'&&b.hp>0&&b.completed&&b.kind==='factory')){s.status='defeat';this.emit('defeat',{reason:'Утрачены строители и производство'});}
  }
  beginTick(dt,budgeted=false){
+  this.trafficCoordinator.publishPlanning(this);
   refreshCommandGroups(this);
   auditNavigationWaits(this);
   this.state.time+=dt;this.unitIndex.rebuild(this.state.units);
   this.unitIndexActive=true;
+  applyRouteContinuations(this);
   try{this.trafficCoordinator.update(this);}finally{this.unitIndexActive=false;}
   this.pendingTick={dt,cursor:0,units:this.state.units.slice(),budgeted};
   if(this.state.parkingGoalReleases?.length){
@@ -2277,11 +2397,12 @@ export class Mission{
     if(pending.goalRelease.next().done)pending.goalRelease=null;
     if(performance.now()>=deadline)return false;
    }
+   this.applyPendingStops();
    while(pending.cursor<pending.units.length){
     const unit=pending.units[pending.cursor];
     pending.iterator??=this.updateUnitSteps(unit,dt);
     if(!pending.iterator.next().done){if(performance.now()>=deadline)return false;continue;}
-    pending.iterator=null;pending.cursor++;this.unitIndex.update(unit);
+    pending.iterator=null;this.applyPendingStops();pending.cursor++;this.unitIndex.update(unit);
     if(pending.budgeted)this.unitFrameTimes.set(unit,performance.now());
     if(performance.now()>=deadline&&pending.cursor<pending.units.length)return false;
    }
@@ -2290,7 +2411,17 @@ export class Mission{
     while(true){const step=pending.overlaps.next();if(step.done){pending.overlapsComplete=true;pending.overlaps=null;break;}
      if(performance.now()>=deadline)return false;}
    }
-   this.updateProjectiles();updateBurning(this);updateStreetFurniture(this);updateSalvage(this);updateWrecks(this);this.finalizeBuilderContacts(dt);this.updateConstructionSites();this.updateEconomy(dt);
+   if(!pending.economyStarted){
+    this.updateProjectiles();updateBurning(this);updateStreetFurniture(this);updateSalvage(this);updateWrecks(this);this.finalizeBuilderContacts(dt);this.updateConstructionSites();
+    pending.economyStarted=true;pending.iterator=this.updateEconomySteps(dt);
+   }
+   // Factory parking and exit routing can be as expensive as unit recovery.
+   // Keep them in the same suspended controller slot, so command publication
+   // and Stop retain their existing safe-boundary and cancellation rules.
+   while(pending.iterator){
+    if(pending.iterator.next().done){pending.iterator=null;this.applyPendingStops();break;}
+    if(performance.now()>=deadline)return false;
+   }
    for(const b of this.state.buildings)if(b.owner==='scavs'&&b.hp>0){b.cooldown=Math.max(0,b.cooldown-dt);const spec=this.buildingSpec(b);if(spec.damage){const enemy=this.nearestEnemy(b,spec.range);if(enemy)this.attack(b,enemy,spec);}}
    this.fogTimer+=dt;if(this.fogTimer>=.25){this.fogTimer=0;this.updateFog();}this.updateMission();if(this.navigationDirty){this.rebuildNavigation();this.navigationDirty=false;}
    this.pendingTick=null;updateOpeningConstruction(this);updateScavReinforcements(this);return true;
@@ -2300,7 +2431,7 @@ export class Mission{
   const scale=this.config.worldScale,pairs=this.collisionPairs??=new Map(),rockPairs=this.contactRockPairs??=new Map();
   const vx=-Math.sin(unit.heading)*speed,vy=Math.cos(unit.heading)*speed;
   for(const other of blockers){
-   if(!vehicleObstacle(other)||other===unit)continue;
+   if(!vehicleObstacle(other)||other===unit||!trafficCollisionRequired(unit,other))continue;
    const contact=vehicleContact(unit,other,scale,this.field);if(contact.gap>1.5||contact.gap<-.25*scale)continue;
    const v=other.hp>0?(other.driveSpeed??0)*(other.reversing?-1:1):0,n=contact.normal;
    const closing=((vx+Math.sin(other.heading)*v)*n[0]+(vy-Math.cos(other.heading)*v)*n[1])/scale,power=impactPower(closing);
@@ -2347,11 +2478,20 @@ export class Mission{
   if(distance(unit,point)<1)unit.path.shift();return true;
  }
  finishPendingStep(){if(this.pendingTick&&!this.unitIndexActive)this.continueTick();}
- tick(dt){this.continueTick();if(this.state.status!=='running')return;this.beginTick(dt);this.continueTick();}
+ tick(dt){this.continueTick();if(this.state.status!=='running')return;this.trafficCoordinator.advancePlanning(this,2);this.beginTick(dt);this.continueTick();}
  advance(seconds,{budgetMs=Infinity,rate=1}={}){
   const frameStarted=performance.now();
   if(!this.commandPlanner&&this.state.commandOrders?.some(order=>['queued','planning'].includes(order.status)))this.commandPlanner=new CommandPlanner(this);
-  this.commandPlanner?.advance(Number.isFinite(budgetMs)?Math.min(2,Math.max(0,budgetMs)):2);
+  // Command routes, local recovery and publication share one frame allowance.
+  // Individual JS geometry operations remain cooperative, not preemptible.
+  const planningBudget=Number.isFinite(budgetMs)?Math.min(2,Math.max(0,budgetMs)):2;
+  const planningDeadline=frameStarted+planningBudget;
+  this.commandPlanner?.advance(Math.min(planningBudget*.5,Math.max(0,planningDeadline-performance.now())));
+  this.trafficCoordinator.advancePlanning(this,Math.max(0,planningDeadline-performance.now()));
+  const planningMs=performance.now()-frameStarted;
+  this.planningStats??={maxFrameMs:0,maxOverrunMs:0};
+  this.planningStats.maxFrameMs=Math.max(this.planningStats.maxFrameMs,planningMs);
+  this.planningStats.maxOverrunMs=Math.max(this.planningStats.maxOverrunMs,planningMs-planningBudget);
   this.presentationRate=Math.max(.01,rate);
   this.accumulator+=Math.max(0,seconds);let ticks=0;
   const budgeted=Number.isFinite(budgetMs);
@@ -2368,6 +2508,15 @@ export class Mission{
  renderUnitPhase(unit,nowMs){const at=this.unitFrameTimes.get(unit);return at===undefined?null:clamp((nowMs-at)*(this.presentationRate??1)/(this.config.simulationStep*1000),0,1);}
  objectives(){const s=this.state,has=kind=>s.buildings.some(b=>b.owner==='rai'&&b.hp>0&&b.completed&&b.kind===kind);return [{id:'base',name:'Развернуть передовую базу',done:has('generator')&&has('factory')&&has('lab')&&this.defenseReady()},{id:'power',name:'Обеспечить энергоснабжение',done:s.powered},{id:'production',name:'Наладить производство техники',done:s.statistics.produced>0},{id:'research',name:'Организовать научные исследования',done:Object.keys(this.config.research).every(key=>s.research[key]),progress:Object.keys(s.research).length+'/3'},{id:'security',name:s.flags.contact?'Уничтожить четыре лагеря':'Обеспечить безопасность района',done:s.camps.every(c=>c.cleared)&&s.flags.raidWon,progress:s.camps.filter(c=>c.cleared).length+'/4'}];}
  save(){this.continueTick();this.updateFog();return JSON.stringify({version:1,mission:this.config.id,serial:this.serial,randomState:this.randomState,accumulator:this.accumulator,fogTimer:this.fogTimer,state:this.state,explored:Array.from(this.explored)});}
+ async saveAsync(){
+  const world=this.state;
+  while(this.pendingTick){
+   this.continueTick(performance.now()+5);
+   if(this.pendingTick)await new Promise(resolve=>setTimeout(resolve,0));
+   if(this.state!==world)throw new Error('Mission changed while saving');
+  }
+  return this.save();
+ }
  updateUnrevealedCampLayout(){
   // Revealed camps keep their saved positions so ongoing battles can resume.
   if(this.state.flags.lastRevealed)return;
@@ -2386,10 +2535,10 @@ export class Mission{
    });
   }
  }
- load(json){const data=typeof json==='string'?JSON.parse(json):json;if(data.version!==1||data.mission!==this.config.id||!Array.isArray(data.state?.units)||data.explored?.length!==16384)throw new Error('Несовместимое сохранение');this.state=data.state;
+ load(json){const data=typeof json==='string'?JSON.parse(json):json;if(data.version!==1||data.mission!==this.config.id||!Array.isArray(data.state?.units)||data.explored?.length!==16384)throw new Error('Несовместимое сохранение');this.state=data.state;for(const unit of this.state.units)delete unit.trafficOnScreen;
   this.oilSpent=0;this.oilWorkTime=null;
-  this.commandPlanner=null;this.scavJob=null;
-  this.pendingTick=null;this.unitFrameTimes=new WeakMap();this.unitIndexActive=false;this.collisionPairs=new Map();this.contactRockPairs=new Map();this.trafficCoordinator=new TrafficCoordinator();
+  this.commandPlanner=null;this.scavJob=null;this.pendingStops=null;
+  this.pendingTick=null;this.unitFrameTimes=new WeakMap();this.unitIndexActive=false;this.collisionPairs=new Map();this.contactRockPairs=new Map();this.trafficCoordinator=new PredictiveTraffic();
   ensureSalvage(this);
   this.state.projectiles??=[];
   if(!this.state.scavRosterVersion){
@@ -2399,9 +2548,10 @@ export class Mission{
    this.state.scavRosterVersion=1;
   }
   for(const unit of this.state.units)if(unit.hp<=0&&unit.damage?.wreck)this.freezeWreck(unit);
-  const legacyWrecks=[];
+  const legacyWrecks=[],armyPolicy=normalizeCombatPolicy(armyCombatPolicy(this));this.state.armyCombatPolicy=armyPolicy;
   for(const entity of [...this.state.units,...this.state.buildings]){
    if(entity.combatPolicy)entity.combatPolicy=normalizeCombatPolicy(entity.combatPolicy);
+   if(entity.owner==='rai'&&this.config.units[entity.kind]?.damage)entity.combatPolicy={...armyPolicy};
    upgradeDamageState(entity.damage,!!this.config.units[entity.kind]);
    if(this.config.units[entity.kind])syncFieldHp(this,entity);
    if(entity.hp<=0){if(entity.destroyedAt===undefined)legacyWrecks.push(entity);scheduleWreck(this,entity);}

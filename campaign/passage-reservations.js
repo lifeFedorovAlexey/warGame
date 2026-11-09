@@ -1,4 +1,4 @@
-import {vehicleEnvelope,footprintSupport,vehicleSweep} from './vehicle-collision.js';
+import {vehicleEnvelope,footprintSupport,vehicleSweep,trafficCollisionRequired} from './vehicle-collision.js';
 
 const maximumBatch=4;
 const keyFor=t=>[t.along,t.low,t.high,t.centre,t.width].join(':');
@@ -10,6 +10,7 @@ const axis=(shape,t)=>t.along==='x'?{centre:shape.x,radius:footprintSupport(shap
 export function passageWaitClear(mission,unit,from,to){
  const decision=mission.trafficCoordinator.passageDecisions.get(unit.id),t=unit.passage?.throat;
  if(!decision||decision.admitted||!t)return true;
+ if(decision.yieldTo&&!trafficCollisionRequired(unit,mission.entity(decision.yieldTo)))return true;
  const scale=mission.config.worldScale,skin=scale*.055+.02,sweep=vehicleSweep(from,to,scale,mission.field);
  const clearance=shape=>{const a=axis(shape,t);return decision.direction>0
   ?t.low-decision.apron-skin-a.centre-a.radius:a.centre-a.radius-t.high-decision.apron-skin;};
@@ -101,7 +102,8 @@ export function updatePassageReservations(mission,living){
   for(const unit of requests){
    const shape=vehicleEnvelope(unit,scale,field),a=axis(shape,t),direction=unit.passage.direction;
    const exited=direction>0?a.centre-a.radius>t.high+skin:a.centre+a.radius<t.low-skin;
-   const admitted=exited||lease.admitted.includes(unit.id);
+   const relevant=[...occupied,...requests].some(other=>other!==unit&&trafficCollisionRequired(unit,other));
+   const admitted=!relevant||exited||lease.admitted.includes(unit.id);
    // Leave enough real apron for the exiting car's Ackermann turn and its
    // rotating body, not merely the centre point beyond the bridge mouth.
    const stopAt=direction>0?t.low-apron-a.radius-skin:t.high+apron+a.radius+skin;

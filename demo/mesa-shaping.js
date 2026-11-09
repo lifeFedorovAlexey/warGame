@@ -19,5 +19,34 @@ export function shapeMesaRims(field){
   const target=sample(x+wxOffset,y+wyOffset),change=clamp((target-h)*.84,-6,6)*mask*border;
   field.renderSamples[i]=h+change;if(Math.abs(change)>.001){changedVertices++;maxChangeMetres=Math.max(maxChangeMetres,Math.abs(change));}
  }
- return {changedVertices,maxChangeMetres,maxAllowedChangeMetres:6,flatInteriorVertices};
+ // Explicit local visual profiles follow authored level rims. They do not
+ // determine passability; navigation continues to use its level walls/gates.
+ let profiledVertices=0;
+ for(const profile of field.terrainProfiles??[]){
+  const segments=[];let total=0;
+  for(let i=1;i<profile.points.length;i++){
+   const a=profile.points[i-1],b=profile.points[i],dx=b[0]-a[0],dy=b[1]-a[1],length=Math.hypot(dx,dy);
+   segments.push({a,dx,dy,length,start:total});total+=length;
+  }
+  const radius=profile.blendMetres,points=profile.points;
+  const x0=clamp(Math.floor((Math.min(...points.map(p=>p[0]))-radius+field.half)/field.renderCell),0,n-1);
+  const x1=clamp(Math.ceil((Math.max(...points.map(p=>p[0]))+radius+field.half)/field.renderCell),0,n-1);
+  const y0=clamp(Math.floor((field.half-Math.max(...points.map(p=>p[1]))-radius)/field.renderCell),0,n-1);
+  const y1=clamp(Math.ceil((field.half-Math.min(...points.map(p=>p[1]))+radius)/field.renderCell),0,n-1);
+  for(let row=y0;row<=y1;row++)for(let col=x0;col<=x1;col++){
+   const x=col*field.renderCell-field.half,y=field.half-row*field.renderCell;let closest=null,gap=Infinity;
+   for(const segment of segments){
+    const {a,dx,dy,length}=segment,t=clamp(((x-a[0])*dx+(y-a[1])*dy)/(length*length),0,1);
+    const ox=x-a[0]-dx*t,oy=y-a[1]-dy*t,d=Math.hypot(ox,oy);
+    if(d<gap){gap=d;closest={side:(dx*oy-dy*ox)/length,along:segment.start+t*length};}
+   }
+   if(gap>=radius)continue;
+   const half=profile.slopeWidthMetres/2;
+   const weight=(1-smooth(half,radius,gap))*smooth(0,profile.endBlendMetres,closest.along)
+    *smooth(0,profile.endBlendMetres,total-closest.along);
+   const height=profile.bottom+(profile.top-profile.bottom)*smooth(-half,half,closest.side),i=row*n+col;
+   field.renderSamples[i]+=(height-field.renderSamples[i])*weight;if(weight>.001)profiledVertices++;
+  }
+ }
+ return {changedVertices,maxChangeMetres,maxAllowedChangeMetres:6,flatInteriorVertices,profiledVertices};
 }

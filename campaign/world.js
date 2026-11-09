@@ -5,6 +5,7 @@ import {createDesertSky} from '../demo/sky.js';
 import {createVehicleLayer} from './vehicle-layer.js';
 import {createHealthBars} from './health-bars.js';
 import {createFactoryServiceEffects,factoryShutterDamagePose} from './factory-service-effects.js';
+import {createFactoryRoadView} from './factory-road-view.js';
 import {createBuildingPrefab} from './prefabs.js';
 import {createScavPrefab} from './scav-prefabs.js';
 import {createScavBasePrefab} from './scav-base-prefabs.js';
@@ -24,12 +25,11 @@ import {createFogMask} from './fog-mask.js';
 import {createStorySignals} from './story-signals.js';
 import {createRallyFlags} from './rally-flags.js';
 import {createBaseYard} from './base-yard.js';
-import {createFactoryRoadView} from './factory-road-view.js';
 import {createDamEnvironment} from './dam-environment.js';
 import {createDesertDressing} from './desert-dressing.js';
 import {createFieldArtifact} from './field-artifacts.js';
 import {combatContact} from './combat-contact.js';
-import {vehicleLocalBoxes} from './vehicle-collision.js';
+import {vehicleLocalBoxes,vehicleRadiusBound} from './vehicle-collision.js';
 import {buildLayerHeight} from './builder-optics.js';
 import {createDamageSystem} from './damage-system.js';
 import {partMissing} from './damage-state.js';
@@ -84,6 +84,10 @@ export async function createCampaignWorld(host,config,sound,loading){
  sun.shadow.camera.up.set(0,0,1);
  let lastWorldTime=-1,lastScaleAt=0,frameAverage=.023,terrainMode='',lastShadowLod=-1,fixedRenderScale=false,lastDamageRows=-1,minimumCameraHeight=40;
  const shadowCasters=createShadowCasters();
+ const shaderWarmup=new T.Group(),preparedBuildings=new Set();
+ shaderWarmup.name='shader_preload';
+ let shadersPrepared=false;
+ const shaderPreparation={runs:0,totalMs:0};
  let shadowUpdates=0;
  const damageCasters=['damage_debris_pool','recoverable_parts'].map(name=>scene.getObjectByName(name)).filter(Boolean);
  const shadowCentre=new T.Vector3(Infinity,Infinity,Infinity);
@@ -93,6 +97,7 @@ export async function createCampaignWorld(host,config,sound,loading){
  const oilMarkers=config.oilFields.map(grid=>{const p=field.gridToWorld(grid),root=new T.Group();root.position.set(p.x,p.y,field.heightAt(p.x,p.y)+.25);const ring=new T.Mesh(new T.RingGeometry(10,11.5,24),new T.MeshBasicMaterial({color:'#baac72',transparent:true,opacity:.65,side:T.DoubleSide,depthWrite:false}));root.add(ring);const pipe=new T.Mesh(new T.CylinderGeometry(1.7,2,3,10),new T.MeshStandardMaterial({color:'#44463b',metalness:.6,roughness:.8}));pipe.rotation.x=Math.PI/2;pipe.position.z=1.5;root.add(pipe);scene.add(root);return{root,...p};});
  const artifactObjects=new Map();
  const ringGeometry=new T.RingGeometry(1,1.08,64),selectedMaterial=new T.MeshBasicMaterial({color:'#c0ce93',transparent:true,opacity:.85,depthWrite:false,side:T.DoubleSide,polygonOffset:true,polygonOffsetFactor:-1}),selectionRings=[];
+ const blockerMaterial=new T.MeshBasicMaterial({color:'#ff352b',transparent:true,opacity:.95,depthWrite:false,side:T.DoubleSide,polygonOffset:true,polygonOffsetFactor:-1});
  selectionRoot.name='selection_rings';
  for(let i=0;i<48;i++){const ring=new T.Mesh(ringGeometry.clone(),selectedMaterial);ring.visible=false;selectionRoot.add(ring);selectionRings.push(ring);}
  const marker=new T.Mesh(new T.RingGeometry(6,7,32),new T.MeshBasicMaterial({color:'#cfb473',transparent:true,opacity:.7,depthWrite:false,side:T.DoubleSide}));marker.visible=false;scene.add(marker);let markerUntil=0;
@@ -173,6 +178,66 @@ export async function createCampaignWorld(host,config,sound,loading){
   }
   return prefabs.get(key);
  }
+ // Run while the loading screen still covers the canvas. Keep representative
+ // materials alive so later LOD switches, construction and debris reuse their
+ // programs instead of synchronously compiling on a gameplay frame.
+ async function prepareRendering(mission){
+  const started=performance.now(),previousCount=preparedBuildings.size;
+  const definitions=[...Object.keys(config.buildings).filter(kind=>!config.buildings[kind].enemyOnly)
+   .map(kind=>({kind,owner:'rai'})),...mission.state.buildings];
+  for(const entity of definitions){
+   const {kind,owner='rai',campId,scavVariant,fenceSpan,fenceProfile}=entity;
+   const key=[kind,owner,campId,scavVariant,fenceSpan,fenceProfile].join(':');
+   if(preparedBuildings.has(key))continue;preparedBuildings.add(key);
+   const raw=getPrefab(kind,owner,campId,scavVariant,fenceSpan,fenceProfile).clone(true);
+   shaderWarmup.add(raw);
+   if(owner==='rai'){
+    const preview=raw.clone(true),copies=new Map();
+    const copy=source=>{if(!copies.has(source)){const material=source.clone();material.transparent=true;material.opacity=Math.min(source.opacity,.72);material.depthWrite=true;copies.set(source,material);}return copies.get(source);};
+    preview.traverse(mesh=>{if(mesh.isMesh){mesh.material=Array.isArray(mesh.material)?mesh.material.map(copy):copy(mesh.material);mesh.castShadow=false;}});
+    shaderWarmup.add(preview);
+   }
+   for(const completed of [true,false]){
+    if(!completed&&owner!=='rai')continue;
+    const model=raw.clone(true);damage.attachBuilding(model,entity);
+    if(!completed)construction.building(model,{...entity,completed:false,progress:.5,groundHeight:0},config.buildings[kind]);
+    shaderWarmup.add(model);
+   }
+  }
+  if(shadersPrepared&&preparedBuildings.size===previousCount)return;
+  if(!shadersPrepared){
+   vehicles.preloadMaterials(shaderWarmup);
+   factoryEffects.preloadMaterials(shaderWarmup);
+   for(const key of new Set(mission.state.artifacts.map(a=>a.key)))shaderWarmup.add(createFieldArtifact(T,key));
+   shadersPrepared=true;
+  }
+  // compileAsync visits invisible meshes too. Include custom shadow materials;
+  // the renderer normally encounters those only on the first shadow pass.
+  const depthRoot=new T.Group();
+  for(const root of [scene,shaderWarmup])root.traverse(object=>{
+   if(!object.isMesh||!object.customDepthMaterial)return;
+   const proxy=object.clone(false),source=object.material,depth=object.customDepthMaterial;
+   depth.side=source.shadowSide??[T.BackSide,T.FrontSide,T.DoubleSide][source.side];
+   for(const key of ['map','alphaMap','alphaTest','clipShadows','clippingPlanes','clipIntersection'])depth[key]=source[key];
+   proxy.material=depth;depthRoot.add(proxy);
+  });
+  terrain.setViewMode('overview');
+  await renderer.compileAsync(scene,camera);
+  terrain.setViewMode('close');
+  await renderer.compileAsync(scene,camera);
+  await renderer.compileAsync(shaderWarmup,camera,scene);
+  await renderer.compileAsync(depthRoot,camera,scene);
+  // Finish uploads and any driver-specific shadow/clipping variants before
+  // revealing gameplay. No mission time, order or camera pose is changed.
+  const saved=[];scene.add(shaderWarmup);
+  scene.traverse(object=>{
+   saved.push([object,object.visible,object.frustumCulled]);object.visible=true;
+   if(object.isMesh||object.isPoints||object.isLine)object.frustumCulled=false;
+  });
+  try{for(const mode of ['overview','close']){terrain.setViewMode(mode);renderer.shadowMap.needsUpdate=true;renderer.render(scene,camera);}}
+  finally{for(const [object,visible,culled] of saved){object.visible=visible;object.frustumCulled=culled;}scene.remove(shaderWarmup);terrain.setViewMode(terrainMode||'close');renderer.shadowMap.needsUpdate=true;}
+  shaderPreparation.runs++;shaderPreparation.totalMs+=performance.now()-started;
+ }
  function buildingCards(){
   const stage = new T.Scene(), camera = new T.OrthographicCamera(-1,1,1,-1,.1,80);
   stage.background = new T.Color('#41433c');
@@ -251,6 +316,22 @@ export async function createCampaignWorld(host,config,sound,loading){
   position.needsUpdate=true;
  }
  function commandMarker(point,hostile=false){marker.position.set(point.x,point.y,field.heightAt(point.x,point.y)+.4);marker.material.color.set(hostile?'#f4a081':'#cfb473');marker.visible=true;markerUntil=performance.now()+1000;}
+ const trafficFrustum=new T.Frustum(),trafficProjection=new T.Matrix4(),trafficSphere=new T.Sphere();
+ function updateTrafficVisibility(mission){
+  camera.updateMatrixWorld();trafficFrustum.setFromProjectionMatrix(trafficProjection.multiplyMatrices(camera.projectionMatrix,camera.matrixWorldInverse));
+  let visible=0,hidden=0;
+  for(const unit of mission.state.units){
+   if(unit.hp<=0||unit.owner!=='rai'||isInfantry(unit))continue;
+   // The sphere encloses the whole model and the next movement step. Switch
+   // collision back on before any part of the car can enter the camera.
+   const scale=config.worldScale,radius=vehicleRadiusBound(unit.kind,scale);
+   trafficSphere.center.set(unit.x,unit.y,field.heightAt(unit.x,unit.y)+scale*1.5);
+   trafficSphere.radius=Math.hypot(radius,scale*1.8)+(config.units[unit.kind]?.speed??0)*config.simulationStep;
+   unit.trafficOnScreen=trafficFrustum.intersectsSphere(trafficSphere);
+   if(unit.trafficOnScreen)visible++;else hidden++;
+  }
+  mission.trafficCamera={visible,hidden};
+ }
  function update(mission,selected,dt,live=false,showHealth=true){
   factoryRoads.update(mission);
   const time=mission.state.time,now=performance.now()/1000,shotsThisFrame=mission.drainEffects();
@@ -272,6 +353,7 @@ export async function createCampaignWorld(host,config,sound,loading){
   }
   const distance=camera.position.distanceTo(controls.target),pan=distance*dt*.7;let dx=(keys.has('KeyD')?1:0)-(keys.has('KeyA')?1:0),dy=(keys.has('KeyW')?1:0)-(keys.has('KeyS')?1:0);if(dx||dy){const right=new T.Vector3().setFromMatrixColumn(camera.matrixWorld,0);right.z=0;right.normalize();const forward=new T.Vector3(-right.y,right.x,0);const offset=right.multiplyScalar(dx*pan).addScaledVector(forward,dy*pan);camera.position.add(offset);controls.target.add(offset);}
   controls.target.x=T.MathUtils.clamp(controls.target.x,-field.half,field.half);controls.target.y=T.MathUtils.clamp(controls.target.y,-field.half,field.half);controls.update();camera.position.z=Math.max(camera.position.z,field.heightAt(camera.position.x,camera.position.y)+minimumCameraHeight);
+  updateTrafficVisibility(mission);
   sky.update(camera,false);
   if(baseYard.update(mission,time+(live?mission.accumulator:0)))renderer.shadowMap.needsUpdate=true;
   if(dam.update(mission,camera,time+(live?mission.accumulator:0),live))renderer.shadowMap.needsUpdate=true;
@@ -284,7 +366,7 @@ export async function createCampaignWorld(host,config,sound,loading){
   // Update rising/clipped geometry before the scanner finds its surface.
   for(const b of mission.state.buildings){const object=buildings.get(b.id);if(object&&b.owner==='rai'&&b.hp>0&&!b.completed)construction.building(object,b,config.buildings[b.kind]);}
   vehicles.update(mission,distance,shotTimes,now,camera,buildings,time+(live?mission.accumulator:0));
-  construction.update(vehicles.workBeams,time);
+  construction.update(vehicles.workBeams,time,mission);
   const texel=800/sun.shadow.mapSize.x,shadowX=controls.target.dot(lightRight),shadowY=controls.target.dot(lightUp);
   stableTarget.copy(controls.target).addScaledVector(lightRight,Math.round(shadowX/texel)*texel-shadowX).addScaledVector(lightUp,Math.round(shadowY/texel)*texel-shadowY);
   const targetMoved=shadowCentre.distanceToSquared(stableTarget)>.03;
@@ -332,7 +414,17 @@ export async function createCampaignWorld(host,config,sound,loading){
    shadowCasters.watch(b.id,b.kind,b.owner,b.campId,b.x,b.y,object.position.z,b.rotation,b.progress,b.completed,b.clearing,
     object.userData.pumpPhase,aim?.x,aim?.y,aim?.z,recoil);
   }
-  let index=0;for(const id of selected){const entity=mission.entity(id);if(!entity||entity.factoryVisit?.phase==='inside'||index>=selectionRings.length)continue;const ring=selectionRings[index++],pose=vehicles.transforms.get(id)?.position,profile=SCAV_PROFILES[entity.kind];ring.visible=true;const radius=entity.path?(profile?.infantry?3:profile?Math.max(8,profile.boxes[0][2]*config.worldScale):8):Math.max(entity.halfWidth,entity.halfDepth)*1.1;placeSelectionRing(ring,field,pose?.x??entity.x,pose?.y??entity.y,radius);}for(;index<selectionRings.length;index++)selectionRings[index].visible=false;
+  const blockers=mission.navigationDiagnostics?.blockingIds??new Set(),marked=new Set([...blockers,...selected]);
+  let index=0;
+  for(const id of marked){
+   const entity=mission.entity(id);if(!entity||entity.factoryVisit?.phase==='inside'||entity.hp<=0||entity.owner!=='rai'&&!mission.visibleAt(entity.x,entity.y))continue;
+   if(index>=selectionRings.length){const ring=new T.Mesh(ringGeometry.clone(),selectedMaterial);selectionRoot.add(ring);selectionRings.push(ring);}
+   const ring=selectionRings[index++],pose=vehicles.transforms.get(id)?.position,profile=SCAV_PROFILES[entity.kind];
+   ring.visible=true;ring.material=blockers.has(id)?blockerMaterial:selectedMaterial;ring.userData.entity=id;ring.userData.trafficBlocker=blockers.has(id);
+   const radius=entity.path?(profile?.infantry?3:profile?Math.max(8,profile.boxes[0][2]*config.worldScale):8):Math.max(entity.halfWidth,entity.halfDepth)*1.1;
+   placeSelectionRing(ring,field,pose?.x??entity.x,pose?.y??entity.y,radius);
+  }
+  for(;index<selectionRings.length;index++)selectionRings[index].visible=false;
   for(const event of shotsThisFrame){
    if(event.type==='explosion'){
     if(event.owner==='rai'||mission.visibleAt(event.to.x,event.to.y))combat.explode(new T.Vector3(event.to.x,event.to.y,event.to.z),event.radius,now,camera);
@@ -385,7 +477,7 @@ export async function createCampaignWorld(host,config,sound,loading){
    shadowCasters.watch(artifact.id,artifact.x,artifact.y,artifact.key);
   }
   if(time-dustTime>.16){dustTime=time;for(const unit of mission.state.units){if(unit.hp<=0||isInfantry(unit)||unit.owner!=='rai'&&!mission.visibleAt(unit.x,unit.y)||Math.hypot(unit.x-unit.previousX,unit.y-unit.previousY)<.15)continue;particles.push({x:unit.x+Math.sin(unit.heading)*9,y:unit.y-Math.cos(unit.heading)*9,z:field.heightAt(unit.x,unit.y)+1,born:time});}}while(particles.length>256)particles.shift();for(let i=particles.length-1;i>=0;i--)if(time-particles[i].born>2.5)particles.splice(i,1);particles.forEach((p,i)=>dustPositions.set([p.x+(time-p.born)*1.8,p.y,p.z+(time-p.born)*1.2],i*3));dustGeometry.attributes.position.needsUpdate=true;dustGeometry.setDrawRange(0,particles.length);marker.visible=performance.now()<markerUntil;
-  if(factoryEffects.update(mission,buildings,time,dt))renderer.shadowMap.needsUpdate=true;
+  if(factoryEffects.update(mission,buildings,time,dt,camera))renderer.shadowMap.needsUpdate=true;
   let engine=0,rolling=0,slip=0,road=0;
   for(const unit of vehicles.visible){
    const distance=Math.hypot(unit.x-controls.target.x,unit.y-controls.target.y),volume=Math.max(0,1-distance/380);
@@ -397,11 +489,13 @@ export async function createCampaignWorld(host,config,sound,loading){
    slip=Math.max(slip,volume*speed*Math.min(1,Math.abs(unit.steering??0)*.65+Math.hypot(slope.x,slope.y)*1.7));
    if(terrain.field.roadBlendAt)road=Math.max(road,terrain.field.roadBlendAt(unit.x,unit.y)*volume);
   }
-  const projection=vehicles.workBeams.reduce((level,{from})=>{
+  let projection=0,buildingScan=0;
+  for(const {from,mode} of vehicles.workBeams){
    const distance=Math.hypot(from.x-controls.target.x,from.y-controls.target.y);
-   return level+.55*Math.max(0,1-distance/360);
-  },0);
-  sound?.update({field:live,engine:Math.min(1,engine),rolling:Math.min(1,rolling),slip:Math.min(1,slip),road:Math.min(1,road),welding:Math.min(1,projection+factoryEffects.soundLevel)});
+   const level=.55*Math.max(0,1-distance/360);
+   if(mode==='build')buildingScan+=level;else projection+=level;
+  }
+  sound?.update({field:live,engine:Math.min(1,engine),rolling:Math.min(1,rolling),slip:Math.min(1,slip),road:Math.min(1,road),welding:Math.min(1,projection+factoryEffects.soundLevel),construction:Math.min(1,buildingScan)});
   damage.end();
   for(const group of damageCasters)if(group.visible)for(const model of group.children){
    if(!model.visible)continue;
@@ -417,5 +511,5 @@ export async function createCampaignWorld(host,config,sound,loading){
   renderer.render(scene,camera);
   lastWorldTime=time;
  }
- return{renderer,scene,camera,controls,terrain,field,vehicles,damage,ground,pickEntity,screen,centre,focusStorySignal,setGhost,commandMarker,buildingCards,drawMinimapFog:fog.drawMinimap,storySignals,update,keys,buildingObjects:buildings,set minimumCameraHeight(value){minimumCameraHeight=value;},set fixedRenderScale(value){fixedRenderScale=value;},get fixedRenderScale(){return fixedRenderScale;},get statistics(){return{drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,vehicleDrawCalls:vehicles.drawCalls,vehicleLod:vehicles.lod,dustParticles:particles.length,dustLimit:256,...combat.statistics,...groundEffects.statistics,headlightBeams:headlightCount,projectors:construction.active,frameMs:frameAverage*1000,renderScale:renderer.getPixelRatio(),terrainMode,shadowUpdates,damage:damage.statistics};}};
+ return{renderer,scene,camera,controls,terrain,field,vehicles,damage,prepareRendering,shaderPreparation,ground,pickEntity,screen,centre,focusStorySignal,setGhost,commandMarker,buildingCards,drawMinimapFog:fog.drawMinimap,storySignals,update,updateTrafficVisibility,keys,buildingObjects:buildings,set minimumCameraHeight(value){minimumCameraHeight=value;},set fixedRenderScale(value){fixedRenderScale=value;},get fixedRenderScale(){return fixedRenderScale;},get statistics(){return{drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,vehicleDrawCalls:vehicles.drawCalls,vehicleLod:vehicles.lod,dustParticles:particles.length,dustLimit:256,...combat.statistics,...groundEffects.statistics,headlightBeams:headlightCount,projectors:construction.active,frameMs:frameAverage*1000,renderScale:renderer.getPixelRatio(),terrainMode,shadowUpdates,damage:damage.statistics};}};
 }

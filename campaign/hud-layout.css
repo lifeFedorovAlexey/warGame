@@ -30,6 +30,7 @@
 #roster button.icon-button { --button-size: 40px; --icon-size: 34px; display: flex; align-items: center; justify-content: center; height: 40px; padding: 3px; }
 #roster button.icon-button.active { outline: 1px solid #e3d5a980; outline-offset: -1px; }
 #roster button.icon-button.active::after { content: none; }
+#roster button.icon-button.repairing { opacity: .8; }
 #roster i { left: 6px; right: 6px; bottom: 1px; }
 #roster .stack-count { right: 0; font-size: 9px; }
 .order-bar { display: flex; flex-wrap: wrap; max-width: 304px; gap: 4px; }
