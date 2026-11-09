@@ -25,7 +25,7 @@
 #loading-progress::-webkit-progress-bar { background:#2d2b1da6; }
 #loading-progress::-webkit-progress-value { background:#dca858; }
 #loading-progress::-moz-progress-bar { background:#dca858; }
-#welcome #loading-retry { --button-size:44px;--icon-size:32px;margin-top:20px;padding:0;background:none;border:0;border-radius:0;box-shadow:none; }
+#welcome :is(#loading-retry,#loading-sound) { --button-size:44px;--icon-size:32px;margin-top:20px;padding:0;background:none;border:0;border-radius:0;box-shadow:none; }
 .loading-active #loading-progress::-webkit-progress-value { animation:loading-breathe 1.2s ease-in-out infinite alternate; }
 .loading-active #loading-progress::-moz-progress-bar { animation:loading-breathe 1.2s ease-in-out infinite alternate; }
 @keyframes loading-breathe { from { opacity:.65; } to { opacity:1; } }

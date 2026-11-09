@@ -9,17 +9,27 @@ const loading=createLoadingProgress(root);
 const music=document.getElementById('menu-music'),soundToggle=document.getElementById('sound-toggle');
 const media=preloadMenuMedia(stage.querySelector('img'),music);
 music.volume=.28;
-let musicStarting=false,menuReady=false;
+let musicStarting=null,menuReady=false,openMenu=null;
+function playMusic(){
+  if(musicStarting)return musicStarting;
+  if(!music.paused)return Promise.resolve();
+  musicStarting=music.play().finally(()=>{musicStarting=null;});
+  return musicStarting;
+}
 function syncMusic(){
   let enabled=soundToggle.getAttribute('aria-pressed')!=='false';
   try{enabled=enabled&&localStorage.getItem('warGame.fieldSound')!=='off';}catch{}
-  if(!menuReady||root.classList.contains('is-loading')||root.hidden||document.hidden||!enabled){music.pause();return;}
-  if(!music.paused||musicStarting)return;
-  musicStarting=true;
-  music.play().catch(error=>{
-    // Browsers may require a first click/key before allowing audible playback.
-    if(!['NotAllowedError','AbortError'].includes(error.name))console.warn('Музыка меню недоступна:',error.message);
-  }).finally(()=>{musicStarting=false;});
+  if(root.hidden||document.hidden){music.pause();return;}
+  if(openMenu){
+    if(!enabled){music.pause();openMenu();return;}
+    playMusic().then(()=>{if(!root.hidden&&!document.hidden)openMenu?.();},error=>{
+      if(error.name==='NotAllowedError')loading.awaitSound();
+      else if(error.name!=='AbortError'){openMenu=null;loading.error('Не удалось запустить музыку меню. Повторите загрузку.');}
+    });
+    return;
+  }
+  if(!menuReady||root.classList.contains('is-loading')||!enabled){music.pause();return;}
+  playMusic().catch(error=>{if(!['NotAllowedError','AbortError'].includes(error.name))console.warn('Музыка меню недоступна:',error.message);});
 }
 new MutationObserver(syncMusic).observe(root,{attributes:true,attributeFilter:['hidden','class']});
 new MutationObserver(syncMusic).observe(soundToggle,{attributes:true,attributeFilter:['aria-pressed']});
@@ -82,13 +92,17 @@ export const mainMenu={
   loading,
   prepareMedia(){return media.ready(fraction=>loading.update('audio',fraction));},
   ready(hasSave){
-    menuReady=true;
-    loading.hide();
-    document.getElementById('begin').disabled=false;
-    document.getElementById('resume-save').disabled=!hasSave;
-    document.getElementById('resume-save').title=hasSave?'Продолжить операцию':'Сохранения ещё нет';
-    document.getElementById('menu-settings').disabled=false;
-    status.hidden=true;refresh();syncMusic();
+    // Reveal the art after play() succeeds, not merely after its bytes arrive.
+    // A saved mute deliberately opens silently; it is never overridden here.
+    openMenu=()=>{
+      openMenu=null;menuReady=true;loading.hide();
+      document.getElementById('begin').disabled=false;
+      document.getElementById('resume-save').disabled=!hasSave;
+      document.getElementById('resume-save').title=hasSave?'Продолжить операцию':'Сохранения ещё нет';
+      document.getElementById('menu-settings').disabled=false;
+      status.hidden=true;refresh();
+    };
+    syncMusic();
   },
   error(text){loading.error(text);},
 };
