@@ -1,7 +1,7 @@
 import {createFactoryGateSignals} from './factory-gate-signals.js';
 
-export function createFactoryShutter(T,depth,partId,parts){
- const root=new T.Group();root.name='factory_shutter';root.position.set(0,-depth*.79/2-.13,.35);
+export function createFactoryShutter(T,depth,partId,parts,rear=false){
+ const root=new T.Group();root.name=rear?'factory_exit_shutter':'factory_shutter';root.position.set(0,(rear?1:-1)*(depth*.79/2+.13),.35);root.rotation.z=rear?Math.PI:0;
  root.userData.damageDynamic=true;
  const metal=new T.MeshStandardMaterial({color:'#3e443e',metalness:.6,roughness:.72});metal.name='factory_shutter_metal';
  const panel=new T.Mesh(new T.BoxGeometry(5.86,.12,3.48),metal);panel.position.z=1.74;panel.castShadow=panel.receiveShadow=true;root.add(panel);
@@ -11,9 +11,9 @@ export function createFactoryShutter(T,depth,partId,parts){
 }
 function poseShutter(shutter,open){shutter.position.z=.35+3.48*open;shutter.scale.z=1-open*.97;}
 export function factoryShutterDamagePose(T,root,bindings){
- const shutter=root.getObjectByName('factory_shutter');if(!shutter)return undefined;
+ const shutter=root.getObjectByName('factory_shutter'),exit=root.getObjectByName('factory_exit_shutter');if(!shutter)return undefined;
  const moving=bindings.filter(b=>b.dynamic),inverses=new Map(moving.map(b=>[b,b.bind.clone().invert()])),matrices=new Map(moving.map(b=>[b,new T.Matrix4()]));
- return factory=>{poseShutter(shutter,factory.garageDoorOpen??0);root.updateMatrixWorld(true);for(const b of moving)matrices.get(b).multiplyMatrices(b.node.matrixWorld,inverses.get(b));return matrices;};
+ return factory=>{poseShutter(shutter,factory.garageDoorOpen??0);if(exit)poseShutter(exit,factory.garageExitOpen??0);root.updateMatrixWorld(true);for(const b of moving)matrices.get(b).multiplyMatrices(b.node.matrixWorld,inverses.get(b));return matrices;};
 }
 export function createFactoryServiceEffects(T,scene,scale){
  const gateSignals=createFactoryGateSignals(T,scene,scale);
@@ -29,8 +29,10 @@ export function createFactoryServiceEffects(T,scene,scale){
   for(const f of mission.state.buildings){
    if(f.kind!=='factory')continue;const object=buildings.get(f.id);if(!object)continue;live.add(f.id);
    const working=f.hp>0&&f.completed&&!!f.activeRepair,shutter=object.getObjectByName('factory_shutter');
-   const gate=mission.state.units.find(u=>u.id===f.garageGate&&u.factoryVisit?.factoryId===f.id),opening=working||gate&&['gate','entering','leaving'].includes(gate.factoryVisit.phase);
-   if(f.owner==='rai'||mission.visibleAt(f.x,f.y))gateSignals.add(f,object,gate,mission.config.buildings.factory.realSizeMetres[1]);
+   const gate=mission.state.units.find(u=>u.id===f.garageGate&&u.factoryVisit?.factoryId===f.id),opening=working||gate&&['gate','entering'].includes(gate.factoryVisit.phase);
+   const departure=mission.state.units.find(u=>u.id===f.garageExit&&u.factoryVisit?.factoryId===f.id),exit=object.getObjectByName('factory_exit_shutter'),exitOpening=departure&&['leaving','departure'].includes(departure.factoryVisit.phase)||f.queue[0]?.progress>=.98;
+   if(f.owner==='rai'||mission.visibleAt(f.x,f.y))gateSignals.add(f,object,gate,mission.config.buildings.factory.realSizeMetres[1],departure);
+   if(exit){const target=exitOpening?1:0,old=f.garageExitOpen??0,open=old+Math.sign(target-old)*Math.min(Math.abs(target-old),dt*1.8);doorChanged||=old!==open;f.garageExitOpen=open;poseShutter(exit,open);}
    if(shutter){const target=opening?1:0,old=f.garageDoorOpen??0,open=old+Math.sign(target-old)*Math.min(Math.abs(target-old),dt*1.8);doorChanged||=old!==open;f.garageDoorOpen=open;poseShutter(shutter,open);}
    let state=states.get(f.id);
    if(!state&&working&&states.size<16){

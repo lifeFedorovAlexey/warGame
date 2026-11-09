@@ -1,3 +1,4 @@
+import {factoryAccessVersion,refreshFactoryAccess} from './factory-access.js';
 import {updateFactoryRepairs} from './factory-repair.js';
 import {updateFactoryVisit,insideFactory,factoryProductionPaused} from './factory-garage.js';
 import {TerrainNavigator} from './navigation.js';
@@ -27,7 +28,7 @@ import {updateOpeningConstruction} from './opening-construction.js';
 import {installScavBases,campGuardPose} from './scav-base-layout.js';
 const completeSteps=iterator=>{let step;do{step=iterator.next();}while(!step.done);return step.value;};
 import {UnitSpatialIndex} from './unit-spatial-index.js';
-import {vehicleContact,impactPower,fallbackVehicleImpact} from './vehicle-impact.js';
+import {vehicleContact,impactPower,fallbackVehicleImpact,resolveVehicleOverlapsSteps} from './vehicle-impact.js';
 import {kickContactRock} from './vehicle-contact-rock.js';
 import {TrafficCoordinator} from './traffic-coordinator.js';
 import {prepareTrafficDeparture,departureSlotOrder,rememberYieldHome,recordYieldStep,resumeYieldHome,borrowedHomeClear} from './traffic-start.js';
@@ -768,7 +769,7 @@ export class Mission{
    if(!exit)return this.fail('Машинам некуда выехать с площадки');
    exits.push(exit);
   }
-  const building=this.addStructure(kind,'rai',place,{rotation:place.rotation,halfWidth:place.halfWidth,halfDepth:place.halfDepth,groundHeight:place.height,cost:this.config.buildings[kind].cost,funding:{paid:0}});
+  const building=this.addStructure(kind,'rai',place,{rotation:place.rotation,halfWidth:place.halfWidth,halfDepth:place.halfDepth,groundHeight:place.height,accessRoads:place.accessRoads,accessRoadVersion:kind==='factory'?factoryAccessVersion:undefined,cost:this.config.buildings[kind].cost,funding:{paid:0}});
   const builderIds=builders.map(unit=>unit.id);
   building.builderIds=builderIds;
   if(exits.length){
@@ -2147,7 +2148,7 @@ export class Mission{
   const point={x:building.x+(x*c-y*s)*scale,y:building.y+(x*s+y*c)*scale};
   const exit=this.nav.nearest(point.x,point.y,2);
   if(!exit)return false;
-  const heading=angleDelta(building.rotation+Math.PI,0);
+  const heading=angleDelta(building.rotation+(y>0?0:Math.PI),0);
   const departure={...exit,heading,owner:'rai',kind:item.kind};
   const door={...departure,...point};
   const solids=this.nav.nearbySolids(door,scale*4.8+distance(door,departure));
@@ -2165,7 +2166,7 @@ export class Mission{
   }
 
   const slot=building.producedCount??0;
-  const side=(slot%3-1)*24,forward=-42-Math.floor(slot/3)%3*24;
+  const side=(slot%3-1)*24,forward=(y>0?1:-1)*(42+Math.floor(slot/3)%3*24);
   const rally=building.rally??{x:point.x+side*c-forward*s,y:point.y+side*s+forward*c};
   const reservations=[exit];
   for(const other of this.state.units){
@@ -2284,6 +2285,11 @@ export class Mission{
     if(pending.budgeted)this.unitFrameTimes.set(unit,performance.now());
     if(performance.now()>=deadline&&pending.cursor<pending.units.length)return false;
    }
+   if(!pending.overlapsComplete){
+    pending.overlaps??=resolveVehicleOverlapsSteps(this,dt);
+    while(true){const step=pending.overlaps.next();if(step.done){pending.overlapsComplete=true;pending.overlaps=null;break;}
+     if(performance.now()>=deadline)return false;}
+   }
    this.updateProjectiles();updateBurning(this);updateStreetFurniture(this);updateSalvage(this);updateWrecks(this);this.finalizeBuilderContacts(dt);this.updateConstructionSites();this.updateEconomy(dt);
    for(const b of this.state.buildings)if(b.owner==='scavs'&&b.hp>0){b.cooldown=Math.max(0,b.cooldown-dt);const spec=this.buildingSpec(b);if(spec.damage){const enemy=this.nearestEnemy(b,spec.range);if(enemy)this.attack(b,enemy,spec);}}
    this.fogTimer+=dt;if(this.fogTimer>=.25){this.fogTimer=0;this.updateFog();}this.updateMission();if(this.navigationDirty){this.rebuildNavigation();this.navigationDirty=false;}
@@ -2401,6 +2407,24 @@ export class Mission{
    if(entity.hp<=0){if(entity.destroyedAt===undefined)legacyWrecks.push(entity);scheduleWreck(this,entity);}
   }
   this.updateUnrevealedCampLayout();
+  // Keep existing wells on their authored oil points after the base-yard edit.
+  // This is a building relocation; vehicle positions and orders are untouched.
+  for(const relocation of this.config.oilFieldRelocations??[]){
+   const from=this.field.gridToWorld(relocation.from),to=this.field.gridToWorld(relocation.to);
+   for(const building of this.state.buildings){
+    if(building.kind!=='derrick'||building.owner!=='rai'||building.hp<=0||distance(building,from)>.5)continue;
+    const occupied=this.state.buildings.some(b=>b!==building&&(b.hp>0||b.damage?.wreck)
+     &&Math.abs(b.x-to.x)<b.halfWidth+building.halfWidth&&Math.abs(b.y-to.y)<b.halfDepth+building.halfDepth);
+    if(occupied)continue;
+    Object.assign(building,to);
+    building.groundHeight=Math.max(...[-1,0,1].flatMap(dx=>[-1,0,1].map(dy=>this.field.heightAt(to.x+dx*building.halfWidth,to.y+dy*building.halfDepth))));
+   }
+  }
+  for(const building of this.state.buildings){
+   if(!this.field.preparedPads?.some(({rect:[left,bottom,right,top]})=>building.x-building.halfWidth>=left
+    &&building.x+building.halfWidth<=right&&building.y-building.halfDepth>=bottom&&building.y+building.halfDepth<=top))continue;
+   building.groundHeight=Math.max(...[-1,0,1].flatMap(dx=>[-1,0,1].map(dy=>this.field.heightAt(building.x+dx*building.halfWidth,building.y+dy*building.halfDepth))));
+  }
   const bunker=this.config.buildings.bunker;
   if(bunker)for(const building of this.state.buildings){
    if(building.kind!=='bunker'||building.owner!=='rai')continue;
@@ -2410,6 +2434,7 @@ export class Mission{
   }
   this.state.bounds=(this.state.flags.lastRevealed?this.config.finalMapBounds:this.config.initialMapBounds).slice();this.state.designs=Array.isArray(this.state.designs)?latestVehicleProjects(this.state.designs):starterProjects(this.vehicleRecipes);this.serial=data.serial;this.randomState=data.randomState;this.explored.set(data.explored);this.events=[];this.effects=[];this.accumulator=data.accumulator??0;this.fogTimer=data.fogTimer??0;this.navigationDirty=false;this.linkOilWells(this.state.buildings.filter(b=>b.owner==='rai'&&b.hp>0&&b.completed),0);this.rebuildNavigation();this.updateFog();
   installScavBases(this,{restoring:true});this.rebuildNavigation();
+  if(refreshFactoryAccess(this))this.rebuildNavigation();
   for(const entity of legacyWrecks){
    const state=entity.damage,mark=state?.marks?.at(-1);
    if(state){state.burn=Math.max(state.burn,.48);state.revision++;}

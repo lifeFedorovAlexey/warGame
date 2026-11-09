@@ -15,7 +15,8 @@
   "baseSites": [
     {"kind": "generator", "grid": [9.5, 55], "rotationDegrees": 180},
     {"kind": "factory", "grid": [12.25, 49.25]},
-    {"kind": "lab", "grid": [18.5, 50]}
+    {"kind": "lab", "grid": [18.5, 50]},
+    {"kind": "factory", "grid": [13.5, 56.5], "approachRoad": false}
   ],
   "raidApproachGrid": [21, 52.25],
   "raidStagingGrid": [29.5, 52.125],
@@ -28,7 +29,8 @@
   "buildingGridMetres": 8,
   "maxBuildingGrade": 0.12,
   "builderRangeMetres": 16,
-  "oilFields": [[10.5, 52], [16.5, 56.5], [30, 42], [38, 30], [24.5, 71.5]],
+  "oilFields": [[10.5, 52], [18.5, 56.5], [30, 42], [38, 30], [24.5, 71.5]],
+  "oilFieldRelocations": [{"from": [16.5, 56.5], "to": [18.5, 56.5]}],
   "camps": [
     {"id": "nw-pocket", "name": "Первый лагерь", "grid": [31.5, 42.7], "gateGrid": [35.5, 42.5], "artifact": "flamethrower", "chapter": "first-artifact", "units": 3, "strength": 1.12, "extraGuards": ["scav-rifleman", "raider"], "wave": {"seconds": 65, "units": ["scav-zaporozhets", "scav-rifleman"]}},
     {"id": "nw-west", "name": "Склад", "grid": [15.9, 30.5], "gateGrid": [18.5, 33.5], "artifact": "mg-ammo-1", "chapter": "second-artifact", "units": 4, "strength": 1.38, "extraGuards": ["raider", "scav-grenadier"], "wave": {"seconds": 60, "units": ["raider", "scav-grenadier"]}},
@@ -66,7 +68,7 @@
     },
     "generator": {"name": "АЭС", "realSizeMetres": [12, 10, 5], "footprintMetres": [14, 12], "cost": 140, "seconds": 20, "hp": 950, "vision": 130, "power": 0, "oilSlots": 4, "workAnchor": [0, -8, 0]},
     "derrick": {"name": "Вышка", "realSizeMetres": [8, 8, 14], "footprintMetres": [10, 10], "cost": 90, "seconds": 16, "hp": 650, "vision": 100, "power": 0, "energyPerSecond": 5, "requiresOil": true, "workAnchor": [0, -6, 0]},
-    "factory": {"name": "Завод", "realSizeMetres": [26, 20, 9], "footprintMetres": [28, 24], "cost": 220, "seconds": 35, "hp": 1400, "vision": 150, "power": 0, "workAnchor": [0, -14, 0], "exitAnchor": [0, -18, 0], "production": ["bukhanka", "builder", "flamer"]},
+    "factory": {"name": "Завод", "realSizeMetres": [26, 20, 9], "footprintMetres": [28, 24], "cost": 220, "seconds": 35, "hp": 1400, "vision": 150, "power": 0, "workAnchor": [0, -14, 0], "entryAnchor": [0, -18, 0], "exitAnchor": [0, 18, 0], "production": ["bukhanka", "builder", "flamer"], "repair": {"hpPerSecond": 40, "energyPerSecond": 1.5, "rangeMetres": 24, "bays": 1}},
     "lab": {"name": "НИИ", "realSizeMetres": [16, 14, 7], "footprintMetres": [18, 16], "cost": 180, "seconds": 28, "hp": 1000, "vision": 150, "power": 0, "workAnchor": [0, -10, 0]},
     "bunker": {"name": "ДОТ", "realSizeMetres": [4.6, 3.8, 2], "footprintMetres": [6.4, 5.6], "cost": 85, "seconds": 18, "hp": 800, "vision": 170, "power": 0, "range": 130, "damage": 9, "cooldown": 0.65, "workAnchor": [0, -5, 0]},
     "mg-tower": {"name": "Башня", "realSizeMetres": [7, 7, 12], "footprintMetres": [9, 9], "requires": "mg-tower", "cost": 150, "seconds": 25, "hp": 1000, "vision": 240, "power": 0, "range": 210, "damage": 12, "cooldown": 0.55, "workAnchor": [0, -6, 0]}

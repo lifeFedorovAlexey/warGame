@@ -21,8 +21,9 @@ for(const rotation of [0,Math.PI/2,Math.PI]){
   for(const e of m.events)if(['factory-admitted','factory-repair-complete','factory-released'].includes(e.type)){log.push({type:e.type,unit:e.unit,time:e.time});if(e.type==='factory-released')left.add(e.unit);}
   m.events=[];
   const outside=cars.filter(u=>!insideFactory(u));
-  assert(outside.filter(u=>['gate','entering','leaving','departure'].includes(u.factoryVisit?.phase)).length<=1,'One physical crossing at a time');
-  for(let a=0;a<outside.length;a++)for(let b=0;b<a;b++)assert(vehicleClearance(outside[a],outside[b],config.worldScale,field)>0,'No overlapping vehicles');
+  assert(outside.filter(u=>['gate','entering'].includes(u.factoryVisit?.phase)).length<=1,'One incoming vehicle');
+  assert(outside.filter(u=>['leaving','departure'].includes(u.factoryVisit?.phase)).length<=1,'One outgoing vehicle');
+  for(let a=0;a<outside.length;a++)for(let b=0;b<a;b++)assert(vehicleClearance(outside[a],outside[b],config.worldScale,field)>0,'No overlapping vehicles: '+JSON.stringify({time:m.state.time,a:outside[a].id,b:outside[b].id,ap:outside[a].factoryVisit?.phase,bp:outside[b].factoryVisit?.phase,ax:outside[a].x,ay:outside[a].y,bx:outside[b].x,by:outside[b].y}));
   if(cars.some(u=>insideFactory(u)&&u.hp===u.maxHp)&&!cars.some(u=>['gate','entering','leaving','departure'].includes(u.factoryVisit?.phase))){readyWithoutGate++;freeReadySteps++;}else freeReadySteps=0;
   maxFreeReadySteps=Math.max(maxFreeReadySteps,freeReadySteps);
   if(left.size===12)break;
@@ -40,6 +41,6 @@ if(!observe){
  const ready=m.addUnit('bukhanka','rai',factoryPoint(m,f,0,-3)),waiting=m.addUnit('bukhanka','rai',factoryPoint(m,f,9,-23));
  ready.factoryVisit={factoryId:f.id,phase:'inside',arrived:0,slot:0};waiting.hp=100;waiting.factoryVisit={factoryId:f.id,phase:'waiting',queued:0,slot:1};f.garageGate=waiting.id;m.rebuildNavigation();
  const steps=updateFactoryVisit(m,ready,f,.1);while(!steps.next().done){}
- assert.equal(ready.factoryVisit.phase,'leaving','A stale reservation for a waiting car does not prevent release');assert.equal(f.garageGate,ready.id);
+ assert.equal(ready.factoryVisit.phase,'leaving','An incoming reservation does not prevent release');assert.equal(f.garageExit,ready.id);assert.equal(f.garageGate,waiting.id);
 }
 console.log(observe?'Observed current gate arbitration':'PASS: 12 vehicles repair and exit individually at three factory rotations, no entry-batch barrier or overlapping vehicles');

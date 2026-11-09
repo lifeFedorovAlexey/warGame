@@ -1,3 +1,4 @@
+import {planFactoryAccess,roadIntersectsSite} from './factory-access.js';
 const quarter=Math.PI/2,epsilon=1e-6;
 export const buildingGridStep=config=>Math.max(.1,config.buildingGridMetres??8);
 export const buildingRotation=angle=>((Math.round(angle/quarter)%4+4)%4)*quarter;
@@ -47,7 +48,7 @@ export function checkBuildingPlacement(mission,kind,x,y,angle=0,{checkMoney=true
  if(!spec)return {ok:false,reason:'Неизвестное здание',x,y,rotation};
  const [halfWidth,halfDepth]=buildingHalfSize(spec,config.worldScale,rotation);
  const structures=mission.state.buildings.filter(b=>b.hp>0||b.damage?.wreck);
- let site={x,y,rotation,halfWidth,halfDepth,blockers:[]};
+ let site={kind,x,y,rotation,halfWidth,halfDepth,blockers:[]};
  if(snap&&!spec.requiresOil)site=snapBuilding(site,structures.filter(b=>mission.exploredAt(b.x,b.y)),buildingGridStep(config));
  if(spec.requiresOil){
   const oil=config.oilFields.map(grid=>field.gridToWorld(grid)).find(p=>Math.hypot(p.x-x,p.y-y)<25);
@@ -77,9 +78,14 @@ export function checkBuildingPlacement(mission,kind,x,y,angle=0,{checkMoney=true
  if(structures.some(b=>rectanglesOverlap(site,b)))return fail('Пересечение с постройкой');
  const exit=buildingExit(site,spec,config.worldScale);
  for(const b of structures){
+  if(b.hp>0&&(b.accessRoads??[]).some(road=>roadIntersectsSite(road,site)))return fail('Нельзя перекрывать подъездную дорогу завода');
   const otherExit=b.hp>0&&buildingExit(b,mission.buildingSpec(b),config.worldScale);
   if(otherExit&&rectanglesOverlap(site,otherExit))return fail('Нельзя перекрывать выезд завода');
   if(exit&&rectanglesOverlap(exit,b))return fail('Для выезда завода нет места');
+  const entrySpec=mission.buildingSpec(b),otherEntry=b.hp>0&&entrySpec.entryAnchor&&buildingExit(b,{exitAnchor:entrySpec.entryAnchor},config.worldScale);
+  if(otherEntry&&rectanglesOverlap(site,otherEntry))return fail('Нельзя перекрывать въезд завода');
+  const entry=spec.entryAnchor&&buildingExit(site,{exitAnchor:spec.entryAnchor},config.worldScale);
+  if(entry&&rectanglesOverlap(entry,b))return fail('Для въезда завода нет места');
  }
  const blockers=mission.siteUnits({...site,kind});
  site.blockers=blockers.map(u=>u.id);
@@ -94,5 +100,9 @@ export function checkBuildingPlacement(mission,kind,x,y,angle=0,{checkMoney=true
    &&(Math.abs(p.x-x)>=halfWidth+mission.nav.clearance||Math.abs(p.y-y)>=halfDepth+mission.nav.clearance))approach=true;
  }
  if(!approach)return fail('Нет площадки для подъезда строителя');
+ if(kind==='factory'){
+  const access=planFactoryAccess(mission,site);site.accessRoads=access.roads;
+  if(!access.ok)return fail(access.reason);
+ }
  return {...site,ok:true};
 }

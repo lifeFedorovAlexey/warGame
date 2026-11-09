@@ -14,13 +14,13 @@ export function surfaceTravelCost(coverage, slope, pavedTrip) {
 }
 
 export class RoadTraffic {
-  constructor(field) {
+  constructor(field,localRoads=[]) {
     this.field = field;
     this.buckets = new Map();
     this.routes = new Map();
     this.junctionLinks = new Map();
     this.intersections = (field.roadNetwork?.nodes ?? []).filter(node => node.degree > 2 || node.base);
-    for (const [pathIndex,path] of (field.roadNetwork?.paths ?? []).entries()) {
+    for (const [pathIndex,path] of [...(field.roadNetwork?.paths ?? []),...localRoads].entries()) {
       const pathId=path.id??pathIndex,segments=[];
       this.routes.set(pathId,segments);
       let progress=0;

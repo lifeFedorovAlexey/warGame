@@ -1,6 +1,7 @@
 import {baseApproachRoads} from './base-roads.js';
 import {createBaseSiteMarkings} from './base-site-markings.js';
 import {createStreetLampLayer} from './street-lamp-layer.js';
+import {createRoadJunctionCutout} from './road-junction-cutout.js';
 // Physical scenery only. Nothing here is registered as an entity or navigation obstacle.
 export function createBaseYard(T,field,config,addFog){
   const root=new T.Group();root.name='base_yard';root.userData.decorative=true;
@@ -14,6 +15,7 @@ export function createBaseYard(T,field,config,addFog){
   const rust=new T.MeshStandardMaterial({color:'#865638',roughness:1});
   const paint=new T.MeshStandardMaterial({color:'#ddd2b9',roughness:1,vertexColors:true,transparent:true,opacity:.84,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});
   for(const material of [concrete,steel,olive,wood,rust,paint])addFog(material);
+  const junctions=createRoadJunctionCutout(T);junctions.apply(concrete);junctions.apply(paint);
   const positions=[],colors=[],uvs=[];
   const random=(x,y)=>{const n=Math.sin(x*127.1+y*311.7)*43758.5453;return n-Math.floor(n);};
   const sites=(config.baseSites??[]).map(site=>({...site,...field.gridToWorld(site.grid)}));
@@ -26,6 +28,7 @@ export function createBaseYard(T,field,config,addFog){
     }
   }
   for(const site of sites){
+    if(site.kind==='factory')continue; // The built factory supplies its actual driveway.
     const [w,d]=config.buildings[site.kind].realSizeMetres;
     const cols=site.kind==='factory'?3:2,rows=site.kind==='factory'?3:2;
     const direction=site.rotationDegrees===180?-1:1;
@@ -47,12 +50,13 @@ export function createBaseYard(T,field,config,addFog){
     const end=road.points[1];
     for(const side of [-1,1])for(let y=start.y+25;y<end.y;y+=6)tile(end.x+side*(road.width/2+5),y,6.4,5.92,.94);
   }
-  const markings=[],markColors=[],markUvs=[];
-  function marking(x,y,w,d,angle=0){
+  const markings=[],markColors=[],markUvs=[],markCuttable=[];
+  function marking(x,y,w,d,angle=0,cuttable=false){
     const c=Math.cos(angle),s=Math.sin(angle);
     for(const [dx,dy] of [[-w/2,-d/2],[w/2,-d/2],[w/2,d/2],[-w/2,-d/2],[w/2,d/2],[-w/2,d/2]]){
       const px=x+dx*c-dy*s,py=y+dx*s+dy*c,tint=.86+random(px,py)*.12;
       markings.push(px,py,field.heightAt(px,py)+.19);markUvs.push(0,0);markColors.push(tint,tint,tint);
+      markCuttable.push(cuttable?1:0);
     }
   }
   const crossings=[start.x-205,start.x-28];
@@ -69,7 +73,7 @@ export function createBaseYard(T,field,config,addFog){
   for(let x=west+12;x<east-12;x+=14)if(!nearCrossing(x))marking(x,start.y,7.5,.50);
   for(const side of [-1,1])for(let x=west+10;x<east-4;x+=6){
     const junction=roads.slice(1).some(r=>Math.sign(r.points[1].y-start.y)===side&&Math.abs(x-r.points[0].x)<r.width/2+3);
-    if(!junction&&!nearCrossing(x))marking(x,start.y+side*12.6,5.96,.42);
+    if(!junction&&!nearCrossing(x))marking(x,start.y+side*12.6,5.96,.42,0,true);
   }
   for(const crossing of crossings)crosswalk(crossing,start.y,street.width-4);
   // Continue the same lane markings along the tapered road, not the old path.
@@ -81,7 +85,7 @@ export function createBaseYard(T,field,config,addFog){
       const width=(a.width??street.width)+((b.width??street.width)-(a.width??street.width))*t;
       if((travelled+length*t)%14<7.5)marking(x,y,length/steps+.015,.5,angle);
       const edge=width/2-2-(width-24)/6*.4;
-      for(const side of [-1,1])marking(x-side*Math.sin(angle)*edge,y+side*Math.cos(angle)*edge,length/steps+.015,.42,angle);
+      for(const side of [-1,1])marking(x-side*Math.sin(angle)*edge,y+side*Math.cos(angle)*edge,length/steps+.015,.42,angle,true);
     }travelled+=length;
   }
   for(const road of roads.slice(1).filter(r=>r.points[1].y>start.y)){
@@ -96,8 +100,8 @@ export function createBaseYard(T,field,config,addFog){
     for(const [key,[values,size]] of Object.entries(attributes))geo.setAttribute(key,new T.Float32BufferAttribute(values,size));
     geo.computeVertexNormals();const mesh=new T.Mesh(geo,material);mesh.name=name;mesh.receiveShadow=true;root.add(mesh);
   }
-  surface('old_concrete_sites',positions,uvs,concrete,{color:[colors,3]});
-  surface('street_markings',markings,markUvs,paint,{color:[markColors,3]});
+  surface('old_concrete_sites',positions,uvs,concrete,{color:[colors,3],roadCuttable:[new Float32Array(positions.length/3).fill(1),1]});
+  surface('street_markings',markings,markUvs,paint,{color:[markColors,3],roadCuttable:[markCuttable,1]});
   const parts=new Map();
   function shape(geometry,material,position,rotation){
     const mesh=new T.Mesh(geometry,material);mesh.position.set(...position);if(rotation)mesh.rotation.set(...rotation);mesh.updateMatrix();geometry.applyMatrix4(mesh.matrix);
@@ -138,5 +142,5 @@ export function createBaseYard(T,field,config,addFog){
     }
     const mesh=new T.Mesh(geometry,mat);mesh.castShadow=mesh.receiveShadow=true;root.add(mesh);for(const g of geometries)g.dispose();
   }
-  return {root,sites,roads,lamps,update(mission,time){return lamps.update(mission,time);}};
+  return {root,sites,roads,lamps,setAccessRoads:junctions.setRoads,update(mission,time){return lamps.update(mission,time);}};
 }

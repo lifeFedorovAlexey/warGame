@@ -23,6 +23,7 @@ export function baseApproachRoads(field,config){
   else main.push({...point(join.x+64,join.y+slope*64),width:endWidth});
   roads.push({kind:'street',width:30,points:main,markUntilX:join.x+22,replaceRect:[west-42,start.y-120,join.x+40,start.y+170]});
   for(const site of config.baseSites??[]){
+    if(site.kind==='factory'||site.approachRoad===false)continue;
     const p=field.gridToWorld(site.grid),direction=site.rotationDegrees===180?-1:1;
     const front=p.y-direction*config.buildings[site.kind].realSizeMetres[1]*config.worldScale/2;
     roads.push({kind:site.kind,width:site.kind==='factory'?25:21,points:[point(p.x,start.y),point(p.x,front-direction*5)]});

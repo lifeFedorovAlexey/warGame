@@ -33,11 +33,11 @@ function fixture(){
 for(const rotation of [0,Math.PI/2,Math.PI,Math.PI*1.5]){
  const {add,place}=fixture(),factory=add('factory',0,0,rotation),exit=buildingExit(factory,config.buildings.factory,config.worldScale);
  const blocked=place('bunker',exit.x,exit.y,0,{snap:false});assert.equal(blocked.reason,'Нельзя перекрывать выезд завода');
- const rear=place('bunker',-exit.x,-exit.y,rotation+Math.PI,{snap:false});assert(rear.ok,rear.reason);
+ const rear=place('bunker',-exit.x,-exit.y,rotation+Math.PI,{snap:false});assert.equal(rear.reason,'Нельзя перекрывать въезд завода');
 }
 {
  const {add,place}=fixture();add('bunker',0,-81);
- assert.equal(place('factory',0,0).reason,'Для выезда завода нет места');
+ assert.equal(place('factory',0,0).reason,'Для въезда завода нет места');
 }
 {
  const {m,place}=fixture();m.config.oilFields=[[103,137]];

@@ -3,7 +3,7 @@
 export function createLocalRoadMask(T){
   const empty=new T.DataTexture(new Uint8Array(4),1,1,T.RGBAFormat);empty.needsUpdate=true;
   const bounds={value:new T.Vector4(0,0,1,1)},texture={value:empty},enabled={value:0};
-  let pixels,size=256,area;
+  let pixels,size=1024,area;
   function setRoads(paths){
     const segments=[];
     for(const road of paths)for(let i=1;i<road.points.length;i++){

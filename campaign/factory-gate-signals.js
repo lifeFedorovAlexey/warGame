@@ -14,21 +14,21 @@ export function createFactoryGateSignals(T,scene,scale){
   meshes=streams.map(([name,geometry,material])=>{const mesh=new T.InstancedMesh(geometry,material,capacity);mesh.name=name;mesh.count=0;mesh.frustumCulled=false;mesh.instanceMatrix.setUsage(T.DynamicDrawUsage);mesh.setColorAt(0,new T.Color(0xffffff));mesh.instanceColor.setUsage(T.DynamicDrawUsage);root.add(mesh);return mesh;});
  }
  allocate();
- function begin(factoryCount){if(factoryCount>capacity){while(capacity<factoryCount)capacity*=2;allocate();}counts.fill(0);}
- function write(stream,f,object,x,y,z,flip,color){
+ function begin(factoryCount){if(factoryCount*2>capacity){while(capacity<factoryCount*2)capacity*=2;allocate();}counts.fill(0);}
+ function write(stream,f,object,x,y,z,flip,color,rear=false){
   const a=f.rotation??0,c=Math.cos(a),s=Math.sin(a),mesh=meshes[stream],index=counts[stream]++;
   pose.position.set(f.x+(x*c-y*s)*scale,f.y+(x*s+y*c)*scale,object.position.z+z*scale);
-  pose.rotation.set(0,flip?Math.PI:0,a,'ZYX');pose.scale.setScalar(scale);pose.updateMatrix();mesh.setMatrixAt(index,pose.matrix);mesh.setColorAt(index,color??white);
+  pose.rotation.set(0,flip?Math.PI:0,a+(rear?Math.PI:0),'ZYX');pose.scale.setScalar(scale);pose.updateMatrix();mesh.setMatrixAt(index,pose.matrix);mesh.setColorAt(index,color??white);
  }
- function add(f,object,gate,depth){
+ function add(f,object,gate,depth,departure){
   if(f.hp<=0||!f.completed||!object.visible)return;
-  const front=-depth*.79/2-.62;
-  write(0,f,object,0,front,4.5,false);
-  const phase=gate?.hp>0&&gate.factoryVisit?.factoryId===f.id?gate.factoryVisit.phase:null;
-  if(['gate','entering','leaving','departure'].includes(phase)){
-   const outgoing=phase==='leaving'||phase==='departure';write(1,f,object,0,front-.09,4.5,outgoing,outgoing?exit:entry);
+  for(const rear of [false,true]){
+   const side=rear?1:-1,edge=side*(depth*.79/2+.62),vehicle=rear?departure:gate;
+   write(0,f,object,0,edge,4.5,false,undefined,rear);
+   const phase=vehicle?.hp>0&&vehicle.factoryVisit?.factoryId===f.id?vehicle.factoryVisit.phase:null;
+   if((rear?['leaving','departure']:['gate','entering']).includes(phase))write(1,f,object,0,edge+side*.09,4.5,rear,rear?exit:entry,rear);
+   if(f.activeRepair)write(2,f,object,0,edge+side*.09,3.98,false,repair,rear);
   }
-  if(f.activeRepair)write(2,f,object,0,front-.09,3.98,false,repair);
  }
  function end(){for(const [i,mesh] of meshes.entries()){mesh.count=counts[i];if(mesh.count){mesh.instanceMatrix.needsUpdate=true;if(mesh.instanceColor)mesh.instanceColor.needsUpdate=true;}}}
  return {begin,add,end};
