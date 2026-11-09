@@ -15,10 +15,13 @@ export function setFactoryPriority(m,id,priority){
 }
 function resetDrive(u){u.path=[];u.task=null;u.driveSpeed=0;for(const k of ['detour','yieldReturn','traffic','trafficHold','passingLane','driveWatch','routeOrder','routeContinuation','combatParking'])delete u[k];}
 function gateOwner(m,f){
- const visitors=factoryVisitors(m,f),current=visitors.find(u=>['gate','entering','leaving','departure'].includes(u.factoryVisit.phase))??visitors.find(u=>u.id===f.garageGate);
- if(current&&!insideFactory(current))return current;
+ const visitors=factoryVisitors(m,f),current=visitors.find(u=>['gate','entering','leaving','departure'].includes(u.factoryVisit.phase));
+ if(current&&!insideFactory(current)){f.garageGate=current.id;return current;}
  const ready=visitors.filter(u=>insideFactory(u)&&(u.hp>=u.maxHp||f.hp<=0)).sort((a,b)=>a.factoryVisit.arrived-b.factoryVisit.arrived);
  const arriving=visitors.filter(u=>u.factoryVisit.phase==='waiting').sort((a,b)=>a.factoryVisit.queued-b.factoryVisit.queued||a.id.localeCompare(b.id));
+ // Finish a crossing already in progress, then release repaired cars before
+ // admitting another arrival. A stored gate id alone is not a live crossing:
+ // cancelled/waiting arrivals must not hold ready vehicles inside.
  const owner=ready[0]??arriving[0];f.garageGate=owner?.id;return owner;
 }
 function waitPoint(m,f,index){
