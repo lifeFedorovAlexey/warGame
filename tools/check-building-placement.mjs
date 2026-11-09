@@ -50,6 +50,15 @@ for(const rotation of [0,Math.PI/2,Math.PI,Math.PI*1.5]){
 }
 // Verify flush placement against the real terrain and navigation clearance.
 {
+ const {m,place}=fixture();
+ m.field.heightAt=(x,y)=>x*.07+Math.sin(y/8)*.15;m.field.gradientAt=(x,y)=>({x:.07,y:Math.cos(y/8)*.15/8});
+ const gentle=place('generator',0,0);assert(gentle.ok,gentle.reason);assert(gentle.height>2.5/2,'The old unscaled relief limit would reject this site');
+ m.field.heightAt=x=>x*.08;m.field.gradientAt=()=>({x:.08,y:0});
+ assert.equal(place('factory',0,0).reason,'Слишком большой перепад высоты','Large foundations still cannot bridge a hillside');
+ m.field.heightAt=x=>x*.3;m.field.gradientAt=()=>({x:.3,y:0});
+ assert.equal(place('generator',0,0).reason,'Слишком крутой склон');
+}
+{
  const field=createHeightfield(JSON.parse(fs.readFileSync('assets/maps/alpha/heightfield.json','utf8'))),m=new Mission(config,field),p=field.gridToWorld(config.startGrid);
  m.explored.fill(255);m.state.energy=2400;let verified=false;
  search:for(let x=p.x-200;x<=p.x+200;x+=24)for(let y=p.y-200;y<=p.y+200;y+=24){

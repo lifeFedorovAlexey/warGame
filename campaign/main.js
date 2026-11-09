@@ -578,7 +578,7 @@ function installInput() {
     }
     if(buildKind&&!event.ctrlKey&&!event.metaKey){
       if(['AltLeft','AltRight'].includes(code)){event.preventDefault();freePlacement=true;updatePlacement();return;}
-      if(code==='KeyR'){event.preventDefault();if(!event.repeat)rotatePlacement(event.shiftKey?-1:1);return;}
+      if(['KeyQ','KeyE','KeyR'].includes(code)){event.preventDefault();if(!event.repeat)rotatePlacement(code==='KeyQ'||code==='KeyR'&&event.shiftKey?-1:1);return;}
     }
     if(event.altKey&&code==='KeyR'&&!event.repeat){
       event.preventDefault();const result=mission.retreat(selection().filter(liveMobile).map(u=>u.id));

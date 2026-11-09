@@ -67,7 +67,9 @@ export function checkBuildingPlacement(mission,kind,x,y,angle=0,{checkMoney=true
   heights.push(field.heightAt(x+dx,y+dy));
  }
  site.height=Math.max(...heights);
- if(site.height-Math.min(...heights)>2.5)return fail('Нужна ровная площадка');
+ // Dimensions are authored in model metres, while terrain heights use the
+ // scaled world. Small height differences are taken up by the footing.
+ if(site.height-Math.min(...heights)>(config.maxBuildingReliefMetres??1.5)*config.worldScale)return fail('Слишком большой перепад высоты');
  if(!spec.requiresOil)for(const grid of config.oilFields){
   const oil={...field.gridToWorld(grid),halfWidth:config.worldScale*5+5,halfDepth:config.worldScale*5+5};
   if(rectanglesOverlap(site,oil))return fail('Нефтяной участок зарезервирован для вышки');

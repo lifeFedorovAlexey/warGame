@@ -15,6 +15,7 @@ import {createHeadlightPair,setHeadlightPower} from '../demo/vehicle-effects.js'
 import {createCombatEffects} from './combat-effects.js';
 import {placeSelectionRing} from './selection-rings.js';
 import {createPlacementGrid} from './placement-grid.js';
+import {fitBuildingFoundation} from './building-foundation.js';
 import {SCAV_PROFILES,isInfantry} from './scav-unit-profiles.js';
 import {createConstructionEffects} from './construction-effects.js';
 import {createFogMask} from './fog-mask.js';
@@ -221,6 +222,7 @@ export async function createCampaignWorld(host,config,sound){
   const {x,y,ok,rotation=0} = placement;
   const z = placement.height ?? field.heightAt(x,y);
   ghost.visible=true;ghost.position.set(x,y,z);ghost.rotation.z=rotation;ghost.scale.setScalar(config.worldScale);
+  fitBuildingFoundation(ghost,{...placement,kind},field,config);
   if(ghostValid!==ok){
    ghostValid=ok;const tint=new T.Color(ok?'#b8d488':'#ed806b');
    for(const {material,color} of ghostMaterials)if(color)material.color.copy(color).lerp(tint,ok?.12:.55);
@@ -300,6 +302,7 @@ export async function createCampaignWorld(host,config,sound){
   });
   const buildingIds=new Set(mission.state.buildings.map(b=>b.id));for(const [id,object] of buildings)if(!buildingIds.has(id)){construction.release(object);damage.releaseBuilding(object);buildingRoot.remove(object);buildings.delete(id);}
   for(const b of mission.state.buildings){let object=buildings.get(b.id);if(object&&(object.userData.kind!==b.kind||object.userData.owner!==b.owner)){construction.release(object);damage.releaseBuilding(object);buildingRoot.remove(object);buildings.delete(b.id);object=null;}if(!object){object=getPrefab(b.kind,b.owner,b.campId,b.scavVariant,b.fenceSpan,b.fenceProfile).clone(true);object.userData.entity=b.id;damage.attachBuilding(object,b);buildingRoot.add(object);buildings.set(b.id,object);}object.visible=(b.hp>0||b.damage?.wreck)&&(b.owner==='rai'||mission.exploredAt(b.x,b.y));if(!object.visible)continue;object.position.set(b.x,b.y,b.groundHeight??field.heightAt(b.x,b.y));object.rotation.z=b.rotation;object.scale.setScalar(config.worldScale);
+   fitBuildingFoundation(object,b,field,config);
    if(b.kind==='mg-tower')aimTowerWeapon(object,b,field,config.worldScale,b.aimTarget,now-(shotTimes.get(b.id)??-Infinity));
    if(b.owner==='rai'&&b.hp>0)construction.building(object,b,config.buildings[b.kind]);
    damage.updateBuilding(object,b);
