@@ -1,4 +1,5 @@
 import {generatorLayout} from './generator-layout.js';
+import {breakableHall} from './breakable-hall.js';
 
 // Silhouettes and details follow references/buildings/industrial-atlas.png.
 export function buildIndustrialStructure(T, kind, size, kit) {
@@ -55,8 +56,7 @@ export function buildIndustrialStructure(T, kind, size, kit) {
   if(kind==='factory'){
     const width=w*.63,depth=d*.79,x=-w*.117,front=-depth/2,back=depth/2;
     const wall=h*.59,top=.35+wall;
-    box([width,depth,wall],[x,0,.35+wall/2],concrete);
-    box([width+.18,depth+.16,.22],[x,0,top+.07],roof);
+    breakableHall(T,kit,'factory',[width,depth,wall],[x,0,.35],{concrete,roof,steel,dark});
     box([width+.10,.105,1.19],[x,front-.06,1.7],stripe);
     windows(x,front-.09,top-.81,width*.82,11,.55);
     for(const side of [-1,1]){
@@ -78,8 +78,10 @@ export function buildIndustrialStructure(T, kind, size, kit) {
     monitor.applyMatrix4(new T.Matrix4().makeBasis(new T.Vector3(0,1,0),new T.Vector3(0,0,1),new T.Vector3(1,0,0)));
     for(const y of [-depth*.32,0,depth*.32]){
       const z=top+.18;
-      mesh(monitor.clone(),steel,[x-monitorWidth/2,y,z]);
-      box([monitorWidth+.15,1.43,.12],[x,y+.17,z+.87],roof);
+      kit.structuralPart('roof_monitor_'+y,{material:'metal',strength:150},()=>{
+       mesh(monitor.clone(),steel,[x-monitorWidth/2,y,z]);
+       box([monitorWidth+.15,1.43,.12],[x,y+.17,z+.87],roof);
+      });
       for(let i=0;i<8;i++){
         const paneX=x-monitorWidth/2+(i+.5)*panePitch;
         box([panePitch-.17,1.08,.08],[paneX,y-1.01,z+.46],glass,[slope,0,0]);
@@ -92,6 +94,7 @@ export function buildIndustrialStructure(T, kind, size, kit) {
     const sx=w*.371;
     stack(w*.287,d*.303,.39,h-.08,.69);
     for(const y of [-d*.255,-d*.073,d*.106]){
+      kit.structuralPart('tank_'+y,{material:'metal',strength:200},()=>{
       for(const dx of [-.87,.87])for(const dy of [-.87,.87])rod([sx+dx,y+dy,.35],[sx+dx,y+dy,2.13],.11,steel);
       box([2.45,2.47,.17],[sx,y,2.14],steel);
       cylinder(1.04,2.84,[sx,y,3.66],pipe);
@@ -102,6 +105,7 @@ export function buildIndustrialStructure(T, kind, size, kit) {
         rod([sx+side*.87,y-.87,.49],[sx+side*.87,y+.87,2.06],.061,steel);
         rod([sx-.87,y+side*.87,.49],[sx+.87,y+side*.87,2.06],.061,steel);
       }
+      });
     }
     const wallX=x+width/2, canopyX=wallX+1.22, pipeX=wallX+2.52, pipeZ=2.99;
     box([2.74,3.85,.24],[canopyX,-1.70,3.17],trim);
@@ -133,9 +137,7 @@ export function buildIndustrialStructure(T, kind, size, kit) {
     const wing=w*.352,sideX=w*.291,depth=d*.715,fy=-depth/2+.21,wall=h*.615,top=.35+wall;
     for(const side of [-1,1]){
       const x=side*sideX;
-      box([wing,depth,wall],[x,.21,.35+wall/2],concrete);
-      box([wing+.16,depth+.16,.22],[x,.21,top+.07],trim);
-      box([wing-.20,depth-.19,.06],[x,.21,top+.20],roof);
+      breakableHall(T,kit,'lab_'+side,[wing,depth,wall],[x,.21,.35],{concrete,roof,steel,dark});
       box([wing+.16,.19,.22],[x,.21+depth/2,top+.23],trim);
       box([.19,depth,.22],[x+side*wing/2,.21,top+.23],trim);
       for(const z of [1.44,2.67,3.83]){
@@ -151,9 +153,7 @@ export function buildIndustrialStructure(T, kind, size, kit) {
       vent(x-side*.82,2.33,top+.24,.86);
     }
     const midH=h*.789,midW=w*.238,midFront=-d*.396,midDepth=d*.79,base=.35+midH;
-    box([midW,midDepth,midH],[0,midFront+midDepth/2,.35+midH/2],trim);
-    box([midW+.15,midDepth+.12,.23],[0,midFront+midDepth/2,base-.04],concrete);
-    box([midW-.35,midDepth-.35,.065],[0,midFront+midDepth/2,base+.07],roof);
+    breakableHall(T,kit,'lab_centre',[midW,midDepth,midH],[0,midFront+midDepth/2,.35],{concrete:trim,roof,steel,dark});
     box([midW*.68,.13,midH*.65],[0,midFront-.11,.35+midH*.61],stripe);
     for(const side of [-1,1]){
       box([.33,.23,midH-.20],[side*midW*.45,midFront-.06,.35+(midH-.20)/2],concrete);
@@ -190,8 +190,7 @@ export function buildIndustrialStructure(T, kind, size, kit) {
 
   const {hall,towers}=generatorLayout(size);
   const {x,y,width,depth,bottom,top}=hall,fy=y-depth/2,by=y+depth/2;
-  box([width,depth,top-bottom],[x,y,(top+bottom)/2],concrete);
-  box([width+.15,depth+.15,.17],[x,y,top+.055],roof);
+  breakableHall(T,kit,'plant',[width,depth,top-bottom],[x,y,bottom],{concrete,roof,steel,dark});
   for(const side of [-1,1]){
     const sx=x+side*width/2, edgeY=y+side*depth/2;
     box([width+.18,.18,.20],[x,edgeY,top+.16],trim);
@@ -223,6 +222,7 @@ export function buildIndustrialStructure(T, kind, size, kit) {
     for(let i=0;i<5;i++)box([.80,.105,.049],[x+dx,by+.16,.88+i*.135],pipe,[.34,0,0]);
   }
   for(const {x:sx,y:sy,lift,outer,rings} of towers){
+    kit.structuralPart('cooling_tower_'+sy,{material:'concrete',strength:380},()=>{
     for(const [profile,material] of [[rings.slice(0,outer.length+1),concrete],[rings.slice(outer.length),roof]]){
       const shell=new T.LatheGeometry(profile.map(([radius,z])=>new T.Vector2(radius,z)),24);
       shell.rotateX(Math.PI/2);mesh(shell,material,[sx,sy,0]);
@@ -237,6 +237,7 @@ export function buildIndustrialStructure(T, kind, size, kit) {
       rod(bottom,next,.067,steel);
       rod(upper,next,.065,steel);
     }
+    });
     part('cooling_pipe_'+sy,{material:'equipment',detachable:true,strength:150},()=>{
       rod([x+width*.47,sy,1.22],[sx-1.45,sy,1.22],.15,stripe);
       rod([sx-1.48,sy,1.18],[sx-1.48,sy,.68],.15,stripe);

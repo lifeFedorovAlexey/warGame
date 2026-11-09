@@ -34,6 +34,11 @@ export function createDamageDebris(T,scene,field,scale,{activeLimit=24,capacity=
     slot.model.position.copy(part.centre.applyMatrix4(matrix));
     slot.supports=part.supports;slot.restAxis=part.restAxis;
     slot.velocity.fromArray(direction).multiplyScalar(Math.min(4,Math.sqrt(power)*.22)*scale/Math.sqrt(Math.max(1,part.radius)));slot.velocity.z+=scale*.8;
+    if(state.wreck){
+      const centre=new T.Vector3().setFromMatrixPosition(matrix),out=slot.model.position.clone().sub(centre);out.z=0;
+      if(out.lengthSq()<.1)out.set(Math.cos(id*2.399),Math.sin(id*2.399),0);out.normalize();
+      slot.velocity.addScaledVector(out,scale*(1.6+(id%5)*.3)/Math.sqrt(Math.max(1,part.radius)));slot.velocity.z+=scale*(1.1+(id%3)*.4);
+    }
     slot.spin.set((id%3-1)*2.4,1.2+(id%4)*.5,.6+(id%2));root.add(slot.model);return true;
   }
   function update(dt,camera){
@@ -42,7 +47,7 @@ export function createDamageDebris(T,scene,field,scale,{activeLimit=24,capacity=
       accumulator-=1/30;
       for(const slot of slots){
         if(!slot.model)continue;slot.age+=1/30;
-        if(slot.age>35){clear(slot);continue;}
+        if(slot.age>55){clear(slot);continue;}
         if(!slot.active)continue;
         const p=slot.model.position;slot.velocity.z-=9.8*scale/30;p.addScaledVector(slot.velocity,1/30);
         slot.model.rotateX(slot.spin.x/30);slot.model.rotateY(slot.spin.y/30);slot.model.rotateZ(slot.spin.z/30);

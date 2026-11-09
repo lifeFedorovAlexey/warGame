@@ -100,9 +100,13 @@ export function createDamageSystem(T,scene,field,config){
     if(entity.damage){
       if(visible){r.lastVisible=frame;upload(r);stats.visibleDamaged++;}
       else if(r.revision!==entity.damage.revision)stats.deferred++;
-      for(const [key,s] of Object.entries(entity.damage.parts))if(s.detached&&!r.detached.has(Number(key))){
+      // Interleave roofs, walls and fittings before the physics pool fills;
+      // numeric ID order otherwise spends every slot on the first facade.
+      const pending=Object.entries(entity.damage.parts).filter(([key,s])=>s.detached&&!r.detached.has(Number(key)));
+      if(entity.damage.wreck)pending.sort(([a],[b])=>(Number(a)*17%43)-(Number(b)*17%43));
+      for(const [key,s] of pending){
         const id=Number(key);r.detached.add(id);
-        if(visible&&r.lod===0&&enabled.value&&!s.salvageId){
+        if(visible&&r.lod<=1&&enabled.value&&!s.salvageId){
           const template=getTemplate(entity),impact=entity.damage.lastImpact;
           if(template&&impact)debris.spawn(template.bindings,id,entity.damage,matrix,impact.direction,impact.power,template.pose?.(entity),config.units[entity.kind]?entity:undefined);
         }
@@ -136,13 +140,15 @@ export function createDamageSystem(T,scene,field,config){
       return applyStructuralImpact(entity.damage,hit,template.regions,template.parts);
     };
     m.onDamageDestroyed=(entity,hit)=>{
-      if(config.units[entity.kind]||!hit)return;
+      if(!hit||config.units[entity.kind]?.infantry)return;
       const template=getTemplate(entity);if(!template)return;
       const point=hit.restPoint??hit.point;
       const candidates=template.regions.filter(r=>template.parts[r.id]?.detachable&&!entity.damage.parts[r.id]?.detached);
       const distance=r=>Math.hypot(...point.map((v,k)=>v-Math.max(r.min[k],Math.min(r.max[k],v))));
       candidates.sort((a,b)=>distance(a)-distance(b));
-      for(const r of candidates.slice(0,3))entity.damage.parts[r.id]={damage:1,detached:true};
+      const mobile=!!config.units[entity.kind];
+      const broken=mobile?candidates.filter(r=>!['glass'].includes(template.parts[r.id]?.material)).slice(0,3):candidates;
+      for(const r of broken)entity.damage.parts[r.id]={...entity.damage.parts[r.id],damage:1,detached:true};
       if(candidates.length)entity.damage.revision++;
     };
   }

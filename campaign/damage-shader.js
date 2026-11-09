@@ -66,6 +66,13 @@ mat3 damageJac=mat3(1.);vec3 damageOffset=vec3(0.);
 #ifdef DAMAGE_DEFORM
 if(ds.x>.5&&ds.y<1.5&&damageMeta.z>.5)damageOffset=damageCage(damagePosition,ds.x,damageJac);
 #endif
+#ifdef DAMAGE_COLLAPSE
+if(ds.x>.5&&damageMeta.w>.5){
+  vec4 life=damageTex(ds.x,${META_OFFSET+1});
+  float fall=smoothstep(life.x+.12,life.x+1.65,damageTime);
+  damageOffset.z-=max(0.,damagePosition.z-.35)*fall*.92;
+}
+#endif
 `;
 const fragmentHeader=common+`
 void damageLayer(inout vec3 ink,inout float coverage,vec3 colour,float alpha){
@@ -165,7 +172,7 @@ export function attachDamageShader(T,mesh,binding,atlas,enabled,{instanced=false
       damageCageMin:{value:new T.Vector3(...binding.cageBounds.min)},damageCageScale:{value:new T.Vector3(...[4,8,4].map((v,i)=>v/(binding.cageBounds.max[i]-binding.cageBounds.min[i])))},
       damageToPart:{value:binding.inverseLinear},normalToDamage:{value:new T.Matrix3().getNormalMatrix(binding.bind)},normalFromDamage:{value:new T.Matrix3().getNormalMatrix(binding.bind).invert()}});
     const glazing=/window_glass|building_window/.test(binding.material.name??'');
-    const defines=(instanced?'#define DAMAGE_INSTANCED\n':'')+(binding.deform?'#define DAMAGE_DEFORM\n':'')+(glazing?'#define DAMAGE_GLAZING\n':'');
+    const defines=(instanced?'#define DAMAGE_INSTANCED\n':'')+(binding.deform?'#define DAMAGE_DEFORM\n':'')+(glazing?'#define DAMAGE_GLAZING\n':'')+(binding.category==='building'&&binding.constructionClipped?'#define DAMAGE_COLLAPSE\n':'');
     shader.vertexShader=defines+common+vertexHeader+cage+shader.vertexShader;
     shader.vertexShader=shader.vertexShader.replace(/void main\(\)\s*\{/,match=>match+'\n'+vertexSetup);
     shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\ntransformed+=damageToPart*damageOffset;');
@@ -193,10 +200,10 @@ export function attachDamageShader(T,mesh,binding,atlas,enabled,{instanced=false
     }
   }
   material.onBeforeCompile=shader=>patch(shader);
-  material.customProgramCacheKey=()=>oldKey()+'_damage_v4_'+instanced+'_'+binding.deform+'_'+/window_glass|building_window/.test(binding.material.name??'');
+  material.customProgramCacheKey=()=>oldKey()+'_damage_v5_'+instanced+'_'+binding.deform+'_'+binding.constructionClipped+'_'+/window_glass|building_window/.test(binding.material.name??'');
   mesh.material=material;
   const depth=new T.MeshDepthMaterial({depthPacking:T.RGBADepthPacking,side:source.side});
-  depth.onBeforeCompile=shader=>patch(shader,true);depth.customProgramCacheKey=()=> 'damage_depth_v4_'+instanced+'_'+binding.deform+'_'+/window_glass|building_window/.test(binding.material.name??'');
+  depth.onBeforeCompile=shader=>patch(shader,true);depth.customProgramCacheKey=()=> 'damage_depth_v5_'+instanced+'_'+binding.deform+'_'+binding.constructionClipped+'_'+/window_glass|building_window/.test(binding.material.name??'');
   mesh.customDepthMaterial=depth;
   return {objectDamage,dispose(){material.dispose();depth.dispose();}};
 }

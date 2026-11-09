@@ -10,7 +10,8 @@ export function createBuildingPrefab(T,kind,spec){
  let oilPump,tower;
  const [w,d,h]=spec.realSizeMetres??[12,10,5],paint=new T.MeshStandardMaterial({color:'#66674e',metalness:.4,roughness:.69}),steel=new T.MeshStandardMaterial({color:'#454b47',metalness:.7,roughness:.55}),concrete=new T.MeshStandardMaterial({color:'#8d8574',roughness:1}),dark=new T.MeshStandardMaterial({color:'#242e2d',roughness:.7}),light=new T.MeshStandardMaterial({color:'#c8b282',emissive:'#ac8a43',emissiveIntensity:.35}),baseGroups=new Map(),structureGroups=new Map();let groups=baseGroups;
  paint.name='building_paint';steel.name='building_structural_steel';concrete.name='foundation_concrete';dark.name='building_dark';light.name='building_lamp';
- const damageParts={0:{name:'structure',material:'concrete'}},damageNames=new Map();let activePart=0,nextPart=1;
+ const damageParts={0:{name:'structure',material:'concrete'}},damageNames=new Map();let activePart=0,nextPart=1,nextStructural=128;
+ function structuralPart(name,profile,build){const id=nextStructural++;if(id>=192)throw new Error('Structural part budget exceeded: '+kind);damageParts[id]={name,...profile,detachable:true,structural:true};const previous=activePart;activePart=id;try{return build(id);}finally{activePart=previous;}}
  function part(name,profile,build){let id=damageNames.get(name);if(id===undefined){if(nextPart===9)nextPart++;if(nextPart>=128)throw new Error('Building damage part budget exceeded: '+kind);id=name==='weapon'?9:nextPart++;damageNames.set(name,id);damageParts[id]={name,...profile};}const previous=activePart;activePart=id;try{return build(id);}finally{activePart=previous;}}
  function mesh(geo,mat,pos=[0,0,0],rotation){const item=new T.Mesh(geo,mat);item.position.set(...pos);if(rotation)item.rotation.set(...rotation);item.updateMatrix();geo.applyMatrix4(item.matrix);let id=activePart;if(!id&&mat.name==='building_window'){const name='window_'+pos.map(x=>x.toFixed(3)).join('_');part(name,{material:'glass',detachable:true},()=>{id=activePart;});}geo.setAttribute('damagePart',new T.Float32BufferAttribute(new Float32Array(geo.attributes.position.count).fill(id),1));if(!groups.has(mat))groups.set(mat,[]);const flat=geo.index?geo.toNonIndexed():geo;groups.get(mat).push(flat);if(flat!==geo)geo.dispose();}
  const box=(size,pos,mat=paint,rotation)=>mesh(new T.BoxGeometry(...size),mat,pos,rotation);
@@ -22,7 +23,7 @@ export function createBuildingPrefab(T,kind,spec){
  if(kind==='bunker')for(const x of [-w*.24,0,w*.24])box([.17,.22,.21],[x,-d*.487,.30],steel);
  groups=structureGroups;
  if(['generator','factory','lab'].includes(kind)){
-  buildIndustrialStructure(T,kind,[w,d,h],{box,cylinder,rod,mesh,part});
+  buildIndustrialStructure(T,kind,[w,d,h],{box,cylinder,rod,mesh,part,structuralPart});
  }else if(kind==='base-sign'){
   buildBaseSign(T,{box,mesh},{concrete,steel,paint});
  }else if(kind==='derrick'){

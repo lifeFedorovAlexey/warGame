@@ -3,6 +3,8 @@ import {combatContact} from './combat-contact.js';
 import {createDamageState,applyDamageHit,normalize} from './damage-state.js';
 import {salvageFromImpact} from './vehicle-salvage.js';
 import {isInfantry} from './scav-unit-profiles.js';
+import {kickWeaponRock} from './vehicle-contact-rock.js';
+import {ignite} from './burning.js';
 
 export function recordDamage(mission,target,amount,source,contact){
   if(mission.damageEnabled===false)return null; // reproducible benchmark baseline only
@@ -23,6 +25,10 @@ export function recordDamage(mission,target,amount,source,contact){
   }
   const start=performance.now(),state=target.damage??=createDamageState(hit.binding?.cageBounds);
   const result=applyDamageHit(state,{...hit,type,power},hit.partSpec,{deform:mobile&&!isInfantry(target)&&hit.binding?.deform!==false});
+  if(!contact?.burningTick){
+    if(type==='fire')ignite(target,{...hit,power},mission.state?.time??0,source?.id);
+    else if(mobile&&!isInfantry(target))kickWeaponRock(target,{...hit,type,power},mission.state?.time??0,mission.config.units[source?.kind]?.weapon??'mg');
+  }
   state.lastImpact={direction:hit.worldDirection??hit.direction,power,partId:hit.partId};
   result.secondaryFailures=mission.onDamageImpact?.(target,{...hit,type,power})??[];
   salvageFromImpact(mission,target,{...hit,type,power},result);

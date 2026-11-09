@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import * as T from '../demo/vendor/three.module.js';
-import {createDamageState,applyDamageHit,applyStructuralImpact,upgradeDamageState,cageSample,damageLOD,partMissing,destroyDamage,MAX_MARKS,damageMobility,VEHICLE_PARTS,CAGE,PROFILES} from '../campaign/damage-state.js';
+import {createDamageState,applyDamageHit,applyStructuralImpact,upgradeDamageState,cageSample,damageLOD,partMissing,destroyDamage,MAX_MARKS,MAX_PARTS,damageMobility,VEHICLE_PARTS,CAGE,PROFILES} from '../campaign/damage-state.js';
 import {prepareDamageGeometry,createDamageCollider} from '../campaign/damage-geometry.js';
 import {createDamageDebris} from '../campaign/damage-debris.js';
 import {recordDamage} from '../campaign/damage-contact.js';
@@ -73,7 +73,7 @@ test('Original building prefabs have tagged windows and equipment within budget'
   const config=JSON.parse(fs.readFileSync('assets/campaign/alpha/mission01/gameplay.json'));
   for(const kind of ['factory','lab','generator','mg-tower']){
     const model=createBuildingPrefab(T,kind,config.buildings[kind]),parts=model.userData.damageParts;
-    assert(Object.keys(parts).length<128,kind);assert(Object.values(parts).some(p=>p.detachable),kind);
+    assert(Object.keys(parts).length<MAX_PARTS&&Object.keys(parts).every(id=>Number(id)<MAX_PARTS),kind);assert(Object.values(parts).some(p=>p.detachable),kind);
     if(kind!=='mg-tower')assert(Object.values(parts).some(p=>p.material==='glass'),kind);
     model.traverse(n=>{if(n.isMesh)assert(n.geometry.attributes.damagePart,kind);});
   }

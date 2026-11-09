@@ -35,10 +35,13 @@ export function createScavBasePrefab(T,kind,site,span=7,variant='0',profile=null
   const barracks=kind==='scav-barracks',w=barracks?9.2:5.6,d=barracks?5.1:3.5,h=barracks?3.0:2.5;
   box(w,d,.22,0,0,.08,3);
   // Different sheets, boarded windows and an exposed doorway under an awning.
-  box(w,.14,h,0,d/2,h/2,0);for(const x of [-w/2,w/2])box(.14,d,h,x,0,h/2,1);
-  for(const x of [-w*.32,w*.32])box(w*.34,.14,h,x,-d/2,h/2,0);
+  for(let i=0;i<3;i++)panel(32+i,'back_wall_'+i,()=>box(w/3,.14,h,-w/2+(i+.5)*w/3,d/2,h/2,0));
+  for(const [i,x] of [-w/2,w/2].entries())panel(35+i,'side_wall_'+i,()=>box(.14,d,h,x,0,h/2,1));
+  for(const [i,x] of [-w*.32,w*.32].entries())panel(37+i,'front_wall_'+i,()=>{
+   box(w*.34,.14,h,x,-d/2,h/2,0);
+   box(1.3,.1,.75,x,-d/2-.1,1.85,2);for(const z of [1.56,1.9,2.18])box(1.5,.13,.12,x,-d/2-.19,z,3,0,0,.06);
+  });
   box(w*.30,.14,.65,0,-d/2,h-.325,1);box(w*.24,.1,h*.76,0,-d/2+.14,h*.38,2);
-  for(const x of [-w*.32,w*.32]){box(1.3,.1,.75,x,-d/2-.1,1.85,2);for(const z of [1.56,1.9,2.18])box(1.5,.13,.12,x,-d/2-.19,z,3,0,0,.06);}
   for(let i=0;i<7;i++){const x=(i-3)*w/7,mat=i===1||i===4?3:0;panel(16+i,'roof_sheet_'+i,()=>{
    box(w/7+.08,d+.4,.13,x,0,h+.18,mat);
    for(const offset of [-.33,0,.33])box(.045,d+.38,.045,x+offset,0,h+.27,mat);

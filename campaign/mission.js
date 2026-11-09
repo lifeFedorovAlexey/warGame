@@ -17,6 +17,7 @@ import {recordDamage} from './damage-contact.js';
 import {destroyDamage,damageMobility,partMissing,upgradeDamageState} from './damage-state.js';
 import {ensureSalvage,updateSalvage,armorMultiplier,salvageFromWreck,availableFieldRecipes,modificationInstalled,touchesSalvage,canInstallRecipe,syncFieldHp} from './vehicle-salvage.js';
 import {scheduleWreck,updateWrecks} from './wreck-lifecycle.js';
+import {updateBurning} from './burning.js';
 import {updateStreetFurniture} from './street-furniture.js';
 import {updateOpeningConstruction} from './opening-construction.js';
 import {installScavBases,campGuardPose} from './scav-base-layout.js';
@@ -865,7 +866,8 @@ export class Mission{
  explodeWreck(target){
   if(isInfantry(target))return;
   const mobile=!!this.config.units[target.kind],scale=this.config.worldScale;
-  this.effects.push({type:'explosion',targetId:target.id,owner:target.owner,to:{x:target.x,y:target.y,z:(target.groundHeight??this.field.heightAt(target.x,target.y))+(mobile?1:.8)*scale},radius:mobile?2.4*scale:Math.min(32,Math.max(target.halfWidth,target.halfDepth)*.7)});
+  const height=mobile?1:(this.config.buildings[target.kind]?.realSizeMetres?.[2]??6)*.45;
+  this.effects.push({type:'explosion',targetId:target.id,owner:target.owner,to:{x:target.x,y:target.y,z:(target.groundHeight??this.field.heightAt(target.x,target.y))+height*scale},radius:mobile?2.4*scale:Math.min(32,Math.max(target.halfWidth,target.halfDepth)*.7)});
  }
  attack(attacker,target,spec){
   if(attacker.cooldown>0||partMissing(attacker.damage,9)||distance(attacker,target)>spec.range||!this.lineOfSight(attacker,target))return false;
@@ -2265,7 +2267,7 @@ export class Mission{
     if(pending.budgeted)this.unitFrameTimes.set(unit,performance.now());
     if(performance.now()>=deadline&&pending.cursor<pending.units.length)return false;
    }
-   this.updateProjectiles();updateStreetFurniture(this);updateSalvage(this);updateWrecks(this);this.finalizeBuilderContacts(dt);this.updateConstructionSites();this.updateEconomy(dt);
+   this.updateProjectiles();updateBurning(this);updateStreetFurniture(this);updateSalvage(this);updateWrecks(this);this.finalizeBuilderContacts(dt);this.updateConstructionSites();this.updateEconomy(dt);
    for(const b of this.state.buildings)if(b.owner==='scavs'&&b.hp>0){b.cooldown=Math.max(0,b.cooldown-dt);const spec=this.buildingSpec(b);if(spec.damage){const enemy=this.nearestEnemy(b,spec.range);if(enemy)this.attack(b,enemy,spec);}}
    this.fogTimer+=dt;if(this.fogTimer>=.25){this.fogTimer=0;this.updateFog();}this.updateMission();if(this.navigationDirty){this.rebuildNavigation();this.navigationDirty=false;}
    this.pendingTick=null;updateOpeningConstruction(this);updateScavReinforcements(this);return true;

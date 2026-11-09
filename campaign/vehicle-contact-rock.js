@@ -18,3 +18,15 @@ export function kickContactRock(unit,worldDirection,closingSpeed,time){
   unit.contactRock={at:time,roll:prior.roll,pitch:prior.pitch,
     rollSpeed:clamp(prior.rollSpeed+side*kick,-.85,.85),pitchSpeed:clamp(prior.pitchSpeed-forward*kick*.55,-.44,.44)};
 }
+// Weapon impulses use the same suspension as contacts, but never move the
+// navigation body. A flame stream heats the hull rather than kicking it.
+export function kickWeaponRock(unit,hit,time,weapon='mg'){
+  if(unit.hp<=0||['fire','collision'].includes(hit.type))return;
+  const heavy=['shell','grenade','penetrator'].includes(hit.type);
+  const mass=unit.kind==='scav-bus'||unit.kind==='scav-firetruck'?1.8:unit.kind==='scav-zaporozhets'?.7:1;
+  const strength=(heavy?Math.min(1.45,.45+Math.sqrt(hit.power)*.065):Math.min(.26,.06+Math.sqrt(hit.power)*.045)*(weapon==='rifle'?.65:1))/mass;
+  const dir=hit.worldDirection??hit.direction,c=Math.cos(unit.heading??0),s=Math.sin(unit.heading??0),prior=contactRockAt(unit,time);
+  const side=dir[0]*c+dir[1]*s,forward=-dir[0]*s+dir[1]*c;
+  unit.contactRock={at:time,roll:prior.roll,pitch:prior.pitch,
+    rollSpeed:clamp(prior.rollSpeed+side*strength,-1.65,1.65),pitchSpeed:clamp(prior.pitchSpeed-forward*strength*.75,-1.2,1.2)};
+}

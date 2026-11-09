@@ -263,7 +263,7 @@ export function extractDamagePart(T,bindings,id,state,transforms=null){
     }
     if(!positions.length)continue;
     const geometry=new T.BufferGeometry();geometry.setAttribute('position',new T.Float32BufferAttribute(positions,3));geometry.setAttribute('normal',new T.Float32BufferAttribute(normals,3));if(uvs.length)geometry.setAttribute('uv',new T.Float32BufferAttribute(uvs,2));
-    if(!materials.has(binding.material)){const material=binding.material.clone();material.color.multiplyScalar(1-(state?.burn??0)*.3);material.emissiveIntensity=0;material.roughness=Math.max(material.roughness??.65,.65);materials.set(binding.material,material);}
+    if(!materials.has(binding.material)){const material=binding.material.clone();material.color.multiplyScalar(state?.wreck?.55:1-(state?.burn??0)*.3);material.emissiveIntensity=0;material.roughness=Math.max(material.roughness??.65,.65);materials.set(binding.material,material);}
     const material=materials.get(binding.material);
     const mesh=new T.Mesh(geometry,material);mesh.castShadow=true;root.add(mesh);
   }

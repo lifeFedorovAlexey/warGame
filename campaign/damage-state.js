@@ -3,7 +3,7 @@ export const DAMAGE_VERSION = 3;
 export const CAGE = {size:[5,9,5], min:[-1.35,-2.7,0], max:[1.35,2.7,3.6]};
 export const CAGE_COUNT = 225;
 export const MAX_MARKS = 24;
-export const MAX_PARTS = 128;
+export const MAX_PARTS = 192;
 const cagePoints=new Float32Array(CAGE_COUNT*3);
 const customCagePoints=new WeakMap();
 for(let z=0;z<5;z++)for(let y=0;y<9;y++)for(let x=0;x<5;x++){

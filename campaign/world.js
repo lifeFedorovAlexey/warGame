@@ -91,7 +91,7 @@ export async function createCampaignWorld(host,config,sound){
  footprint.visible = false;
  footprint.renderOrder = 8;
  scene.add(footprint);
- const combat=createCombatEffects(T,scene,config.worldScale,sound),lightLift=new T.Matrix4().makeTranslation(0,0,1.05);
+ const combat=createCombatEffects(T,scene,config.worldScale,sound,field),lightLift=new T.Matrix4().makeTranslation(0,0,1.05);
  const headlights=Array.from({length:software?1:2},()=>{
   const root=new T.Group();root.name='bukhanka_headlights';root.matrixAutoUpdate=false;
   const spots=createHeadlightPair(T,root);scene.add(root);
@@ -330,6 +330,7 @@ export async function createCampaignWorld(host,config,sound){
    combat.spawn(start,end,event.weapon,now,camera,event);
    if(aimed&&from.aimTarget!==event.to)aimTowerWeapon(building,from,field,config.worldScale);
   }
+  combat.updateBurning(mission,vehicles.transforms);
   combat.update(now,camera,renderer.domElement.height,(shot,start=shot.start)=>{
    const target=mission.entity(shot.targetId);
    if(!target||target.owner!=='rai'&&!mission.visibleAt(target.x,target.y))return null;
