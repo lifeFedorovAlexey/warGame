@@ -192,7 +192,7 @@ export async function createVehicleLayer(T,scene,field,config,damage) {
   const live=new Set();
   for(const unit of mission.state.units){
    const phase=unit.hp<=0?1:mission.renderUnitPhase?.(unit,now*1000)??T.MathUtils.clamp(mission.accumulator/config.simulationStep,0,1);
-   if(unit.hp<=0&&!unit.damage?.wreck||unit.owner!=='rai'&&!mission.visibleAt(unit.x,unit.y))continue;
+   if(unit.factoryVisit?.phase==='inside'||unit.hp<=0&&!unit.damage?.wreck||unit.owner!=='rai'&&!mission.visibleAt(unit.x,unit.y))continue;
    live.add(unit.id);
    const moving=unit.hp>0&&Math.hypot(unit.x-unit.previousX,unit.y-unit.previousY)>.008;
    const blend=moving?phase:1;

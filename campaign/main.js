@@ -1,6 +1,7 @@
 import {setButtonIcon, speedIcon} from '../assets/ui/icons.js';
 import {createCampaignWorld} from './world.js';
 import {Mission} from './mission.js';
+import {factoryPriority,factoryVisitors,setFactoryPriority} from './factory-garage.js';
 import {canDemolish,demolitionWorkers,requestDemolition,cancelDemolition} from './building-demolition.js';
 import {FieldRadio, missionSignal} from './field-radio.js';
 import {raidApproachSignal, visibleRaidContact, warehouseAdvanceHint, waterTowerSignal} from './threat-guidance.js';
@@ -18,7 +19,6 @@ import {pickupTarget} from './pickup-orders.js';
 import {expandCommandIds} from './group-command.js';
 import {latestVehicleProject} from './vehicle-designs.js';
 import {oilPowerStatus,oilReserved,oilFundingRemaining,oilOrderProgress} from './oil-economy.js';
-import {installNavigationTelemetry} from './navigation-telemetry.js';
 
 const $ = id => document.getElementById(id);
 const saveKey = 'warGame.alpha.mission01.v1';
@@ -47,7 +47,7 @@ async function toggleNavigationDebug(force){
 
 const vehicles = () => mission.state.units.filter(unit => unit.owner === 'rai' && unit.hp > 0);
 const builders = () => vehicles().filter(unit => config.units[unit.kind].role === 'builder');
-const selection = () => [...selected].map(id => mission.entity(id)).filter(Boolean);
+const selection = () => [...selected].map(id => mission.entity(id)).filter(e=>e&&!e.factoryVisit);
 const commandSelection = () => expandCommandIds(mission,[...selected]).map(id=>mission.entity(id)).filter(Boolean);
 const unitType = unit => [unit.kind,...(unit.components??config.units[unit.kind].components??[]),unit.engineUpgradeLevel??0].join('/');
 function firstPowerSites(){
@@ -167,7 +167,7 @@ function liveMobile(entity) {
 }
 function select(ids, append = false, speak = true) {
   if (!append) selected.clear();
-  for (const id of ids) if (mission.entity(id)) selected.add(id);
+  for (const id of ids) if (mission.entity(id)&&!mission.entity(id).factoryVisit) selected.add(id);
   cancelMode({keepAttack:true});
   if (speak && active && ids.some(id => liveMobile(mission.entity(id)))) {
     sound.acknowledge('select', selection().filter(liveMobile).map(unit => unit.id));
@@ -731,7 +731,7 @@ function updateContext(first) {
   const projects = factory ? mission.factoryProjects() : [];
   const designs = factory ? s.designs.map(project => project.id + ':' + project.name).join(',') : '';
   const activeResearch = s.buildings.filter(b=>b.hp>0&&b.research).map(b=>b.research.key);
-  const key = [first?.id, first?.completed, first?.clearing, first?.research?.key, activeResearch.join(), s.artifactKeys.join(), Object.keys(s.research).join(), thresholds, designs, builders().length,mission.researchUnlocked(),canSelectDemolition,orderMode,demolishers.length,!!first?.demolitionProgress].join('|');
+  const key = [first?.id, first?.completed, first?.clearing, first?.research?.key, activeResearch.join(), s.artifactKeys.join(), Object.keys(s.research).join(), thresholds, designs, builders().length,mission.researchUnlocked(),first?.workPriority,canSelectDemolition,orderMode,demolishers.length,!!first?.demolitionProgress].join('|');
   if (key !== actionKey) {
     actionKey = key;
     const items = [];
@@ -741,6 +741,12 @@ function updateContext(first) {
       return item;
     };
     if (factory) {
+      const priority=factoryPriority(first),control=add('Приоритет: '+(priority==='repair'?'ремонт':'производство'),
+        priority==='repair'?'Ремонт приостанавливает выпуск. Нажмите для приоритета производства':'Машины ждут ремонта внутри завода. Нажмите для приоритета ремонта',
+        ()=>setFactoryPriority(mission,first.id,priority==='repair'?'production':'repair'),false,priority==='repair'?'repair-depot':'produce');
+      control.dataset.factoryPriority=priority;
+      const count=document.createElement('span');count.className='production-count';count.hidden=true;control.append(count);
+      const progress=document.createElement('progress');progress.className='production-progress';progress.max=1;progress.hidden=true;progress.setAttribute('aria-label','Ремонт машины');control.append(progress);
       for (const {id, kind, name, spec} of projects) {
         const label=name;
         const control=add(label, spec.cost + ' нефти · ' + spec.seconds + ' с', () => {
@@ -797,6 +803,12 @@ function updateContext(first) {
   if(demolitionProgress){demolitionProgress.value=first?.demolitionProgress??0;demolitionProgress.setAttribute('aria-valuetext',Math.round(demolitionProgress.value*100)+'%');}
   const queue=$('queue');
   if(factory){
+    const control=$('actions').querySelector('[data-factory-priority]'),visits=factoryVisitors(mission,first);
+    if(control){
+      const count=control.querySelector('.production-count'),progress=control.querySelector('progress');
+      count.hidden=!visits.length;count.textContent=String(visits.length);progress.hidden=!first.activeRepair;progress.value=first.activeRepair?.progress??0;
+      control.setAttribute('aria-description',visits.length?'На обслуживании: '+visits.length:'Очередь ремонта пуста');
+    }
     queue.hidden=true;queue.replaceChildren();queueKey='';
     const jobs=first.queue,counts=new Map();
     const projectId=job=>mission.productionProjectId(job,projects);
@@ -810,15 +822,15 @@ function updateContext(first) {
       control.classList.toggle('cannot-produce',!canProduce);
       badge.hidden=!count;badge.textContent=String(count);
       const progress=control.querySelector('.production-progress'),time=control.querySelector('.production-time');
-      const blocked=running&&first.exitBlocked,stopped=paused;
+      const servicing=running&&first.productionPaused,blocked=running&&first.exitBlocked&&!servicing,stopped=paused||servicing;
       const flow=running?oilOrderProgress(jobs[0],config.units[jobs[0].kind].seconds,config):null;
       const value=flow?.progress??0,remaining=Math.ceil(flow?.remaining??0);
       progress.hidden=time.hidden=!running;progress.value=value;
-      time.textContent=running?(blocked?'!':remaining+'с'):'';
+      time.textContent=running?(servicing?'Ⅱ':blocked?'!':remaining+'с'):'';
       control.dataset.productionState=running?(blocked?'blocked':stopped?'paused':flow.funding?'funding':'running'):'waiting';
       control.classList.toggle('has-queue',count>0);control.classList.toggle('is-producing',running&&!stopped&&!blocked);
       const phase=flow?.funding?'Перечисление нефти '+Math.floor(jobs[0].funding.paid)+'/'+jobs[0].cost:'Выпуск '+Math.floor((jobs[0]?.progress??0)*100)+'%';
-      const status=count?'В очереди: '+count+(running?' · '+phase+' · Осталось '+remaining+' с'+(blocked?' · Ждёт выезда':paused?' · Пауза':''):' · Ожидает очереди'):'';
+      const status=count?'В очереди: '+count+(running?' · '+phase+' · Осталось '+remaining+' с'+(servicing?' · Обслуживание техники':blocked?' · Ждёт выезда':paused?' · Пауза':''):' · Ожидает очереди'):'';
       progress.setAttribute('aria-valuetext',status);
       control.title=control.dataset.baseTitle+' · ЛКМ — заказать · ПКМ — отменить один'+(status?' · '+status:'');
       if(status)control.setAttribute('aria-description',status);else control.removeAttribute('aria-description');
@@ -941,7 +953,7 @@ function updateUi() {
 function minimap(){const canvas=$('minimap'),ctx=canvas.getContext('2d'),size=canvas.width,field=world.field;ctx.fillStyle='#171e1c';ctx.fillRect(0,0,size,size);if(miniBackground.complete&&miniBackground.naturalWidth)ctx.drawImage(miniBackground,0,0,size,size);
  world.drawMinimapFog(ctx,size);
  for(const grid of config.oilFields){const p=field.gridToWorld(grid);if(!mission.exploredAt(p.x,p.y))continue;ctx.fillStyle='#d5b869';ctx.fillRect(grid[0]/127*size-2,grid[1]/127*size-2,4,4);}
- for(const e of [...mission.state.units,...mission.state.buildings]){if(config.buildings[e.kind]?.storyOnly)continue;if(e.hp<=0||e.owner!=='rai'&&!mission.visibleAt(e.x,e.y))continue;const [x,y]=field.worldToGrid(e.x,e.y);ctx.fillStyle=selected.has(e.id)?'#eff2c3':e.owner==='rai'?'#a8c28a':'#d77e60';ctx.fillRect(x/127*size-2,y/127*size-2,e.path?3:5,e.path?3:5);}for(const a of mission.state.artifacts)if(!a.collected&&mission.exploredAt(a.x,a.y)){const [x,y]=field.worldToGrid(a.x,a.y);ctx.fillStyle='#e8d891';ctx.fillRect(x/127*size-3,y/127*size-3,6,6);}if(mission.state.flags.lastRevealed&&!mission.state.camps[3].cleared){const camp=mission.state.camps[3],x=camp.grid[0]/127*size,y=camp.grid[1]/127*size;ctx.strokeStyle='#df997b';ctx.strokeRect(x-5,y-5,10,10);ctx.fillStyle='#edc6a2';ctx.font='10px Arial';ctx.fillText('4',x+7,y+3);}const [cx,cy]=field.worldToGrid(world.controls.target.x,world.controls.target.y);ctx.strokeStyle='#e3d4a3';ctx.lineWidth=1;ctx.strokeRect(cx/127*size-9,cy/127*size-7,18,14);
+ for(const e of [...mission.state.units,...mission.state.buildings]){if(config.buildings[e.kind]?.storyOnly)continue;if(e.factoryVisit?.phase==='inside'||e.hp<=0||e.owner!=='rai'&&!mission.visibleAt(e.x,e.y))continue;const [x,y]=field.worldToGrid(e.x,e.y);ctx.fillStyle=selected.has(e.id)?'#eff2c3':e.owner==='rai'?'#a8c28a':'#d77e60';ctx.fillRect(x/127*size-2,y/127*size-2,e.path?3:5,e.path?3:5);}for(const a of mission.state.artifacts)if(!a.collected&&mission.exploredAt(a.x,a.y)){const [x,y]=field.worldToGrid(a.x,a.y);ctx.fillStyle='#e8d891';ctx.fillRect(x/127*size-3,y/127*size-3,6,6);}if(mission.state.flags.lastRevealed&&!mission.state.camps[3].cleared){const camp=mission.state.camps[3],x=camp.grid[0]/127*size,y=camp.grid[1]/127*size;ctx.strokeStyle='#df997b';ctx.strokeRect(x-5,y-5,10,10);ctx.fillStyle='#edc6a2';ctx.font='10px Arial';ctx.fillText('4',x+7,y+3);}const [cx,cy]=field.worldToGrid(world.controls.target.x,world.controls.target.y);ctx.strokeStyle='#e3d4a3';ctx.lineWidth=1;ctx.strokeRect(cx/127*size-9,cy/127*size-7,18,14);
  world.storySignals.drawMap(ctx,size);
  const contact=visibleRaidContact(mission);
  if(contact){
@@ -1038,8 +1050,6 @@ try {
   openingTelevision = new OpeningTelevision(sound);
   world = await createCampaignWorld($('world'), config, sound);
   mission = new Mission(config, world.field);
-  navigationTelemetry=installNavigationTelemetry(mission,()=>({active,paused,speed,openingPlaying,
-   designerVisible:!!designer?.visible,renderSuspended:!!window.campaign?.renderSuspended,selected:[...selected]}));
   world.damage.bindMission(mission);
   designer = new VehicleDesigner($('designer'), $('design-toggle'), mission, {
     makeModel: (components, paint) => world.vehicles.makeDesignModel(components, paint),

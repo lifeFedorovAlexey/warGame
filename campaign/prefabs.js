@@ -3,6 +3,7 @@ import {createOilPump} from './oil-pump.js';
 import {buildIndustrialStructure} from './industrial-buildings.js';
 import {buildDefenseTower} from './defense-tower.js';
 import {buildBaseSign} from './base-sign.js';
+import {createFactoryShutter} from './factory-service-effects.js';
 
 // Replaceable engineering prefabs. Dimensions and anchors belong to gameplay.json.
 export function createBuildingPrefab(T,kind,spec){
@@ -71,6 +72,7 @@ export function createBuildingPrefab(T,kind,spec){
  }
  for(const [name,grouped] of [['building_foundation',baseGroups],['building_structure',structureGroups]]){const group=new T.Group();group.name=name;root.add(group);for(const [material,geometries] of grouped){const merged=new T.BufferGeometry();for(const key of ['position','normal','uv','damagePart']){const arrays=geometries.map(g=>g.getAttribute(key)).filter(Boolean);if(arrays.length!==geometries.length)continue;const values=new Float32Array(arrays.reduce((sum,a)=>sum+a.array.length,0));let offset=0;for(const a of arrays){values.set(a.array,offset);offset+=a.array.length;}merged.setAttribute(key,new T.BufferAttribute(values,key==='uv'?2:key==='damagePart'?1:3));}const item=new T.Mesh(merged,material);item.userData.damageParts=damageParts;item.castShadow=item.receiveShadow=true;group.add(item);for(const geo of geometries)geo.dispose();}}
  root.userData.damageParts=damageParts;
+ if(kind==='factory')part('factory_shutter',{material:'metal',detachable:true,strength:110},id=>root.getObjectByName('building_structure').add(createFactoryShutter(T,d,id,damageParts)));
  if(oilPump)root.getObjectByName('building_structure').add(oilPump);
  if(tower){tower.traverse(node=>{if(node.isMesh)node.userData.damageParts=damageParts;});root.getObjectByName('building_structure').add(tower);}
  const contact=new T.Object3D();contact.name='work_contact';contact.position.set(0,rail.position[1]-rail.depth/2,rail.position[2]);root.add(contact);

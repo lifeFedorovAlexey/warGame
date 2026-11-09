@@ -1,3 +1,5 @@
+import {updateFactoryRepairs} from './factory-repair.js';
+import {updateFactoryVisit,insideFactory,factoryProductionPaused} from './factory-garage.js';
 import {TerrainNavigator} from './navigation.js';
 import {waterTower} from './threat-guidance.js';
 import {checkBuildingPlacement} from './building-placement.js';
@@ -499,7 +501,7 @@ export class Mission{
   if(action==='build'&&target.clearing)return this.fail('Техника освобождает площадку');
   if(action==='demolish'&&!canDemolish(this,target))return this.fail('Выберите своё готовое здание');
   if(['build','repair','demolish'].includes(action)&&(target.owner!=='rai'||!this.entity(target.id)))return this.fail('Нужна своя техника или постройка');
-  const units=this.state.units.filter(u=>ids.includes(u.id)&&u.owner==='rai'&&u.hp>0&&(!['build','repair','demolish'].includes(action)||this.unitSpec(u).role==='builder')&&(!combat||this.unitSpec(u).damage));if(!units.length)return this.fail('Не выбрана подходящая техника');const assigned=new Set();
+  const units=this.state.units.filter(u=>ids.includes(u.id)&&u.owner==='rai'&&u.hp>0&&!u.factoryVisit&&(!['build','repair','demolish'].includes(action)||this.unitSpec(u).role==='builder')&&(!combat||this.unitSpec(u).damage));if(!units.length)return this.fail('Не выбрана подходящая техника');const assigned=new Set();
   const pickup=action==='move'?pickupTarget(this,target):null;
   if(pickup)return orderPickup(this,units,pickup);
   const commandGroup=commandGroupFor(this,units),formationMode=commandGroup?.formation??'auto';
@@ -780,7 +782,7 @@ export class Mission{
   return {ok:true,id:building.id,waiting:result.waiting};
  }
  setCombatPolicy(ids,changes){this.finishPendingStep();return configureCombat(this,ids,changes);}
- stop(ids,{expandGroup=true}={}){if(expandGroup)ids=expandCommandIds(this,ids);this.commandPlanner?.cancel(ids);this.finishPendingStep();for(const unit of this.state.units)if(ids.includes(unit.id)&&unit.owner==='rai'&&unit.hp>0){delete unit.yieldReturn;unit.task=null;unit.path=[];unit.builderWorking=false;cancelCombatRetreat(unit);cancelCombatDeployment(unit);delete unit.detour;delete unit.traffic;delete unit.trafficHold;delete unit.resumeConstructionId;}return{ok:true};}
+ stop(ids,{expandGroup=true}={}){if(expandGroup)ids=expandCommandIds(this,ids);ids=ids.filter(id=>!this.entity(id)?.factoryVisit);this.commandPlanner?.cancel(ids);this.finishPendingStep();for(const unit of this.state.units)if(ids.includes(unit.id)&&unit.owner==='rai'&&unit.hp>0){delete unit.yieldReturn;unit.task=null;unit.path=[];unit.builderWorking=false;cancelCombatRetreat(unit);cancelCombatDeployment(unit);delete unit.detour;delete unit.traffic;delete unit.trafficHold;delete unit.resumeConstructionId;}return{ok:true};}
  setRally(id,point){const factory=this.entity(id);if(factory?.kind!=='factory'||factory.owner!=='rai'||!factory.completed)return this.fail('Выберите готовый завод');if(!this.inBounds(point.x,point.y)||!this.exploredAt(point.x,point.y))return this.fail('Точка сбора должна быть разведана');factory.rally={x:point.x,y:point.y};return{ok:true};}
  cancelBuilding(id){this.finishPendingStep();const building=this.entity(id);if(!building||building.owner!=='rai'||building.completed)return this.fail('Отменить можно только незавершённую стройку');this.state.energy=Math.min(this.config.energyCapacity,this.state.energy+oilRefund(building));building.hp=0;this.rebuildNavigation();this.releaseSite(building);for(const unit of this.state.units)if(unit.task?.targetId===id){unit.task=null;unit.path=[];unit.foldTime=2.6;}this.emit('construction-cancelled',{building:id});return {ok:true};}
  availableVehicleRecipes(){
@@ -842,7 +844,7 @@ export class Mission{
  research(id,key){this.finishPendingStep();if(!this.researchUnlocked())return this.fail('НИИ ещё не принят в эксплуатацию');const lab=this.entity(id),spec=this.config.research[key];if(!lab||lab.kind!=='lab'||lab.owner!=='rai'||!lab.completed)return this.fail('Нужен исследовательский центр');if(!spec||!this.state.artifactKeys.includes(key))return this.fail('Сначала найдите артефакт');if(this.state.research[key]||this.state.buildings.some(b=>b.hp>0&&b.research?.key===key))return this.fail('Исследование уже выполнено или выполняется');if(lab.research)return this.fail('Лаборатория занята');if(!this.canSpend(spec.cost))return this.fail('Недостаточно нефти');lab.research={key,progress:0,cost:spec.cost,funding:{paid:0}};this.emit('research-start',{key});return {ok:true};}
  lineOfSight(from,to){return clearCombatSight(this,from,to);}
  damage(target,amount,source,contact){
-  this.finishPendingStep();if(target.hp<=0||!Number.isFinite(amount)||amount<=0)return;
+  this.finishPendingStep();if(insideFactory(target)||target.hp<=0||!Number.isFinite(amount)||amount<=0)return;
   const hit=recordDamage(this,target,amount,source,contact);
   target.hp=Math.max(0,target.hp-amount*armorMultiplier(hit,target));
   syncFieldHp(this,target);
@@ -892,7 +894,7 @@ export class Mission{
   if(this.effects.length>128)this.effects.shift();
   return true;
  }
- enemyOf(item,other){return other.hp>0&&item.owner!==other.owner&&(!other.campId||this.inBounds(other.x,other.y));}
+ enemyOf(item,other){return !insideFactory(other)&&other.hp>0&&item.owner!==other.owner&&(!other.campId||this.inBounds(other.x,other.y));}
  updateProjectiles(){
   const waiting=[];
   for(const shot of this.state.projectiles){
@@ -2012,6 +2014,10 @@ export class Mission{
  }
  *executeUnitSteps(unit,dt){
   if(unit.hp<=0)return;unit.previousX=unit.x;unit.previousY=unit.y;unit.previousHeading=unit.heading;unit.previousWheelDistance=unit.wheelDistance??0;unit.previousSteering=unit.steering??0;unit.cooldown=Math.max(0,unit.cooldown-dt);const spec=this.unitSpec(unit);
+  if(unit.factoryVisit&&['entering','inside','leaving','departure'].includes(unit.factoryVisit.phase)){
+   const factory=this.state.buildings.find(b=>b.id===unit.factoryVisit.factoryId)??{...unit.factoryVisit.factory,hp:0};
+   yield* updateFactoryVisit(this,unit,factory,dt);return;
+  }
   if(unit.pendingOrder&&shouldAutoRetreat(unit,spec)){
    // Invalidate only this member's queued command. The planner's revision
    // checks discard its stale result; retreat search still uses this tick's
@@ -2194,9 +2200,11 @@ export class Mission{
   const structures=this.state.buildings.filter(b=>b.owner==='rai'&&b.hp>0&&b.completed);
   const generation=this.linkOilWells(structures,dt);
   beginOilFlow(this,generation,dt);
+  for(const b of structures)if(b.kind==='factory')b.productionPaused=factoryProductionPaused(this,b);
   transferOil(this,dt);
+  updateFactoryRepairs(this,structures,dt);
   for(const building of structures){building.cooldown=Math.max(0,building.cooldown-dt);const spec=this.buildingSpec(building);if(spec.damage){const target=this.nearestEnemy(building,spec.range);if(target)this.attack(building,target,spec);}
-   if(building.queue.length){
+   if(building.queue.length&&!building.productionPaused){
     const item=building.queue[0],unitSpec=this.config.units[item.kind];
     item.progress=Math.min(1,item.progress+fundedWorkTime(this,item,dt)/unitSpec.seconds);
     if(item.progress>=1&&!(building.exitRetryAt>this.state.time)){
@@ -2224,7 +2232,7 @@ export class Mission{
     for(let col=Math.max(0,b[0],Math.ceil(x-radius));col<=Math.min(127,b[2],Math.floor(x+radius));col++)
      if(Math.hypot(col-x,row-y)<=radius){this.visible[row*128+col]=255;this.explored[row*128+col]=255;}
   };
-  for(const unit of this.state.units)if(unit.owner==='rai'&&unit.hp>0)stamp(unit,this.unitSpec(unit).vision);for(const b of this.state.buildings)if(b.owner==='rai'&&b.hp>0&&b.completed)stamp(b,this.buildingSpec(b).vision);
+  for(const unit of this.state.units)if(unit.owner==='rai'&&unit.hp>0&&!insideFactory(unit))stamp(unit,this.unitSpec(unit).vision);for(const b of this.state.buildings)if(b.owner==='rai'&&b.hp>0&&b.completed)stamp(b,this.buildingSpec(b).vision);
  }
  updateMission(){
   updateCampPerimeters(this);

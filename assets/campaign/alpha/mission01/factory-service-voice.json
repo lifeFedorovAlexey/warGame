@@ -1,0 +1,58 @@
+{
+  "barks": [
+    {
+      "id": "factory-repair-start",
+      "event": "factory-repair-start",
+      "speaker": "builder",
+      "text": "Загоняй. Сейчас подварим.",
+      "clip": {
+        "file": "audio-factory-service/factory-repair-start.ogg",
+        "duration": 2.5269583333333334,
+        "leadingSilence": 0.07,
+        "trailingSilence": 0.33695833333333347,
+        "speaker": "builder",
+        "sha256": "3f75e31e72d987c23a4775f3e7fc87852b0187740aac055338dc916625c4d857",
+        "bytes": 12091,
+        "origin": "temporary-synthesis",
+        "generator": "local Piper + FFmpeg",
+        "voice": "denis"
+      }
+    },
+    {
+      "id": "factory-repair-start-alt",
+      "event": "factory-repair-start-alt",
+      "speaker": "warrant",
+      "text": "Рано списывать. Эта ещё поездит.",
+      "clip": {
+        "file": "audio-factory-service/factory-repair-start-alt.ogg",
+        "duration": 2.5869166666666668,
+        "leadingSilence": 0.02,
+        "trailingSilence": 0.2869166666666665,
+        "speaker": "warrant",
+        "sha256": "43ebc203b815be64d7f655b11f5231122f2d7d723e6ee6c59947e0f61494ba2e",
+        "bytes": 12490,
+        "origin": "temporary-synthesis",
+        "generator": "local Piper + FFmpeg",
+        "voice": "dmitri"
+      }
+    },
+    {
+      "id": "factory-repair-complete",
+      "event": "factory-repair-complete",
+      "speaker": "builder",
+      "text": "Готово. Только краску не трогай.",
+      "clip": {
+        "file": "audio-factory-service/factory-repair-complete.ogg",
+        "duration": 2.7359166666666668,
+        "leadingSilence": 0.04,
+        "trailingSilence": 0.4359166666666665,
+        "speaker": "builder",
+        "sha256": "08057f46edce281a7857383294850595054310842508ed09dbe0ef7bbd9441f7",
+        "bytes": 13073,
+        "origin": "temporary-synthesis",
+        "generator": "local Piper + FFmpeg",
+        "voice": "denis"
+      }
+    }
+  ]
+}

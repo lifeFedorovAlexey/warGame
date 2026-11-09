@@ -114,7 +114,7 @@ export class TrafficCoordinator{
  update(mission){
   const started=performance.now(),{state,config,field}=mission,now=state.time,scale=config.worldScale;
   const saved=state.trafficControl??={version:1,leases:[],waiting:{}};
-  const living=state.units.filter(u=>u.hp>0),byId=new Map(living.map(u=>[u.id,u]));
+  const living=state.units.filter(u=>u.hp>0&&u.factoryVisit?.phase!=='inside'),byId=new Map(living.map(u=>[u.id,u]));
   this.passageDecisions=updatePassageReservations(mission,living);
   const leases=new Map(saved.leases.filter(l=>byId.has(l.a)&&byId.has(l.b)
    &&(l.zone?!crossingReleased(l,byId,scale,field):l.expires>now)).map(l=>[l.key,l]));

@@ -1,3 +1,5 @@
+import {updateFactoryVisit} from './factory-garage.js';
+import {rememberRetreatOrder} from './factory-repair.js';
 import {expandCommandIds} from './group-command.js';
 import {isCampPerimeter} from './camp-demolition.js';
 
@@ -201,9 +203,9 @@ export function* updateCombatRetreat(mission, unit, spec, dt) {
   let retreat=unit.combatRetreat;
   if(!retreat) {
     if(!shouldAutoRetreat(unit,spec))return false;
-    const threat=retreatThreat(mission,unit,spec);
+    const resume=rememberRetreatOrder(mission,unit),threat=retreatThreat(mission,unit,spec);
     clearMotion(unit);
-    retreat=unit.combatRetreat={status:'planning',threat:threat?{...threat}:null,started:mission.state.time};
+    retreat=unit.combatRetreat={status:'planning',resume,threat:threat?{...threat}:null,started:mission.state.time};
   }
   const current=()=>unit.hp>0&&unit.combatRetreat===retreat&&!unit.pendingOrder;
   // Upgrade old saves whose retreat stopped at an arbitrary escape point.
@@ -213,6 +215,8 @@ export function* updateCombatRetreat(mission, unit, spec, dt) {
     delete retreat.failedSignature;
     if(retreat.status==='arrived')retreat.status='planning';
   }
+  const serviceBase=retreat.home?.id&&mission.entity(retreat.home.id);
+  if(serviceBase?.kind==='factory'&&(unit.factoryVisit||retreat.service!=='complete'))return yield* updateFactoryVisit(mission,unit,serviceBase,dt);
   if(retreat.status==='blocked'||retreat.status==='planning'){
     const home=retreatHome(mission,unit);
     if(home.id!==retreat.home.id||home.x!==retreat.home.x||home.y!==retreat.home.y){retreat.home=home;delete retreat.failedSignature;}

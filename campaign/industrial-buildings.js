@@ -57,7 +57,7 @@ export function buildIndustrialStructure(T, kind, size, kit) {
     const width=w*.63,depth=d*.79,x=-w*.117,front=-depth/2,back=depth/2;
     const wall=h*.59,top=.35+wall;
     breakableHall(T,kit,'factory',[width,depth,wall],[x,0,.35],{concrete,roof,steel,dark});
-    box([width+.10,.105,1.19],[x,front-.06,1.7],stripe);
+    for(const [left,right] of [[x-width/2-.05,-2.95],[2.95,x+width/2+.05]])box([right-left,.105,1.19],[(left+right)/2,front-.06,1.7],stripe);
     windows(x,front-.09,top-.81,width*.82,11,.55);
     for(const side of [-1,1]){
       const sx=x+side*(width/2+.055);
@@ -66,10 +66,8 @@ export function buildIndustrialStructure(T, kind, size, kit) {
       for(const y of [front+.12,-depth*.19,depth*.19,back-.14])box([.38,.34,wall+.09],[sx,y,.35+wall/2],trim);
     }
     const doorX=0,doorW=5.9,doorH=3.48;
-    box([doorW,.18,doorH],[doorX,front-.12,.35+doorH/2],dark);
     for(const side of [-1,1])box([.39,.48,doorH+.22],[doorX+side*(doorW/2+.09),front-.24,.35+doorH/2],steel);
     box([doorW+.65,.52,.40],[doorX,front-.24,.35+doorH+.17],trim);
-    for(let j=0;j<7;j++)box([doorW-.20,.035,.032],[doorX,front-.225,.64+j*.37],steel);
     for(let j=0;j<9;j++)box([.18,.12,.09],[doorX-doorW*.42+j*.55,front-.37,.39],j%2?dark:caution);
     // Roof monitors have sloped glazing, a ridge and sheet-metal backs.
     const profile=new T.Shape().moveTo(-1.44,0).lineTo(1.40,0).lineTo(.83,.84).lineTo(-.50,.84).closePath();

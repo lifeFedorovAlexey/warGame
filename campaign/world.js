@@ -4,6 +4,7 @@ import {createAlphaMap} from '../demo/alpha-map.js';
 import {createDesertSky} from '../demo/sky.js';
 import {createVehicleLayer} from './vehicle-layer.js';
 import {createHealthBars} from './health-bars.js';
+import {createFactoryServiceEffects,factoryShutterDamagePose} from './factory-service-effects.js';
 import {createBuildingPrefab} from './prefabs.js';
 import {createScavPrefab} from './scav-prefabs.js';
 import {createScavBasePrefab} from './scav-base-prefabs.js';
@@ -67,7 +68,7 @@ export async function createCampaignWorld(host,config,sound){
  damage.setTemplateProvider(entity=>{
    const root=getPrefab(entity.kind,entity.owner,entity.campId,entity.scavVariant,entity.fenceSpan,entity.fenceProfile);root.updateMatrixWorld(true);
    const bindings=[];root.traverse(node=>{if(node.isMesh)bindings.push(damage.prepare(node,'building',0));});
-   return {bindings,parts:root.userData.damageParts??{0:{name:'structure',material:'concrete'}},pose:towerDamagePose(T,root,bindings,field,config.worldScale)};
+   return {bindings,parts:root.userData.damageParts??{0:{name:'structure',material:'concrete'}},pose:towerDamagePose(T,root,bindings,field,config.worldScale)??factoryShutterDamagePose(T,root,bindings)};
  });
  const groundEffects=createGroundEffects(T,scene,field,config.worldScale),shotTimes=new Map();
  if(software)sun.shadow.mapSize.set(512,512);
@@ -103,6 +104,7 @@ export async function createCampaignWorld(host,config,sound){
  });
  let headlightCount=0;
  const construction=createConstructionEffects(T,scene,config.worldScale);
+ const factoryEffects=createFactoryServiceEffects(T,scene,config.worldScale);
  const dustCanvas=document.createElement('canvas');dustCanvas.width=dustCanvas.height=64;const dc=dustCanvas.getContext('2d'),gradient=dc.createRadialGradient(32,32,0,32,32,30);gradient.addColorStop(0,'rgba(255,255,255,.7)');gradient.addColorStop(1,'rgba(255,255,255,0)');dc.fillStyle=gradient;dc.fillRect(0,0,64,64);const dustPositions=new Float32Array(256*3),dustGeometry=new T.BufferGeometry();dustGeometry.setAttribute('position',new T.BufferAttribute(dustPositions,3));dustGeometry.setDrawRange(0,0);const dust=new T.Points(dustGeometry,new T.PointsMaterial({map:new T.CanvasTexture(dustCanvas),color:'#b5a180',size:8,transparent:true,opacity:.13,depthWrite:false}));dust.frustumCulled=false;scene.add(dust);const particles=[];let dustTime=0;
  const ray=new T.Raycaster(),ndc=new T.Vector2(),vector=new T.Vector3();
  const localRay=new T.Ray(),inverse=new T.Matrix4(),pickBox=new T.Box3(),pickPoint=new T.Vector3();
@@ -316,7 +318,7 @@ export async function createCampaignWorld(host,config,sound){
    shadowCasters.watch(b.id,b.kind,b.owner,b.campId,b.x,b.y,object.position.z,b.rotation,b.progress,b.completed,b.clearing,
     object.userData.pumpPhase,aim?.x,aim?.y,aim?.z,recoil);
   }
-  let index=0;for(const id of selected){const entity=mission.entity(id);if(!entity||index>=selectionRings.length)continue;const ring=selectionRings[index++],pose=vehicles.transforms.get(id)?.position,profile=SCAV_PROFILES[entity.kind];ring.visible=true;const radius=entity.path?(profile?.infantry?3:profile?Math.max(8,profile.boxes[0][2]*config.worldScale):8):Math.max(entity.halfWidth,entity.halfDepth)*1.1;placeSelectionRing(ring,field,pose?.x??entity.x,pose?.y??entity.y,radius);}for(;index<selectionRings.length;index++)selectionRings[index].visible=false;
+  let index=0;for(const id of selected){const entity=mission.entity(id);if(!entity||entity.factoryVisit?.phase==='inside'||index>=selectionRings.length)continue;const ring=selectionRings[index++],pose=vehicles.transforms.get(id)?.position,profile=SCAV_PROFILES[entity.kind];ring.visible=true;const radius=entity.path?(profile?.infantry?3:profile?Math.max(8,profile.boxes[0][2]*config.worldScale):8):Math.max(entity.halfWidth,entity.halfDepth)*1.1;placeSelectionRing(ring,field,pose?.x??entity.x,pose?.y??entity.y,radius);}for(;index<selectionRings.length;index++)selectionRings[index].visible=false;
   for(const event of shotsThisFrame){
    if(event.type==='explosion'){
     if(event.owner==='rai'||mission.visibleAt(event.to.x,event.to.y))combat.explode(new T.Vector3(event.to.x,event.to.y,event.to.z),event.radius,now,camera);
@@ -369,6 +371,7 @@ export async function createCampaignWorld(host,config,sound){
    shadowCasters.watch(artifact.id,artifact.x,artifact.y,artifact.key);
   }
   if(time-dustTime>.16){dustTime=time;for(const unit of mission.state.units){if(unit.hp<=0||isInfantry(unit)||unit.owner!=='rai'&&!mission.visibleAt(unit.x,unit.y)||Math.hypot(unit.x-unit.previousX,unit.y-unit.previousY)<.15)continue;particles.push({x:unit.x+Math.sin(unit.heading)*9,y:unit.y-Math.cos(unit.heading)*9,z:field.heightAt(unit.x,unit.y)+1,born:time});}}while(particles.length>256)particles.shift();for(let i=particles.length-1;i>=0;i--)if(time-particles[i].born>2.5)particles.splice(i,1);particles.forEach((p,i)=>dustPositions.set([p.x+(time-p.born)*1.8,p.y,p.z+(time-p.born)*1.2],i*3));dustGeometry.attributes.position.needsUpdate=true;dustGeometry.setDrawRange(0,particles.length);marker.visible=performance.now()<markerUntil;
+  if(factoryEffects.update(mission,buildings,time,dt))renderer.shadowMap.needsUpdate=true;
   let engine=0,rolling=0,slip=0,road=0;
   for(const unit of vehicles.visible){
    const distance=Math.hypot(unit.x-controls.target.x,unit.y-controls.target.y),volume=Math.max(0,1-distance/380);
@@ -384,7 +387,7 @@ export async function createCampaignWorld(host,config,sound){
    const distance=Math.hypot(from.x-controls.target.x,from.y-controls.target.y);
    return level+.55*Math.max(0,1-distance/360);
   },0);
-  sound?.update({field:live,engine:Math.min(1,engine),rolling:Math.min(1,rolling),slip:Math.min(1,slip),road:Math.min(1,road),welding:Math.min(1,projection)});
+  sound?.update({field:live,engine:Math.min(1,engine),rolling:Math.min(1,rolling),slip:Math.min(1,slip),road:Math.min(1,road),welding:Math.min(1,projection+factoryEffects.soundLevel)});
   damage.end();
   for(const group of damageCasters)if(group.visible)for(const model of group.children){
    if(!model.visible)continue;

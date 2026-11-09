@@ -19,7 +19,7 @@ function oilOrders(state, activeOnly=false) {
     if(b.owner!=='rai'||b.hp<=0)continue;
     if(!b.completed)orders.push(b);
     if(b.completed||!activeOnly){
-      orders.push(...(activeOnly?b.queue.slice(0,1):b.queue));
+      orders.push(...(activeOnly?(b.productionPaused?[]:b.queue.slice(0,1)):b.queue));
       if(b.research)orders.push(b.research);
     }
   }

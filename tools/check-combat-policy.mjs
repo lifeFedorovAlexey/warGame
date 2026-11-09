@@ -92,11 +92,11 @@ for(const [retreat,damage] of [['light',70],['heavy',220]]){
  m.setCombatPolicy([u.id],{retreat:'light',response:'ignore'});m.damage(u,70,enemy);tick(m,u);
  assert.equal(u.combatRetreat.home.id,factory.id,'The built base takes priority over the initial landing point');
  assert(!u.combatResume&&!u.combatParking,'An interrupted combat resume cannot restart an attack during withdrawal');
- for(let i=0;i<500&&u.combatRetreat.status!=='arrived';i++)tick(m,u);
- assert.equal(u.combatRetreat.status,'arrived');assert.equal(u.combatRetreat.phase,'home');
- assert(Math.hypot(u.x-factory.x,u.y-factory.y)<u.combatRetreat.home.radius+30,'Physically park outside the friendly factory');
- assert(m.vehicleMotionClear(u,u,u),'The parked vehicle does not overlap the base');
- checks.push('retreat returns to the built factory and clears interrupted attack state');
+ for(let i=0;i<500&&u.factoryVisit?.phase!=='inside';i++)tick(m,u);
+ assert.equal(u.combatRetreat.status,'servicing');assert.equal(u.factoryVisit.phase,'inside');
+ assert.equal(u.factoryVisit.factoryId,factory.id,'Retreat enters the friendly factory');
+ assert(Math.hypot(u.x-factory.x,u.y-factory.y)<20,'The car is stored inside the hall');
+ checks.push('retreat enters the built factory and clears interrupted attack state');
 }
 {
  const m=fixture(),u=unit(m),enemy=unit(m,'raider','scavs',0,-50);

@@ -125,6 +125,6 @@ export class StoryDirector {
 export async function loadMissionStory() {
   const base=new URL('../assets/campaign/alpha/mission01/',import.meta.url);
   const load=async file=>{const response=await fetch(new URL(file,base));if(!response.ok)throw new Error(file+': '+response.status);return response.json();};
-  const [story,audio]=await Promise.all([load('story-v2.json'),load('audio-v2.json')]);
-  return {...story,dialogue:story.dialogue.map(line=>({...line,clip:audio.clips[line.id]})),barks:story.barks.map(line=>({...line,clip:audio.clips[line.id]}))};
+  const [story,audio,service]=await Promise.all([load('story-v2.json'),load('audio-v2.json'),load('factory-service-voice.json')]);
+  return {...story,dialogue:story.dialogue.map(line=>({...line,clip:audio.clips[line.id]})),barks:[...story.barks.map(line=>({...line,clip:audio.clips[line.id]})),...service.barks]};
 }

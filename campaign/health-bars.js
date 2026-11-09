@@ -61,7 +61,7 @@ export function createHealthBars(T,scene,field,config,transforms,buildings){
   viewport.set(width,height);let count=0;
   if(enabled)for(const entity of entities){
    const spec=config.buildings[entity.kind],unit=config.units[entity.kind];
-   if(spec?.storyOnly||entity.hp<=0||entity.owner!=='rai'&&!mission.visibleAt(entity.x,entity.y))continue;
+   if(entity.factoryVisit?.phase==='inside'||spec?.storyOnly||entity.hp<=0||entity.owner!=='rai'&&!mission.visibleAt(entity.x,entity.y))continue;
    if(entity.hp===entity.maxHp&&!selected.has(entity.id)&&entity.completed!==false)continue;
    const pose=unit&&transforms.get(entity.id);
    if(unit&&!pose)continue;

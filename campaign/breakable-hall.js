@@ -5,6 +5,13 @@ export function breakableHall(T,{box,mesh,structuralPart},name,[w,d,h],[x,y,bott
  box([w-t*2,d-t*2,.12],[x,y,bottom+.06],m.dark);
  for(const side of [-1,1]){
   for(const axis of ['x','y'])for(let row=0;row<2;row++)for(let col=0;col<2;col++){
+   if(name==='factory'&&axis==='y'&&side===-1){
+    const left=x-w/2,right=x+w/2,doorLeft=-2.95,doorRight=2.95,doorH=3.48;
+    const a=row===0?(col===0?left:doorRight):(col===0?left:x),b=row===0?(col===0?doorLeft:right):(col===0?x:right);
+    const low=row===0?0:doorH,high=row===0?doorH:h;
+    structuralPart(name+'_wall_'+axis+'_'+side+'_'+(row*2+col),{material:'concrete',strength:190},()=>box([b-a,t,high-low],[(a+b)/2,y-d/2+t/2,bottom+(low+high)/2],m.concrete));
+    continue;
+   }
    const width=axis==='y'?w:d-t*2;
    const at=(a,b)=>[width*(a/2-.5)+(a===1&&b===1?width*.07:0),h*b/2+(a===1&&b===1?h*.07:0)];
    const points=[at(col,row),at(col+1,row),at(col+1,row+1),at(col,row+1)],shape=new T.Shape();shape.moveTo(...points[0]);for(const p of points.slice(1))shape.lineTo(...p);shape.closePath();

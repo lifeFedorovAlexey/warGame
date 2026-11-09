@@ -409,6 +409,11 @@ export class FieldSound {
   storyEvent(event) {
     if(!this.storyVoices)return;
     const mission=this.storyMission;
+    if(event.type==='factory-repair-start'){
+      const variant=(this.factoryBarkVariant??0)%2;this.factoryBarkVariant=variant+1;
+      this.bark(variant?'factory-repair-start-alt':'factory-repair-start');
+    }
+    if(event.type==='factory-repair-complete')this.bark('factory-repair-complete');
     if(event.type==='research-start')this.bark('a07');
     if(event.type==='research-complete'&&!['flamethrower','mg-ammo-1','mg-tower'].includes(event.key))this.bark('a08');
     // A damage quip may use the first quiet moment, but never arrive minutes late.

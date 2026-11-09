@@ -23,7 +23,7 @@ export function vehicleRadiusBound(kind,scale){
 }
 // Death releases the driving space immediately. A retained visual wreck and
 // collectible parts have their own lifetimes, but are never traffic obstacles.
-export const vehicleObstacle = unit => unit.hp > 0;
+export const vehicleObstacle = unit => unit.hp > 0&&unit.factoryVisit?.phase!=='inside';
 
 // Local dimensions follow the C01/B01 GLB bounds. Project both the lower
 // running gear and the higher body onto the ground using the render pose.
