@@ -1,6 +1,7 @@
 import {setButtonIcon, speedIcon} from '../assets/ui/icons.js';
 import {createCampaignWorld} from './world.js';
 import {Mission} from './mission.js';
+import {canDemolish,demolitionWorkers,requestDemolition,cancelDemolition} from './building-demolition.js';
 import {FieldRadio, missionSignal} from './field-radio.js';
 import {raidApproachSignal, visibleRaidContact, warehouseAdvanceHint, waterTowerSignal} from './threat-guidance.js';
 import {restoreRadioStory} from './radio-save.js';
@@ -227,6 +228,7 @@ function beginOrder(mode) {
   updateUi();
 }
 function toggleAttackOrder(){if(orderMode==='attack')cancelMode();else beginOrder('attack');}
+function toggleDemolitionOrder(){if(orderMode==='demolish')return cancelMode();cancelMode();orderMode='demolish';updateUi();}
 function saveGame(notify = true) {
   try {
     localStorage.setItem(saveKey, mission.save());
@@ -294,7 +296,10 @@ function ordersAt(point, target, mode) {
   if (!chosen.some(isMobile)) return toast('Выберите машину на карте или в списке');
   let action = 'move';
   let destination = point;
-  if ((mode === 'attack'||!mode) && target?.owner === 'scavs') {
+  if(mode==='demolish'){
+    if(!canDemolish(mission,target))return toast('Выберите своё готовое здание');
+    action='demolish';destination=target;
+  } else if ((mode === 'attack'||!mode) && target?.owner === 'scavs') {
     action = 'attack';
     destination = target;
   } else if (mode === 'attack') {
@@ -314,7 +319,7 @@ function ordersAt(point, target, mode) {
   lastCommandRevision=result.revision??null;lastCommandFeedback='';
   const combatOrder=action==='attack'||action==='attack-move';
   world.commandMarker(destination,combatOrder);
-  const eligible = (combatOrder?commandSelection():chosen).filter(entity => liveMobile(entity) && (!combatOrder || config.units[entity.kind].damage) && (!['build', 'repair'].includes(action) || entity.kind === 'builder'));
+  const eligible = (combatOrder?commandSelection():chosen).filter(entity => liveMobile(entity) && (!combatOrder || config.units[entity.kind].damage) && (!['build', 'repair', 'demolish'].includes(action) || entity.kind === 'builder'));
   blockedOrders=new Set(result.unassigned);
   blockedUntil=performance.now()+7500;
   const feedback=$('order-feedback');
@@ -322,7 +327,7 @@ function ordersAt(point, target, mode) {
   feedback.querySelector('span').textContent=text;
   feedback.hidden=!text;
   $('select-blocked').hidden=!blockedOrders.size;
-  sound.acknowledge(combatOrder?'attack':action,result.assignedIds??eligible.filter(unit=>!blockedOrders.has(unit.id)).map(unit=>unit.id));
+  sound.acknowledge(combatOrder?'attack':action==='demolish'?'move':action,result.assignedIds??eligible.filter(unit=>!blockedOrders.has(unit.id)).map(unit=>unit.id));
   orderMode = mode === 'attack' ? 'attack' : null;
   combatMenu?.close();
   updateUi();
@@ -467,6 +472,7 @@ function installInput() {
       ordersAt(world.ground(event.clientX, event.clientY), hitEntity(event.clientX, event.clientY), orderMode);
     }
     if (event.button === 0) {
+      if(orderMode==='demolish'){event.preventDefault();cancelMapGesture();lastSelectionClick=null;cancelMode();return;}
       canvas.setPointerCapture(event.pointerId);
       drag = {x: event.clientX, y: event.clientY, append: event.shiftKey, pointerId:event.pointerId};
     }
@@ -518,6 +524,7 @@ function installInput() {
       }
       return;
     }
+    if(orderMode==='demolish')return cancelMode();
     const selecting=Math.hypot(x - origin.x, y - origin.y)>6;
     const ownTarget=orderMode==='attack'?hitEntity(x,y):null;
     if (orderMode && !(orderMode==='attack'&&(selecting||ownTarget?.owner==='rai'))) return ordersAt(world.ground(x,y), ownTarget??hitEntity(x,y), orderMode);
@@ -720,12 +727,13 @@ function updateRoster() {
 }
 function updateContext(first) {
   const s = mission.state;
+  const demolishers=demolitionWorkers(mission,first?.id),canSelectDemolition=selection().some(u=>liveMobile(u)&&config.units[u.kind].role==='builder');
   const thresholds = [...Object.values(config.units), ...Object.values(config.research)].map(spec => Number(mission.canSpend(spec.cost))).join('');
   const factory = first?.owner === 'rai' && first.completed && first.kind === 'factory';
   const projects = factory ? mission.factoryProjects() : [];
   const designs = factory ? s.designs.map(project => project.id + ':' + project.name).join(',') : '';
   const activeResearch = s.buildings.filter(b=>b.hp>0&&b.research).map(b=>b.research.key);
-  const key = [first?.id, first?.completed, first?.clearing, first?.research?.key, activeResearch.join(), s.artifactKeys.join(), Object.keys(s.research).join(), thresholds, designs, builders().length,mission.researchUnlocked()].join('|');
+  const key = [first?.id, first?.completed, first?.clearing, first?.research?.key, activeResearch.join(), s.artifactKeys.join(), Object.keys(s.research).join(), thresholds, designs, builders().length,mission.researchUnlocked(),canSelectDemolition,orderMode,demolishers.length,!!first?.demolitionProgress].join('|');
   if (key !== actionKey) {
     actionKey = key;
     const items = [];
@@ -771,10 +779,24 @@ function updateContext(first) {
       }, first.clearing||!builders().length, 'build');
       add('Отменить', 'Вернуть остаток нефти', () => mission.cancelBuilding(first.id), false, 'close');
     }
+    if(canSelectDemolition&&!canDemolish(mission,first)){
+      const control=add('Снести здание','ПКМ по своему готовому зданию · ЛКМ — отменить выбор',()=>{toggleDemolitionOrder();return {ok:true};},false,'close');
+      control.dataset.demolish='target';control.classList.toggle('active',orderMode==='demolish');control.setAttribute('aria-pressed',String(orderMode==='demolish'));
+    }
+    if(canDemolish(mission,first)){
+      const running=demolishers.length>0;
+      const control=add(running?'Отменить снос':'Снести здание',running?'Остановить строителей':'Отправить ближайшего строителя',()=>{
+        const result=running?cancelDemolition(mission,first.id):requestDemolition(mission,first.id);if(result.ok)sound.signal('order');return result;
+      },!running&&!builders().length,'close');
+      control.dataset.demolish=running?'cancel':'building';
+      if(running||first.demolitionProgress){const progress=document.createElement('progress');progress.className='production-progress';progress.dataset.demolitionProgress='';progress.max=1;progress.setAttribute('aria-label','Снос здания');control.append(progress);}
+    }
     $('actions').replaceChildren(...items);
     $('actions').classList.toggle('factory-actions', !!factory);
     $('actions').hidden = !items.length;
   }
+  const demolitionProgress=$('actions').querySelector('[data-demolition-progress]');
+  if(demolitionProgress){demolitionProgress.value=first?.demolitionProgress??0;demolitionProgress.setAttribute('aria-valuetext',Math.round(demolitionProgress.value*100)+'%');}
   const queue=$('queue');
   if(factory){
     queue.hidden=true;queue.replaceChildren();queueKey='';

@@ -1,6 +1,7 @@
 import {TerrainNavigator} from './navigation.js';
 import {waterTower} from './threat-guidance.js';
 import {checkBuildingPlacement} from './building-placement.js';
+import {canDemolish,advanceDemolition} from './building-demolition.js';
 import {constructionUnlocked,researchUnlocked,defenseReady} from './story-construction.js';
 import {driveStep,clearOfVehicles,vehicleClearance,planManeuver,planManeuverSteps,maneuverStep,checkManeuver} from './vehicle-motion.js';
 import {footprintSupport,vehicleEnvelope,vehicleSweep,vehicleGroundSafe,vehicleObstacle,vehicleRadiusBound} from './vehicle-collision.js';
@@ -407,7 +408,7 @@ export class Mission{
   const repair=!!this.config.units[target.kind],scale=this.config.worldScale;
   if(this.canWorkHere(unit,target))return [];
   const goal=this.workPoint(target,offset),[col,row]=this.nav.grid(goal.x,goal.y),candidates=[],seen=new Set();
-  const reservations=this.state.units.filter(other=>other!==unit&&other.hp>0&&other.task?.targetId===target.id&&other.path.length&&['build','repair'].includes(other.task.type)).map(other=>({...other,...other.path.at(-1)}));
+  const reservations=this.state.units.filter(other=>other!==unit&&other.hp>0&&other.task?.targetId===target.id&&other.path.length&&['build','repair','demolish'].includes(other.task.type)).map(other=>({...other,...other.path.at(-1)}));
   const sample=(x,y)=>{
    const key=y*this.nav.size+x;
    if(seen.has(key)||!this.nav.allowed(x,y))return;
@@ -492,12 +493,13 @@ export class Mission{
  submitOrder(ids,action,target){if(action==='retreat')return this.retreat(ids);return (this.commandPlanner??=new CommandPlanner(this)).submit(selectedCommandIds(this,ids,action,target),action,target);}
  order(ids,action,target){ids=selectedCommandIds(this,ids,action,target);this.finishPendingStep();const result=completeSteps(this.orderSteps(ids,action,target));if(result.ok)this.commandPlanner?.cancel(result.assignedIds??ids.filter(id=>!result.unassigned?.includes(id)));return result;}
  *orderSteps(ids,action,target){
-  if(!['move','attack-move','attack','build','repair'].includes(action)||!target||!Number.isFinite(target.x)||!Number.isFinite(target.y))return this.fail('Недопустимый приказ');
+  if(!['move','attack-move','attack','build','repair','demolish'].includes(action)||!target||!Number.isFinite(target.x)||!Number.isFinite(target.y))return this.fail('Недопустимый приказ');
   const travel=action==='move'||action==='attack-move',combat=action==='attack'||action==='attack-move';
   if(action==='attack'&&(target.owner==='rai'||!this.entity(target.id)||!this.visibleAt(target.x,target.y)))return this.fail('Цель не обнаружена');
   if(action==='build'&&target.clearing)return this.fail('Техника освобождает площадку');
-  if(['build','repair'].includes(action)&&(target.owner!=='rai'||!this.entity(target.id)))return this.fail('Нужна своя техника или постройка');
-  const units=this.state.units.filter(u=>ids.includes(u.id)&&u.owner==='rai'&&u.hp>0&&(!['build','repair'].includes(action)||this.unitSpec(u).role==='builder')&&(!combat||this.unitSpec(u).damage));if(!units.length)return this.fail('Не выбрана подходящая техника');const assigned=new Set();
+  if(action==='demolish'&&!canDemolish(this,target))return this.fail('Выберите своё готовое здание');
+  if(['build','repair','demolish'].includes(action)&&(target.owner!=='rai'||!this.entity(target.id)))return this.fail('Нужна своя техника или постройка');
+  const units=this.state.units.filter(u=>ids.includes(u.id)&&u.owner==='rai'&&u.hp>0&&(!['build','repair','demolish'].includes(action)||this.unitSpec(u).role==='builder')&&(!combat||this.unitSpec(u).damage));if(!units.length)return this.fail('Не выбрана подходящая техника');const assigned=new Set();
   const pickup=action==='move'?pickupTarget(this,target):null;
   if(pickup)return orderPickup(this,units,pickup);
   const commandGroup=commandGroupFor(this,units),formationMode=commandGroup?.formation??'auto';
@@ -599,7 +601,7 @@ export class Mission{
    const live=job.mission.entity(unit.id);
    if(live?.hp>0&&live.pendingOrder?.revision===job.revision)Object.assign(live.pendingOrder,{status:'blocked',...failure});
   };
-  for(let index=0;index<units.length;index++){const unit=units[index],workOffset=(index-(units.length-1)/2)*18,goal=action==='build'||action==='repair'?this.workPoint(target,workOffset):target;
+  for(let index=0;index<units.length;index++){const unit=units[index],workOffset=(index-(units.length-1)/2)*18,goal=['build','repair','demolish'].includes(action)?this.workPoint(target,workOffset):target;
    if(performance.now()>=(this.nav.workDeadline??Infinity))yield;
    if(this.commandJob&&unit.pendingOrder?.revision!==this.commandJob.revision)continue;
    const planningUnit=this.commandJob?{...unit}:unit;
@@ -632,7 +634,7 @@ export class Mission{
     }
    }
    if(egress&&!viaPassage){failUnit(unit);continue;}
-   let path=action==='attack'?(yield* this.attackPathSteps(planningUnit,target,reserved)):['build','repair'].includes(action)?(yield* this.workPathSteps(planningUnit,target,workOffset)):roadPath??viaPassage??(arrivals
+   let path=action==='attack'?(yield* this.attackPathSteps(planningUnit,target,reserved)):['build','repair','demolish'].includes(action)?(yield* this.workPathSteps(planningUnit,target,workOffset)):roadPath??viaPassage??(arrivals
     ?(yield* arrivals.path(planningUnit,formation,{pathOptions:formationOptions}))
     :(yield* this.movePathSteps(planningUnit,formation,reserved,parkingRadius,false,()=>true,formationOptions))??(yield* this.movePathSteps(planningUnit,goal,reserved,parkingRadius,false,()=>true,formationOptions)));
    let remainingEscape=null;
@@ -910,7 +912,7 @@ export class Mission{
  requestPassage(...args){this.finishPendingStep();return completeSteps(this.requestPassageSteps(...args));}
  *requestPassageSteps(unit,blockers){
   if(unit.task?.type==='clear-site'||unit.detour||unit.traffic||unit.trafficHold)return false;
-  const scale=this.config.worldScale,workOrder=['build','repair'].includes(unit.task?.type);
+  const scale=this.config.worldScale,workOrder=['build','repair','demolish'].includes(unit.task?.type);
   for(const other of blockers){
    const holding=other.combatDeployment&&['arrived','reserve'].includes(other.combatDeployment.status);
    if(other.hp<=0||other.owner!==unit.owner||other.path.length||other.task&&!holding||other.detour||this.unitSpec(other).role==='builder'
@@ -1100,7 +1102,7 @@ export class Mission{
   unit.passingLane=lane;return target;
  }
  drivingIntent(unit,point,course,scale){
-  const cruising=!['build','repair','clear-site','combat-position'].includes(unit.task?.type)&&!unit.combatRetreat;
+  const cruising=!['build','repair','demolish','clear-site','combat-position'].includes(unit.task?.type)&&!unit.combatRetreat;
   const passing=cruising?this.passingLane(unit,point,course,scale):null;
   // Roads affect route cost, not a compulsory steering rail. Only an actual
   // opposing vehicle creates a passing corridor; parallel cars need not merge.
@@ -1432,7 +1434,7 @@ export class Mission{
   }
   const point=unit.path[0]??unit, next=unit.path[1], d=distance(unit,point);
   const atPivot=egress?.phase==='approach'&&point.x===egress.start.x&&point.y===egress.start.y;
-  const precise=!next&&['build','repair'].includes(unit.task?.type);
+  const precise=!next&&['build','repair','demolish'].includes(unit.task?.type);
   const tolerance=atPivot?.45:(precise||unit.task?.salvageId)?.65:2;
   const blockers=new Set();
   const applyPose=pose=>{
@@ -1833,7 +1835,7 @@ export class Mission{
   const legs=(yield* this.planManeuverSteps(unit,point,{...maneuverOptions,reverseBudget:0}))
    ??(reverseBudget>=scale*.6?(yield* this.planManeuverSteps(unit,point,{...maneuverOptions,reverseBudget})):null);
   if(legs){unit.detour={legs,parking:false,blocked:0};return !!pose;}
-  if(target&&['build','repair'].includes(unit.task.type)&&watch.attempts>=2&&this.state.time>=(unit.workEscapeRetryAt??0)){
+  if(target&&['build','repair','demolish'].includes(unit.task.type)&&watch.attempts>=2&&this.state.time>=(unit.workEscapeRetryAt??0)){
    unit.workEscapeRetryAt=this.state.time+4;
    const escape=yield* this.workRouteExitSteps(unit,destination);
    if(escape){
@@ -1880,7 +1882,7 @@ export class Mission{
     if(around){unit.path.shift();unit.detour={legs:around,parking:false,blocked:0};return !!pose;}
    }
   }
-  if(target&&['build','repair'].includes(unit.task.type))unit.path=(yield* this.workPathSteps(unit,target))??unit.path;
+  if(target&&['build','repair','demolish'].includes(unit.task.type))unit.path=(yield* this.workPathSteps(unit,target))??unit.path;
   else if(target&&unit.task.type==='attack')unit.path=(yield* this.attackPathSteps(unit,target))??unit.path;
   else if(travel&&!unit.combatParking&&watch.attempts>=3&&distance(unit,destination)<scale*12){
    const parkingAllowed=point=>gate?.parkingEdge===undefined||(point[gate.along]-gate.parkingEdge)*gate.direction>=0;
@@ -1948,10 +1950,10 @@ export class Mission{
   unit.projector??={yaw:0,pitch:0};
   let target=unit.task?.targetId?this.entity(unit.task.targetId):null;
   const job=unit.task?.type;
-  if(unit.task?.targetId&&(!target||job==='build'&&target.completed||job==='repair'&&target.hp>=target.maxHp)){
+  if(unit.task?.targetId&&(!target||job==='build'&&target.completed||job==='repair'&&target.hp>=target.maxHp||job==='demolish'&&!canDemolish(this,target))){
    unit.task=null;unit.path=[];target=null;
   }
-  const working=target&&['build','repair'].includes(job)&&!target.clearing;
+  const working=target&&['build','repair','demolish'].includes(job)&&!target.clearing;
   const parked=working&&!unit.path.length&&this.canWorkHere(unit,target);
   const moving=working&&this.config.units[target.kind]&&Math.hypot(target.x-target.previousX,target.y-target.previousY)>.05;
   const aim=parked&&!moving?this.projectorAim(unit,target):null;
@@ -1997,6 +1999,8 @@ export class Mission{
     if(target.progress>=1){target.completed=true;this.state.statistics.buildingsCompleted++;this.emit('construction-complete',{kind:target.kind,building:target.id});}
    }else if(unit.task.type==='repair'&&target.hp<target.maxHp){
     repairWithOil(this,target,dt);
+   }else if(unit.task.type==='demolish'){
+    unit.builderWorking=advanceDemolition(this,unit,target,dt);
    }else unit.builderWorking=false;
   }
  }
@@ -2083,14 +2087,14 @@ export class Mission{
    }else unit.attackRouteTarget??={x:target.x,y:target.y};
   }
   else if(spec.damage){const enemy=automaticCombatTarget(this,unit,spec);if(enemy)this.attack(unit,enemy,spec);}
-  const working=target&&['build','repair'].includes(unit.task?.type)&&!unit.path.length&&distance(unit,this.workPoint(target,unit.task.workOffset??0))<=this.config.builderRangeMetres;
+  const working=target&&['build','repair','demolish'].includes(unit.task?.type)&&!unit.path.length&&distance(unit,this.workPoint(target,unit.task.workOffset??0))<=this.config.builderRangeMetres;
   if(working){unit.path=[];unit.tool=Math.min(1,unit.tool+dt/2.6);unit.aimTarget={x:target.x,y:target.y};if(unit.tool<.99)return;
    if(unit.task.type==='build'&&!target.completed){target.progress=Math.min(1,target.progress+(oilFundingRemaining(target)>0?0:dt)/this.buildingSpec(target).seconds);if(target.progress>=1){target.completed=true;this.state.statistics.buildingsCompleted++;this.emit('construction-complete',{kind:target.kind,building:target.id});}}
    else if(unit.task.type==='repair'&&target.hp<target.maxHp){repairWithOil(this,target,dt);}
    if((unit.task.type==='build'&&target.completed)||(unit.task.type==='repair'&&target.hp>=target.maxHp)){unit.task=null;unit.foldTime=2.6;}
   }else{
    if(unit.tool>0){unit.foldTime=2.6;return;}
-   if(target&&['build','repair'].includes(unit.task?.type)&&!unit.path.length&&this.state.time-(unit.lastRepath??-10)>1){
+   if(target&&['build','repair','demolish'].includes(unit.task?.type)&&!unit.path.length&&this.state.time-(unit.lastRepath??-10)>1){
     unit.path=(yield* this.workPathSteps(unit,target));unit.lastRepath=this.state.time;
    }
    if(unit.task?.type==='move'&&!unit.path.length){
