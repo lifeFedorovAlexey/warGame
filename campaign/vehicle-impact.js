@@ -18,3 +18,5 @@ export function fallbackVehicleImpact(target,point,direction,field,scale){
  const pose=vehiclePose(target,field,scale),localDirection=worldDirectionToVehicle(direction,pose);
  return {worldPoint:point,worldDirection:direction,worldNormal:direction.map(v=>-v),point:worldToVehicle(point,pose),direction:localDirection,normal:localDirection.map(v=>-v),partId:0,partSpec:{material:'metal'},type:'collision'};
 }
+
+export {resolveVehicleOverlapsSteps} from './vehicle-overlap.js';

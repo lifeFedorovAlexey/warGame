@@ -27,7 +27,7 @@ import {updateOpeningConstruction} from './opening-construction.js';
 import {installScavBases,campGuardPose} from './scav-base-layout.js';
 const completeSteps=iterator=>{let step;do{step=iterator.next();}while(!step.done);return step.value;};
 import {UnitSpatialIndex} from './unit-spatial-index.js';
-import {vehicleContact,impactPower,fallbackVehicleImpact} from './vehicle-impact.js';
+import {vehicleContact,impactPower,fallbackVehicleImpact,resolveVehicleOverlapsSteps} from './vehicle-impact.js';
 import {kickContactRock} from './vehicle-contact-rock.js';
 import {TrafficCoordinator} from './traffic-coordinator.js';
 import {prepareTrafficDeparture,departureSlotOrder,rememberYieldHome,recordYieldStep,resumeYieldHome,borrowedHomeClear} from './traffic-start.js';
@@ -2283,6 +2283,11 @@ export class Mission{
     pending.iterator=null;pending.cursor++;this.unitIndex.update(unit);
     if(pending.budgeted)this.unitFrameTimes.set(unit,performance.now());
     if(performance.now()>=deadline&&pending.cursor<pending.units.length)return false;
+   }
+   if(!pending.overlapsComplete){
+    pending.overlaps??=resolveVehicleOverlapsSteps(this,dt);
+    while(true){const step=pending.overlaps.next();if(step.done){pending.overlapsComplete=true;pending.overlaps=null;break;}
+     if(performance.now()>=deadline)return false;}
    }
    this.updateProjectiles();updateBurning(this);updateStreetFurniture(this);updateSalvage(this);updateWrecks(this);this.finalizeBuilderContacts(dt);this.updateConstructionSites();this.updateEconomy(dt);
    for(const b of this.state.buildings)if(b.owner==='scavs'&&b.hp>0){b.cooldown=Math.max(0,b.cooldown-dt);const spec=this.buildingSpec(b);if(spec.damage){const enemy=this.nearestEnemy(b,spec.range);if(enemy)this.attack(b,enemy,spec);}}
