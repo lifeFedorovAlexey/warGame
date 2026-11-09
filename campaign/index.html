@@ -117,7 +117,10 @@
     <div class="command-deck">
     <section class="squad" aria-label="Выбранная техника">
       <div class="selection-title" hidden><strong id="selection"></strong><small id="details"></small></div>
-      <div id="roster" aria-label="Своя техника"></div>
+      <div class="army-roster">
+        <button id="select-army" data-icon="select-army" aria-label="Вся армия" title="F2 · Без отходящих и ремонта" aria-keyshortcuts="F2" aria-pressed="false" disabled></button>
+        <div id="roster" aria-label="Своя техника"></div>
+      </div>
     </section>
 
     <aside id="minimap-panel" class="panel">

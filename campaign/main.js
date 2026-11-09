@@ -18,6 +18,7 @@ import {storyObjectives} from './story-objectives.js';
 import {createMinimap,installMinimapInput} from './minimap.js';
 import {VehicleDesigner} from './designer.js';
 import {CombatMenu} from './combat-menu.js';
+import {armySelectionIds} from './army-selection.js';
 import {pickupTarget} from './pickup-orders.js';
 import {expandCommandIds} from './group-command.js';
 import {latestVehicleProject} from './vehicle-designs.js';
@@ -180,6 +181,12 @@ function select(ids, append = false, speak = true) {
 function focusUnit(unit) {
   select([unit.id]);
   world.centre(unit, 320);
+}
+function selectArmy(){
+  if(!active||designer.visible)return;
+  const ids=armySelectionIds(mission);
+  if(!ids.length)return;
+  select(ids);
 }
 function availableBuilding(kind) {
   return mission.state.buildings.filter(b=>b.owner==='rai'&&b.kind===kind&&b.hp>0)
@@ -577,7 +584,7 @@ function installInput() {
     if(drag?.pointerId===event.pointerId){cancelMapGesture();lastSelectionClick=null;}
   });
   document.addEventListener('keydown', event => {
-    if (!active || designer.visible || event.target.matches('input, select, textarea')) return;
+    if (!active || designer.visible || event.target.isContentEditable || event.target.matches('input, select, textarea')) return;
     const {code} = event;
     if(event.ctrlKey&&code==='KeyG'&&!event.repeat){
       event.preventDefault();
@@ -609,6 +616,7 @@ function installInput() {
       return;
     }
     if(event.ctrlKey||event.metaKey||event.altKey)return;
+    if(code==='F2'){event.preventDefault();if(!event.repeat)selectArmy();return;}
     if(code==='KeyG'&&!event.repeat){
       const first=selection().find(liveMobile),group=first&&mission.state.commandGroups?.find(g=>g.id===first.commandGroupId);
       if(group){event.preventDefault();select(group.members);}
@@ -673,6 +681,9 @@ function updatePalette() {
 }
 function updateRoster() {
   const units=vehicles(),roster=$('roster');
+  const army=armySelectionIds(mission),armyButton=$('select-army');
+  armyButton.disabled=!army.length;
+  armyButton.setAttribute('aria-pressed',String(army.length>0&&selected.size===army.length&&army.every(id=>selected.has(id))));
   const tileWidth=roster.firstElementChild?.offsetWidth||40;
   const gap=parseFloat(getComputedStyle(roster).columnGap)||0;
   const columns=Math.max(1,Math.min(6,Math.floor((roster.clientWidth+gap)/(tileWidth+gap))));
@@ -1074,6 +1085,7 @@ try {
   $('lab-toggle').onclick = () => openBuilding('lab');
   $('lab-toggle').ondblclick = () => openBuilding('lab', true);
   $('production-toggle').onclick = () => openBuilding('factory');
+  $('select-army').onclick = selectArmy;
   $('production-toggle').ondblclick = () => openBuilding('factory', true);
   $('close-build').onclick = $('cancel-order').onclick = cancelMode;
   $('suggest-site').onclick = suggestSite;
