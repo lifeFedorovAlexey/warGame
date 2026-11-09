@@ -1,10 +1,10 @@
 // World-space yards follow the flat pockets already present on the campaign map.
 // A wide, permanently open scrap gate keeps both attackers and sorties mobile.
 const layouts={
- 'nw-pocket':{box:[-88,-29,112,145],gate:'east',gateAt:64,barracks:[-43,105],store:[48,112],towers:[[87,24],[87,119]],garageTurn:180},
- 'nw-west':{box:[-84,-116,128,109],gate:'south',gateAt:32,exitGate:'north',exitAt:28,barracks:[91,43],store:[-43,65],towers:[[-59,-89],[101,-89]]},
- 'nw-east':{box:[-70,-65,112,104],gate:'south',gateAt:24,barracks:[60,61],store:[-35,65],towers:[[-44,20],[86,-35]]},
- 'west-south':{box:[-150,-106,123,117],gate:'north',gateAt:8,exitGate:'south',exitAt:-100,exitSpan:92,barracks:[67,-61],barracksTurn:-90,store:[-77,30],towers:[[-80,89],[94,89]]},
+ 'nw-pocket':{box:[-88,-29,112,145],gate:'east',gateAt:12,gateSpan:76,barracks:[-43,105],store:[48,112],towers:[[87,72],[87,119]],garageTurn:180},
+ 'nw-west':{box:[-84,-116,128,109],gate:'south',gateAt:83.2,exitGate:'north',exitAt:59,barracks:[-43,-60],barracksTurn:90,store:[-43,65],towers:[[-65,-97],[114,-75]]},
+ 'nw-east':{box:[-70,-65,112,104],gate:'south',gateAt:24,barracks:[60,61],store:[92,-8],towers:[[-44,20],[86,-43]]},
+ 'west-south':{box:[-175,-106,123,117],gate:'north',gateAt:26,gateSpan:90,exitGate:'south',exitAt:-132,exitSpan:76,barracks:[67,-61],barracksTurn:180,store:[-77,30],towers:[[-80,89],[94,89]]},
 };
 export function campGuardPose(camp,index){
  const layout=campBaseLayout(camp),g=layout?.gate??camp.gate,n=layout?.normal??{x:0,y:1},forward=20+Math.floor(index/2)*32,side=(index%2?1:-1)*65;
@@ -12,7 +12,7 @@ export function campGuardPose(camp,index){
 }
 export function campBaseLayout(camp){
  const data=layouts[camp.id];if(!data)return null;
- const [left,bottom,right,top]=data.box,span=68,at=data.gateAt;
+ const [left,bottom,right,top]=data.box,span=data.gateSpan??68,at=data.gateAt;
  const point=(x,y)=>({x:camp.x+x,y:camp.y+y});
  const side=data.gate,normal=side==='east'?{x:1,y:0}:side==='north'?{x:0,y:1}:{x:0,y:-1};
  const gate=side==='east'?point(right,at):point(at,side==='north'?top:bottom);
@@ -41,7 +41,7 @@ export function installScavBases(mission,{restoring=false}={}){
  for(const camp of mission.state.camps){
   if(camp.baseVersion)continue;
   const layout=campBaseLayout(camp);if(!layout)continue;
-  camp.baseVersion=1;
+  camp.baseVersion=2;
   const core=mission.state.buildings.find(b=>b.campId===camp.id&&b.kind==='camp-core');
   // Never resurrect a cleared or already demolished base when migrating a save.
   if(camp.cleared||!core||core.hp<=0)continue;

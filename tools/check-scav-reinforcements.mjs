@@ -39,6 +39,7 @@ while(mission.state.time<205){
 const report=[];
 for(const b of rows){
  const p=b.scavProduction,created=events.filter(e=>e.type==='scav-produced'&&e.building===b.id),waves=events.filter(e=>e.type==='scav-sortie'&&e.building===b.id);
+ if(created.length<SCAV_PRODUCTION[p.type].size)console.error(JSON.stringify({blockedProducer:{id:b.id,camp:b.campId,x:b.x,y:b.y,rotation:b.rotation,production:p,created,waiting:mission.state.units.filter(u=>u.producerId===b.id).map(u=>({id:u.id,x:u.x,y:u.y,hp:u.hp,path:u.path,task:u.task}))}}));
  assert(created.length>=SCAV_PRODUCTION[p.type].size,b.campId+' '+p.type+' produces a full group');
  assert(waves.length>=1,b.campId+' '+p.type+' sends its group into an attack');
  assert(waves.every(e=>e.count===SCAV_PRODUCTION[p.type].size));

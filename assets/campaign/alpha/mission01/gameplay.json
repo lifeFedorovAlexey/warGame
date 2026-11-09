@@ -29,13 +29,14 @@
   "buildingGridMetres": 8,
   "maxBuildingGrade": 0.12,
   "builderRangeMetres": 16,
-  "oilFields": [[10.5, 52], [18.5, 56.5], [30, 42], [38, 30], [24.5, 71.5]],
-  "oilFieldRelocations": [{"from": [16.5, 56.5], "to": [18.5, 56.5]}],
+  "oilFields": [[10.5, 52], [18.5, 56.5], [30.125, 41.5625], [36.85, 21.9625], [13.25, 73.9375]],
+  "oilFieldRelocations": [{"from": [16.5, 56.5], "to": [18.5, 56.5]}, {"from": [30, 42], "to": [30.125, 41.5625]}, {"from": [38, 30], "to": [36.85, 21.9625]}, {"from": [24.5, 71.5], "to": [13.25, 73.9375]}],
+  "campOilFields": {"nw-pocket": 2, "nw-east": 3, "west-south": 4},
   "camps": [
-    {"id": "nw-pocket", "name": "Первый лагерь", "grid": [31.5, 42.7], "gateGrid": [35.5, 42.5], "artifact": "flamethrower", "chapter": "first-artifact", "units": 3, "strength": 1.12, "extraGuards": ["scav-rifleman", "raider"], "wave": {"seconds": 65, "units": ["scav-zaporozhets", "scav-rifleman"]}},
+    {"id": "nw-pocket", "name": "Первый лагерь", "grid": [32, 42.5], "gateGrid": [35.5, 42.5], "artifact": "flamethrower", "chapter": "first-artifact", "units": 3, "strength": 1.12, "extraGuards": ["scav-rifleman", "raider"], "wave": {"seconds": 65, "units": ["scav-zaporozhets", "scav-rifleman"]}},
     {"id": "nw-west", "name": "Склад", "grid": [15.9, 30.5], "gateGrid": [18.5, 33.5], "artifact": "mg-ammo-1", "chapter": "second-artifact", "units": 4, "strength": 1.38, "extraGuards": ["raider", "scav-grenadier"], "wave": {"seconds": 60, "units": ["raider", "scav-grenadier"]}},
-    {"id": "nw-east", "name": "Водонапорная башня", "grid": [39.6, 25.9], "gateGrid": [38.5, 29.5], "towerGrids": [[38.1, 26.8375]], "artifact": "mg-tower", "chapter": "third-artifact", "units": 4, "strength": 1.65, "extraGuards": ["scav-rifleman", "scav-grenadier", "scav-zaporozhets"], "wave": {"seconds": 55, "units": ["scav-firetruck", "scav-rifleman"]}},
-    {"id": "west-south", "name": "Штаб Петровича", "grid": [13.5, 71.75], "gateGrid": [14.5, 67.5], "approachGrid": [16, 80.5], "approachRoad": ["junction-6", "junction-1", "junction-7", "west-south"], "coreRotationDegrees": 180, "towerGrids": [[9.625, 71.625], [15.25, 70.8125]], "requiresCamps": 3, "chapter": "last-camp", "units": 6, "strength": 1.95, "extraGuards": ["scav-bus", "scav-rifleman", "scav-grenadier"], "wave": {"seconds": 50, "units": ["scav-zaporozhets", "scav-grenadier"]}}
+    {"id": "nw-east", "name": "Водонапорная башня", "grid": [38.1, 24.4], "gateGrid": [38.5, 29.5], "towerGrids": [[36.6, 25.3375]], "artifact": "mg-tower", "chapter": "third-artifact", "units": 4, "strength": 1.65, "extraGuards": ["scav-rifleman", "scav-grenadier", "scav-zaporozhets"], "wave": {"seconds": 55, "units": ["scav-firetruck", "scav-rifleman"]}},
+    {"id": "west-south", "name": "Штаб Петровича", "grid": [13.25, 71.75], "gateGrid": [14.5, 67.5], "approachGrid": [16, 80.5], "approachRoad": ["junction-6", "junction-1", "junction-7", "west-south"], "coreRotationDegrees": 180, "towerGrids": [[9.375, 71.625], [16.375, 70.5]], "requiresCamps": 3, "chapter": "last-camp", "units": 6, "strength": 1.95, "extraGuards": ["scav-bus", "scav-rifleman", "scav-grenadier"], "wave": {"seconds": 50, "units": ["scav-zaporozhets", "scav-grenadier"]}}
   ],
   "units": {
     "bukhanka": {"name": "Пулемёт", "components": ["C01", "B01", "U01"], "cost": 130, "seconds": 18, "hp": 320, "speed": 30, "range": 145, "damage": 9, "cooldown": 0.55, "vision": 210, "role": "combat"},

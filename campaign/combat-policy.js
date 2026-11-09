@@ -100,7 +100,7 @@ export function automaticCombatTarget(mission, unit, spec, excludedIds=null) {
   if(retaliation&&!unit.lastHostileHit)return null;
   let best=null,bestValue=Infinity,bestDistance=Infinity;
   const consider=target=>{
-    if(isCampPerimeter(target))return;
+    if(isCampPerimeter(target)||target.campResource)return;
     if(excludedIds?.includes(target.id))return;
     if(!mission.enemyOf(unit,target)||!mission.visibleAt(target.x,target.y)||retaliation&&target.id!==unit.lastHostileHit.id)return;
     const d=distance(unit,target);if(d>spec.range)return;

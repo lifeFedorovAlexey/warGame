@@ -26,6 +26,8 @@ import {updateBurning} from './burning.js';
 import {updateStreetFurniture} from './street-furniture.js';
 import {updateOpeningConstruction} from './opening-construction.js';
 import {installScavBases,campGuardPose} from './scav-base-layout.js';
+import {installCampResources,captureCampResources} from './camp-resources.js';
+import {migrateScavLayout} from './scav-layout-migration.js';
 const completeSteps=iterator=>{let step;do{step=iterator.next();}while(!step.done);return step.value;};
 import {UnitSpatialIndex} from './unit-spatial-index.js';
 import {vehicleContact,impactPower,fallbackVehicleImpact,resolveVehicleOverlapsSteps} from './vehicle-impact.js';
@@ -97,7 +99,7 @@ export class Mission{
    const roster=SCAV_ROSTERS[data.id];
    for(let i=0;i<data.units;i++){const pose=campGuardPose(camp,i);this.addUnit(roster?.[i%roster.length]??'raider','scavs',pose,{campId:data.id,heading:pose.heading,guard:pose.guard});}
   });
-  this.state.scavRosterVersion=1;this.state.projectiles=[];installScavBases(this);
+  this.state.scavRosterVersion=1;this.state.projectiles=[];installScavBases(this);installCampResources(this);
   this.rebuildNavigation();this.updateFog();this.reserveRaid();placeExtraCampGuards(this);
  }
  id(prefix){return prefix+this.serial++;}
@@ -2371,7 +2373,7 @@ export class Mission{
  updateMission(){
   updateCampPerimeters(this);
   const s=this.state,captured=s.camps.filter(c=>c.cleared).length;
-  for(const camp of s.camps){if(camp.cleared)continue;const hostile=[...s.units,...s.buildings].some(e=>e.campId===camp.id&&e.hp>0&&!isCampPerimeter(e));if(!hostile){camp.cleared=true;this.emit('camp-cleared',{camp:camp.id});if(camp.artifact&&!camp.artifactSpawned){const point=this.nav.nearest(camp.x+35,camp.y,8)??camp;s.artifacts.push({id:this.id('a'),key:camp.artifact,x:point.x,y:point.y,collected:false});camp.artifactSpawned=true;}}}
+  for(const camp of s.camps){if(camp.cleared)continue;const hostile=[...s.units,...s.buildings].some(e=>e.campId===camp.id&&e.owner==='scavs'&&e.hp>0&&!isCampPerimeter(e)&&!e.campResource);if(!hostile){camp.cleared=true;captureCampResources(this,camp);this.emit('camp-cleared',{camp:camp.id});if(camp.artifact&&!camp.artifactSpawned){const point=this.nav.nearest(camp.x+35,camp.y,8)??camp;s.artifacts.push({id:this.id('a'),key:camp.artifact,x:point.x,y:point.y,collected:false});camp.artifactSpawned=true;}}}
   for(const artifact of s.artifacts)if(!artifact.collected&&s.units.some(u=>u.owner==='rai'&&u.hp>0&&distance(u,artifact)<24)){artifact.collected=true;if(!s.artifactKeys.includes(artifact.key))s.artifactKeys.push(artifact.key);this.emit('artifact-collected',{key:artifact.key});if(artifact.key!=='mg-tower')this.cinematic('artifact-'+artifact.key);}
   const enemyVisible=s.units.some(u=>u.owner==='scavs'&&u.hp>0&&this.visibleAt(u.x,u.y));const has=kind=>s.buildings.some(b=>b.owner==='rai'&&b.hp>0&&b.completed&&b.kind===kind);
   this.updateRaid(s.storyConstruction?.enabled
@@ -2561,12 +2563,13 @@ export class Mission{
   const legacyWrecks=[],armyPolicy=normalizeCombatPolicy(armyCombatPolicy(this));this.state.armyCombatPolicy=armyPolicy;
   for(const entity of [...this.state.units,...this.state.buildings]){
    if(entity.combatPolicy)entity.combatPolicy=normalizeCombatPolicy(entity.combatPolicy);
-   if(entity.owner==='rai'&&this.config.units[entity.kind]?.damage)entity.combatPolicy={...armyPolicy};
+   // Army defaults fill legacy omissions; explicit saved unit rules survive.
+   if(entity.owner==='rai'&&this.config.units[entity.kind]?.damage&&!entity.combatPolicy)entity.combatPolicy={...armyPolicy};
    upgradeDamageState(entity.damage,!!this.config.units[entity.kind]);
    if(this.config.units[entity.kind])syncFieldHp(this,entity);
    if(entity.hp<=0){if(entity.destroyedAt===undefined)legacyWrecks.push(entity);scheduleWreck(this,entity);}
   }
-  this.updateUnrevealedCampLayout();
+  this.updateUnrevealedCampLayout();migrateScavLayout(this);
   // Keep existing wells on their authored oil points after the base-yard edit.
   // This is a building relocation; vehicle positions and orders are untouched.
   for(const relocation of this.config.oilFieldRelocations??[]){
@@ -2593,7 +2596,7 @@ export class Mission{
    building.halfDepth=Math.min(building.halfDepth,halfDepth);
   }
   this.state.bounds=(this.state.flags.lastRevealed?this.config.finalMapBounds:this.config.initialMapBounds).slice();this.state.designs=Array.isArray(this.state.designs)?latestVehicleProjects(this.state.designs):starterProjects(this.vehicleRecipes);this.serial=data.serial;this.randomState=data.randomState;this.explored.set(data.explored);this.events=[];this.effects=[];this.accumulator=data.accumulator??0;this.fogTimer=data.fogTimer??0;this.navigationDirty=false;this.linkOilWells(this.state.buildings.filter(b=>b.owner==='rai'&&b.hp>0&&b.completed),0);this.rebuildNavigation();this.updateFog();
-  installScavBases(this,{restoring:true});this.rebuildNavigation();
+  installScavBases(this,{restoring:true});installCampResources(this);this.rebuildNavigation();
   if(refreshFactoryAccess(this))this.rebuildNavigation();
   for(const entity of legacyWrecks){
    const state=entity.damage,mark=state?.marks?.at(-1);
