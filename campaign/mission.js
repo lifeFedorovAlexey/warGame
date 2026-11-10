@@ -47,7 +47,7 @@ import {alertScavs,updateScavCombat} from './scav-ai.js';
 import {configureCombat,configureArmyCombat,armyCombatPolicy,normalizeCombatPolicy,rememberHostileHit,cancelCombatRetreat,automaticCombatTarget,forceCombatRetreat} from './combat-policy.js';
 import {updateFactoryRepairs} from './factory-repair.js';
 import {updateFactoryVisit,insideFactory,factoryProductionPaused,tryEnterFactory} from './factory-garage.js';
-import {inFactoryInterior,shouldAutoRetreat} from './combat-retreat-state.js';
+import {inFactoryInterior,shouldAutoRetreat,canAutoRetreat} from './combat-retreat-state.js';
 import {blockingCombatTarget,interruptedCombatTargets,movementCombatTarget} from './combat-orders.js';
 import {cancelCombatDeployment,updateCombatDeployment,updateCombatParking,combatPositionConditions} from './combat-deployment.js';
 import {pickupTarget,orderPickup,updatePickupOrder} from './pickup-orders.js';
@@ -177,7 +177,7 @@ export class Mission{
  buildingSpec(building){return this.config.buildings[building.kind]??{name:'Лагерь отбросов',seconds:1,hp:750,vision:180,power:0};}
  entity(id){return this.state.units.find(item=>item.id===id&&item.hp>0)??this.state.buildings.find(item=>item.id===id&&item.hp>0);}
  addUnit(kind,owner,point,extra={}){const spec=this.config.units[kind],unit={id:this.id('u'),kind,owner,x:point.x,y:point.y,previousX:point.x,previousY:point.y,hp:spec.hp,maxHp:spec.hp,heading:0,path:[],task:null,cooldown:0,tool:0,foldTime:0,...extra};
-  if(owner==='rai'&&spec.damage)unit.combatPolicy={...armyCombatPolicy(this)};
+  if(owner==='rai'&&canAutoRetreat(spec))unit.combatPolicy={...armyCombatPolicy(this)};
   this.state.units.push(unit);registerPersonnel(this,unit);if(this.unitIndexActive)this.unitIndex.insert(unit,this.state.units.length-1);return unit;}
  addStructure(kind,owner,point,extra={}){const spec=this.config.buildings[kind]??{},scale=this.config.worldScale,foot=spec.footprintMetres??[14,12],item={id:this.id('b'),kind,owner,x:point.x,y:point.y,rotation:0,hp:spec.hp??750,maxHp:spec.hp??750,halfWidth:foot[0]*scale/2,halfDepth:foot[1]*scale/2,progress:owner==='rai'?0:1,completed:owner!=='rai',queue:[],research:null,cooldown:0,...extra};item.maxHp=item.hp;this.state.buildings.push(item);return item;}
  rebuildNavigation(){this.finishPendingStep();this.nav.bounds=this.state.bounds.slice();this.nav.rebuild(this.state.buildings.filter(building=>!building.clearing));}
@@ -2581,7 +2581,7 @@ export class Mission{
   for(const entity of [...this.state.units,...this.state.buildings]){
    if(entity.combatPolicy)entity.combatPolicy=normalizeCombatPolicy(entity.combatPolicy);
    // Army defaults fill legacy omissions; explicit saved unit rules survive.
-   if(entity.owner==='rai'&&this.config.units[entity.kind]?.damage&&!entity.combatPolicy)entity.combatPolicy={...armyPolicy};
+   if(entity.owner==='rai'&&canAutoRetreat(this.config.units[entity.kind])&&!entity.combatPolicy)entity.combatPolicy={...armyPolicy};
    upgradeDamageState(entity.damage,!!this.config.units[entity.kind]);
    if(this.config.units[entity.kind])syncFieldHp(this,entity);
    if(entity.hp<=0){if(entity.destroyedAt===undefined)legacyWrecks.push(entity);scheduleWreck(this,entity);}

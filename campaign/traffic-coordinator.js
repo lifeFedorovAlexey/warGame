@@ -230,7 +230,7 @@ export class TrafficCoordinator{
    }
   }
   if(unit.foldTime>0){
-   if(!retreat?.forced)return false;
+   if(!retreat)return false;
    unit.foldTime=Math.max(0,unit.foldTime-dt);unit.tool=Math.max(0,unit.tool-dt/2.6);return true;
   }
   return yield* updateCombatRetreat(mission,unit,spec,dt);

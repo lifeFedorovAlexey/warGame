@@ -3,7 +3,7 @@ import {isCampPerimeter} from './camp-demolition.js';
 import {rememberRetreatOrder,factoryCanRepair} from './factory-repair.js';
 import {factoryVisitors,updateFactoryVisit} from './factory-garage.js';
 import {chooseRepairFactory,needsFactoryVisit,repairChoiceDue} from './factory-routing.js';
-import {shouldAutoRetreat,isAutomaticRepair,inFactoryInterior} from './combat-retreat-state.js';
+import {shouldAutoRetreat,canAutoRetreat,isAutomaticRepair,inFactoryInterior} from './combat-retreat-state.js';
 import {navigationDecision} from './navigation-state.js';
 export {shouldAutoRetreat} from './combat-retreat-state.js';
 
@@ -49,7 +49,7 @@ export function configureArmyCombat(mission,changes){
  const keys=Object.keys(changes??{});
  if(!keys.length||keys.some(key=>!COMBAT_OPTIONS[key]?.some(o=>o.value===changes[key])))return mission.fail('Недопустимый режим боя');
  const policy={...armyCombatPolicy(mission),...changes};
- const ids=mission.state.units.filter(u=>u.hp>0&&u.owner==='rai'&&mission.unitSpec(u).damage).map(u=>u.id);
+ const ids=mission.state.units.filter(u=>u.hp>0&&u.owner==='rai'&&(mission.unitSpec(u).damage||changes.retreat&&canAutoRetreat(mission.unitSpec(u)))).map(u=>u.id);
  // Changing modes while the army is empty still configures future production.
  const result=ids.length?configureCombat(mission,ids,changes):{ok:true,changed:0};
  if(result.ok)mission.state.armyCombatPolicy=policy;
@@ -60,12 +60,14 @@ export function configureCombat(mission, ids, changes) {
   if(!keys.length||keys.some(key=>!COMBAT_OPTIONS[key]?.some(o=>o.value===changes[key])))return mission.fail('Недопустимая настройка атаки');
   const selected=new Set(expandCommandIds(mission,ids,{includeRepairing:true})),urgent=[];let changed=0;
   for(const unit of mission.state.units) {
-    if(!selected.has(unit.id)||unit.hp<=0||unit.owner!=='rai'||!mission.unitSpec(unit).damage)continue;
+    if(!selected.has(unit.id)||unit.hp<=0||unit.owner!=='rai')continue;
+    const spec=mission.unitSpec(unit),defensiveOnly=!spec.damage;
+    if(defensiveOnly&&(!changes.retreat||!canAutoRetreat(spec)))continue;
     const previous=combatPolicy(unit);
-    unit.combatPolicy={...previous,...changes};
+    unit.combatPolicy={...previous,...(defensiveOnly?{retreat:changes.retreat}:changes)};
     // A newer rule must take effect during an explicit attack too. Release
     // its old target; a subsequent direct attack remains a deliberate override.
-    const changedFireRule=keys.some(key=>key==='response'||key==='priority');
+    const changedFireRule=!defensiveOnly&&keys.some(key=>key==='response'||key==='priority');
     const explicit=unit.pendingOrder?.type==='attack'||unit.task?.type==='attack'||unit.combatDeployment?.resume.type==='attack';
     if(changedFireRule&&explicit&&!isAutomaticRepair(unit,mission.unitSpec(unit))){urgent.push(unit.id);clearMotion(unit);unit.driveSpeed=0;}
     if(changes.retreat==='never'&&unit.combatRetreat&&!unit.combatRetreat.forced){clearMotion(unit);cancelCombatRetreat(unit);unit.driveSpeed=0;}
@@ -132,6 +134,8 @@ function clearMotion(unit) {
 export function startAutomaticRetreat(mission,unit,spec){
  const resume=unit.combatRetreat?.resume??rememberRetreatOrder(mission,unit),threat=retreatThreat(mission,unit,spec);
  clearMotion(unit);
+ unit.builderWorking=false;unit.builderContact=null;
+ if(unit.tool>0)unit.foldTime=Math.max(unit.foldTime??0,2.6);
  unit.combatRetreat={status:'planning',resume,threat:threat?{...threat}:null,started:mission.state.time};
  return unit.combatRetreat;
 }
@@ -301,7 +305,7 @@ function* withdrawalDetour(mission,unit,spec,home,current){
 // Uses the existing yielding path search and swept vehicle movement. A retreat
 // never jumps the vehicle to a point or disables collision checks.
 export function* updateCombatRetreat(mission, unit, spec, dt) {
-  if(unit.owner!=='rai'||!spec.damage&&!unit.combatRetreat?.forced)return false;
+  if(unit.owner!=='rai'||!canAutoRetreat(spec)&&!unit.combatRetreat?.forced)return false;
   let retreat=unit.combatRetreat;
   if(!retreat) {
     if(!shouldAutoRetreat(unit,spec))return false;

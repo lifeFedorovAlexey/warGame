@@ -17,9 +17,11 @@ export function rememberRetreatOrder(mission,unit){
  const origin=unit.yieldReturn?.home??unit;
  const type=pending?.type??task?.type;
  const target=pending?.target??unit.routeOrder?.destination??task??origin;
- const action=['move','attack-move','attack'].includes(type)?type:'move';
+ const work=mission.unitSpec(unit).role==='builder'&&['build','repair','demolish','upgrade-power'].includes(type);
+ const action=work||['move','attack-move','attack'].includes(type)?type:'move';
  const result={action,target:{x:target.x??origin.x,y:target.y??origin.y},origin:{x:origin.x,y:origin.y}};
  if(action==='attack')result.target.id=pending?.target.id??task?.targetId;
+ if(work){result.target.id=pending?.target.id??task?.targetId;return result;}
  // Track a formation relative to another member's accepted slot. If that
  // group receives a later march while this car is at the factory, rejoin its
  // current destination rather than the obsolete battlefield coordinates.
@@ -35,6 +37,13 @@ export function rememberRetreatOrder(mission,unit){
 }
 export function retreatReturnOrder(mission,unit){
  const resume=unit.combatRetreat?.resume;if(!resume)return null;
+ if(['build','repair','demolish','upgrade-power'].includes(resume.action)){
+  const target=mission.entity(resume.target.id);
+  const needed=target?.hp>0&&target.owner===unit.owner&&
+   (resume.action==='build'?!target.completed:resume.action==='repair'?target.hp<target.maxHp:
+    resume.action==='upgrade-power'?!target.powerModule:true);
+  return needed?{action:resume.action,target}:{action:'move',target:resume.origin};
+ }
  if(resume.action==='attack'){
   const enemy=mission.entity(resume.target.id);
   if(enemy?.hp>0&&mission.enemyOf(unit,enemy)&&mission.visibleAt(enemy.x,enemy.y))return {action:'attack',target:enemy};
