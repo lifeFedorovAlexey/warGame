@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "draftRevision": 120,
-  "draftSha256": "433dec9e40c0fb872a02c568a09308b1acb28c05a67916806479b1779d009e02",
-  "throughScene": "r19",
-  "appliedAt": "2026-11-10T09:16:28.914533+00:00",
+  "draftRevision": 216,
+  "draftSha256": "fd1840ef3a51f0e2eec699b76944b0b727a7d8ab3886f3b9bb22fe5332c424c6",
+  "throughScene": "r36",
+  "appliedAt": "2026-11-10T19:29:39.572467+00:00",
   "scenes": [
     {
       "id": "p01",
@@ -63,8 +63,7 @@
       "title": "Вывеска",
       "cues": [
         "m01-s03-l001",
-        "m01-v3-builder-crooked-plinth",
-        "m01-s03-l003"
+        "m01-v3-builder-crooked-plinth"
       ],
       "sourceLine": 61,
       "sections": [
@@ -254,7 +253,7 @@
         "r11",
         "r12"
       ],
-      "triggerDescription": "Завод готов; разговор о запуске производства завершён. Приказ строить НИИ звучит до начала его строительства.",
+      "triggerDescription": "Сразу после готовности завода, в ближайшую паузу между сценами. Не ждать рассказа о производстве или первой машины; не выдавать приказ, если НИИ уже строится.",
       "notes": "",
       "enabled": true
     },
@@ -270,7 +269,7 @@
       "sections": [
         "r13"
       ],
-      "triggerDescription": "НИИ построен; спокойный эфир. Сцены 11–12 завершены.",
+      "triggerDescription": "НИИ построен; спокойный эфир. Доступно и при самостоятельной постройке НИИ до приказа.",
       "notes": "",
       "enabled": true
     },
@@ -289,7 +288,7 @@
         "r14",
         "r15"
       ],
-      "triggerDescription": "разведка обнаружила приближающуюся вражескую группу.",
+      "triggerDescription": "Получено предупреждение о группе на подходе либо группа видна напрямую. Не ждать входа противника в дальность стрельбы.",
       "notes": "",
       "enabled": true
     },
@@ -307,7 +306,7 @@
         "r16",
         "r17"
       ],
-      "triggerDescription": "до начала стрельбы, если противник ещё находится на связи.",
+      "triggerDescription": "После доклада о приближении группы, пока противник жив. Начавшаяся перестрелка не отменяет разговор про выборы.",
       "notes": "",
       "enabled": true
     },
@@ -344,9 +343,701 @@
       "triggerDescription": "первая атака отражена, прошло 10 секунд спокойного эфира.",
       "notes": "",
       "enabled": true
+    },
+    {
+      "id": "r21",
+      "title": "Приказ укрепиться",
+      "cues": [
+        "m01-v3-r21-l001",
+        "m01-v3-r21-l002",
+        "m01-v3-r21-l003"
+      ],
+      "sourceLine": 379,
+      "sections": [
+        "r21"
+      ],
+      "triggerDescription": "атака отражена, сведения о противнике получены.",
+      "notes": "",
+      "enabled": true
+    },
+    {
+      "id": "r22",
+      "title": "Первый ДОТ готов",
+      "cues": [
+        "m01-v3-r22-l001",
+        "m01-v3-r22-l002",
+        "m01-v3-r22-l003"
+      ],
+      "sourceLine": 397,
+      "sections": [
+        "r22"
+      ],
+      "triggerDescription": "первый собственный ДОТ построен.",
+      "notes": "",
+      "enabled": true
+    },
+    {
+      "id": "r23",
+      "title": "Переход в наступление",
+      "cues": [
+        "m01-v3-r23-l001",
+        "m01-v3-r23-l002"
+      ],
+      "sourceLine": 413,
+      "sections": [
+        "r23"
+      ],
+      "triggerDescription": "первый оборонительный рубеж готов. Игрок может продолжать укрепление самостоятельно.",
+      "notes": "",
+      "enabled": true
+    },
+    {
+      "id": "r24",
+      "title": "Подход к лагерю",
+      "cues": [
+        "m01-v3-r24-l001",
+        "m01-v3-r24-l002",
+        "m01-v3-r24-l003"
+      ],
+      "sourceLine": 433,
+      "sections": [
+        "r24"
+      ],
+      "triggerDescription": "разведчик впервые обнаружил укрепления первого лагеря.",
+      "notes": "",
+      "enabled": true
+    },
+    {
+      "id": "r24a",
+      "title": "Лагерь с огнемётом — другой порядок наступления",
+      "cues": [
+        "m01-v3-r24a-l001",
+        "m01-v3-r24-l002",
+        "m01-v3-r24-l003"
+      ],
+      "sourceLine": 442,
+      "sections": [
+        "r24a"
+      ],
+      "triggerDescription": "Обнаружен лагерь с огнемётом; другой лагерь уже уничтожен.",
+      "notes": "",
+      "enabled": true
+    },
+    {
+      "id": "r25",
+      "title": "Лагерь зачищен",
+      "cues": [
+        "m01-v3-r25-l001",
+        "m01-v3-r25-l002"
+      ],
+      "sourceLine": 451,
+      "sections": [
+        "r25"
+      ],
+      "triggerDescription": "лагерь уничтожен.",
+      "notes": "",
+      "enabled": true
+    },
+    {
+      "id": "r26",
+      "title": "Найден артефакт",
+      "cues": [
+        "m01-s08-l001",
+        "m01-s08-l002",
+        "m01-s08-l003"
+      ],
+      "sourceLine": 463,
+      "sections": [
+        "r26"
+      ],
+      "triggerDescription": "обнаружен огнемётный артефакт; он ещё не исследуется.",
+      "notes": "",
+      "enabled": true
+    },
+    {
+      "id": "r27",
+      "title": "Демонтаж",
+      "cues": [
+        "m01-s08-l005",
+        "m01-s08-l006",
+        "m01-s08-l007",
+        "m01-s08-l008",
+        "m01-s08-l009",
+        "m01-s08-l011"
+      ],
+      "sourceLine": 479,
+      "sections": [
+        "r27",
+        "r28"
+      ],
+      "triggerDescription": "артефакт подобран, исследование ещё не начато.",
+      "notes": "",
+      "enabled": true
+    },
+    {
+      "id": "r29",
+      "title": "Огнемёт опознан",
+      "cues": [
+        "m01-s08-l013",
+        "m01-s08-l014",
+        "m01-s08-l015",
+        "m01-s08-l018",
+        "m01-s08-l019"
+      ],
+      "sourceLine": 515,
+      "sections": [
+        "r29",
+        "r30"
+      ],
+      "triggerDescription": "исследование flamethrower завершено.",
+      "notes": "",
+      "enabled": true
+    },
+    {
+      "id": "r30-alt",
+      "title": "Огнемёт — самостоятельный доклад",
+      "cues": [
+        "m01-v3-r30-alt-l001",
+        "m01-s08-l018",
+        "m01-s08-l019"
+      ],
+      "sourceLine": 545,
+      "sections": [
+        "r30-alt"
+      ],
+      "triggerDescription": "",
+      "notes": "",
+      "enabled": true
+    },
+    {
+      "id": "r31",
+      "title": "Обнаружение лагеря",
+      "cues": [
+        "m01-v3-r31-l001",
+        "m01-v3-r31-l002",
+        "m01-v3-r31-l003"
+      ],
+      "sourceLine": 563,
+      "sections": [
+        "r31"
+      ],
+      "triggerDescription": "впервые обнаружен следующий лагерь со складом вооружения.",
+      "notes": "",
+      "enabled": true
+    },
+    {
+      "id": "r32",
+      "title": "Захват склада",
+      "cues": [
+        "m01-s09-l001",
+        "m01-s09-l002",
+        "m01-v3-ammo-stock-report"
+      ],
+      "sourceLine": 579,
+      "sections": [
+        "r32"
+      ],
+      "triggerDescription": "лагерь зачищен, склад доступен для осмотра.",
+      "notes": "",
+      "enabled": true
+    },
+    {
+      "id": "r33",
+      "title": "Улучшенные боеприпасы",
+      "cues": [
+        "m01-s09-l006",
+        "m01-s09-l007",
+        "m01-v3-ammo-feed-improvement",
+        "m01-s09-l009",
+        "m01-s09-l010"
+      ],
+      "sourceLine": 595,
+      "sections": [
+        "r33",
+        "r34"
+      ],
+      "triggerDescription": "исследован артефакт mg-ammo-1.",
+      "notes": "",
+      "enabled": true
+    },
+    {
+      "id": "r35",
+      "title": "Подготовка к следующему лагерю",
+      "cues": [
+        "m01-v3-r35-l001",
+        "m01-v3-r35-l002",
+        "m01-v3-r35-l003"
+      ],
+      "sourceLine": 627,
+      "sections": [
+        "r35"
+      ],
+      "triggerDescription": "артефакт исследован, игрок продолжает продвижение; спокойный эфир.",
+      "notes": "",
+      "enabled": true
+    },
+    {
+      "id": "r36",
+      "title": "Необычное укрепление",
+      "cues": [
+        "m01-s10-l005",
+        "m01-s10-l006",
+        "m01-s10-l007",
+        "m01-s10-l008",
+        "m01-s10-l009",
+        "m01-s10-l010"
+      ],
+      "sourceLine": 647,
+      "sections": [
+        "r36",
+        "r37"
+      ],
+      "triggerDescription": "обнаружена живая пулемётная водонапорная башня.",
+      "notes": "",
+      "enabled": true
     }
   ],
   "dialogue": [
+    {
+      "id": "m01-s10-l005",
+      "speaker": "scout",
+      "text": "Командир, на высоте пулемётная башня. Бронированная, с поворотным механизмом. Похоже, довоенная.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s10-l006",
+      "speaker": "commander",
+      "text": "И как они её запустили?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s10-l007",
+      "speaker": "scout",
+      "text": "думаю Инструкцию нашли.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s10-l008",
+      "speaker": "commander",
+      "text": "Прочитали чтоли?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s10-l009",
+      "speaker": "scout",
+      "text": "Нет. Но картинки, видимо, поняли.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s10-l010",
+      "speaker": "commander",
+      "text": "Недооценили мы противника. Башню подавить, механизм сохранить. Инструкцию — нашим учёным.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-v3-r30-alt-l001",
+      "speaker": "scientist",
+      "text": "Разобрались с находкой. Это огнемёт. Причём действующий.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s08-l018",
+      "speaker": "commander",
+      "text": "А зачем синяя?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s08-l019",
+      "speaker": "scientist",
+      "text": "Если учесть все нюансы конструкции и использованные детали... вывод очевиден...сИНЯЯ ИЗОЛЕНТА НУЖНА - Чтобы жёлтая не разматывалась.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-v3-r31-l001",
+      "speaker": "scout",
+      "text": "Командир, у второго лагеря отбросов построение. Уже третье за пять минут.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-v3-r31-l002",
+      "speaker": "commander",
+      "text": "Дисциплину наводят?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-v3-r31-l003",
+      "speaker": "scout",
+      "text": "Пытаются. Первые два раза командиры подрались, кто главный.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s09-l001",
+      "speaker": "scout",
+      "text": "Склад наш! Боеприпасы довоенные, ящики под завязку.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s09-l002",
+      "speaker": "commander",
+      "text": "Документы?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-v3-ammo-stock-report",
+      "speaker": "scout",
+      "text": "По документам — пусто. По факту — полный склад. У отбросов, видать, тоже прапорщик был.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s09-l006",
+      "speaker": "scientist",
+      "text": "Изучили трофейные патронные ленты. Нашли способ увеличить скорострельность пулемётов.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s09-l007",
+      "speaker": "commander",
+      "text": "За счёт чего?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-v3-ammo-feed-improvement",
+      "speaker": "scientist",
+      "text": "Усовершенствовали механизм подачи. Теперь лента идёт быстрее и без задержек.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s09-l009",
+      "speaker": "commander",
+      "text": "А в чем подвох?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s09-l010",
+      "speaker": "scientist",
+      "text": "Патроны теперь кончаются еще быстрее. Но это уже проблема снабженцев.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-v3-r35-l001",
+      "speaker": "scout",
+      "text": "Следующий лагерь обнаружен. На въезде баррикады, пулемёт. Похоже, нас ждут.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-v3-r35-l002",
+      "speaker": "commander",
+      "text": "С чего ты взял?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-v3-r35-l003",
+      "speaker": "scout",
+      "text": "На воротах написали: «Альфа, идите домой». Причём с ошибками.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-v3-r24-l001",
+      "speaker": "scout",
+      "text": "Впереди лагерь отбросов. У въезда пост, за ограждением техника.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-v3-r24-l002",
+      "speaker": "commander",
+      "text": "Что по охране?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-v3-r24-l003",
+      "speaker": "scout",
+      "text": "Двое часовых. Один спит, второй охраняет его сон.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-v3-r24a-l001",
+      "speaker": "scout",
+      "text": "Впереди ещё один лагерь. У ворот часовые, за ограждением какие-то баллоны таскают. Похоже, не самогон.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-v3-r25-l001",
+      "speaker": "scout",
+      "text": "Лагерь зачищен. Нашли довоенное оборудование. Отбросы пытались переделать его в самогонный аппарат.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-v3-r25-l002",
+      "speaker": "commander",
+      "text": "уЧЕНЫМ  отправь. И прапорщику про аппарат ни слова.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s08-l001",
+      "speaker": "scout",
+      "text": "Командир, нашли довоенный блок. Отбросы к нему провода примотали.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s08-l002",
+      "speaker": "commander",
+      "text": "И что?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s08-l003",
+      "speaker": "scout",
+      "text": "Судя по всему, пытались улучшить пулемёт. Улучшили только пожарную обстановку. Сам блок целый, в НИИ отправим.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s08-l005",
+      "speaker": "scout",
+      "text": "Товарищ командир, синюю изоленту сняли.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s08-l006",
+      "speaker": "commander",
+      "text": "Отлично. И что за агрегат?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s08-l007",
+      "speaker": "scout",
+      "text": "Неизвестно. Под ней жёлтая.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s08-l008",
+      "speaker": "commander",
+      "text": "Ну снимайте и жёлтую.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s08-l009",
+      "speaker": "scout",
+      "text": "Никак нельзя.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s08-l011",
+      "speaker": "scout",
+      "text": "Она, похоже, заводская.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s08-l013",
+      "speaker": "scientist",
+      "text": "Разобрались с находкой. Это огнемёт. Причём действующий.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s08-l014",
+      "speaker": "commander",
+      "text": "И что обнаружили?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s08-l015",
+      "speaker": "scientist",
+      "text": "Бак от трактора, форсунка от котла. Всё собрано на синей изоленте.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-v3-r21-l001",
+      "speaker": "commander",
+      "text": "Атаку отбили. ДОТы на въезде поставить!",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-v3-r21-l002",
+      "speaker": "builder",
+      "text": "А если они с другой стороны зайдут?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-v3-r21-l003",
+      "speaker": "warrant",
+      "text": "Там дороги нет. Пусть сначала построят.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-v3-r22-l001",
+      "speaker": "builder",
+      "text": "ДОТ готов. Въезд перекрыли.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-v3-r22-l002",
+      "speaker": "commander",
+      "text": "А наши как выезжать будут?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-v3-r22-l003",
+      "speaker": "builder",
+      "text": "А нам разве приказ на выезд давали?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-v3-r23-l001",
+      "speaker": "radio",
+      "text": "оБНАРУЖЕНО Четыре лагеря. Противник на связь не выходит.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-v3-r23-l002",
+      "speaker": "commander",
+      "text": "Ну что ж. Раз дипломатия не удалась — придётся нанести визит лично.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s03-l001",
+      "speaker": "warrant",
+      "text": "Криво повесил.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-v3-builder-crooked-plinth",
+      "speaker": "builder",
+      "text": "Так постамент кривой.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s02-l003",
+      "speaker": "commander",
+      "text": "Сон приснился. Будто все умерли.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s02-l004",
+      "speaker": "warrant",
+      "text": "А приказ на это был?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s02-l007",
+      "speaker": "commander",
+      "text": "Не было.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s02-l008",
+      "speaker": "warrant",
+      "text": "Значит ВОСПОМИНАНИЯ,  Спи дальше.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
     {
       "id": "m01-s07-l001",
       "speaker": "scout",
@@ -532,38 +1223,6 @@
       "notes": ""
     },
     {
-      "id": "m01-s02-l003",
-      "speaker": "commander",
-      "text": "Сон приснился. Будто все умерли.",
-      "pauseAfter": 0.2,
-      "recordingStatus": "Т",
-      "notes": ""
-    },
-    {
-      "id": "m01-s02-l004",
-      "speaker": "warrant",
-      "text": "А приказ на это был?",
-      "pauseAfter": 0.2,
-      "recordingStatus": "Т",
-      "notes": ""
-    },
-    {
-      "id": "m01-s02-l007",
-      "speaker": "commander",
-      "text": "Не было.",
-      "pauseAfter": 0.2,
-      "recordingStatus": "Т",
-      "notes": ""
-    },
-    {
-      "id": "m01-s02-l008",
-      "speaker": "warrant",
-      "text": "Значит, сон. Спи дальше.",
-      "pauseAfter": 0.2,
-      "recordingStatus": "Т",
-      "notes": ""
-    },
-    {
       "id": "m01-s02-l013",
       "speaker": "commander",
       "text": "Подъём! Родину восстанавливать будем!",
@@ -575,30 +1234,6 @@
       "id": "m01-s02-l014",
       "speaker": "soldier",
       "text": "Опять копать?! ",
-      "pauseAfter": 0.2,
-      "recordingStatus": "Т",
-      "notes": ""
-    },
-    {
-      "id": "m01-s03-l001",
-      "speaker": "warrant",
-      "text": "Криво повесил.",
-      "pauseAfter": 0.2,
-      "recordingStatus": "Т",
-      "notes": ""
-    },
-    {
-      "id": "m01-v3-builder-crooked-plinth",
-      "speaker": "builder",
-      "text": "Так постамент кривой.",
-      "pauseAfter": 0.2,
-      "recordingStatus": "Т",
-      "notes": ""
-    },
-    {
-      "id": "m01-s03-l003",
-      "speaker": "warrant",
-      "text": "Тогда нормально.",
       "pauseAfter": 0.2,
       "recordingStatus": "Т",
       "notes": ""
@@ -773,6 +1408,792 @@
     }
   ],
   "clips": {
+    "m01-s10-l005": {
+      "file": "recordings/reviewed/m01-s10-l005-f8e05017a1d3.mp3",
+      "duration": 6.191041666666667,
+      "leadingSilence": 0.11,
+      "trailingSilence": 0.17104166666666654,
+      "speaker": "scout",
+      "sha256": "f8e05017a1d3de06d18f502d642f9e39510511a0497d435fecb49c509e490655",
+      "bytes": 115993,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T19_20_01_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 216,
+      "transcriptSource": "owner-workshop",
+      "text": "Командир, на высоте пулемётная башня. Бронированная, с поворотным механизмом. Похоже, довоенная."
+    },
+    "m01-s10-l006": {
+      "file": "recordings/reviewed/m01-s10-l006-be3c3c108129.mp3",
+      "duration": 2.1942916666666665,
+      "leadingSilence": 0.13,
+      "trailingSilence": 0.3242916666666664,
+      "speaker": "commander",
+      "sha256": "be3c3c108129b6b9b361fe9df42fa84903409210523c83f4f586ef80082cfc45",
+      "bytes": 52045,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T19_15_52_comandorNig_gen_s50_sim75_v4.mp3",
+      "draftRevision": 216,
+      "transcriptSource": "owner-workshop",
+      "text": "И как они её запустили?"
+    },
+    "m01-s10-l007": {
+      "file": "recordings/reviewed/m01-s10-l007-420cf9559d73.mp3",
+      "duration": 2.429375,
+      "leadingSilence": 0.04,
+      "trailingSilence": 0.339375,
+      "speaker": "scout",
+      "sha256": "420cf9559d73d8cfc7eb480bc6fe1e7453512afc3e4513d6434d54bdd292c71e",
+      "bytes": 55807,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T19_16_30_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 216,
+      "transcriptSource": "owner-workshop",
+      "text": "думаю Инструкцию нашли."
+    },
+    "m01-s10-l008": {
+      "file": "recordings/reviewed/m01-s10-l008-2eda89d7f2a1.mp3",
+      "duration": 1.5673333333333332,
+      "leadingSilence": 0.11,
+      "trailingSilence": 0.30733333333333324,
+      "speaker": "commander",
+      "sha256": "2eda89d7f2a12631cb5d6d92496d0e04c204235ab96f2eb7d97900fa326eb6ab",
+      "bytes": 42014,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T19_17_06_comandorNig_gen_s50_sim75_v4.mp3",
+      "draftRevision": 216,
+      "transcriptSource": "owner-workshop",
+      "text": "Прочитали чтоли?"
+    },
+    "m01-s10-l009": {
+      "file": "recordings/reviewed/m01-s10-l009-c21a093b4be2.mp3",
+      "duration": 3.3175416666666666,
+      "leadingSilence": 0.14,
+      "trailingSilence": 0.15754166666666647,
+      "speaker": "scout",
+      "sha256": "c21a093b4be2601bd1b77811e2b01a5f22997fdac57558da99ff40f03774d202",
+      "bytes": 70017,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T19_17_34_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 216,
+      "transcriptSource": "owner-workshop",
+      "text": "Нет. Но картинки, видимо, поняли."
+    },
+    "m01-s10-l010": {
+      "file": "recordings/reviewed/m01-s10-l010-1e169904a3b5.mp3",
+      "duration": 6.922458333333333,
+      "leadingSilence": 0.21,
+      "trailingSilence": 0.17245833333333316,
+      "speaker": "commander",
+      "sha256": "1e169904a3b5b4e717d466c26c653aa473edd08b9268a571811e3163d7a28f12",
+      "bytes": 127696,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T19_17_57_comandorNig_gen_s50_sim75_v4.mp3",
+      "draftRevision": 216,
+      "transcriptSource": "owner-workshop",
+      "text": "Недооценили мы противника. Башню подавить, механизм сохранить. Инструкцию — нашим учёным."
+    },
+    "m01-v3-r30-alt-l001": {
+      "file": "recordings/reviewed/m01-v3-r30-alt-l001-b0364776def2.mp3",
+      "duration": 4.675916666666667,
+      "leadingSilence": 0.12,
+      "trailingSilence": 0.20591666666666697,
+      "speaker": "scientist",
+      "sha256": "b0364776def26a5c5d259e8ed5607594355ab4536520a6c9194fec8219b2219b",
+      "bytes": 91751,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T18_46_31_M. Danisch - Narrator_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 215,
+      "transcriptSource": "owner-workshop",
+      "text": "Разобрались с находкой. Это огнемёт. Причём действующий."
+    },
+    "m01-s08-l018": {
+      "file": "recordings/commander/m01-s08-l018.mp3",
+      "duration": 1.6457083333333333,
+      "leadingSilence": 0.13,
+      "trailingSilence": 0.2557083333333332,
+      "speaker": "commander",
+      "sha256": "c7597953606c127f669d0c840123c04edac8afb53b4602fb38a1cc611b5c4d88",
+      "bytes": 43268,
+      "origin": "user-recording",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-s08-l018"
+      },
+      "textMatch": "exact",
+      "text": "А зачем синяя?"
+    },
+    "m01-s08-l019": {
+      "file": "recordings/reviewed/m01-s08-l019-bff461588b00.mp3",
+      "duration": 9.560833333333333,
+      "leadingSilence": 0.1,
+      "trailingSilence": 0.16083333333333272,
+      "speaker": "scientist",
+      "sha256": "bff461588b006787ccd34bb7824d70dc4e23949ccd8653abab088f88dd42dee4",
+      "bytes": 169910,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T18_45_24_M. Danisch - Narrator_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 215,
+      "transcriptSource": "owner-workshop",
+      "text": "Если учесть все нюансы конструкции и использованные детали... вывод очевиден...сИНЯЯ ИЗОЛЕНТА НУЖНА - Чтобы жёлтая не разматывалась."
+    },
+    "m01-v3-r31-l001": {
+      "file": "recordings/reviewed/m01-v3-r31-l001-4bcc26bf2743.mp3",
+      "duration": 4.989375,
+      "leadingSilence": 0.08,
+      "trailingSilence": 0.1693749999999996,
+      "speaker": "scout",
+      "sha256": "4bcc26bf2743ac28a9bb9ea61e5851ab37aa7237d3f695dc828949dc58a8cea2",
+      "bytes": 96767,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T18_52_43_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 215,
+      "transcriptSource": "owner-workshop",
+      "text": "Командир, у второго лагеря отбросов построение. Уже третье за пять минут."
+    },
+    "m01-v3-r31-l002": {
+      "file": "recordings/reviewed/m01-v3-r31-l002-b46a827a294a.mp3",
+      "duration": 1.9592083333333334,
+      "leadingSilence": 0.06,
+      "trailingSilence": 0.4092083333333334,
+      "speaker": "commander",
+      "sha256": "b46a827a294a8f94d0f1165f3d5e50f44c731a9bb6e91d2beb857a2571e7967d",
+      "bytes": 48283,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T18_53_15_comandorNig_gen_s50_sim75_v4.mp3",
+      "draftRevision": 215,
+      "transcriptSource": "owner-workshop",
+      "text": "Дисциплину наводят?"
+    },
+    "m01-v3-r31-l003": {
+      "file": "recordings/reviewed/m01-v3-r31-l003-760200d4a12b.mp3",
+      "duration": 4.284083333333333,
+      "leadingSilence": 0.07,
+      "trailingSilence": 0.17408333333333292,
+      "speaker": "scout",
+      "sha256": "760200d4a12bb9975e26925c3905297a30282ca119da2d844a43dba77b87952e",
+      "bytes": 85482,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T18_53_51_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 215,
+      "transcriptSource": "owner-workshop",
+      "text": "Пытаются. Первые два раза командиры подрались, кто главный."
+    },
+    "m01-s09-l001": {
+      "file": "recordings/reviewed/m01-s09-l001-cf02b31fa68e.mp3",
+      "duration": 4.597541666666666,
+      "leadingSilence": 0.06,
+      "trailingSilence": 0.18754166666666627,
+      "speaker": "scout",
+      "sha256": "cf02b31fa68e7ba15b78eaecbd7b093948ab963f079f40c0b72e719e2680e599",
+      "bytes": 90497,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T18_55_54_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 215,
+      "transcriptSource": "owner-workshop",
+      "text": "Склад наш! Боеприпасы довоенные, ящики под завязку."
+    },
+    "m01-s09-l002": {
+      "file": "recordings/reviewed/m01-s09-l002-c2d763b9ea51.mp3",
+      "duration": 1.22775,
+      "leadingSilence": 0.07,
+      "trailingSilence": 0.3377499999999999,
+      "speaker": "commander",
+      "sha256": "c2d763b9ea51665cfe309d9be5b7a8d44f8e7605cb7f6947626f0434b17813a3",
+      "bytes": 36581,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T18_56_49_comandorNig_gen_s50_sim75_v4.mp3",
+      "draftRevision": 215,
+      "transcriptSource": "owner-workshop",
+      "text": "Документы?"
+    },
+    "m01-v3-ammo-stock-report": {
+      "file": "recordings/reviewed/m01-v3-ammo-stock-report-bfc8c4177a16.mp3",
+      "duration": 6.765708333333333,
+      "leadingSilence": 0.13,
+      "trailingSilence": 0.2257083333333334,
+      "speaker": "scout",
+      "sha256": "bfc8c4177a16d68ec2692ea328a7fd6dfb445c6ba7af9d18d0f51293d767c622",
+      "bytes": 125188,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T18_57_12_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 215,
+      "transcriptSource": "owner-workshop",
+      "text": "По документам — пусто. По факту — полный склад. У отбросов, видать, тоже прапорщик был."
+    },
+    "m01-s09-l006": {
+      "file": "recordings/reviewed/m01-s09-l006-14d4c55cb981.mp3",
+      "duration": 5.5640833333333335,
+      "leadingSilence": 0.04,
+      "trailingSilence": 0.22408333333333363,
+      "speaker": "scientist",
+      "sha256": "14d4c55cb98117b0517052c5fa0b3fab85512ec5077f9112818d8d8839d9478d",
+      "bytes": 105962,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T18_59_11_M. Danisch - Narrator_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 215,
+      "transcriptSource": "owner-workshop",
+      "text": "Изучили трофейные патронные ленты. Нашли способ увеличить скорострельность пулемётов."
+    },
+    "m01-s09-l007": {
+      "file": "recordings/reviewed/m01-s09-l007-f67f36b141c4.mp3",
+      "duration": 1.8808333333333334,
+      "leadingSilence": 0.46,
+      "trailingSilence": 0.2908333333333333,
+      "speaker": "commander",
+      "sha256": "f67f36b141c45948c52d283f46f0c1dbde78c69c7b41ef9399994a88155e7580",
+      "bytes": 47030,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T18_59_37_comandorNig_gen_s50_sim75_v4.mp3",
+      "draftRevision": 215,
+      "transcriptSource": "owner-workshop",
+      "text": "За счёт чего?"
+    },
+    "m01-v3-ammo-feed-improvement": {
+      "file": "recordings/reviewed/m01-v3-ammo-feed-improvement-e3d13d8084ca.mp3",
+      "duration": 5.877541666666667,
+      "leadingSilence": 0.07,
+      "trailingSilence": 0.14754166666666624,
+      "speaker": "scientist",
+      "sha256": "e3d13d8084ca9a1a3c4701937eb0208a9c527d43ec8561de182f9bb083173eed",
+      "bytes": 110977,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T19_00_06_M. Danisch - Narrator_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 215,
+      "transcriptSource": "owner-workshop",
+      "text": "Усовершенствовали механизм подачи. Теперь лента идёт быстрее и без задержек."
+    },
+    "m01-s09-l009": {
+      "file": "recordings/reviewed/m01-s09-l009-5b90623e455f.mp3",
+      "duration": 1.8024583333333333,
+      "leadingSilence": 0.29,
+      "trailingSilence": 0.3024583333333333,
+      "speaker": "commander",
+      "sha256": "5b90623e455f924c520bb36abbd92f00b9729054308e5720cd6eaedad56bcb88",
+      "bytes": 45776,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T19_00_38_comandorNig_gen_s50_sim75_v4.mp3",
+      "draftRevision": 215,
+      "transcriptSource": "owner-workshop",
+      "text": "А в чем подвох?"
+    },
+    "m01-s09-l010": {
+      "file": "recordings/reviewed/m01-s09-l010-61771db7da4b.mp3",
+      "duration": 5.250625,
+      "leadingSilence": 0.12,
+      "trailingSilence": 0.1506249999999998,
+      "speaker": "scientist",
+      "sha256": "61771db7da4be8611db5e22312a4ceb87b6b78adda0269cface8897708acde1f",
+      "bytes": 100946,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T19_01_31_M. Danisch - Narrator_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 215,
+      "transcriptSource": "owner-workshop",
+      "text": "Патроны теперь кончаются еще быстрее. Но это уже проблема снабженцев."
+    },
+    "m01-v3-r35-l001": {
+      "file": "recordings/reviewed/m01-v3-r35-l001-fba49a5627c1.mp3",
+      "duration": 5.146125,
+      "leadingSilence": 0.06,
+      "trailingSilence": 0.14612499999999962,
+      "speaker": "scout",
+      "sha256": "fba49a5627c141dfe2eabc9c94e218f801909c8d9dd0c293c2b801dbc6afc393",
+      "bytes": 99274,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T19_03_39_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 215,
+      "transcriptSource": "owner-workshop",
+      "text": "Следующий лагерь обнаружен. На въезде баррикады, пулемёт. Похоже, нас ждут."
+    },
+    "m01-v3-r35-l002": {
+      "file": "recordings/reviewed/m01-v3-r35-l002-4e11732f7d0f.mp3",
+      "duration": 1.5673333333333332,
+      "leadingSilence": 0.2,
+      "trailingSilence": 0.31733333333333325,
+      "speaker": "commander",
+      "sha256": "4e11732f7d0fec1f1ab7dd62a77b5cb9e831e15252642c52414229d6bedfdd5f",
+      "bytes": 42014,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T19_04_13_comandorNig_gen_s50_sim75_v4.mp3",
+      "draftRevision": 215,
+      "transcriptSource": "owner-workshop",
+      "text": "С чего ты взял?"
+    },
+    "m01-v3-r35-l003": {
+      "file": "recordings/reviewed/m01-v3-r35-l003-81196d262ea6.mp3",
+      "duration": 4.832666666666666,
+      "leadingSilence": 0.06,
+      "trailingSilence": 0.12266666666666648,
+      "speaker": "scout",
+      "sha256": "81196d262ea672ff3b892cec25258e71ffd74a21ac3d91cc7e3b8e6cb2a84c29",
+      "bytes": 94259,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T19_04_39_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 215,
+      "transcriptSource": "owner-workshop",
+      "text": "На воротах написали: «Альфа, идите домой». Причём с ошибками."
+    },
+    "m01-v3-r24-l001": {
+      "file": "recordings/reviewed/m01-v3-r24-l001-0ceb5ea02c8d.mp3",
+      "duration": 4.597541666666666,
+      "leadingSilence": 0.07,
+      "trailingSilence": 0.18754166666666627,
+      "speaker": "scout",
+      "sha256": "0ceb5ea02c8dcfcfb002a0856fa1fef3f07ce3108b93cedb4ee3c7afb0d74043",
+      "bytes": 90497,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T18_10_54_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 184,
+      "transcriptSource": "owner-workshop",
+      "text": "Впереди лагерь отбросов. У въезда пост, за ограждением техника."
+    },
+    "m01-v3-r24-l002": {
+      "file": "recordings/reviewed/m01-v3-r24-l002-42cf292d8cc0.mp3",
+      "duration": 1.489,
+      "leadingSilence": 0.08,
+      "trailingSilence": 0.3290000000000002,
+      "speaker": "commander",
+      "sha256": "42cf292d8cc007b65d0919d7c085fbe56617a54c3f1228da374543a452c42bc4",
+      "bytes": 40760,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T18_14_29_comandorNig_gen_s50_sim75_v4.mp3",
+      "draftRevision": 184,
+      "transcriptSource": "owner-workshop",
+      "text": "Что по охране?"
+    },
+    "m01-v3-r24-l003": {
+      "file": "recordings/reviewed/m01-v3-r24-l003-08d0be09b039.mp3",
+      "duration": 4.519208333333333,
+      "leadingSilence": 0.04,
+      "trailingSilence": 0.1892083333333332,
+      "speaker": "scout",
+      "sha256": "08d0be09b0397933f678962780b0c88c0a069cd50cdd4c8ecaa3a3dc1fa75493",
+      "bytes": 89243,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T18_15_02_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 184,
+      "transcriptSource": "owner-workshop",
+      "text": "Двое часовых. Один спит, второй охраняет его сон."
+    },
+    "m01-v3-r24a-l001": {
+      "file": "recordings/reviewed/m01-v3-r24a-l001-ff05768c4cc2.mp3",
+      "duration": 7.157541666666667,
+      "leadingSilence": 0.07,
+      "trailingSilence": 0.19754166666666695,
+      "speaker": "scout",
+      "sha256": "ff05768c4cc2809ec7466784486ef5cd54e0a8905e2fea877848301f7571bbb7",
+      "bytes": 131457,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T18_22_16_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 184,
+      "transcriptSource": "owner-workshop",
+      "text": "Впереди ещё один лагерь. У ворот часовые, за ограждением какие-то баллоны таскают. Похоже, не самогон."
+    },
+    "m01-v3-r25-l001": {
+      "file": "recordings/reviewed/m01-v3-r25-l001-dd44a3c494ba.mp3",
+      "duration": 6.687333333333333,
+      "leadingSilence": 0.15,
+      "trailingSilence": 0.22733333333333317,
+      "speaker": "scout",
+      "sha256": "dd44a3c494ba6c28997a527a7f8e70bd6690fabaeefae5ff3b37bec5a9e86117",
+      "bytes": 123934,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T18_27_19_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 184,
+      "transcriptSource": "owner-workshop",
+      "text": "Лагерь зачищен. Нашли довоенное оборудование. Отбросы пытались переделать его в самогонный аппарат."
+    },
+    "m01-v3-r25-l002": {
+      "file": "recordings/reviewed/m01-v3-r25-l002-2eb2e25e06c8.mp3",
+      "duration": 3.78775,
+      "leadingSilence": 0.14,
+      "trailingSilence": 0.28774999999999995,
+      "speaker": "commander",
+      "sha256": "2eb2e25e06c898198aea3fe9e17eaa68a13d4e08b7d29ae853167d0d927f20c4",
+      "bytes": 77541,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T18_29_16_comandorNig_gen_s50_sim75_v4.mp3",
+      "draftRevision": 184,
+      "transcriptSource": "owner-workshop",
+      "text": "уЧЕНЫМ  отправь. И прапорщику про аппарат ни слова."
+    },
+    "m01-s08-l001": {
+      "file": "recordings/reviewed/m01-s08-l001-1b2c29465e86.mp3",
+      "duration": 4.519208333333333,
+      "leadingSilence": 0.04,
+      "trailingSilence": 0.1792083333333334,
+      "speaker": "scout",
+      "sha256": "1b2c29465e867693b10e3e5bc9b5b6fc03bc97474ee54c8d68768a2856883371",
+      "bytes": 89243,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T18_31_55_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 184,
+      "transcriptSource": "owner-workshop",
+      "text": "Командир, нашли довоенный блок. Отбросы к нему провода примотали."
+    },
+    "m01-s08-l002": {
+      "file": "recordings/reviewed/m01-s08-l002-90143e42e67c.mp3",
+      "duration": 1.0710416666666667,
+      "leadingSilence": 0.15,
+      "trailingSilence": 0.3610416666666667,
+      "speaker": "commander",
+      "sha256": "90143e42e67cd67998e2c9d7d1add1856612267f6bbbaf2d17dbb992a0a640a1",
+      "bytes": 34073,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T18_32_23_comandorNig_gen_s50_sim75_v4.mp3",
+      "draftRevision": 184,
+      "transcriptSource": "owner-workshop",
+      "text": "И что?"
+    },
+    "m01-s08-l003": {
+      "file": "recordings/reviewed/m01-s08-l003-9ad19dec241b.mp3",
+      "duration": 7.549375,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.17937500000000028,
+      "speaker": "scout",
+      "sha256": "9ad19dec241b6d5cc599c97b5584d1536af7306c03e85bbd9e2010cad73ac82f",
+      "bytes": 137727,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T18_32_47_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 184,
+      "transcriptSource": "owner-workshop",
+      "text": "Судя по всему, пытались улучшить пулемёт. Улучшили только пожарную обстановку. Сам блок целый, в НИИ отправим."
+    },
+    "m01-s08-l005": {
+      "file": "recordings/reviewed/m01-s08-l005-b7aac5e18051.mp3",
+      "duration": 2.925708333333333,
+      "leadingSilence": 0.13,
+      "trailingSilence": 0.17570833333333313,
+      "speaker": "scout",
+      "sha256": "b7aac5e180513da3313de20cecaca7152dbc26e29d634aa519f20df3e00f43aa",
+      "bytes": 63748,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T18_34_06_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 184,
+      "transcriptSource": "owner-workshop",
+      "text": "Товарищ командир, синюю изоленту сняли."
+    },
+    "m01-s08-l006": {
+      "file": "recordings/commander/m01-s08-l006.mp3",
+      "duration": 3.0040833333333334,
+      "leadingSilence": 0.16,
+      "trailingSilence": 0.2940833333333335,
+      "speaker": "commander",
+      "sha256": "7b3a70a1f2e2d32acbebaeadc4ee2a7f49f3f260769003dd193e908d61a1000e",
+      "bytes": 65002,
+      "origin": "user-recording",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-s08-l006"
+      },
+      "textMatch": "exact",
+      "text": "Отлично. И что за агрегат?"
+    },
+    "m01-s08-l007": {
+      "file": "recordings/reviewed/m01-s08-l007-4733347e3eff.mp3",
+      "duration": 2.429375,
+      "leadingSilence": 0.06,
+      "trailingSilence": 0.1493749999999996,
+      "speaker": "scout",
+      "sha256": "4733347e3efff285dd3baaf317e19cf7026df1fb39935cd63ea831d5b5c55b65",
+      "bytes": 55807,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T18_34_40_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 184,
+      "transcriptSource": "owner-workshop",
+      "text": "Неизвестно. Под ней жёлтая."
+    },
+    "m01-s08-l008": {
+      "file": "recordings/commander/m01-s08-l008.mp3",
+      "duration": 2.1159166666666667,
+      "leadingSilence": 0.13,
+      "trailingSilence": 0.3759166666666667,
+      "speaker": "commander",
+      "sha256": "548d347bc74fe2524a035e371fd1abfae07cb155cb8c73bc8ba2eb0daa2b772c",
+      "bytes": 50791,
+      "origin": "user-recording",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-s08-l008"
+      },
+      "textMatch": "exact",
+      "text": "Ну снимайте и жёлтую."
+    },
+    "m01-s08-l009": {
+      "file": "recordings/reviewed/m01-s08-l009-5ca0c82687aa.mp3",
+      "duration": 1.5673333333333332,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.34733333333333327,
+      "speaker": "scout",
+      "sha256": "5ca0c82687aa7a9e448db9e4db5e333f07c8f7dc262ff0412b789cfce951a015",
+      "bytes": 42014,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T18_35_14_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4 (1).mp3",
+      "draftRevision": 184,
+      "transcriptSource": "owner-workshop",
+      "text": "Никак нельзя."
+    },
+    "m01-s08-l011": {
+      "file": "recordings/reviewed/m01-s08-l011-cf6e2a4ce812.mp3",
+      "duration": 2.272666666666667,
+      "leadingSilence": 0.11,
+      "trailingSilence": 0.30266666666666686,
+      "speaker": "scout",
+      "sha256": "cf6e2a4ce812c7853eb8806ab75821880f706d6d7284fa170e3334852f5fbef3",
+      "bytes": 53299,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T18_35_49_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 184,
+      "transcriptSource": "owner-workshop",
+      "text": "Она, похоже, заводская."
+    },
+    "m01-s08-l013": {
+      "file": "recordings/reviewed/m01-s08-l013-b0364776def2.mp3",
+      "duration": 4.675916666666667,
+      "leadingSilence": 0.12,
+      "trailingSilence": 0.20591666666666697,
+      "speaker": "scientist",
+      "sha256": "b0364776def26a5c5d259e8ed5607594355ab4536520a6c9194fec8219b2219b",
+      "bytes": 91751,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T18_46_31_M. Danisch - Narrator_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 184,
+      "transcriptSource": "owner-workshop",
+      "text": "Разобрались с находкой. Это огнемёт. Причём действующий."
+    },
+    "m01-s08-l014": {
+      "file": "recordings/commander/m01-s08-l014.mp3",
+      "duration": 1.8024583333333333,
+      "leadingSilence": 0.13,
+      "trailingSilence": 0.012458333333333238,
+      "speaker": "commander",
+      "sha256": "6a3f4af02f8a81002f62f4140cc4ed895bdf186ed5e3cf05be0f9a1e7cbf7ada",
+      "bytes": 45776,
+      "origin": "user-recording",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-s08-l014"
+      },
+      "textMatch": "exact",
+      "text": "И что обнаружили?"
+    },
+    "m01-s08-l015": {
+      "file": "recordings/reviewed/m01-s08-l015-2dfd76f6a327.mp3",
+      "duration": 5.720833333333333,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.2908333333333335,
+      "speaker": "scientist",
+      "sha256": "2dfd76f6a32725b31907842dbee9de4cd410a16c0daac48206ff8dbf55850cf2",
+      "bytes": 108470,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T18_40_30_M. Danisch - Narrator_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 184,
+      "transcriptSource": "owner-workshop",
+      "text": "Бак от трактора, форсунка от котла. Всё собрано на синей изоленте."
+    },
+    "m01-v3-r21-l001": {
+      "file": "recordings/reviewed/m01-v3-r21-l001-f8027ae17544.mp3",
+      "duration": 3.0040833333333334,
+      "leadingSilence": 0.09,
+      "trailingSilence": 0.27408333333333346,
+      "speaker": "commander",
+      "sha256": "f8027ae17544cf3800967e8fbe8d80769b091d3e15ef56b69f26f122a01dad19",
+      "bytes": 65002,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T17_37_22_comandorNig_gen_s50_sim75_v4.mp3",
+      "draftRevision": 148,
+      "transcriptSource": "owner-workshop",
+      "text": "Атаку отбили. ДОТы на въезде поставить!"
+    },
+    "m01-v3-r21-l002": {
+      "file": "recordings/reviewed/m01-v3-r21-l002-d90f25c18c99.mp3",
+      "duration": 2.586125,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.3261249999999998,
+      "speaker": "builder",
+      "sha256": "d90f25c18c9983f3c7343ca922287a77b12166c854c08ac030eff2076d34a651",
+      "bytes": 58314,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T17_37_57_Alexandr Vlasov - Vibrant and Energetic_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 148,
+      "transcriptSource": "owner-workshop",
+      "text": "А если они с другой стороны зайдут?"
+    },
+    "m01-v3-r21-l003": {
+      "file": "recordings/reviewed/m01-v3-r21-l003-a03c33b6ac18.mp3",
+      "duration": 3.3175416666666666,
+      "leadingSilence": 0.13,
+      "trailingSilence": 0.3475416666666664,
+      "speaker": "warrant",
+      "sha256": "a03c33b6ac1825e9f8f7866b879d605d9cdab1230914a4042fe2c8921a44cdf0",
+      "bytes": 70017,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T17_39_03_Egor Gadzhiyev - Clear and Commanding_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 148,
+      "transcriptSource": "owner-workshop",
+      "text": "Там дороги нет. Пусть сначала построят."
+    },
+    "m01-v3-r22-l001": {
+      "file": "recordings/reviewed/m01-v3-r22-l001-835b3c50e69e.mp3",
+      "duration": 2.586125,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.3661249999999998,
+      "speaker": "builder",
+      "sha256": "835b3c50e69e5631dd92a0b5802bd53741b589f251b9e2c9f32a88b868f5d56a",
+      "bytes": 58314,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T17_42_05_Alexandr Vlasov - Vibrant and Energetic_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 148,
+      "transcriptSource": "owner-workshop",
+      "text": "ДОТ готов. Въезд перекрыли."
+    },
+    "m01-v3-r22-l002": {
+      "file": "recordings/reviewed/m01-v3-r22-l002-f4d3ae074105.mp3",
+      "duration": 2.3510416666666667,
+      "leadingSilence": 0.11,
+      "trailingSilence": 0.3310416666666667,
+      "speaker": "commander",
+      "sha256": "f4d3ae0741058bb9052297c2e9d3a14aa2bb45219b0bc20243e6e42e5b2762a1",
+      "bytes": 54553,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T17_43_00_comandorNig_gen_s50_sim75_v4.mp3",
+      "draftRevision": 148,
+      "transcriptSource": "owner-workshop",
+      "text": "А наши как выезжать будут?"
+    },
+    "m01-v3-r22-l003": {
+      "file": "recordings/reviewed/m01-v3-r22-l003-b802c496d59d.mp3",
+      "duration": 3.0040833333333334,
+      "leadingSilence": 0.11,
+      "trailingSilence": 0.3440833333333333,
+      "speaker": "builder",
+      "sha256": "b802c496d59ddebdffbc4927c4a40c9452a084b877c66d863f5a73a333a1e098",
+      "bytes": 65002,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T17_43_31_Alexandr Vlasov - Vibrant and Energetic_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 148,
+      "transcriptSource": "owner-workshop",
+      "text": "А нам разве приказ на выезд давали?"
+    },
+    "m01-v3-r23-l001": {
+      "file": "recordings/reviewed/m01-v3-r23-l001-63ffedd1feeb.mp3",
+      "duration": 3.709375,
+      "leadingSilence": 0.07,
+      "trailingSilence": 0.15937499999999982,
+      "speaker": "radio",
+      "sha256": "63ffedd1feebd07fc368737d02acc86112f5b41c97f9607b9af08edf07fede93",
+      "bytes": 76287,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T18_03_49_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 148,
+      "transcriptSource": "owner-workshop",
+      "text": "оБНАРУЖЕНО Четыре лагеря. Противник на связь не выходит."
+    },
+    "m01-v3-r23-l002": {
+      "file": "recordings/reviewed/m01-v3-r23-l002-a2b2eef294d0.mp3",
+      "duration": 5.407333333333334,
+      "leadingSilence": 0.13,
+      "trailingSilence": 0.12733333333333352,
+      "speaker": "commander",
+      "sha256": "a2b2eef294d0e2343e41b35f10b8247968933ff36aed315f59f33c929d926291",
+      "bytes": 103454,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T18_04_35_comandorNig_gen_s50_sim75_v4.mp3",
+      "draftRevision": 148,
+      "transcriptSource": "owner-workshop",
+      "text": "Ну что ж. Раз дипломатия не удалась — придётся нанести визит лично."
+    },
+    "m01-s03-l001": {
+      "file": "recordings/warrant/m01-s03-l001.mp3",
+      "duration": 1.5673333333333332,
+      "leadingSilence": 0.22,
+      "trailingSilence": 0.43733333333333313,
+      "speaker": "warrant",
+      "sha256": "bd64fa8e549c91dffb9bfc35373ddc789e0b025ab75e7b5fb994e299dd64d5a6",
+      "bytes": 42014,
+      "origin": "user-recording",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-s03-l001"
+      },
+      "textMatch": "exact",
+      "text": "Криво повесил."
+    },
+    "m01-v3-builder-crooked-plinth": {
+      "file": "recordings/reviewed/m01-v3-builder-crooked-plinth-8e0311c0b77a.mp3",
+      "duration": 1.8024583333333333,
+      "leadingSilence": 0.1,
+      "trailingSilence": 0.3224583333333333,
+      "speaker": "builder",
+      "sha256": "8e0311c0b77abdb367ebe7fc71dfc745c48cca922b140d2da23d0beec4225f0d",
+      "bytes": 45776,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-09T17_21_12_Alexandr Vlasov - Vibrant and Energetic_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 148,
+      "transcriptSource": "owner-workshop",
+      "text": "Так постамент кривой."
+    },
+    "m01-s02-l003": {
+      "file": "recordings/commander/m01-s02-l003.mp3",
+      "duration": 3.6310416666666665,
+      "leadingSilence": 0.29,
+      "trailingSilence": 0.15104166666666652,
+      "speaker": "commander",
+      "sha256": "0ef4535fc76297db4a41b7ff5ed781ba747fe429fbd9b58ee0264bf910d734b9",
+      "bytes": 75033,
+      "origin": "user-recording",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-s02-l003"
+      },
+      "textMatch": "exact",
+      "text": "Сон приснился. Будто все умерли."
+    },
+    "m01-s02-l004": {
+      "file": "recordings/warrant/m01-s02-l004.mp3",
+      "duration": 1.7240833333333334,
+      "leadingSilence": 0.13,
+      "trailingSilence": 0.3540833333333333,
+      "speaker": "warrant",
+      "sha256": "8e529f614b943b2abc76458e67da77e7befed7d8bab3aeeae4f4df6251abd083",
+      "bytes": 44522,
+      "origin": "user-recording",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-s02-l004"
+      },
+      "textMatch": "exact",
+      "text": "А приказ на это был?"
+    },
+    "m01-s02-l007": {
+      "file": "recordings/commander/m01-s02-l007.mp3",
+      "duration": 1.410625,
+      "leadingSilence": 0.13,
+      "trailingSilence": 0.400625,
+      "speaker": "commander",
+      "sha256": "f4702a08562ef9c7482aaddecb62e4fc7085a76affe0f9e6c3d60caeb5e2e574",
+      "bytes": 39506,
+      "origin": "user-recording",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-s02-l007"
+      },
+      "textMatch": "exact",
+      "text": "Не было."
+    },
+    "m01-s02-l008": {
+      "file": "recordings/reviewed/m01-s02-l008-bf2f525c5f66.mp3",
+      "duration": 3.6310416666666665,
+      "leadingSilence": 0.06,
+      "trailingSilence": 0.3810416666666665,
+      "speaker": "warrant",
+      "sha256": "bf2f525c5f66a67d891c2ba98efc3d8b40548904e29736991c1c3ea95a42eb6c",
+      "bytes": 75033,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T17_29_53_Egor Gadzhiyev - Clear and Commanding_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 148,
+      "transcriptSource": "owner-workshop",
+      "text": "Значит ВОСПОМИНАНИЯ,  Спи дальше."
+    },
     "m01-s07-l001": {
       "file": "recordings/reviewed/m01-s07-l001-efb6cf71e8a6.mp3",
       "duration": 2.50775,
@@ -1102,69 +2523,6 @@
       "transcriptSource": "owner-workshop",
       "text": "Приказы - выполнять! Железки. - им везите!"
     },
-    "m01-s02-l003": {
-      "file": "recordings/commander/m01-s02-l003.mp3",
-      "duration": 3.6310416666666665,
-      "leadingSilence": 0.29,
-      "trailingSilence": 0.15104166666666652,
-      "speaker": "commander",
-      "sha256": "0ef4535fc76297db4a41b7ff5ed781ba747fe429fbd9b58ee0264bf910d734b9",
-      "bytes": 75033,
-      "origin": "user-recording",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s02-l003"
-      },
-      "textMatch": "exact",
-      "text": "Сон приснился. Будто все умерли."
-    },
-    "m01-s02-l004": {
-      "file": "recordings/warrant/m01-s02-l004.mp3",
-      "duration": 1.7240833333333334,
-      "leadingSilence": 0.13,
-      "trailingSilence": 0.3540833333333333,
-      "speaker": "warrant",
-      "sha256": "8e529f614b943b2abc76458e67da77e7befed7d8bab3aeeae4f4df6251abd083",
-      "bytes": 44522,
-      "origin": "user-recording",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s02-l004"
-      },
-      "textMatch": "exact",
-      "text": "А приказ на это был?"
-    },
-    "m01-s02-l007": {
-      "file": "recordings/commander/m01-s02-l007.mp3",
-      "duration": 1.410625,
-      "leadingSilence": 0.13,
-      "trailingSilence": 0.400625,
-      "speaker": "commander",
-      "sha256": "f4702a08562ef9c7482aaddecb62e4fc7085a76affe0f9e6c3d60caeb5e2e574",
-      "bytes": 39506,
-      "origin": "user-recording",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s02-l007"
-      },
-      "textMatch": "exact",
-      "text": "Не было."
-    },
-    "m01-s02-l008": {
-      "file": "recordings/reviewed/m01-s02-l008-db561c85e7c8.mp3",
-      "duration": 2.925708333333333,
-      "leadingSilence": 0.39,
-      "trailingSilence": 0.265708333333333,
-      "speaker": "warrant",
-      "sha256": "db561c85e7c86cc2af7fc2126dcd4cf173f579202507d7ed5c89cbda42e9ff90",
-      "bytes": 63748,
-      "origin": "user-recording",
-      "sourceName": "ElevenLabs_2026-11-09T17_04_55_Egor Gadzhiyev - Clear and Commanding_pvc_s50_sim75_v4.mp3",
-      "draftRevision": 70,
-      "transcriptSource": "owner-workshop",
-      "text": "Значит, сон. Спи дальше.",
-      "textEditedAfterUpload": true
-    },
     "m01-s02-l013": {
       "file": "recordings/reviewed/m01-s02-l013-09a7b8618ab7.mp3",
       "duration": 3.0824583333333333,
@@ -1192,50 +2550,6 @@
       "draftRevision": 70,
       "transcriptSource": "owner-workshop",
       "text": "Опять копать?! "
-    },
-    "m01-s03-l001": {
-      "file": "recordings/warrant/m01-s03-l001.mp3",
-      "duration": 1.5673333333333332,
-      "leadingSilence": 0.22,
-      "trailingSilence": 0.43733333333333313,
-      "speaker": "warrant",
-      "sha256": "bd64fa8e549c91dffb9bfc35373ddc789e0b025ab75e7b5fb994e299dd64d5a6",
-      "bytes": 42014,
-      "origin": "user-recording",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s03-l001"
-      },
-      "textMatch": "exact",
-      "text": "Криво повесил."
-    },
-    "m01-v3-builder-crooked-plinth": {
-      "file": "recordings/reviewed/m01-v3-builder-crooked-plinth-8e0311c0b77a.mp3",
-      "duration": 1.8024583333333333,
-      "leadingSilence": 0.1,
-      "trailingSilence": 0.3224583333333333,
-      "speaker": "builder",
-      "sha256": "8e0311c0b77abdb367ebe7fc71dfc745c48cca922b140d2da23d0beec4225f0d",
-      "bytes": 45776,
-      "origin": "user-recording",
-      "sourceName": "ElevenLabs_2026-11-09T17_21_12_Alexandr Vlasov - Vibrant and Energetic_pvc_s50_sim75_v4.mp3",
-      "draftRevision": 70,
-      "transcriptSource": "owner-workshop",
-      "text": "Так постамент кривой."
-    },
-    "m01-s03-l003": {
-      "file": "recordings/reviewed/m01-s03-l003-ab5edd4cebae.mp3",
-      "duration": 1.489,
-      "leadingSilence": 0.13,
-      "trailingSilence": 0.41900000000000004,
-      "speaker": "warrant",
-      "sha256": "ab5edd4cebae9e5403fcbc455c22c3b84d939e7711610afe97641b9225535f6f",
-      "bytes": 40760,
-      "origin": "user-recording",
-      "sourceName": "ElevenLabs_2026-11-09T18_03_48_Egor Gadzhiyev - Clear and Commanding_pvc_s50_sim75_v4.mp3",
-      "draftRevision": 70,
-      "transcriptSource": "owner-workshop",
-      "text": "Тогда нормально."
     },
     "m01-v3-general-coffee": {
       "file": "recordings/reviewed/m01-v3-general-coffee-e0340deb6dc0.mp3",

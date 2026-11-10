@@ -1,7 +1,8 @@
 import {iconElement, setButtonIcon} from '../assets/ui/icons.js';
+import {mergeDrafts, sameDraft} from './draft-merge.js';
 
 const $ = selector => document.querySelector(selector);
-const state = {document:null, revision:0, serial:0, savedSerial:0, mode:'sequence', scene:null, query:'', history:[], saving:null, conflict:false};
+const state = {document:null, baseDocument:null, revision:0, serial:0, savedSerial:0, mode:'sequence', scene:null, query:'', history:[], saving:null, conflict:false};
 const player = new Audio();
 player.preload = 'metadata';
 let timer, playToken = 0, playingKey = null, playlist = [], playlistIndex = 0, sequenceTimer, uploadCount = 0;
@@ -53,7 +54,7 @@ function remember() {
   $('#undo').disabled = false;
 }
 function backup() {
-  try { localStorage.setItem(backupKey(state.document.id), JSON.stringify({revision:state.revision, document:state.document})); }
+  try { localStorage.setItem(backupKey(state.document.id), JSON.stringify({revision:state.revision, document:state.document, baseDocument:state.baseDocument})); }
   catch { /* Disk autosave remains available if browser storage is full. */ }
 }
 function changed() {
@@ -71,11 +72,11 @@ async function flush() {
   if (state.saving) return state.saving;
   state.saving = (async () => {
     while (state.savedSerial < state.serial) {
-      const serial = state.serial;
+      const serial = state.serial, document = clone(state.document);
       status('Сохраняется…');
       const saved = await request('/api/dialogues/' + state.document.id, {method:'PUT',
-        headers:{'Content-Type':'application/json'}, body:JSON.stringify({revision:state.revision, document:state.document})});
-      state.revision = saved.revision; state.savedSerial = serial;
+        headers:{'Content-Type':'application/json'}, body:JSON.stringify({revision:state.revision, document})});
+      state.revision = saved.revision; state.savedSerial = serial; state.baseDocument = document;
       if (serial === state.serial) {try {localStorage.removeItem(backupKey(state.document.id));} catch {}}
       else backup();
       status('Сохранено · ' + new Date(saved.savedAt).toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'}));
@@ -88,6 +89,16 @@ async function flush() {
     throw error;
   }).finally(() => {state.saving = null;});
   return state.saving;
+}
+async function backupBase(id, pending) {
+  if (pending.baseDocument?.id === id) return pending.baseDocument;
+  if (!/^[a-zA-Z0-9_-]+$/.test(id) || !Number.isSafeInteger(pending.revision) || pending.revision < 0) return null;
+  // Older editor backups did not include their base. The server retains each
+  // saved revision, so they can still be recovered without discarding edits.
+  try {
+    const previous = await request('/docs/campaign/dialogue-drafts/' + id + '/.history/' + String(pending.revision).padStart(6, '0') + '.json');
+    return previous.revision === pending.revision && previous.document?.id === id ? previous.document : null;
+  } catch { return null; }
 }
 function autoSize(node) { node.style.height = 'auto'; node.style.height = Math.max(node.scrollHeight, 24) + 'px'; }
 function editField(tag, value, label, className, update) {
@@ -117,18 +128,24 @@ async function loadMission(id) {
     if (uploadCount) throw new Error('Дождитесь загрузки файла.');
     await flush(); stop();
     const saved = await request('/api/dialogues/' + id);
-    state.document = saved.document; state.revision = saved.revision;
+    state.document = saved.document; state.baseDocument = clone(saved.document); state.revision = saved.revision;
     state.serial = 0; state.savedSerial = 0; state.history = []; state.conflict = false;
     $('#undo').disabled = true;
     let pending;
     try { pending = JSON.parse(localStorage.getItem(backupKey(id))); } catch {}
-    if (pending?.revision === saved.revision) {
-      state.document = pending.document; changed();
-    } else if (pending) {
-      state.document = pending.document; state.serial = 1; state.conflict = true;
-      showError('Восстановлены несохранённые правки этой вкладки. На сервере есть другая версия. Скачайте локальный JSON перед обновлением.');
-      status('Восстановлена локальная копия', true);
-    } else status(saved.savedAt ? 'Сохранено на диске' : 'Готов к работе');
+    if (pending?.document?.id === id) {
+      const base = pending.revision === saved.revision ? saved.document : await backupBase(id, pending);
+      const merged = base ? mergeDrafts(base, pending.document, saved.document) : null;
+      if (merged && !merged.conflicts.length) {
+        state.document = merged.document;
+        if (!sameDraft(state.document, saved.document)) changed();
+        else {try {localStorage.removeItem(backupKey(id));} catch {} showError(''); status('Сохранено на диске');}
+      } else {
+        state.document = pending.document; state.baseDocument = base; state.revision = pending.revision; state.serial = 1; state.conflict = true;
+        showError('Восстановлены несохранённые правки. Одни и те же реплики изменены в двух версиях. Кнопка скачивания сохранит локальную копию.');
+        status('Восстановлена локальная копия', true);
+      }
+    } else {showError(''); status(saved.savedAt ? 'Сохранено на диске' : 'Готов к работе');}
     state.scene = (state.mode === 'sequence' && state.document.scenes.find(scene => scene.id === 'r01')?.id) || state.document.scenes.find(scene => scene.kind === state.mode)?.id || null;
     renderMissionLinks(); renderScenes(); renderEditor();
   } catch (error) {showError(error.message); status('Не удалось загрузить', true);}

@@ -1,0 +1,37 @@
+{
+  "draftRevision": 184,
+  "throughScene": "r30-alt",
+  "sceneIds": [
+    "r24",
+    "r24a",
+    "r25",
+    "r26",
+    "r27",
+    "r29",
+    "r30-alt"
+  ],
+  "activeLines": 21,
+  "importedRecordings": [
+    "m01-v3-r24-l001",
+    "m01-v3-r24-l002",
+    "m01-v3-r24-l003",
+    "m01-v3-r24a-l001",
+    "m01-v3-r25-l001",
+    "m01-v3-r25-l002",
+    "m01-s08-l001",
+    "m01-s08-l002",
+    "m01-s08-l003",
+    "m01-s08-l005",
+    "m01-s08-l007",
+    "m01-s08-l009",
+    "m01-s08-l011",
+    "m01-s08-l013",
+    "m01-s08-l015",
+    "m01-s08-l019",
+    "m01-v3-r30-alt-l001"
+  ],
+  "removedActiveCues": [],
+  "textEditedAfterUpload": [],
+  "note": "Original audio bytes preserved. Earlier recordings remain available to archived scripts.",
+  "fromScene": "r24"
+}

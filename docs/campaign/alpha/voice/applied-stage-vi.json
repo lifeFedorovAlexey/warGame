@@ -1,0 +1,24 @@
+{
+  "draftRevision": 148,
+  "throughScene": "r23",
+  "sceneIds": [
+    "r21",
+    "r22",
+    "r23"
+  ],
+  "activeLines": 8,
+  "importedRecordings": [
+    "m01-v3-r21-l001",
+    "m01-v3-r21-l002",
+    "m01-v3-r21-l003",
+    "m01-v3-r22-l001",
+    "m01-v3-r22-l002",
+    "m01-v3-r22-l003",
+    "m01-v3-r23-l001",
+    "m01-v3-r23-l002"
+  ],
+  "removedActiveCues": [],
+  "textEditedAfterUpload": [],
+  "note": "Original audio bytes preserved. Earlier recordings remain available to archived scripts.",
+  "fromScene": "r21"
+}

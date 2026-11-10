@@ -1,0 +1,17 @@
+{
+  "draftRevision": 148,
+  "throughScene": "p04",
+  "sceneIds": [
+    "p04"
+  ],
+  "activeLines": 2,
+  "importedRecordings": [
+    "m01-v3-builder-crooked-plinth"
+  ],
+  "removedActiveCues": [
+    "m01-s03-l003"
+  ],
+  "textEditedAfterUpload": [],
+  "note": "Original audio bytes preserved. Earlier recordings remain available to archived scripts.",
+  "fromScene": "p04"
+}
