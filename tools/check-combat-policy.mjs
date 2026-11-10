@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {Mission} from '../campaign/mission.js';
-import {automaticCombatTarget,combatPolicy,DEFAULT_COMBAT_POLICY} from '../campaign/combat-policy.js';
+import {automaticCombatTarget,combatPolicy,DEFAULT_COMBAT_POLICY,updateCombatRetreat} from '../campaign/combat-policy.js';
+import {bodyContact,bodyEnvelope} from '../campaign/vehicle-overlap.js';
 const config=JSON.parse(fs.readFileSync('assets/campaign/alpha/mission01/gameplay.json'));
 const field={extent:4096,half:2048,cellMetres:32,heightAt:()=>0,gradientAt:()=>({x:0,y:0}),gridToWorld:([x,y])=>({x:x*32-2048,y:2048-y*32}),worldToGrid:(x,y)=>[(x+2048)/32,(2048-y)/32]};
 function fixture(){const m=new Mission({...config,startGrid:[64,56]},field);m.state.units=[];m.state.buildings=[];m.state.camps=[];m.state.bounds=[0,0,127,127];m.state.pendingCinematics=[];m.updateMission=()=>{};m.rebuildNavigation();m.visible.fill(1);m.explored.fill(1);return m;}
@@ -117,5 +118,77 @@ for(const [retreat,damage] of [['light',70],['heavy',220]]){
  const data=JSON.parse(m.save());delete data.state.units[0].combatPolicy;m.load(data);
  assert.deepEqual(combatPolicy(m.entity(a.id)),DEFAULT_COMBAT_POLICY,'old saves get defaults');
  checks.push('selection eligibility, validation, legacy save');
+}
+function withdrawalScene(response,busy=true){
+ const m=fixture();
+ const factory=m.addStructure('factory','rai',{x:0,y:240},{completed:true,progress:1});
+ const car=unit(m),enemy=unit(m,'raider','scavs',0,-75);
+ enemy.hp=enemy.maxHp=5000;
+ const owner=busy?unit(m,'bukhanka','rai',0,159):null;
+ if(owner)owner.factoryVisit={garageVersion:2,factoryId:factory.id,phase:'gate',queued:0,slot:0};
+ for(const x of [-17,0,17])unit(m,'bukhanka','rai',x,41);
+ m.rebuildNavigation();
+ m.setCombatPolicy([car.id],{response});
+ m.damage(car,90,enemy);
+ assert(m.retreat([car.id]).ok);
+ car.combatRetreat.home={id:factory.id,x:factory.x,y:factory.y,radius:Math.hypot(factory.halfWidth,factory.halfDepth)+config.worldScale*9};
+ if(owner)car.factoryVisit={garageVersion:2,factoryId:factory.id,phase:'waiting',queued:1,slot:1};
+ return {m,car,enemy,owner,factory};
+}
+
+for(const response of ['return','ignore']){
+ const {m,car,enemy,owner,factory}=withdrawalScene(response);
+ const hp=car.hp;
+ let rollingShots=0,totalShots=0,minimumGap=Infinity,passedRow=false,leftRangeAt=null;
+ for(let i=0;i<100;i++){
+  const from={x:car.x,y:car.y};
+  tick(m,car);
+  const fired=m.drainEffects().filter(e=>e.type==='shot'&&e.from===car.id).length;
+  totalShots+=fired;
+  if(Math.hypot(car.x-from.x,car.y-from.y)>.01)rollingShots+=fired;
+  if(from.y<41&&car.y>=41&&Math.abs(car.x)>27)passedRow=true;
+  if(leftRangeAt===null&&Math.hypot(car.x-enemy.x,car.y-enemy.y)>m.unitSpec(enemy).range)leftRangeAt=m.state.time;
+  const shape=bodyEnvelope(car,config.worldScale,m.field);
+  for(const other of m.state.units.filter(u=>u!==car&&u.hp>0)){
+   minimumGap=Math.min(minimumGap,bodyContact(shape,bodyEnvelope(other,config.worldScale,m.field)).gap);
+  }
+ }
+ assert.equal(car.navigation.reason,'retreat-cover-until-repair-free');
+ assert(Math.hypot(car.x-enemy.x,car.y-enemy.y)>m.unitSpec(enemy).range);
+ assert(passedRow,'Withdrawal goes around the row of parked vehicles');
+ assert.equal(car.hp,hp);
+ assert(minimumGap>=0,'The exterior bodies remain separate');
+ assert.equal(owner.factoryVisit.phase,'gate','The other vehicle keeps its doorway ownership');
+ assert.equal(car.factoryVisit,undefined,'A car at cover does not occupy the repair queue');
+ if(response==='return')assert(rollingShots>0,'Return fire must occur on ticks with physical movement');
+ else assert.equal(totalShots,0,'Hold fire remains explicit during withdrawal');
+ // Release the doorway. The next repair route must use the same factory.
+ delete owner.factoryVisit;
+ owner.x=220;
+ owner.y=159;
+ for(let i=0;i<500&&car.factoryVisit?.phase!=='inside';i++)tick(m,car);
+ assert.equal(car.factoryVisit?.phase,'inside');
+ assert.equal(car.factoryVisit.factoryId,factory.id);
+ checks.push(`busy factory: bypass, cover and re-entry (${response}, out of range in ${leftRangeAt.toFixed(1)}s, ${rollingShots} shots while moving, gap ${minimumGap.toFixed(2)})`);
+}
+{
+ const {m,car}=withdrawalScene('return',false);
+ // Restore the controller state of a car that lost its approach without a
+ // competing garage visitor. The recovery uses the same real movement solver.
+ car.combatRetreat.status='blocked';
+ for(let i=0;i<30;i++)tick(m,car);
+ assert.equal(car.combatRetreat.phase,'cover');
+ assert(Math.hypot(car.x,car.y)>20);
+ checks.push('blocked approach under fire also triggers withdrawal with a free factory');
+}
+{
+ const {m,car}=withdrawalScene('return');
+ const search=updateCombatRetreat(m,car,m.unitSpec(car),.1);
+ assert.equal(search.next().done,false,'The cover search must yield');
+ m.stop([car.id]);
+ assert.equal(search.next().done,true);
+ assert(!car.combatRetreat&&!car.path.length&&!car.task);
+ assert.deepEqual([car.x,car.y],[0,0]);
+ checks.push('Stop cancels a suspended search for cover');
 }
 console.log(JSON.stringify({passed:checks.length,checks},null,2));

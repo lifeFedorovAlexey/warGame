@@ -1,9 +1,10 @@
 import {expandCommandIds} from './group-command.js';
 import {isCampPerimeter} from './camp-demolition.js';
 import {rememberRetreatOrder,factoryCanRepair} from './factory-repair.js';
-import {updateFactoryVisit} from './factory-garage.js';
+import {factoryVisitors,updateFactoryVisit} from './factory-garage.js';
 import {chooseRepairFactory,needsFactoryVisit,repairChoiceDue} from './factory-routing.js';
 import {shouldAutoRetreat,isAutomaticRepair,inFactoryInterior} from './combat-retreat-state.js';
+import {navigationDecision} from './navigation-state.js';
 export {shouldAutoRetreat} from './combat-retreat-state.js';
 
 // Units carry a serializable copy of the army's rules, including factory output.
@@ -226,6 +227,55 @@ function* currentRetreatSteps(iterator,current){
   return null;
  }finally{iterator.return();}
 }
+
+function repairBlocker(mission,unit,factory){
+  const owner=factoryVisitors(mission,factory).find(other=>other!==unit&&
+    ['gate','entering','inside','leaving','departure'].includes(other.factoryVisit.phase));
+  return owner?.id??(factory.workPriority==='production'&&factory.queue?.length?factory.id:null);
+}
+
+function* withdrawalDetour(mission,unit,spec,current){
+  const scale=mission.config.worldScale;
+  const range=Math.max(spec.vision??0,spec.range??0,unit.lastHostileHit?.range??0,scale*30);
+  const known=[];
+  let threat,exposure=0;
+  for(const enemy of [...mission.nearbyUnits(unit,range,unit.owner),...mission.state.buildings]){
+    if(!mission.enemyOf(unit,enemy)||!mission.visibleAt(enemy.x,enemy.y))continue;
+    const weapon=mission.config.units[enemy.kind]??mission.buildingSpec(enemy);
+    if(!weapon.damage||!(weapon.range>0))continue;
+    const contact={x:enemy.x,y:enemy.y,range:weapon.range};
+    known.push(contact);
+    const danger=weapon.range-distance(unit,enemy);
+    if(danger>=exposure&&mission.lineOfSight(enemy,unit)){threat=contact;exposure=danger;}
+  }
+  if(!threat)return null;
+  const origin={x:unit.x,y:unit.y};
+  const angle=Math.atan2(origin.y-threat.y,origin.x-threat.x);
+  const travel=Math.max(scale*18,exposure+scale*10);
+  const safe=point=>known.every(enemy=>distance(point,enemy)>enemy.range+scale*5);
+  for(const turn of [0,.45,-.45,.9,-.9,1.35,-1.35]){
+    const point={x:origin.x+Math.cos(angle+turn)*travel,y:origin.y+Math.sin(angle+turn)*travel};
+    if(!mission.inBounds(point.x,point.y)||!mission.exploredAt(point.x,point.y)||!safe(point))continue;
+    yield;
+    if(!current())return null;
+    const path=yield* currentRetreatSteps(mission.vehiclePathSteps(unit,point,{avoidMoving:true,fallback:false,maxGoalDistance:scale}),current);
+    if(!current())return null;
+    if(!path?.length||!safe(path.at(-1)))continue;
+    let from=origin;
+    let approachesEnemy=false;
+    for(const to of path){
+      const dx=to.x-from.x,dy=to.y-from.y,length=dx*dx+dy*dy;
+      if(known.some(enemy=>{
+        const t=length?Math.max(0,Math.min(1,((enemy.x-from.x)*dx+(enemy.y-from.y)*dy)/length)):0;
+        const closest={x:from.x+t*dx,y:from.y+t*dy};
+        return distance(closest,enemy)<Math.min(distance(origin,enemy),enemy.range)-scale*2;
+      })) {approachesEnemy=true;break;}
+      from=to;
+    }
+    if(!approachesEnemy)return path;
+  }
+  return null;
+}
 // Uses the existing yielding path search and swept vehicle movement. A retreat
 // never jumps the vehicle to a point or disables collision checks.
 export function* updateCombatRetreat(mission, unit, spec, dt) {
@@ -245,11 +295,58 @@ export function* updateCombatRetreat(mission, unit, spec, dt) {
     // changes the service destination, including while already en route.
     if(unit.factoryVisit&&['approach','waiting'].includes(unit.factoryVisit.phase))delete unit.factoryVisit;
     if(existingBase&&replacement.id!==existingBase.id)mission.emit('factory-repair-rerouted',{unit:unit.id,from:existingBase.id,to:replacement.id});
-    clearMotion(unit);retreat.home=replacement;retreat.status='planning';
-    delete retreat.destination;delete retreat.phase;delete retreat.service;
-    delete retreat.failedSignature;
+    retreat.home=replacement;
+    if(retreat.phase!=='cover'){
+      clearMotion(unit);retreat.status='planning';
+      delete retreat.destination;delete retreat.phase;delete retreat.service;
+      delete retreat.failedSignature;
+    }
   }
   const serviceBase=retreat.home?.id&&mission.entity(retreat.home.id);
+  const garage=serviceBase?.kind==='factory'&&(unit.factoryVisit||retreat.service!=='complete'&&needsFactoryVisit(unit,serviceBase));
+  const inCover=retreat.phase==='cover';
+  const busy=garage?repairBlocker(mission,unit,serviceBase):null;
+  const stalled=unit.navigation?.waitSeconds>=.6||retreat.status==='blocked';
+  const stoppedInCover=inCover&&!unit.path.length;
+  // A vehicle in the doorway finishes that checked transfer. Outside, keep
+  // the old route and gate ownership until an alternative has been found.
+  const visit=unit.factoryVisit;
+  if(!inFactoryInterior(unit)&&visit?.phase!=='departure'&&!unit.detour&&!unit.yieldReturn&&!unit.jointTraffic
+    &&(stalled||stoppedInCover||busy&&!inCover)&&mission.state.time>=(retreat.nextCoverSearchAt??0)){
+    retreat.nextCoverSearchAt=mission.state.time+1.5;
+    const topology=mission.nav.topologyRevision,{x,y,heading}=unit;
+    const valid=()=>current()&&unit.factoryVisit===visit&&mission.nav.topologyRevision===topology&&unit.x===x&&unit.y===y&&unit.heading===heading;
+    const path=yield* currentRetreatSteps(withdrawalDetour(mission,unit,spec,valid),valid);
+    if(!valid())return true;
+    if(path){
+      if(serviceBase?.garageGate===unit.id)delete serviceBase.garageGate;
+      delete unit.factoryVisit;
+      clearMotion(unit);
+      delete retreat.failedSignature;
+      delete retreat.service;
+      retreat.destination={...path.at(-1)};
+      retreat.phase='cover';
+      retreat.status='moving';
+      unit.path=path;
+      unit.task={type:'move',...retreat.destination};
+      unit.routeOrder={revision:2,type:'retreat',request:{...retreat.destination},destination:{...retreat.destination}};
+      mission.emit('retreat-detour',{unit:unit.id,blocker:busy??unit.navigation?.blockerId??null,destination:retreat.destination});
+    }
+  }
+  if(retreat.phase==='cover'){
+    if(unit.path.length||unit.detour||unit.yieldReturn){
+      yield* currentRetreatSteps(mission.moveSteps(unit,dt),current);
+      return true;
+    }
+    if(busy){
+      unit.driveSpeed=0;
+      navigationDecision(unit,'WAITING_RESERVATION','retreat-cover-until-repair-free',busy,'resume-repair');
+      return true;
+    }
+    delete retreat.phase;
+    delete retreat.destination;
+    retreat.status='planning';
+  }
   // Garage queues may extend beyond the repair radius. Their waiting spots
   // are validated by factoryWaitingPoint against the apron and topology;
   // applying the service radius here cancelled the same route every tick.
@@ -263,7 +360,7 @@ export function* updateCombatRetreat(mission, unit, spec, dt) {
   // An existing visit owns physical space at the door or inside the hall.
   // Healthy arrivals use the exterior retreat positions unless the factory
   // was explicitly configured for modernization.
-  if(serviceBase?.kind==='factory'&&(unit.factoryVisit||retreat.service!=='complete'&&needsFactoryVisit(unit,serviceBase))){
+  if(garage){
     return yield* updateFactoryVisit(mission,unit,serviceBase,dt);
   }
   if(retreat.status==='blocked'||retreat.status==='planning'){
