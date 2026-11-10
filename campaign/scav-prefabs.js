@@ -22,6 +22,12 @@ export function createScavPrefab(T, kind, site) {
   let nextDamagePart=16;
   const damageParts={0:{name:'structure',material:'metal'},9:{name:'weapon',material:'equipment',detachable:true,strength:210}};
   root.userData.damageParts=damageParts;
+  function fragment(name,material,build){
+    const previous=damagePart;
+    damagePart=nextDamagePart++;
+    damageParts[damagePart]={name,material,detachable:true,structural:true,strength:95};
+    try{build();}finally{damagePart=previous;}
+  }
   function shape(geometry, material, position, rotation = [0,0,0]) {
     const object = new T.Object3D();
     object.position.set(...position);
@@ -73,20 +79,29 @@ export function createScavPrefab(T, kind, site) {
     }
   }
   if (kind === 'mg-tower') {
+    // Keep the intact silhouette and material batches; each physical member
+    // can now detach instead of leaving the whole frame to the collapse shader.
     for (const x of [-2.2,2.2]) for (const y of [-2.2,2.2]) {
-      beam([x,y,-.6], [x*.63,y*.63,9.15], .23, improvised?mats.wood:mats.rust);
-      beam([x,y,1.25], [-x*.72,y*.73,7.9], .14, mats.dark);
+      const a=[x,y,-.6],b=[x*.63,y*.63,9.15],mid=a.map((v,i)=>(v+b[i])/2);
+      fragment('leg_lower_'+x+'_'+y,improvised?'wood':'metal',()=>beam(a,mid,.23,improvised?mats.wood:mats.rust));
+      fragment('leg_upper_'+x+'_'+y,improvised?'wood':'metal',()=>beam(mid,b,.23,improvised?mats.wood:mats.rust));
+      fragment('brace_'+x+'_'+y,'metal',()=>beam([x,y,1.25], [-x*.72,y*.73,7.9], .14, mats.dark));
       if (stronghold) box([.76,.76,.28], [x,y,-.08], mats.wood);
       if (waterTower) box([.71,.71,.60], [x,y,-.19], mats.dark);
     }
-    box([3.75,3.75,.24],[0,0,9.15],mats.wood);
-    for(const x of [-.43,.43])beam([x,2.18,-.3],[x,1.62,9.36],.11,mats.dark);
-    for(let z=.4;z<9.2;z+=.48)beam([-.49,2.18-z*.06,z],[.49,2.18-z*.06,z],.085,mats.rust);
+    fragment('platform','wood',()=>box([3.75,3.75,.24],[0,0,9.15],mats.wood));
+    for(const [i,low,high] of [[0,-.3,4.53],[1,4.53,9.36]])fragment('ladder_'+i,'metal',()=>{
+      const y=z=>2.18-(z+.3)/9.66*.56;
+      for(const x of [-.43,.43])beam([x,y(low),low],[x,y(high),high],.11,mats.dark);
+      for(let z=.4;z<9.2;z+=.48)if(z>=low&&z<high)beam([-.49,2.18-z*.06,z],[.49,2.18-z*.06,z],.085,mats.rust);
+    });
     if(improvised){
-      for(const side of [-1,1])for(let i=0;i<4;i++)box([.18,.69,1.05],[side*1.65,-1.1+i*.73,9.65],i%2?mats.rust:mats.wood,[0,side*.08,0]);
-      box([1.36,1.66,.07],[.70,.29,11.20],mats.rust,[.08,0,-.09]);
-      beam([-1.45,-1.43,9.1],[-1.53,-1.45,11.1],.14,mats.wood);
-      box([.8,.12,.6],[0,-1.70,9.9],mats.tin,[0,0,.08]);
+      for(const side of [-1,1])fragment('scrap_side_'+side,'metal',()=>{for(let i=0;i<4;i++)box([.18,.69,1.05],[side*1.65,-1.1+i*.73,9.65],i%2?mats.rust:mats.wood,[0,side*.08,0]);});
+      fragment('scrap_roof','metal',()=>box([1.36,1.66,.07],[.70,.29,11.20],mats.rust,[.08,0,-.09]));
+      fragment('scrap_post','wood',()=>{
+        beam([-1.45,-1.43,9.1],[-1.53,-1.45,11.1],.14,mats.wood);
+        box([.8,.12,.6],[0,-1.70,9.9],mats.tin,[0,0,.08]);
+      });
     }
     const yaw = new T.Group();
     yaw.name = 'tower_yaw';
@@ -94,30 +109,40 @@ export function createScavPrefab(T, kind, site) {
     const mountBatches = new Map();
     surfaces.push([yaw,mountBatches]);
     if (waterTower) {
-      drum(1.46,.21,[0,.39,9.38],mats.dark,12);
-      drum(1.59,2.14,[0,.39,10.53],mats.tin,12);
-      for(const z of [9.62,11.38])drum(1.63,.12,[0,.39,z],mats.rust,12);
-      drum(1.64,.54,[0,.39,11.9],mats.tin,12,.34);
-      pipe([[1.10,-.49,9.57],[1.48,-.81,9.57],[1.48,-.81,.40],[1.95,-.29,.40],[1.95,-.29,-.22]],.12,mats.dark);
+      fragment('tank_base','metal',()=>drum(1.46,.21,[0,.39,9.38],mats.dark,12));
+      fragment('tank','metal',()=>{
+        drum(1.59,2.14,[0,.39,10.53],mats.tin,12);
+        for(const z of [9.62,11.38])drum(1.63,.12,[0,.39,z],mats.rust,12);
+        for(const x of [-.44,.44])box([.38,.15,.61],[x,-1.56,10.62],mats.dark);
+      });
+      fragment('tank_roof','metal',()=>{
+        drum(1.64,.54,[0,.39,11.9],mats.tin,12,.34);
+        drum(.80,.19,[0,0,12.19],mats.rust,12);
+      });
+      fragment('water_pipe','metal',()=>{
+        pipe([[1.10,-.49,9.57],[1.48,-.81,9.57],[1.48,-.81,.40],[1.95,-.29,.40],[1.95,-.29,-.22]],.12,mats.dark);
+        for(const z of [2.4,5.5,8.2])box([.34,.15,.13],[1.48,-.81,z],mats.tin);
+      });
       box([.74,.72,.45],[1.95,-.29,-.13],mats.dark);
       drum(.20,.095,[1.95,-.29,.135],mats.rust,8);
-      for(const z of [2.4,5.5,8.2])box([.34,.15,.13],[1.48,-.81,z],mats.tin);
-      for(const x of [-.44,.44])box([.38,.15,.61],[x,-1.56,10.62],mats.dark);
-      drum(.80,.19,[0,0,12.19],mats.rust,12);
       activeBatches = mountBatches;
-      drum(.40,.20,[0,0,12.38],mats.dark,12);
-      box([.54,1.88,.19],[0,-.71,12.52],mats.rust);
-      drum(.29,.33,[0,-1.52,12.72],mats.dark,10);
-      for (const x of [-.28,.28]) box([.12,.42,.48],[x,-1.52,12.98],mats.dark);
+      fragment('weapon_mount','metal',()=>{
+        drum(.40,.20,[0,0,12.38],mats.dark,12);
+        box([.54,1.88,.19],[0,-.71,12.52],mats.rust);
+        drum(.29,.33,[0,-1.52,12.72],mats.dark,10);
+        for (const x of [-.28,.28]) box([.12,.42,.48],[x,-1.52,12.98],mats.dark);
+      });
     } else {
       activeBatches = mountBatches;
-      box([3.28,.20,1.02],[0,-1.55,9.82],mats.rust);
-      box([3.28,3.1,.12],[0,.08,11.03],mats.tarp,[.08,0,0]);
-      for (const x of [-1.48,1.48]) beam([x,1.38,9.22],[x,1.38,11.02],.16,mats.wood);
+      fragment('shield','metal',()=>box([3.28,.20,1.02],[0,-1.55,9.82],mats.rust));
+      fragment('canopy','wood',()=>box([3.28,3.1,.12],[0,.08,11.03],mats.tarp,[.08,0,0]));
+      fragment('canopy_posts','wood',()=>{for (const x of [-1.48,1.48]) beam([x,1.38,9.22],[x,1.38,11.02],.16,mats.wood);});
       if(stronghold){
         for(const side of [-1,1]){
+         fragment('side_shield_'+side,'metal',()=>{
           box([1.26,.23,.67],[side*.92,-1.59,10.52],mats.dark,[.12,0,side*.11]);
           box([.21,2.25,.79],[side*1.57,-.18,9.96],mats.rust);
+         });
         }
       }
     }
