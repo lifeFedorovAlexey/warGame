@@ -35,7 +35,7 @@ try{
  // render frame before the test pauses; combat is introduced explicitly below.
  await page.evaluate(()=>{const m=campaign.mission,d=campaign.radio.director.data;if(d.facts.contact)d.facts.contact.fired=false;d.lastCombat=-30000;m.effects=[];m.state.projectiles=[];});
  const screenshot=async name=>{
-  for(const [suffix,width,height] of [['desktop',1440,900],['narrow',390,844]]){
+  for(const [suffix,width,height] of [['desktop',1440,900],['mobile-landscape',844,390],['mobile-landscape-small',667,375]]){
    await page.setViewportSize({width,height});await page.screenshot({path:folder+'/'+name+'-'+suffix+'.png'});
   }
  };
@@ -73,5 +73,5 @@ try{
   if(timeline[i].scene==='r19')assert(gap>=9950,'The explanation waits ten seconds after victory');
  }
  assert.deepEqual(errors,[]);fs.writeFileSync(folder+'/verification.json',JSON.stringify({pass:true,timeline,errors},null,2));
- console.log('PASS: 16 stage V lines, actual audio completion, correct speakers and subtitles, attack does not interrupt, save does not replay, two-second gaps and ten-second aftermath, desktop/narrow');
+ console.log('PASS: 16 stage V lines, actual audio completion, correct speakers and subtitles, attack does not interrupt, save does not replay, two-second gaps and ten-second aftermath, desktop/mobile landscape');
 }finally{await browser.close();}
