@@ -705,16 +705,13 @@ function updateRoster() {
   armyButton.setAttribute('aria-pressed',String(army.length>0&&selected.size===army.length&&army.every(id=>selected.has(id))));
   const columns=rosterColumns;
   const groups=new Map(),types=new Map();
-  const stack=units.length>columns;
-  const counts={};
   for(const unit of units){
-    counts[unit.kind]=(counts[unit.kind]??0)+1;
-    const recovering=repairing(unit),blocked=!recovering&&blockedOrders.has(unit.id),separate=blocked&&blockedOrders.size<=4;
+    const recovering=repairing(unit),blocked=!recovering&&blockedOrders.has(unit.id);
     const design=unitType(unit);
     if(!types.has(design))types.set(design,types.size);
-    const key=stack&&!separate?[recovering,blocked,design,selected.has(unit.id)].join(':'):unit.id;
+    const key=[recovering,blocked,design,selected.has(unit.id)].join(':');
     if(!groups.has(key)){
-      const name=projectLabel(unit),label=name+(name===config.units[unit.kind].name&&(!stack||separate)?' '+counts[unit.kind]:'');
+      const label=projectLabel(unit);
       groups.set(key,{label:recovering?label+' · Авторемонт':label,kind:unit.kind,design,recovering,units:[]});
     }
     groups.get(key).units.push(unit);
