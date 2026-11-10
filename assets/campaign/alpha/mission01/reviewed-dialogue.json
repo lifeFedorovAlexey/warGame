@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "draftRevision": 86,
-  "draftSha256": "6f93344e51b1bf47e8fd28b83fb1088aec68275fc77d2e0742fe872bc9b70b90",
-  "throughScene": "r13",
-  "appliedAt": "2026-11-09T20:51:24.711841+00:00",
+  "draftRevision": 120,
+  "draftSha256": "433dec9e40c0fb872a02c568a09308b1acb28c05a67916806479b1779d009e02",
+  "throughScene": "r19",
+  "appliedAt": "2026-11-10T09:16:28.914533+00:00",
   "scenes": [
     {
       "id": "p01",
@@ -273,9 +273,208 @@
       "triggerDescription": "НИИ построен; спокойный эфир. Сцены 11–12 завершены.",
       "notes": "",
       "enabled": true
+    },
+    {
+      "id": "r14",
+      "title": "Обнаружение отбросов",
+      "cues": [
+        "m01-s07-l001",
+        "m01-s07-l002",
+        "m01-s07-l003",
+        "m01-s07-l004",
+        "m01-s07-l005"
+      ],
+      "sourceLine": 279,
+      "sections": [
+        "r14",
+        "r15"
+      ],
+      "triggerDescription": "разведка обнаружила приближающуюся вражескую группу.",
+      "notes": "",
+      "enabled": true
+    },
+    {
+      "id": "r16",
+      "title": "Первое обращение",
+      "cues": [
+        "m01-s07-l006",
+        "m01-s07-l007",
+        "m01-s07-l008",
+        "m01-s07-l009"
+      ],
+      "sourceLine": 307,
+      "sections": [
+        "r16",
+        "r17"
+      ],
+      "triggerDescription": "до начала стрельбы, если противник ещё находится на связи.",
+      "notes": "",
+      "enabled": true
+    },
+    {
+      "id": "r18",
+      "title": "Атака отражена",
+      "cues": [
+        "field:raid-won"
+      ],
+      "sourceLine": 335,
+      "sections": [
+        "r18"
+      ],
+      "triggerDescription": "последняя машина первой атакующей группы уничтожена или отступила; непосредственная угроза закончилась.",
+      "notes": "",
+      "enabled": true
+    },
+    {
+      "id": "r19",
+      "title": "Кто такие отбросы",
+      "cues": [
+        "m01-s07-l010",
+        "m01-s07-l011",
+        "m01-s07-l012",
+        "m01-s07-l013",
+        "m01-s07-l014",
+        "m01-s07-l016"
+      ],
+      "sourceLine": 343,
+      "sections": [
+        "r19",
+        "r20"
+      ],
+      "triggerDescription": "первая атака отражена, прошло 10 секунд спокойного эфира.",
+      "notes": "",
+      "enabled": true
     }
   ],
   "dialogue": [
+    {
+      "id": "m01-s07-l001",
+      "speaker": "scout",
+      "text": "Командир, движение на северо-востоке.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s07-l002",
+      "speaker": "commander",
+      "text": "Кто?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s07-l003",
+      "speaker": "scout",
+      "text": "Машины с пулемётами. Все своим ходом, ни одной на буксире.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s07-l004",
+      "speaker": "commander",
+      "text": "Наши?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s07-l005",
+      "speaker": "scout",
+      "text": "Товарищ командир, я ж говорю — ни одной на буксире.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s07-l006",
+      "speaker": "raider",
+      "text": "Эй! Вы кто такие? Чего припёрлись?!",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s07-l007",
+      "speaker": "commander",
+      "text": "Вежливые люди. Слышали про таких? Не хотите проголосовать за присоединение?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s07-l008",
+      "speaker": "raider",
+      "text": "Ты нам ещё выборы тут устрой!",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s07-l009",
+      "speaker": "commander",
+      "text": "Уже!\nКак раз выезное голосование - проходите в буханку... ",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "field:raid-won",
+      "speaker": "commander",
+      "text": "Голосование закончено.\n112 процентов за!\nПроверьте машины может еще что найдем!?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s07-l010",
+      "speaker": "radio",
+      "text": "Альфа, выяснили, кто это. Местные называют их отбросами.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s07-l011",
+      "speaker": "commander",
+      "text": "Почему отбросы?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s07-l012",
+      "speaker": "radio",
+      "text": "На свалках живут. Тащат всё, что не прикручено.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s07-l013",
+      "speaker": "commander",
+      "text": "А мы?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s07-l014",
+      "speaker": "radio",
+      "text": "А мы цивилизацию восстанавливаем.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
+    {
+      "id": "m01-s07-l016",
+      "speaker": "builder",
+      "text": "Нам и прикрученное надо. Дай отвёртку.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т",
+      "notes": ""
+    },
     {
       "id": "m01-s05-l002",
       "speaker": "general",
@@ -574,6 +773,237 @@
     }
   ],
   "clips": {
+    "m01-s07-l001": {
+      "file": "recordings/reviewed/m01-s07-l001-efb6cf71e8a6.mp3",
+      "duration": 2.50775,
+      "leadingSilence": 0.11,
+      "trailingSilence": 0.28774999999999995,
+      "speaker": "scout",
+      "sha256": "efb6cf71e8a6db1a870286e1196113d2b018782865203f54e6ad31161140e903",
+      "bytes": 57061,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T08_35_58_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 120,
+      "transcriptSource": "owner-workshop",
+      "text": "Командир, движение на северо-востоке."
+    },
+    "m01-s07-l002": {
+      "file": "recordings/commander/m01-s07-l004.mp3",
+      "duration": 0.8359166666666666,
+      "leadingSilence": 0.13,
+      "trailingSilence": 0.34591666666666665,
+      "speaker": "commander",
+      "sha256": "597083bcf6cbb47a67b0df0e4079c55d12f17a7e18b45b2f4b3e174001126da9",
+      "bytes": 30311,
+      "origin": "user-recording",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-s07-l002"
+      },
+      "textMatch": "exact",
+      "text": "Кто?"
+    },
+    "m01-s07-l003": {
+      "file": "recordings/reviewed/m01-s07-l003-9e26b682333d.mp3",
+      "duration": 4.1273333333333335,
+      "leadingSilence": 0.04,
+      "trailingSilence": 0.21733333333333338,
+      "speaker": "scout",
+      "sha256": "9e26b682333d8caeb189a7cc4194661bcb4bdbd1f9ef2ed58de5d5ea50bc337b",
+      "bytes": 82974,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T08_36_24_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 120,
+      "transcriptSource": "owner-workshop",
+      "text": "Машины с пулемётами. Все своим ходом, ни одной на буксире.",
+      "textEditedAfterUpload": true
+    },
+    "m01-s07-l004": {
+      "file": "recordings/commander/pending/m01-s07-l007.mp3",
+      "duration": 1.5673333333333332,
+      "leadingSilence": 0.37,
+      "trailingSilence": 0.5173333333333332,
+      "speaker": "commander",
+      "sha256": "62b98474be794dbf39ba089738c05c25fee408a8b4dd2995b1559e2d93a57cb4",
+      "bytes": 42014,
+      "origin": "user-recording",
+      "reusedFrom": {
+        "catalog": "audio.json",
+        "cueId": "m01-s07-l004"
+      },
+      "textMatch": "exact",
+      "text": "Наши?"
+    },
+    "m01-s07-l005": {
+      "file": "recordings/reviewed/m01-s07-l005-e185c8fd8b64.mp3",
+      "duration": 3.866125,
+      "leadingSilence": 0.11,
+      "trailingSilence": 0.15612499999999985,
+      "speaker": "scout",
+      "sha256": "e185c8fd8b6449ed87a6dfb63b17cef4cb5c89a232830fc149c3be80e62819c6",
+      "bytes": 78794,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T08_37_16_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 120,
+      "transcriptSource": "owner-workshop",
+      "text": "Товарищ командир, я ж говорю — ни одной на буксире.",
+      "textEditedAfterUpload": true
+    },
+    "m01-s07-l006": {
+      "file": "recordings/reviewed/m01-s07-l006-487c6e289f3b.mp3",
+      "duration": 3.0040833333333334,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.30408333333333326,
+      "speaker": "raider",
+      "sha256": "487c6e289f3beb653bc62cb7fed65bd958293a56d144acea6302c45c6682976f",
+      "bytes": 65002,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T08_47_23_Ivo - Calming, chill and narrative_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 120,
+      "transcriptSource": "owner-workshop",
+      "text": "Эй! Вы кто такие? Чего припёрлись?!"
+    },
+    "m01-s07-l007": {
+      "file": "recordings/reviewed/m01-s07-l007-d9dcbee27aba.mp3",
+      "duration": 4.989375,
+      "leadingSilence": 0.08,
+      "trailingSilence": 0.11937499999999979,
+      "speaker": "commander",
+      "sha256": "d9dcbee27abacc2141f0c3964efdb7e9c570bf72b8114af8c67819ab7730b608",
+      "bytes": 96767,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T08_48_01_comandorNig_gen_s50_sim75_v4.mp3",
+      "draftRevision": 120,
+      "transcriptSource": "owner-workshop",
+      "text": "Вежливые люди. Слышали про таких? Не хотите проголосовать за присоединение?",
+      "textEditedAfterUpload": true
+    },
+    "m01-s07-l008": {
+      "file": "recordings/reviewed/m01-s07-l008-318fcbb3e82c.mp3",
+      "duration": 2.1942916666666665,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.3042916666666664,
+      "speaker": "raider",
+      "sha256": "318fcbb3e82ccac59672d244ec4d4d6fd1d7e2980f1f072a1acb71d0198d4fc6",
+      "bytes": 52045,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T08_52_58_Ivo - Calming, chill and narrative_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 120,
+      "transcriptSource": "owner-workshop",
+      "text": "Ты нам ещё выборы тут устрой!"
+    },
+    "m01-s07-l009": {
+      "file": "recordings/reviewed/m01-s07-l009-5a04d1bbebd4.mp3",
+      "duration": 4.284083333333333,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.3240833333333333,
+      "speaker": "commander",
+      "sha256": "5a04d1bbebd41581f32b3de9db6e6549c0dfacb0f0c5855521da330f19822b1b",
+      "bytes": 85482,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T08_55_54_comandorNig_gen_s50_sim75_v4.mp3",
+      "draftRevision": 120,
+      "transcriptSource": "owner-workshop",
+      "text": "Уже!\nКак раз выезное голосование - проходите в буханку... "
+    },
+    "field:raid-won": {
+      "file": "recordings/reviewed/field-raid-won-ec0adabee02e.mp3",
+      "duration": 6.609,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.1689999999999996,
+      "speaker": "commander",
+      "sha256": "ec0adabee02e8fc1090679c0535e9cded6ef0c81eb132e28bb21c5cd1b637933",
+      "bytes": 122680,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T09_00_23_comandorNig_gen_s50_sim75_v4.mp3",
+      "draftRevision": 120,
+      "transcriptSource": "owner-workshop",
+      "text": "Голосование закончено.\n112 процентов за!\nПроверьте машины может еще что найдем!?"
+    },
+    "m01-s07-l010": {
+      "file": "recordings/reviewed/m01-s07-l010-33b68facef4e.mp3",
+      "duration": 4.284083333333333,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.29408333333333303,
+      "speaker": "radio",
+      "sha256": "33b68facef4e461fa8ec728db0de26394240acf50cf9d4f3474d70eb886bd4aa",
+      "bytes": 85482,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T09_04_18_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 120,
+      "transcriptSource": "owner-workshop",
+      "text": "Альфа, выяснили, кто это. Местные называют их отбросами."
+    },
+    "m01-s07-l011": {
+      "file": "recordings/reviewed/m01-s07-l011-30505577193f.mp3",
+      "duration": 1.6457083333333333,
+      "leadingSilence": 0.13,
+      "trailingSilence": 0.3357083333333333,
+      "speaker": "commander",
+      "sha256": "30505577193f7fda3ad7465299f8811a60a7860393fa778e96f227d571e9f7fd",
+      "bytes": 43268,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T09_04_45_comandorNig_gen_s50_sim75_v4.mp3",
+      "draftRevision": 120,
+      "transcriptSource": "owner-workshop",
+      "text": "Почему отбросы?"
+    },
+    "m01-s07-l012": {
+      "file": "recordings/reviewed/m01-s07-l012-9194b0bf5ba8.mp3",
+      "duration": 3.474291666666667,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.20429166666666676,
+      "speaker": "radio",
+      "sha256": "9194b0bf5ba86d75a8f834f406888b6d7171beac137038411563f7b8a01138c8",
+      "bytes": 72525,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T09_05_14_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 120,
+      "transcriptSource": "owner-workshop",
+      "text": "На свалках живут. Тащат всё, что не прикручено."
+    },
+    "m01-s07-l013": {
+      "file": "recordings/reviewed/m01-s07-l013-478d298c3dce.mp3",
+      "duration": 1.306125,
+      "leadingSilence": 0.46,
+      "trailingSilence": 0.316125,
+      "speaker": "commander",
+      "sha256": "478d298c3dce06436fc14ef178618f4dac6413dd6f17fd07a2892edd2e68d78b",
+      "bytes": 37834,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T09_05_41_comandorNig_gen_s50_sim75_v4.mp3",
+      "draftRevision": 120,
+      "transcriptSource": "owner-workshop",
+      "text": "А мы?"
+    },
+    "m01-s07-l014": {
+      "file": "recordings/reviewed/m01-s07-l014-4e14be06b9b1.mp3",
+      "duration": 3.474291666666667,
+      "leadingSilence": 0.13,
+      "trailingSilence": 0.4142916666666667,
+      "speaker": "radio",
+      "sha256": "4e14be06b9b1155f9d172d2ad351ef622770b629d1241313303b233a4ca38308",
+      "bytes": 72525,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T09_10_57_Egor Gadzhiyev - Clear and Commanding_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 120,
+      "transcriptSource": "owner-workshop",
+      "text": "А мы цивилизацию восстанавливаем."
+    },
+    "m01-s07-l016": {
+      "file": "recordings/reviewed/m01-s07-l016-afb6e8a76f18.mp3",
+      "duration": 3.0040833333333334,
+      "leadingSilence": 0.06,
+      "trailingSilence": 0.2240833333333332,
+      "speaker": "builder",
+      "sha256": "afb6e8a76f185dc1fbef1d25b4570a58eb076c082e072c826af6459bafa18578",
+      "bytes": 65002,
+      "origin": "user-recording",
+      "sourceName": "ElevenLabs_2026-11-10T09_07_58_Alexandr Vlasov - Vibrant and Energetic_pvc_s50_sim75_v4.mp3",
+      "draftRevision": 120,
+      "transcriptSource": "owner-workshop",
+      "text": "Нам и прикрученное надо. Дай отвёртку."
+    },
     "m01-s05-l002": {
       "file": "recordings/reviewed/m01-s05-l002-cfeed48a6de6.mp3",
       "duration": 2.925708333333333,

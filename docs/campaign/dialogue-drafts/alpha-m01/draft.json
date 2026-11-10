@@ -1,6 +1,6 @@
 {
-  "revision": 86,
-  "savedAt": "2026-11-09T20:51:24.546195+00:00",
+  "revision": 120,
+  "savedAt": "2026-11-10T09:11:14.857456+00:00",
   "document": {
     "id": "alpha-m01",
     "title": "Освоение целины",
@@ -3071,19 +3071,10 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio/m01-s07-l001.ogg",
-          "duration": 2.6315,
-          "leadingSilence": 0.04,
-          "trailingSilence": 0.2915000000000001,
-          "speaker": "scout",
-          "sha256": "4d05c0556e50d68d6d4a21adc3756966e17cbf81a78d40629bbf8aedb8ab8e74",
-          "bytes": 12965,
-          "origin": "temporary-synthesis",
-          "reusedFrom": {
-            "catalog": "audio.json",
-            "cueId": "m01-s07-l001"
-          },
-          "textMatch": "exact",
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/efb6cf71e8a6db1a870286e1196113d2b018782865203f54e6ad31161140e903.mp3",
+          "name": "ElevenLabs_2026-11-10T08_35_58_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 2.50775,
           "text": "Командир, движение на северо-востоке."
         }
       },
@@ -3119,7 +3110,7 @@
       "m01-s07-l003": {
         "id": "m01-s07-l003",
         "speaker": "scout",
-        "text": "Неизвестные. Вооружены. Техника кустарного производства. На броне мусор, тряпки, железо.",
+        "text": "Машины с пулемётами. Все своим ходом, ни одной на буксире.",
         "pauseAfter": 0.2,
         "sourceLine": 293,
         "recordingStatus": "В",
@@ -3129,19 +3120,10 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio/m01-s07-l003.ogg",
-          "duration": 6.675583333333333,
-          "leadingSilence": 0.03,
-          "trailingSilence": 0.3555833333333327,
-          "speaker": "scout",
-          "sha256": "1be16123c37457c7a8be97a8a46dee11f2e94a9c7d0c63c80733fc795877cff1",
-          "bytes": 32308,
-          "origin": "temporary-synthesis",
-          "reusedFrom": {
-            "catalog": "audio.json",
-            "cueId": "m01-s07-l003"
-          },
-          "textMatch": "exact",
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/9e26b682333d8caeb189a7cc4194661bcb4bdbd1f9ef2ed58de5d5ea50bc337b.mp3",
+          "name": "ElevenLabs_2026-11-10T08_36_24_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 4.127313,
           "text": "Неизвестные. Вооружены. Техника кустарного производства. На броне мусор, тряпки, железо."
         }
       },
@@ -3177,7 +3159,7 @@
       "m01-s07-l005": {
         "id": "m01-s07-l005",
         "speaker": "scout",
-        "text": "Нет. У наших номера есть.",
+        "text": "Товарищ командир, я ж говорю — ни одной на буксире.",
         "pauseAfter": 0.2,
         "sourceLine": 305,
         "recordingStatus": "В",
@@ -3187,26 +3169,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio/m01-s07-l005.ogg",
-          "duration": 2.477625,
-          "leadingSilence": 0.04,
-          "trailingSilence": 0.42762500000000037,
-          "speaker": "scout",
-          "sha256": "d095d11e9151adf2b2479bcf92ae7f12d4453366f5540bda39042d01c703aba0",
-          "bytes": 11706,
-          "origin": "temporary-synthesis",
-          "reusedFrom": {
-            "catalog": "audio.json",
-            "cueId": "m01-s07-l005"
-          },
-          "textMatch": "exact",
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/e185c8fd8b6449ed87a6dfb63b17cef4cb5c89a232830fc149c3be80e62819c6.mp3",
+          "name": "ElevenLabs_2026-11-10T08_37_16_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 3.866063,
           "text": "Нет. У наших номера есть."
         }
       },
       "m01-s07-l006": {
         "id": "m01-s07-l006",
         "speaker": "raider",
-        "text": "Эй, вы кто такие?! Чего припёрлись?!",
+        "text": "Эй! Вы кто такие? Чего припёрлись?!",
         "pauseAfter": 0.2,
         "sourceLine": 313,
         "recordingStatus": "В",
@@ -3216,26 +3189,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio/m01-s07-l006.ogg",
-          "duration": 2.436541666666667,
-          "leadingSilence": 0.01,
-          "trailingSilence": 0.34654166666666697,
-          "speaker": "raider",
-          "sha256": "94f5b7a1b758aa159ebf9a51211d38bfa5cac26d25d724dcb17245c3186580c6",
-          "bytes": 11805,
-          "origin": "temporary-synthesis",
-          "reusedFrom": {
-            "catalog": "audio.json",
-            "cueId": "m01-s07-l006"
-          },
-          "textMatch": "exact",
-          "text": "Эй, вы кто такие?! Чего припёрлись?!"
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/487c6e289f3beb653bc62cb7fed65bd958293a56d144acea6302c45c6682976f.mp3",
+          "name": "ElevenLabs_2026-11-10T08_47_23_Ivo - Calming, chill and narrative_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 3.004063,
+          "text": "Эй! Вы кто такие? Чего припёрлись?!"
         }
       },
       "m01-s07-l007": {
         "id": "m01-s07-l007",
         "speaker": "commander",
-        "text": "Спецназ Вооружённых сил Российской Федерации. Группа «Альфа». Предлагаю сложить оружие.",
+        "text": "Вежливые люди. Слышали про таких? Не хотите проголосовать за присоединение?",
         "pauseAfter": 0.2,
         "sourceLine": 317,
         "recordingStatus": "Т",
@@ -3245,26 +3209,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/recordings/commander/m01-s07-l007.mp3",
-          "duration": 6.687333333333333,
-          "leadingSilence": 0.11,
-          "trailingSilence": 0.17733333333333334,
-          "speaker": "commander",
-          "sha256": "f0ac73d691c1873747e7e1ba996ccae36592e693a821e03235bd612c9196bf75",
-          "bytes": 123934,
-          "origin": "user-recording",
-          "reusedFrom": {
-            "catalog": "audio.json",
-            "cueId": "m01-s07-l007"
-          },
-          "textMatch": "exact",
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/d9dcbee27abacc2141f0c3964efdb7e9c570bf72b8114af8c67819ab7730b608.mp3",
+          "name": "ElevenLabs_2026-11-10T08_48_01_comandorNig_gen_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 4.989375,
           "text": "Спецназ Вооружённых сил Российской Федерации. Группа «Альфа». Предлагаю сложить оружие."
         }
       },
       "m01-s07-l008": {
         "id": "m01-s07-l008",
         "speaker": "raider",
-        "text": "Какая ещё Федерация?! Тут наша земля!",
+        "text": "Ты нам ещё выборы тут устрой!",
         "pauseAfter": 0.2,
         "sourceLine": 325,
         "recordingStatus": "В",
@@ -3274,26 +3229,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio/m01-s07-l008.ogg",
-          "duration": 2.841875,
-          "leadingSilence": 0.01,
-          "trailingSilence": 0.3318749999999997,
-          "speaker": "raider",
-          "sha256": "a7149522cee52976eb43f4cbe4e0916a43ec603b32e19b847a41759fe45fd6a9",
-          "bytes": 13617,
-          "origin": "temporary-synthesis",
-          "reusedFrom": {
-            "catalog": "audio.json",
-            "cueId": "m01-s07-l008"
-          },
-          "textMatch": "exact",
-          "text": "Какая ещё Федерация?! Тут наша земля!"
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/318fcbb3e82ccac59672d244ec4d4d6fd1d7e2980f1f072a1acb71d0198d4fc6.mp3",
+          "name": "ElevenLabs_2026-11-10T08_52_58_Ivo - Calming, chill and narrative_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 2.19425,
+          "text": "Ты нам ещё выборы тут устрой!"
         }
       },
       "m01-s07-l009": {
         "id": "m01-s07-l009",
         "speaker": "commander",
-        "text": "Значит, будете федеративным округом.",
+        "text": "Уже!\nКак раз выезное голосование - проходите в буханку... ",
         "pauseAfter": 0.2,
         "sourceLine": 329,
         "recordingStatus": "Т",
@@ -3303,26 +3249,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/recordings/commander/m01-s07-l009.mp3",
-          "duration": 3.3959166666666665,
-          "leadingSilence": 0.21,
-          "trailingSilence": 0.14591666666666647,
-          "speaker": "commander",
-          "sha256": "dce3d422efdae6f89d023bef69ff95d2fd330237b6bd36e24c6524964221f410",
-          "bytes": 71271,
-          "origin": "user-recording",
-          "reusedFrom": {
-            "catalog": "audio.json",
-            "cueId": "m01-s07-l009"
-          },
-          "textMatch": "exact",
-          "text": "Значит, будете федеративным округом."
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/5a04d1bbebd41581f32b3de9db6e6549c0dfacb0f0c5855521da330f19822b1b.mp3",
+          "name": "ElevenLabs_2026-11-10T08_55_54_comandorNig_gen_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 4.284063,
+          "text": "Уже!\nКак раз выезное голосование - проходите в буханку... "
         }
       },
       "field:raid-won": {
         "id": "field:raid-won",
         "speaker": "commander",
-        "text": "Сектор зачищен. Проверьте машины. Продолжаем операцию.",
+        "text": "Голосование закончено.\n112 процентов за!\nПроверьте машины может еще что найдем!?",
         "pauseAfter": 0.2,
         "sourceLine": 341,
         "recordingStatus": "Т",
@@ -3332,26 +3269,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/field-radio/raid-won.mp3",
-          "duration": 4.3624583333333335,
-          "leadingSilence": 0.24,
-          "trailingSilence": 0.15245833333333358,
-          "speaker": "commander",
-          "sha256": "0fd6f7d4bfd07211c9a571d39aa866a481d524ac922af9886c8dce8d95142fc7",
-          "bytes": 86736,
-          "origin": "user-recording",
-          "reusedFrom": {
-            "catalog": "field-radio/manifest.json",
-            "cueId": "raid-won"
-          },
-          "textMatch": "exact",
-          "text": "Сектор зачищен. Проверьте машины. Продолжаем операцию."
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/ec0adabee02e8fc1090679c0535e9cded6ef0c81eb132e28bb21c5cd1b637933.mp3",
+          "name": "ElevenLabs_2026-11-10T09_00_23_comandorNig_gen_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 6.608938,
+          "text": "Голосование закончено.\n112 процентов за!\nПроверьте машины может еще что найдем!?"
         }
       },
       "m01-s07-l010": {
         "id": "m01-s07-l010",
         "speaker": "radio",
-        "text": "Альфа, противник идентифицирован как местные вооружённые формирования. Условное наименование — «Отбросы».",
+        "text": "Альфа, выяснили, кто это. Местные называют их отбросами.",
         "pauseAfter": 0.2,
         "sourceLine": 349,
         "recordingStatus": "В",
@@ -3361,20 +3289,11 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio/m01-s07-l010.ogg",
-          "duration": 6.507333333333333,
-          "leadingSilence": 0.06,
-          "trailingSilence": 0.317333333333333,
-          "speaker": "radio",
-          "sha256": "6405a2bacaaf39dd50d3d02083d77267b31852c0a7786eb703452422aaf8f878",
-          "bytes": 32349,
-          "origin": "temporary-synthesis",
-          "reusedFrom": {
-            "catalog": "audio.json",
-            "cueId": "m01-s07-l010"
-          },
-          "textMatch": "exact",
-          "text": "Альфа, противник идентифицирован как местные вооружённые формирования. Условное наименование — «Отбросы»."
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/33b68facef4e461fa8ec728db0de26394240acf50cf9d4f3474d70eb886bd4aa.mp3",
+          "name": "ElevenLabs_2026-11-10T09_04_18_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 4.284063,
+          "text": "Альфа, выяснили, кто это. Местные называют их отбросами."
         }
       },
       "m01-s07-l011": {
@@ -3390,26 +3309,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/recordings/commander/m01-s07-l011.mp3",
-          "duration": 1.8024583333333333,
-          "leadingSilence": 0.23,
-          "trailingSilence": 0.3424583333333333,
-          "speaker": "commander",
-          "sha256": "cd0b338885b5f2fe2bfbe344b1be07d5fb7b678e8714f4ec97e01e7204bc5e74",
-          "bytes": 45776,
-          "origin": "user-recording",
-          "reusedFrom": {
-            "catalog": "audio.json",
-            "cueId": "m01-s07-l011"
-          },
-          "textMatch": "exact",
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/30505577193f7fda3ad7465299f8811a60a7860393fa778e96f227d571e9f7fd.mp3",
+          "name": "ElevenLabs_2026-11-10T09_04_45_comandorNig_gen_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 1.645688,
           "text": "Почему отбросы?"
         }
       },
       "m01-s07-l012": {
         "id": "m01-s07-l012",
         "speaker": "radio",
-        "text": "Разведка доложила, что проживают на свалках и используют мусор.",
+        "text": "На свалках живут. Тащат всё, что не прикручено.",
         "pauseAfter": 0.2,
         "sourceLine": 357,
         "recordingStatus": "В",
@@ -3419,20 +3329,11 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio/m01-s07-l012.ogg",
-          "duration": 4.0132916666666665,
-          "leadingSilence": 0.05,
-          "trailingSilence": 0.37329166666666636,
-          "speaker": "radio",
-          "sha256": "f12016b3bc01aef139bee4bedb4ca47511550b75d72dd4e7fe3393ca75fa2c9b",
-          "bytes": 20013,
-          "origin": "temporary-synthesis",
-          "reusedFrom": {
-            "catalog": "audio.json",
-            "cueId": "m01-s07-l012"
-          },
-          "textMatch": "exact",
-          "text": "Разведка доложила, что проживают на свалках и используют мусор."
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/9194b0bf5ba86d75a8f834f406888b6d7171beac137038411563f7b8a01138c8.mp3",
+          "name": "ElevenLabs_2026-11-10T09_05_14_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 3.47425,
+          "text": "На свалках живут. Тащат всё, что не прикручено."
         }
       },
       "m01-s07-l013": {
@@ -3448,26 +3349,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/recordings/commander/m01-s07-l013.mp3",
-          "duration": 1.0710416666666667,
-          "leadingSilence": 0.15,
-          "trailingSilence": 0.3910416666666666,
-          "speaker": "commander",
-          "sha256": "96e1aca567864bfc64d4f330d569135b527bdc226f9e9b569f86735f7e33cf8c",
-          "bytes": 34073,
-          "origin": "user-recording",
-          "reusedFrom": {
-            "catalog": "audio.json",
-            "cueId": "m01-s07-l013"
-          },
-          "textMatch": "exact",
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/478d298c3dce06436fc14ef178618f4dac6413dd6f17fd07a2892edd2e68d78b.mp3",
+          "name": "ElevenLabs_2026-11-10T09_05_41_comandorNig_gen_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 1.306063,
           "text": "А мы?"
         }
       },
       "m01-s07-l014": {
         "id": "m01-s07-l014",
         "speaker": "radio",
-        "text": "А мы — организованная структура.",
+        "text": "А мы цивилизацию восстанавливаем.",
         "pauseAfter": 0.2,
         "sourceLine": 369,
         "recordingStatus": "В",
@@ -3477,26 +3369,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio/m01-s07-l014.ogg",
-          "duration": 2.4230833333333335,
-          "leadingSilence": 0.06,
-          "trailingSilence": 0.25308333333333355,
-          "speaker": "radio",
-          "sha256": "f017765c61f7556a7b172090943070ceb3a598b0e1f9f21971b613f03e3e9af8",
-          "bytes": 12057,
-          "origin": "temporary-synthesis",
-          "reusedFrom": {
-            "catalog": "audio.json",
-            "cueId": "m01-s07-l014"
-          },
-          "textMatch": "exact",
-          "text": "А мы — организованная структура."
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/4e14be06b9b1155f9d172d2ad351ef622770b629d1241313303b233a4ca38308.mp3",
+          "name": "ElevenLabs_2026-11-10T09_10_57_Egor Gadzhiyev - Clear and Commanding_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 3.47425,
+          "text": "А мы цивилизацию восстанавливаем."
         }
       },
       "m01-s07-l016": {
         "id": "m01-s07-l016",
-        "speaker": "warrant",
-        "text": "У нас это склад называется.",
+        "speaker": "builder",
+        "text": "Нам и прикрученное надо. Дай отвёртку.",
         "pauseAfter": 0.2,
         "sourceLine": 373,
         "recordingStatus": "Н",
@@ -3506,17 +3389,11 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio-v2/m01-s07-l016.ogg",
-          "duration": 1.9035833333333334,
-          "leadingSilence": 0.03,
-          "trailingSilence": 0.36358333333333337,
-          "speaker": "warrant",
-          "sha256": "32c586582deacb1924e0d1a36db72ef7b583f87fcd22cf17f118375b99b3d58a",
-          "bytes": 9246,
-          "origin": "temporary-synthesis",
-          "generator": "local Piper + FFmpeg",
-          "voice": "dmitri",
-          "text": "У нас это склад называется."
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/afb6e8a76f185dc1fbef1d25b4570a58eb076c082e072c826af6459bafa18578.mp3",
+          "name": "ElevenLabs_2026-11-10T09_07_58_Alexandr Vlasov - Vibrant and Energetic_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 3.004063,
+          "text": "Нам и прикрученное надо. Дай отвёртку."
         }
       },
       "m01-v3-r21-l001": {
