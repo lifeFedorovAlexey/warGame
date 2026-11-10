@@ -1,4 +1,5 @@
 import {isInfantry} from './scav-unit-profiles.js';
+import {fieldEffects} from './field-modifications.js';
 // Game handling profiles in world units/second and radians. Top speed and
 // health still come from the existing unit specification. All safety probes
 // use these same acceleration/braking limits as the actual executor.
@@ -9,7 +10,14 @@ const modularKinds=new Set(['bukhanka','flamer','builder']),modularScale=.9;
 export const vehicleSizeScale=unit=>modularKinds.has(typeof unit==='string'?unit:unit.kind)?modularScale:1;
 const modular=Object.freeze({...standard,wheelbase:standard.wheelbase*modularScale});
 const light=Object.freeze({...modular,acceleration:36,braking:26,steeringLimit:.72,turnPenalty:.85,maneuverForward:17,maneuverReverse:11});
-export function vehicleDynamics(unit){return unit.kind==='bukhanka'?light:modularKinds.has(unit.kind)?modular:standard;}
+const loadedDynamics=new WeakMap();
+export function vehicleDynamics(unit){
+ const base=unit.kind==='bukhanka'?light:modularKinds.has(unit.kind)?modular:standard,effects=fieldEffects(unit);
+ if(!effects.massKg)return base;
+ const saved=loadedDynamics.get(unit);if(saved?.effects===effects&&saved.base===base)return saved.value;
+ const value={...base,acceleration:base.acceleration*effects.acceleration,braking:base.braking*effects.braking,steeringRate:base.steeringRate*effects.steeringRate,maneuverForward:base.maneuverForward*effects.speed,maneuverReverse:base.maneuverReverse*effects.speed};
+ loadedDynamics.set(unit,{base,effects,value});return value;
+}
 
 // Red matches the existing HP bar. Roll only when damage crosses that boundary.
 export const STEERING_DAMAGE={redFraction:.28,chance:.30};

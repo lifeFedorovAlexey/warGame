@@ -3,6 +3,7 @@ import {DesignPreview} from './design-preview.js';
 import {FIELD_RECIPES,ensureSalvage} from './vehicle-salvage.js';
 import {setButtonIcon} from '../assets/ui/icons.js';
 import {VEHICLE_PAINTS,vehiclePaint} from './vehicle-paint.js';
+import {modificationEffects,fieldRecipeSummary} from './field-modifications.js';
 
 const catalogue = {
   C01: {role:'wheeled', detail:'Полный привод', icon:'move', massKg:1120},
@@ -151,13 +152,16 @@ export class VehicleDesigner {
     if(this.salvageKey===key)return;this.salvageKey=key;this.salvageToggle.checked=state.enabled;
     this.salvageChoices.replaceChildren(...Object.entries(FIELD_RECIPES).map(([id,recipe])=>{
       const label=document.createElement('label'),input=document.createElement('input');input.type='checkbox';input.checked=state.wanted.includes(id);input.disabled=!state.enabled||!state.recipes.includes(id);
-      label.append(input,document.createTextNode(' '+recipe.name+' · +'+recipe.hpBonus+' HP'+(state.recipes.includes(id)?'':' · нет чертежа')));
+      label.append(input,document.createTextNode(' '+recipe.name+(state.recipes.includes(id)?'':' · нет чертежа')));label.title=fieldRecipeSummary(recipe);
       input.onchange=()=>{state.userConfigured=true;state.wanted=input.checked?[...new Set([...state.wanted,id])]:state.wanted.filter(key=>key!==id);this.paintSalvage();};return label;
     }));
   }
 
   paintChoices() {
+    this.paintChoicesRoot.parentElement.hidden=this.activeSlot!==4;
+    this.cards.hidden=this.activeSlot===4;
     for (const [index, tab] of this.tabs.entries()) {
+      if(index===4){tab.setAttribute('aria-pressed',String(this.activeSlot===4));setButtonIcon(tab,'paint-bucket','Окраска кузова');continue;}
       if(index===3){
         tab.setAttribute('aria-pressed',String(this.activeSlot===3));
         setButtonIcon(tab,'armor-upgrade','04 · Навесные модули');
@@ -169,6 +173,7 @@ export class VehicleDesigner {
       const partName = id ? this.componentInfo(id).name : '—';
       setButtonIcon(tab, ['wheels', 'body', 'turret-ring'][index], slotName + ' · ' + partName);
     }
+    if(this.activeSlot===4){this.filters.hidden=this.pages.hidden=true;this.paintFieldNote();return;}
     if(this.activeSlot===3)return this.paintFieldChoices();
     const index = this.activeSlot;
     const prefix = this.components.slice(0, index);
@@ -271,19 +276,20 @@ export class VehicleDesigner {
     const body = this.components[1] ? this.componentInfo(this.components[1]) : null;
     const masses = this.components.map(id => this.componentInfo(id).massKg);
     const total = masses.length && masses.every(Number.isFinite) ? masses.reduce((sum, mass) => sum + mass, 0) : 0;
-    const modifications=this.fieldPreview(),bonus=modifications.reduce((sum,r)=>sum+r.hpBonus,0);
+    const modifications=this.fieldPreview(),effects=modificationEffects(modifications,total||2005);
     const values = {
-      hp:spec ? spec.hp+bonus : null,
+      hp:spec ? spec.hp : null,
       cost:spec && String(spec.cost),
       time:spec && spec.seconds + ' с',
-      speed:spec && spec.speed + ' м/с',
+      speed:spec && new Intl.NumberFormat('ru-RU',{maximumFractionDigits:1}).format(spec.speed*effects.speed) + ' м/с',
       range:spec?.range ? spec.range + ' м' : null,
       vision:spec && spec.vision + ' м',
-      mass:total ? '≈ ' + tons.format(total / 1000) + ' т' : null,
-      armor:bonus?'Навесная · +'+bonus+' HP':body?.armor,
+      mass:total ? '≈ ' + tons.format((total+effects.massKg) / 1000) + ' т' : null,
+      armor:modifications.length?'Навесная':body?.armor,
     };
     for (const [key, value] of Object.entries(values)) this.panel.querySelector('[data-design-' + key + ']').textContent = value ?? '—';
-    this.panel.querySelector('[data-design-armor]').title = bonus?modifications.map(r=>r.name).join(', '):body?.armorDetail ?? '';
+    this.panel.querySelector('[data-design-armor]').title = modifications.length?modifications.map(r=>r.name+' · '+fieldRecipeSummary(r)).join('\n'):body?.armorDetail ?? '';
+    this.panel.querySelector('[data-design-mass]').title=effects.massKg?`Навеска: +${effects.massKg} кг · разгон −${((1-effects.acceleration)*100).toFixed(1)}% · торможение −${((1-effects.braking)*100).toFixed(1)}%`:'Без навесных деталей';
   }
 
   fieldChoices() {
@@ -300,7 +306,7 @@ export class VehicleDesigner {
       const button=document.createElement('button');button.type='button';button.className='design-part';
       button.dataset.designModification=recipe.id;
       button.setAttribute('aria-pressed',String(this.previewModules.has(recipe.id)));
-      setButtonIcon(button,recipe.icon??(recipe.id==='hood-guard'?'armor-plate':'wall'),recipe.name,'Показать на машине · +'+recipe.hpBonus+' HP');
+      setButtonIcon(button,recipe.icon??(recipe.id==='hood-guard'?'armor-plate':'wall'),recipe.name,fieldRecipeSummary(recipe));
       button.onclick=()=>{
         if(this.previewModules.has(recipe.id))this.previewModules.delete(recipe.id);else this.previewModules.add(recipe.id);
         this.paintFieldChoices();this.paintAssembly();
@@ -312,8 +318,8 @@ export class VehicleDesigner {
 
   paintFieldNote() {
     const modules=this.fieldPreview();
-    this.fieldNote.hidden=this.activeSlot!==3&&!modules.length;
-    this.fieldNote.textContent=modules.length?modules.map(r=>r.name+' +'+r.hpBonus+' HP').join(' · ')+'. Установка при подборе деталей.'
+    this.fieldNote.hidden=this.activeSlot!==3;
+    this.fieldNote.textContent=modules.length?'Навеска: '+modules.length+' · +'+modificationEffects(modules).massKg+' кг. Защита только в месте попадания. Масса снижает разгон и торможение. Установка при подборе деталей.'
       :this.fieldChoices().length?'Выберите модуль для осмотра на машине. Установка при подборе деталей.':'Нет доступных навесных модулей для этого корпуса.';
   }
 

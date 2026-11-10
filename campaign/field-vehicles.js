@@ -1,4 +1,5 @@
 import {mergeGeometries} from '../demo/vendor/utils/BufferGeometryUtils.js';
+import {hoodGeometry,tagSalvagePart} from './salvage-part-models.js';
 
 const commandMountHeight = 1.05;
 const commandPads = [['FL',-.65,1.45],['FR',.65,1.45],['RL',-.65,-1.45],['RR',.65,-1.45]];
@@ -160,7 +161,13 @@ export function createFieldVehicle(T, kind, kit, palette) {
     }
   }
   const floor=isCommand?1.09:.86;
-  profile(body,[[-2.015,floor],[1.94,floor],[1.94,1.19],[1.76,1.40],[.58,1.45],[-1.96,1.46]],1.70,paint);
+  if(isCommand)profile(body,[[-2.015,floor],[1.94,floor],[1.94,1.19],[1.76,1.40],[.58,1.45],[-1.96,1.46]],1.70,paint);
+  else{
+    profile(body,[[-2.015,floor],[.58,floor],[.58,1.45],[-1.96,1.46]],1.70,paint);
+    for(const x of [-.77,.77])profile(body,[[.58,floor],[1.94,floor],[1.94,1.19],[1.76,1.40],[.58,1.45]],.16,paint,x);
+    box(body,[.86,1.05,.27],[0,1.19,1.06],dark);
+    tagSalvagePart(T,kit.mesh(body,hoodGeometry(T),paint,[0,1.22,1.40],'donor_hood'),30);
+  }
   profile(body,[[.45,1.40],[.38,1.63],[.16,2.03],[-.68,2.09],[-.91,1.90],[-.95,1.43]],1.63,trim);
   profile(body,[[.40,1.56],[.20,1.97],[-.58,2.01],[-.75,1.93],[-.75,1.56]],1.66,glass);
   for(const x of [-.87,.87]){

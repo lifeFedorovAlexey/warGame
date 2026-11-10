@@ -31,14 +31,14 @@ try {
   await page.screenshot({path:folder+'/nii-shortcut.png'});
   await page.locator('#design-toggle').click();
   await page.locator('[data-design-slot="field"]').click();
-  assert.equal(await page.locator('[data-design-modification]').count(),2);
+  assert.equal(await page.locator('[data-design-modification]').count(),6);
   const baseHp=Number(await page.locator('[data-design-hp]').textContent());
   await page.locator('[data-design-modification="hood-guard"]').click();
-  assert.equal(Number(await page.locator('[data-design-hp]').textContent()),baseHp+120);
+  assert.equal(Number(await page.locator('[data-design-hp]').textContent()),baseHp);
   assert.deepEqual(await page.evaluate(()=>testPreview.modifications.map(n=>n.name)),['hood-guard']);
   await page.screenshot({path:folder+'/module-hood.png'});
   await page.locator('[data-design-modification="window-grille"]').click();
-  assert.equal(Number(await page.locator('[data-design-hp]').textContent()),baseHp+200);
+  assert.equal(Number(await page.locator('[data-design-hp]').textContent()),baseHp);
   assert.deepEqual(await page.evaluate(()=>testPreview.modifications.map(n=>n.name)),['hood-guard','window-grille']);
   await page.waitForTimeout(150);
   await page.screenshot({path:folder+'/modules-both.png'});
@@ -48,7 +48,7 @@ try {
   await page.locator('[data-design-explode]').click();
   await page.waitForTimeout(450);
   await page.locator('[data-design-modification="hood-guard"]').click();
-  assert.equal(Number(await page.locator('[data-design-hp]').textContent()),baseHp+80);
+  assert.equal(Number(await page.locator('[data-design-hp]').textContent()),baseHp);
   assert.deepEqual(await page.evaluate(()=>testPreview.modifications.map(n=>n.name)),['window-grille']);
   await page.screenshot({path:folder+'/module-grille.png'});
   await page.setViewportSize({width:390,height:844});
@@ -71,7 +71,7 @@ try {
     m.damage(loaded,130,null,hit);const destroyed={max:loaded.maxHp,detached:loaded.damage.parts[22].detached};
     c.select([loaded.id]);c.advance(0);return {migrated,again,destroyed};
   });
-  assert.deepEqual(hp.migrated,{hp:400,max:520});assert.deepEqual(hp.again,hp.migrated);assert.deepEqual(hp.destroyed,{max:400,detached:true});
+  assert.deepEqual(hp.migrated,{hp:200,max:320});assert.deepEqual(hp.again,hp.migrated);assert.deepEqual(hp.destroyed,{max:320,detached:true});
   const noThreat=await page.evaluate(()=>{
     const c=window.campaign,m=c.mission,w=c.world,p=w.field.gridToWorld(m.config.raidApproachGrid);
     m.state.flags.contact=true;m.state.flags.raidWon=false;m.explored.fill(1);m.visible.fill(1);c.select([]);c.advance(0);

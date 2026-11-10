@@ -40,11 +40,15 @@ export const VEHICLE_PARTS = {
   19:{name:'window_rear_side_r',material:'glass',detachable:true},
   20:{name:'window_cab_l',material:'glass',detachable:true},
   21:{name:'window_cab_r',material:'glass',detachable:true},
-  22:{name:'hood_guard',material:'metal',detachable:true,strength:120},
-  23:{name:'window_grille',material:'metal',detachable:true,strength:80},
+  22:{name:'hood_guard',material:'metal',detachable:true,strength:95},
+  23:{name:'window_grille',material:'metal',detachable:true,strength:55},
   24:{name:'cargo_rail_left',material:'metal',detachable:true,strength:75},
   25:{name:'cargo_rail_right',material:'metal',detachable:true,strength:75},
-  26:{name:'tube_bumper',material:'metal',detachable:true,strength:150},
+  26:{name:'tube_bumper',material:'metal',detachable:true,strength:125},
+  27:{name:'side_hood_left',material:'metal',detachable:true,strength:75},
+  28:{name:'side_hood_right',material:'metal',detachable:true,strength:75},
+  29:{name:'spare_wheel',material:'rubber',detachable:true,strength:100},
+  30:{name:'hood_panel',material:'metal',detachable:true,strength:65},
 };
 export const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
 export const normalize = v=>{const l=Math.hypot(...v)||1;return v.map(x=>x/l);};

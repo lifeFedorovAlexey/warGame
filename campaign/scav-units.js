@@ -1,4 +1,5 @@
 import {vehicleKit,batchRigidMeshes} from './field-vehicles.js';
+import {hoodGeometry} from './salvage-part-models.js';
 import {SCAV_PROFILES} from './scav-unit-profiles.js';
 
 // Civilian silhouettes, salvaged plates and dull paint match the field assets.
@@ -115,7 +116,10 @@ export function createScavUnit(T,kind) {
     const length=kind==='scav-zaporozhets'?3.72:7.30,width=kind==='scav-zaporozhets'?1.56:2.26;
     box(root,[width*.76,length,.19],[0,0,info.wheel+.17],m.dark);
     if(kind==='scav-zaporozhets'){
-      profile(root,[[-1.86,.52],[1.86,.52],[1.86,.82],[1.52,1.0],[-1.55,.97],[-1.86,.80]],1.55,m.paint);
+      profile(root,[[-1.86,.52],[1.86,.52],[1.86,.82],[-1.86,.80]],1.55,m.paint);
+      box(root,[1.55,2.46,.14],[0,-.57,.89],m.paint);
+      for(const x of [-.73,.73])box(root,[.10,1.12,.12],[x,1.27,.91],m.paint);
+      tagged(kit.mesh(root,hoodGeometry(T,1.32,1.05),m.paint,[0,1.27,.96],'donor_hood'),30);
       profile(root,[[-1.10,.94],[.90,.94],[.52,1.42],[-.68,1.45]],1.39,m.cream);
       for(const side of [-1,1]){
         profile(root,[[-.95,1.02],[.75,1.02],[.45,1.35],[-.65,1.37]],.025,m.glass,side*.706);
@@ -125,11 +129,12 @@ export function createScavUnit(T,kind) {
       }
       windshield(1.18,.76,1.19,.32,.40);lamps(.53,1.87,.79);
       box(root,[1.7,.14,.13],[0,1.94,.48],m.steel);
-      patch([.66,.64,.035],[-.31,1.18,1.01],-.11);
       gun=weapon([0,-.37,1.49]);
     }else if(kind==='scav-firetruck'){
       // ZIL-style hood/cab, water tank, lockers, hose reels and roof ladder.
-      profile(root,[[1.62,.78],[3.48,.78],[3.48,1.42],[3.30,1.54],[1.62,1.54]],1.82,m.paint);
+      profile(root,[[1.62,.78],[3.48,.78],[3.48,1.33],[1.62,1.33]],1.82,m.paint);
+      for(const x of [-.86,.86])box(root,[.10,1.86,.18],[x,2.55,1.42],m.paint);
+      tagged(kit.mesh(root,hoodGeometry(T,1.68,1.80),m.paint,[0,2.55,1.51],'donor_hood'),30);
       profile(root,[[.45,.88],[1.88,.88],[1.88,2.38],[1.55,2.57],[.45,2.57]],2.24,m.paint);
       windshield(1.90,1.91,2.10,.60);lamps(.68,3.51,1.22);
       box(root,[1.10,.08,.56],[0,3.50,1.17],m.dark);

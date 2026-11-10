@@ -1,6 +1,7 @@
 import {extractDamagePart} from './damage-geometry.js';
 import {vehiclePaint,vehiclePaintTint,isVehiclePaintMaterial} from './vehicle-paint.js';
 import {debrisLaunch} from './debris-motion.js';
+import {recoveredPaint,paintSalvageModel} from './salvage-paint.js';
 
 export function createDamageDebris(T,scene,field,scale,{activeLimit=24,capacity=64}={}){
   const root=new T.Group();root.name='damage_debris_pool';scene.add(root);
@@ -29,6 +30,7 @@ export function createDamageDebris(T,scene,field,scale,{activeLimit=24,capacity=
     if(vehicle){
       const tint=vehiclePaintTint(T,vehiclePaint(vehicle)),painted=new Set();
       part.root.traverse(node=>{const material=node.material;if(node.isMesh&&isVehiclePaintMaterial(material)&&!painted.has(material)){material.color.multiply(tint);painted.add(material);}});
+      if([27,28,30].includes(id))paintSalvageModel(part.root,recoveredPaint(vehicle,id));
     }
     clear(slot);slot.model=part.root;slot.age=0;slot.active=true;slot.serial=serial++;
     matrix.decompose(slot.model.position,slot.model.quaternion,slot.model.scale);

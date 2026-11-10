@@ -953,7 +953,7 @@ function events() {
     }
     if (event.type === 'navigation-command-rejected') toast('Новый маршрут недоступен · прежний приказ сохранён');
     if (event.type === 'unit-produced') toast((event.name ?? config.units[event.kind].name) + ' · готово к выезду');
-    if (event.type === 'field-modification') toast('Установлено · '+event.name+' · +'+event.hpBonus+' HP');
+    if (event.type === 'field-modification') toast('Установлено · '+event.name+' · +'+event.massKg+' кг');
     if (event.type === 'construction-refused') toast(event.reason);
     if (event.type === 'artifact-collected') toast('Артефакт доставлен в НИИ');
     if (event.type === 'camp-cleared') toast('Лагерь зачищен');

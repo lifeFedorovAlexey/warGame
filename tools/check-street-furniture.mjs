@@ -39,8 +39,8 @@ test('Fallen stock waits for its fall, requires a recipe and installs only once'
  m.state.time=item.readyAt+.1;m.state.salvage.recipes=[];updateSalvage(m);assert(!u.damage);
  m.state.salvage.recipes=['tube-bumper'];m.state.salvage.enabled=false;updateSalvage(m);assert(!u.damage);
  m.state.salvage.enabled=true;updateSalvage(m);assert(u.damage.parts[26].installed);
- assert.equal(u.maxHp,400);assert.equal(u.hp,400);assert.equal(m.state.salvage.items.length,0);
- updateSalvage(m);assert.equal(u.maxHp,400);assert.equal(Object.keys(m.state.streetFurniture).length,1);
+ assert.equal(u.maxHp,320);assert.equal(u.hp,320);assert.equal(m.state.salvage.items.length,0);
+ updateSalvage(m);assert.equal(u.maxHp,320);assert.equal(Object.keys(m.state.streetFurniture).length,1);
 });
 test('Stock expires while the broken lamp stays broken',()=>{
  const m=fixture();drive(m);updateStreetFurniture(m);m.state.time=SALVAGE_LIMITS.lifetime+1;updateSalvage(m);

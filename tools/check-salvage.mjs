@@ -23,7 +23,7 @@ test('Pickup respects disable, recipe, compatibility, ownership and settling',()
   m.state.salvage.recipes=['hood-guard'];u.kind='raider';updateSalvage(m);assert(!u.damage);
   u.kind='bukhanka';u.owner='scavs';updateSalvage(m);assert(!u.damage);
   u.owner='rai';u.hp=0;updateSalvage(m);assert(!u.damage);
-  u.hp=100;updateSalvage(m);assert(u.damage.parts[22].installed);assert.equal(u.hp,220);assert.equal(u.maxHp,440);assert.equal(m.state.salvage.items.length,0);
+  u.hp=100;updateSalvage(m);assert(u.damage.parts[22].installed);assert.equal(u.hp,100);assert.equal(u.maxHp,320);assert.equal(m.state.salvage.items.length,0);
 });
 test('Swept pickup survives saving, cannot duplicate an installed mod and consumes exactly once',()=>{
   const m=fixture(),item=drop(m);m.state.salvage.enabled=true;m.state.salvage.wanted=['hood-guard'];m.state.time=3;
@@ -37,26 +37,26 @@ test('Protection is local to a real installed guard and supports destruction',()
   const root=createFieldModification(T,'hood-guard');root.updateMatrixWorld(true);const binding=prepareDamageGeometry(T,root.children[0],'body'),collider=createDamageCollider(T,[binding]),state=createDamageState();
   assert.equal(collider.trace([0,5,1.47],[0,-1,0],state),null);
   state.parts[22]={installed:true,damage:0,detached:false};const hit=collider.trace([0,5,1.47],[0,-1,0],state);assert.equal(hit?.partId,22);
-  const unit={damage:state};assert.equal(armorMultiplier({...hit,type:'bullet'},unit),.65);assert.equal(armorMultiplier({...hit,type:'shell'},unit),1);assert.equal(armorMultiplier({partId:0,type:'bullet'},unit),1);
+  const unit={damage:state};assert.equal(armorMultiplier({...hit,type:'bullet'},unit),.82);assert.equal(armorMultiplier({...hit,type:'shell'},unit),1);assert.equal(armorMultiplier({partId:0,type:'bullet'},unit),1);
   applyDamageHit(state,{...hit,direction:[0,-1,0],power:140,type:'bullet'},VEHICLE_PARTS[22]);assert(state.parts[22].installed);assert.equal(collider.trace([0,5,1.47],[0,-1,0],state),null);
 });
-test('Module HP stacks once, survives loading, and replaces broken protection without growing the cap',()=>{
+test('Local protection never heals the hull; old whole-hull bonuses migrate once',()=>{
   const m=fixture(),item=drop(m),u={id:'receiver',kind:'bukhanka',owner:'rai',hp:100,maxHp:320,x:item.x,y:item.y};
   m.state.units=[u];m.state.time=3;updateSalvage(m);
-  assert.deepEqual([u.hp,u.maxHp,u.fieldHpBonus],[220,440,120]);
+  assert.deepEqual([u.hp,u.maxHp],[100,320]);
   drop(m,'second');m.state.time=6;updateSalvage(m);
-  assert.deepEqual([u.hp,u.maxHp,u.fieldHpBonus],[300,520,200]);
+  assert.deepEqual([u.hp,u.maxHp],[100,320]);
   syncFieldHp(m,u);assert.equal(u.maxHp-u.hp,220,'Installing steel does not repair existing hull damage');
   const loaded=JSON.parse(JSON.stringify(u));syncFieldHp(m,loaded);
   assert.deepEqual(loaded,u,'Loading an already counted bonus does not grant HP again');
-  const legacy=structuredClone(u);delete legacy.fieldHpBonus;legacy.hp=100;legacy.maxHp=320;
-  syncFieldHp(m,legacy);assert.deepEqual([legacy.hp,legacy.maxHp],[300,520]);
-  syncFieldHp(m,legacy);assert.deepEqual([legacy.hp,legacy.maxHp],[300,520],'Legacy migration is idempotent');
-  const hit={point:[0,2.2,1.6],normal:[0,1,0],direction:[0,-1,0],partId:22,type:'bullet',power:130};
-  applyDamageHit(u.damage,hit,VEHICLE_PARTS[22]);u.hp-=130*armorMultiplier(hit,u);const afterHit=u.hp;
-  syncFieldHp(m,u);assert.equal(u.maxHp,400);assert.equal(u.hp,afterHit,'Detachment must not deal the same damage twice');
+  const legacy=structuredClone(u);legacy.fieldHpBonus=200;legacy.hp=300;legacy.maxHp=520;
+  syncFieldHp(m,legacy);assert.deepEqual([legacy.hp,legacy.maxHp],[100,320]);
+  syncFieldHp(m,legacy);assert.deepEqual([legacy.hp,legacy.maxHp],[100,320],'Legacy migration is idempotent');
+  const hit={point:[0,2.2,1.6],normal:[0,1,0],direction:[0,-1,0],partId:22,type:'bullet',power:100};
+  applyDamageHit(u.damage,hit,VEHICLE_PARTS[22]);u.hp-=hit.power*armorMultiplier(hit,u);const afterHit=u.hp;
+  syncFieldHp(m,u);assert.equal(u.maxHp,320);assert.equal(u.hp,afterHit,'Detachment must not deal the same damage twice');
   drop(m,'replacement');m.state.time=9;updateSalvage(m);
-  assert.equal(u.maxHp,520);assert.equal(u.hp,afterHit+120);
+  assert.equal(u.maxHp,320);assert.equal(u.hp,afterHit);assert(!u.damage.parts[22].detached,'Replacement fitted without healing');
   u.hp=0;syncFieldHp(m,u);assert.equal(u.hp,0,'A bonus never resurrects a wreck');assert.equal(u.maxHp,320);
 });
 console.log(JSON.stringify({passed:tests.length,tests},null,2));

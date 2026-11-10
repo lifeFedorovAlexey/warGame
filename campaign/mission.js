@@ -1,3 +1,4 @@
+import {fieldUnitSpec} from './field-modifications.js';
 import {TerrainNavigator} from './navigation.js';
 import {waterTower} from './threat-guidance.js';
 import {checkBuildingPlacement} from './building-placement.js';
@@ -170,7 +171,7 @@ export class Mission{
  drainEffects(){return this.effects.splice(0);}
  cinematic(id){if(!this.state.seenCinematics.includes(id)&&!this.state.pendingCinematics.includes(id)){this.state.pendingCinematics.push(id);this.emit('cinematic',{chapter:id});}}
  finishCinematic(id){const index=this.state.pendingCinematics.indexOf(id);if(index>=0)this.state.pendingCinematics.splice(index,1);if(!this.state.seenCinematics.includes(id))this.state.seenCinematics.push(id);}
- unitSpec(unit){return this.config.units[unit.kind];}
+ unitSpec(unit){return fieldUnitSpec(unit,this.config.units[unit.kind]);}
  buildingSpec(building){return this.config.buildings[building.kind]??{name:'Лагерь отбросов',seconds:1,hp:750,vision:180,power:0};}
  entity(id){return this.state.units.find(item=>item.id===id&&item.hp>0)??this.state.buildings.find(item=>item.id===id&&item.hp>0);}
  addUnit(kind,owner,point,extra={}){const spec=this.config.units[kind],unit={id:this.id('u'),kind,owner,x:point.x,y:point.y,previousX:point.x,previousY:point.y,hp:spec.hp,maxHp:spec.hp,heading:0,path:[],task:null,cooldown:0,tool:0,foldTime:0,...extra};

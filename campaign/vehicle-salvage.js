@@ -1,5 +1,9 @@
 import {createDamageState,partMissing} from './damage-state.js';
 import {vehicleToWorld,vehiclePose,angleDelta} from './builder-kinematics.js';
+import {FIELD_RECIPES} from './field-modifications.js';
+import {SCAV_PROFILES} from './scav-unit-profiles.js';
+import {recoveredPaint,safeSalvageColor} from './salvage-paint.js';
+export {FIELD_RECIPES} from './field-modifications.js';
 
 export const SALVAGE_LIMITS={items:24,lifetime:240,settleSeconds:2,pickupMarginMetres:2.5,cellMetres:8};
 export function salvagePickupReach(scale=1){
@@ -7,15 +11,16 @@ export function salvagePickupReach(scale=1){
   return {side,front,radius:Math.hypot(side,front)};
 }
 // Original model attachments, in metres. These are part anchors, not wreck meshes.
-const modularStock={7:[0,2.25,.96],8:[0,-2.25,.96]};
-const raiderStock={7:[0,2.024,.85],8:[0,-2.02,.85],24:[-.84,-1.4,1.95],25:[.84,-1.4,1.95]};
-const stockFor=(mission,unit)=>unit.kind==='raider'?raiderStock:unit.kind!=='command'&&mission.config.units[unit.kind]?.components?.includes('B01')?modularStock:null;
+const wheelAnchors=(track,front,rear,height)=>({1:[-track,front,height],2:[track,front,height],3:[-track,rear,height],4:[track,rear,height]});
+const modularStock={...wheelAnchors(.86,1.35,-1.35,.435),7:[0,2.25,.96],8:[0,-2.25,.96]};
+const raiderStock={...wheelAnchors(.79,1.21,-1.29,.43),7:[0,2.024,.85],8:[0,-2.02,.85],24:[-.84,-1.4,1.95],25:[.84,-1.4,1.95],30:[0,1.22,1.43]};
+const scavStocks=Object.fromEntries(Object.entries(SCAV_PROFILES).filter(([,p])=>!p.infantry).map(([id,p])=>[id,{...wheelAnchors(p.track,p.front,p.rear,p.wheel),...(id==='scav-zaporozhets'?{30:[0,1.27,.99]}:id==='scav-firetruck'?{30:[0,2.55,1.54]}:{})}]));
+function stockFor(mission,unit){
+ const stock=unit.kind==='raider'?raiderStock:scavStocks[unit.kind]??(unit.kind!=='command'&&mission.config.units[unit.kind]?.components?.includes('B01')?modularStock:null);
+ if(!stock)return null;
+ return {...stock,...Object.fromEntries(Object.values(FIELD_RECIPES).filter(r=>unit.damage?.parts?.[r.part]?.installed).map(r=>[r.part,r.part===27?[-1.24,-.15,1.35]:r.part===28?[1.24,-.15,1.35]:r.part===29?[0,-2.55,1.55]:r.part===23?[0,2.05,2.16]:[0,2.3,1.3]]))};
+}
 export const canInstallRecipe=(mission,unit,recipe)=>unit.kind!=='command'&&!!mission.config.units[unit.kind]?.components?.includes(recipe.body);
-export const FIELD_RECIPES={
-  'hood-guard':{name:'Защита передка',part:22,stock:'guard-stock',body:'B01',strength:120,hpBonus:120,bulletMultiplier:.65},
-  'window-grille':{name:'Решётки лобовых стёкол',part:23,stock:'guard-stock',body:'B01',strength:80,hpBonus:80,bulletMultiplier:.75},
-  'tube-bumper':{name:'Трубчатый бампер',icon:'armor-upgrade',part:26,stock:'tube-stock',body:'B01',strength:150,hpBonus:80,bulletMultiplier:.8},
-};
 export function ensureSalvage(mission){
   const state=mission.state.salvage??={enabled:true,recipes:[...(mission.config.salvage?.initialRecipes??[])],wanted:Object.keys(FIELD_RECIPES),items:[],serial:0};
   // Previous saves had an implicit off default. Keep explicit user choices.
@@ -25,6 +30,13 @@ export function ensureSalvage(mission){
       state.recipes.push(id);if(!state.userConfigured&&!state.wanted.includes(id))state.wanted.push(id);
     }
     state.recipeVersion=1;
+  }
+  if(!state.attachmentVersion){
+    for(const id of ['side-hood-left','side-hood-right','spare-wheel']){
+      if(!state.recipes.includes(id))state.recipes.push(id);
+      if(!state.userConfigured&&!state.wanted.includes(id))state.wanted.push(id);
+    }
+    state.attachmentVersion=1;
   }
   return state;
 }
@@ -41,23 +53,18 @@ export function salvageRecipe(mission,unit,item){
 }
 export function syncFieldHp(mission,unit){
   const previous=unit.fieldHpBonus??0;
-  const bonus=unit.hp>0&&!unit.damage?.wreck?Object.values(FIELD_RECIPES)
-    .filter(recipe=>canInstallRecipe(mission,unit,recipe)&&modificationInstalled(unit,recipe.part))
-    .reduce((sum,recipe)=>sum+recipe.hpBonus,0):0;
-  if(bonus===previous)return;
-  const base=(unit.maxHp??mission.config.units[unit.kind]?.hp??unit.hp)-previous;
-  unit.maxHp=base+bonus;
-  // New steel adds its own HP, preserving existing hull damage. Losing a part
-  // lowers the cap; the hit already dealt damage and must not be charged twice.
-  if(unit.hp>0)unit.hp=Math.min(unit.maxHp,unit.hp+Math.max(0,bonus-previous));
-  unit.fieldHpBonus=bonus;
+  if(!previous)return;
+  // Strip the old whole-hull bonus once. Keep accumulated hull damage and
+  // never kill a living vehicle merely because the balance was updated.
+  unit.maxHp=Math.max(1,unit.maxHp-previous);
+  if(unit.hp>0)unit.hp=Math.max(1,Math.min(unit.maxHp,unit.hp-previous));
+  unit.fieldHpBonus=0;
 }
 export function salvageFromImpact(mission,unit,hit,result){
   if(!mission.state||!stockFor(mission,unit))return;
   const state=ensureSalvage(mission),ids=[...(result.detached?[result.partId]:[]),...result.secondaryFailures];
   for(const part of ids){
-    // Recover structural guards only. Glass, tyres and pulverised pieces have
-    // no usable stock. No chance roll tied to IDs or camera visibility.
+    // One physical detached part = one recoverable object. No ID/camera roll.
     const anchor=stockFor(mission,unit)[part];
     if(!anchor||hit.power>600||unit.damage.parts[part].salvageId)continue;
     const scale=mission.config.worldScale,pose=mission.field?vehiclePose(unit,mission.field,scale):{position:[unit.x,unit.y,0],heading:unit.heading??0,pitch:0,roll:0,scale};
@@ -66,12 +73,14 @@ export function salvageFromImpact(mission,unit,hit,result){
     const x=p[0]+outward[0]/length*scale*.8,y=p[1]+outward[1]/length*scale*.8;
     const id='scrap-'+(++state.serial);
     if(state.items.length>=SALVAGE_LIMITS.items)state.items.shift();
-    state.items.push({id,stock:'guard-stock',sourceKind:unit.kind,sourcePart:part,sourceUnit:unit.id,x,y,origin:p,bornAt:mission.state.time,heading:unit.heading??0,readyAt:mission.state.time+SALVAGE_LIMITS.settleSeconds,expiresAt:mission.state.time+SALVAGE_LIMITS.lifetime});
+    const installed=Object.values(FIELD_RECIPES).find(r=>r.part===part),stock=installed?.stock??(part===30?'hood-stock':part<=4?'wheel-stock':'guard-stock');
+    const paintColor=recoveredPaint(unit,part);
+    state.items.push({id,stock,paintColor,sourcePaint:unit.paint,sourceKind:unit.kind,sourcePart:part,sourceUnit:unit.id,x,y,origin:p,bornAt:mission.state.time,heading:unit.heading??0,readyAt:mission.state.time+SALVAGE_LIMITS.settleSeconds,expiresAt:mission.state.time+SALVAGE_LIMITS.lifetime});
     unit.damage.parts[part].salvageId=id;
   }
 }
 export function salvageFromWreck(mission,unit,hit){
-  const stock=stockFor(mission,unit);if(!stock||!unit.damage||!hit||hit.power>600||unit.damage.burn>.8)return;
+  const stock=stockFor(mission,unit);if(!stock||!unit.damage||unit.damage.salvageReleased||!hit||hit.power>600||unit.damage.burn>.8)return;
   // Loss of the frame releases the closest surviving reusable attachment to
   // the lethal contact. Preserve all earlier failures and the deformed body.
   const point=hit.restPoint??hit.point;
@@ -79,8 +88,13 @@ export function salvageFromWreck(mission,unit,hit){
   const candidates=Object.entries(stock).filter(([id])=>!partMissing(unit.damage,id));
   candidates.sort((a,b)=>Math.hypot(...a[1].map((v,k)=>v-point[k]))-Math.hypot(...b[1].map((v,k)=>v-point[k])));
   if(!candidates.length)return;
-  const part=Number(candidates[0][0]);unit.damage.parts[part]={...unit.damage.parts[part],damage:1,detached:true};unit.damage.revision++;
-  salvageFromImpact(mission,unit,hit,{detached:true,partId:part,secondaryFailures:[]});
+  unit.damage.salvageReleased=true;
+  // A lost frame can release its nearest fitting and one wheel/bonnet. Each
+  // item is removed from the actual donor; repeated destruction cannot clone it.
+  const chosen=candidates.slice(0,1),extra=candidates.find(([id])=>!chosen.some(([first])=>first===id)&&(Number(id)===30||Number(id)<=4));
+  if(extra)chosen.push(extra);
+  for(const [id] of chosen){const part=Number(id);unit.damage.parts[part]={...unit.damage.parts[part],damage:1,detached:true};unit.damage.revision++;
+    salvageFromImpact(mission,unit,hit,{detached:true,partId:part,secondaryFailures:[]});}
 }
 
 // Sweep the pickup area around the hull, including stock beside a wreck.
@@ -124,9 +138,9 @@ export function updateSalvage(mission){
         syncFieldHp(mission,unit);
         const damage=unit.damage??=createDamageState();damage.parts[recipe.part]={installed:true,detached:false,damage:0};damage.revision++;
         syncFieldHp(mission,unit);
-        (unit.fieldModifications??={})[recipe.id]={source:item.id,installedAt:now};consumed.add(item.id);
+        (unit.fieldModifications??={})[recipe.id]={source:item.id,installedAt:now,paintColor:safeSalvageColor(item.paintColor),sourceKind:item.sourceKind,sourcePart:item.sourcePart};consumed.add(item.id);
         if(unit.task?.salvageId===item.id){unit.task=null;unit.path=[];unit.driveSpeed=0;delete unit.detour;}
-        mission.emit?.('field-modification',{unit:unit.id,recipe:recipe.id,name:recipe.name,hpBonus:recipe.hpBonus,
+        mission.emit?.('field-modification',{unit:unit.id,recipe:recipe.id,name:recipe.name,hpBonus:0,massKg:recipe.massKg,
           item:item.id,pickupDistance:Math.hypot(unit.x-item.x,unit.y-item.y),pickupMarginMetres:SALVAGE_LIMITS.pickupMarginMetres});
       }
     }
@@ -134,9 +148,10 @@ export function updateSalvage(mission){
   if(consumed.size)state.items=state.items.filter(item=>!consumed.has(item.id));
 }
 export function armorMultiplier(hit,unit){
-  if(hit?.type!=='bullet')return 1;
+  if(!hit)return 1;
   const recipe=Object.values(FIELD_RECIPES).find(r=>r.part===hit.partId);
   // The contact was resolved against an installed guard before its durability
   // changed. The last hit receives protection; later rays hit exposed metal.
-  return recipe&&unit.damage?.parts?.[recipe.part]?.installed?recipe.bulletMultiplier:1;
+  if(!recipe||!unit.damage?.parts?.[recipe.part]?.installed)return 1;
+  return ({bullet:recipe.bulletMultiplier,collision:recipe.collisionMultiplier,fire:recipe.fireMultiplier}[hit.type])??1;
 }
