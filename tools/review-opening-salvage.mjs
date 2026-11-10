@@ -6,23 +6,38 @@ if(fs.existsSync('tools/.runtime-media/playwright'))process.env.PLAYWRIGHT_BROWS
 const {chromium}=require('C:/Users/Алексей/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
 const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true,args:['--use-angle=d3d11']});
 const results=[];
+const captureVideo=!process.argv.includes('--no-video');
+const openingOnly=process.argv.includes('--opening-only');
+const base=process.env.WARGAME_URL??'http://127.0.0.1:8766';
 try{
- for(const [name,viewport] of [['desktop',{width:1920,height:1080}],['narrow',{width:390,height:844}]]){
-  const context=await browser.newContext({viewport,...(name==='desktop'?{recordVideo:{dir:folder,size:{width:1280,height:720}}}:{})});
+ for(const [name,viewport] of [['desktop',{width:1920,height:1080}],['landscape',{width:844,height:390}],['compact-landscape',{width:667,height:375}],['narrow',{width:390,height:844}]]){
+  const context=await browser.newContext({viewport,...(name==='desktop'&&captureVideo?{recordVideo:{dir:folder,size:{width:1280,height:720}}}:{})});
   const page=await context.newPage(),errors=[];
-  page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});page.on('response',r=>{if(r.status()>=400)errors.push(r.status()+' '+r.url());});
+  page.on('pageerror',e=>{errors.push(e.message);console.error(e.message);});page.on('console',m=>{if(m.type()==='error'){errors.push(m.text());console.error(m.text(),m.location().url);}});page.on('response',r=>{if(r.status()>=400)errors.push(r.status()+' '+r.url());});
   await page.addInitScript(()=>localStorage.setItem('warGame.fieldRadio','off'));
-  await page.goto('http://127.0.0.1:8766/review/opening-salvage-'+Date.now()+'/campaign/');
-  await page.waitForFunction(()=>window.campaign?.ready,null,{timeout:90000});
+  await page.goto(base+'/review/opening-salvage-'+Date.now()+'/campaign/');
+  await page.waitForFunction(()=>window.campaign?.ready||document.getElementById('loading')?.dataset.phase==='error',null,{timeout:90000});
+  assert(await page.evaluate(()=>!!window.campaign?.ready),await page.locator('#loading-status').textContent());
   await page.evaluate(()=>{campaign.renderSuspended=true;});await page.locator('#begin').click();
+  await page.locator('[data-dream="skip"]').click();
   const initial=await page.evaluate(()=>{
    const {mission:m,world:w}=campaign,units=m.state.units.filter(u=>u.owner==='rai');
    window.openingReview={position:w.camera.position.clone(),target:w.controls.target.clone()};
    const x=units.reduce((sum,u)=>sum+u.x,0)/units.length,y=units[0].y,z=w.field.heightAt(x,y);
    w.controls.target.set(x,y,z);w.camera.position.set(x+15,y-160,z+(innerWidth<600?350:220));w.controls.update();w.update(m,new Set(),0);
-   return units.map(u=>({id:u.id,x:u.x,y:u.y,hp:u.hp}));
+   return units.map(u=>({id:u.id,x:u.x,y:u.y,hp:u.hp,maxHp:u.maxHp}));
   });
   assert.equal(new Set(initial.map(u=>u.y)).size,1);assert.equal(initial.length,5);
+  await page.evaluate(()=>{
+   const mesh=campaign.world.scene.getObjectByName('small_pines'),a=mesh.instanceMatrix.array,vertices=mesh.geometry.attributes.position;
+   let crown=0;for(let i=0;i<vertices.count;i++)crown=Math.max(crown,Math.hypot(vertices.getX(i),vertices.getY(i)));
+   const trees=Array.from({length:mesh.count},(_,i)=>({x:a[i*16+12],y:a[i*16+13],radius:crown*Math.hypot(a[i*16],a[i*16+1],a[i*16+2])}));
+   window.openingTrees={count:trees.length,minGap:Infinity};
+   function sample(){const m=campaign.mission,s=m.state.openingScene;
+    for(const id of [s.builderId,s.salvageDemo.vehicleId]){const u=m.entity(id);for(const t of trees)openingTrees.minGap=Math.min(openingTrees.minGap,Math.hypot(u.x-t.x,u.y-t.y)-t.radius-2.5*m.config.worldScale);}
+    if(!s.handedOver)requestAnimationFrame(sample);
+   }sample();
+  });
   await page.screenshot({path:folder+'/initial-row-'+name+'.png'});
   await page.evaluate(()=>{const w=campaign.world;w.camera.position.copy(openingReview.position);w.controls.target.copy(openingReview.target);w.controls.update();campaign.renderSuspended=false;});
   // No movement command is injected: the new-game opening runs on its own.
@@ -34,9 +49,10 @@ try{
    const m=campaign.mission,d=m.state.openingScene.salvageDemo,u=m.entity(d.vehicleId),p=campaign.world.screen(u,6);
    return {vehicle:u.id,hp:u.hp,maxHp:u.maxHp,installed:!!u.damage?.parts?.[26]?.installed,screen:p,width:innerWidth,height:innerHeight,broken:Object.keys(m.state.streetFurniture)};
   });
-  assert.equal(demo.vehicle,initial[0].id);assert(demo.installed);assert.equal(demo.maxHp,400);assert.equal(demo.broken.length,1);
+  assert.equal(demo.vehicle,initial[0].id);assert(demo.installed);assert.equal(demo.maxHp,initial[0].maxHp);assert.equal(demo.broken.length,1);
   assert(demo.screen.x>30&&demo.screen.x<demo.width-30&&demo.screen.y>70&&demo.screen.y<demo.height-150,'First vehicle is visible during the upgrade');
   await page.waitForFunction(()=>campaign.state.openingCamera==='drive');
+  await page.waitForFunction(()=>{const s=campaign.mission.state.openingScene,u=campaign.mission.entity(s.builderId),t=campaign.world.controls.target;return Math.hypot(t.x-u.x,t.y-u.y)<12;});
   await page.screenshot({path:folder+'/builder-drive-'+name+'.png'});
   await page.waitForFunction(()=>campaign.state.active,null,{timeout:60000});await page.locator('#pause').click();
   const final=await page.evaluate(()=>{
@@ -45,8 +61,10 @@ try{
   });
   assert(final.signCompleted&&final.handedOver);assert.equal(final.status,'done');assert.equal(final.broken.length,1);assert.equal(final.stock,0);
   assert(Math.hypot(final.car.x-final.park.x,final.car.y-final.park.y)<4);
+  const trees=await page.evaluate(()=>openingTrees);assert(trees.count>0&&trees.minGap>0,'Opening vehicles must not pass through pine crowns: '+JSON.stringify(trees));
   await page.screenshot({path:folder+'/handoff-'+name+'.png'});
-  const crossings=await page.evaluate(()=>{
+  let crossings=null;
+  if(!openingOnly){crossings=await page.evaluate(()=>{
    const {mission:m,world:w}=campaign,start=w.field.gridToWorld(m.config.startGrid),vertices=w.scene.getObjectByName('street_markings').geometry.attributes.position,rects=[];
    for(let i=0;i<vertices.count;i+=6){let xmin=Infinity,xmax=-Infinity,ymin=Infinity,ymax=-Infinity;for(let k=0;k<6;k++){const x=vertices.getX(i+k),y=vertices.getY(i+k);xmin=Math.min(xmin,x);xmax=Math.max(xmax,x);ymin=Math.min(ymin,y);ymax=Math.max(ymax,y);}rects.push({x:(xmin+xmax)/2,y:(ymin+ymax)/2,w:xmax-xmin,d:ymax-ymin});}
    const main=rects.filter(r=>Math.abs(r.x-(start.x-28))<.1&&Math.abs(r.y-start.y)<13);
@@ -57,12 +75,13 @@ try{
   assert.equal(crossings.main.length,6);assert.equal(crossings.branch.length,5);
   assert(crossings.main.every(r=>r.w>r.d*5),'Main street bars follow traffic');assert(crossings.branch.every(r=>r.d>r.w*5),'Branch street bars follow traffic');
   await page.screenshot({path:folder+'/crosswalks-'+name+'.png'});
+  }
   await page.evaluate(()=>localStorage.setItem('warGame.alpha.mission01.v1',campaign.mission.save()));
   await page.reload();await page.waitForFunction(()=>window.campaign?.ready,null,{timeout:90000});await page.locator('#resume-save').click();await page.waitForFunction(()=>campaign.state.active);
   assert.equal(await page.evaluate(()=>campaign.state.openingCamera),null,'Loading a completed opening never drives the first car again');
-  assert.deepEqual(errors,[]);results.push({viewport,initial,demo,final,crossings,errors});
+  assert.deepEqual(errors,[]);results.push({viewport,initial,demo,final,crossings,trees,errors});
   const video=page.video();await page.close();await context.close();if(video)await video.saveAs(folder+'/automatic-opening.webm');
  }
  fs.writeFileSync(folder+'/checks.json',JSON.stringify(results,null,2));
- console.log('PASS: one initial row, automatic first-car impact/pickup/bumper, builder continuation, clear crossing, correct zebra orientations, save restore, desktop and narrow');
+ console.log('PASS: initial row, automatic impact/pickup/bumper, builder continuation, parking, save restore, desktop and narrow'+(openingOnly?'':' and road crossings'));
 }finally{await browser.close();}

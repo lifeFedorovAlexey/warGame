@@ -3,8 +3,8 @@ import * as T from '../demo/vendor/three.module.js';
 import {OpeningCamera} from '../campaign/opening-camera.js';
 
 const camera=new T.PerspectiveCamera(43,1.6,1,10000);camera.position.set(80,-240,260);
-const target=new T.Vector3(0,80,0),controls={target,enabled:true,enableDamping:true,update(){camera.lookAt(target);}};
-const world={camera,controls,keys:new Set(['KeyW']),field:{heightAt(){return 0;}}};
+const target=new T.Vector3(0,80,0),controls={target,enabled:true,enableDamping:true,minDistance:110,maxPolarAngle:Math.PI*.42,update(){camera.lookAt(target);}};
+const world={camera,controls,minimumCameraHeight:40,keys:new Set(['KeyW']),field:{heightAt(){return 0;}}};
 const sign={id:'sign',x:0,y:180,groundHeight:0,rotation:-.6,progress:0,completed:false};
 const builder={id:'builder',x:0,y:0};
 const car={id:'first-car',x:-78,y:-60,heading:0};
@@ -14,6 +14,10 @@ assert.equal(controls.enabled,false);assert.equal(world.keys.size,0);
 for(let i=0;i<120;i++)sequence.update(1/60);
 assert.equal(sequence.phase,'salvage');assert(Math.abs(target.x-car.x)<3);
 mission.state.openingScene.salvageDemo.status='show';sequence.update(1/60);assert.equal(sequence.phase,'bumper');
+for(let i=0;i<120;i++)sequence.update(1/60);
+assert(camera.position.distanceTo(target)<55,'Bumper receives a close shot instead of the distant driving view');
+assert(target.y-car.y>9&&camera.position.y>target.y,'Camera looks into the front bumper from ahead of the car');
+assert(camera.position.z<35,'Bumper shot remains low enough to see the front rather than the roof');
 mission.state.openingScene.salvageDemo.status='done';
 for(let i=0;i<600;i++){builder.y=i*.15;sequence.update(1/60);}
 assert.equal(sequence.phase,'drive');assert(Math.abs(target.y-builder.y)<9,'Camera tracks the moving builder');
@@ -27,6 +31,7 @@ assert.equal(sequence.phase,'sign','Finishing construction alone does not hand o
 assert.equal(sequence.update(1/60,true),false);assert.equal(sequence.phase,'return');
 for(let i=0;i<180;i++)sequence.update(1/60,true);
 assert.equal(sequence.phase,'done');assert.equal(controls.enableDamping,true);
+assert.equal(controls.minDistance,110);assert.equal(controls.maxPolarAngle,Math.PI*.42);assert.equal(world.minimumCameraHeight,40);
 assert(camera.position.distanceTo(position)<1e-9);assert(target.distanceTo(look)<1e-9);
 camera.position.set(32,50,90);target.set(20,30,0);sequence.update(1,true);
 assert.deepEqual(camera.position.toArray(),[32,50,90],'Finished sequence cannot override the player camera');

@@ -1,4 +1,5 @@
 import {mergeGeometries} from '../demo/vendor/utils/BufferGeometryUtils.js';
+import {streetLampSites} from './street-furniture.js';
 
 // Visual-only vegetation and small stones; no entities, collision or picking.
 export function createDesertDressing(T,field,config,roads,dam,addFog){
@@ -39,6 +40,13 @@ export function createDesertDressing(T,field,config,roads,dam,addFog){
  const oil=config.oilFields.map(field.gridToWorld),camps=config.camps.map(c=>field.gridToWorld(c.grid)),sign=field.gridToWorld(config.openingSignGrid);
  const segments=[];for(const road of roads)for(let i=1;i<road.points.length;i++)segments.push({a:road.points[i-1],b:road.points[i],width:road.width??24});
  function roadDistance(p,{a,b,width}){const dx=b.x-a.x,dy=b.y-a.y,t=Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/(dx*dx+dy*dy||1)));return Math.hypot(p.x-a.x-dx*t,p.y-a.y-dy*t)-width/2;}
+ const start=field.gridToWorld(config.startGrid),row=config.initialRow??{offset:[-(config.initialUnits.length-1)*14,-60],spacing:28};
+ const first={x:start.x+row.offset[0],y:start.y+row.offset[1]},last={x:first.x+(config.initialUnits.length-1)*row.spacing,y:first.y};
+ const openingLamp=streetLampSites(field,config).find(p=>p.id===config.openingSalvageLamp);
+ // Keep both the starting formation and the builder's hillside approach clear.
+ const openingCorridors=[{a:first,b:last,width:44},{a:last,b:sign,width:44}];
+ if(openingLamp){const goal={x:openingLamp.x,y:openingLamp.y+2.3*config.worldScale};openingCorridors.push({a:first,b:goal,width:44},{a:goal,b:{x:goal.x,y:start.y+42},width:44});}
+ const openingClear=(p,r)=>openingCorridors.every(segment=>roadDistance(p,segment)>=r);
  function reserved(p,r){
   if(field.preparedPads?.some(({rect:[left,bottom,right,top]})=>p.x>left-r&&p.x<right+r&&p.y>bottom-r&&p.y<top+r))return true;
   if(Math.hypot(p.x-sign.x,p.y-sign.y)<30+r)return true;
@@ -49,7 +57,7 @@ export function createDesertDressing(T,field,config,roads,dam,addFog){
  }
  function add(target,x,y,size,rotation=0,stretch=[1,1,1]){target.poses.push({x,y,z:field.heightAt(x,y),s:stretch.map(v=>v*size),rotation});}
  function shrubs(x,y,size,a){add(scrub,x,y,size,a);add(bush,x,y,size,a);}
- function tree(x,y){const s=2.5+random()*1.5,a=random()*6.28;add(trunks,x,y,s,a);add(pine,x,y,s,a);}
+ function tree(x,y){const s=2.5+random()*1.5,a=random()*6.28;if(!openingClear({x,y},2.13*s))return;add(trunks,x,y,s,a);add(pine,x,y,s,a);}
  const bounds=config.finalMapBounds;
  for(let cluster=0;cluster<180;cluster++){
   const center=field.gridToWorld([bounds[0]+1+random()*(bounds[2]-bounds[0]-2),bounds[1]+1+random()*(bounds[3]-bounds[1]-2)]);
@@ -61,7 +69,6 @@ export function createDesertDressing(T,field,config,roads,dam,addFog){
   }
   if(cluster%3===0&&field.heightAt(center.x,center.y)>14&&!reserved(center,9))tree(center.x,center.y);
  }
- const start=field.gridToWorld(config.startGrid);
  // Small groups of pines on the flanks of the base; the centre stays open.
  for(const side of [-1,1])for(let group=0;group<9;group++){
   const cx=start.x-130+group*43,cy=start.y+side*(165+random()*55);
@@ -82,7 +89,7 @@ export function createDesertDressing(T,field,config,roads,dam,addFog){
  // trunk/crown instances, colours and scale; no geometry or per-frame work.
  function setAccessRoads(accessRoads){
   const access=[];for(const road of accessRoads)for(let i=1;i<road.points.length;i++)access.push({a:road.points[i-1],b:road.points[i],width:road.width});
-  const clear=(p,r)=>access.every(s=>roadDistance(p,s)>=r+3);
+  const clear=(p,r)=>openingClear(p,r)&&access.every(s=>roadDistance(p,s)>=r+3);
   let moved=0;
   pine.poses.forEach((p,i)=>{
    const radius=2.13*p.s[0];if(clear(p,radius))return;

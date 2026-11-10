@@ -25,7 +25,8 @@ export function advanceOpeningSalvage(mission,scene){
     }
     return false;
   }
-  if(now-demo.installedAt<1.2)return false;
+  // Hold the installed front bumper long enough for the close camera to settle.
+  if(now-demo.installedAt<(demo.skipped?1.2:4.2))return false;
   // Leave the crossing clear. The builder can start while the car parks beyond it.
   const start=mission.field.gridToWorld(mission.config.startGrid),park={x:demo.goal.x,y:start.y+42};
   const result=mission.order([vehicle.id],'move',park);

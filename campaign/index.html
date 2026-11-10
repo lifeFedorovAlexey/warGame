@@ -231,6 +231,10 @@
   </dialog>
   <div id="toast" role="status" hidden></div>
   <section id="welcome" class="main-menu is-loading" aria-busy="true" aria-label="Операция «Рай» — главное меню">
+    <picture class="loading-scenery" aria-hidden="true">
+      <source media="(max-aspect-ratio: 4/5)" srcset="../assets/menu/loading-wasteland-portrait.webp">
+      <img src="../assets/menu/loading-wasteland.webp" alt="" width="1672" height="941" fetchpriority="high" draggable="false">
+    </picture>
     <audio id="menu-music" data-src="../assets/music/wasteland-menu.mp3" loop preload="auto"></audio>
     <div class="menu-art" inert>
       <img src="../assets/menu/desert-main-menu.png" alt="" draggable="false">
@@ -249,7 +253,7 @@
       <button id="menu-settings-close" data-icon="previous" aria-label="Назад в меню"></button>
     </section>
     <div id="loading" class="startup-loading">
-      <h1 class="loading-title"><span>Операция</span>Рай</h1>
+      <h1 class="loading-title"><span>Операция</span><strong>Рай</strong></h1>
       <div class="loading-action">
         <button id="loading-sound" data-icon="play" aria-label="Открыть меню" aria-describedby="loading-status" disabled></button>
         <button id="loading-retry" data-icon="restart" aria-label="Повторить загрузку" hidden></button>

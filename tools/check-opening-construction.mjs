@@ -12,6 +12,7 @@ const base=createHeightfield(json('assets/maps/alpha/heightfield.json'));
 shapeMesaRims(base);const field=refineRoadHeightfield(base);applyRoadGrades(field,json('assets/maps/alpha/roads.json'));
 const mission=new Mission(config,field),energy=mission.state.energy;
 const initial=mission.state.units.filter(u=>u.owner==='rai');
+const initialMaxHp=initial[0].maxHp;
 assert.equal(new Set(initial.map(u=>u.y)).size,1,'All initial vehicles stand in one row');
 assert(initial.slice(1).every((u,i)=>u.x-initial[i].x===config.initialRow.spacing));
 const opening=startOpeningConstruction(mission),sign=mission.entity(opening.signId);
@@ -34,7 +35,7 @@ for(let i=0;i<900&&!sign.completed;i++){
 }
 assert(sign.completed,JSON.stringify({time:mission.state.time,sign,builder:mission.entity(opening.builderId)}));
 assert.deepEqual(Object.keys(mission.state.streetFurniture),[opening.salvageDemo.lampId],'Only the demonstrated pole is broken');
-assert.equal(opening.salvageDemo.status,'done');assert(initial[0].damage.parts[26].installed);assert.equal(initial[0].maxHp,400);
+assert.equal(opening.salvageDemo.status,'done');assert(initial[0].damage.parts[26].installed);assert.equal(initial[0].maxHp,initialMaxHp);
 assert(Math.hypot(initial[0].x-opening.salvageDemo.park.x,initial[0].y-opening.salvageDemo.park.y)<4,'The first car clears the road after pickup');
 assert(fallSave,'A real falling pole exists before it is collected');
 const duringFall=new Mission(config,field);duringFall.load(fallSave);restoreOpeningConstruction(duringFall);

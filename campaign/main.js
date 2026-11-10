@@ -287,7 +287,7 @@ async function start(restore = false) {
   resultShown = false;
   resultPrepared=false;
   radio.reset();
-  if(!restore)radio.director.beginStory(mission,{enabled:radio.enabled});
+  if(!restore)radio.director.beginStory(mission);
   if(!restore)startOpeningConstruction(mission);
   else restoreOpeningConstruction(mission);
   openingPlaying=!!mission.state.openingScene&&!mission.state.openingScene.handedOver;
@@ -313,7 +313,7 @@ async function start(restore = false) {
   await mainMenu.loading.finish();
   mainMenu.loading.hide();
   $('welcome').hidden = true;
-  if(!openingTelevision.start(mission,radio.director,{enabled:radio.enabled}))radio.consume(mission, performance.now());
+  if(!openingTelevision.start(mission,radio.director))radio.consume(mission, performance.now());
   if (restore) toast('Операция загружена');
   } catch(error) {mainMenu.error('Ошибка подготовки игры. '+error.message);}
   finally {loadingGame=false;last=performance.now();}
@@ -986,7 +986,6 @@ function frame(now) {
   if(!$('result').hidden){sound.update();return;}
   if(openingTelevision?.active){
     openingTelevision.update(dt);
-    world.update(mission,selected,dt,false,false);
     return;
   }
   if (designer?.visible) {
