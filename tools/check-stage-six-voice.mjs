@@ -72,7 +72,7 @@ try{
  await page.waitForFunction(()=>!!(campaign.state.openingPlaying||campaign.state.active)&&document.getElementById('welcome').hidden,null,{timeout:60000});
  if(battleReview)await page.locator('#pause').click();
  const screenshot=async name=>{
-  for(const [suffix,width,height] of [['desktop',1440,900],['narrow',390,844]]){
+  for(const [suffix,width,height] of [['desktop',1440,900],['mobile-landscape',844,390],['mobile-landscape-small',667,375]]){
    await page.setViewportSize({width,height});
    await page.screenshot({path:folder+'/'+name+'-'+suffix+'.png'});
    assert(!await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),'No horizontal overflow');
@@ -198,5 +198,5 @@ try{
  }
  assert.deepEqual(errors,[]);
  fs.writeFileSync(folder+'/verification.json',JSON.stringify({pass:true,draftRevision:edits.draftRevision,timeline,errors},null,2));
- console.log(battleReview?'PASS: '+sceneIds.join(' → ')+'; '+timeline.length+' full recordings, correct files/subtitles/portraits, desktop/narrow and scene gaps':'PASS: updated warrant line, two-line sign handoff, eight stage VI recordings, two real bunker milestones, audio completion, save/resume, no combat interruption, scene gaps and desktop/narrow screenshots');
+ console.log(battleReview?'PASS: '+sceneIds.join(' → ')+'; '+timeline.length+' full recordings, correct files/subtitles/portraits, desktop/mobile landscape and scene gaps':'PASS: updated warrant line, two-line sign handoff, eight stage VI recordings, two real bunker milestones, audio completion, save/resume, no combat interruption, scene gaps and desktop/mobile landscape screenshots');
 }finally{await browser.close();}
