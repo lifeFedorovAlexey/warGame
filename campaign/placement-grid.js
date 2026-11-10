@@ -35,6 +35,7 @@ export function createPlacementGrid(T,scene,field,config){
   const exits=nearby.filter(b=>b.hp>0).map(b=>buildingExit(b,mission.buildingSpec(b),config.worldScale)).filter(Boolean);
   const ownExit=buildingExit(place,config.buildings[kind],config.worldScale);if(ownExit)exits.push(ownExit);
   const oil=config.buildings[kind].requiresOil?[]:config.oilFields.map(g=>({...field.gridToWorld(g),halfWidth:config.worldScale*5+5,halfDepth:config.worldScale*5+5}));
+  const maxGrade=config.buildings[kind].maxBuildingGrade??config.maxBuildingGrade;
   const vertices=[],colors=[],segments=[],guides=[],edges=new Set();
   const point=(x,y)=>[x,y,field.heightAt(x,y)+1.1];
   function edge(a,b){const key=[...a,...b].join(',');if(edges.has(key))return;edges.add(key);segments.push(...point(...a),...point(...b));}
@@ -43,7 +44,7 @@ export function createPlacementGrid(T,scene,field,config){
    const x=col*step,y=row*step,tile={x:x+step/2,y:y+step/2,halfWidth:step/2,halfDepth:step/2};
    if(!mission.inBounds(tile.x,tile.y)||!mission.exploredAt(tile.x,tile.y))continue;
    edge([x,y],[x+step,y]);edge([x,y+step],[x+step,y+step]);edge([x,y],[x,y+step]);edge([x+step,y],[x+step,y+step]);
-   const slope=field.gradientAt(tile.x,tile.y),blocked=Math.hypot(slope.x,slope.y)>config.maxBuildingGrade
+   const slope=field.gradientAt(tile.x,tile.y),blocked=Math.hypot(slope.x,slope.y)>maxGrade
     ||nearby.some(b=>rectanglesOverlap(tile,b))||oil.some(b=>rectanglesOverlap(tile,b));
    const under=rectanglesOverlap(tile,place),reserved=exits.some(b=>rectanglesOverlap(tile,b));
    const color=under?(place.ok?green:red):blocked?red:reserved?amber:null;

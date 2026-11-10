@@ -3,12 +3,16 @@ import fs from 'node:fs';
 import {checkBuildingPlacement,buildingHalfSize,buildingExit,buildingRotation} from '../campaign/building-placement.js';
 import {Mission} from '../campaign/mission.js';
 import {createHeightfield} from '../demo/map-route.js';
+import {shapeMesaRims} from '../demo/mesa-shaping.js';
+import {refineRoadHeightfield} from '../demo/road-heightfield.js';
+import {applyRoadGrades} from '../demo/road-grading.js';
 const config=JSON.parse(fs.readFileSync('assets/campaign/alpha/mission01/gameplay.json','utf8'));
 const close=(a,b)=>assert(Math.abs(a-b)<1e-6,`${a} != ${b}`);
 function fixture(){
  const m={config:{...config,oilFields:[]},state:{buildings:[],research:{}},field:{heightAt:()=>0,gradientAt:()=>({x:0,y:0}),gridToWorld:([x,y])=>({x,y})},
   constructionUnlocked:()=>true,canSpend:()=>true,inBounds:(x,y)=>Math.abs(x)<1000&&Math.abs(y)<1000,exploredAt:()=>true,siteUnits:()=>[],buildingSpec:b=>config.buildings[b.kind]};
- m.nav={clearance:15,grid:(x,y)=>[Math.round(x/8),Math.round(y/8)],position:(x,y)=>({x:x*8,y:y*8}),
+ m.field.localRoads=[-200,200].map(y=>({kind:'street',width:30,points:[{x:-500,y},{x:500,y}]}));
+ m.nav={clearance:15,solids:[],terrainAllowed:()=>true,grid:(x,y)=>[Math.round(x/8),Math.round(y/8)],position:(x,y)=>({x:x*8,y:y*8}),
   allowed:(x,y)=>!m.state.buildings.some(b=>Math.abs(x*8-b.x)<b.halfWidth+15&&Math.abs(y*8-b.y)<b.halfDepth+15)};
  const add=(kind,x,y,rotation=0)=>{const [halfWidth,halfDepth]=buildingHalfSize(config.buildings[kind],config.worldScale,rotation),b={id:'b'+m.state.buildings.length,kind,x,y,rotation,hp:100,halfWidth,halfDepth};m.state.buildings.push(b);return b;};
  const place=(kind,x,y,angle=0,options)=>checkBuildingPlacement(m,kind,x,y,angle,options);
@@ -53,13 +57,27 @@ for(const rotation of [0,Math.PI/2,Math.PI,Math.PI*1.5]){
  const {m,place}=fixture();
  m.field.heightAt=(x,y)=>x*.07+Math.sin(y/8)*.15;m.field.gradientAt=(x,y)=>({x:.07,y:Math.cos(y/8)*.15/8});
  const gentle=place('generator',0,0);assert(gentle.ok,gentle.reason);assert(gentle.height>2.5/2,'The old unscaled relief limit would reject this site');
- m.field.heightAt=x=>x*.08;m.field.gradientAt=()=>({x:.08,y:0});
- assert.equal(place('factory',0,0).reason,'Слишком большой перепад высоты','Large foundations still cannot bridge a hillside');
+ m.field.heightAt=x=>x*.108+Math.sin(x/8)*.16;m.field.gradientAt=x=>({x:.108+Math.cos(x/8)*.02,y:0});
+ const factory=place('factory',0,0);
+ assert(factory.ok,factory.reason);close(factory.height,m.field.heightAt(63));
+ assert.equal(factory.accessRoads.length,2,'A cross slope still leaves two usable driveways');
+ assert.deepEqual(place('factory',factory.x,factory.y,factory.rotation,{snap:false}),factory);
+ assert.equal(place('generator',0,0).reason,'Слишком крутой склон','Small buildings keep their own grade limit');
+ assert.equal(place('factory',0,0,Math.PI/2).reason,'Слишком большой перепад высоты у ворот завода','Rotating the gates downhill is unsafe here');
+ m.field.heightAt=x=>x*.16;m.field.gradientAt=()=>({x:.16,y:0});
+ assert.equal(place('factory',0,0).reason,'Слишком большой перепад высоты','Footing depth is limited');
  m.field.heightAt=x=>x*.3;m.field.gradientAt=()=>({x:.3,y:0});
  assert.equal(place('generator',0,0).reason,'Слишком крутой склон');
+ assert.equal(place('factory',0,0).reason,'Слишком крутой склон');
+ m.field.heightAt=()=>0;m.field.gradientAt=(x,y)=>({x:x===31.5&&y===27?.5:0,y:0});
+ assert.equal(place('factory',0,0).reason,'Слишком крутой склон','A steep section inside the footprint also blocks placement');
 }
 {
- const field=createHeightfield(JSON.parse(fs.readFileSync('assets/maps/alpha/heightfield.json','utf8'))),m=new Mission(config,field),p=field.gridToWorld(config.startGrid);
+ const source=createHeightfield(JSON.parse(fs.readFileSync('assets/maps/alpha/heightfield.json','utf8')));
+ shapeMesaRims(source);
+ const field=refineRoadHeightfield(source);
+ applyRoadGrades(field,JSON.parse(fs.readFileSync('assets/maps/alpha/roads.json','utf8')));
+ const m=new Mission(config,field),p=field.gridToWorld(config.startGrid);
  m.explored.fill(255);m.state.energy=2400;let verified=false;
  search:for(let x=p.x-200;x<=p.x+200;x+=24)for(let y=p.y-200;y<=p.y+200;y+=24){
   const a=m.placement('bunker',x,y);if(!a.ok)continue;
@@ -72,4 +90,4 @@ for(const rotation of [0,Math.PI/2,Math.PI,Math.PI*1.5]){
  }
  assert(verified,'Adjacent structures remain buildable on the real map with builder access');
 }
-console.log('PASS: grid/free placement, edge alignment, zero gap without overlap, normalized rotation, factory exits in four orientations, oil reservations, builder access, consistent invalid previews, real terrain');
+console.log('PASS: grid/free placement, edge alignment, zero gap without overlap, normalized rotation, factory gates and slope limits, oil reservations, builder access, consistent invalid previews, real terrain');
