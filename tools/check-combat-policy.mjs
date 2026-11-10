@@ -119,12 +119,12 @@ for(const [retreat,damage] of [['light',70],['heavy',220]]){
  assert.deepEqual(combatPolicy(m.entity(a.id)),DEFAULT_COMBAT_POLICY,'old saves get defaults');
  checks.push('selection eligibility, validation, legacy save');
 }
-function withdrawalScene(response,busy=true){
+function withdrawalScene(response,busy=true,base={x:0,y:240}){
  const m=fixture();
- const factory=m.addStructure('factory','rai',{x:0,y:240},{completed:true,progress:1});
+ const factory=m.addStructure('factory','rai',base,{completed:true,progress:1});
  const car=unit(m),enemy=unit(m,'raider','scavs',0,-75);
  enemy.hp=enemy.maxHp=5000;
- const owner=busy?unit(m,'bukhanka','rai',0,159):null;
+ const owner=busy?unit(m,'bukhanka','rai',base.x,base.y-81):null;
  if(owner)owner.factoryVisit={garageVersion:2,factoryId:factory.id,phase:'gate',queued:0,slot:0};
  for(const x of [-17,0,17])unit(m,'bukhanka','rai',x,41);
  m.rebuildNavigation();
@@ -180,6 +180,26 @@ for(const response of ['return','ignore']){
  assert.equal(car.combatRetreat.phase,'cover');
  assert(Math.hypot(car.x,car.y)>20);
  checks.push('blocked approach under fire also triggers withdrawal with a free factory');
+}
+{
+ const {m,car,enemy,factory}=withdrawalScene('return',true,{x:240,y:0});
+ const initialDistance=Math.hypot(car.x-factory.x,car.y-factory.y);
+ tick(m,car);
+ const goal=car.combatRetreat.destination;
+ assert.equal(car.combatRetreat.phase,'cover');
+ assert(Math.hypot(goal.x-factory.x,goal.y-factory.y)<initialDistance,'Choose cover towards the base when a safe route exists');
+ for(let i=0;i<99;i++)tick(m,car);
+ const finalDistance=Math.hypot(car.x-factory.x,car.y-factory.y);
+ assert(finalDistance<initialDistance);
+ assert(Math.hypot(car.x-enemy.x,car.y-enemy.y)>m.unitSpec(enemy).range);
+ checks.push(`withdrawal towards lateral base (${initialDistance.toFixed(1)} → ${finalDistance.toFixed(1)} world units)`);
+}
+{
+ const {m,car,enemy}=withdrawalScene('return',true,{x:0,y:-300});
+ for(let i=0;i<100;i++)tick(m,car);
+ assert.equal(car.combatRetreat.phase,'cover');
+ assert(car.y>0&&Math.hypot(car.x-enemy.x,car.y-enemy.y)>m.unitSpec(enemy).range);
+ checks.push('an enemy between the car and the base keeps the safe escape available');
 }
 {
  const {m,car}=withdrawalScene('return');
