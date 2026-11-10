@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {lockRenderScale,verifyFrameConditions} from './frame-benchmark-conditions.mjs';
+let ratio=.86;const world={fixedRenderScale:false,renderer:{getPixelRatio:()=>ratio,setPixelRatio:value=>{ratio=value;}}};
+lockRenderScale(world,1);assert.equal(ratio,1);assert.equal(world.fixedRenderScale,true);
+const warmup={locked:true,frames:300,requestedFrames:300,simStart:0,simEnd:0,scales:[1,1,1],wallMs:5000},frames=[{renderScale:1},{renderScale:1}];
+assert(verifyFrameConditions(frames,warmup).allFramesVerified);
+assert.throws(()=>verifyFrameConditions([{renderScale:.86}],warmup),/scale changed/);
+assert.throws(()=>verifyFrameConditions(frames,{...warmup,simEnd:.1}),/paused frames/);
+assert.throws(()=>verifyFrameConditions(frames,{...warmup,frames:299}),/paused frames/);
+assert.throws(()=>verifyFrameConditions(frames,{...warmup,scales:[.86,1]}),/scale changed/);
+console.log('PASS: lock sets actual pixel ratio; scale drift, simulation advance and unequal warmup rejected');
