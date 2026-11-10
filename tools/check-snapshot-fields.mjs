@@ -7,6 +7,7 @@ const m=fixture(),planner=new TrafficPlanner();
 const units=Array.from({length:24},(_,i)=>m.addUnit(i%3?'bukhanka':'builder',i%5?'rai':'scav',{x:(i%6)*30,y:Math.floor(i/6)*40}));
 const a=units[0],b=units[1],point={x:150,y:160};
 Object.assign(a,{hp:50,maxHp:100,heading:.2,trafficOnScreen:true,commandRevision:3,
+ factoryVisit:{phase:'approach'},trafficPassThrough:{revision:3,pairs:[{id:b.id,startedAt:1,crossing:false}]},
  pendingOrder:{type:'move',goal:point},path:[point],task:{type:'move',...point},routeOrder:{destination:point},
  reverseDebt:1,driveSpeed:2,reversing:false,steering:.1,steeringFault:{since:1},
  damage:{wreck:false,parts:Object.fromEntries([1,2,3,4].map(i=>[i,{detached:false}]))},
@@ -39,12 +40,13 @@ for(const [field,value] of Object.entries({id:'renamed',x:5,y:7,heading:.8,kind:
  commandRevision:4,pendingOrder:null,path:[],task:null,routeOrder:null,reverseDebt:2,driveSpeed:3,reversing:true,steering:.3,
  steeringFault:{since:2},detour:null,traffic:null,trafficHold:null,passage:null,passingLane:null,yieldReturn:null,jointTraffic:null,
  cycleContinuation:null,tool:'working',foldTime:2,builderWorking:true,combatPolicy:{retreat:'heavy'},retreatSuppressed:true,
- combatRetreat:null,combatDeployment:null,combatResume:null,damage:{wreck:true,parts:{}}}))add(field,value);
+ combatRetreat:null,combatDeployment:null,combatResume:null,damage:{wreck:true,parts:{}},
+ factoryVisit:{phase:'entering'},trafficPassThrough:null}))add(field,value);
 assert.deepEqual([...reads].sort(),[...new Set(cases.map(c=>c.field))].sort(),'Every key dependency must have a sensitivity case');
 // Deterministic nested mutations exercise JSON-shaped paths/reservations,
 // including every wheel and all coordinates, not just two empty bodies.
 let seed=0x51a7;const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/2**32;};
-const nested=['pendingOrder','path','task','routeOrder','steeringFault','detour','traffic','trafficHold','passage','passingLane','yieldReturn','jointTraffic','cycleContinuation','combatPolicy','combatRetreat','combatDeployment','combatResume','damage'];
+const nested=['pendingOrder','path','task','routeOrder','steeringFault','detour','traffic','trafficHold','passage','passingLane','yieldReturn','jointTraffic','cycleContinuation','combatPolicy','combatRetreat','combatDeployment','combatResume','damage','factoryVisit','trafficPassThrough'];
 function leaves(value,path=[]){return value&&typeof value==='object'?Object.entries(value).flatMap(([k,v])=>leaves(v,[...path,k])):[path];}
 for(const field of nested)for(const path of leaves(baseline[field])){
  if(field==='detour'&&path[0]==='blocked'||field==='combatRetreat'&&path[0]==='threat')continue;

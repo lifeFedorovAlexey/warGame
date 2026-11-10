@@ -3,7 +3,7 @@ import {UnitSpatialIndex} from './unit-spatial-index.js';
 // A search owns this buffer until disposal. No render damage cage, decals,
 // economy, dialogue, salvage or mission history belongs to a traffic proof.
 const unitFields=('id kind owner hp maxHp x y heading path task routeOrder commandRevision pendingOrder '+
- 'driveSpeed reversing steering steeringRequested steeringClock steeringFault wheelDistance trafficOnScreen '+
+ 'driveSpeed reversing steering steeringRequested steeringClock steeringFault wheelDistance trafficOnScreen trafficPassThrough '+
  'detour traffic trafficHold driveWatch reverseDebt failedArcs passage passingLane yieldReturn jointTraffic '+
  'cycleContinuation trafficRecoveryUntil terrainEscape navigation tool foldTime builderWorking '+
  'combatPolicy combatRetreat retreatSuppressed combatDeployment combatResume factoryVisit overlapRecovery '+

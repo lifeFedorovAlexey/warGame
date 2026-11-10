@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {Mission} from '../campaign/mission.js';
-import {vehicleClearance} from '../campaign/vehicle-collision.js';
+import {trafficCollisionRequired,vehicleClearance} from '../campaign/vehicle-collision.js';
 import {factoryPoint,setFactoryPriority,insideFactory,factoryPriority} from '../campaign/factory-garage.js';
 function progressMission(){
  const config=JSON.parse(fs.readFileSync('assets/campaign/alpha/mission01/gameplay.json','utf8'));
@@ -15,7 +15,8 @@ function step(m,cars,seconds=.1){
  const visible=cars.filter(u=>u.hp>0&&!insideFactory(u));
  assert(visible.filter(u=>['gate','entering'].includes(u.factoryVisit?.phase)).length<=1,'One vehicle owns the entrance');
  assert(visible.filter(u=>['leaving','departure'].includes(u.factoryVisit?.phase)).length<=1,'One vehicle owns the exit');
- for(let i=0;i<visible.length;i++)for(let j=0;j<i;j++)assert(vehicleClearance(visible[i],visible[j],m.config.worldScale,m.field)>0,'Cars outside never overlap');
+ for(let i=0;i<visible.length;i++)for(let j=0;j<i;j++)if(trafficCollisionRequired(visible[i],visible[j]))
+  assert(vehicleClearance(visible[i],visible[j],m.config.worldScale,m.field)>0,'Cars outside can overlap only with an active exemption');
 }
 const m=progressMission();m.state.energy=2000;
 const f=m.addStructure('factory','rai',{x:0,y:0},{completed:true,progress:1});
@@ -111,4 +112,4 @@ for(const [i,u] of evac.entries()){Object.assign(u,factoryPoint(destroyed,df,0,-
 destroyed.state.buildings=[];destroyed.rebuildNavigation();
 for(let i=0;i<1000&&evac.some(u=>u.factoryVisit);i++)step(destroyed,evac);
 assert(evac.every(u=>!u.factoryVisit),'Destroyed factory releases all stored vehicles');
-console.log('PASS: direct entry for all cars, internal queue, repair/production priority, save restore, eight rotated arrivals without overlap, serialized exit, destruction evacuation');
+console.log('PASS: direct entry for all cars, internal queue, repair/production priority, save restore, eight rotated arrivals, serialized exit, destruction evacuation');

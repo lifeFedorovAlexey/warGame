@@ -1,5 +1,5 @@
 import {navigationDecision} from './navigation-state.js';
-import {vehicleEnvelope,vehicleSweep,clearOfVehicles,vehicleGroundSafe,footprintSupport} from './vehicle-collision.js';
+import {vehicleEnvelope,vehicleSweep,clearOfVehicles,vehicleGroundSafe,footprintSupport,trafficCollisionRequired,vehicleClearance} from './vehicle-collision.js';
 import {angleDelta} from './builder-kinematics.js';
 import {vehicleDynamics} from './vehicle-dynamics.js';
 import {CommandPlanner} from './command-planner.js';
@@ -150,7 +150,15 @@ export function tryEnterFactory(m,u,f,blockers){
  const bay=factoryPoint(m,f,0,-3),scale=m.config.worldScale;
  if(Math.hypot(u.x-bay.x,u.y-bay.y)>scale*26
   ||factoryVisitors(m,f).some(other=>other.factoryVisit.phase==='entering'))return false;
- const corridor=checkedEntryCorridor(m,u,f,bay,blockers);
+ // Prove the approach with the collision policy of the doorway transfer.
+ // A jam exemption can be active on either of the cars still outside.
+ const entering={...u,factoryVisit:{phase:'entering'}};
+ const skin=scale*.055;
+ const overlapping=m.state.units.find(other=>other!==u&&other.hp>0
+  &&trafficCollisionRequired(entering,other)&&!trafficCollisionRequired(u,other)
+  &&vehicleClearance(u,other,scale,m.field,skin)<skin);
+ if(overlapping){blockers?.add(overlapping);return false;}
+ const corridor=checkedEntryCorridor(m,entering,f,bay,blockers);
  if(!corridor)return false;
  visit.phase='entering';visit.entryHeading=corridor[1].to.heading;visit.entryCorridor=corridor;
  f.garageGate=u.id;resetDrive(u);invalidateTrafficCorridors(m);
