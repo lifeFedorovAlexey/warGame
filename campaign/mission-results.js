@@ -107,7 +107,7 @@ export class MissionResultsView{
  pick(e){
   const box=this.canvas.getBoundingClientRect(),x=e.clientX-box.left,y=e.clientY-box.top;
   let found=-1,score=Infinity;
-  for(const g of this.scene.hitAreas??[]){const distance=Math.hypot((x-g.x)/Math.max(14,g.size*.32),(y-(g.y-g.size*.55))/Math.max(22,g.size*.55));if(distance<=1&&distance<score){found=g.index;score=distance;}}
+  for(const g of this.scene.hitAreas??[]){const distance=Math.hypot((x-g.x)/Math.max(14,g.size*.34),(y-(g.y-g.size*.37))/Math.max(22,g.size*.55));if(distance<=1&&distance<score){found=g.index;score=distance;}}
   this.inspect(found);
  }
  inspect(index){

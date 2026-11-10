@@ -23,6 +23,12 @@ export const orthodoxCrossBeams=Object.freeze([
  {x:0,y:25,z:4,w:31,h:5.4,d:5,angle:-Math.PI/9},
 ]);
 const polygon=(ctx,pts)=>{ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();};
+function texturedTriangle(ctx,image,s,d){
+ const du1=s[1].x-s[0].x,dv1=s[1].y-s[0].y,du2=s[2].x-s[0].x,dv2=s[2].y-s[0].y,det=du1*dv2-du2*dv1;
+ const dx1=d[1].x-d[0].x,dy1=d[1].y-d[0].y,dx2=d[2].x-d[0].x,dy2=d[2].y-d[0].y;
+ const a=(dx1*dv2-dx2*dv1)/det,b=(dy1*dv2-dy2*dv1)/det,c=(dx2*du1-dx1*du2)/det,e=(dy2*du1-dy1*du2)/det;
+ ctx.save();polygon(ctx,d);ctx.clip();ctx.transform(a,b,c,e,d[0].x-a*s[0].x-c*s[0].y,d[0].y-b*s[0].x-e*s[0].y);ctx.drawImage(image,0,0);ctx.restore();
+}
 function crossFaces(yaw,seed){
  const cs=Math.cos(yaw),sn=Math.sin(yaw),project=([x,y,z])=>({x:x*cs+z*sn,y:-y+(z*cs-x*sn)*.20,depth:z*cs-x*sn});
  const faces=[];
@@ -45,11 +51,12 @@ function crossFaces(yaw,seed){
 }
 function shadow(ctx,g,art){
  if(g.zone==='hill'){
-  ctx.save();ctx.translate(g.x,g.y-g.size*.024);ctx.fillStyle='#17120f38';ctx.shadowColor='#17120f55';ctx.shadowBlur=Math.max(1,g.size*.055);
-  ctx.beginPath();ctx.ellipse(0,0,g.size*.32,g.size*.047,0,0,tau);ctx.fill();ctx.restore();
+  const q=g.groundQuad;ctx.save();ctx.fillStyle='#17120f38';ctx.shadowColor='#17120f55';ctx.shadowBlur=Math.max(1,g.size*.035);
+  ctx.transform(q[1].x-q[0].x,q[1].y-q[0].y,q[3].x-q[0].x,q[3].y-q[0].y,q[0].x,q[0].y);
+  ctx.beginPath();ctx.ellipse(.5,.5,.39,.39,0,0,tau);ctx.fill();ctx.restore();
  }
  const away=Math.max(-.9,Math.min(.9,(g.x-(art.ox+art.iw*.75))/(art.iw*.33)));
- const {x,y,size,yaw}=g;ctx.save();ctx.translate(x,y-size*.10);ctx.scale(size*.87/100,size*.87/100);
+ const {x,y,size,yaw}=g;ctx.save();ctx.translate(x,y);ctx.scale(size*.83/100,size*.83/100);
  ctx.fillStyle='#17120f30';ctx.shadowColor='#17120f35';ctx.shadowBlur=3.5;
  for(const face of crossFaces(yaw,g.index).filter(f=>f.light===.40)){
   polygon(ctx,face.points.map(p=>({x:p.x-p.y*away,y:-p.y*.24})));ctx.fill();
@@ -126,6 +133,12 @@ export class MemorialScene{
   this.graveSprites=new WeakMap();
   this.image=new Image();this.image.src='../assets/campaign/personnel/memorial-hill-calm-v4.png';this.image.onload=()=>this.resize();
   this.graveImage=new Image();this.graveImage.src='../assets/campaign/personnel/grave-private-v2.png';this.graveImage.onload=()=>this.resize();
+  this.soilImage=new Image();this.soilImage.src='../assets/campaign/personnel/grave-soil-topdown.png';this.soilImage.onload=()=>{
+   const soil=this.soilSprite=document.createElement('canvas');soil.width=soil.height=256;const ctx=soil.getContext('2d');
+   ctx.filter='saturate(.65) brightness(.60)';ctx.drawImage(this.soilImage,0,0,256,256);ctx.filter='none';
+   const edge=ctx.createRadialGradient(128,128,72,128,128,114);edge.addColorStop(0,'#fff');edge.addColorStop(1,'#fff0');
+   ctx.globalCompositeOperation='destination-in';ctx.fillStyle=edge;ctx.fillRect(0,0,256,256);this.resize();
+  };this.soilImage.onerror=()=>{this.soilFailed=true;this.draw();};
   this.graveArt=new MemorialGraveArt(()=>this.resize());
   this.flagImage=new Image();this.flagImage.src='../assets/campaign/personnel/rai-flag-cloth.png';this.flagImage.onload=()=>{
    this.flagTexture=document.createElement('canvas');this.flagTexture.width=this.flagImage.width;this.flagTexture.height=this.flagImage.height;
@@ -177,42 +190,41 @@ export class MemorialScene{
   if(selected)this.drawGrave(ctx,selected,true);
   this.birds(ctx,w,h,t);
   this.frameCount++;this.canvas.dataset.memorialFrames=String(this.frameCount);this.canvas.dataset.memorialGraves=String(this.graves.length);
-  const art=this.graveArt.status(this.graves);this.canvas.dataset.memorialArtReady=String(art.ready);this.canvas.dataset.memorialArtErrors=art.failed.join(',');
+  const art=this.graveArt.status(this.graves);this.canvas.dataset.memorialArtReady=String(art.ready&&!!this.soilSprite);this.canvas.dataset.memorialArtErrors=[...art.failed,...(this.soilFailed?['soil-topdown']:[])].join(',');
  }
  drawGrave(ctx,g,active=false){
   const source=this.graveArt.get(g.soldier)??this.graveImage;
-  let image=this.graveSprites.get(source);
-  if(!image){
-   image=document.createElement('canvas');const scale=512/Math.max(source.width,source.height);
-   image.width=Math.round(source.width*scale);image.height=Math.round(source.height*scale);
-   const sprite=image.getContext('2d'),split=Math.floor(image.height*.80);
-   // Broaden the round earth mound gradually, keeping the cross and its
-   // masonry proportions intact. Source art and casualty records stay intact.
-   sprite.drawImage(source,0,0,source.width,split/scale,0,0,image.width,split);
-   for(let y=split;y<image.height;y+=2){
-    const h=Math.min(2,image.height-y),t=Math.min(1,(y/image.height-.80)/.14),spread=1+.28*t*t*(3-2*t),width=image.width*spread;
-    sprite.drawImage(source,0,y/scale,source.width,h/scale,(image.width-width)/2,y,width,h);
-   }
-   // Ground bounce is weaker on the front of the mound. Let its lowest
-   // soil edge settle into the terrain instead of reading as a bright cutout.
-   const groundShade=sprite.createLinearGradient(0,image.height*.78,0,image.height);
-   groundShade.addColorStop(0,'#211a1400');groundShade.addColorStop(.45,'#211a1418');groundShade.addColorStop(1,'#211a1470');
-   sprite.globalCompositeOperation='source-atop';sprite.fillStyle=groundShade;sprite.fillRect(0,image.height*.78,image.width,image.height*.22);
-   const groundEdge=sprite.createLinearGradient(0,image.height*.96,0,image.height);
-   groundEdge.addColorStop(0,'#fff');groundEdge.addColorStop(1,'#fff0');
-   sprite.globalCompositeOperation='destination-in';sprite.fillStyle=groundEdge;sprite.fillRect(0,0,image.width,image.height);
-   this.graveSprites.set(source,image);
+  let sprite=this.graveSprites.get(source);
+  if(!sprite){
+   const appearance=g.appearance??graveAppearance(g.soldier),split=appearance.material==='wood'?.81:.86;
+   const scale=512/Math.max(source.width,source.height),w=Math.round(source.width*scale),h=Math.round(source.height*scale),bodyHeight=Math.round(h*split);
+   const body=document.createElement('canvas');body.width=w;body.height=bodyHeight;
+   body.getContext('2d').drawImage(source,0,0,source.width,source.height*split,0,0,w,bodyHeight);
+   const tiny=document.createElement('canvas');tiny.height=32;tiny.width=Math.max(1,Math.round(w*32/bodyHeight));
+   const miniature=tiny.getContext('2d');miniature.filter='saturate(.5) brightness(.57) contrast(.85)';miniature.drawImage(body,0,0,tiny.width,tiny.height);
+   sprite={body,tiny,split,aspect:source.width/source.height};this.graveSprites.set(source,sprite);
   }
-  const height=g.size,width=image.width/image.height*height;
-  ctx.save();ctx.translate(g.x,g.y);ctx.rotate(g.rotation);
+  const height=g.size,width=sprite.aspect*height*.84/sprite.split;
+  ctx.save();
   ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
   const hill=g.zone==='hill',distance=Math.max(0,Math.min(1,(g.depth-.52)/.43)),near=distance*distance*(3-2*distance);
   const brightness=((hill?.74+near*.16+g.depth*.05:.53+g.depth*.22)+(active?.04:0))*(g.appearance??graveAppearance(g.soldier)).light;
   // Three tonal planes: full material contrast in front, quiet solid forms
   // on the middle slope, then silhouettes in the valley haze. No glowing rims.
   ctx.globalAlpha=hill?1:.72+g.depth*.27;
-  ctx.filter=`sepia(${hill?.14:0}) saturate(${hill?.55+near*.21:.50}) brightness(${brightness}) contrast(${hill?1+near*.05:.85}) blur(${hill?.34-near*.25:.36-g.depth*.24}px)`;
-  ctx.drawImage(image,-width*.5,-height*.99,width,height);
+  const soil=this.soilSprite,q=g.groundQuad;
+  // Grade the soil before projection: filtering a nearly edge-on affine
+  // texture can require huge intermediate surfaces on a software renderer.
+  ctx.filter='none';
+  if(soil&&g.size>=12){
+   const uv=[{x:0,y:0},{x:soil.width,y:0},{x:soil.width,y:soil.height},{x:0,y:soil.height}],peak={x:soil.width*.5,y:soil.height*.5};
+   for(let i=0;i<4;i++)texturedTriangle(ctx,soil,[uv[i],uv[(i+1)%4],peak],[q[i],q[(i+1)%4],g.groundCenter]);
+  }
+  // Subpixel soil detail is not visible in the valley. A pregraded small
+  // sprite avoids costly filters and almost-degenerate texture transforms.
+  const tiny=g.size<10;
+  ctx.filter=tiny?'none':`sepia(${hill?.14:0}) saturate(${hill?.55+near*.21:.50}) brightness(${brightness}) contrast(${hill?1+near*.05:.85}) blur(${hill?.34-near*.25:.36-g.depth*.24}px)`;
+  ctx.drawImage(tiny?sprite.tiny:sprite.body,g.x-width*.5,g.y-height*.84,width,height*.84);
   ctx.restore();
  }
  waveFlag(ctx,t){

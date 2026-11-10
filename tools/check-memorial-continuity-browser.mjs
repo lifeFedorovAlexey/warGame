@@ -46,7 +46,15 @@ try{
   });
   assert.equal(check.count,80);assert.equal(check.unique,80);assert.deepEqual(check.pairs,[]);assert(check.privates.every(z=>z==='field'));assert(check.ratio>2);assert(!check.overflow);
   assert(check.hillWidth>.65&&check.hillHeight>.4,'Graves cover the whole visible hill');assert(check.fieldWidth>.45,'Graves cover the valley beyond the hill');
-  await page.screenshot({path:folder+'/'+name+'.png'});return check;
+  await page.screenshot({path:folder+'/'+name+'.png'});
+  if(name==='wide'){
+   // Identical crosses expose inconsistent perspective that different rank
+   // ornamentation could conceal. This changes only the isolated view fixture.
+   await page.evaluate(()=>{const s=rankMemorial,privateAppearance=s.hitAreas.find(g=>g.appearance.id==='private').appearance;window.perspectiveOriginal=s.hitAreas;s.hitAreas=s.hitAreas.map(g=>({...g,appearance:privateAppearance,soldier:{...g.soldier,rank:'private',death:{...g.soldier.death,rank:'private'}}}));s.resize();});
+   await page.screenshot({path:folder+'/perspective-calibration.png'});
+   await page.evaluate(()=>{rankMemorial.hitAreas=window.perspectiveOriginal;delete window.perspectiveOriginal;rankMemorial.resize();});
+  }
+  return check;
  }
  const wide=await layoutCheck('wide',1440,900),narrow=await layoutCheck('narrow',390,844);
  await page.setViewportSize({width:1440,height:900});await page.waitForTimeout(250);

@@ -1,4 +1,5 @@
 import {graveAppearance} from './memorial-graves.js';
+import {memorialPerspective} from './memorial-perspective.js';
 
 const mix=(a,b,t)=>a+(b-a)*t;
 const random=i=>{const x=Math.sin(i*127.1+13.7)*43758.5453;return x-Math.floor(x);};
@@ -9,46 +10,45 @@ export function memorialRidge(x){
  return .36;
 }
 
-// Bounds include all opaque parts of the approved sprites, including the
-// round mound. Size is the whole monument's height, with its foot at y.
-export const graveBounds=g=>({left:g.x-g.size*.41,right:g.x+g.size*.41,top:g.y-g.size*1.01,bottom:g.y+g.size*.025});
+// Bounds cover the upright sprite and the entire projected soil footprint.
+// x/y is the world-space ground contact, not the bottom of a flat PNG.
+export const graveBounds=g=>({left:Math.min(g.x-g.size*.46,...g.groundQuad.map(p=>p.x)),right:Math.max(g.x+g.size*.46,...g.groundQuad.map(p=>p.x)),top:Math.min(g.y-g.size*.91,...g.groundQuad.map(p=>p.y)),bottom:Math.max(g.y+g.size*.16,...g.groundQuad.map(p=>p.y))});
 const overlaps=(a,b,gap=0)=>a.left<b.right+gap&&a.right>b.left-gap&&a.top<b.bottom+gap&&a.bottom>b.top-gap;
 
 function candidates({width,height,art},density){
  const {ox,oy,iw,ih}=art,hill=[],field=[];
- const add=(target,x,y,size,depth,seed,anchor=-1)=>{
-  const p={x:ox+x*iw,y:oy+y*ih,size:size*ih*density,depth,zone:target===field?'field':'hill',anchor,
-   yaw:(random(seed)-.5)*.30,rotation:(random(seed+7)-.5)*.026};
+ const add=(target,x,y,seed,anchor=-1)=>{
+  const zone=target===field?'field':'hill',perspective=memorialPerspective(x,y,zone,density);if(!perspective)return;
+  const p={...perspective,x:ox+x*iw,y:oy+y*ih,size:perspective.size*ih,zone,anchor,
+   groundQuad:perspective.groundQuad.map(v=>({x:ox+v.x*iw,y:oy+v.y*ih})),groundCenter:{x:ox+perspective.groundCenter.x*iw,y:oy+perspective.groundCenter.y*ih},yaw:0,rotation:0};
   const b=graveBounds(p);
   if(b.left>=8&&b.right<=width-8&&b.top>=4&&b.bottom<=height-8)target.push({...p,bounds:b});
  };
- // Secondary monuments recede through three readable planes. The few larger
- // foreground accents below establish scale; the rest must not compete with them.
+ // Ground positions are composed first. Every monument has the same physical
+ // height; size and depth come exclusively from the shared camera projection.
  const samples=Math.min(64000,Math.ceil(1800/(density*density)));
  for(let i=0;i<samples;i++){
   const x=.10+random(i*5+801)*.875,depth=.045+random(i*5+802)*.815;
-  const size=(.023+.060*Math.pow(depth,1.35))*(.94+random(i*5+803)*.12);
   const y=mix(memorialRidge(x)+.025,.965,depth);
-  add(hill,x,y,size,depth,i+1200);
+  add(hill,x,y,i+1200);
  }
  // Asymmetric foreground triangle, with one principal memorial and two
  // supporting ones. Small alternate positions let the layout avoid UI/cropping.
- const accents=[[.78,.93,.130,.99],[.66,.87,.108,.94],[.91,.88,.112,.96]];
+ const accents=[[.78,.93],[.66,.87],[.91,.88]];
  for(let anchor=0;anchor<accents.length;anchor++)for(let i=0;i<48;i++){
-  const [ax,ay,size,depth]=accents[anchor],radius=i?Math.sqrt(i/47):0,angle=i*2.399963;
-  add(hill,ax+Math.cos(angle)*radius*.055,ay+Math.sin(angle)*radius*.035,size,depth,9000+anchor*80+i,anchor);
+  const [ax,ay]=accents[anchor],radius=i?Math.sqrt(i/47):0,angle=i*2.399963;
+  add(hill,ax+Math.cos(angle)*radius*.055,ay+Math.sin(angle)*radius*.035,9000+anchor*80+i,anchor);
  }
  // The distant valley is a separate burial field, below the city and behind
  // the near slope. Privates and NCOs never consume the foreground by default.
  for(let i=0;i<samples*2;i++){
   const x=.08+random(i*5+17001)*.60,v=random(i*5+17002);
-  const size=(.009+.009*v)*(.96+random(i*5+17003)*.08)*1.12;
   // Follow the actual valley floor rather than putting crosses into its sky
   // or into the ridge that occludes the valley on the right.
   const near=memorialRidge(x)-.024,far=x<.4?mix(.77,.565,(x-.08)/.32):mix(.565,.522,(x-.4)/.28);
   if(near-far<.015)continue;
   const y=mix(far,near,v);
-  add(field,x,y,size,.08+.10*v,i+21000);
+  add(field,x,y,i+21000);
  }
  return {hill,field};
 }
@@ -131,7 +131,7 @@ export function layoutMemorialGraves(graves,viewport){
    }
    // Rank affects who occupies the selected plots, not whether the back or
    // left side of the landscape remains empty. Preserve original archive indices.
-   plots.sort((a,b)=>b.depth-a.depth||b.size-a.size);
+   plots.sort((a,b)=>a.world.z-b.world.z||b.size-a.size);
    for(let i=0;i<people.length;i++)placed.push({...people[i],...plots[i]});
    return true;
   };
