@@ -5,6 +5,8 @@ import {distribution} from '../campaign/performance.js';
 import {compareWallClock} from './frame-acceptance-contract.mjs';
 import {alignFrameTrace} from './frame-trace-alignment.mjs';
 const folder=process.argv[2]??'campaign/reports/frame-budget/safety-fix/combat';
+const output=process.argv.find(arg=>arg.startsWith('--output='))?.slice('--output='.length)??folder;
+fs.mkdirSync(output,{recursive:true});
 const summary=[];
 for(const variant of ['baseline','after']){
  const file=path.join(folder,variant+'.json');if(!fs.existsSync(file))continue;
@@ -47,7 +49,22 @@ for(const variant of ['baseline','after']){
    cause:gc.some(e=>e.ms>4)?'GC occurs in this callback; see trace duration and sampled stacks':f.cpuMs>33?'CPU: inspect stage timings and attached slow-call stacks':f.interval>33?'Gap outside measured CPU. GPU/scheduler attribution not established by stage timers.':'No >33 ms frame'};
  });
  const snapshot=p.stages['traffic snapshot']??p.stages.snapshot;
- const out={variant,frameMs:p.frameMs,cpuMs:p.cpuMs,over33:p.over33,over50:p.over50,longTasks:p.longTasks,stages:p.stages,snapshot,
+ const completedTicks=(raw.latency?.ticks??[]).map(t=>t.completionWallMs).filter(Number.isFinite);
+ const tickMaxMs=completedTicks.length?Math.max(...completedTicks):null;
+ let firstMotion;
+ if(raw.minimalCommands){
+  const samples=[];
+  let expectedCount=0;
+  for(const group of raw.minimalCommands.groups)for(const row of group.rows){
+   expectedCount++;
+   if(!group.result?.ok||group.result.reused||!Number.isInteger(group.revision)||row.revision!==group.revision)continue;
+   if(!Number.isFinite(row.firstMotionAt)||!Number.isFinite(group.receivedAt))continue;
+   const ms=row.firstMotionAt-group.receivedAt;
+   if(ms>=0)samples.push(ms);
+  }
+  firstMotion={rate:raw.rate,expectedCount,actualFirstMotionMs:distribution(samples)};
+ }
+ const out={variant,frameMs:p.frameMs,cpuMs:p.cpuMs,over33:p.over33,over50:p.over50,longTasks:p.longTasks,stages:p.stages,snapshot,tickMaxMs,firstMotion,
   drawCalls:p.drawCalls,triangles:p.triangles,renderScale:p.renderScale,gpuMs:raw.gpuMs,traceEvents,
   alignment:{method:'Unique contiguous callback sequence; every recorded CPU interval fits inside its FunctionCall with one common clock offset',...alignmentProof,callbacks:main.length,offsetMs:offset,spreadMs:spread,gameStart,gameEnd,
    excludedAfterGame:trace.traceEvents.filter(e=>e.ph==='X'&&e.name==='FireAnimationFrame'&&e.dur>50000&&e.ts>=gameEnd).map(e=>({start:e.ts,ms:e.dur/1000,reason:'Test callback after renderSuspended/perf.stop; report construction and export'}))},
@@ -59,11 +76,11 @@ for(const variant of ['baseline','after']){
    minGap:raw.contactAudit.minGap,minBodyGap:raw.contactAudit.minBodyGap,minRequiredGap:raw.contactAudit.minRequiredGap,
    preTickMismatches:raw.preTickMismatches,postTickPoseLagFrames:raw.postTickPoseLagFrames,telemetryMismatches:raw.telemetryMismatches,combatHits:raw.combatHits,alive:raw.alive,arrived:raw.arrived,simSeconds:raw.simSeconds},
   instrumentation:{captureMs:raw.contactAudit.captureMs,auditMs:raw.contactAudit.auditDistribution,geometryOutsideSimulationDeadline:true}};
- fs.writeFileSync(path.join(folder,variant+'-analysis.json'),JSON.stringify(out,null,2));
- summary.push({variant,frameMs:out.frameMs,over50:out.over50,longTasks:out.longTasks.length,stages:out.stages,safety:out.safety,topSelf:topSelf.filter(r=>!r.frame.includes('browser:')).slice(0,6),traceEvents});
+ fs.writeFileSync(path.join(output,variant+'-analysis.json'),JSON.stringify(out,null,2));
+ summary.push({variant,frameMs:out.frameMs,over50:out.over50,longTasks:out.longTasks.length,stages:out.stages,tickMaxMs,firstMotion,safety:out.safety,topSelf:topSelf.filter(r=>!r.frame.includes('browser:')).slice(0,6),traceEvents});
 }
 if(summary.length===2){
  const comparison=compareWallClock(summary[0],summary[1]);
- fs.writeFileSync(path.join(folder,'comparison.json'),JSON.stringify(comparison,null,2));
+ fs.writeFileSync(path.join(output,'comparison.json'),JSON.stringify(comparison,null,2));
 }
 console.log(JSON.stringify(summary,null,2));
