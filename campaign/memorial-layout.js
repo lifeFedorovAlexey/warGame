@@ -26,7 +26,9 @@ function candidates({width,height,art},density){
  const samples=Math.min(64000,Math.ceil(1800/(density*density)));
  for(let i=0;i<samples;i++){
   const x=.10+random(i*5+801)*.875,depth=.045+random(i*5+802)*.815;
-  const size=(.022+.059*depth)*(.96+random(i*5+803)*.08);
+  // A gentle foreground lift: up to 18%, fading out on the middle slope.
+  const near=Math.max(0,(depth-.45)/.41),nearScale=1+.18*near*near*(3-2*near);
+  const size=(.022+.059*depth)*(.96+random(i*5+803)*.08)*nearScale;
   const y=mix(memorialRidge(x)+.025,.965,depth);
   add(hill,x,y,size,depth,i+1200);
  }
