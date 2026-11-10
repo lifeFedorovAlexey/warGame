@@ -57,7 +57,7 @@
  #result .result-rank .rank-insignia {width:18px;height:28px;}#result h2 {margin-bottom:8px;}#result #result-message {margin-bottom:22px;}
 }
 @media(max-width:700px) {
- #result {display:flex;flex-direction:column;background:#151b1a url('../assets/campaign/personnel/memorial-hill-clean-v2.png') left top / auto 100vh no-repeat;}
+ #result {display:flex;flex-direction:column;background:#151b1a url('../assets/campaign/personnel/memorial-hill-earth-v3.png') left top / auto 100vh no-repeat;}
  #result .result-copy {width:100%;padding:24px 22px 12px;}#result .result-eyebrow {font-size:9px;margin-bottom:12px;}
  #result h1 {font-size:31px;letter-spacing:.025em;}#result #result-message {font-size:14px;margin-bottom:24px;}
  #result .result-columns {grid-template-columns:1fr 1fr;gap:20px;}#result .result-section {margin-bottom:24px;}#result h2 {font-size:17px;letter-spacing:.045em;}
