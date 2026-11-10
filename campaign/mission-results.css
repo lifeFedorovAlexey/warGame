@@ -133,3 +133,27 @@
 .personnel-award-icon {width:17px;height:22px;flex:none;}
 .personnel-award small {font-size:9px;}
 .personnel-award-names {display:block;margin-top:4px;color:#c9b47b;font-size:11px;line-height:1.5;}
+
+/* A short landscape viewport keeps one full-scene canvas and readable ranks. */
+@media(max-height:520px) and (orientation:landscape){
+ #result {background:#151b1a;}
+ #result .memorial-scene {position:absolute;inset:0;width:100%;height:100%;min-height:0;z-index:-1;}
+ #result .result-copy {top:12px;left:3vw;bottom:58px;width:70vw;}
+ #result h1 {font-size:28px;margin-bottom:7px;}#result #result-message {font-size:12px;margin-bottom:12px;}
+ #result .result-columns {grid-template-columns:1fr 1fr;gap:18px;}
+ #result .result-columns>div {gap:10px;}
+ #result .result-columns>div:last-child>.result-section:nth-child(2) {position:fixed;bottom:9px;left:calc(3vw + 184px);width:130px;}
+ #result .result-columns>div:last-child>.result-section:nth-child(3) {position:fixed;bottom:9px;left:calc(3vw + 334px);width:132px;}
+ #result h2 {font-size:13px;margin-bottom:5px;letter-spacing:.02em;}
+ #result dl>div {padding:3px 0;gap:6px;}#result dt {font-size:10px;}#result dd {font-size:18px;}
+ #result #result-survivor-ranks,#result #result-loss-ranks {gap:2px 4px;}
+ #result .result-rank,#result .result-many-ranks .result-rank {gap:3px;}
+ #result .result-rank .rank-insignia {width:14px;}
+ #result #result-honours>div {gap:4px 8px;}#result .result-honour {gap:4px;}
+ #result .result-honour .personnel-award-icon {width:16px;height:20px;}#result .result-honour strong+span {font-size:15px;}
+ #result .result-actions {left:3vw;bottom:7px;height:44px;gap:18px;}
+ #result-person {left:75vw!important;right:12px!important;top:18vh!important;bottom:auto!important;width:auto!important;max-width:none;}
+ #result-person h3 {font-size:18px;}#result-person p {font-size:10px;}#result-person .result-person-callsign {font-size:12px;margin-bottom:5px;}
+ #result-person .personnel-award-names {display:none;}
+ #result-empty {right:3vw;bottom:20vh;width:22vw;font-size:12px;}#result-history-note {font-size:9px;margin-top:4px;}
+}

@@ -89,11 +89,12 @@ export class MissionResultsView{
  }
  fitRanks(){
   if(this.root.hidden)return;
-  const narrow=matchMedia('(max-width:700px)').matches;
+  const landscape=matchMedia('(max-height:520px) and (orientation:landscape)').matches;
+  const narrow=landscape||matchMedia('(max-width:700px)').matches;
   for(const node of this.root.querySelectorAll('.result-rank-grid')){
    const n=node.querySelectorAll('.result-rank').length,w=node.clientWidth,h=node.clientHeight;if(!n||!w||!h)continue;
    const css=getComputedStyle(node),gx=parseFloat(css.columnGap)||0,gy=parseFloat(css.rowGap)||0;
-   const desired=narrow?33:66,minimum=narrow?29:46,preferredRow=narrow?24:40;
+   const desired=narrow?33:66,minimum=narrow?29:46,preferredRow=landscape?18:narrow?24:40;
    const natural=Math.max(1,Math.floor((w+gx)/(desired+gx))),maximum=Math.max(1,Math.floor((w+gx)/(minimum+gx)));
    if(n<=5){node.style.gridTemplateColumns=`repeat(${natural},minmax(0,1fr))`;node.style.setProperty('--rank-cell-height',preferredRow+'px');node.style.setProperty('--rank-count-size',(narrow?13:20)+'px');continue;}
    const needed=Math.ceil(n/Math.max(1,Math.floor((h+gy)/(preferredRow+gy)))),columns=Math.min(maximum,Math.max(natural,needed)),rows=Math.ceil(n/columns);

@@ -27,6 +27,7 @@ try{
   for(const rank of [...Array(41).fill('private'),...personnelRanks.map(r=>r.id)]){
    const u=m.addUnit('bukhanka','rai',{x:800,y:800});c.setPersonnelRank(p.crews[u.id].memberIds[0],rank);m.damage(u,1e6,{id:'fixture-enemy',kind:'raider',owner:'scavs',x:700,y:700});
   }
+  if(!m.enterM02)for(const rank of personnelRanks){const u=m.addUnit('bukhanka','rai',{x:850,y:850});c.setPersonnelRank(p.crews[u.id].memberIds[0],rank.id);}
   m.state.energy=5432;for(const [key,spec] of Object.entries(m.config.research).filter(([,spec])=>spec.mission!=='m02')){m.state.research[key]=true;if(!m.state.artifactKeys.includes(key))m.state.artifactKeys.push(key);}
   m.state.time=1634;m.state.status='victory';c.getResults();m.load(m.save());c.showResults();
   const state=m.state;window.carryReference={veteranId,veteranUnitId:veteran.id,people:structuredClone(state.campaign.personnel.soldiers),
@@ -43,10 +44,18 @@ try{
    return {count:list.length,unique:new Set(list.map(g=>g.soldier.id)).size,pairs,privates:list.filter(g=>g.appearance.order===0).map(g=>g.zone),
     hillWidth:span('hill','x'),hillHeight:span('hill','y'),fieldWidth:span('field','x'),
     largest:Math.max(...list.map(g=>g.size)),ratio:Math.max(...list.filter(g=>g.appearance.order>=15).map(g=>g.size))/Math.max(...list.filter(g=>g.appearance.order===0).map(g=>g.size)),
+    rankFont:Math.min(...[...document.querySelectorAll('.result-rank b')].map(n=>parseFloat(getComputedStyle(n).fontSize))),
+    rankClipping:[...document.querySelectorAll('.result-rank')].some(n=>{const r=n.getBoundingClientRect(),p=n.parentElement.getBoundingClientRect();return r.top<p.top-1||r.bottom>p.bottom+1||r.right>p.right+1;}),
+    graveClipping:list.some(g=>g.bounds.left<0||g.bounds.top<0||g.bounds.right>scene.width||g.bounds.bottom>scene.height),
     overflow:document.documentElement.scrollWidth>innerWidth||document.querySelector('#result').scrollHeight>innerHeight};
   });
   assert.equal(check.count,80);assert.equal(check.unique,80);assert.deepEqual(check.pairs,[]);assert(check.privates.every(z=>z==='field'));assert(check.ratio>2);assert(!check.overflow);
-  assert(check.hillWidth>.65&&check.hillHeight>.4,'Graves cover the whole visible hill');assert(check.fieldWidth>.45,'Graves cover the valley beyond the hill');
+  assert(check.rankFont>=11&&!check.rankClipping,'All rank counts remain readable and fit their allotted space');
+  assert(!check.graveClipping,'Every grave stays on the visible canvas');
+  // The dense landscape report excludes much of the valley and near-left hill.
+  // Full-scene coverage is checked in the unobstructed layout tests and tall
+  // viewports; the short view must preserve every identity without collisions.
+  if(height>520){assert(check.hillWidth>.65&&check.hillHeight>.4,'Graves cover the whole visible hill');assert(check.fieldWidth>.45,'Graves cover the valley beyond the hill');}
   await page.screenshot({path:folder+'/'+name+'.png'});
   if(name==='wide'){
    // Identical crosses expose inconsistent perspective that different rank
@@ -58,6 +67,7 @@ try{
   return check;
  }
  const wide=await layoutCheck('wide',1440,900),narrow=await layoutCheck('narrow',390,844);
+ const landscape=[await layoutCheck('landscape',844,390),await layoutCheck('landscape-small',667,375)];
  await page.setViewportSize({width:1440,height:900});await page.waitForTimeout(250);
  const person=await page.evaluate(()=>{const g=rankMemorial.hitAreas.find(g=>g.appearance.id==='marshal');return {id:g.soldier.id,name:g.soldier.name,x:g.x,y:g.y-g.size*.5};});
  await page.mouse.move(person.x,person.y);await page.waitForFunction(name=>document.querySelector('#result-person h3').textContent===name,person.name);
@@ -71,7 +81,7 @@ try{
   assert(await page.locator('#result-person').isVisible());await page.keyboard.press('Escape');
   assert(await page.locator('#result').isHidden());assert(await page.evaluate(()=>!document.querySelector('#mission-hud').inert&&!campaign.memorialAudio.active));
   await page.evaluate(()=>campaign.showResults());assert(await page.evaluate(()=>campaign.memorialAudio.active));
-  assert.deepEqual(errors,[]);fs.writeFileSync(folder+'/verification.json',JSON.stringify({passed:true,mode:'results-only',wide,narrow,checks:['real-game-startup','39-ranks','80-graves','wide-and-narrow','save-load-twice','keyboard-inspection','map-return','music-switch','no-dead-continue']},null,2));
+  assert.deepEqual(errors,[]);fs.writeFileSync(folder+'/verification.json',JSON.stringify({passed:true,mode:'results-only',wide,narrow,landscape,checks:['real-game-startup','39-ranks','80-graves','desktop-portrait-landscape','save-load-twice','keyboard-inspection','map-return','music-switch','no-dead-continue']},null,2));
   console.log('PASS integrated main: actual game, 80 graves, wide/narrow, save/load, keyboard, map return and audio switch');
  }else{
  await page.locator('#result-continue').click();await page.waitForFunction(()=>campaign.mission.state.m02?.initialized,null,{timeout:60000});
