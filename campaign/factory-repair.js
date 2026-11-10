@@ -1,4 +1,4 @@
-import {availableOil,spendOil} from './oil-economy.js';
+import {oilFundingRemaining,spendOil} from './oil-economy.js';
 import {insideFactory,factoryPriority,factoryVisitors} from './factory-garage.js';
 // Service uses the same simulation clock and oil stock as construction.
 // A bay is assigned once per economy step, never once per search/frame slice.
@@ -66,15 +66,17 @@ export function updateFactoryRepairs(mission,structures,dt){
    .sort((a,b)=>a.factoryVisit.arrived-b.factoryVisit.arrived||a.id.localeCompare(b.id));
   for(const [index,unit] of waiting.entries()){
    const retreat=unit.combatRetreat??={},visit=unit.factoryVisit;
-   if(factoryPriority(factory)==='production'&&factory.queue.length){retreat.service='waiting-production';continue;}
+   const order=factory.queue[0],productionReady=order&&!(order.progress>=1&&factory.exitBlocked)
+    &&(oilFundingRemaining(order)===0||mission.state.energy>0);
+   if(factoryPriority(factory)==='production'&&productionReady){retreat.service='waiting-production';continue;}
    if(index>0){retreat.service='waiting-bay';continue;}
    const seconds=Math.min(dt,(unit.maxHp-unit.hp)/service.hpPerSecond);
-   const oil=factoryPriority(factory)==='repair'?mission.state.energy:availableOil(mission.state);
+   const oil=mission.state.energy;
    const affordable=service.energyPerSecond>0?Math.min(seconds,oil/service.energyPerSecond):seconds;
    if(affordable<=0){retreat.service='waiting-energy';continue;}
    if(visit.repairStartHp===undefined){visit.repairStartHp=unit.hp;mission.emit('factory-repair-start',{unit:unit.id,factory:factory.id});}
    retreat.service='repairing';unit.hp=Math.min(unit.maxHp,unit.hp+service.hpPerSecond*affordable);
-   spendOil(mission,service.energyPerSecond*affordable,{reserved:factoryPriority(factory)==='repair'});
+   spendOil(mission,service.energyPerSecond*affordable,{reserved:true});
    factory.activeRepair={unitId:unit.id,progress:(unit.hp-visit.repairStartHp)/Math.max(1,unit.maxHp-visit.repairStartHp)};
    if(unit.hp===unit.maxHp&&unit.damage){
     // Restore mechanical parts as well as HP. Keep installed upgrades and

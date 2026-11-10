@@ -1,5 +1,6 @@
 import {setButtonIcon} from '../assets/ui/icons.js';
-import {factoryPriority,factoryVisitors,setFactoryPriority} from './factory-garage.js';
+import {factoryPriority,setFactoryPriority} from './factory-garage.js';
+import {factoryRepairQueue} from './factory-routing.js';
 import {oilOrderProgress} from './oil-economy.js';
 
 function indicators(control,label){
@@ -20,8 +21,8 @@ export function createFactoryRows(mission,factories,projects,{act,focus}){
   indicators(priority,'Ремонт · Завод '+(index+1));row.append(priority);
   for(const {id,kind,name,spec} of projects){
    const control=document.createElement('button');setButtonIcon(control,kind,name);control.dataset.factoryProduction=control.dataset.production=id;
-   control.dataset.baseTitle=name+' · Завод '+(index+1)+' · '+spec.cost+' нефти';
-   control.onclick=()=>act(()=>mission.produce(factory.id,id));
+   control.dataset.baseTitle=name+' · '+spec.cost+' нефти · Автовыбор свободного завода';
+   control.onclick=()=>act(()=>mission.produce(factory.id,id,{distributed:true}));
    control.oncontextmenu=event=>{event.preventDefault();act(()=>mission.cancelProduction(factory.id,id));};
    indicators(control,'Выпуск · Завод '+(index+1)+' · '+name);row.append(control);
   }
@@ -59,16 +60,18 @@ export function updateProductionButtons(root,mission,factories,projects,paused){
 export function updateFactoryRows(root,mission,projects,paused){
  for(const row of root.querySelectorAll('[data-factory-row]')){
   const factory=mission.entity(row.dataset.factoryRow);if(!factory)continue;
-  const control=row.querySelector('[data-factory-priority]'),priority=factoryPriority(factory),visits=factoryVisitors(mission,factory);
+  const control=row.querySelector('[data-factory-priority]'),priority=factoryPriority(factory),visits=factoryRepairQueue(mission,factory);
   if(control.dataset.factoryPriority!==priority){
    const children=[...control.children].filter(c=>!c.classList.contains('game-icon'));
    setButtonIcon(control,priority==='repair'?'repair-depot':'produce','Приоритет: '+(priority==='repair'?'ремонт':'производство'));
    control.append(...children);control.dataset.factoryPriority=priority;
   }
-  control.title=control.getAttribute('aria-label')+' · Переключить';
+  const inside=visits.filter(u=>u.factoryVisit?.phase==='inside').length;
+  const status='Ремонт: '+visits.length+' (в цехе '+inside+', на подходе '+(visits.length-inside)+') · Сборка: '+factory.queue.length;
+  control.title=control.getAttribute('aria-label')+' · '+(priority==='repair'?'Сначала ремонт, затем сборка':'Сначала сборка, затем ремонт')+' · '+status+' · Переключить';
   const count=control.querySelector('.production-count'),progress=control.querySelector('progress');
   count.hidden=!visits.length;count.textContent=String(visits.length);progress.hidden=!factory.activeRepair;progress.value=factory.activeRepair?.progress??0;
-  control.setAttribute('aria-description','На обслуживании: '+visits.length);
+  control.setAttribute('aria-description',status);
   updateProductionButtons(row,mission,[factory],projects,paused);
  }
 }
