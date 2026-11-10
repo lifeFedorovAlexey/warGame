@@ -14,6 +14,7 @@
 <link rel="stylesheet" href="combat-menu.css">
 <link rel="stylesheet" href="opening-television.css">
 <link rel="stylesheet" href="main-menu.css">
+<link rel="stylesheet" href="mission-results.css">
 </head>
 <body>
 <main id="game">
@@ -70,6 +71,7 @@
               <button id="load" data-icon="load" aria-label="Загрузить"></button>
               <button id="tempo" title="Скорость симуляции" data-icon="speed-one" aria-label="Скорость симуляции"></button>
               <button id="home" title="К начальной базе · Home" data-icon="home" aria-label="К базе"></button>
+              <button id="results-open" hidden data-icon="memorial" aria-label="Итоги операции и холм памяти" title="Итоги операции и холм памяти"></button>
               <button id="main-menu-return" data-icon="menu" aria-label="Сохранить и выйти в главное меню"></button>
             </div>
           </section>
@@ -258,12 +260,36 @@
       </div>
     </div>
   </section>
-  <section id="result" class="corner-card panel" hidden>
-    <h1 id="result-title"></h1>
-    <p id="result-message"></p>
-    <button id="result-close" data-icon="map" aria-label="Карта"></button>
-    <button id="result-signal" hidden data-icon="radar" aria-label="К сигналу"></button>
-    <button id="restart" data-icon="restart" aria-label="Заново"></button>
+  <section id="result" role="dialog" aria-modal="true" aria-labelledby="result-title" hidden>
+    <div class="result-copy">
+      <p class="result-eyebrow">Операция «Рай» · Боевой журнал</p>
+      <h1 id="result-title"></h1><p id="result-message"></p>
+      <div class="result-columns">
+        <div>
+          <section class="result-section"><h2>Статистика операции</h2><dl>
+            <div><dt>Уничтожено противников</dt><dd id="result-enemies"></dd></div>
+            <div><dt>Разрушено сооружений</dt><dd id="result-buildings"></dd></div>
+            <div><dt>Время операции</dt><dd id="result-time"></dd></div>
+          </dl></section>
+          <section class="result-section"><h2>Остались в строю · <span id="result-alive"></span></h2><div id="result-survivor-ranks"></div></section>
+        </div>
+        <div>
+          <section class="result-section"><h2>Наши потери</h2><dl><div><dt>За эту миссию</dt><dd id="result-lost"></dd></div></dl><div id="result-loss-ranks"></div></section>
+          <section class="result-section"><h2>Память кампании</h2><dl><div><dt>Всего погибло</dt><dd id="result-total-lost"></dd></div></dl></section>
+          <section id="result-honours" class="result-section" hidden><h2>Награждены</h2><div></div></section>
+        </div>
+      </div>
+      <p id="result-history-note" hidden></p>
+    </div>
+    <canvas class="memorial-scene" tabindex="0" role="img" aria-label="Холм памяти"></canvas>
+    <p id="result-empty" hidden>Все вернулись. Холм памяти пуст.</p>
+    <aside id="result-person" role="status" hidden><h3></h3><p class="result-person-callsign"></p><div class="result-person-unit"><span class="result-person-rank"></span><p class="result-person-service"></p></div><p class="result-person-score"></p><p class="result-person-mission"></p></aside>
+    <nav class="result-actions" aria-label="После операции">
+      <button id="result-continue" hidden data-icon="play" aria-label="Продолжить: Энергетический всплеск" title="Продолжить: Энергетический всплеск"></button>
+      <button id="result-close" data-icon="map" aria-label="Вернуться к карте" title="Вернуться к карте"></button>
+      <button id="result-menu" data-icon="menu" aria-label="Сохранить итоги и выйти в главное меню" title="Сохранить итоги и выйти в главное меню"></button>
+      <span id="result-campaign-end" hidden>Доступные миссии завершены.<br>Итоги кампании сохранены.</span>
+    </nav>
   </section>
 </main>
 <script type="module" src="main.js"></script>

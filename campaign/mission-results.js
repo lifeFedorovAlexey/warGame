@@ -34,7 +34,7 @@ export class MissionResultsView{
   const $=id=>this.root.querySelector('#'+id),victory=data.outcome==='victory';
   $('result-title').textContent=victory?'Миссия завершена':'Операция прервана';
   $('result-message').textContent=missionName(data.missionId);
-  $('result-continue').hidden=!victory||data.missionId!=='m01';
+  $('result-continue').hidden=!victory||data.missionId!=='m01'||typeof mission.enterM02!=='function';
   $('result-campaign-end').hidden=!victory||data.missionId!=='m02';
   $('result-history-note').hidden=data.historyComplete&&data.campaignHistoryComplete;
   $('result-history-note').textContent='Старое сохранение: потери и личный счёт учтены с момента обновления игры.';

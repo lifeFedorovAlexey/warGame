@@ -123,3 +123,13 @@
 #result .result-rank-grid .result-rank .rank-insignia {height:min(28px,var(--rank-cell-height,28px));}
 #result .result-rank-grid .result-rank b {font-size:var(--rank-count-size,20px);line-height:1;}
 #result .result-section:has(#result-survivor-ranks:not(.result-many-ranks)),#result .result-section:has(#result-loss-ranks:not(.result-many-ranks)) {flex:none;}
+
+/* Shared service marks needed by the standalone results screen. */
+.personnel-service {display:inline-flex;align-items:center;flex-wrap:wrap;gap:4px;vertical-align:middle;}
+.personnel-rank {display:inline-flex;align-items:center;gap:4px;max-width:100%;min-width:0;}
+.personnel-rank-mark {display:inline-flex;align-items:center;flex:none;}
+.personnel-rank-mark .rank-insignia {width:22px;height:58px;color:#c9b47b;}
+.personnel-award {display:inline-flex;align-items:center;color:#c9b47b;vertical-align:middle;}
+.personnel-award-icon {width:17px;height:22px;flex:none;}
+.personnel-award small {font-size:9px;}
+.personnel-award-names {display:block;margin-top:4px;color:#c9b47b;font-size:11px;line-height:1.5;}

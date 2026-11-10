@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
 const {chromium}=createRequire(import.meta.url)('C:/Users/Алексей/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
 const folder='campaign/previews/memorial-layout';fs.mkdirSync(folder,{recursive:true});
+const resultsOnly=process.argv.includes('--results-only');
 const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true,args:['--enable-unsafe-swiftshader','--use-angle=swiftshader']});
 let page;const errors=[];
 try{
@@ -11,7 +12,7 @@ try{
  page.on('console',message=>{if(message.type()==='error')console.error('Browser:',message.text());});
  page.on('requestfailed',request=>console.error('Request:',request.url(),request.failure()?.errorText));
  await page.addInitScript(()=>{for(const key of ['fieldRadio','fieldSound','fieldStoryVoice'])localStorage.setItem('warGame.'+key,'off');});
- await page.goto('http://127.0.0.1:8766/campaign/');await page.waitForFunction(()=>window.campaign?.ready||document.querySelector('#welcome')?.textContent.includes('Ошибка запуска'),null,{timeout:120000});
+ await page.goto(process.env.CAMPAIGN_URL??'http://127.0.0.1:8766/campaign/');await page.waitForFunction(()=>window.campaign?.ready||document.querySelector('#welcome')?.textContent.includes('Ошибка запуска'),null,{timeout:120000});
  assert(await page.evaluate(()=>!!window.campaign?.ready),'Game startup: '+errors.join('; '));console.log('Game ready');
  await page.locator('#begin').click();await page.waitForFunction(()=>document.querySelector('#welcome').hidden,null,{timeout:120000});
  if(await page.evaluate(()=>campaign.state.dreamPlaying))await page.locator('[data-dream="skip"]').click();
@@ -61,6 +62,18 @@ try{
  const person=await page.evaluate(()=>{const g=rankMemorial.hitAreas.find(g=>g.appearance.id==='marshal');return {id:g.soldier.id,name:g.soldier.name,x:g.x,y:g.y-g.size*.5};});
  await page.mouse.move(person.x,person.y);await page.waitForFunction(name=>document.querySelector('#result-person h3').textContent===name,person.name);
  await page.screenshot({path:folder+'/inspect-senior.png'});await page.mouse.move(20,20);
+ if(resultsOnly){
+  assert(await page.locator('#result-continue').isHidden(),'A build without the next mission must not offer a dead Continue action');
+  const restored=await page.evaluate(()=>{const m=campaign.mission,report=campaign.getResults(),save=m.save();m.load(save);m.load(save);return {report,after:campaign.getResults(),people:m.state.campaign.personnel.soldiers};});
+  assert.deepEqual(restored.after,restored.report);assert.equal(restored.after.memorial.length,80);
+  await page.locator('#result-close').click();await page.waitForFunction(()=>document.querySelector('#result').hidden);
+  await page.evaluate(()=>campaign.showResults());await page.locator('.memorial-scene').focus();await page.keyboard.press('ArrowRight');
+  assert(await page.locator('#result-person').isVisible());await page.keyboard.press('Escape');
+  assert(await page.locator('#result').isHidden());assert(await page.evaluate(()=>!document.querySelector('#mission-hud').inert&&!campaign.memorialAudio.active));
+  await page.evaluate(()=>campaign.showResults());assert(await page.evaluate(()=>campaign.memorialAudio.active));
+  assert.deepEqual(errors,[]);fs.writeFileSync(folder+'/verification.json',JSON.stringify({passed:true,mode:'results-only',wide,narrow,checks:['real-game-startup','39-ranks','80-graves','wide-and-narrow','save-load-twice','keyboard-inspection','map-return','music-switch','no-dead-continue']},null,2));
+  console.log('PASS integrated main: actual game, 80 graves, wide/narrow, save/load, keyboard, map return and audio switch');
+ }else{
  await page.locator('#result-continue').click();await page.waitForFunction(()=>campaign.mission.state.m02?.initialized,null,{timeout:60000});
  const inherited=await page.evaluate(()=>{
   const c=campaign,m=c.mission,r=carryReference,p=m.state.campaign.personnel;
@@ -83,4 +96,5 @@ try{
  await page.waitForFunction(()=>document.querySelector('.memorial-scene').dataset.memorialGraves==='81');await page.mouse.move(20,20);await page.screenshot({path:folder+'/mission-two.png'});
  assert.deepEqual(errors,[]);fs.writeFileSync(folder+'/verification.json',JSON.stringify({passed:true,wide,narrow,firstDeaths:80,secondDeaths:1,total:81,carryover:['names','callsigns','ranks','kills','awards','crews','graves','reports','vehicles','buildings','research','oil']},null,2));
  console.log('PASS actual Continue button m01→m02: identities, ranks, kills, awards, 80+1 graves, reports, vehicles, buildings, research and oil; repeated load; compact wide/narrow without overlap');
+ }
 }catch(error){if(page){await page.screenshot({path:folder+'/failure.png'});console.error(errors,await page.evaluate(()=>({state:window.campaign?.state,mission:window.campaign?.mission?.state?.mission})));}throw error;}finally{await browser.close();}

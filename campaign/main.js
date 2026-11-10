@@ -1,3 +1,5 @@
+import {missionResults,campaignMemorial,setPersonnelRank} from './personnel.js';
+import {MissionResultsView,resultsPresentationReady} from './mission-results.js';
 import {perf} from './performance.js';
 import {setButtonIcon, speedIcon} from '../assets/ui/icons.js';
 import {createCampaignWorld} from './world.js';
@@ -34,6 +36,7 @@ const selected = new Set();
 const miniBackground = new Image();
 let world, mission, config, radio, sound, designer, combatMenu, openingTelevision;
 let minimapView;
+let resultsView,resultPrepared=false;
 let active = false, paused = false, speed = 1, resultShown = false;
 let openingPlaying = false;
 let openingCamera=null;
@@ -282,6 +285,7 @@ async function start(restore = false) {
   designer.close(false);
   paused = false;
   resultShown = false;
+  resultPrepared=false;
   radio.reset();
   if(!restore)radio.director.beginStory(mission,{enabled:radio.enabled});
   if(!restore)startOpeningConstruction(mission);
@@ -295,7 +299,7 @@ async function start(restore = false) {
   minimapView.reset(restore);
   blockedOrders.clear();
   $('order-feedback').hidden=true;
-  $('result').hidden = true;
+  resultsView?.hide();$('results-open').hidden=mission.state.status==='running';
   $('mission-hud').hidden = false;
   document.querySelector('.settings').open = false;
   const worker = builders()[0];
@@ -591,6 +595,7 @@ function installInput() {
     if(drag?.pointerId===event.pointerId){cancelMapGesture();lastSelectionClick=null;}
   });
   document.addEventListener('keydown', event => {
+    if(!$('result').hidden){if(event.code==='Escape'){event.preventDefault();resultsView.hide();}return;}
     if (!active || designer.visible || event.target.isContentEditable || event.target.matches('input, select, textarea')) return;
     const {code} = event;
     if(event.ctrlKey&&code==='KeyG'&&!event.repeat){
@@ -978,6 +983,7 @@ function frame(now) {
   last = now;
   if (loadingGame || !world || !mission || !$('welcome').hidden) return;
   if(window.campaign?.renderSuspended)return;
+  if(!$('result').hidden){sound.update();return;}
   if(openingTelevision?.active){
     openingTelevision.update(dt);
     world.update(mission,selected,dt,false,false);
@@ -1023,12 +1029,9 @@ function frame(now) {
     }
     if(uiPending){uiPending=false;flushUi();}
     if (mission.state.status !== 'running' && !resultShown) {
-      resultShown = true;
-      const victory=mission.state.status==='victory';
-      $('result-title').textContent = victory ? 'Миссия завершена' : 'Операция прервана';
-      $('result-message').textContent = victory ? 'Передовая база действует. Все четыре лагеря зачищены.' : 'Утрачены строители и производство.';
-      $('result-signal').hidden=!victory;
-      $('result').hidden = false;
+      if(!resultPrepared){resultPrepared=true;saveGame(false);}
+      $('results-open').hidden=false;
+      if(resultsPresentationReady(mission,radio)){resultShown=true;saveGame(false);resultsView.show(mission);}
     }
   }
   if (now >= toastUntil) $('toast').hidden = true;
@@ -1107,6 +1110,9 @@ try {
   window.addEventListener('resize',cacheRadioPosition,{passive:true});
   window.campaign = {
     ready: true, mission, world, select, radio,
+    getResults:id=>missionResults(mission,id),getMemorial:()=>campaignMemorial(mission),
+    showResults:()=>resultsView.show(mission),setPersonnelRank:(id,rank)=>setPersonnelRank(mission,id,rank),
+    get memorialAudio(){return {active:!!sound.memorialMix,enabled:sound.enabled,playing:!!sound.memorialMusic&&!sound.memorialMusic.paused,src:sound.memorialMusic?.src??''};},
     get drivingAudio() { return {running:sound.ready(), recordings:!!sound.recordings}; },
     get storyAudio() { return {playing:!!sound.storyPlayback, enabled:sound.storyEnabled, chapter:sound.storyPlayback?.chapter, cueId:sound.storyPlayback?.cueId, urgent:!!sound.storyPlayback?.urgent}; },
     get unitVoice() {return {playing:!!sound.voiceSource,cueId:sound.voiceCueId};},
@@ -1161,15 +1167,25 @@ try {
     if(live.length===1)focusUnit(live[0]);
     else if(live.length)select(live.map(unit=>unit.id));
   };
-  $('result-close').onclick = () => { $('result').hidden = true; };
-  $('result-signal').onclick = () => {
-    const signal=missionSignal('outro',mission);
-    $('result').hidden = true;
-    radio.dismiss();
-    presentSignal(signal);
-    focusSignal(signal);
+  let enteringM02=false;
+  resultsView=new MissionResultsView($('result'),{onVisibility:visible=>{
+    sound.setMemorialMix(visible);
+    world.controls.enabled=!visible&&!openingPlaying;world.keys.clear();$('mission-hud').inert=visible;
+    if(visible){cancelMode();document.querySelector('.settings').open=false;}
+  }});
+  $('results-open').onclick=()=>resultsView.show(mission);
+  $('result-continue').onclick=async()=>{
+    if(typeof mission.enterM02!=='function'||enteringM02||mission.state.m02||mission.state.status!=='victory')return;
+    enteringM02=true;$('result-continue').disabled=true;
+    try{
+      try{localStorage.setItem('warGame.alpha.before-m02.v1',await mission.saveAsync());}catch{return toast('Не удалось создать контрольное сохранение');}
+      const result=mission.enterM02();if(!result.ok)return report(result);
+      resultShown=false;resultPrepared=false;resultsView.hide();$('results-open').hidden=true;radio.reset();taskKey='';actionKey='';world.storySignals.show(null);
+      await saveGame(false);updateUi();
+    }finally{enteringM02=false;$('result-continue').disabled=false;}
   };
-  $('restart').onclick = () => location.reload();
+  $('result-close').onclick = () => resultsView.hide();
+  $('result-menu').onclick = () => {resultsView.hide();$('main-menu-return').click();};
 } catch (error) {
   console.error(error);
   mainMenu.error('Ошибка запуска. ' + error.message);

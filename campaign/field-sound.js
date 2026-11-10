@@ -64,6 +64,7 @@ export class FieldSound {
       if (this.enabled) this.unlock();
       else {
         this.music?.pause();
+        this.memorialMusic?.pause();
         this.stopStory();
         this.pendingVoice = null;
         this.voiceSource?.stop();
@@ -80,7 +81,7 @@ export class FieldSound {
     };
     this.menu=document.getElementById('welcome');
     if(this.menu)new MutationObserver(()=>{
-      if(this.menu.hidden)this.playMusic();else this.music?.pause();
+      if(this.menu.hidden)this.playMusic();else {this.music?.pause();this.memorialMusic?.pause();}
     }).observe(this.menu,{attributes:true,attributeFilter:['hidden']});
   }
 
@@ -93,6 +94,17 @@ export class FieldSound {
   }
 
   setOpeningMix(active) { this.openingMix=active;this.refresh(); }
+
+  setMemorialMix(active) {
+    this.memorialMix=active;
+    clearTimeout(this.memorialPauseTimer);
+    clearTimeout(this.fieldPauseTimer);
+    if(this.context){
+      this.updateMusicMix(.55);
+      if(active){this.playMemorialMusic();this.fieldPauseTimer=setTimeout(()=>{if(this.memorialMix)this.music?.pause();},1500);}
+      else {this.playMusic();this.memorialPauseTimer=setTimeout(()=>{if(!this.memorialMix)this.memorialMusic?.pause();},1500);}
+    }
+  }
 
   async unlock() {
     if (!this.enabled) return;
@@ -126,6 +138,11 @@ export class FieldSound {
     this.musicOutput.gain.value = 0;
     this.musicSource = ctx.createMediaElementSource(this.music);
     this.musicSource.connect(this.musicOutput).connect(this.output);
+    this.memorialMusic = new Audio(new URL('../assets/music/memorial-red-banner.mp3', import.meta.url).href);
+    this.memorialMusic.loop=true;this.memorialMusic.preload='metadata';
+    this.memorialMusicOutput=ctx.createGain();this.memorialMusicOutput.gain.value=0;
+    this.memorialMusicSource=ctx.createMediaElementSource(this.memorialMusic);
+    this.memorialMusicSource.connect(this.memorialMusicOutput).connect(this.output);
     this.noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
     const samples = this.noise.getChannelData(0);
     let low = 0;
@@ -156,6 +173,7 @@ export class FieldSound {
   }
 
   playMusic() {
+    if(this.memorialMix){this.playMemorialMusic();return;}
     if (!this.enabled || !this.music || this.menu&&!this.menu.hidden || !this.music.paused) return;
     const now = this.context.currentTime;
     this.musicOutput.gain.cancelScheduledValues(now);
@@ -168,8 +186,15 @@ export class FieldSound {
 
   updateMusicMix(transition = .7) {
     const story = this.storyPlayback;
-    const level = story ? (story.urgent ? .035 : .055) : this.voiceSource ? .09 : .2;
+    const level = this.memorialMix ? 0 : story ? (story.urgent ? .035 : .055) : this.voiceSource ? .09 : .2;
     this.musicOutput.gain.setTargetAtTime(level, this.context.currentTime, transition);
+    this.memorialMusicOutput?.gain.setTargetAtTime(this.memorialMix?.26:0,this.context.currentTime,transition);
+  }
+
+  playMemorialMusic(){
+    if(!this.enabled||!this.memorialMix||!this.memorialMusic||this.menu&&!this.menu.hidden)return;
+    this.updateMusicMix(.55);
+    if(this.memorialMusic.paused)this.memorialMusic.play().catch(error=>{if(error.name!=='AbortError')console.warn('Музыка экрана памяти недоступна:',error.message);});
   }
 
   async loadClip(base, file) {
@@ -224,10 +249,11 @@ export class FieldSound {
   }
 
   storyClip(chapter, cue) {
+    if(cue&&!cue.clip?.file)return Promise.resolve(null);
     if (cue) {
       const key = 'line:' + cue.id;
       if (!this.storyClips.has(key)) this.storyClips.set(key,
-        this.loadClip(dialogueBase, cue.clip.file).catch(error => {
+        this.loadClip(cue.clip.base??dialogueBase, cue.clip.file).catch(error => {
           this.storyClips.delete(key);
           console.warn('Реплика сюжета недоступна:', error.message);
           return null;
@@ -593,7 +619,7 @@ export class FieldSound {
     }
     this.projector?.gain.gain.setTargetAtTime(.56*welding, now, .12);
     this.construction?.gain.gain.setTargetAtTime(.7*construction, now, .08);
-    this.wind?.gain.gain.setTargetAtTime(field ? .16 * (1 - .5*engine) : 0, now, .28);
+    this.wind?.gain.gain.setTargetAtTime(this.memorialMix ? .13+.035*Math.sin(now*.41)+.018*Math.sin(now*.87) : field ? .16 * (1 - .5*engine) : 0, now, .4);
   }
 
   anomaly() {

@@ -46,7 +46,7 @@ try{
    localStorage.setItem('warGame.dialogueWorkshop.alpha-m01',JSON.stringify(local));sessionStorage.setItem('recovery-test-seeded','1');
   }
  },local);
- await page.goto('http://127.0.0.1:8766/dialogues/');
+ await page.goto(process.env.DIALOGUE_URL??'http://127.0.0.1:8766/dialogues/');
  await page.waitForFunction(()=>document.querySelector('#save-status').textContent==='Сохранено на диске');
  assert.equal(puts,0);assert.equal(await page.evaluate(()=>localStorage.getItem('warGame.dialogueWorkshop.alpha-m01')),null);
  assert(await page.locator('#error').isHidden());
