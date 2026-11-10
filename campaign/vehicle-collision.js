@@ -36,10 +36,20 @@ export function vehicleRadiusBound(kind,scale){
 }
 // Death releases driving space; retained visual wrecks are not traffic obstacles.
 export const vehicleObstacle = unit => unit.hp > 0&&unit.factoryVisit?.phase!=='inside';
-// Explicit owner rule: only two allied vehicles wholly outside the camera
-// may pass through each other. Unknown visibility keeps collision enabled.
-export const trafficCollisionRequired=(a,b)=>a?.factoryVisit?.phase!=='inside'&&b?.factoryVisit?.phase!=='inside'&&!(a?.owner==='rai'&&b?.owner==='rai'
- &&a.trafficOnScreen===false&&b.trafficOnScreen===false&&!SCAV_PROFILES[a.kind]?.infantry&&!SCAV_PROFILES[b.kind]?.infantry);
+const alliedVehicles=(a,b)=>a?.owner==='rai'&&b?.owner==='rai'&&!SCAV_PROFILES[a.kind]?.infantry&&!SCAV_PROFILES[b.kind]?.infantry;
+const factoryTransfer=u=>{
+ const phase=u.factoryVisit?.phase;
+ return phase==='entering'||phase==='inside'||phase==='leaving'||phase==='departure';
+};
+export const jamPassThroughAllowed=(a,b)=>alliedVehicles(a,b)&&!factoryTransfer(a)&&!factoryTransfer(b);
+const hasPassage=(a,b)=>a.trafficPassThrough?.revision===a.commandRevision
+ &&a.trafficPassThrough?.pairs.some(pair=>pair.id===b.id);
+export function trafficCollisionRequired(a,b){
+ if(a?.factoryVisit?.phase==='inside'||b?.factoryVisit?.phase==='inside')return false;
+ if(!alliedVehicles(a,b))return true;
+ if(a.trafficOnScreen===false&&b.trafficOnScreen===false)return false;
+ return !(hasPassage(a,b)||hasPassage(b,a))||factoryTransfer(a)||factoryTransfer(b);
+}
 
 export function vehicleEnvelope(unit, scale, field) {
  const heading=unit.heading??0,kind=unit.kind,entry=cached.get(unit);

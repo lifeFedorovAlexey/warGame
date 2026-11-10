@@ -43,7 +43,8 @@ export function installMinimapInput(canvas,{mission,enabled,mode,building,order,
 
 export function createMinimap(canvas,{world,mission,selected,background,notify}){
  const base=document.createElement('canvas'),ctx=canvas.getContext('2d'),cached=base.getContext('2d'),alerts=new MinimapAlerts(notify);
- let refreshed=-Infinity,boundsKey='';
+ let refreshed=-Infinity,boundsKey='',cachedCssSize=canvas.clientWidth||132;
+ new ResizeObserver(entries=>{cachedCssSize=entries[0].contentRect.width||132;refreshed=-Infinity;}).observe(canvas);
  const position=p=>minimapPosition(world.field,p,canvas.width,canvas.height,mission.state.bounds);
  function rebuild(scale){
   // Square viewports may extend beyond the map. Match unexplored fog instead
@@ -71,7 +72,7 @@ export function createMinimap(canvas,{world,mission,selected,background,notify})
   }
  }
  function render(now){
-  const cssSize=canvas.clientWidth||132,pixelRatio=Math.min(2,globalThis.devicePixelRatio||1),size=Math.round(cssSize*pixelRatio);
+  const cssSize=cachedCssSize,pixelRatio=Math.min(2,globalThis.devicePixelRatio||1),size=Math.round(cssSize*pixelRatio);
   const nextBounds=mission.state.bounds.join(',');if(nextBounds!==boundsKey){boundsKey=nextBounds;refreshed=-Infinity;}
   if(canvas.width!==size){canvas.width=canvas.height=base.width=base.height=size;refreshed=-Infinity;}
   if(base.width!==size){base.width=base.height=size;refreshed=-Infinity;}

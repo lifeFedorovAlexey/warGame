@@ -107,10 +107,11 @@ export class PredictiveTraffic extends TrafficCoordinator{
    if(unit.hp<=0||!unit.path?.length||unit.pendingOrder)delete unit.routeTopologyPending;
    else this.requestRoute(mission,unit);
   }
-  this.planner.pruneOffscreen(mission);super.update(mission);this.planner.requestPassages(mission);
+  this.planner.prunePassThrough(mission);super.update(mission);this.planner.requestPassages(mission);
  }
  routeIntent(unit){return JSON.stringify([unit.commandRevision,unit.routeOrder,unit.task,unit.yieldReturn?.home,
-  unit.combatDeployment&&[unit.combatDeployment.targetId,unit.combatDeployment.goal,unit.combatDeployment.slot]]);}
+  unit.combatDeployment&&[unit.combatDeployment.targetId,unit.combatDeployment.goal,unit.combatDeployment.slot],
+  unit.trafficPassThrough?.pairs.map(pair=>pair.id)]);}
  routeGoal(unit){
   if(unit.task?.type==='combat-position')return unit.combatDeployment?.goal??unit.combatDeployment?.slot??unit.path?.at(-1);
   return unit.routeOrder?.destination??unit.yieldReturn?.home??unit.path?.at(-1);
@@ -291,6 +292,8 @@ export class PredictiveTraffic extends TrafficCoordinator{
     const facade=Object.create(mission);facade.nav=this[navKey];
     job.source={...job.unit,path:job.unit.path.map(point=>({...point}))};
     const obstacles=mission.state.units.map(body=>({id:body.id,kind:body.kind,hp:body.hp,owner:body.owner,trafficOnScreen:body.trafficOnScreen,
+     commandRevision:body.commandRevision,trafficPassThrough:body.trafficPassThrough&&structuredClone(body.trafficPassThrough),
+     factoryVisit:body.factoryVisit&&{phase:body.factoryVisit.phase},
      x:body.x,y:body.y,heading:body.heading,path:body.path?.length?[{}]:[]}));
     job.iterator=job.make?job.make(facade,job.source)
      :facade.vehiclePathSteps(job.source,job.goal,{avoidMoving:true,maxGoalDistance:.01,fallback:true,obstacles});
@@ -581,10 +584,15 @@ export class PredictiveTraffic extends TrafficCoordinator{
   const initialCost=motionCost(unit);
   const backingArrival=final&&remaining<radius*2&&Math.abs(turn)>Math.PI/2;
   const nearby=mission.nearbyUnits(unit,100).filter(other=>other!==unit&&other.hp>0);
-  const visibility=[[unit,unit.trafficOnScreen],...nearby.map(other=>[other,other.trafficOnScreen])];
+  const visible=unit.trafficOnScreen,neighbours=[];
+  const bodies=nearby.map(other=>{
+   const collides=trafficCollisionRequired(unit,other);
+   if(collides)neighbours.push(other);
+   return [other,other.trafficOnScreen,collides];
+  });
   const current=()=>mission.state===world&&mission.nav.topologyRevision===topology&&unit.hp>0&&!unit.pendingOrder&&unit.x===origin.x&&unit.y===origin.y
-   &&unit.heading===origin.heading&&this.routeIntent(unit)===intent&&visibility.every(([body,visible])=>body.trafficOnScreen===visible);
-  const neighbours=nearby.filter(other=>trafficCollisionRequired(unit,other));
+   &&unit.heading===origin.heading&&this.routeIntent(unit)===intent&&unit.trafficOnScreen===visible
+   &&bodies.every(([body,wasVisible,collides])=>body.trafficOnScreen===wasVisible&&trafficCollisionRequired(unit,body)===collides);
   const forecasts=neighbours.map(other=>{
    const key=[other.x,other.y,other.heading,other.kind,other.driveSpeed,other.reversing,other.steering,
     other.steeringRequested,other.steeringFault?.episodes,mission.state.time,dt,scale];

@@ -1,3 +1,4 @@
+import {safeSalvageColor} from './salvage-paint.js';
 import {GLTFLoader} from '../demo/vendor/loaders/GLTFLoader.js';
 import {createConstructionProjector} from './construction-projector.js';
 import {createConstructionScanner} from './construction-scanner.js';
@@ -39,7 +40,7 @@ export class PoseBatch{
   const mesh=new T.InstancedMesh(geometry,material,capacity);
   // Painted metal has its own shared tint stream. All other primitives keep
   // the general tint, so paint changes cannot tint glass, rubber or lights.
-  const painted=profile.paintable&&isVehiclePaintMaterial(material);
+  const painted=profile.paintable&&(isVehiclePaintMaterial(material)||material.name==='salvage_hood_paint');
   if(painted)this.paintAttribute??=new T.InstancedBufferAttribute(new Float32Array(capacity*3),3).setUsage(T.DynamicDrawUsage);
   mesh.instanceColor=painted?this.paintAttribute:this.colorAttribute;
   if(baked)mesh.instanceMatrix=this.rigidMatrix??=new T.InstancedBufferAttribute(new Float32Array(capacity*16),16).setUsage(T.DynamicDrawUsage);
@@ -145,7 +146,7 @@ export async function createVehicleLayer(T,scene,field,config,damage,onLoaded=()
  const scavModels=new Map(Object.keys(SCAV_PROFILES).filter(kind=>config.units[kind]).map(kind=>[kind,createScavUnit(T,kind)]));
  const infantryParts={0:{name:'person',material:'equipment',strength:10000},9:{name:'rifle',material:'equipment',strength:10000}};
  const scavBatches=new Map([...scavModels].map(([kind,model])=>[kind,new PoseBatch(T,root,model.root,capacity,damage,model.info.infantry?'equipment':'body',0,{cageBounds:model.info.bounds,parts:model.info.infantry?infantryParts:undefined})]));
- const modBatches=Object.entries(FIELD_RECIPES).map(([id,recipe])=>({id,recipe,batch:new PoseBatch(T,root,createFieldModification(T,id),capacity,damage,'body')}));
+ const modBatches=Object.entries(FIELD_RECIPES).map(([id,recipe])=>({id,recipe,batch:new PoseBatch(T,root,createFieldModification(T,id,{paintColor:'#ffffff'}),capacity,damage,'body',0,{paintable:true})}));
  const modularBindings=[...lods[0].flatMap(entry=>entry.batch.parts.map(p=>p.binding)),...modBatches.flatMap(m=>m.batch.parts.map(p=>p.binding))];
  function damagePose(bindings,kind){
   const animated=bindings.filter(b=>b.dynamic),matrices=new Map(animated.map(b=>[b,new T.Matrix4()])),inverses=new Map(animated.map(b=>[b,b.bind.clone().invert()]));
@@ -176,7 +177,7 @@ export async function createVehicleLayer(T,scene,field,config,damage,onLoaded=()
  const extras=[builderBatch,gunBatch,flameBatch,commandBatch,raiderBatch,...scavBatches.values(),...modBatches.map(m=>m.batch)];
  const transforms=new Map(),muzzles=new Map(),visible=[],workBeams=[],contacts=[];
  const contactShadows=createVehicleContactShadows(T,scene,field,scale);
- const dummy=new T.Object3D(),color=new T.Color(),matrix=new T.Matrix4(),contact=new T.Vector3();
+ const dummy=new T.Object3D(),color=new T.Color(),scrapColor=new T.Color(),matrix=new T.Matrix4(),contact=new T.Vector3();
  const paintTints=new Map(VEHICLE_PAINTS.map(paint=>[paint.id,vehiclePaintTint(T,paint)]));
  const turnDelta=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
  let activeLod=1;
@@ -229,7 +230,7 @@ export async function createVehicleLayer(T,scene,field,config,damage,onLoaded=()
     return T.MathUtils.clamp((field.heightAt(contact.x,contact.y)-contact.z)/Math.max(1,matrix.elements[10]),-.11,.11);
    };
    const custom=scavModels.get(unit.kind)??(unit.kind==='command'?command:unit.kind==='raider'?raider:null);
-   if(!custom)for(const mod of modBatches)if(modificationInstalled(unit,mod.recipe.part)){color.setRGB(1,1,1);mod.batch.add(matrix,color,{},damageInfo);}
+   if(!custom)for(const mod of modBatches)if(modificationInstalled(unit,mod.recipe.part)){color.setRGB(1,1,1);scrapColor.set(safeSalvageColor(unit.fieldModifications?.[mod.id]?.paintColor));mod.batch.add(matrix,color,{},damageInfo,null,scrapColor);}
    if(custom&&!custom.scav){
     for(const wheel of custom.wheels){wheel.wheel.rotation.x=spin;wheel.steer.rotation.z=wheel.front?steer:0;wheel.steer.position.z=.43+suspensionDelta(wheel.steer.position.x,wheel.steer.position.y);}
    }else if(!custom){

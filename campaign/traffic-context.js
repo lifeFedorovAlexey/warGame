@@ -15,7 +15,7 @@ export const trafficBodyKey=u=>JSON.stringify([trafficPoseKey(u),u.hp>=u.maxHp,
  u.traffic,u.trafficHold,u.passage,u.passingLane,u.yieldReturn,u.jointTraffic,u.cycleContinuation,u.tool,u.foldTime,
  u.builderWorking,u.combatPolicy,retreatIntent(u),u.combatDeployment,u.combatResume]);
 export const trafficReservationKey=(mission,u)=>JSON.stringify([
- u.detour?.reservedCorridor,u.traffic,u.jointTraffic,u.passage,
+ u.detour?.reservedCorridor,u.traffic,u.jointTraffic,u.passage,u.factoryVisit?.phase,u.trafficPassThrough,
  mission.trafficCoordinator?.decisions?.get(u.id),mission.trafficCoordinator?.passageDecisions?.get(u.id)]);
 export const trafficConditionKey=(mission,u)=>trafficBodyKey(u)+'|'+trafficReservationKey(mission,u);
 export function trafficRequestKey(mission,type,ids){

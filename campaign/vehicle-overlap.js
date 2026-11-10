@@ -1,4 +1,4 @@
-import {vehicleEnvelope} from './vehicle-collision.js';
+import {vehicleEnvelope,trafficCollisionRequired} from './vehicle-collision.js';
 import {isInfantry} from './scav-unit-profiles.js';
 import {navigationDecision} from './navigation-state.js';
 
@@ -14,8 +14,7 @@ export function bodyContact(a,b){
  }return best;
 }
 const inDoor=u=>['entering','inside','leaving'].includes(u.factoryVisit?.phase);
-const bodyCollisionRequired=(a,b)=>!inDoor(a)&&!inDoor(b)&&!(a.owner==='rai'&&b.owner==='rai'
- &&a.trafficOnScreen===false&&b.trafficOnScreen===false&&!isInfantry(a)&&!isInfantry(b));
+const bodyCollisionRequired=(a,b)=>!inDoor(a)&&!inDoor(b)&&trafficCollisionRequired(a,b);
 
 // A camera returning to off-screen pass-through traffic can reveal overlaps.
 // Solve only existing penetration. Corrections are bounded physical translation
@@ -30,7 +29,7 @@ export function* resolveVehicleOverlapsSteps(mission,dt,onMoved=()=>{}){
  const world=mission.state,topology=mission.nav.topologyRevision,unitCount=world.units.length;
  const levelAt=(x,y)=>mission.nav.terrainAllowed.levelAt?.(x,y)??(mission.nav.terrainAllowed(x,y)?0:-1);
  const entry=u=>{let p=poses.get(u);if(!p){p={unit:u,x:u.x,y:u.y,heading:u.heading,kind:u.kind,
-  ox:u.x,oy:u.y,visible:u.trafficOnScreen,mobile:!isInfantry(u)};poses.set(u,p);}return p;};
+  ox:u.x,oy:u.y,visible:u.trafficOnScreen,revision:u.commandRevision,passage:u.trafficPassThrough,mobile:!isInfantry(u)};poses.set(u,p);}return p;};
  for(const unit of bodies){
   if(isInfantry(unit))continue;
   if(performance.now()>=mission.nav.workDeadline){account();yield;sliceAt=performance.now();}
@@ -120,7 +119,8 @@ export function* resolveVehicleOverlapsSteps(mission,dt,onMoved=()=>{}){
  }
  if(mission.state!==world||mission.nav.topologyRevision!==topology||world.units.length!==unitCount
   ||[...poses.values()].some(p=>p.unit.hp<=0||p.unit.kind!==p.kind||p.unit.x!==p.ox||p.unit.y!==p.oy
-  ||p.unit.heading!==p.heading||p.unit.trafficOnScreen!==p.visible)){account();return;}
+  ||p.unit.heading!==p.heading||p.unit.trafficOnScreen!==p.visible
+  ||p.unit.commandRevision!==p.revision||p.unit.trafficPassThrough!==p.passage)){account();return;}
  for(const p of moved){
   const unit=p.unit,dx=(p.x-p.ox)*accepted,dy=(p.y-p.oy)*accepted;
   if(!unit.overlapRecovery){unit.overlapRecovery={since:mission.state.time};mission.emit('navigation-overlap-started',{unit:unit.id,x:unit.x,y:unit.y});}

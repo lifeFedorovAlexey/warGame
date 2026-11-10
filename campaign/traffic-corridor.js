@@ -68,18 +68,18 @@ function preparedSweep(mission,segment){
 function* reservations(mission,unit){
  let index=active.get(mission);
  if(!index||index.state!==mission.state||index.time!==mission.state.time){
-  index={state:mission.state,time:mission.state.time,owners:mission.state.units.filter(u=>u.detour?.reservedCorridor||u.traffic?.cycle&&u.traffic.passageCorridor)};
+  index={state:mission.state,time:mission.state.time,owners:mission.state.units.filter(u=>u.factoryVisit?.entryCorridor||u.detour?.reservedCorridor||u.traffic?.cycle&&u.traffic.passageCorridor)};
   active.set(mission,index);
  }
  for(const owner of index.owners){
-  const state=owner.traffic,local=owner.detour?.reservedCorridor,corridor=local??state?.passageCorridor;
+  const state=owner.traffic,local=owner.detour?.reservedCorridor??owner.factoryVisit?.entryCorridor,corridor=local??state?.passageCorridor;
   if(!corridor||!local&&(!state?.cycle||state.passageComplete)||owner.hp<=0||owner.pendingOrder||owner.owner!==unit.owner
    ||owner.id===unit.id||!local&&state.leader===unit.id)continue;
   if(owner.detour?.joint){
    const joint=jointPlanFor(mission,owner);
    if(!joint||joint.plan.members.some(member=>member.id===unit.id))continue;
   }
-  if(local&&owner.detour.cooperativeYield===unit.id&&(owner.detour.cooperativeBackoff||unit.detour?.idleYield&&!unit.detour.yieldReturning)
+  if(local&&owner.detour?.cooperativeYield===unit.id&&(owner.detour.cooperativeBackoff||unit.detour?.idleYield&&!unit.detour.yieldReturning)
    &&unit.yieldReturn?.cooperativeRequester?.id===owner.id)continue;
   const leader=local?owner:mission.entity(state.leader);
   if(!leader||leader.hp<=0||leader.pendingOrder||!local&&leader.cycleContinuation!==owner.id)continue;

@@ -60,17 +60,21 @@ export function checkBuildingPlacement(mission,kind,x,y,angle=0,{checkMoney=true
  if(spec.requires&&!mission.state.research[spec.requires])return fail('Требуется исследование: '+config.research[spec.requires].name);
  if(checkMoney&&!mission.canSpend(spec.cost))return fail('Недостаточно нефти');
  if(!mission.inBounds(x,y)||!mission.exploredAt(x,y))return fail('Район ещё не разведан');
- const heights=[];
- for(const dx of [-halfWidth,0,halfWidth])for(const dy of [-halfDepth,0,halfDepth]){
-  if(!mission.inBounds(x+dx,y+dy)||!mission.exploredAt(x+dx,y+dy))return fail('Пятно застройки выходит за разведанный район');
-  const slope=field.gradientAt(x+dx,y+dy);
-  if(Math.hypot(slope.x,slope.y)>config.maxBuildingGrade)return fail('Слишком крутой склон');
-  heights.push(field.heightAt(x+dx,y+dy));
+ const maxGrade=spec.maxBuildingGrade??config.maxBuildingGrade;
+ const samples=kind==='factory'?[-1,-.5,0,.5,1]:[-1,0,1];
+ let low=Infinity,high=-Infinity;
+ for(const dx of samples)for(const dy of samples){
+  const px=x+dx*halfWidth,py=y+dy*halfDepth;
+  if(!mission.inBounds(px,py)||!mission.exploredAt(px,py))return fail('Пятно застройки выходит за разведанный район');
+  const slope=field.gradientAt(px,py);
+  if(Math.hypot(slope.x,slope.y)>maxGrade)return fail('Слишком крутой склон');
+  const height=field.heightAt(px,py);
+  low=Math.min(low,height);high=Math.max(high,height);
  }
- site.height=Math.max(...heights);
+ site.height=high;
  // Dimensions are authored in model metres, while terrain heights use the
- // scaled world. Small height differences are taken up by the footing.
- if(site.height-Math.min(...heights)>(config.maxBuildingReliefMetres??1.5)*config.worldScale)return fail('Слишком большой перепад высоты');
+ // scaled world. The concrete footing takes up the difference under the hall.
+ if(high-low>(spec.maxBuildingReliefMetres??config.maxBuildingReliefMetres??1.5)*config.worldScale)return fail('Слишком большой перепад высоты');
  if(!spec.requiresOil)for(const grid of config.oilFields){
   const oil={...field.gridToWorld(grid),halfWidth:config.worldScale*5+5,halfDepth:config.worldScale*5+5};
   if(rectanglesOverlap(site,oil))return fail('Нефтяной участок зарезервирован для вышки');
@@ -103,6 +107,16 @@ export function checkBuildingPlacement(mission,kind,x,y,angle=0,{checkMoney=true
  if(kind==='factory'){
   const access=planFactoryAccess(mission,site);site.accessRoads=access.roads;
   if(!access.ok)return fail(access.reason);
+  // A deeper footing can support the hall on a cross slope. Both thresholds
+  // still need to be close to the ground across the full driveway width.
+  const maxGateRelief=(spec.maxGateReliefMetres??Infinity)*config.worldScale;
+  for(const road of access.roads){
+   const door=road.points[0];
+   for(const side of [-.5,0,.5]){
+    const ground=field.heightAt(door.x+side*road.width*c,door.y+side*road.width*s);
+    if(Math.abs(high-ground)>maxGateRelief)return fail('Слишком большой перепад высоты у ворот завода');
+   }
+  }
  }
  return {...site,ok:true};
 }

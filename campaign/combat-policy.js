@@ -1,9 +1,10 @@
 import {expandCommandIds} from './group-command.js';
 import {isCampPerimeter} from './camp-demolition.js';
 import {rememberRetreatOrder,factoryCanRepair} from './factory-repair.js';
-import {updateFactoryVisit} from './factory-garage.js';
-import {chooseRepairFactory,repairChoiceDue} from './factory-routing.js';
+import {factoryVisitors,updateFactoryVisit} from './factory-garage.js';
+import {chooseRepairFactory,needsFactoryVisit,repairChoiceDue} from './factory-routing.js';
 import {shouldAutoRetreat,isAutomaticRepair,inFactoryInterior} from './combat-retreat-state.js';
+import {navigationDecision} from './navigation-state.js';
 export {shouldAutoRetreat} from './combat-retreat-state.js';
 
 // Units carry a serializable copy of the army's rules, including factory output.
@@ -226,6 +227,77 @@ function* currentRetreatSteps(iterator,current){
   return null;
  }finally{iterator.return();}
 }
+
+function repairBlocker(mission,unit,factory){
+  const owner=factoryVisitors(mission,factory).find(other=>other!==unit&&
+    ['gate','entering'].includes(other.factoryVisit.phase));
+  return owner?.id??null;
+}
+
+function withdrawalPoints(origin,home,away,travel,turns=[0,.45,-.45,.9,-.9,1.35,-1.35]){
+  const pointAt=angle=>({x:origin.x+Math.cos(angle)*travel,y:origin.y+Math.sin(angle)*travel});
+  const escape=turns.map(turn=>pointAt(away+turn));
+  const startDistance=distance(origin,home);
+  const advances=point=>distance(point,home)<startDistance;
+  const preferred=escape.filter(advances);
+  const bearing=Math.atan2(home.y-origin.y,home.x-origin.x);
+  for(const turn of [0,.45,-.45]){
+    const point=pointAt(bearing+turn);
+    if(advances(point)&&!preferred.some(other=>distance(point,other)<.01))preferred.push(point);
+  }
+  preferred.sort((a,b)=>distance(a,home)-distance(b,home));
+  return [...preferred,...escape.filter(point=>!advances(point))];
+}
+
+function* withdrawalDetour(mission,unit,spec,home,current){
+  const scale=mission.config.worldScale;
+  const range=Math.max(spec.vision??0,spec.range??0,unit.lastHostileHit?.range??0,scale*30);
+  const known=[];
+  let threat,exposure=0;
+  for(const enemy of [...mission.nearbyUnits(unit,range,unit.owner),...mission.state.buildings]){
+    if(!mission.enemyOf(unit,enemy)||!mission.visibleAt(enemy.x,enemy.y))continue;
+    const weapon=mission.config.units[enemy.kind]??mission.buildingSpec(enemy);
+    if(!weapon.damage||!(weapon.range>0))continue;
+    const contact={x:enemy.x,y:enemy.y,range:weapon.range};
+    known.push(contact);
+    const danger=weapon.range-distance(unit,enemy);
+    if(danger>=exposure&&mission.lineOfSight(enemy,unit)){threat=contact;exposure=danger;}
+  }
+  if(!threat)return null;
+  const origin={x:unit.x,y:unit.y};
+  const angle=Math.atan2(origin.y-threat.y,origin.x-threat.x);
+  const travel=Math.max(scale*18,exposure+scale*10);
+  const safe=point=>known.every(enemy=>distance(point,enemy)>enemy.range+scale*5);
+  const startDistance=distance(origin,home);
+  let fallback=null;
+  for(const point of withdrawalPoints(origin,home,angle,travel)){
+    const towardsBase=distance(point,home)<startDistance;
+    if(!towardsBase&&fallback)return fallback;
+    if(!mission.inBounds(point.x,point.y)||!mission.exploredAt(point.x,point.y)||!safe(point))continue;
+    yield;
+    if(!current())return null;
+    const path=yield* currentRetreatSteps(mission.vehiclePathSteps(unit,point,{avoidMoving:true,fallback:false,maxGoalDistance:scale}),current);
+    if(!current())return null;
+    if(!path?.length||!safe(path.at(-1)))continue;
+    let from=origin;
+    let approachesEnemy=false;
+    for(const to of path){
+      const dx=to.x-from.x,dy=to.y-from.y,length=dx*dx+dy*dy;
+      if(known.some(enemy=>{
+        const t=length?Math.max(0,Math.min(1,((enemy.x-from.x)*dx+(enemy.y-from.y)*dy)/length)):0;
+        const closest={x:from.x+t*dx,y:from.y+t*dy};
+        return distance(closest,enemy)<Math.min(distance(origin,enemy),enemy.range)-scale*2;
+      })) {approachesEnemy=true;break;}
+      from=to;
+    }
+    if(approachesEnemy)continue;
+    if(!towardsBase||distance(path.at(-1),home)<startDistance)return path;
+    // The navigator may offset the requested endpoint. Keep a safe escape
+    // while checking whether the remaining candidates can still gain ground.
+    fallback??=path;
+  }
+  return fallback;
+}
 // Uses the existing yielding path search and swept vehicle movement. A retreat
 // never jumps the vehicle to a point or disables collision checks.
 export function* updateCombatRetreat(mission, unit, spec, dt) {
@@ -245,14 +317,59 @@ export function* updateCombatRetreat(mission, unit, spec, dt) {
     // changes the service destination, including while already en route.
     if(unit.factoryVisit&&['approach','waiting'].includes(unit.factoryVisit.phase))delete unit.factoryVisit;
     if(existingBase&&replacement.id!==existingBase.id)mission.emit('factory-repair-rerouted',{unit:unit.id,from:existingBase.id,to:replacement.id});
-    clearMotion(unit);retreat.home=replacement;retreat.status='planning';
-    delete retreat.destination;delete retreat.phase;delete retreat.service;
-    delete retreat.failedSignature;
+    retreat.home=replacement;
+    if(retreat.phase!=='cover'){
+      clearMotion(unit);retreat.status='planning';
+      delete retreat.destination;delete retreat.phase;delete retreat.service;
+      delete retreat.failedSignature;
+    }
   }
   const serviceBase=retreat.home?.id&&mission.entity(retreat.home.id);
-  // Garage queues may extend beyond the repair radius. Their waiting spots
-  // are validated by factoryWaitingPoint against the apron and topology;
-  // applying the service radius here cancelled the same route every tick.
+  const garage=serviceBase?.kind==='factory'&&(unit.factoryVisit||retreat.service!=='complete'&&needsFactoryVisit(unit,serviceBase));
+  const inCover=retreat.phase==='cover';
+  const busy=garage?repairBlocker(mission,unit,serviceBase):null;
+  const stalled=unit.navigation?.waitSeconds>=.6||retreat.status==='blocked';
+  const stoppedInCover=inCover&&!unit.path.length;
+  // A vehicle in the doorway finishes that checked transfer. Outside, keep
+  // the old route until an alternative has been found.
+  const visit=unit.factoryVisit;
+  if(!inFactoryInterior(unit)&&visit?.phase!=='departure'&&!unit.detour&&!unit.yieldReturn&&!unit.jointTraffic
+    &&(stalled||stoppedInCover||busy&&!inCover)&&mission.state.time>=(retreat.nextCoverSearchAt??0)){
+    retreat.nextCoverSearchAt=mission.state.time+1.5;
+    const topology=mission.nav.topologyRevision,{x,y,heading}=unit;
+    const valid=()=>current()&&unit.factoryVisit===visit&&mission.nav.topologyRevision===topology&&unit.x===x&&unit.y===y&&unit.heading===heading;
+    const path=yield* currentRetreatSteps(withdrawalDetour(mission,unit,spec,retreat.home,valid),valid);
+    if(!valid())return true;
+    if(path){
+      if(serviceBase?.garageGate===unit.id)delete serviceBase.garageGate;
+      delete unit.factoryVisit;
+      clearMotion(unit);
+      delete retreat.failedSignature;
+      delete retreat.service;
+      retreat.destination={...path.at(-1)};
+      retreat.phase='cover';
+      retreat.status='moving';
+      unit.path=path;
+      unit.task={type:'move',...retreat.destination};
+      unit.routeOrder={revision:2,type:'retreat',request:{...retreat.destination},destination:{...retreat.destination}};
+      mission.emit('retreat-detour',{unit:unit.id,blocker:busy??unit.navigation?.blockerId??null,destination:retreat.destination});
+    }
+  }
+  if(retreat.phase==='cover'){
+    if(unit.path.length||unit.detour||unit.yieldReturn){
+      yield* currentRetreatSteps(mission.moveSteps(unit,dt),current);
+      return true;
+    }
+    if(busy){
+      unit.driveSpeed=0;
+      navigationDecision(unit,'WAITING_RESERVATION','retreat-cover-until-repair-free',busy,'resume-repair');
+      return true;
+    }
+    delete retreat.phase;
+    delete retreat.destination;
+    retreat.status='planning';
+  }
+  // The garage uses checked doorway routes, independent of the repair radius.
   if(serviceBase?.kind!=='factory'&&retreat.phase==='home'&&retreat.destination&&serviceBase&&mission.buildingSpec(serviceBase).repair
    &&!factoryCanRepair(mission,serviceBase,retreat.destination)){
     const rejected={...retreat.destination};clearMotion(unit);retreat.status='planning';
@@ -260,7 +377,12 @@ export function* updateCombatRetreat(mission, unit, spec, dt) {
     mission.emit('navigation-retreat-destination-rejected',{unit:unit.id,factory:serviceBase.id,
      destination:rejected,reason:'outside-factory-apron'});
   }
-  if(serviceBase?.kind==='factory'&&(unit.factoryVisit||retreat.service!=='complete'))return yield* updateFactoryVisit(mission,unit,serviceBase,dt);
+  // An existing visit owns physical space at the door or inside the hall.
+  // Healthy arrivals use the exterior retreat positions unless the factory
+  // was explicitly configured for modernization.
+  if(garage){
+    return yield* updateFactoryVisit(mission,unit,serviceBase,dt);
+  }
   if(retreat.status==='blocked'||retreat.status==='planning'){
     const home=retreatHome(mission,unit);
     if(home.id!==retreat.home.id||home.x!==retreat.home.x||home.y!==retreat.home.y){retreat.home=home;delete retreat.failedSignature;}
@@ -310,11 +432,10 @@ export function* updateCombatRetreat(mission, unit, spec, dt) {
     }
     const safe=point=>distance(point,threat)>Math.max(distance(unit,threat)+scale*8,threat.range+scale*5)
       &&known.every(enemy=>distance(point,enemy)>enemy.range+scale*5);
-    for(const turn of threat?[0,.4,-.4,.8,-.8,1.2,-1.2]:[]) {
-      if(home)break;
+    const escapeGoals=threat&&!home?withdrawalPoints(unit,retreat.home,angle,travel,[0,.4,-.4,.8,-.8,1.2,-1.2]):[];
+    for(const goal of escapeGoals) {
       yield;
       if(!planningCurrent())return true;
-      const goal={x:unit.x+Math.cos(angle+turn)*travel,y:unit.y+Math.sin(angle+turn)*travel};
       if(!mission.inBounds(goal.x,goal.y)||!mission.exploredAt(goal.x,goal.y)||!safe(goal))continue;
       const path=yield* currentRetreatSteps(mission.vehiclePathSteps(unit,goal,{fallback:false,maxGoalDistance:8}),planningCurrent);
       if(!planningCurrent())return true;

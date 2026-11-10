@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {Mission} from '../campaign/mission.js';
-import {vehicleClearance} from '../campaign/vehicle-collision.js';
+import {trafficCollisionRequired,vehicleClearance} from '../campaign/vehicle-collision.js';
 import {factoryPoint,setFactoryPriority,insideFactory,factoryPriority} from '../campaign/factory-garage.js';
 function progressMission(){
  const config=JSON.parse(fs.readFileSync('assets/campaign/alpha/mission01/gameplay.json','utf8'));
@@ -15,7 +15,8 @@ function step(m,cars,seconds=.1){
  const visible=cars.filter(u=>u.hp>0&&!insideFactory(u));
  assert(visible.filter(u=>['gate','entering'].includes(u.factoryVisit?.phase)).length<=1,'One vehicle owns the entrance');
  assert(visible.filter(u=>['leaving','departure'].includes(u.factoryVisit?.phase)).length<=1,'One vehicle owns the exit');
- for(let i=0;i<visible.length;i++)for(let j=0;j<i;j++)assert(vehicleClearance(visible[i],visible[j],m.config.worldScale,m.field)>0,'Cars outside never overlap');
+ for(let i=0;i<visible.length;i++)for(let j=0;j<i;j++)if(trafficCollisionRequired(visible[i],visible[j]))
+  assert(vehicleClearance(visible[i],visible[j],m.config.worldScale,m.field)>0,'Cars outside can overlap only with an active exemption');
 }
 const m=progressMission();m.state.energy=2000;
 const f=m.addStructure('factory','rai',{x:0,y:0},{completed:true,progress:1});
@@ -31,6 +32,14 @@ const start=performance.now();let admitted=false,productionPriorityChecks=0;
 for(let i=0;i<2500&&performance.now()-start<55000;i++){
  const before= cars.map(u=>u.hp),producing=f.queue.length>0;
  step(m,cars);
+ if(i===0){
+  const door=factoryPoint(m,f,0,-18);
+  for(const car of cars){
+   assert.equal(car.factoryVisit?.phase,'approach');
+   assert.deepEqual(car.routeOrder?.destination,door,'Every car starts towards the factory door');
+   assert.equal(car.factoryVisit.waitingPoint,undefined,'No exterior waiting bay is assigned on entry');
+  }
+ }
  if(producing&&f.queue.length){assert.deepEqual(cars.map(u=>u.hp),before,'Production priority defers repairs while production remains queued');productionPriorityChecks++;}
  if(cars.every(insideFactory)){admitted=true;break;}
 }
@@ -56,6 +65,18 @@ for(let i=0;i<100;i++)step(m,cars);
 assert(!f.queue.length||f.queue[0].progress>.2,'Production resumes after the repair queue');
 for(let i=0;i<2000&&copy.state.units.some(u=>u.factoryVisit);i++)step(copy,copy.state.units);
 assert(copy.state.units.every(u=>!u.factoryVisit&&u.hp===u.maxHp),'Saved internal queue resumes and exits: '+JSON.stringify(copy.state.units.map(u=>({id:u.id,hp:u.hp,max:u.maxHp,x:u.x,y:u.y,visit:u.factoryVisit,retreat:u.combatRetreat}))));
+
+// The inside queue must not materialize a repaired vehicle into the turn
+// being used by an incoming car, even when their current hulls are separated.
+const transfer=progressMission();
+const tf=transfer.addStructure('factory','rai',{x:0,y:0},{completed:true,progress:1});
+const ready=transfer.addUnit('bukhanka','rai',factoryPoint(transfer,tf,0,-3));
+const incoming=transfer.addUnit('bukhanka','rai',factoryPoint(transfer,tf,0,-18));
+ready.factoryVisit={garageVersion:2,factoryId:tf.id,phase:'inside',arrived:0,slot:0};
+incoming.factoryVisit={garageVersion:2,factoryId:tf.id,phase:'entering',slot:1};
+incoming.hp=100;
+transfer.rebuildNavigation();step(transfer,[ready,incoming]);
+assert(insideFactory(ready),'Exit waits for the shared turn inside the factory');
 
 // Rotated factories use the authored front gate, with a larger incoming group.
 const rotated=progressMission();rotated.state.energy=2000;
@@ -91,4 +112,4 @@ for(const [i,u] of evac.entries()){Object.assign(u,factoryPoint(destroyed,df,0,-
 destroyed.state.buildings=[];destroyed.rebuildNavigation();
 for(let i=0;i<1000&&evac.some(u=>u.factoryVisit);i++)step(destroyed,evac);
 assert(evac.every(u=>!u.factoryVisit),'Destroyed factory releases all stored vehicles');
-console.log('PASS: internal queue, repair/production priority, preserved production, save restore, eight rotated arrivals without overlap, gate arbitration, destruction evacuation');
+console.log('PASS: direct entry for all cars, internal queue, repair/production priority, save restore, eight rotated arrivals, serialized exit, destruction evacuation');

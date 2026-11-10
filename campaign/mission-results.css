@@ -1,0 +1,125 @@
+@font-face {font-family:Memorial Condensed;src:url('../assets/campaign/personnel/fonts/oswald-variable.ttf') format('truetype');font-weight:200 700;font-display:swap;}
+@font-face {font-family:Memorial Serif;src:url('../assets/campaign/personnel/fonts/literata-variable.ttf') format('truetype');font-weight:200 900;font-display:swap;}
+#result {
+ position:fixed;inset:0;z-index:80;width:100%;max-width:none;height:100dvh;
+ overflow:auto;background:#151b1a;color:#d9d8c9;padding:0;border:0;border-radius:0;box-shadow:none;
+ font-family:"Segoe UI",sans-serif;isolation:isolate;
+}
+#result .memorial-scene {position:absolute;inset:0;width:100%;height:100%;display:block;z-index:-1;outline:0;}
+#result .result-copy {width:min(58%,830px);padding:4.5vh 0 100px 4vw;pointer-events:none;text-shadow:0 1px 3px #0b100e;}
+#result .result-eyebrow {font:400 11px "Memorial Condensed",sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#9eaa9f;margin:0 0 16px;}
+#result h1 {font-family:"Memorial Condensed",sans-serif;font-weight:500;font-size:clamp(33px,4.1vw,64px);line-height:1.12;letter-spacing:.045em;text-transform:uppercase;margin:0 0 14px;color:#e1dece;}
+#result #result-message {font:400 clamp(15px,1.35vw,20px) "Memorial Serif",Georgia,serif;color:#b6b8a8;margin:0 0 5vh;}
+#result h2 {font-family:"Memorial Condensed",sans-serif;font-weight:400;font-size:clamp(17px,1.55vw,23px);letter-spacing:.075em;text-transform:uppercase;margin:0 0 18px;color:#bdc6b8;}
+#result .result-columns {display:grid;grid-template-columns:1.12fr 1fr;gap:3.2vw;}
+#result .result-section {margin:0 0 4.5vh;}
+#result dl {margin:0;}
+#result dl>div {display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:8px 0;}
+#result dt {color:#adb4aa;font-size:clamp(12px,1.1vw,16px);}
+#result dd {margin:0;white-space:nowrap;font:400 clamp(19px,1.8vw,27px) "Memorial Condensed",sans-serif;font-variant-numeric:tabular-nums;color:#e0d8bd;}
+#result .result-rank {display:grid;grid-template-columns:22px 1fr auto;gap:10px;align-items:center;min-height:35px;font-size:clamp(12px,1.05vw,15px);color:#adb4aa;}
+#result .rank-insignia {width:18px;height:48px;color:#b4a57d;vertical-align:middle;}
+#result .result-rank b {font:400 21px "Memorial Condensed",sans-serif;color:#d9d4bf;}
+#result .personnel-rank-honours {display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap;font:400 11px/1.45 "Segoe UI",sans-serif;color:#b4a57d;margin-left:6px;pointer-events:auto;cursor:help;}
+#result .result-muted,#result-history-note {font-size:12px;line-height:1.6;color:#97a197;}
+#result-history-note {max-width:480px;}
+#result-honours>div {display:flex;flex-wrap:wrap;gap:12px 25px;}
+#result .result-honour {display:flex;gap:9px;align-items:center;margin:0;font-size:12px;line-height:1.5;max-width:100%;overflow-wrap:anywhere;}
+#result .result-honour>span:first-child {display:flex;color:#c9b47b;flex:none;}
+#result .result-honour .personnel-award-icon {width:24px;height:30px;}
+#result .result-honour strong {display:block;font-weight:400;color:#c9c8b5;}
+#result .result-honour strong+span {display:block;color:#a7b1a1;}
+#result #result-honours>div {flex-direction:column;gap:14px;}
+#result .result-rank .rank-insignia {width:20px;height:28px;}
+@media(min-width:1100px){
+ #result .result-many-ranks {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 12px;}
+ #result .result-many-ranks .result-rank {grid-template-columns:20px minmax(0,1fr) auto;gap:6px;font-size:12px;}
+ #result .result-many-ranks .personnel-rank-honours {margin-left:0;}
+}
+#result .result-actions {position:fixed;bottom:22px;left:4vw;display:flex;gap:24px;align-items:center;}
+#result button {width:48px;height:48px;padding:4px;border:0;border-radius:0;box-shadow:none;background:none;}
+#result button:hover {background:none;filter:brightness(1.3);}
+#result button .game-icon {width:40px;height:40px;}
+#result button:focus-visible {outline:0;filter:brightness(1.6);}
+#result-person {position:absolute;right:auto;bottom:auto;pointer-events:none;text-align:left;text-shadow:0 1px 3px #080f0d,0 2px 8px #080f0dcc;z-index:3;}
+#result-person h3 {font:400 29px/1.15 "Memorial Condensed",sans-serif;letter-spacing:.045em;text-transform:uppercase;margin:0 0 4px;color:#e6dfc8;overflow-wrap:anywhere;}
+#result-person .result-person-callsign {font:400 16px "Memorial Condensed",sans-serif;letter-spacing:.04em;color:#c4baa0;margin:0 0 9px;}
+#result-person p {font-size:12px;line-height:1.4;margin:4px 0;color:#c3c8ba;}
+#result-person .result-person-unit {display:flex;align-items:center;gap:7px;margin:0 0 5px;}
+#result-person .result-person-service {margin:0;}
+#result-person .result-person-rank {display:flex;align-items:center;}
+#result-person .rank-insignia {width:18px;height:50px;}
+#result-empty {position:absolute;right:6vw;bottom:22vh;font:400 18px "Memorial Serif",serif;pointer-events:none;text-shadow:0 2px 4px #000;color:#c2b59a;}
+#result-campaign-end {max-width:260px;color:#b9b09a;font-size:13px;}
+@media(max-width:1000px) {
+ #result .result-columns {grid-template-columns:1fr;gap:0;}#result .result-copy {width:48%;}
+ #result .result-section {margin-bottom:2.2vh;}#result .result-rank {display:inline-grid;grid-template-columns:18px auto auto;margin-right:16px;gap:6px;}
+ #result .result-rank .rank-insignia {width:18px;height:28px;}#result h2 {margin-bottom:8px;}#result #result-message {margin-bottom:22px;}
+}
+@media(max-width:700px) {
+ #result {display:flex;flex-direction:column;background:#151b1a url('../assets/campaign/personnel/memorial-hill-calm-v4.png') left top / auto 100vh no-repeat;}
+ #result .result-copy {width:100%;padding:24px 22px 12px;}#result .result-eyebrow {font-size:9px;margin-bottom:12px;}
+ #result h1 {font-size:31px;letter-spacing:.025em;}#result #result-message {font-size:14px;margin-bottom:24px;}
+ #result .result-columns {grid-template-columns:1fr 1fr;gap:20px;}#result .result-section {margin-bottom:24px;}#result h2 {font-size:17px;letter-spacing:.045em;}
+ #result dl>div {gap:8px;align-items:center;}#result dt {font-size:12px;}#result dd {font-size:19px;}
+ #result .result-rank {display:grid;grid-template-columns:14px 1fr auto;font-size:12px;margin:0;gap:5px;}
+ #result .result-rank .rank-insignia {width:14px;height:26px;}#result .result-rank b {font-size:18px;}
+ #result .memorial-scene {position:relative;inset:auto;z-index:0;width:100%;height:55vh;min-height:360px;flex-shrink:0;}
+ #result .result-actions {position:relative;left:auto;bottom:auto;padding:12px 22px 20px;gap:22px;background:none;}
+ #result-person h3 {font-size:27px;}#result-person p {font-size:12px;}#result-person .result-person-callsign {font-size:15px;margin-bottom:7px;}
+ #result-empty {position:static;font-size:14px;text-align:center;margin:0;padding:10px;}
+ #result-history-note {margin-bottom:0;}#result-campaign-end {font-size:11px;max-width:170px;}
+}
+@media(prefers-reduced-motion:reduce){#result *{animation:none;transition:none;}}
+
+/* Fixed viewport report: every populated rank remains visible, no paging or scroll. */
+#result {display:block;overflow:hidden;}
+#result .result-copy {position:absolute;top:3vh;left:3vw;bottom:82px;width:57vw;padding:0;display:flex;flex-direction:column;min-height:0;}
+#result .result-eyebrow,#result .result-section:has(#result-enemies)>h2 {display:none;}
+#result h1 {font-size:clamp(30px,3.5vw,54px);line-height:1.1;margin-bottom:9px;}
+#result #result-message {font-size:clamp(13px,1.2vw,18px);line-height:1.3;margin-bottom:24px;}
+#result h2 {font-size:clamp(15px,1.3vw,21px);line-height:1.2;letter-spacing:.04em;margin-bottom:10px;}
+#result .result-columns {display:grid;grid-template-columns:1.12fr 1fr;gap:3vw;min-height:0;flex:1;}
+#result .result-columns>div {display:flex;flex-direction:column;gap:20px;min-width:0;min-height:0;}
+#result .result-section {margin:0;min-width:0;flex:none;}
+#result .result-section:has(#result-survivor-ranks),#result .result-section:has(#result-loss-ranks) {display:flex;flex-direction:column;min-height:0;flex:1;}
+#result dl>div {align-items:center;gap:12px;padding:5px 0;}#result dt {font-size:clamp(11px,1vw,15px);}#result dd {font-size:clamp(18px,1.7vw,26px);}
+#result #result-survivor-ranks,#result #result-loss-ranks {display:grid;grid-template-columns:repeat(auto-fill,minmax(58px,1fr));grid-auto-rows:minmax(28px,40px);gap:6px 10px;align-content:start;min-height:0;pointer-events:auto;}
+#result .result-rank,#result .result-many-ranks .result-rank {display:flex;align-items:center;gap:8px;min-width:0;min-height:0;margin:0;cursor:help;}
+#result .result-rank>span:nth-child(2) {display:none;}
+#result .result-rank .rank-insignia {width:20px;height:28px;color:#c9b47b;display:block;}
+#result .result-rank b {font-size:20px;font-variant-numeric:tabular-nums;}
+#result .result-muted,#result-history-note {font-size:11px;line-height:1.35;margin:0;}#result .result-muted {grid-column:1/-1;}#result-history-note {margin-top:10px;}
+#result #result-honours>div {flex-direction:row;gap:12px 24px;}#result .result-honour {gap:7px;pointer-events:auto;cursor:help;}
+#result .result-honour .personnel-award-icon {width:22px;height:28px;}#result .result-honour strong {display:none;}#result .result-honour strong+span {font:400 20px "Memorial Condensed",sans-serif;color:#d9d4bf;}
+#result .result-actions {position:absolute;bottom:16px;left:3vw;height:48px;padding:0;gap:22px;}
+#result button {width:44px;height:44px;padding:3px;}#result button .game-icon {width:38px;height:38px;}
+#result-person h3 {font-size:26px;}#result-empty {position:absolute;right:5vw;bottom:22vh;width:30vw;font-size:16px;padding:0;margin:0;}
+@media(min-width:701px){#result-person {left:65vw!important;right:3vw!important;top:22vh!important;width:auto!important;max-width:340px;}}
+@media(max-width:1100px) and (min-width:701px){
+ #result .result-copy{width:59vw;}#result #result-survivor-ranks,#result #result-loss-ranks{grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:3px 5px;grid-auto-rows:30px;}
+ #result .result-rank{gap:5px;}#result .result-columns{gap:20px;}#result .result-columns>div{gap:14px;}#result #result-message{margin-bottom:18px;}
+}
+@media(max-width:700px){
+ #result .result-copy {top:16px;left:16px;bottom:calc(25vh + 64px);width:calc(100% - 32px);}
+ #result h1 {font-size:27px;letter-spacing:.02em;}#result #result-message {font-size:12px;margin-bottom:14px;}
+ #result .result-columns {grid-template-columns:1fr 1fr;gap:16px;}#result .result-columns>div {gap:12px;}#result h2 {font-size:14px;letter-spacing:.02em;margin-bottom:7px;}
+ #result dl>div {gap:6px;padding:3px 0;}#result dt {font-size:10px;}#result dd {font-size:17px;}
+ #result #result-survivor-ranks,#result #result-loss-ranks {grid-template-columns:repeat(auto-fill,minmax(29px,1fr));grid-auto-rows:21px;gap:1px 4px;}
+ #result .result-rank,#result .result-many-ranks .result-rank {gap:3px;}#result .result-rank .rank-insignia {width:13px;height:21px;}#result .result-rank b {font-size:13px;}
+ #result #result-honours>div {gap:6px 12px;}#result .result-honour {gap:4px;}#result .result-honour .personnel-award-icon {width:16px;height:21px;}#result .result-honour strong+span {font-size:16px;}
+ #result-history-note {font-size:9px;margin-top:7px;}#result .result-muted {font-size:10px;}
+ #result .memorial-scene {position:absolute;top:auto;bottom:58px;height:25vh;min-height:0;z-index:0;}
+ #result .result-actions {left:16px;bottom:8px;height:42px;gap:18px;}
+ #result-person {left:16px!important;right:16px!important;top:auto!important;bottom:calc(58px + 2vh)!important;width:auto!important;max-width:60%;}
+ #result-person h3 {font-size:19px;}#result-person p {font-size:10px;}#result-person .result-person-callsign {font-size:12px;margin-bottom:4px;}#result-person .rank-insignia {width:13px;height:34px;}
+ #result-person .personnel-award-names {display:none;}#result-empty {right:20px;bottom:calc(58px + 8vh);width:55%;font-size:12px;}#result-campaign-end {font-size:10px;max-width:125px;}
+}
+@media(max-height:620px) and (min-width:701px){
+ #result .result-copy{top:14px;bottom:64px;}#result h1{font-size:32px;}#result #result-message{margin-bottom:12px;}#result .result-columns>div{gap:12px;}#result h2{font-size:15px;margin-bottom:6px;}
+ #result #result-survivor-ranks,#result #result-loss-ranks{grid-auto-rows:26px;gap:2px 6px;}#result .result-rank .rank-insignia{height:24px;}#result .result-actions{bottom:8px;}
+}
+#result #result-survivor-ranks.result-rank-grid,#result #result-loss-ranks.result-rank-grid {flex:1;grid-auto-rows:var(--rank-cell-height,28px);}
+#result .result-rank-grid .result-rank .rank-insignia {height:min(28px,var(--rank-cell-height,28px));}
+#result .result-rank-grid .result-rank b {font-size:var(--rank-count-size,20px);line-height:1;}
+#result .result-section:has(#result-survivor-ranks:not(.result-many-ranks)),#result .result-section:has(#result-loss-ranks:not(.result-many-ranks)) {flex:none;}

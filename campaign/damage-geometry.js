@@ -60,6 +60,9 @@ function classify(node,point,category){
   const wheel=wheelId(node);if(wheel)return wheel;
   const name=node.material.name??'',[x,y,z]=point;
   if(name==='headlamp_lens')return x<0?5:6;
+  // B01 batches the front and rear amber lenses in one unnamed emissive mesh.
+  // Only the lenses at the tail join the red stop lens as one rear lamp.
+  if(name==='rear_stop_lens'||node.name.startsWith('B01_surface_')&&y<-2.035&&node.material.emissive?.r>0)return x<0?31:32;
   if(/window_glass/.test(name)){
     if(Math.abs(x)>1.02)return x<0?16:17;
     if(y>1.77)return x<0?10:11;

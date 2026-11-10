@@ -1,0 +1,24 @@
+import assert from 'node:assert/strict';
+import * as T from '../demo/vendor/three.module.js';
+import {createHealthBars} from '../campaign/health-bars.js';
+const scene=new T.Scene(),field={heightAt:()=>0},config={units:{bukhanka:{},'scav-zaporozhets':{},'scav-firetruck':{}},buildings:{}},poses=new Map();
+const a={id:'a',kind:'bukhanka',owner:'rai',x:-5,y:0,hp:100,maxHp:100},b={...a,id:'b',x:5};
+for(const e of [a,b])poses.set(e.id,{matrix:new T.Matrix4().makeTranslation(e.x,e.y,0),position:new T.Vector3(e.x,e.y,0)});
+const camera=new T.PerspectiveCamera(43,1.6,1,1000);camera.up.set(0,0,1);camera.position.set(0,-30,25);camera.lookAt(0,0,0);camera.updateMatrixWorld();
+const bars=createHealthBars(T,scene,field,config,poses,new Map()),mission={state:{units:[a,b],buildings:[]},visibleAt:()=>true};
+const draw=ids=>bars.update(mission,new Set(ids),camera,1280,800);
+draw(['a']);const rect=bars.root.geometry.attributes.barRect,values=bars.root.geometry.attributes.barValues,first=rect.getX(0),version=rect.version;
+draw(['a']);assert.equal(rect.version,version,'No unchanged buffer upload');
+draw(['b']);assert.notEqual(rect.getX(0),first);draw(['a']);assert.equal(rect.getX(0),first,'Returning selection must replace equal-count cached membership');
+// Keep identity, health, selection, visibility, pose and camera unchanged.
+const oldY=rect.getY(0);a.kind='scav-zaporozhets';draw(['a']);
+assert.notEqual(rect.getY(0),oldY,'Kind conversion invalidates cached height at identical hp/maxHp');
+const shortY=rect.getY(0);a.kind='scav-firetruck';draw(['a']);assert.notEqual(rect.getY(0),shortY);
+const ownerVersion=values.version;a.owner='scav';draw(['a']);
+assert.equal(values.getZ(0),1,'Ownership conversion updates hostile indicator');assert(values.version>ownerVersion);
+a.owner='rai';draw(['a']);assert.equal(values.getZ(0),0,'Returning ownership clears hostile indicator');
+const stableRect=rect.version,stableValues=values.version;draw(['a']);assert.equal(rect.version,stableRect);assert.equal(values.version,stableValues);
+const hpVersion=values.version;a.hp=20;draw(['a']);assert(values.version>hpVersion,'Critical damage updates immediately');
+a.hp=0;draw(['a']);assert.equal(bars.root.visible,false,'Death immediately removes the bar');
+const c={...b,id:'c',hp:30};mission.state.units=[c];poses.set(c.id,poses.get(b.id));draw(['c']);assert.equal(bars.root.geometry.instanceCount,1,'New damaged body appears immediately');
+console.log(JSON.stringify({passed:true,cases:['unchanged upload','selection membership swap','kind at same hp/maxHp','owner with unchanged visibility','critical damage','death','spawn']}));

@@ -1,3 +1,5 @@
+import {envelopeClearance,jamPassThroughAllowed,vehicleEnvelope,vehicleRadiusBound} from './vehicle-collision.js';
+
 /** @typedef {'MOVING'|'YIELDING'|'WAITING_RESERVATION'|'MANEUVERING'|'LOCAL_REPLAN'|'GLOBAL_REPLAN'|'ARRIVED'|'BLOCKED'|'UNREACHABLE'|'IDLE'} NavigationState */
 
 // Diagnostics describe the controller that actually ran. They never grant
@@ -11,6 +13,50 @@ export function navigationDecision(unit,state,reason,blockerId=null,nextAction=n
  info.control=state;info.controlReason=reason;
  info.blockerIds=[...new Set((Array.isArray(blockerId)?blockerId:[blockerId]).filter(Boolean))];
  info.blockerId=info.blockerIds[0]??null;info.nextAction=nextAction;info.desiredSpeed=desiredSpeed;
+}
+function updateJamPassages(mission,unit,info,moving){
+ const hasRoute=unit.path.length||unit.detour||unit.yieldReturn||unit.jointTraffic;
+ // Reaching a factory's approach waypoint can empty the path while the
+ // actual repair trip is still waiting for the checked doorway transfer.
+ const intent=unit.hp>0&&(hasRoute||unit.factoryVisit?.phase==='approach')&&jamPassThroughAllowed(unit,unit);
+ const newOrder=info.commandRevision!==unit.commandRevision;
+ if(!intent||newOrder){
+  delete unit.trafficPassThrough;delete info.trafficJamSince;
+  if(!intent)return;
+ }
+ const {time}=mission.state,scale=mission.config.worldScale;
+ const grant=unit.trafficPassThrough;
+ if(grant){
+  const body=other=>({...vehicleEnvelope(other,scale,mission.field),ellipse:false});
+  const own=body(unit),separation=scale*.055+.02;
+  grant.pairs=grant.pairs.filter(pair=>{
+   const other=mission.entity(pair.id);
+   if(!other||other.hp<=0||!jamPassThroughAllowed(unit,other))return false;
+   const gap=envelopeClearance(own,body(other),separation);
+   if(gap<=0)pair.crossing=true;
+   // Keep the exception while the bodies cross, then restore collisions.
+   return pair.crossing?gap<separation:time-pair.startedAt<2;
+  });
+  if(!grant.pairs.length)delete unit.trafficPassThrough;
+ }
+ if(moving||unit.jointTraffic||!hasRoute){delete info.trafficJamSince;return;}
+ if(newOrder)info.trafficJamSince=time;
+ const goal=unit.routeOrder?.destination??unit.path.at(-1);
+ for(const id of info.blockerIds){
+  const other=mission.entity(id);
+  if(!other||other===unit||other.hp<=0||other.jointTraffic||!jamPassThroughAllowed(unit,other))continue;
+  const length=vehicleRadiusBound(unit.kind,scale)+vehicleRadiusBound(other.kind,scale);
+  if(Math.hypot(unit.x-other.x,unit.y-other.y)>length+scale*3)continue;
+  // Passing needs room beyond the blocker; don't let two cars stop on the
+  // same destination, including the shared factory approach waypoint.
+  const sharedFactory=unit.factoryVisit?.factoryId&&unit.factoryVisit.factoryId===other.factoryVisit?.factoryId;
+  const exitRoom=length+(sharedFactory?scale*6:0);
+  if(goal&&Math.hypot(goal.x-other.x,goal.y-other.y)<=exitRoom)continue;
+  info.trafficJamSince??=info.stoppedSince??time;
+  if(time-info.trafficJamSince<1-1e-6)break;
+  const passage=unit.trafficPassThrough??={revision:unit.commandRevision,pairs:[]};
+  if(!passage.pairs.some(pair=>pair.id===id))passage.pairs.push({id,startedAt:time,crossing:false});
+ }
 }
 export function finishNavigationStep(mission,unit,dt,fromX,fromY){
  const info=unit.navigation,now=mission.state.time;
@@ -42,9 +88,10 @@ export function finishNavigationStep(mission,unit,dt,fromX,fromY){
  if(Math.hypot(unit.x-anchor.x,unit.y-anchor.y)>=mission.config.worldScale*.02){
   info.lastProgressAt=now;info.progressAnchor={x:unit.x,y:unit.y};
  }
- info.commandRevision=unit.commandRevision;
  info.stoppedSince=!moving&&active&&state!=='ARRIVED'?(info.stoppedSince??now):null;
  info.waitSeconds=info.stoppedSince===null?0:Math.max(0,now-info.stoppedSince);
+ updateJamPassages(mission,unit,info,moving);
+ info.commandRevision=unit.commandRevision;
  info.attempt=unit.driveWatch?.attempts??0;
  // Named waits can also fail to make progress. The short threshold diagnoses
  // missing controller decisions; the longer one flags starvation for review,

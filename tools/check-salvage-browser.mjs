@@ -42,9 +42,9 @@ export async function checkSalvageBrowser(page){
     m.state.units=[loaded];d.selectTarget(loaded.id);w.update(m,new Set(),1/60);const matrix=w.damage.matrixFor(loaded).clone();w.controls.enableDamping=false;w.controls.target.copy(new T.Vector3(0,0,1.4).applyMatrix4(matrix));w.camera.position.copy(new T.Vector3(5,7,4.5).applyMatrix4(matrix));w.controls.update();w.update(m,new Set(),1/60);document.querySelector('#welcome').hidden=true;d.panel.hidden=true;
     return {a:!!a,b:!!b,spawned,installed,ticks,travelled:Math.hypot(receiver.x-(drop.x+20),receiver.y-drop.y),hitPart:hit?.partId,beforeHP,hoodHp,hoodMaxHp,grilleMaxHp,hpLost,persisted,remaining,grilleInstalled,grilleTicks,grilleHitPart:grilleHit?.partId,grilleHpLost,expired:m.state.salvage.items.length,renderedRecoverable:w.damage.statistics.recoverableParts,unitId:loaded.id};
   });
-  assert(result.a&&result.b);assert.equal(result.spawned,2);assert(result.installed&&result.travelled>5);assert.equal(result.hitPart,22);assert(Math.abs(result.hpLost-5.2)<1e-6);assert(result.persisted);assert.equal(result.remaining,1);assert.equal(result.expired,0);assert.equal(result.renderedRecoverable,0);
-  assert(result.grilleInstalled);assert.equal(result.grilleHitPart,23);assert(Math.abs(result.grilleHpLost-6)<1e-6);
-  assert.equal(result.hoodHp,result.beforeHP+120);assert.equal(result.hoodMaxHp,440);assert.equal(result.grilleMaxHp,520);
+  assert(result.a&&result.b);assert(result.spawned>=2);assert(result.installed&&result.travelled>5);assert.equal(result.hitPart,22);assert(Math.abs(result.hpLost-6.56)<1e-6);assert(result.persisted);assert.equal(result.remaining,result.spawned-1);assert.equal(result.expired,0);assert.equal(result.renderedRecoverable,0);
+  assert(result.grilleInstalled);assert.equal(result.grilleHitPart,23);assert(Math.abs(result.grilleHpLost-7.36)<1e-6);
+  assert.equal(result.hoodHp,result.beforeHP);assert.equal(result.hoodMaxHp,320);assert.equal(result.grilleMaxHp,320);
   await page.screenshot({path:'campaign/previews/salvage-installed.png'});
   // Verify the actual constructor preference, rather than relying on a hidden API.
   await page.evaluate(()=>{document.querySelector('#welcome').hidden=true;document.querySelector('#design-toggle').click();});

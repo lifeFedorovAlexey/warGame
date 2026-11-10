@@ -74,4 +74,19 @@ const results=[];
  delete u.detour;a.hp=0;assert.notEqual(chooseRepairFactory(m,u),a);
  results.push({case:'doorway ownership, recheck interval, active manoeuvres and destroyed factory'});
 }
+{
+ const {m,factories:[a,b,c]}=fixture(),u=car(m),v=car(m);
+ Object.assign(a,{x:-56,y:0});Object.assign(b,{x:0,y:-162,rotation:Math.PI});c.hp=0;
+ Object.assign(u,{x:-12,y:-85});Object.assign(v,{x:-20,y:-65,hp:1});
+ for(const [unit,factory] of [[u,a],[v,b]]){
+  unit.combatRetreat.home={id:factory.id,x:factory.x,y:factory.y};
+  unit.factoryVisit={factoryId:factory.id,phase:'approach'};
+ }
+ assert.equal(chooseRepairFactory(m,u),a,'An approach in progress keeps its factory');
+ u.navigation={waitCycle:true,waitSeconds:3,blockerId:v.id};
+ assert.equal(chooseRepairFactory(m,u),b,'A closer door resolves the opposing approach cycle');
+ u.factoryVisit.phase='entering';
+ assert.equal(chooseRepairFactory(m,u),a,'Never redirect an active doorway transfer');
+ results.push({case:'reroute only exterior deadlocked approaches to the nearer door'});
+}
 console.log(JSON.stringify({passed:true,results},null,2));

@@ -101,8 +101,10 @@
 }
 
 /* Workshop controls use the same bare, centred pictograms as the field HUD. */
-#designer .designer-tabs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-.design-field-note { margin: 0; font-size: 11px; line-height: 1.4; color: #c5cbb4; }
+#designer .designer-tabs { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.design-field-note { margin: 0; font-size: 11px; line-height: 1.5; color: #c5cbb4; white-space:pre-line; }
+#designer .designer-paint-row[hidden],#designer .designer-cards[hidden] {display:none;}
+body:has(#designer[open]) #toast {visibility:hidden;}
 #designer :is(.designer-tabs button, .design-part) {
   --icon-size: 44px; display: inline-flex; align-items: center; justify-content: center;
   width: 100%; min-width: 0; height: 56px; padding: 4px; gap: 0;

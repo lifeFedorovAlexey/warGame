@@ -48,7 +48,8 @@
     "build:story-audio": "python tools/build-mission-v2-audio.py",
     "build:map": "python tools/build-alpha-map.py",
     "build:map-textures": "node tools/build-alpha-texture.cjs",
-    "build:roads": "node tools/build-roads.cjs"
+    "build:roads": "node tools/build-roads.cjs",
+    "check:frame-optimizations": "node tools/check-frame-optimizations.mjs && node tools/check-health-cache.mjs && node tools/check-minimap-partial.mjs && node tools/check-snapshot-fields.mjs && node tools/check-traffic-visibility-cache.mjs && node tools/check-traffic-camera-rate.mjs"
   },
   "devDependencies": {
     "gltf-validator": "^2.0.0-dev.3.10"

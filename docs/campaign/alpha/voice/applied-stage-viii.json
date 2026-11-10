@@ -1,0 +1,34 @@
+{
+  "draftRevision": 215,
+  "throughScene": "r35",
+  "sceneIds": [
+    "r30-alt",
+    "r31",
+    "r32",
+    "r33",
+    "r35"
+  ],
+  "activeLines": 17,
+  "importedRecordings": [
+    "m01-v3-r30-alt-l001",
+    "m01-s08-l019",
+    "m01-v3-r31-l001",
+    "m01-v3-r31-l002",
+    "m01-v3-r31-l003",
+    "m01-s09-l001",
+    "m01-s09-l002",
+    "m01-v3-ammo-stock-report",
+    "m01-s09-l006",
+    "m01-s09-l007",
+    "m01-v3-ammo-feed-improvement",
+    "m01-s09-l009",
+    "m01-s09-l010",
+    "m01-v3-r35-l001",
+    "m01-v3-r35-l002",
+    "m01-v3-r35-l003"
+  ],
+  "removedActiveCues": [],
+  "textEditedAfterUpload": [],
+  "note": "Original audio bytes preserved. Earlier recordings remain available to archived scripts.",
+  "fromScene": "r30-alt"
+}

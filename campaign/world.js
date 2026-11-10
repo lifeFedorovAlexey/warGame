@@ -1,3 +1,5 @@
+import {perf} from './performance.js';
+import {createTrafficVisibility} from './traffic-visibility.js';
 import * as T from 'three';
 import {OrbitControls} from '../demo/vendor/OrbitControls.js';
 import {createAlphaMap} from '../demo/alpha-map.js';
@@ -31,7 +33,7 @@ import {createDamEnvironment} from './dam-environment.js';
 import {createDesertDressing} from './desert-dressing.js';
 import {createFieldArtifact} from './field-artifacts.js';
 import {combatContact} from './combat-contact.js';
-import {vehicleLocalBoxes,vehicleRadiusBound} from './vehicle-collision.js';
+import {vehicleLocalBoxes} from './vehicle-collision.js';
 import {buildLayerHeight} from './builder-optics.js';
 import {createDamageSystem} from './damage-system.js';
 import {partMissing} from './damage-state.js';
@@ -49,7 +51,7 @@ export async function createCampaignWorld(host,config,sound,loading){
  const normalCameraLimit=Math.PI*.42;
  const controls=new OrbitControls(camera,renderer.domElement);controls.target.set(start.x,start.y,field.heightAt(start.x,start.y));camera.position.set(start.x+100,start.y-360,controls.target.z+360);controls.enableDamping=true;controls.minDistance=110;controls.maxDistance=5300;controls.minPolarAngle=.06;controls.maxPolarAngle=normalCameraLimit;controls.mouseButtons={LEFT:-1,MIDDLE:T.MOUSE.ROTATE,RIGHT:-1};controls.enablePan=false;
  controls.addEventListener('start',()=>{controls.maxPolarAngle=normalCameraLimit;});
- const fog=createFogMask(T);
+ const fog=createFogMask(T);if(perf)perf.wrap(fog,'update','fog');
  const storySignals=createStorySignals(T,scene,field);
  const rallyFlags=createRallyFlags(T,scene,field,config.worldScale);
  const foggedMaterials=new Set();function addFog(material){if(!material||foggedMaterials.has(material))return;foggedMaterials.add(material);const before=material.onBeforeCompile,cache=material.customProgramCacheKey.bind(material);material.onBeforeCompile=shader=>{before.call(material,shader);shader.uniforms.missionFog={value:fog.texture};shader.uniforms.missionExtent={value:field.extent};shader.uniforms.storySpill=storySignals.spill;shader.uniforms.storyObserver=storySignals.observer;shader.vertexShader='varying vec2 vMissionXY;\n'+shader.vertexShader;shader.vertexShader=shader.vertexShader.replace('#include <worldpos_vertex>','#include <worldpos_vertex>\nvec4 missionPosition=vec4(transformed,1.);\n#ifdef USE_INSTANCING\nmissionPosition=instanceMatrix*missionPosition;\n#endif\nvMissionXY=(modelMatrix*missionPosition).xy;');shader.fragmentShader='uniform sampler2D missionFog;uniform float missionExtent;uniform vec3 storySpill;uniform vec2 storyObserver;varying vec2 vMissionXY;\n'+shader.fragmentShader;shader.fragmentShader=shader.fragmentShader.replace('#include <dithering_fragment>',`#include <dithering_fragment>
@@ -75,7 +77,7 @@ export async function createCampaignWorld(host,config,sound,loading){
  const damage=createDamageSystem(T,scene,field,config);
  await loading?.stage('vehicles');
  const vehicles=await createVehicleLayer(T,scene,field,config,damage,(completed,total)=>loading?.update('vehicles',completed,total)),buildingRoot=new T.Group();scene.add(buildingRoot);const buildings=new Map(),prefabs=new Map(),selectionRoot=new T.Group();scene.add(selectionRoot);
- const healthBars=createHealthBars(T,scene,field,config,vehicles.transforms,buildings);
+ const healthBars=createHealthBars(T,scene,field,config,vehicles.transforms,buildings);if(perf)perf.wrap(healthBars,'update','health bars');
  damage.setTemplateProvider(entity=>{
    const root=getPrefab(entity.kind,entity.owner,entity.campId,entity.scavVariant,entity.fenceSpan,entity.fenceProfile);root.updateMatrixWorld(true);
    const bindings=[];root.traverse(node=>{if(node.isMesh)bindings.push(damage.prepare(node,'building',0));});
@@ -85,6 +87,15 @@ export async function createCampaignWorld(host,config,sound,loading){
  if(software)sun.shadow.mapSize.set(512,512);
  sun.shadow.camera.up.set(0,0,1);
  let lastWorldTime=-1,lastScaleAt=0,frameAverage=.023,terrainMode='',lastShadowLod=-1,fixedRenderScale=false,lastDamageRows=-1,minimumCameraHeight=40;
+ let shadowDirty=true,lastShadowAt=-Infinity,lastAudioAt=-Infinity,lastAudioLive=null;
+ const shadowHz=25;
+ let shadowQuality='soft';
+ function setShadowQuality(quality){
+  if(!['soft','pcf','off'].includes(quality))throw new Error('Unknown shadow quality: '+quality);
+  shadowQuality=quality;renderer.shadowMap.enabled=quality!=='off';renderer.shadowMap.type=quality==='pcf'?T.PCFShadowMap:T.PCFSoftShadowMap;
+  renderer.shadowMap.needsUpdate=true;shadowDirty=true;
+ }
+ setShadowQuality(new URLSearchParams(location.search).get('shadows')??'soft');
  const shadowCasters=createShadowCasters();
  const shaderWarmup=new T.Group(),preparedBuildings=new Set();
  shaderWarmup.name='shader_preload';
@@ -124,10 +135,13 @@ export async function createCampaignWorld(host,config,sound,loading){
  const dustCanvas=document.createElement('canvas');dustCanvas.width=dustCanvas.height=64;const dc=dustCanvas.getContext('2d'),gradient=dc.createRadialGradient(32,32,0,32,32,30);gradient.addColorStop(0,'rgba(255,255,255,.7)');gradient.addColorStop(1,'rgba(255,255,255,0)');dc.fillStyle=gradient;dc.fillRect(0,0,64,64);const dustPositions=new Float32Array(256*3),dustGeometry=new T.BufferGeometry();dustGeometry.setAttribute('position',new T.BufferAttribute(dustPositions,3));dustGeometry.setDrawRange(0,0);const dust=new T.Points(dustGeometry,new T.PointsMaterial({map:new T.CanvasTexture(dustCanvas),color:'#b5a180',size:8,transparent:true,opacity:.13,depthWrite:false}));dust.frustumCulled=false;scene.add(dust);const particles=[];let dustTime=0;
  const ray=new T.Raycaster(),ndc=new T.Vector2(),vector=new T.Vector3();
  const localRay=new T.Ray(),inverse=new T.Matrix4(),pickBox=new T.Box3(),pickPoint=new T.Vector3();
- const keys=new Set();
- const resize=()=>{renderer.setSize(host.clientWidth,host.clientHeight,false);camera.aspect=host.clientWidth/host.clientHeight;camera.updateProjectionMatrix();};new ResizeObserver(resize).observe(host);resize();
+ const keys=new Set(),visibleIds=new Set(),panRight=new T.Vector3(),panForward=new T.Vector3(),screenPoint=new T.Vector3();
+ const viewport={left:0,top:0,width:1,height:1};
+ const cacheViewport=()=>{const rect=renderer.domElement.getBoundingClientRect();Object.assign(viewport,{left:rect.left,top:rect.top,width:rect.width,height:rect.height});};
+ const resize=()=>{const rect=host.getBoundingClientRect();renderer.setSize(rect.width,rect.height,false);camera.aspect=rect.width/rect.height;camera.updateProjectionMatrix();cacheViewport();};
+ new ResizeObserver(resize).observe(host);window.addEventListener('scroll',cacheViewport,{passive:true,capture:true});resize();
  function pointerRay(clientX,clientY){
-  const rect=renderer.domElement.getBoundingClientRect();
+  const rect=viewport;
   ndc.set((clientX-rect.left)/rect.width*2-1,-(clientY-rect.top)/rect.height*2+1);
   ray.setFromCamera(ndc,camera);
  }
@@ -159,7 +173,7 @@ export async function createCampaignWorld(host,config,sound,loading){
   }
   return selected;
  }
- function screen(entity,height=8){const pose=entity.id&&vehicles.transforms.get(entity.id);const point=(pose?pose.position.clone():new T.Vector3(entity.x,entity.y,field.heightAt(entity.x,entity.y)));point.z+=height;point.project(camera);const rect=renderer.domElement.getBoundingClientRect();return{x:(point.x+1)*rect.width/2+rect.left,y:(1-point.y)*rect.height/2+rect.top,visible:point.z>-1&&point.z<1};}
+ function screen(entity,height=8){const pose=entity.id&&vehicles.transforms.get(entity.id);const point=pose?screenPoint.copy(pose.position):screenPoint.set(entity.x,entity.y,field.heightAt(entity.x,entity.y));point.z+=height;point.project(camera);const rect=viewport;return{x:(point.x+1)*rect.width/2+rect.left,y:(1-point.y)*rect.height/2+rect.top,visible:point.z>-1&&point.z<1};}
  function centre(entity,distance){const offset=camera.position.clone().sub(controls.target);controls.maxPolarAngle=normalCameraLimit;controls.target.set(entity.x,entity.y,field.heightAt(entity.x,entity.y));if(distance)offset.setLength(distance);camera.position.copy(controls.target).add(offset);controls.update();}
  function focusStorySignal(signal,foreground){
   if(signal.kind!=='anomaly'){centre(signal,signal.distance);return;}
@@ -242,49 +256,6 @@ export async function createCampaignWorld(host,config,sound,loading){
   finally{for(const [object,visible,culled] of saved){object.visible=visible;object.frustumCulled=culled;}scene.remove(shaderWarmup);terrain.setViewMode(terrainMode||'close');renderer.shadowMap.needsUpdate=true;}
   shaderPreparation.runs++;shaderPreparation.totalMs+=performance.now()-started;
  }
- function buildingCards(){
-  const stage = new T.Scene(), camera = new T.OrthographicCamera(-1,1,1,-1,.1,80);
-  stage.background = new T.Color('#41433c');
-  stage.add(new T.HemisphereLight('#e7edf2','#938c71',1.95));
-  const key = new T.DirectionalLight('#ffdfb4',2.85);
-  key.position.set(-5,-8,12);
-  stage.add(key);
-  camera.up.set(0,0,1);
-  const size = renderer.getSize(new T.Vector2()), ratio = renderer.getPixelRatio(), shadow = renderer.shadowMap.enabled;
-  const result = {};
-  try {
-   renderer.shadowMap.enabled = false;
-   renderer.setPixelRatio(1);
-   renderer.setSize(192,116,false);
-   const aspect=192/116, corner=new T.Vector3();
-   for (const kind of Object.keys(config.buildings)) {
-    if(config.buildings[kind].storyOnly||config.buildings[kind].enemyOnly)continue;
-    const mesh = getPrefab(kind).clone(true), bounds = new T.Box3().setFromObject(mesh);
-    const centre = bounds.getCenter(new T.Vector3());
-    camera.position.copy(centre).add(new T.Vector3(kind==='factory'||kind==='generator'?22:-22,-29,20));
-    camera.lookAt(centre);
-    camera.updateMatrixWorld(true);
-    let radius=0;
-    for(const x of [bounds.min.x,bounds.max.x])for(const y of [bounds.min.y,bounds.max.y])for(const z of [bounds.min.z,bounds.max.z]){
-     corner.set(x,y,z).applyMatrix4(camera.matrixWorldInverse);
-     radius=Math.max(radius,Math.abs(corner.x)/aspect,Math.abs(corner.y));
-    }
-    radius*=kind==='bunker'?1.48:1.13;
-    camera.left=-radius*aspect;camera.right=-camera.left;camera.top=radius;camera.bottom=-radius;
-    camera.updateProjectionMatrix();
-    stage.add(mesh);
-    renderer.render(stage,camera);
-    result[kind] = renderer.domElement.toDataURL('image/webp',.88);
-    stage.remove(mesh);
-   }
-  } finally {
-   renderer.setPixelRatio(ratio);
-   renderer.setSize(size.x,size.y,false);
-   renderer.shadowMap.enabled = shadow;
-   renderer.shadowMap.needsUpdate = true;
-  }
-  return result;
- }
  function setGhost(kind,placement,mission){
   factoryRoads.setPreview(kind==='factory'?placement:null);
   placementGrid.update(kind,placement,mission);
@@ -320,21 +291,11 @@ export async function createCampaignWorld(host,config,sound,loading){
   position.needsUpdate=true;
  }
  function commandMarker(point,hostile=false){marker.position.set(point.x,point.y,field.heightAt(point.x,point.y)+.4);marker.material.color.set(hostile?'#f4a081':'#cfb473');marker.visible=true;markerUntil=performance.now()+1000;}
- const trafficFrustum=new T.Frustum(),trafficProjection=new T.Matrix4(),trafficSphere=new T.Sphere();
- function updateTrafficVisibility(mission){
-  camera.updateMatrixWorld();trafficFrustum.setFromProjectionMatrix(trafficProjection.multiplyMatrices(camera.projectionMatrix,camera.matrixWorldInverse));
-  let visible=0,hidden=0;
-  for(const unit of mission.state.units){
-   if(unit.hp<=0||unit.owner!=='rai'||isInfantry(unit))continue;
-   // The sphere encloses the whole model and the next movement step. Switch
-   // collision back on before any part of the car can enter the camera.
-   const scale=config.worldScale,radius=vehicleRadiusBound(unit.kind,scale);
-   trafficSphere.center.set(unit.x,unit.y,field.heightAt(unit.x,unit.y)+scale*1.5);
-   trafficSphere.radius=Math.hypot(radius,scale*1.8)+(config.units[unit.kind]?.speed??0)*config.simulationStep;
-   unit.trafficOnScreen=trafficFrustum.intersectsSphere(trafficSphere);
-   if(unit.trafficOnScreen)visible++;else hidden++;
-  }
-  mission.trafficCamera={visible,hidden};
+ const trafficVisibility=createTrafficVisibility(T,camera,field,config),updateTrafficVisibility=trafficVisibility.update;
+ function prepareFrame(mission,dt){
+  const distance=camera.position.distanceTo(controls.target),pan=distance*dt*.7;let dx=(keys.has('KeyD')?1:0)-(keys.has('KeyA')?1:0),dy=(keys.has('KeyW')?1:0)-(keys.has('KeyS')?1:0);if(dx||dy){const right=panRight.setFromMatrixColumn(camera.matrixWorld,0);right.z=0;right.normalize();const forward=panForward.set(-right.y,right.x,0);const offset=right.multiplyScalar(dx*pan).addScaledVector(forward,dy*pan);camera.position.add(offset);controls.target.add(offset);}
+  controls.target.x=T.MathUtils.clamp(controls.target.x,-field.half,field.half);controls.target.y=T.MathUtils.clamp(controls.target.y,-field.half,field.half);controls.update();camera.position.z=Math.max(camera.position.z,field.heightAt(camera.position.x,camera.position.y)+minimumCameraHeight);
+  updateTrafficVisibility(mission);
  }
  function update(mission,selected,dt,live=false,showHealth=true){
   factoryRoads.update(mission);
@@ -355,9 +316,8 @@ export async function createCampaignWorld(host,config,sound,loading){
    }
    if(next!==ratio){renderer.setPixelRatio(next);lastScaleAt=now;}
   }
-  const distance=camera.position.distanceTo(controls.target),pan=distance*dt*.7;let dx=(keys.has('KeyD')?1:0)-(keys.has('KeyA')?1:0),dy=(keys.has('KeyW')?1:0)-(keys.has('KeyS')?1:0);if(dx||dy){const right=new T.Vector3().setFromMatrixColumn(camera.matrixWorld,0);right.z=0;right.normalize();const forward=new T.Vector3(-right.y,right.x,0);const offset=right.multiplyScalar(dx*pan).addScaledVector(forward,dy*pan);camera.position.add(offset);controls.target.add(offset);}
-  controls.target.x=T.MathUtils.clamp(controls.target.x,-field.half,field.half);controls.target.y=T.MathUtils.clamp(controls.target.y,-field.half,field.half);controls.update();camera.position.z=Math.max(camera.position.z,field.heightAt(camera.position.x,camera.position.y)+minimumCameraHeight);
-  updateTrafficVisibility(mission);
+  const distance=camera.position.distanceTo(controls.target);
+  prepareFrame(mission,dt);
   sky.update(camera,false);
   if(baseYard.update(mission,time+(live?mission.accumulator:0)))renderer.shadowMap.needsUpdate=true;
   if(dam.update(mission,camera,time+(live?mission.accumulator:0),live))renderer.shadowMap.needsUpdate=true;
@@ -375,11 +335,11 @@ export async function createCampaignWorld(host,config,sound,loading){
   stableTarget.copy(controls.target).addScaledVector(lightRight,Math.round(shadowX/texel)*texel-shadowX).addScaledVector(lightUp,Math.round(shadowY/texel)*texel-shadowY);
   const targetMoved=shadowCentre.distanceToSquared(stableTarget)>.03;
   if(targetMoved||vehicles.lod!==lastShadowLod){
-   shadowCentre.copy(stableTarget);sun.position.copy(stableTarget).add(lightOffset);sun.target.position.copy(stableTarget);
+   shadowDirty=true;
    lastShadowLod=vehicles.lod;renderer.shadowMap.needsUpdate=true;
   }
   shadowCasters.begin();
-  const visibleIds=new Set(vehicles.visible.map(unit=>unit.id));
+  visibleIds.clear();for(const unit of vehicles.visible)visibleIds.add(unit.id);
   const phase=Math.max(0,Math.min(1,mission.accumulator/config.simulationStep));
   const blend=(previous,next)=>T.MathUtils.lerp(previous??next??0,next??0,phase);
   for(const unit of mission.state.units){
@@ -482,6 +442,8 @@ export async function createCampaignWorld(host,config,sound,loading){
   }
   if(time-dustTime>.16){dustTime=time;for(const unit of mission.state.units){if(unit.hp<=0||isInfantry(unit)||unit.owner!=='rai'&&!mission.visibleAt(unit.x,unit.y)||Math.hypot(unit.x-unit.previousX,unit.y-unit.previousY)<.15)continue;particles.push({x:unit.x+Math.sin(unit.heading)*9,y:unit.y-Math.cos(unit.heading)*9,z:field.heightAt(unit.x,unit.y)+1,born:time});}}while(particles.length>256)particles.shift();for(let i=particles.length-1;i>=0;i--)if(time-particles[i].born>2.5)particles.splice(i,1);particles.forEach((p,i)=>dustPositions.set([p.x+(time-p.born)*1.8,p.y,p.z+(time-p.born)*1.2],i*3));dustGeometry.attributes.position.needsUpdate=true;dustGeometry.setDrawRange(0,particles.length);marker.visible=performance.now()<markerUntil;
   if(factoryEffects.update(mission,buildings,time,dt,camera))renderer.shadowMap.needsUpdate=true;
+  if(now-lastAudioAt>=1/12||live!==lastAudioLive){
+   lastAudioAt=now;lastAudioLive=live;
   let engine=0,rolling=0,slip=0,road=0;
   for(const unit of vehicles.visible){
    const distance=Math.hypot(unit.x-controls.target.x,unit.y-controls.target.y),volume=Math.max(0,1-distance/380);
@@ -500,6 +462,7 @@ export async function createCampaignWorld(host,config,sound,loading){
    if(mode==='build')buildingScan+=level;else projection+=level;
   }
   sound?.update({field:live,engine:Math.min(1,engine),rolling:Math.min(1,rolling),slip:Math.min(1,slip),road:Math.min(1,road),welding:Math.min(1,projection+factoryEffects.soundLevel),construction:Math.min(1,buildingScan)});
+  }
   damage.end();
   for(const group of damageCasters)if(group.visible)for(const model of group.children){
    if(!model.visible)continue;
@@ -508,12 +471,15 @@ export async function createCampaignWorld(host,config,sound,loading){
   }
   const {textureRows}=damage.statistics;
   if(textureRows!==lastDamageRows){lastDamageRows=textureRows;renderer.shadowMap.needsUpdate=true;}
-  if(shadowCasters.end()||time<lastWorldTime)renderer.shadowMap.needsUpdate=true;
-  if(renderer.shadowMap.needsUpdate)shadowUpdates++;
-  const viewport=renderer.domElement.getBoundingClientRect();
+  shadowDirty=shadowCasters.end()||renderer.shadowMap.needsUpdate||time<lastWorldTime||shadowDirty;
+  renderer.shadowMap.needsUpdate=shadowDirty&&(now-lastShadowAt>=1/shadowHz||time<lastWorldTime);
+  if(renderer.shadowMap.needsUpdate){
+   shadowCentre.copy(stableTarget);sun.position.copy(stableTarget).add(lightOffset);sun.target.position.copy(stableTarget);
+   shadowUpdates++;shadowDirty=false;lastShadowAt=now;
+  }
   healthBars.update(mission,selected,camera,viewport.width,viewport.height,showHealth);
   renderer.render(scene,camera);
   lastWorldTime=time;
  }
- return{renderer,scene,camera,controls,terrain,field,vehicles,damage,prepareRendering,shaderPreparation,ground,pickEntity,screen,centre,focusStorySignal,setGhost,commandMarker,buildingCards,drawMinimapFog:fog.drawMinimap,storySignals,update,updateTrafficVisibility,keys,buildingObjects:buildings,set minimumCameraHeight(value){minimumCameraHeight=value;},set fixedRenderScale(value){fixedRenderScale=value;},get fixedRenderScale(){return fixedRenderScale;},get statistics(){return{drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,vehicleDrawCalls:vehicles.drawCalls,vehicleLod:vehicles.lod,dustParticles:particles.length,dustLimit:256,...combat.statistics,...groundEffects.statistics,headlightBeams:headlightCount,projectors:construction.active,frameMs:frameAverage*1000,renderScale:renderer.getPixelRatio(),terrainMode,shadowUpdates,damage:damage.statistics};}};
+ return{renderer,scene,camera,controls,terrain,field,vehicles,damage,setShadowQuality,prepareRendering,shaderPreparation,ground,pickEntity,screen,centre,focusStorySignal,setGhost,commandMarker,drawMinimapFog:fog.drawMinimap,storySignals,update,prepareFrame,updateTrafficVisibility,keys,buildingObjects:buildings,set minimumCameraHeight(value){minimumCameraHeight=value;},set fixedRenderScale(value){fixedRenderScale=value;},get fixedRenderScale(){return fixedRenderScale;},get statistics(){return{drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,vehicleDrawCalls:vehicles.drawCalls,vehicleLod:vehicles.lod,dustParticles:particles.length,dustLimit:256,...combat.statistics,...groundEffects.statistics,headlightBeams:headlightCount,projectors:construction.active,frameMs:frameAverage*1000,renderScale:renderer.getPixelRatio(),terrainMode,shadowUpdates,shadowQuality,shadowHz,fog:fog.stats,damage:damage.statistics};}};
 }

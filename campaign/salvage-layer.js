@@ -1,4 +1,5 @@
 import {extractDamagePart} from './damage-geometry.js';
+import {paintSalvageModel} from './salvage-paint.js';
 export function createSalvageLayer(T,scene,field,scale,getTemplate){
   const root=new T.Group();root.name='recoverable_parts';scene.add(root);
   const models=new Map(),cache=new Map(),point=new T.Vector3(),spin=new T.Quaternion();
@@ -12,10 +13,10 @@ export function createSalvageLayer(T,scene,field,scale,getTemplate){
       if(item.sourceKind==='street-lamp')continue;
       let model=models.get(item.id);
       if(!model){
-        const key=item.sourceKind+':'+item.sourcePart;
+        const key=item.sourceKind+':'+item.sourcePart+':'+item.paintColor;
         if(!cache.has(key)){
           const template=getTemplate({kind:item.sourceKind}),part=template&&extractDamagePart(T,template.bindings,item.sourcePart,null);
-          if(!part)continue;cache.set(key,part);
+          if(!part)continue;paintSalvageModel(part.root,item.paintColor);cache.set(key,part);
         }
         const part=cache.get(key);model=part.root.clone(true);model.name=item.id;model.scale.setScalar(scale);
         model.quaternion.setFromUnitVectors(part.restAxis,new T.Vector3(0,0,1));

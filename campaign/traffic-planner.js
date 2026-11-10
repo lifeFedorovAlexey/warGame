@@ -1,5 +1,5 @@
 import {trafficCollisionRequired} from './vehicle-collision.js';
-import {UnitSpatialIndex} from './unit-spatial-index.js';
+import {createTrafficBuffer,captureTrafficState} from './traffic-snapshot.js';
 import {recoverWaitCycle} from './traffic-cycle.js';
 import {invalidateTrafficCorridors} from './traffic-corridor.js';
 import {checkManeuverSteps} from './vehicle-motion.js';
@@ -66,8 +66,11 @@ function* passageStillClear(mission,job,deadline){
 // Search work owns an immutable world view and a private navigator. Physical
 // ticks never drain this queue. Only the dispatcher publishes a finished patch
 // at a tick boundary, after checking all bodies in the inspected region.
+function collisionFreeGroup(members){
+ return members.length>1&&members.every((a,i)=>a&&members.every((b,j)=>j<=i||b&&!trafficCollisionRequired(a,b)));
+}
 export class TrafficPlanner{
- constructor(){this.queued=new Map();this.failures=new Map();this.active=null;this.ready=[];this.navPool=[];this.sequence=0;
+ constructor(){this.queued=new Map();this.failures=new Map();this.active=null;this.ready=[];this.navPool=[];this.snapshotPool=[];this.sequence=0;
   this.stats={started:0,applied:0,failed:0,discarded:0,revalidated:0,slices:0,maxSliceMs:0,maxSnapshotMs:0,maxPublishMs:0,
    snapshotMs:0,searchMs:0,revalidationMs:0,publishMs:0,maxNextMs:0,maxSearchNextMs:0,maxRevalidationNextMs:0,
    negativeCacheHits:0,maxQueueWaitMs:0,maxServiceGapMs:0,maxJobAge:0,cancellations:{},cacheInvalidations:{},outcomes:{}};}
@@ -116,6 +119,8 @@ export class TrafficPlanner{
  dispose(job){
   job.iterator?.return();job.validation?.return();
   if(job.shadow?.nav){this.navPool.push(job.shadow.nav);if(this.navPool.length>4)this.navPool.shift();}
+  if(job.buffer){if(this.snapshotPool.length<4)this.snapshotPool.push(job.buffer);job.buffer=null;}
+  job.shadow=null;
  }
  discard(mission,job,reason,details={}){
   this.dispose(job);this.stats.discarded++;this.stats.outcomes.STALE=(this.stats.outcomes.STALE??0)+1;
@@ -123,11 +128,11 @@ export class TrafficPlanner{
   this.stats.lastDiscard={at:mission.state.time,ids:job.ids,reason,outcome:SEARCH_OUTCOME.STALE,...details};
   this.trace(mission,job,'cancelled',{reason,outcome:SEARCH_OUTCOME.STALE,...details});
  }
- pruneOffscreen(mission){
-  const unnecessary=job=>{const members=job.ids.map(id=>mission.entity(id));return members.length>1&&members.every(body=>body&&!trafficCollisionRequired(members[0],body));};
-  if(this.active&&unnecessary(this.active)){this.discard(mission,this.active,'offscreen-friendly-pass-through');this.active=null;}
-  for(const [id,job] of this.queued)if(unnecessary(job)){this.queued.delete(id);this.discard(mission,job,'offscreen-friendly-pass-through');}
-  this.ready=this.ready.filter(job=>{if(!unnecessary(job))return true;this.discard(mission,job,'offscreen-friendly-pass-through');return false;});
+ prunePassThrough(mission){
+  const unnecessary=job=>collisionFreeGroup(job.ids.map(id=>mission.entity(id)));
+  if(this.active&&unnecessary(this.active)){this.discard(mission,this.active,'friendly-pass-through');this.active=null;}
+  for(const [id,job] of this.queued)if(unnecessary(job)){this.queued.delete(id);this.discard(mission,job,'friendly-pass-through');}
+  this.ready=this.ready.filter(job=>{if(!unnecessary(job))return true;this.discard(mission,job,'friendly-pass-through');return false;});
  }
  requestPassages(mission){
   // A stopped route behind an arrived ally is not a wait cycle. It still
@@ -174,7 +179,7 @@ export class TrafficPlanner{
    if(old?.type==='cycle'&&!old.iterator&&old.requestKey!==key){this.queued.delete(ownerId);this.discard(mission,old,'dependencies-changed');}
    if(this.queued.has(ownerId)||this.active?.ownerId===ownerId||this.ready.some(j=>j.ownerId===ownerId))continue;
    const members=ids.map(id=>mission.entity(id));
-   if(members.every(body=>body&&!trafficCollisionRequired(members[0],body)))continue;
+   if(collisionFreeGroup(members))continue;
    if(members.some(u=>!u||isInfantry(u)||u.owner!==members[0].owner||u.pendingOrder||u.jointTraffic||u.overlapRecovery&&u.overlapRecovery.active!==false||(u.driveSpeed??0)>.1||this.pendingFor(u)
     ||mission.trafficCoordinator.routes?.has(u.id)))continue;
    if(this.negativeHit(mission,'cycle',ids))continue;
@@ -185,12 +190,13 @@ export class TrafficPlanner{
   const started=performance.now();
   const pooled=this.navPool.findIndex(nav=>nav.baseNavigator===mission.nav);
   const nav=pooled<0?mission.nav.createSearchContext():this.navPool.splice(pooled,1)[0];
-  const shadow=Object.create(mission),state=structuredClone(mission.state);nav.refreshContext();
-  const unitIndex=new UnitSpatialIndex();unitIndex.rebuild(state.units);
+  const buffer=job.buffer=this.snapshotPool.pop()??createTrafficBuffer();
+  const shadow=Object.create(mission),state=captureTrafficState(mission,buffer);nav.refreshContext();
+  const unitIndex=buffer.unitIndex;
   const coordinator=Object.create(mission.trafficCoordinator);
   for(const key of ['decisions','intents','passageDecisions','queues','groups','statistics'])coordinator[key]=structuredClone(mission.trafficCoordinator[key]);
-  coordinator.updatedState=state;coordinator.updatedAt=state.time;coordinator.planner=null;
-  Object.assign(shadow,{state,nav,unitIndex,unitIndexActive:true,trafficCoordinator:coordinator,pendingTick:null,
+  coordinator.updatedState=state;coordinator.updatedAt=state.time;coordinator.planner=null;coordinator.liveMission=shadow;
+  Object.assign(shadow,{state,nav,unitIndex,visible:buffer.visible,unitIndexActive:true,trafficCoordinator:coordinator,pendingTick:null,
    commandPlanner:null,events:[],effects:[],finishPendingStep:()=>{},navigationDiagnostics:structuredClone(mission.navigationDiagnostics)});
   job.region={left:Infinity,right:-Infinity,bottom:Infinity,top:-Infinity};job.blockers=new Set();
   const observe=(point,radius)=>{
@@ -233,7 +239,7 @@ export class TrafficPlanner{
  advance(mission,budgetMs=2){
   // Zero budget is a strict no-op, including snapshot creation and counters.
   if(!(budgetMs>0))return;
-  this.pruneOffscreen(mission);
+  this.prunePassThrough(mission);
   const start=performance.now(),deadline=start+Math.min(2,budgetMs);
   while(performance.now()<deadline){
    if(this.active&&!contextValid(mission,this.active)){
