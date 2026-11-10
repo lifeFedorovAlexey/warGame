@@ -9,7 +9,7 @@ export function createFactoryRoadView(T,scene,field,terrain,baseRoads,addFog,upd
   const factories=mission.state.buildings.filter(b=>b.kind==='factory'&&b.hp>0&&b.accessRoads?.length),key=factories.map(f=>f.id+':'+f.x+':'+f.y+':'+f.rotation+':'+JSON.stringify(f.accessRoads)).join('|');
   if(key===signature)return;signature=key;
   const accessRoads=factories.flatMap(f=>f.accessRoads);
-  terrain.setLocalRoads([...baseRoads,...accessRoads]);updateJunctions?.(accessRoads);
+  terrain.setLocalRoads([...baseRoads,...accessRoads],baseRoads.length);updateJunctions?.(accessRoads);
   const vertices=[];
   const strip=(a,b,offset,width)=>{
    const length=Math.hypot(b.x-a.x,b.y-a.y),nx=-(b.y-a.y)/length,ny=(b.x-a.x)/length;
