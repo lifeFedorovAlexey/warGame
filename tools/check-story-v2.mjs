@@ -23,9 +23,10 @@ for(const cue of [...source.dialogue,...source.barks]){
  assert(clip.duration>0);
  if(cue.speaker!=='past')assert(portraits.characters[cue.speaker],cue.speaker);
 }
-assert.equal(userCount,60);
-assert.equal(source.dialogue.find(c=>c.id==='m01-s07-l016').text,'У нас это склад называется.');
-assert.equal(audio.clips['m01-s07-l016'].origin,'temporary-synthesis');
+assert.equal(userCount,69);
+assert.equal(source.dialogue.find(c=>c.id==='m01-s07-l016').text,'Нам и прикрученное надо. Дай отвёртку.');
+assert.equal(source.dialogue.find(c=>c.id==='m01-s07-l016').speaker,'builder');
+assert.equal(audio.clips['m01-s07-l016'].origin,'user-recording');
 // Mislabeled takes use the owner's confirmed spoken words, not their filenames.
 assert.equal(audio.clips['m01-s06-l008'].file,'recordings/commander/m01-s07-l002.mp3');
 assert.equal(audio.clips['m01-s07-l002'].file,'recordings/commander/m01-s07-l004.mp3');
