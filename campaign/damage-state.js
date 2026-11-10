@@ -23,8 +23,8 @@ export const VEHICLE_PARTS = {
   2:{name:'wheel_fr',material:'rubber',detachable:true},
   3:{name:'wheel_rl',material:'rubber',detachable:true},
   4:{name:'wheel_rr',material:'rubber',detachable:true},
-  5:{name:'headlamp_l',material:'glass',detachable:true},
-  6:{name:'headlamp_r',material:'glass',detachable:true},
+  5:{name:'headlamp_l',material:'glass',detachable:true,breakOnWreck:true},
+  6:{name:'headlamp_r',material:'glass',detachable:true,breakOnWreck:true},
   7:{name:'bumper_front',material:'metal',detachable:true},
   8:{name:'bumper_rear',material:'metal',detachable:true},
   9:{name:'weapon',material:'equipment',detachable:true,strength:210},
@@ -49,6 +49,8 @@ export const VEHICLE_PARTS = {
   28:{name:'side_hood_right',material:'metal',detachable:true,strength:75},
   29:{name:'spare_wheel',material:'rubber',detachable:true,strength:100},
   30:{name:'hood_panel',material:'metal',detachable:true,strength:65},
+  31:{name:'rear_lamp_l',material:'glass',detachable:true,breakOnWreck:true},
+  32:{name:'rear_lamp_r',material:'glass',detachable:true,breakOnWreck:true},
 };
 export const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
 export const normalize = v=>{const l=Math.hypot(...v)||1;return v.map(x=>x/l);};

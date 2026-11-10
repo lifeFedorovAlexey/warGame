@@ -147,7 +147,10 @@ export function createDamageSystem(T,scene,field,config){
       const distance=r=>Math.hypot(...point.map((v,k)=>v-Math.max(r.min[k],Math.min(r.max[k],v))));
       candidates.sort((a,b)=>distance(a)-distance(b));
       const mobile=!!config.units[entity.kind];
-      const broken=mobile?candidates.filter(r=>!['glass'].includes(template.parts[r.id]?.material)).slice(0,3):candidates;
+      const broken=mobile?[
+        ...candidates.filter(r=>template.parts[r.id].breakOnWreck),
+        ...candidates.filter(r=>template.parts[r.id].material!=='glass'&&!template.parts[r.id].breakOnWreck).slice(0,3),
+      ]:candidates;
       for(const r of broken)entity.damage.parts[r.id]={...entity.damage.parts[r.id],damage:1,detached:true};
       if(candidates.length)entity.damage.revision++;
     };

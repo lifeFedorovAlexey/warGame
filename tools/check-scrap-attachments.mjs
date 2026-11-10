@@ -1,12 +1,15 @@
 import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
 import {registerHooks} from 'node:module';
 registerHooks({resolve(s,c,next){return next(s==='three'?new URL('../demo/vendor/three.module.js',import.meta.url).href:s,c);}});
 const T=await import('../demo/vendor/three.module.js');
+const {GLTFLoader}=await import('../demo/vendor/loaders/GLTFLoader.js');
 const {FIELD_RECIPES,fieldEffects,fieldUnitSpec}=await import('../campaign/field-modifications.js');
 const {vehicleDynamics}=await import('../campaign/vehicle-dynamics.js');
 const {ensureSalvage,salvageFromImpact,salvageFromWreck,updateSalvage,armorMultiplier}=await import('../campaign/vehicle-salvage.js');
-const {createDamageState,applyDamageHit,VEHICLE_PARTS}=await import('../campaign/damage-state.js');
+const {createDamageState,applyDamageHit,destroyDamage,VEHICLE_PARTS}=await import('../campaign/damage-state.js');
 const {prepareDamageGeometry,createDamageCollider,extractDamagePart}=await import('../campaign/damage-geometry.js');
+const {createDamageSystem}=await import('../campaign/damage-system.js');
 const {createFieldModification}=await import('../campaign/field-modification-models.js');
 const {createScavUnit}=await import('../campaign/scav-units.js');
 const {recoveredPaint}=await import('../campaign/salvage-paint.js');
@@ -19,6 +22,48 @@ function drop(m,kind,part,id='donor'){
 }
 const collect=(m,u,item)=>{u.previousX=u.x=item.x;u.previousY=u.y=item.y;m.state.time=item.readyAt+.01;updateSalvage(m);};
 const bindings=root=>{root.updateMatrixWorld(true);const list=[];root.traverse(n=>{if(n.isMesh)list.push(prepareDamageGeometry(T,n,'body'));});return list;};
+const bodies=[];
+for(const lod of [0,1,2]){
+ const bytes=await readFile(new URL('../assets/vehicles/B01/B01-lod'+lod+'.glb',import.meta.url));
+ const {scene}=await new GLTFLoader().parseAsync(Uint8Array.from(bytes).buffer,'');
+ scene.rotation.x=Math.PI/2;scene.position.z=1.05;scene.updateMatrixWorld(true);bodies.push(scene);
+}
+test('Both side bonnets bolt into the actual B01 skin and panel',()=>{
+ const body=bodies[0],shell=body.getObjectsByProperty('isMesh',true).find(n=>n.material.name==='paint_olive'),ray=new T.Raycaster();
+ const surface=(mesh,x,side,y,z)=>{
+  ray.set(new T.Vector3(x,y,z),new T.Vector3(side,0,0));
+  return Math.abs(ray.intersectObject(mesh)[0]?.point.x);
+ };
+ for(const [id,side] of [['side-hood-left',-1],['side-hood-right',1]]){
+  const root=createFieldModification(T,id);root.updateMatrixWorld(true);
+  const [panel,bolts,steel]=['salvage_hood_paint','salvage_bolt','field_guard'].map(name=>root.children.find(n=>n.material.name===name));
+  for(const y of [-.66,.22])for(const z of [1.14,1.72]){
+   const skin=surface(shell,2*side,-side,y,z),rail=surface(steel,.8*side,side,y,z);
+   const spacer=surface(steel,2*side,-side,y,z),inner=surface(panel,.8*side,side,y,z),outer=surface(panel,2*side,-side,y,z);
+   const bolt=surface(bolts,.8*side,side,y,z);
+   assert(rail<skin&&skin<inner&&inner<spacer&&bolt<outer,id+' has a continuous mount through skin and panel');
+   assert(outer-skin<.22,id+' standoff is limited');
+  }
+ }
+});
+test('B01 headlamps and rear lamps break on impact and on wrecks at every LOD',()=>{
+ const rays=[[-.62,4,1.61,5],[.62,4,1.61,6],[-.77,-4,1.40,31],[.77,-4,1.40,32],[-.77,-4,1.288,31],[.77,-4,1.288,32]];
+ const m={state:{time:0},config:{units:{bukhanka:{}},worldScale:1}};
+ const system=createDamageSystem(T,new T.Scene(),{heightAt:()=>0},m.config);system.bindMission(m);
+ for(const [lod,root] of bodies.entries()){
+  const b=root.getObjectsByProperty('isMesh',true).map(mesh=>prepareDamageGeometry(T,mesh,'body',lod));
+  system.registerVehicle('bukhanka',b);
+  const collider=system.getTemplate({kind:'bukhanka'}).collider,s=createDamageState(),trace=([x,y,z])=>collider.trace([x,y,z],[0,-Math.sign(y),0],s);
+  for(const ray of rays)assert.equal(trace(ray)?.partId,ray[3],'intact lamp on LOD '+lod);
+  const hit=trace(rays[0]);applyDamageHit(s,{...hit,direction:[0,-1,0],power:24,type:'bullet'},VEHICLE_PARTS[5]);
+  assert.notEqual(trace(rays[0])?.partId,5);assert.equal(trace(rays[1])?.partId,6);
+  destroyDamage(s);m.onDamageDestroyed({kind:'bukhanka',damage:s},{point:[0,0,1.5]});
+  const saved=JSON.parse(JSON.stringify(s));
+  for(const id of [5,6,31,32])assert(saved.parts[id]?.detached);
+  for(const ray of rays)assert.notEqual(trace(ray)?.partId,ray[3],'wreck has no intact lens on LOD '+lod);
+  for(const id of [10,11,14,15])assert(!saved.parts[id]?.detached,'Wreck transition keeps window damage independent');
+ }
+});
 test('Two hoods fill separate sides; rear spare consumes one wheel; colour survives a second drop and save',()=>{
  const m=fixture(),u=car('receiver');m.state.units=[u];
  const a=drop(m,'scav-firetruck',30,'red');assert.equal(a.stock,'hood-stock');assert.equal(a.paintColor,'#914c39');collect(m,u,a);

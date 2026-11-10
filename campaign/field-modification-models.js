@@ -19,11 +19,16 @@ export function createFieldModification(T,id,{paintColor='#825a46'}={}){
     node.userData.installationPart=part;node.castShadow=node.receiveShadow=true;root.add(node);return node;
   }
   if(id.startsWith('side-hood-')){
-    const side=id.endsWith('left')?-1:1,x=side*1.25,y=-.22,z=1.43;
-    const panel=hoodGeometry(T);panel.rotateY(side*Math.PI/2);panel.translate(x,y,z);mesh(panel,'salvage_hood_paint',paintColor);
-    for(const dy of [-.44,.44])for(const dz of [-.49,.49]){
-      bar([side*1.14,y+dy,z+dz],[x,y+dy,z+dz],.025);
-      const bolt=new T.CylinderGeometry(.037,.037,.045,6).rotateZ(Math.PI/2).translate(x+side*.05,y+dy,z+dz);mesh(bolt,'salvage_bolt','#74776a');
+    const side=id.endsWith('left')?-1:1,x=1.075,y=-.22,z=1.43;
+    const panel=hoodGeometry(T);panel.rotateY(side*Math.PI/2);panel.translate(side*x,y,z);mesh(panel,'salvage_hood_paint',paintColor);
+    for(const mountY of [y-.44,y+.44]){
+      // Rails seat against the curved B01 side. Short spacers reach into the
+      // pressed panel at the same height as the outer bolt heads.
+      geometries.push(new T.BoxGeometry(.09,.10,.68).translate(side*.96,mountY,z));
+      for(const mountZ of [z-.29,z+.29]){
+        bar([side*.98,mountY,mountZ],[side*(x+.055),mountY,mountZ],.032);
+        const bolt=new T.CylinderGeometry(.037,.037,.045,6).rotateZ(Math.PI/2).translate(side*(x+.075),mountY,mountZ);mesh(bolt,'salvage_bolt','#74776a');
+      }
     }
   }else if(id==='spare-wheel'){
     const y=-2.58,z=1.48,r=.43;
