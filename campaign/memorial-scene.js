@@ -44,6 +44,10 @@ function crossFaces(yaw,seed){
  return faces.sort((a,b)=>a.depth-b.depth);
 }
 function shadow(ctx,g){
+ if(g.zone==='hill'){
+  ctx.save();ctx.translate(g.x,g.y-g.size*.018);ctx.fillStyle='#080c0a55';ctx.shadowColor='#080c0a66';ctx.shadowBlur=Math.max(1,g.size*.035);
+  ctx.beginPath();ctx.ellipse(0,0,g.size*.27,g.size*.042,0,0,tau);ctx.fill();ctx.restore();
+ }
  const {x,y,size,yaw}=g;ctx.save();ctx.translate(x,y-size*.10);ctx.scale(size*.87/100,size*.87/100);
  ctx.fillStyle='#07100d43';ctx.shadowColor='#09100c55';ctx.shadowBlur=2.5;
  for(const face of crossFaces(yaw,g.index).filter(f=>f.light===.40)){
@@ -118,6 +122,7 @@ class FlagCloth{
 export class MemorialScene{
  constructor(canvas){
   this.canvas=canvas;this.ctx=canvas.getContext('2d');this.cache=document.createElement('canvas');this.cacheCtx=this.cache.getContext('2d');
+  this.graveRims=new WeakMap();
   this.image=new Image();this.image.src='../assets/campaign/personnel/memorial-hill-clean-v2.png';this.image.onload=()=>this.resize();
   this.graveImage=new Image();this.graveImage.src='../assets/campaign/personnel/grave-private-v2.png';this.graveImage.onload=()=>this.resize();
   this.graveArt=new MemorialGraveArt(()=>this.resize());
@@ -177,10 +182,26 @@ export class MemorialScene{
   const image=this.graveArt.get(g.soldier)??this.graveImage,height=g.size,width=image.width/image.height*height;
   ctx.save();ctx.translate(g.x,g.y);ctx.rotate(g.rotation);
   ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
-  const brightness=(.53+g.depth*.22+(active?.07:0))*(g.appearance??graveAppearance(g.soldier)).light;
-  ctx.globalAlpha=.72+g.depth*.27;
-  ctx.filter=`saturate(.54) brightness(${brightness}) contrast(.87) blur(${.36-g.depth*.24}px)`;
-  ctx.drawImage(image,-width*.5,-height*.99,width,height);ctx.restore();
+  const hill=g.zone==='hill',brightness=((hill?.76:.53)+g.depth*(hill?.18:.22)+(active?.07:0))*(g.appearance??graveAppearance(g.soldier)).light;
+  ctx.globalAlpha=hill?.90+g.depth*.08:.72+g.depth*.27;
+  ctx.filter=`saturate(${hill?.68:.54}) brightness(${brightness}) contrast(${hill?.99:.87}) blur(${hill?.20-g.depth*.10:.36-g.depth*.24}px)`;
+  ctx.drawImage(image,-width*.5,-height*.99,width,height);
+  if(hill){
+   // Warm light catches the upper/left faces, matching the sprite's sunset
+   // lighting. The mask is inside the material silhouette, never an outer halo.
+   let rim=this.graveRims.get(image);
+   if(!rim){
+    rim=document.createElement('canvas');const scale=256/Math.max(image.width,image.height);rim.width=Math.round(image.width*scale);rim.height=Math.round(image.height*scale);
+    const light=rim.getContext('2d');light.drawImage(image,0,0,rim.width,rim.height);
+    light.globalCompositeOperation='destination-out';light.drawImage(image,2,1.5,rim.width,rim.height);
+    light.globalCompositeOperation='source-in';light.fillStyle='#e9b878';light.fillRect(0,0,rim.width,rim.height);
+    const fade=light.createLinearGradient(0,0,0,rim.height);fade.addColorStop(0,'#fff');fade.addColorStop(.70,'#fff');fade.addColorStop(1,'#fff0');
+    light.globalCompositeOperation='destination-in';light.fillStyle=fade;light.fillRect(0,0,rim.width,rim.height);
+    this.graveRims.set(image,rim);
+   }
+   ctx.globalCompositeOperation='screen';ctx.globalAlpha=.20+g.depth*.10;ctx.filter='blur(.12px)';ctx.drawImage(rim,-width*.5,-height*.99,width,height);
+  }
+  ctx.restore();
  }
  waveFlag(ctx,t){
   const f=this.flag;if(!f||!this.flagTexture)return;
