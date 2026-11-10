@@ -1,4 +1,5 @@
 import {graveAppearance,MemorialGraveArt} from './memorial-graves.js';
+import {layoutMemorialGraves} from './memorial-layout.js';
 // All coordinates belong to this memorial scene, never to the tactical map.
 // There is exactly one grave mound and one three-bar cross per casualty.
 const tau=Math.PI*2;
@@ -8,8 +9,8 @@ const halton=(n,b)=>{let v=0,f=1;for(;n;n=Math.floor(n/b)){f/=b;v+=f*(n%b);}retu
 const ridge=x=>{const p=[[0,.95],[.4,.72],[.58,.62],[.7,.51],[.8,.40],[.9,.34],[1,.36]];for(let i=1;i<p.length;i++)if(x<=p[i][0]){const [a,b]=p[i-1],[c,d]=p[i];return mix(b,d,(x-a)/(c-a));}return .36;};
 const firstPlots=[[.61,.88],[.13,.72],[.88,.46],[.42,.39],[.73,.16],[.04,.22],[.91,.80],[.40,.66]];
 export function gravePosition(index){
- // The first ranks occupy the foreground. Further casualties fill the
- // middle/far slope rather than piling more large graves in front of them.
+ // Compatibility for older diagnostic tools. The actual scene uses
+ // layoutMemorialGraves: placement now depends on rank and free space.
  const [u,depth]=firstPlots[index]??[halton(index+13,2),.08+halton(index+11,3)*.43];
  const x=.57+u*.40,y=mix(ridge(x),.93,depth);
  return {x,y,depth,scale:.038+.137*depth*depth,rotation:(random(index+9)-.5)*.05,yaw:-.30+random(index+5)*.70};
@@ -43,7 +44,7 @@ function crossFaces(yaw,seed){
  return faces.sort((a,b)=>a.depth-b.depth);
 }
 function shadow(ctx,g){
- const {x,y,size,yaw}=g;ctx.save();ctx.translate(x,y);ctx.scale(size/100,size/100);
+ const {x,y,size,yaw}=g;ctx.save();ctx.translate(x,y-size*.10);ctx.scale(size*.87/100,size*.87/100);
  ctx.fillStyle='#07100d43';ctx.shadowColor='#09100c55';ctx.shadowBlur=2.5;
  for(const face of crossFaces(yaw,g.index).filter(f=>f.light===.40)){
   polygon(ctx,face.points.map(p=>({x:p.x-p.y*.86,y:-p.y*.22})));ctx.fill();
@@ -143,18 +144,18 @@ export class MemorialScene{
   this.width=w;this.height=h;this.dpr=Math.min(2,window.devicePixelRatio||1);
   for(const c of [this.canvas,this.cache]){c.width=Math.round(w*this.dpr);c.height=Math.round(h*this.dpr);}
   const ctx=this.cacheCtx;ctx.setTransform(this.dpr,0,0,this.dpr,0,0);
-  const narrow=w<700,sx=narrow?w/(this.image.width*.54):Math.max(w/this.image.width,h/this.image.height),iw=this.image.width*sx,ih=this.image.height*sx;
-  const ox=narrow?w-iw:(w-iw)/2,oy=narrow?h-ih:(h-ih)/2;
+  const sx=Math.max(w/this.image.width,h/this.image.height),iw=this.image.width*sx,ih=this.image.height*sx;
+  const ox=(w-iw)/2,oy=(h-ih)/2;
   ctx.drawImage(this.image,ox,oy,iw,ih);
   // A cool atmospheric veil in the shadows preserves the amber horizon.
   ctx.fillStyle='#152c3725';ctx.fillRect(0,0,w,h);
   this.art={ox,oy,iw,ih};
   const fw=iw*.18,fh=fw*.5,pole=ox+iw*.922;
   this.flag={x:pole-fw*.984,y:oy+ih*.086-fh*.074,w:fw,h:fh,pole};
-  this.hitAreas=this.graves.map((soldier,index)=>{
-   const p=gravePosition(index),appearance=graveAppearance(soldier),x=w*((narrow?.10:.58)+(p.x-.57)/.40*(narrow?.77:.35)),artX=(x-ox)/iw;
-   return {soldier,index,appearance,x,y:oy+mix(ridge(artX),.91,p.depth)*ih,size:Math.max(12,p.scale*ih*(narrow?1.13:1.05))*appearance.scale,yaw:p.yaw,rotation:p.rotation,depth:p.depth};
-  }).sort((a,b)=>a.y-b.y);
+  const canvasBox=this.canvas.getBoundingClientRect(),root=this.canvas.closest('#result');
+  const excluded=[...root?.querySelectorAll('.result-copy h1,#result-message,.result-copy dl,.result-copy h2,.result-rank,.result-honour,#result-history-note,.result-actions')??[]]
+   .filter(node=>node.getClientRects().length).map(node=>{const r=node.getBoundingClientRect();return {left:r.left-canvasBox.left-5,right:r.right-canvasBox.left+5,top:r.top-canvasBox.top-4,bottom:r.bottom-canvasBox.top+4};});
+  this.hitAreas=layoutMemorialGraves(this.graves,{width:w,height:h,art:this.art,excluded});
   this.windPlots=this.hitAreas.filter(g=>g.size>=35).sort((a,b)=>b.size-a.size).slice(0,24);
   for(const g of this.hitAreas){shadow(ctx,g);this.drawGrave(ctx,g);}
   this.draw();
@@ -172,13 +173,13 @@ export class MemorialScene{
   const art=this.graveArt.status(this.graves);this.canvas.dataset.memorialArtReady=String(art.ready);this.canvas.dataset.memorialArtErrors=art.failed.join(',');
  }
  drawGrave(ctx,g,active=false){
-  const image=this.graveArt.get(g.soldier)??this.graveImage,scale=g.size/(image.height*.79),width=image.width*scale,height=image.height*scale;
+  const image=this.graveArt.get(g.soldier)??this.graveImage,height=g.size,width=image.width/image.height*height;
   ctx.save();ctx.translate(g.x,g.y);ctx.rotate(g.rotation);
   ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
   const brightness=(.53+g.depth*.22+(active?.07:0))*(g.appearance??graveAppearance(g.soldier)).light;
   ctx.globalAlpha=.72+g.depth*.27;
   ctx.filter=`saturate(.54) brightness(${brightness}) contrast(.87) blur(${.36-g.depth*.24}px)`;
-  ctx.drawImage(image,-width*.488,-height*.81,width,height);ctx.restore();
+  ctx.drawImage(image,-width*.5,-height*.99,width,height);ctx.restore();
  }
  waveFlag(ctx,t){
   const f=this.flag;if(!f||!this.flagTexture)return;

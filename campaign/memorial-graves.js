@@ -26,7 +26,7 @@ const appearance=(row,order,naval=false)=>{
  const [baseId,name,material]=row,id=(naval?'navy-':'')+baseId;
  return Object.freeze({id,order,service:naval?'navy':'army',material,name:name+(naval?' · морская отделка':''),
   url:new URL('../assets/campaign/personnel/'+(id==='private'?'grave-private-v2.png':'graves/'+id+'.png'),import.meta.url).href,
-  scale:1+order*.004,light:({wood:1,iron:1.12,limestone:.97,granite:1.1,bronze:1.06})[material]});
+  light:({wood:1,iron:1.12,limestone:.97,granite:1.1,bronze:1.06})[material]});
 };
 export const graveAppearances=Object.freeze([...army.map((row,i)=>appearance(row,i)),...army.slice(0,19).map((row,i)=>appearance(row,i,true))]);
 const byRank=new Map(graveAppearances.map(a=>[a.id,a]));

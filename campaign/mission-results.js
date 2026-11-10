@@ -101,6 +101,7 @@ export class MissionResultsView{
    node.style.gridTemplateColumns=`repeat(${columns},minmax(0,1fr))`;
    node.style.setProperty('--rank-cell-height',height+'px');node.style.setProperty('--rank-count-size',Math.min(narrow?13:20,height*.8)+'px');
   }
+  this.scene.resize();
  }
  hide(){this.scene.stop();this.root.hidden=true;this.onVisibility(false);}
  pick(e){

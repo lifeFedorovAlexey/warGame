@@ -13,7 +13,7 @@ assert.equal(graveAppearance({rank:'unknown'}).id,'private');assert.equal(graveA
 assert.equal(graveAppearance({rank:'major',death:{rank:'sergeant'}}).id,'sergeant','Saved death rank takes precedence');
 for(const service of ['army','navy']){
  const rows=graveAppearances.filter(a=>a.service===service);
- for(let i=1;i<rows.length;i++){assert(rows[i].order>rows[i-1].order);assert(rows[i].scale>=rows[i-1].scale);assert(rows[i].scale<1.1,'Perspective remains more important than rank');}
+ for(let i=1;i<rows.length;i++)assert(rows[i].order>rows[i-1].order);
 }
 assert(graveAppearance('private').url.endsWith('/grave-private-v2.png'),'Approved private stays unchanged');
 const hashes=new Set(),report=[];

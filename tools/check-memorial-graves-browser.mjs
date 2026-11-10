@@ -9,12 +9,14 @@ try{
  page.on('pageerror',e=>errors.push(e.message));page.on('response',r=>{if(r.status()>=400)errors.push(r.status()+' '+r.url());});
  await page.addInitScript(()=>{for(const key of ['fieldRadio','fieldSound','fieldStoryVoice'])localStorage.setItem('warGame.'+key,'off');});
  await page.goto('http://127.0.0.1:8766/campaign/');await page.waitForFunction(()=>window.campaign?.ready,null,{timeout:120000});
- await page.locator('#begin').click();await page.evaluate(()=>campaign.advance(40));await page.waitForFunction(()=>campaign.state.active);await page.locator('#pause').click();
+ await page.locator('#begin').click();await page.waitForFunction(()=>document.querySelector('#welcome').hidden,null,{timeout:120000});
+ if(await page.evaluate(()=>campaign.state.dreamPlaying))await page.locator('[data-dream="skip"]').click();
+ await page.evaluate(()=>campaign.advance(40));await page.waitForFunction(()=>campaign.state.active,null,{timeout:60000});await page.locator('#pause').click();
  const saved=await page.evaluate(async()=>{
   const c=campaign,m=c.mission,p=m.state.campaign.personnel,{MemorialScene}=await import('./memorial-scene.js'),{personnelRanks}=await import('./personnel-ranks.js');c.radio.setEnabled(false);
   const original=MemorialScene.prototype.setData;MemorialScene.prototype.setData=function(...args){window.rankMemorial=this;return original.apply(this,args);};
-  // Put representative materials in the existing foreground slots; every
-  // remaining rank still gets exactly one casualty, no decorative graves.
+  // Deliberately create a death order different from rank order. Every rank
+  // still gets exactly one casualty, no decorative graves.
   const first=['private','sergeant','senior-sergeant','warrant-officer','junior-lieutenant','colonel','army-general','marshal'];
   const ranks=[...first,...personnelRanks.map(r=>r.id).filter(id=>!first.includes(id))];
   for(const rank of ranks){const u=m.addUnit('bukhanka','rai',{x:800,y:800}),id=p.crews[u.id].memberIds[0];c.setPersonnelRank(id,rank);m.damage(u,1e6,{id:'fixture-enemy',kind:'raider',owner:'scavs',x:700,y:700});}
