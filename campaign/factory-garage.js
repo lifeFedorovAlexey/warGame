@@ -10,7 +10,10 @@ export const insideFactory=u=>u.factoryVisit?.phase==='inside';
 export const factoryPriority=f=>f.workPriority??'repair';
 export function factoryPoint(m,f,x,y){const a=f.rotation??0,c=Math.cos(a),s=Math.sin(a),scale=m.config.worldScale;return{x:f.x+(x*c-y*s)*scale,y:f.y+(x*s+y*c)*scale};}
 export function factoryVisitors(m,f){return m.state.units.filter(u=>u.hp>0&&u.factoryVisit?.factoryId===f.id);}
-export function factoryProductionPaused(m,f){return factoryVisitors(m,f).some(u=>['entering','leaving','departure'].includes(u.factoryVisit.phase)||insideFactory(u)&&u.hp<u.maxHp&&factoryPriority(f)==='repair');}
+export function factoryProductionPaused(m,f){
+ const canRepair=m.state.energy>0||(m.buildingSpec(f).repair?.energyPerSecond??1.5)===0;
+ return factoryPriority(f)==='repair'&&canRepair&&factoryVisitors(m,f).some(u=>insideFactory(u)&&u.hp<u.maxHp);
+}
 export function setFactoryPriority(m,id,priority){
  m.finishPendingStep();const f=m.entity(id);
  if(!f||f.kind!=='factory'||f.owner!=='rai'||!f.completed||!['repair','production'].includes(priority))return m.fail('Нужен работающий завод');
@@ -85,6 +88,8 @@ function* driveTo(m,u,goal,dt,current,approaching=false){
   if(path){u.path=path;u.task={type:'move',...goal};u.routeOrder={revision:2,type:'retreat',request:{...goal},destination:{...goal}};}
   else {
    const visit=u.factoryVisit;visit.retryAt=m.state.time+.25;
+   if(approaching&&u.combatRetreat)(u.combatRetreat.unavailableFactories??={})[visit.factoryId]=
+    {at:m.state.time,revision:m.nav.topologyRevision,x:u.x,y:u.y};
    if(visit.phase==='departure'){
     (visit.rejectedWaitPoints??=[]).push(goal.x+','+goal.y);delete visit.waitingPoint;delete visit.waitGeometry;
    }

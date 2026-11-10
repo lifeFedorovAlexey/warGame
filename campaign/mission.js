@@ -12,7 +12,7 @@ import {footprintSupport,vehicleEnvelope,vehicleSweep,vehicleObstacle,vehicleRad
 import {passageStillOpen,preparePassageEgress} from './passage-egress.js';
 import {vehicleRecipes,starterProjects,matchingRecipe,projectDesignation,designNameKey,projectAssemblyKey,latestVehicleProjects,latestVehicleProject} from './vehicle-designs.js';
 import {vehiclePaint} from './vehicle-paint.js';
-import {chooseProductionFactory,productionCancellation,productionFactories} from './factory-production.js';
+import {chooseProductionFactory,productionCancellation,productionFactories,rebalanceProduction} from './factory-production.js';
 import {isCampPerimeter,updateCampPerimeters} from './camp-demolition.js';
 import {availableOil,oilFundingRemaining,oilRefund,beginOilFlow,finishOilFlow,transferOil,fundedWorkTime,repairWithOil} from './oil-economy.js';
 import {angleDelta} from './builder-kinematics.js';
@@ -858,17 +858,17 @@ export class Mission{
   return {ok:true,refund};
  }
  produce(id,projectId,{distributed=false}={}){this.finishPendingStep();
-  const factory=distributed?chooseProductionFactory(this,id):this.entity(id);
-  if(!factory||factory.hp<=0||factory.owner!=='rai'||factory.kind!=='factory'||!factory.completed)return this.fail('Нужен построенный завод');
   const project=this.factoryProjects().find(candidate=>candidate.id===projectId);
   if(!project)return this.fail('Сначала сохраните проект в конструкторе');
   const {kind,spec,components,name}=project;
+  const factory=distributed?chooseProductionFactory(this,id,{kind,cost:spec.cost,progress:0,funding:{paid:0}}):this.entity(id);
+  if(!factory||factory.hp<=0||factory.owner!=='rai'||factory.kind!=='factory'||!factory.completed)return this.fail('Нужен построенный завод');
   if(!this.canSpend(spec.cost))return this.fail('Недостаточно нефти');
   const deployed=this.state.units.filter(unit=>unit.owner==='rai'&&unit.hp>0).length;
   const queued=productionFactories(this).reduce((sum,building)=>sum+building.queue.length,0);
   if(deployed+queued>=(this.config.unitLimit??48))return this.fail('Достигнут предел техники');
 
-  factory.queue.push({kind,projectId,name,components:[...components],paint:vehiclePaint(project).id,progress:0,cost:spec.cost,funding:{paid:0},orderSerial:this.serial++});
+  factory.queue.push({kind,projectId,name,components:[...components],paint:vehiclePaint(project).id,progress:0,cost:spec.cost,funding:{paid:0},orderSerial:this.serial++,autoFactory:distributed});
   return {ok:true,factoryId:factory.id};
  }
  research(id,key){this.finishPendingStep();if(!this.researchUnlocked())return this.fail('НИИ ещё не принят в эксплуатацию');const lab=this.entity(id),spec=this.config.research[key];if(!lab||lab.kind!=='lab'||lab.owner!=='rai'||!lab.completed)return this.fail('Нужен исследовательский центр');if(!spec||!this.state.artifactKeys.includes(key))return this.fail('Сначала найдите артефакт');if(this.state.research[key]||this.state.buildings.some(b=>b.hp>0&&b.research?.key===key))return this.fail('Исследование уже выполнено или выполняется');if(lab.research)return this.fail('Лаборатория занята');if(!this.canSpend(spec.cost))return this.fail('Недостаточно нефти');lab.research={key,progress:0,cost:spec.cost,funding:{paid:0}};this.emit('research-start',{key});return {ok:true};}
@@ -2351,13 +2351,14 @@ export class Mission{
   const structures=this.state.buildings.filter(b=>b.owner==='rai'&&b.hp>0&&b.completed);
   const generation=this.linkOilWells(structures,dt);
   beginOilFlow(this,generation,dt);
+  rebalanceProduction(this);
   for(const b of structures)if(b.kind==='factory')b.productionPaused=factoryProductionPaused(this,b);
-  transferOil(this,dt);
   updateFactoryRepairs(this,structures,dt);
+  transferOil(this,dt);
   for(const building of structures){building.cooldown=Math.max(0,building.cooldown-dt);const spec=this.buildingSpec(building);if(spec.damage){const target=this.nearestEnemy(building,spec.range);if(target)this.attack(building,target,spec);}
-   if(building.queue.length&&!building.productionPaused){
+   if(building.queue.length){
     const item=building.queue[0],unitSpec=this.config.units[item.kind];
-    item.progress=Math.min(1,item.progress+fundedWorkTime(this,item,dt)/unitSpec.seconds);
+    if(!building.productionPaused)item.progress=Math.min(1,item.progress+fundedWorkTime(this,item,dt)/unitSpec.seconds);
     if(item.progress>=1&&!(building.exitRetryAt>this.state.time)){
      if(yield* this.spawnProducedVehicleSteps(building,item,spec)){
       delete building.exitBlocked;
@@ -2565,6 +2566,7 @@ export class Mission{
  }
  load(json){const data=typeof json==='string'?JSON.parse(json):json;if(data.version!==1||data.mission!==this.config.id||!Array.isArray(data.state?.units)||data.explored?.length!==16384)throw new Error('Несовместимое сохранение');this.state=data.state;restorePersonnel(this);for(const unit of this.state.units)delete unit.trafficOnScreen;
   this.oilSpent=0;this.oilWorkTime=null;
+  this.factoryBalanceAt=undefined;
   this.commandPlanner=null;this.scavJob=null;this.pendingStops=null;
   this.pendingTick=null;this.unitFrameTimes=new WeakMap();this.unitIndexActive=false;this.collisionPairs=new Map();this.contactRockPairs=new Map();this.trafficCoordinator=new PredictiveTraffic();
   for(const unit of this.state.units)if(this.unitSpec(unit).role==='builder')releaseInvalidRepairTarget(this,unit);

@@ -1,4 +1,5 @@
 import {createFactoryGateSignals} from './factory-gate-signals.js';
+import {createFactoryChimneySmoke} from './factory-chimney-smoke.js';
 
 export function createFactoryShutter(T,depth,partId,parts,rear=false){
  const root=new T.Group();root.name=rear?'factory_exit_shutter':'factory_shutter';root.position.set(0,(rear?1:-1)*(depth*.79/2+.13),.35);root.rotation.z=rear?Math.PI:0;
@@ -20,6 +21,7 @@ export function createFactoryServiceEffects(T,scene,scale){
  const states=new Map(),canvas=document.createElement('canvas');canvas.width=canvas.height=64;
  const ctx=canvas.getContext('2d'),g=ctx.createRadialGradient(32,32,2,32,32,30);g.addColorStop(0,'#ffffffcc');g.addColorStop(.45,'#ffffff77');g.addColorStop(1,'#ffffff00');ctx.fillStyle=g;ctx.fillRect(0,0,64,64);
  const smokeMap=new T.CanvasTexture(canvas),sparkGeo=new T.BufferGeometry(),positions=new T.Float32BufferAttribute(new Float32Array(16*12*3),3).setUsage(T.DynamicDrawUsage);
+ const chimneySmoke=createFactoryChimneySmoke(T,scene,scale,smokeMap);
  sparkGeo.setAttribute('position',positions);sparkGeo.setDrawRange(0,0);
  const sparks=new T.Points(sparkGeo,new T.PointsMaterial({color:'#ffe1a0',size:.09*scale,transparent:true,depthWrite:false,blending:T.AdditiveBlending}));sparks.frustumCulled=false;sparks.name='factory_welding_sparks';scene.add(sparks);
  // Keep the light count constant: adding/removing a point light recompiles
@@ -31,6 +33,7 @@ export function createFactoryServiceEffects(T,scene,scale){
  const lightPosition=new T.Vector3();
  let count=0,level=0;
  function update(mission,buildings,time,dt,camera){
+  chimneySmoke.update(mission,buildings,time,camera);
   gateSignals.begin(mission.state.buildings.reduce((n,f)=>n+Number(f.kind==='factory'),0));
   let points=0,doorChanged=false;count=level=0;const live=new Set(),lit=[];for(const light of lights)light.intensity=0;
   for(const f of mission.state.buildings){
@@ -74,5 +77,5 @@ export function createFactoryServiceEffects(T,scene,scale){
   gateSignals.end();
   return doorChanged;
  }
- return {update,preloadMaterials(parent){parent.add(new T.Sprite(glowMaterial),new T.Sprite(smokeMaterial));},get active(){return count;},get soundLevel(){return Math.min(1,level);}};
+ return {update,preloadMaterials(parent){parent.add(new T.Sprite(glowMaterial),new T.Sprite(smokeMaterial));chimneySmoke.preloadMaterials(parent);},get active(){return count;},get soundLevel(){return Math.min(1,level);}};
 }

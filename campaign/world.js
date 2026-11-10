@@ -8,6 +8,7 @@ import {createVehicleLayer} from './vehicle-layer.js';
 import {createHealthBars} from './health-bars.js';
 import {createFactoryServiceEffects,factoryShutterDamagePose} from './factory-service-effects.js';
 import {createFactoryRoadView} from './factory-road-view.js';
+import {createFactoryStatusBoards} from './factory-status-board.js';
 import {createBuildingPrefab} from './prefabs.js';
 import {createScavPrefab} from './scav-prefabs.js';
 import {createScavBasePrefab} from './scav-base-prefabs.js';
@@ -132,6 +133,7 @@ export async function createCampaignWorld(host,config,sound,loading){
  let headlightCount=0;
  const construction=createConstructionEffects(T,scene,config.worldScale);
  const factoryEffects=createFactoryServiceEffects(T,scene,config.worldScale);
+ const factoryBoards=createFactoryStatusBoards(T,addFog,material=>foggedMaterials.delete(material));
  const dustCanvas=document.createElement('canvas');dustCanvas.width=dustCanvas.height=64;const dc=dustCanvas.getContext('2d'),gradient=dc.createRadialGradient(32,32,0,32,32,30);gradient.addColorStop(0,'rgba(255,255,255,.7)');gradient.addColorStop(1,'rgba(255,255,255,0)');dc.fillStyle=gradient;dc.fillRect(0,0,64,64);const dustPositions=new Float32Array(256*3),dustGeometry=new T.BufferGeometry();dustGeometry.setAttribute('position',new T.BufferAttribute(dustPositions,3));dustGeometry.setDrawRange(0,0);const dust=new T.Points(dustGeometry,new T.PointsMaterial({map:new T.CanvasTexture(dustCanvas),color:'#b5a180',size:8,transparent:true,opacity:.13,depthWrite:false}));dust.frustumCulled=false;scene.add(dust);const particles=[];let dustTime=0;
  const ray=new T.Raycaster(),ndc=new T.Vector2(),vector=new T.Vector3();
  const localRay=new T.Ray(),inverse=new T.Matrix4(),pickBox=new T.Box3(),pickPoint=new T.Vector3();
@@ -442,6 +444,7 @@ export async function createCampaignWorld(host,config,sound,loading){
   }
   if(time-dustTime>.16){dustTime=time;for(const unit of mission.state.units){if(unit.hp<=0||isInfantry(unit)||unit.owner!=='rai'&&!mission.visibleAt(unit.x,unit.y)||Math.hypot(unit.x-unit.previousX,unit.y-unit.previousY)<.15)continue;particles.push({x:unit.x+Math.sin(unit.heading)*9,y:unit.y-Math.cos(unit.heading)*9,z:field.heightAt(unit.x,unit.y)+1,born:time});}}while(particles.length>256)particles.shift();for(let i=particles.length-1;i>=0;i--)if(time-particles[i].born>2.5)particles.splice(i,1);particles.forEach((p,i)=>dustPositions.set([p.x+(time-p.born)*1.8,p.y,p.z+(time-p.born)*1.2],i*3));dustGeometry.attributes.position.needsUpdate=true;dustGeometry.setDrawRange(0,particles.length);marker.visible=performance.now()<markerUntil;
   if(factoryEffects.update(mission,buildings,time,dt,camera))renderer.shadowMap.needsUpdate=true;
+  factoryBoards.update(mission,buildings);
   if(now-lastAudioAt>=1/12||live!==lastAudioLive){
    lastAudioAt=now;lastAudioLive=live;
   let engine=0,rolling=0,slip=0,road=0;
