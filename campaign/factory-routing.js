@@ -7,6 +7,10 @@ const queueTime=u=>u.factoryVisit?.queued??u.combatRetreat?.started??0;
 const queueOrder=(a,b)=>queueTime(a)-queueTime(b)||a.id.localeCompare(b.id);
 const committed=u=>['gate','entering','inside','leaving','departure'].includes(u.factoryVisit?.phase);
 
+export function needsFactoryVisit(unit,factory){
+ return unit.hp<unit.maxHp||!!factory.autoModernize;
+}
+
 function arrivalSeconds(m,u,f){
  const a=f.rotation??0,scale=m.config.worldScale;
  const door={x:f.x+Math.sin(a)*18*scale,y:f.y-Math.cos(a)*18*scale};
@@ -24,7 +28,7 @@ export function repairCompletionSeconds(m,u,f){
  let entrance=0;
  const keepingPlace=assignment(u)===f.id;
  const waiting=m.state.units.filter(v=>v!==u&&v.owner===u.owner&&v.hp>0&&assignment(v)===f.id
-  &&(v.factoryVisit||v.combatRetreat?.service!=='complete')
+  &&(v.factoryVisit||v.combatRetreat?.service!=='complete'&&needsFactoryVisit(v,f))
   &&!['leaving','departure'].includes(v.factoryVisit?.phase));
  const inside=waiting.filter(v=>v.factoryVisit?.phase==='inside')
   .sort((a,b)=>(a.factoryVisit.arrived??0)-(b.factoryVisit.arrived??0)||a.id.localeCompare(b.id));

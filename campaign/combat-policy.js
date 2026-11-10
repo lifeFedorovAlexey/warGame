@@ -2,7 +2,7 @@ import {expandCommandIds} from './group-command.js';
 import {isCampPerimeter} from './camp-demolition.js';
 import {rememberRetreatOrder,factoryCanRepair} from './factory-repair.js';
 import {updateFactoryVisit} from './factory-garage.js';
-import {chooseRepairFactory,repairChoiceDue} from './factory-routing.js';
+import {chooseRepairFactory,needsFactoryVisit,repairChoiceDue} from './factory-routing.js';
 import {shouldAutoRetreat,isAutomaticRepair,inFactoryInterior} from './combat-retreat-state.js';
 export {shouldAutoRetreat} from './combat-retreat-state.js';
 
@@ -260,7 +260,12 @@ export function* updateCombatRetreat(mission, unit, spec, dt) {
     mission.emit('navigation-retreat-destination-rejected',{unit:unit.id,factory:serviceBase.id,
      destination:rejected,reason:'outside-factory-apron'});
   }
-  if(serviceBase?.kind==='factory'&&(unit.factoryVisit||retreat.service!=='complete'))return yield* updateFactoryVisit(mission,unit,serviceBase,dt);
+  // An existing visit owns physical space at the door or inside the hall.
+  // Healthy arrivals use the exterior retreat positions unless the factory
+  // was explicitly configured for modernization.
+  if(serviceBase?.kind==='factory'&&(unit.factoryVisit||retreat.service!=='complete'&&needsFactoryVisit(unit,serviceBase))){
+    return yield* updateFactoryVisit(mission,unit,serviceBase,dt);
+  }
   if(retreat.status==='blocked'||retreat.status==='planning'){
     const home=retreatHome(mission,unit);
     if(home.id!==retreat.home.id||home.x!==retreat.home.x||home.y!==retreat.home.y){retreat.home=home;delete retreat.failedSignature;}
