@@ -6,13 +6,16 @@ import {createHash} from 'node:crypto';
 import {createRequire} from 'node:module';
 import {verifyFrameConditions} from './frame-benchmark-conditions.mjs';
 import {injectLatencyHooks} from './latency-source-hooks.mjs';
+import {injectMinimalCommandMarks} from './minimal-command-source.mjs';
 const require=createRequire(import.meta.url),{chromium}=require(process.env.PLAYWRIGHT_PATH??'C:/Users/Алексей/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
 const option=(n,d)=>process.argv.find(a=>a.startsWith('--'+n+'='))?.slice(n.length+3)??d;
 const folder=path.resolve(option('output','campaign/reports/frame-budget/safety-fix/combat')),paired=path.resolve(option('paired','campaign/reports/frame-budget/safety-fix/variants'));
 const seconds=+option('seconds',180),variants=option('variants','baseline,after').split(','),walkProbe=option('walkProbe','off');
 const latencyProbe=option('latencyProbe','false')==='true',supplement=option('supplement',null);
 const commandTimeline=option('commandTimeline','false')==='true';
+const minimalMarks=option('minimalMarks','false')==='true';
 assert(!commandTimeline||latencyProbe,'Detailed timeline requires the latency probe');
+assert(!(minimalMarks&&commandTimeline),'Run minimal first-motion marks and detailed diagnostics separately');
 const renderScale=+option('renderScale',1),warmupFrames=+option('warmupFrames',300);
 assert(Number.isFinite(renderScale)&&renderScale>0);assert(Number.isInteger(warmupFrames)&&warmupFrames>0);
 const manifest=JSON.parse(fs.readFileSync(path.join(paired,'manifest.json'))),fixture=JSON.parse(fs.readFileSync('campaign/reports/frame-budget/baseline-final/convoy-fixture.json'));
@@ -21,6 +24,7 @@ fs.mkdirSync(folder,{recursive:true});fs.writeFileSync(path.join(folder,'fixture
 const report={seconds,rate:4,renderScale,warmupFrames,scenario:'Authored mission, original hostile units/camps/raid and six allied vans. No enemy or safety overrides. Real rAF and wall-clock CPU budgets; fixed render scale and equal paused warmup frame count.',cpu:os.cpus()[0].model,node:process.version,fixtureHash:digest(path.join(folder,'fixture.json')),harnessHash:digest(new URL(import.meta.url)),results:[]};
 report.latencyProbe=latencyProbe;
 report.commandTimeline=commandTimeline;
+report.minimalMarks=minimalMarks;
 if(supplement){report.supplementHashes=JSON.parse(fs.readFileSync(path.join(supplement,'manifest.json')));for(const [file,hash] of Object.entries(report.supplementHashes))assert.equal(digest(path.join(supplement,file)),hash,file);}
 fs.copyFileSync(new URL(import.meta.url),path.join(folder,'harness.mjs'));
 if(fs.existsSync(path.join(folder,'summary.json'))){
@@ -37,8 +41,8 @@ try{
   const page=await browser.newPage({viewport:{width:1920,height:1080}});page.on('pageerror',e=>errors.push(e.stack));
   const diagnostics=[];page.on('console',m=>{if(m.type()==='error')diagnostics.push(m.text());});page.on('requestfailed',r=>diagnostics.push({url:r.url(),failure:r.failure()}));
   const transformed={};
-  if(commandTimeline)for(const rel of ['campaign/mission.js','campaign/command-planner.js']){
-   const body=injectLatencyHooks(rel,fs.readFileSync(path.join(source,rel),'utf8'));transformed[rel]=body;
+  if(commandTimeline||minimalMarks)for(const rel of ['campaign/mission.js','campaign/command-planner.js','campaign/command-motion.js']){
+   let body=fs.readFileSync(path.join(source,rel),'utf8');if(commandTimeline&&rel!=='campaign/command-motion.js')body=injectLatencyHooks(rel,body);if(minimalMarks)body=injectMinimalCommandMarks(rel,body);transformed[rel]=body;
    const target=path.join(folder,'instrumented',variant,rel);fs.mkdirSync(path.dirname(target),{recursive:true});fs.writeFileSync(target,body);
   }
   await page.route('**/*',route=>{let rel=new URL(route.request().url()).pathname.slice(1);if(rel==='campaign/')rel+='index.html';if(transformed[rel])return route.fulfill({body:transformed[rel],contentType:'text/javascript'});const files=[path.join(source,rel),...(supplement?[path.join(supplement,rel)]:[])],file=files.find(f=>fs.existsSync(f)&&fs.statSync(f).isFile());return file?route.fulfill({path:file}):route.continue();});
@@ -61,12 +65,13 @@ try{
   const cdp=await page.context().newCDPSession(page);
   await cdp.send('Profiler.enable');await cdp.send('Profiler.setSamplingInterval',{interval:1000});
   await cdp.send('Tracing.start',{categories:'devtools.timeline,v8,disabled-by-default-v8.gc,blink.user_timing',transferMode:'ReturnAsStream'});await cdp.send('Profiler.start');
-  const result=await page.evaluate(async({seconds,origin,walkProbe,latencyProbe,commandTimeline})=>{
+  const result=await page.evaluate(async({seconds,origin,walkProbe,latencyProbe,commandTimeline,minimalMarks})=>{
    const c=campaign,m=c.mission,w=c.world,T=await import('/demo/vendor/three.module.js'),{distribution}=await import('/campaign/performance.js');
    const {installTickContactAudit}=await import('/tools/frame-contact-audit.mjs');
    const {vehicleRadiusBound}=await import('/campaign/vehicle-collision.js'),{isInfantry}=await import('/campaign/scav-unit-profiles.js');
    const ids=m.state.units.filter(u=>u.owner==='rai'&&u.kind==='bukhanka').map(u=>u.id);
    const latency=latencyProbe?(await import('/tools/frame-latency-probe.mjs')).installFrameLatencyProbe(m,w):null;
+   const marks=minimalMarks?(await import('/tools/minimal-command-marks.mjs')).installMinimalCommandMarks(m):null;
    const timeline=commandTimeline?(await import('/tools/command-latency-probe.mjs')).installCommandLatencyProbe(m,{CommandPlanner:(await import('/campaign/command-planner.js')).CommandPlanner}):null;
    const audit=installTickContactAudit(m);
    const queryProbe=walkProbe==='off'?null:(await import('/tools/walk-query-probe.mjs')).installWalkQueryProbe(m,{capture:walkProbe==='capture'});
@@ -100,7 +105,7 @@ try{
     if(phase!==cameraPhase){cameraPhase=phase;const mode=(phase+Math.floor(phase/6))%3;
      // Absolute camera targets: no variant-dependent search for a moving edge.
      w.centre({x:origin.x+[0,1200,330][mode],y:origin.y},600);stats.cameraChanges.push({elapsed,mode});}
-    const order=Math.floor(elapsed/30);if(order!==orderPhase){orderPhase=order;const goal={x:origin.x,y:origin.y+(order%2?-10:150)};stats.orders.push({elapsed,goal,result:m.submitOrder(ids,'move',goal)});}
+    const order=Math.floor(elapsed/30);if(order!==orderPhase){orderPhase=order;const goal={x:origin.x,y:origin.y+(order%2?-10:150)};marks?.arm(ids);const submitted=m.submitOrder(ids,'move',goal);marks?.returned(submitted);stats.orders.push({elapsed,goal,result:submitted});}
     if(Math.floor(elapsed/15)!==sample){sample=Math.floor(elapsed/15);stats.samples.push({elapsed,time:m.state.time,status:m.state.status,alive:ids.filter(id=>m.entity(id)).length,arrived:ids.filter(id=>done(m.entity(id))).length,emergencyStops:m.trafficCoordinator.stats.emergencyStops});}
     if(ext){disjoint||=gl.getParameter(ext.GPU_DISJOINT_EXT);while(queries.length&&gl.getQueryParameter(queries[0],gl.QUERY_RESULT_AVAILABLE)){const q=queries.shift();gpu.push(gl.getQueryParameter(q,gl.QUERY_RESULT)/1e6);gl.deleteQuery(q);}}
    }
@@ -108,14 +113,15 @@ try{
    const contactAudit=audit.report();contactAudit.auditDistribution=distribution(contactAudit.auditMs);delete contactAudit.auditMs;
    const latencyMetrics=latency?.report()??null;
    const commandTimelineMetrics=timeline?.report()??null;
+   const minimalCommandMetrics=marks?.report()??null;marks?.restore();
    m.advance=advance;m.damage=damage;w.update=worldUpdate;w.renderer.render=render;audit.restore();for(const q of queries)gl.deleteQuery(q);
    queryProbe?.restore();
    timeline?.restore();
    latency?.restore();
-   return {commandTimeline:commandTimelineMetrics,latency:latencyMetrics,walkQueries:queryProbe&&{records:queryProbe.records,captures:queryProbe.captures},rate:c.state.speed,wallSeconds:(performance.now()-start)/1000,simSeconds:m.state.time-simStart,...stats,contactAudit,perf,gpuMs:ext&&!disjoint?distribution(gpu):null,
+   return {minimalCommands:minimalCommandMetrics,commandTimeline:commandTimelineMetrics,latency:latencyMetrics,walkQueries:queryProbe&&{records:queryProbe.records,captures:queryProbe.captures},rate:c.state.speed,wallSeconds:(performance.now()-start)/1000,simSeconds:m.state.time-simStart,...stats,contactAudit,perf,gpuMs:ext&&!disjoint?distribution(gpu):null,
     emergencyStops:m.trafficCoordinator.stats.emergencyStops,arrived:ids.filter(id=>done(m.entity(id))).length,alive:ids.filter(id=>m.entity(id)).length,total:ids.length,
     units:ids.map(id=>{const u=m.state.units.find(u=>u.id===id);return u&&{id,hp:u.hp,x:u.x,y:u.y,path:u.path,task:u.task};}),status:m.state.status};
-  },{seconds,origin:fixture.origin,walkProbe,latencyProbe,commandTimeline});
+  },{seconds,origin:fixture.origin,walkProbe,latencyProbe,commandTimeline,minimalMarks});
   result.warmup=warmup;result.conditions=verifyFrameConditions(result.perf.frames,warmup,renderScale);
   if(latencyProbe){
    assert.equal(result.latency.ticks.length,result.contactAudit.completedTicks,'Latency probe must cover every completed tick');
