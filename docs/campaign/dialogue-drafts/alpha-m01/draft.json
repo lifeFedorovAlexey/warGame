@@ -1,6 +1,6 @@
 {
-  "revision": 120,
-  "savedAt": "2026-11-10T09:11:14.857456+00:00",
+  "revision": 216,
+  "savedAt": "2026-11-10T19:29:31.534807+00:00",
   "document": {
     "id": "alpha-m01",
     "title": "Освоение целины",
@@ -2327,7 +2327,7 @@
       "m01-s02-l008": {
         "id": "m01-s02-l008",
         "speaker": "warrant",
-        "text": "Значит, сон. Спи дальше.",
+        "text": "Значит ВОСПОМИНАНИЯ,  Спи дальше.",
         "pauseAfter": 0.2,
         "sourceLine": 47,
         "recordingStatus": "Т",
@@ -2337,11 +2337,11 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/db561c85e7c86cc2af7fc2126dcd4cf173f579202507d7ed5c89cbda42e9ff90.mp3",
-          "name": "ElevenLabs_2026-11-09T17_04_55_Egor Gadzhiyev - Clear and Commanding_pvc_s50_sim75_v4.mp3",
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/bf2f525c5f66a67d891c2ba98efc3d8b40548904e29736991c1c3ea95a42eb6c.mp3",
+          "name": "ElevenLabs_2026-11-10T17_29_53_Egor Gadzhiyev - Clear and Commanding_pvc_s50_sim75_v4.mp3",
           "origin": "editor-upload",
-          "duration": 2.925688,
-          "text": "Значит, сон. Спите дальше."
+          "duration": 3.631,
+          "text": "Значит ВОСПОМИНАНИЯ,  Спи дальше."
         }
       },
       "m01-s02-l013": {
@@ -2441,7 +2441,7 @@
         "sourceLine": 73,
         "recordingStatus": "Т",
         "key": "m01-s03-l003",
-        "enabled": true,
+        "enabled": false,
         "notes": "",
         "portraitState": "",
         "portrait": null,
@@ -3399,7 +3399,7 @@
       "m01-v3-r21-l001": {
         "id": "m01-v3-r21-l001",
         "speaker": "commander",
-        "text": "ДОТы поставьте на подходах к базе.",
+        "text": "Атаку отбили. ДОТы на въезде поставить!",
         "pauseAfter": 0.2,
         "sourceLine": 385,
         "recordingStatus": "Н",
@@ -3409,23 +3409,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio-v2/m01-v3-r21-l001.ogg",
-          "duration": 2.4832916666666667,
-          "leadingSilence": 0.04,
-          "trailingSilence": 0.32329166666666653,
-          "speaker": "commander",
-          "sha256": "69a255aa2869ef467c397f5d340ec47c0d99f736236c607c09401dbe2a061314",
-          "bytes": 12238,
-          "origin": "temporary-synthesis",
-          "generator": "local Piper + FFmpeg",
-          "voice": "denis",
-          "text": "ДОТы поставьте на подходах к базе."
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/f8027ae17544cf3800967e8fbe8d80769b091d3e15ef56b69f26f122a01dad19.mp3",
+          "name": "ElevenLabs_2026-11-10T17_37_22_comandorNig_gen_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 3.004063,
+          "text": "Атаку отбили. ДОТы на въезде поставить!"
         }
       },
       "m01-v3-r21-l002": {
         "id": "m01-v3-r21-l002",
         "speaker": "builder",
-        "text": "А если больше не нападут?",
+        "text": "А если они с другой стороны зайдут?",
         "pauseAfter": 0.2,
         "sourceLine": 389,
         "recordingStatus": "Н",
@@ -3435,23 +3429,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio-v2/m01-v3-r21-l002.ogg",
-          "duration": 1.9371666666666667,
-          "leadingSilence": 0.06,
-          "trailingSilence": 0.35716666666666663,
-          "speaker": "builder",
-          "sha256": "1cc92dda53d70ec99226c2104d0889a6f105c9d84e86063dae432e9078481310",
-          "bytes": 9559,
-          "origin": "temporary-synthesis",
-          "generator": "local Piper + FFmpeg",
-          "voice": "denis",
-          "text": "А если больше не нападут?"
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/d90f25c18c9983f3c7343ca922287a77b12166c854c08ac030eff2076d34a651.mp3",
+          "name": "ElevenLabs_2026-11-10T17_37_57_Alexandr Vlasov - Vibrant and Energetic_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 2.586063,
+          "text": "А если они с другой стороны зайдут?"
         }
       },
       "m01-v3-r21-l003": {
         "id": "m01-v3-r21-l003",
         "speaker": "warrant",
-        "text": "Значит, помогло.",
+        "text": "Там дороги нет. Пусть сначала построят.",
         "pauseAfter": 0.2,
         "sourceLine": 393,
         "recordingStatus": "Н",
@@ -3461,23 +3449,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio-v2/m01-v3-r21-l003.ogg",
-          "duration": 1.253375,
-          "leadingSilence": 0.01,
-          "trailingSilence": 0.3833749999999999,
-          "speaker": "warrant",
-          "sha256": "17d01dc83cea0dbc654954314a41e89adb8ef053a6844e3d5ca28ec9e59f4a8a",
-          "bytes": 6070,
-          "origin": "temporary-synthesis",
-          "generator": "local Piper + FFmpeg",
-          "voice": "dmitri",
-          "text": "Значит, помогло."
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/a03c33b6ac1825e9f8f7866b879d605d9cdab1230914a4042fe2c8921a44cdf0.mp3",
+          "name": "ElevenLabs_2026-11-10T17_39_03_Egor Gadzhiyev - Clear and Commanding_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 3.3175,
+          "text": "Там дороги нет. Пусть сначала построят."
         }
       },
       "m01-v3-r22-l001": {
         "id": "m01-v3-r22-l001",
         "speaker": "builder",
-        "text": "ДОТ готов.",
+        "text": "ДОТ готов. Въезд перекрыли.",
         "pauseAfter": 0.2,
         "sourceLine": 403,
         "recordingStatus": "Н",
@@ -3487,26 +3469,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio-v2/m01v2-o11-l001.ogg",
-          "duration": 1.298875,
-          "leadingSilence": 0.07,
-          "trailingSilence": 0.288875,
-          "speaker": "builder",
-          "sha256": "0f7548087924be1081b1b72ebc565889285cd8f7c51a9d75c87647aa8aade6e5",
-          "bytes": 6324,
-          "origin": "temporary-synthesis",
-          "reusedFrom": {
-            "catalog": "archive/audio-opening-v4.json",
-            "cueId": "m01v2-o11-l001"
-          },
-          "textMatch": "exact",
-          "text": "ДОТ готов."
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/835b3c50e69e5631dd92a0b5802bd53741b589f251b9e2c9f32a88b868f5d56a.mp3",
+          "name": "ElevenLabs_2026-11-10T17_42_05_Alexandr Vlasov - Vibrant and Energetic_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 2.586063,
+          "text": "ДОТ готов. Въезд перекрыли."
         }
       },
       "m01-v3-r22-l002": {
         "id": "m01-v3-r22-l002",
         "speaker": "commander",
-        "text": "Проверяли?",
+        "text": "А наши как выезжать будут?",
         "pauseAfter": 0.2,
         "sourceLine": 407,
         "recordingStatus": "Н",
@@ -3516,23 +3489,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio-v2/m01-v3-r22-l002.ogg",
-          "duration": 1.066875,
-          "leadingSilence": 0.04,
-          "trailingSilence": 0.37687499999999996,
-          "speaker": "commander",
-          "sha256": "46cf64fa978ca80a1d86d4f462ad457c915d2f0adc7b02adde0c69388ac8cbe8",
-          "bytes": 5012,
-          "origin": "temporary-synthesis",
-          "generator": "local Piper + FFmpeg",
-          "voice": "denis",
-          "text": "Проверяли?"
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/f4d3ae0741058bb9052297c2e9d3a14aa2bb45219b0bc20243e6e42e5b2762a1.mp3",
+          "name": "ElevenLabs_2026-11-10T17_43_00_comandorNig_gen_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 2.351,
+          "text": "А наши как выезжать будут?"
         }
       },
       "m01-v3-r22-l003": {
         "id": "m01-v3-r22-l003",
         "speaker": "builder",
-        "text": "Пока желающих с той стороны не было.",
+        "text": "А нам разве приказ на выезд давали?",
         "pauseAfter": 0.2,
         "sourceLine": 411,
         "recordingStatus": "Н",
@@ -3542,23 +3509,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio-v2/m01-v3-r22-l003.ogg",
-          "duration": 2.587375,
-          "leadingSilence": 0.04,
-          "trailingSilence": 0.37737500000000024,
-          "speaker": "builder",
-          "sha256": "9274bf8d2fea01ff9cfde20047b0e6a0185e97de57039647515e5658f1d08fc1",
-          "bytes": 12783,
-          "origin": "temporary-synthesis",
-          "generator": "local Piper + FFmpeg",
-          "voice": "denis",
-          "text": "Пока желающих с той стороны не было."
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/b802c496d59ddebdffbc4927c4a40c9452a084b877c66d863f5a73a333a1e098.mp3",
+          "name": "ElevenLabs_2026-11-10T17_43_31_Alexandr Vlasov - Vibrant and Energetic_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 3.004063,
+          "text": "А нам разве приказ на выезд давали?"
         }
       },
       "m01-v3-r23-l001": {
         "id": "m01-v3-r23-l001",
         "speaker": "radio",
-        "text": "Разведка установила расположение четырёх лагерей отбросов.",
+        "text": "оБНАРУЖЕНО Четыре лагеря. Противник на связь не выходит.",
         "pauseAfter": 0.2,
         "sourceLine": 419,
         "recordingStatus": "Н",
@@ -3568,23 +3529,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio-v2/m01-v3-r23-l001.ogg",
-          "duration": 3.7114583333333333,
-          "leadingSilence": 0.04,
-          "trailingSilence": 0.27145833333333336,
-          "speaker": "radio",
-          "sha256": "7fefe301f84cf4ad06a5bcd14f7827e6a3743a7764f7e7a21dd079c42b65c951",
-          "bytes": 18693,
-          "origin": "temporary-synthesis",
-          "generator": "local Piper + FFmpeg",
-          "voice": "denis",
-          "text": "Разведка установила расположение четырёх лагерей отбросов."
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/63ffedd1feebd07fc368737d02acc86112f5b41c97f9607b9af08edf07fede93.mp3",
+          "name": "ElevenLabs_2026-11-10T18_03_49_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 3.709375,
+          "text": "оБНАРУЖЕНО Четыре лагеря. Противник на связь не выходит."
         }
       },
       "m01-v3-r23-l002": {
         "id": "m01-v3-r23-l002",
         "speaker": "commander",
-        "text": "Оборону организовали. Теперь к ним.",
+        "text": "Ну что ж. Раз дипломатия не удалась — придётся нанести визит лично.",
         "pauseAfter": 0.2,
         "sourceLine": 423,
         "recordingStatus": "Н",
@@ -3594,23 +3549,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio-v2/m01-v3-r23-l002.ogg",
-          "duration": 3.0392916666666667,
-          "leadingSilence": 0.06,
-          "trailingSilence": 0.33929166666666655,
-          "speaker": "commander",
-          "sha256": "b4e29a77d4f21f46bc9006177c4877ae3fa406b13680dd6dc3d8d7f213cc90a0",
-          "bytes": 14701,
-          "origin": "temporary-synthesis",
-          "generator": "local Piper + FFmpeg",
-          "voice": "denis",
-          "text": "Оборону организовали. Теперь к ним."
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/a2b2eef294d0e2343e41b35f10b8247968933ff36aed315f59f33c929d926291.mp3",
+          "name": "ElevenLabs_2026-11-10T18_04_35_comandorNig_gen_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 5.407313,
+          "text": "Ну что ж. Раз дипломатия не удалась — придётся нанести визит лично."
         }
       },
       "m01-v3-r24-l001": {
         "id": "m01-v3-r24-l001",
         "speaker": "scout",
-        "text": "Первый лагерь обнаружен. Машины за укрытиями.",
+        "text": "Впереди лагерь отбросов. У въезда пост, за ограждением техника.",
         "pauseAfter": 0.2,
         "sourceLine": 439,
         "recordingStatus": "Н",
@@ -3620,23 +3569,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio-v2/m01-v3-r24-l001.ogg",
-          "duration": 3.44175,
-          "leadingSilence": 0.04,
-          "trailingSilence": 0.32174999999999976,
-          "speaker": "scout",
-          "sha256": "afe60a6e53f83c6b8a6fe3cea9dab9371de7f5a3b2ee217b7d270dadbf7b902f",
-          "bytes": 16580,
-          "origin": "temporary-synthesis",
-          "generator": "local Piper + FFmpeg",
-          "voice": "denis",
-          "text": "Первый лагерь обнаружен. Машины за укрытиями."
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/0ceb5ea02c8dcfcfb002a0856fa1fef3f07ce3108b93cedb4ee3c7afb0d74043.mp3",
+          "name": "ElevenLabs_2026-11-10T18_10_54_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 4.5975,
+          "text": "Впереди лагерь отбросов. У въезда пост, за ограждением техника."
         }
       },
       "m01-v3-r24-l002": {
         "id": "m01-v3-r24-l002",
         "speaker": "commander",
-        "text": "Подходы?",
+        "text": "Что по охране?",
         "pauseAfter": 0.2,
         "sourceLine": 443,
         "recordingStatus": "Н",
@@ -3646,23 +3589,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio-v2/m01-v3-r24-l002.ogg",
-          "duration": 0.9972083333333334,
-          "leadingSilence": 0.04,
-          "trailingSilence": 0.37720833333333337,
-          "speaker": "commander",
-          "sha256": "e841e51fb0bea033dbd9d69ca90aac43d9e6ff6ed535c5d641e749fd96138cff",
-          "bytes": 4745,
-          "origin": "temporary-synthesis",
-          "generator": "local Piper + FFmpeg",
-          "voice": "denis",
-          "text": "Подходы?"
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/42cf292d8cc007b65d0919d7c085fbe56617a54c3f1228da374543a452c42bc4.mp3",
+          "name": "ElevenLabs_2026-11-10T18_14_29_comandorNig_gen_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 1.488938,
+          "text": "Что по охране?"
         }
       },
       "m01-v3-r24-l003": {
         "id": "m01-v3-r24-l003",
         "speaker": "scout",
-        "text": "Один открытый. Остальные придётся проверить.",
+        "text": "Двое часовых. Один спит, второй охраняет его сон.",
         "pauseAfter": 0.2,
         "sourceLine": 447,
         "recordingStatus": "Н",
@@ -3672,23 +3609,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio-v2/m01-v3-r24-l003.ogg",
-          "duration": 3.5225,
-          "leadingSilence": 0.06,
-          "trailingSilence": 0.2925,
-          "speaker": "scout",
-          "sha256": "b889f4328421db28dc7431b52df6b136fed15a922e2be7d08b8f18ad88d15589",
-          "bytes": 17006,
-          "origin": "temporary-synthesis",
-          "generator": "local Piper + FFmpeg",
-          "voice": "denis",
-          "text": "Один открытый. Остальные придётся проверить."
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/08d0be09b0397933f678962780b0c88c0a069cd50cdd4c8ecaa3a3dc1fa75493.mp3",
+          "name": "ElevenLabs_2026-11-10T18_15_02_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 4.519125,
+          "text": "Двое часовых. Один спит, второй охраняет его сон."
         }
       },
       "m01-v3-r25-l001": {
         "id": "m01-v3-r25-l001",
         "speaker": "scout",
-        "text": "Лагерь зачищен. Среди обломков довоенная техника.",
+        "text": "Лагерь зачищен. Нашли довоенное оборудование. Отбросы пытались переделать его в самогонный аппарат.",
         "pauseAfter": 0.2,
         "sourceLine": 457,
         "recordingStatus": "Н",
@@ -3698,23 +3629,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio-v2/m01-v3-r25-l001.ogg",
-          "duration": 3.952583333333333,
-          "leadingSilence": 0.04,
-          "trailingSilence": 0.3025833333333332,
-          "speaker": "scout",
-          "sha256": "e187a90ff8b329ddcfdddca34f58d57d403dc4b1c18d477936bef3ebdfbec593",
-          "bytes": 19251,
-          "origin": "temporary-synthesis",
-          "generator": "local Piper + FFmpeg",
-          "voice": "denis",
-          "text": "Лагерь зачищен. Среди обломков довоенная техника."
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/dd44a3c494ba6c28997a527a7f8e70bd6690fabaeefae5ff3b37bec5a9e86117.mp3",
+          "name": "ElevenLabs_2026-11-10T18_27_19_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 6.687313,
+          "text": "Лагерь зачищен. Нашли довоенное оборудование. Отбросы пытались переделать его в самогонный аппарат."
         }
       },
       "m01-v3-r25-l002": {
         "id": "m01-v3-r25-l002",
         "speaker": "commander",
-        "text": "Осмотреть. Всё неизвестное — в НИИ.",
+        "text": "уЧЕНЫМ  отправь. И прапорщику про аппарат ни слова.",
         "pauseAfter": 0.2,
         "sourceLine": 461,
         "recordingStatus": "Н",
@@ -3724,23 +3649,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio-v2/m01-v3-r25-l002.ogg",
-          "duration": 3.0502083333333334,
-          "leadingSilence": 0.04,
-          "trailingSilence": 0.37020833333333325,
-          "speaker": "commander",
-          "sha256": "51ce63013f646db60149ee61ff368ea54958976820e102da64cd0ece4006a1c5",
-          "bytes": 14888,
-          "origin": "temporary-synthesis",
-          "generator": "local Piper + FFmpeg",
-          "voice": "denis",
-          "text": "Осмотреть. Всё неизвестное — в НИИ."
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/2eb2e25e06c898198aea3fe9e17eaa68a13d4e08b7d29ae853167d0d927f20c4.mp3",
+          "name": "ElevenLabs_2026-11-10T18_29_16_comandorNig_gen_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 3.78775,
+          "text": "уЧЕНЫМ  отправь. И прапорщику про аппарат ни слова."
         }
       },
       "m01-s08-l001": {
         "id": "m01-s08-l001",
         "speaker": "scout",
-        "text": "Командир, нашли артефакт.",
+        "text": "Командир, нашли довоенный блок. Отбросы к нему провода примотали.",
         "pauseAfter": 0.2,
         "sourceLine": 469,
         "recordingStatus": "В",
@@ -3750,26 +3669,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio/m01-s08-l001.ogg",
-          "duration": 2.004583333333333,
-          "leadingSilence": 0.04,
-          "trailingSilence": 0.33458333333333323,
-          "speaker": "scout",
-          "sha256": "23e858a92f27685025d1b127bc57d09351bb3480d09d2c38124ab220f3cf7bbe",
-          "bytes": 9823,
-          "origin": "temporary-synthesis",
-          "reusedFrom": {
-            "catalog": "audio.json",
-            "cueId": "m01-s08-l001"
-          },
-          "textMatch": "exact",
-          "text": "Командир, нашли артефакт."
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/1b2c29465e867693b10e3e5bc9b5b6fc03bc97474ee54c8d68768a2856883371.mp3",
+          "name": "ElevenLabs_2026-11-10T18_31_55_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 4.519125,
+          "text": "Командир, нашли довоенный блок. Отбросы к нему провода примотали."
         }
       },
       "m01-s08-l002": {
         "id": "m01-s08-l002",
         "speaker": "commander",
-        "text": "Докладывай.",
+        "text": "И что?",
         "pauseAfter": 0.2,
         "sourceLine": 473,
         "recordingStatus": "Т",
@@ -3779,26 +3689,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/recordings/commander/m01-s08-l002.mp3",
-          "duration": 1.489,
-          "leadingSilence": 0.32,
-          "trailingSilence": 0.30900000000000016,
-          "speaker": "commander",
-          "sha256": "ea777725fc8d4d9b89dadd103651148070487383a028c4e9ef5f058e6a7cd95a",
-          "bytes": 40760,
-          "origin": "user-recording",
-          "reusedFrom": {
-            "catalog": "audio.json",
-            "cueId": "m01-s08-l002"
-          },
-          "textMatch": "exact",
-          "text": "Докладывай."
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/90143e42e67cd67998e2c9d7d1add1856612267f6bbbaf2d17dbb992a0a640a1.mp3",
+          "name": "ElevenLabs_2026-11-10T18_32_23_comandorNig_gen_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 1.071,
+          "text": "И что?"
         }
       },
       "m01-s08-l003": {
         "id": "m01-s08-l003",
         "speaker": "scout",
-        "text": "Довоенная боевая машина. Вооружение неизвестного типа. К корпусу синей изолентой прикручен какой-то агрегат.",
+        "text": "Судя по всему, пытались улучшить пулемёт. Улучшили только пожарную обстановку. Сам блок целый, в НИИ отправим.",
         "pauseAfter": 0.2,
         "sourceLine": 477,
         "recordingStatus": "В",
@@ -3808,20 +3709,11 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio/m01-s08-l003.ogg",
-          "duration": 7.81575,
-          "leadingSilence": 0.05,
-          "trailingSilence": 0.35575000000000045,
-          "speaker": "scout",
-          "sha256": "3a537bcaebab880fcc07eeaa63848b7a03c103f6d91c5364cff55f19f551762a",
-          "bytes": 38326,
-          "origin": "temporary-synthesis",
-          "reusedFrom": {
-            "catalog": "audio.json",
-            "cueId": "m01-s08-l003"
-          },
-          "textMatch": "exact",
-          "text": "Довоенная боевая машина. Вооружение неизвестного типа. К корпусу синей изолентой прикручен какой-то агрегат."
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/9ad19dec241b6d5cc599c97b5584d1536af7306c03e85bbd9e2010cad73ac82f.mp3",
+          "name": "ElevenLabs_2026-11-10T18_32_47_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 7.549375,
+          "text": "Судя по всему, пытались улучшить пулемёт. Улучшили только пожарную обстановку. Сам блок целый, в НИИ отправим."
         }
       },
       "m01-s08-l005": {
@@ -3837,19 +3729,10 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio/m01-s08-l005.ogg",
-          "duration": 2.747625,
-          "leadingSilence": 0.04,
-          "trailingSilence": 0.3776250000000001,
-          "speaker": "scout",
-          "sha256": "fe87e78d98a8ef304ed0cf1145c68d95fc60d9534c46fe564fd7e0d8883cc55d",
-          "bytes": 13543,
-          "origin": "temporary-synthesis",
-          "reusedFrom": {
-            "catalog": "audio.json",
-            "cueId": "m01-s08-l005"
-          },
-          "textMatch": "exact",
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/b7aac5e180513da3313de20cecaca7152dbc26e29d634aa519f20df3e00f43aa.mp3",
+          "name": "ElevenLabs_2026-11-10T18_34_06_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 2.925688,
           "text": "Товарищ командир, синюю изоленту сняли."
         }
       },
@@ -3895,19 +3778,10 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio/m01-s08-l007.ogg",
-          "duration": 2.4665416666666666,
-          "leadingSilence": 0.04,
-          "trailingSilence": 0.36654166666666654,
-          "speaker": "scout",
-          "sha256": "c1f8a616fa4067d6f8e7542737ef2a44c91441d7df932530de995b88cedacd83",
-          "bytes": 11602,
-          "origin": "temporary-synthesis",
-          "reusedFrom": {
-            "catalog": "audio.json",
-            "cueId": "m01-s08-l007"
-          },
-          "textMatch": "exact",
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/4733347e3efff285dd3baaf317e19cf7026df1fb39935cd63ea831d5b5c55b65.mp3",
+          "name": "ElevenLabs_2026-11-10T18_34_40_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 2.429375,
           "text": "Неизвестно. Под ней жёлтая."
         }
       },
@@ -3953,19 +3827,10 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio/m01-s08-l009.ogg",
-          "duration": 1.3311666666666666,
-          "leadingSilence": 0.06,
-          "trailingSilence": 0.41116666666666657,
-          "speaker": "scout",
-          "sha256": "02ba027ec8a434903b1329d3bd0b282af846f12535616889fb968002fd20faf0",
-          "bytes": 6328,
-          "origin": "temporary-synthesis",
-          "reusedFrom": {
-            "catalog": "audio.json",
-            "cueId": "m01-s08-l009"
-          },
-          "textMatch": "exact",
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/5ca0c82687aa7a9e448db9e4db5e333f07c8f7dc262ff0412b789cfce951a015.mp3",
+          "name": "ElevenLabs_2026-11-10T18_35_14_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4 (1).mp3",
+          "origin": "editor-upload",
+          "duration": 1.567313,
           "text": "Никак нельзя."
         }
       },
@@ -3982,26 +3847,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio/m01-s08-l011.ogg",
-          "duration": 1.8066666666666666,
-          "leadingSilence": 0.04,
-          "trailingSilence": 0.32666666666666666,
-          "speaker": "scout",
-          "sha256": "d58c17c48b9a01c8d54990e55514000693b0bb3fd7ea03253bc5b2c809d9fe25",
-          "bytes": 8795,
-          "origin": "temporary-synthesis",
-          "reusedFrom": {
-            "catalog": "audio.json",
-            "cueId": "m01-s08-l011"
-          },
-          "textMatch": "exact",
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/cf6e2a4ce812c7853eb8806ab75821880f706d6d7284fa170e3334852f5fbef3.mp3",
+          "name": "ElevenLabs_2026-11-10T18_35_49_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 2.272625,
           "text": "Она, похоже, заводская."
         }
       },
       "m01-s08-l013": {
         "id": "m01-s08-l013",
         "speaker": "scientist",
-        "text": "Товарищ командир, мы провели комплексный анализ.",
+        "text": "Разобрались с находкой. Это огнемёт. Причём действующий.",
         "pauseAfter": 0.2,
         "sourceLine": 521,
         "recordingStatus": "В",
@@ -4011,20 +3867,11 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio/m01-s08-l013.ogg",
-          "duration": 2.5264583333333333,
-          "leadingSilence": 0,
-          "trailingSilence": 0.3864583333333331,
-          "speaker": "scientist",
-          "sha256": "a5ba60a4a1e82516f0dad25cdadc3a86c7c67d4bfbceb68b25a1754aec263e9d",
-          "bytes": 12498,
-          "origin": "temporary-synthesis",
-          "reusedFrom": {
-            "catalog": "audio.json",
-            "cueId": "m01-s08-l013"
-          },
-          "textMatch": "exact",
-          "text": "Товарищ командир, мы провели комплексный анализ."
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/b0364776def26a5c5d259e8ed5607594355ab4536520a6c9194fec8219b2219b.mp3",
+          "name": "ElevenLabs_2026-11-10T18_46_31_M. Danisch - Narrator_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 4.675875,
+          "text": "Разобрались с находкой. Это огнемёт. Причём действующий."
         }
       },
       "m01-s08-l014": {
@@ -4059,7 +3906,7 @@
       "m01-s08-l015": {
         "id": "m01-s08-l015",
         "speaker": "scientist",
-        "text": "Это огнемёт.",
+        "text": "Бак от трактора, форсунка от котла. Всё собрано на синей изоленте.",
         "pauseAfter": 0.2,
         "sourceLine": 529,
         "recordingStatus": "В",
@@ -4069,20 +3916,11 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio/m01-s08-l015.ogg",
-          "duration": 1.0757916666666667,
-          "leadingSilence": 0.04,
-          "trailingSilence": 0.4357916666666667,
-          "speaker": "scientist",
-          "sha256": "4b03a09c4f10967cd4a0d2658aead9b9041c7cfbe9ae5fd925a38c65773bba62",
-          "bytes": 5100,
-          "origin": "temporary-synthesis",
-          "reusedFrom": {
-            "catalog": "audio.json",
-            "cueId": "m01-s08-l015"
-          },
-          "textMatch": "exact",
-          "text": "Это огнемёт."
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/2dfd76f6a32725b31907842dbee9de4cd410a16c0daac48206ff8dbf55850cf2.mp3",
+          "name": "ElevenLabs_2026-11-10T18_40_30_M. Danisch - Narrator_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 5.720813,
+          "text": "Бак от трактора, форсунка от котла. Всё собрано на синей изоленте."
         }
       },
       "m01-s08-l018": {
@@ -4117,7 +3955,7 @@
       "m01-s08-l019": {
         "id": "m01-s08-l019",
         "speaker": "scientist",
-        "text": "Чтобы жёлтая не разматывалась.",
+        "text": "Если учесть все нюансы конструкции и использованные детали... вывод очевиден...сИНЯЯ ИЗОЛЕНТА НУЖНА - Чтобы жёлтая не разматывалась.",
         "pauseAfter": 0.2,
         "sourceLine": 541,
         "recordingStatus": "В",
@@ -4127,26 +3965,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio/m01-s08-l019.ogg",
-          "duration": 1.7027083333333333,
-          "leadingSilence": 0.03,
-          "trailingSilence": 0.4027083333333332,
-          "speaker": "scientist",
-          "sha256": "2d573aafe06ccfb583994f2a7418954a1533e486f601ffcbdde4985f67005b1d",
-          "bytes": 8318,
-          "origin": "temporary-synthesis",
-          "reusedFrom": {
-            "catalog": "audio.json",
-            "cueId": "m01-s08-l019"
-          },
-          "textMatch": "exact",
-          "text": "Чтобы жёлтая не разматывалась."
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/bff461588b006787ccd34bb7824d70dc4e23949ccd8653abab088f88dd42dee4.mp3",
+          "name": "ElevenLabs_2026-11-10T18_45_24_M. Danisch - Narrator_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 9.560813,
+          "text": "Если учесть все нюансы конструкции и использованные детали... вывод очевиден...сИНЯЯ ИЗОЛЕНТА НУЖНА - Чтобы жёлтая не разматывалась."
         }
       },
       "m01-v3-r30-alt-l001": {
         "id": "m01-v3-r30-alt-l001",
         "speaker": "scientist",
-        "text": "Изучили найденный агрегат. Это огнемёт, примотанный двумя слоями изоленты.",
+        "text": "Разобрались с находкой. Это огнемёт. Причём действующий.",
         "pauseAfter": 0.2,
         "sourceLine": 549,
         "recordingStatus": "Н",
@@ -4156,23 +3985,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio-v2/m01-v3-r30-alt-l001.ogg",
-          "duration": 4.44025,
-          "leadingSilence": 0.02,
-          "trailingSilence": 0.39025,
-          "speaker": "scientist",
-          "sha256": "a4b72b12b7113731a80e5152b9c5f9980f5f60109a9c855c9fed496c1f495a1f",
-          "bytes": 21652,
-          "origin": "temporary-synthesis",
-          "generator": "local Piper + FFmpeg",
-          "voice": "dmitri",
-          "text": "Изучили найденный агрегат. Это огнемёт, примотанный двумя слоями изоленты."
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/b0364776def26a5c5d259e8ed5607594355ab4536520a6c9194fec8219b2219b.mp3",
+          "name": "ElevenLabs_2026-11-10T18_46_31_M. Danisch - Narrator_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 4.675875,
+          "text": "Разобрались с находкой. Это огнемёт. Причём действующий."
         }
       },
       "m01-v3-r31-l001": {
         "id": "m01-v3-r31-l001",
         "speaker": "scout",
-        "text": "Обнаружен склад отбросов. Охрана усиленная.",
+        "text": "Командир, у второго лагеря отбросов построение. Уже третье за пять минут.",
         "pauseAfter": 0.2,
         "sourceLine": 569,
         "recordingStatus": "Н",
@@ -4182,23 +4005,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio-v2/m01-v3-r31-l001.ogg",
-          "duration": 3.54575,
-          "leadingSilence": 0.06,
-          "trailingSilence": 0.33575,
-          "speaker": "scout",
-          "sha256": "9c3d41514f6da336a363246ea677c01e4d8c77f1ded6d7186a900096eb3e4971",
-          "bytes": 17019,
-          "origin": "temporary-synthesis",
-          "generator": "local Piper + FFmpeg",
-          "voice": "denis",
-          "text": "Обнаружен склад отбросов. Охрана усиленная."
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/4bcc26bf2743ac28a9bb9ea61e5851ab37aa7237d3f695dc828949dc58a8cea2.mp3",
+          "name": "ElevenLabs_2026-11-10T18_52_43_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 4.989375,
+          "text": "Командир, у второго лагеря отбросов построение. Уже третье за пять минут."
         }
       },
       "m01-v3-r31-l002": {
         "id": "m01-v3-r31-l002",
         "speaker": "commander",
-        "text": "Что хранят?",
+        "text": "Дисциплину наводят?",
         "pauseAfter": 0.2,
         "sourceLine": 573,
         "recordingStatus": "Н",
@@ -4208,23 +4025,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio-v2/m01-v3-r31-l002.ogg",
-          "duration": 1.102375,
-          "leadingSilence": 0.06,
-          "trailingSilence": 0.38237500000000013,
-          "speaker": "commander",
-          "sha256": "0b7caa46729766e65f2ce8c0ab23e2b22be1d9cbd91fc2d7071956c868d8035a",
-          "bytes": 5273,
-          "origin": "temporary-synthesis",
-          "generator": "local Piper + FFmpeg",
-          "voice": "denis",
-          "text": "Что хранят?"
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/b46a827a294a8f94d0f1165f3d5e50f44c731a9bb6e91d2beb857a2571e7967d.mp3",
+          "name": "ElevenLabs_2026-11-10T18_53_15_comandorNig_gen_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 1.959125,
+          "text": "Дисциплину наводят?"
         }
       },
       "m01-v3-r31-l003": {
         "id": "m01-v3-r31-l003",
         "speaker": "scout",
-        "text": "Пока что нас туда не пускают.",
+        "text": "Пытаются. Первые два раза командиры подрались, кто главный.",
         "pauseAfter": 0.2,
         "sourceLine": 577,
         "recordingStatus": "Н",
@@ -4234,23 +4045,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio-v2/m01-v3-r31-l003.ogg",
-          "duration": 2.2710416666666666,
-          "leadingSilence": 0.04,
-          "trailingSilence": 0.4110416666666665,
-          "speaker": "scout",
-          "sha256": "26f7b19d6b09e0e31b30114edd1a1656b40830afa9fe293073ae7620da7882a1",
-          "bytes": 10937,
-          "origin": "temporary-synthesis",
-          "generator": "local Piper + FFmpeg",
-          "voice": "denis",
-          "text": "Пока что нас туда не пускают."
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/760200d4a12bb9975e26925c3905297a30282ca119da2d844a43dba77b87952e.mp3",
+          "name": "ElevenLabs_2026-11-10T18_53_51_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 4.284063,
+          "text": "Пытаются. Первые два раза командиры подрались, кто главный."
         }
       },
       "m01-s09-l001": {
         "id": "m01-s09-l001",
         "speaker": "scout",
-        "text": "Командир, нашли склад вооружения.",
+        "text": "Склад наш! Боеприпасы довоенные, ящики под завязку.",
         "pauseAfter": 0.2,
         "sourceLine": 585,
         "recordingStatus": "В",
@@ -4260,26 +4065,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio/m01-s09-l001.ogg",
-          "duration": 2.306416666666667,
-          "leadingSilence": 0.02,
-          "trailingSilence": 0.3164166666666668,
-          "speaker": "scout",
-          "sha256": "a5c69405605b21477a97acf8bd320ab5a60e75d9cdc106c27f007fc2217e7174",
-          "bytes": 11409,
-          "origin": "temporary-synthesis",
-          "reusedFrom": {
-            "catalog": "audio.json",
-            "cueId": "m01-s09-l001"
-          },
-          "textMatch": "exact",
-          "text": "Командир, нашли склад вооружения."
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/cf02b31fa68e7ba15b78eaecbd7b093948ab963f079f40c0b72e719e2680e599.mp3",
+          "name": "ElevenLabs_2026-11-10T18_55_54_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 4.5975,
+          "text": "Склад наш! Боеприпасы довоенные, ящики под завязку."
         }
       },
       "m01-s09-l002": {
         "id": "m01-s09-l002",
         "speaker": "commander",
-        "text": "Состояние?",
+        "text": "Документы?",
         "pauseAfter": 0.2,
         "sourceLine": 589,
         "recordingStatus": "В",
@@ -4289,26 +4085,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio/m01-s09-l002.ogg",
-          "duration": 1.2417083333333334,
-          "leadingSilence": 0.08,
-          "trailingSilence": 0.39170833333333344,
-          "speaker": "commander",
-          "sha256": "f498a60da21b1c216420a96e5b6370a4c7c20f093fed6b6da56a3446674d64b0",
-          "bytes": 5809,
-          "origin": "temporary-synthesis",
-          "reusedFrom": {
-            "catalog": "audio.json",
-            "cueId": "m01-s09-l002"
-          },
-          "textMatch": "exact",
-          "text": "Состояние?"
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/c2d763b9ea51665cfe309d9be5b7a8d44f8e7605cb7f6947626f0434b17813a3.mp3",
+          "name": "ElevenLabs_2026-11-10T18_56_49_comandorNig_gen_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 1.22775,
+          "text": "Документы?"
         }
       },
       "m01-v3-ammo-stock-report": {
         "id": "m01-v3-ammo-stock-report",
         "speaker": "scout",
-        "text": "Хорошее. Ящики с патронами целы. Образцы отправляем в НИИ.",
+        "text": "По документам — пусто. По факту — полный склад. У отбросов, видать, тоже прапорщик был.",
         "pauseAfter": 0.2,
         "sourceLine": 593,
         "recordingStatus": "Н",
@@ -4318,23 +4105,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio-v2/m01-v3-ammo-stock-report.ogg",
-          "duration": 5.029416666666667,
-          "leadingSilence": 0.05,
-          "trailingSilence": 0.3394166666666667,
-          "speaker": "scout",
-          "sha256": "4bc15fd4b6d5f854bcc2248ba3fe7dceaadc3724a50572ef56b23794009d6c6a",
-          "bytes": 24073,
-          "origin": "temporary-synthesis",
-          "generator": "local Piper + FFmpeg",
-          "voice": "denis",
-          "text": "Хорошее. Ящики с патронами целы. Образцы отправляем в НИИ."
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/bfc8c4177a16d68ec2692ea328a7fd6dfb445c6ba7af9d18d0f51293d767c622.mp3",
+          "name": "ElevenLabs_2026-11-10T18_57_12_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 6.765688,
+          "text": "По документам — пусто. По факту — полный склад. У отбросов, видать, тоже прапорщик был."
         }
       },
       "m01-s09-l006": {
         "id": "m01-s09-l006",
         "speaker": "scientist",
-        "text": "НИИ докладывает: увеличена эффективность пулемётного вооружения.",
+        "text": "Изучили трофейные патронные ленты. Нашли способ увеличить скорострельность пулемётов.",
         "pauseAfter": 0.2,
         "sourceLine": 601,
         "recordingStatus": "В",
@@ -4344,20 +4125,11 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio/m01-s09-l006.ogg",
-          "duration": 3.641,
-          "leadingSilence": 0.02,
-          "trailingSilence": 0.31099999999999994,
-          "speaker": "scientist",
-          "sha256": "181a9de4a407e67834c0258080732a7c4286cf1b55a13a71babeb403c936fff4",
-          "bytes": 18463,
-          "origin": "temporary-synthesis",
-          "reusedFrom": {
-            "catalog": "audio.json",
-            "cueId": "m01-s09-l006"
-          },
-          "textMatch": "exact",
-          "text": "НИИ докладывает: увеличена эффективность пулемётного вооружения."
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/14d4c55cb98117b0517052c5fa0b3fab85512ec5077f9112818d8d8839d9478d.mp3",
+          "name": "ElevenLabs_2026-11-10T18_59_11_M. Danisch - Narrator_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 5.564063,
+          "text": "Изучили трофейные патронные ленты. Нашли способ увеличить скорострельность пулемётов."
         }
       },
       "m01-s09-l007": {
@@ -4373,26 +4145,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio/m01-s09-l007.ogg",
-          "duration": 1.3113333333333332,
-          "leadingSilence": 0.04,
-          "trailingSilence": 0.44133333333333324,
-          "speaker": "commander",
-          "sha256": "1d4d5586d11e6423cc4aed8d82f99235150507bf1db8cc8c1d0d0629ecffdc4a",
-          "bytes": 6236,
-          "origin": "temporary-synthesis",
-          "reusedFrom": {
-            "catalog": "audio.json",
-            "cueId": "m01-s09-l007"
-          },
-          "textMatch": "exact",
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/f67f36b141c45948c52d283f46f0c1dbde78c69c7b41ef9399994a88155e7580.mp3",
+          "name": "ElevenLabs_2026-11-10T18_59_37_comandorNig_gen_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 1.880813,
           "text": "За счёт чего?"
         }
       },
       "m01-v3-ammo-feed-improvement": {
         "id": "m01-v3-ammo-feed-improvement",
         "speaker": "scientist",
-        "text": "Убрали ограничитель подачи патронов.",
+        "text": "Усовершенствовали механизм подачи. Теперь лента идёт быстрее и без задержек.",
         "pauseAfter": 0.2,
         "sourceLine": 609,
         "recordingStatus": "Н",
@@ -4402,23 +4165,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio-v2/m01-v3-ammo-feed-improvement.ogg",
-          "duration": 2.1782083333333335,
-          "leadingSilence": 0.04,
-          "trailingSilence": 0.32820833333333344,
-          "speaker": "scientist",
-          "sha256": "260562173891b43c1c445d1c09cad271c5c0c531b5c7a0d121653b98f49654a8",
-          "bytes": 10854,
-          "origin": "temporary-synthesis",
-          "generator": "local Piper + FFmpeg",
-          "voice": "dmitri",
-          "text": "Убрали ограничитель подачи патронов."
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/e3d13d8084ca9a1a3c4701937eb0208a9c527d43ec8561de182f9bb083173eed.mp3",
+          "name": "ElevenLabs_2026-11-10T19_00_06_M. Danisch - Narrator_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 5.8775,
+          "text": "Усовершенствовали механизм подачи. Теперь лента идёт быстрее и без задержек."
         }
       },
       "m01-s09-l009": {
         "id": "m01-s09-l009",
         "speaker": "commander",
-        "text": "И что?",
+        "text": "А в чем подвох?",
         "pauseAfter": 0.2,
         "sourceLine": 617,
         "recordingStatus": "В",
@@ -4428,26 +4185,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio/m01-s09-l009.ogg",
-          "duration": 0.82375,
-          "leadingSilence": 0.06,
-          "trailingSilence": 0.26374999999999993,
-          "speaker": "commander",
-          "sha256": "d5ccda843af11ac7706309b5018142dabb070ae6914146e68674c7364fc942b6",
-          "bytes": 3912,
-          "origin": "temporary-synthesis",
-          "reusedFrom": {
-            "catalog": "audio.json",
-            "cueId": "m01-s09-l009"
-          },
-          "textMatch": "exact",
-          "text": "И что?"
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/5b90623e455f924c520bb36abbd92f00b9729054308e5720cd6eaedad56bcb88.mp3",
+          "name": "ElevenLabs_2026-11-10T19_00_38_comandorNig_gen_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 1.802438,
+          "text": "А в чем подвох?"
         }
       },
       "m01-s09-l010": {
         "id": "m01-s09-l010",
         "speaker": "scientist",
-        "text": "Подаются быстрее.",
+        "text": "Патроны теперь кончаются еще быстрее. Но это уже проблема снабженцев.",
         "pauseAfter": 0.2,
         "sourceLine": 621,
         "recordingStatus": "В",
@@ -4457,26 +4205,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio/m01-s09-l010.ogg",
-          "duration": 1.4119583333333334,
-          "leadingSilence": 0.02,
-          "trailingSilence": 0.4019583333333334,
-          "speaker": "scientist",
-          "sha256": "f70ca9d59db7b08c5a93af2d1cbee2739c07c4ef49a81ec40f4cb80f04a83245",
-          "bytes": 6607,
-          "origin": "temporary-synthesis",
-          "reusedFrom": {
-            "catalog": "audio.json",
-            "cueId": "m01-s09-l010"
-          },
-          "textMatch": "exact",
-          "text": "Подаются быстрее."
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/61771db7da4be8611db5e22312a4ceb87b6b78adda0269cface8897708acde1f.mp3",
+          "name": "ElevenLabs_2026-11-10T19_01_31_M. Danisch - Narrator_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 5.250563,
+          "text": "Патроны теперь кончаются еще быстрее. Но это уже проблема снабженцев."
         }
       },
       "m01-v3-r35-l001": {
         "id": "m01-v3-r35-l001",
         "speaker": "scout",
-        "text": "Впереди укреплённые позиции. Похоже, отбросы готовились.",
+        "text": "Следующий лагерь обнаружен. На въезде баррикады, пулемёт. Похоже, нас ждут.",
         "pauseAfter": 0.2,
         "sourceLine": 633,
         "recordingStatus": "Н",
@@ -4486,23 +4225,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio-v2/m01-v3-r35-l001.ogg",
-          "duration": 4.404875,
-          "leadingSilence": 0.1,
-          "trailingSilence": 0.3748749999999994,
-          "speaker": "scout",
-          "sha256": "8d4087e0b1b16c66def3478df3a00ba99a5bca454c3676b344a8b1c17f916337",
-          "bytes": 21400,
-          "origin": "temporary-synthesis",
-          "generator": "local Piper + FFmpeg",
-          "voice": "denis",
-          "text": "Впереди укреплённые позиции. Похоже, отбросы готовились."
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/fba49a5627c141dfe2eabc9c94e218f801909c8d9dd0c293c2b801dbc6afc393.mp3",
+          "name": "ElevenLabs_2026-11-10T19_03_39_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 5.146063,
+          "text": "Следующий лагерь обнаружен. На въезде баррикады, пулемёт. Похоже, нас ждут."
         }
       },
       "m01-v3-r35-l002": {
         "id": "m01-v3-r35-l002",
         "speaker": "commander",
-        "text": "К чему?",
+        "text": "С чего ты взял?",
         "pauseAfter": 0.2,
         "sourceLine": 637,
         "recordingStatus": "Н",
@@ -4512,23 +4245,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio-v2/m01-v3-r35-l002.ogg",
-          "duration": 0.7772916666666667,
-          "leadingSilence": 0.03,
-          "trailingSilence": 0.3472916666666667,
-          "speaker": "commander",
-          "sha256": "a821a7f0aeacac2487d99c4a30e61b13f79275ff42423d08007ea5d28e859d62",
-          "bytes": 3684,
-          "origin": "temporary-synthesis",
-          "generator": "local Piper + FFmpeg",
-          "voice": "denis",
-          "text": "К чему?"
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/4e11732f7d0fec1f1ab7dd62a77b5cb9e831e15252642c52414229d6bedfdd5f.mp3",
+          "name": "ElevenLabs_2026-11-10T19_04_13_comandorNig_gen_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 1.567313,
+          "text": "С чего ты взял?"
         }
       },
       "m01-v3-r35-l003": {
         "id": "m01-v3-r35-l003",
         "speaker": "scout",
-        "text": "Судя по количеству бетона, к долгому разговору.",
+        "text": "На воротах написали: «Альфа, идите домой». Причём с ошибками.",
         "pauseAfter": 0.2,
         "sourceLine": 641,
         "recordingStatus": "Н",
@@ -4538,23 +4265,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio-v2/m01-v3-r35-l003.ogg",
-          "duration": 2.9909166666666667,
-          "leadingSilence": 0.04,
-          "trailingSilence": 0.25091666666666645,
-          "speaker": "scout",
-          "sha256": "a736bc81a917588ef57039ff777bd8d2b46bad3552b7e8f164b3554117345957",
-          "bytes": 14920,
-          "origin": "temporary-synthesis",
-          "generator": "local Piper + FFmpeg",
-          "voice": "denis",
-          "text": "Судя по количеству бетона, к долгому разговору."
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/81196d262ea672ff3b892cec25258e71ffd74a21ac3d91cc7e3b8e6cb2a84c29.mp3",
+          "name": "ElevenLabs_2026-11-10T19_04_39_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 4.832625,
+          "text": "На воротах написали: «Альфа, идите домой». Причём с ошибками."
         }
       },
       "m01-s10-l005": {
         "id": "m01-s10-l005",
         "speaker": "scout",
-        "text": "По предварительным данным, отбросы поставили пулемёт на водонапорную башню.",
+        "text": "Командир, на высоте пулемётная башня. Бронированная, с поворотным механизмом. Похоже, довоенная.",
         "pauseAfter": 0.2,
         "sourceLine": 653,
         "recordingStatus": "В",
@@ -4564,26 +4285,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio/m01-s10-l005.ogg",
-          "duration": 4.941333333333334,
-          "leadingSilence": 0.02,
-          "trailingSilence": 0.33133333333333326,
-          "speaker": "scout",
-          "sha256": "ea6a96fb71f8ad9d0d2c5c63404862c81398399a83579639adfff463af6cf37f",
-          "bytes": 24855,
-          "origin": "temporary-synthesis",
-          "reusedFrom": {
-            "catalog": "audio.json",
-            "cueId": "m01-s10-l005"
-          },
-          "textMatch": "exact",
-          "text": "По предварительным данным, отбросы поставили пулемёт на водонапорную башню."
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/f8e05017a1d3de06d18f502d642f9e39510511a0497d435fecb49c509e490655.mp3",
+          "name": "ElevenLabs_2026-11-10T19_20_01_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 6.191,
+          "text": "Командир, на высоте пулемётная башня. Бронированная, с поворотным механизмом. Похоже, довоенная."
         }
       },
       "m01-s10-l006": {
         "id": "m01-s10-l006",
         "speaker": "commander",
-        "text": "Работает?",
+        "text": "И как они её запустили?",
         "pauseAfter": 0.2,
         "sourceLine": 657,
         "recordingStatus": "В",
@@ -4593,26 +4305,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio/m01-s10-l006.ogg",
-          "duration": 1.125625,
-          "leadingSilence": 0.07,
-          "trailingSilence": 0.44562500000000005,
-          "speaker": "commander",
-          "sha256": "243155f81951258486df9a3e7493e836515240f6eb6f452f7be454d907e76e93",
-          "bytes": 5262,
-          "origin": "temporary-synthesis",
-          "reusedFrom": {
-            "catalog": "audio.json",
-            "cueId": "m01-s10-l006"
-          },
-          "textMatch": "exact",
-          "text": "Работает?"
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/be3c3c108129b6b9b361fe9df42fa84903409210523c83f4f586ef80082cfc45.mp3",
+          "name": "ElevenLabs_2026-11-10T19_15_52_comandorNig_gen_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 2.19425,
+          "text": "И как они её запустили?"
         }
       },
       "m01-s10-l007": {
         "id": "m01-s10-l007",
         "speaker": "scout",
-        "text": "Стреляет.",
+        "text": "думаю Инструкцию нашли.",
         "pauseAfter": 0.2,
         "sourceLine": 661,
         "recordingStatus": "В",
@@ -4622,26 +4325,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio/m01-s10-l007.ogg",
-          "duration": 0.97075,
-          "leadingSilence": 0.06,
-          "trailingSilence": 0.41074999999999995,
-          "speaker": "scout",
-          "sha256": "f7afba081ab51389fc148893bd1c083fe463fa95c5f30399e14de9b6e449e110",
-          "bytes": 4432,
-          "origin": "temporary-synthesis",
-          "reusedFrom": {
-            "catalog": "audio.json",
-            "cueId": "m01-s10-l007"
-          },
-          "textMatch": "exact",
-          "text": "Стреляет."
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/420cf9559d73d8cfc7eb480bc6fe1e7453512afc3e4513d6434d54bdd292c71e.mp3",
+          "name": "ElevenLabs_2026-11-10T19_16_30_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 2.429375,
+          "text": "думаю Инструкцию нашли."
         }
       },
       "m01-s10-l008": {
         "id": "m01-s10-l008",
         "speaker": "commander",
-        "text": "А вода?",
+        "text": "Прочитали чтоли?",
         "pauseAfter": 0.2,
         "sourceLine": 669,
         "recordingStatus": "В",
@@ -4651,26 +4345,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio/m01-s10-l008.ogg",
-          "duration": 0.974,
-          "leadingSilence": 0.04,
-          "trailingSilence": 0.42399999999999993,
-          "speaker": "commander",
-          "sha256": "0d19dbc3741af53084024404235947e16324735cfccf0cf9f06109985ff30939",
-          "bytes": 4483,
-          "origin": "temporary-synthesis",
-          "reusedFrom": {
-            "catalog": "audio.json",
-            "cueId": "m01-s10-l008"
-          },
-          "textMatch": "exact",
-          "text": "А вода?"
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/2eda89d7f2a12631cb5d6d92496d0e04c204235ab96f2eb7d97900fa326eb6ab.mp3",
+          "name": "ElevenLabs_2026-11-10T19_17_06_comandorNig_gen_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 1.567313,
+          "text": "Прочитали чтоли?"
         }
       },
       "m01-s10-l009": {
         "id": "m01-s10-l009",
         "speaker": "scout",
-        "text": "Не поступает.",
+        "text": "Нет. Но картинки, видимо, поняли.",
         "pauseAfter": 0.2,
         "sourceLine": 673,
         "recordingStatus": "В",
@@ -4680,26 +4365,17 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio/m01-s10-l009.ogg",
-          "duration": 1.28475,
-          "leadingSilence": 0.05,
-          "trailingSilence": 0.3047500000000001,
-          "speaker": "scout",
-          "sha256": "732b4c658340a29fb0c5033440c3f607a2328ec34eff07c743607423979b450d",
-          "bytes": 6199,
-          "origin": "temporary-synthesis",
-          "reusedFrom": {
-            "catalog": "audio.json",
-            "cueId": "m01-s10-l009"
-          },
-          "textMatch": "exact",
-          "text": "Не поступает."
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/c21a093b4be2601bd1b77811e2b01a5f22997fdac57558da99ff40f03774d202.mp3",
+          "name": "ElevenLabs_2026-11-10T19_17_34_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 3.3175,
+          "text": "Нет. Но картинки, видимо, поняли."
         }
       },
       "m01-s10-l010": {
         "id": "m01-s10-l010",
         "speaker": "commander",
-        "text": "Значит, по военному назначению работает исправно.",
+        "text": "Недооценили мы противника. Башню подавить, механизм сохранить. Инструкцию — нашим учёным.",
         "pauseAfter": 0.2,
         "sourceLine": 677,
         "recordingStatus": "В",
@@ -4709,20 +4385,11 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio/m01-s10-l010.ogg",
-          "duration": 3.5050416666666666,
-          "leadingSilence": 0.04,
-          "trailingSilence": 0.2850416666666664,
-          "speaker": "commander",
-          "sha256": "6031aae2aae36768723332e4344c9d6b0e6ec95f7f5f7759e7bf67f2afb90bcc",
-          "bytes": 17393,
-          "origin": "temporary-synthesis",
-          "reusedFrom": {
-            "catalog": "audio.json",
-            "cueId": "m01-s10-l010"
-          },
-          "textMatch": "exact",
-          "text": "Значит, по военному назначению работает исправно."
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/1e169904a3b5b4e717d466c26c653aa473edd08b9268a571811e3163d7a28f12.mp3",
+          "name": "ElevenLabs_2026-11-10T19_17_57_comandorNig_gen_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 6.922438,
+          "text": "Недооценили мы противника. Башню подавить, механизм сохранить. Инструкцию — нашим учёным."
         }
       },
       "m01-v3-r38-l001": {
@@ -6628,7 +6295,7 @@
       "m01-v3-r24a-l001": {
         "id": "m01-v3-r24a-l001",
         "speaker": "scout",
-        "text": "Лагерь обнаружен. Машины за укрытиями.",
+        "text": "Впереди ещё один лагерь. У ворот часовые, за ограждением какие-то баллоны таскают. Похоже, не самогон.",
         "pauseAfter": 0.2,
         "sourceLine": 442,
         "recordingStatus": "Н",
@@ -6638,17 +6305,11 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission01/audio-v2/m01-v3-r24a-l001.ogg",
-          "duration": 3.2670833333333333,
-          "leadingSilence": 0.04,
-          "trailingSilence": 0.31708333333333316,
-          "speaker": "scout",
-          "sha256": "1568e1c3969319c33791a9c31754b5f698a8a28fb54c6044330f7136b52c9a8f",
-          "bytes": 15778,
-          "origin": "temporary-synthesis",
-          "generator": "local Piper + FFmpeg",
-          "voice": "denis",
-          "text": "Лагерь обнаружен. Машины за укрытиями."
+          "file": "docs/campaign/dialogue-drafts/alpha-m01/media/ff05768c4cc2809ec7466784486ef5cd54e0a8905e2fea877848301f7571bbb7.mp3",
+          "name": "ElevenLabs_2026-11-10T18_22_16_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
+          "origin": "editor-upload",
+          "duration": 7.1575,
+          "text": "Впереди ещё один лагерь. У ворот часовые, за ограждением какие-то баллоны таскают. Похоже, не самогон."
         }
       },
       "m01-b012": {

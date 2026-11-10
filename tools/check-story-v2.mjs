@@ -23,7 +23,14 @@ for(const cue of [...source.dialogue,...source.barks]){
  assert(clip.duration>0);
  if(cue.speaker!=='past')assert(portraits.characters[cue.speaker],cue.speaker);
 }
-assert.equal(userCount,69);
+assert.equal(userCount,112);
+for(const id of ['m01-v3-r24-l001','m01-v3-r24-l002','m01-v3-r24-l003'])assert.equal(audio.clips[id].origin,'user-recording',id);
+assert.equal(source.dialogue.find(c=>c.id==='m01-s02-l008').text,'Значит ВОСПОМИНАНИЯ,  Спи дальше.');
+assert.deepEqual(source.scenes.find(s=>s.id==='p04').cues,['m01-s03-l001','m01-v3-builder-crooked-plinth']);
+assert(!source.dialogue.some(c=>c.id==='m01-s03-l003'),'The disabled sign reply must not play');
+for(const sceneId of ['r21','r22','r23','r24','r24a','r25','r26','r27','r29','r30-alt','r31','r32','r33','r35','r36']){
+ for(const id of source.scenes.find(s=>s.id===sceneId).cues)assert.equal(audio.clips[id].origin,'user-recording',id);
+}
 assert.equal(source.dialogue.find(c=>c.id==='m01-s07-l016').text,'Нам и прикрученное надо. Дай отвёртку.');
 assert.equal(source.dialogue.find(c=>c.id==='m01-s07-l016').speaker,'builder');
 assert.equal(audio.clips['m01-s07-l016'].origin,'user-recording');
@@ -39,7 +46,11 @@ assert.deepEqual(originalStory,read('story-v2.json'),'Applying a snapshot does n
 assert.deepEqual(originalAudio,read('audio-v2.json'));
 for(const scene of originalStory.scenes.filter(s=>!applied.scenes.some(a=>a.id===s.id))){
  assert.deepEqual(source.scenes.find(s=>s.id===scene.id),scene);
- for(const id of scene.cues){assert.deepEqual(source.dialogue.find(l=>l.id===id),originalStory.dialogue.find(l=>l.id===id));assert.deepEqual(audio.clips[id],originalAudio.clips[id]);}
+ for(const id of scene.cues){
+  // Alternate approaches share the same recorded question and reply.
+  if(applied.dialogue.some(line=>line.id===id))continue;
+  assert.deepEqual(source.dialogue.find(l=>l.id===id),originalStory.dialogue.find(l=>l.id===id));assert.deepEqual(audio.clips[id],originalAudio.clips[id]);
+ }
 }
 for(const id of ['m01-s01-l003','m01-s01-l004','m01-s05-l014','m01-s05-l015','m01-s05-l016']){
  assert(!source.dialogue.some(line=>line.id===id));assert(!audio.clips[id]);
