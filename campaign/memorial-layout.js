@@ -10,7 +10,7 @@ export function memorialRidge(x){
 
 // Bounds include all opaque parts of the approved sprites, including the
 // round mound. Size is the whole monument's height, with its foot at y.
-export const graveBounds=g=>({left:g.x-g.size*.36,right:g.x+g.size*.36,top:g.y-g.size*1.01,bottom:g.y+g.size*.025});
+export const graveBounds=g=>({left:g.x-g.size*.41,right:g.x+g.size*.41,top:g.y-g.size*1.01,bottom:g.y+g.size*.025});
 const overlaps=(a,b,gap=0)=>a.left<b.right+gap&&a.right>b.left-gap&&a.top<b.bottom+gap&&a.bottom>b.top-gap;
 
 function candidates({width,height,art},density){
@@ -28,7 +28,7 @@ function candidates({width,height,art},density){
   const x=.10+random(i*5+801)*.875,depth=.045+random(i*5+802)*.815;
   // A gentle foreground lift: up to 18%, fading out on the middle slope.
   const near=Math.max(0,(depth-.45)/.41),nearScale=1+.18*near*near*(3-2*near);
-  const size=(.022+.059*depth)*(.96+random(i*5+803)*.08)*nearScale;
+  const size=(.022+.059*depth)*(.96+random(i*5+803)*.08)*nearScale*1.18;
   const y=mix(memorialRidge(x)+.025,.965,depth);
   add(hill,x,y,size,depth,i+1200);
  }
@@ -36,7 +36,7 @@ function candidates({width,height,art},density){
  // the near slope. Privates and NCOs never consume the foreground by default.
  for(let i=0;i<samples*2;i++){
   const x=.08+random(i*5+17001)*.60,v=random(i*5+17002);
-  const size=(.009+.009*v)*(.96+random(i*5+17003)*.08);
+  const size=(.009+.009*v)*(.96+random(i*5+17003)*.08)*1.12;
   // Follow the actual valley floor rather than putting crosses into its sky
   // or into the ridge that occludes the valley on the right.
   const near=memorialRidge(x)-.024,far=x<.4?mix(.77,.565,(x-.08)/.32):mix(.565,.522,(x-.4)/.28);

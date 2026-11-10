@@ -43,15 +43,16 @@ function crossFaces(yaw,seed){
  }
  return faces.sort((a,b)=>a.depth-b.depth);
 }
-function shadow(ctx,g){
+function shadow(ctx,g,art){
  if(g.zone==='hill'){
-  ctx.save();ctx.translate(g.x,g.y-g.size*.018);ctx.fillStyle='#080c0a55';ctx.shadowColor='#080c0a66';ctx.shadowBlur=Math.max(1,g.size*.035);
-  ctx.beginPath();ctx.ellipse(0,0,g.size*.27,g.size*.042,0,0,tau);ctx.fill();ctx.restore();
+  ctx.save();ctx.translate(g.x,g.y-g.size*.024);ctx.fillStyle='#17120f38';ctx.shadowColor='#17120f55';ctx.shadowBlur=Math.max(1,g.size*.055);
+  ctx.beginPath();ctx.ellipse(0,0,g.size*.32,g.size*.047,0,0,tau);ctx.fill();ctx.restore();
  }
+ const away=Math.max(-.9,Math.min(.9,(g.x-(art.ox+art.iw*.75))/(art.iw*.33)));
  const {x,y,size,yaw}=g;ctx.save();ctx.translate(x,y-size*.10);ctx.scale(size*.87/100,size*.87/100);
- ctx.fillStyle='#07100d43';ctx.shadowColor='#09100c55';ctx.shadowBlur=2.5;
+ ctx.fillStyle='#17120f30';ctx.shadowColor='#17120f35';ctx.shadowBlur=3.5;
  for(const face of crossFaces(yaw,g.index).filter(f=>f.light===.40)){
-  polygon(ctx,face.points.map(p=>({x:p.x-p.y*.86,y:-p.y*.22})));ctx.fill();
+  polygon(ctx,face.points.map(p=>({x:p.x-p.y*away,y:-p.y*.24})));ctx.fill();
  }
  ctx.restore();
 }
@@ -122,7 +123,7 @@ class FlagCloth{
 export class MemorialScene{
  constructor(canvas){
   this.canvas=canvas;this.ctx=canvas.getContext('2d');this.cache=document.createElement('canvas');this.cacheCtx=this.cache.getContext('2d');
-  this.graveRims=new WeakMap();
+  this.graveSprites=new WeakMap();
   this.image=new Image();this.image.src='../assets/campaign/personnel/memorial-hill-clean-v2.png';this.image.onload=()=>this.resize();
   this.graveImage=new Image();this.graveImage.src='../assets/campaign/personnel/grave-private-v2.png';this.graveImage.onload=()=>this.resize();
   this.graveArt=new MemorialGraveArt(()=>this.resize());
@@ -163,7 +164,7 @@ export class MemorialScene{
   const layoutKey=JSON.stringify([w,h,ox,oy,iw,ih,excluded]);
   if(this.layoutKey!==layoutKey){this.hitAreas=layoutMemorialGraves(this.graves,{width:w,height:h,art:this.art,excluded});this.layoutKey=layoutKey;}
   this.windPlots=this.hitAreas.filter(g=>g.size>=35).sort((a,b)=>b.size-a.size).slice(0,24);
-  for(const g of this.hitAreas){shadow(ctx,g);this.drawGrave(ctx,g);}
+  for(const g of this.hitAreas){shadow(ctx,g,this.art);this.drawGrave(ctx,g);}
   this.draw();
  }
  draw(){
@@ -179,28 +180,38 @@ export class MemorialScene{
   const art=this.graveArt.status(this.graves);this.canvas.dataset.memorialArtReady=String(art.ready);this.canvas.dataset.memorialArtErrors=art.failed.join(',');
  }
  drawGrave(ctx,g,active=false){
-  const image=this.graveArt.get(g.soldier)??this.graveImage,height=g.size,width=image.width/image.height*height;
+  const source=this.graveArt.get(g.soldier)??this.graveImage;
+  let image=this.graveSprites.get(source);
+  if(!image){
+   image=document.createElement('canvas');const scale=512/Math.max(source.width,source.height);
+   image.width=Math.round(source.width*scale);image.height=Math.round(source.height*scale);
+   const sprite=image.getContext('2d'),split=Math.floor(image.height*.80);
+   // Broaden the round earth mound gradually, keeping the cross and its
+   // masonry proportions intact. Source art and casualty records stay intact.
+   sprite.drawImage(source,0,0,source.width,split/scale,0,0,image.width,split);
+   for(let y=split;y<image.height;y+=2){
+    const h=Math.min(2,image.height-y),t=Math.min(1,(y/image.height-.80)/.14),spread=1+.28*t*t*(3-2*t),width=image.width*spread;
+    sprite.drawImage(source,0,y/scale,source.width,h/scale,(image.width-width)/2,y,width,h);
+   }
+   // Ground bounce is weaker on the front of the mound. Let its lowest
+   // soil edge settle into the terrain instead of reading as a bright cutout.
+   const groundShade=sprite.createLinearGradient(0,image.height*.78,0,image.height);
+   groundShade.addColorStop(0,'#211a1400');groundShade.addColorStop(.45,'#211a1418');groundShade.addColorStop(1,'#211a1470');
+   sprite.globalCompositeOperation='source-atop';sprite.fillStyle=groundShade;sprite.fillRect(0,image.height*.78,image.width,image.height*.22);
+   const groundEdge=sprite.createLinearGradient(0,image.height*.96,0,image.height);
+   groundEdge.addColorStop(0,'#fff');groundEdge.addColorStop(1,'#fff0');
+   sprite.globalCompositeOperation='destination-in';sprite.fillStyle=groundEdge;sprite.fillRect(0,0,image.width,image.height);
+   this.graveSprites.set(source,image);
+  }
+  const height=g.size,width=image.width/image.height*height;
   ctx.save();ctx.translate(g.x,g.y);ctx.rotate(g.rotation);
   ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
-  const hill=g.zone==='hill',brightness=((hill?.76:.53)+g.depth*(hill?.18:.22)+(active?.07:0))*(g.appearance??graveAppearance(g.soldier)).light;
-  ctx.globalAlpha=hill?.90+g.depth*.08:.72+g.depth*.27;
-  ctx.filter=`saturate(${hill?.68:.54}) brightness(${brightness}) contrast(${hill?.99:.87}) blur(${hill?.20-g.depth*.10:.36-g.depth*.24}px)`;
+  const hill=g.zone==='hill',brightness=((hill?.82:.53)+g.depth*(hill?.10:.22)+(active?.04:0))*(g.appearance??graveAppearance(g.soldier)).light;
+  // Use the material's baked side light rather than outlining the silhouette.
+  // Near monuments are opaque; only the distant field fades into the haze.
+  ctx.globalAlpha=hill?1:.72+g.depth*.27;
+  ctx.filter=`saturate(${hill?.76:.54}) brightness(${brightness}) contrast(${hill?1.04:.87}) blur(${hill?.18-g.depth*.09:.36-g.depth*.24}px)`;
   ctx.drawImage(image,-width*.5,-height*.99,width,height);
-  if(hill){
-   // Warm light catches the upper/left faces, matching the sprite's sunset
-   // lighting. The mask is inside the material silhouette, never an outer halo.
-   let rim=this.graveRims.get(image);
-   if(!rim){
-    rim=document.createElement('canvas');const scale=256/Math.max(image.width,image.height);rim.width=Math.round(image.width*scale);rim.height=Math.round(image.height*scale);
-    const light=rim.getContext('2d');light.drawImage(image,0,0,rim.width,rim.height);
-    light.globalCompositeOperation='destination-out';light.drawImage(image,2,1.5,rim.width,rim.height);
-    light.globalCompositeOperation='source-in';light.fillStyle='#e9b878';light.fillRect(0,0,rim.width,rim.height);
-    const fade=light.createLinearGradient(0,0,0,rim.height);fade.addColorStop(0,'#fff');fade.addColorStop(.70,'#fff');fade.addColorStop(1,'#fff0');
-    light.globalCompositeOperation='destination-in';light.fillStyle=fade;light.fillRect(0,0,rim.width,rim.height);
-    this.graveRims.set(image,rim);
-   }
-   ctx.globalCompositeOperation='screen';ctx.globalAlpha=.20+g.depth*.10;ctx.filter='blur(.12px)';ctx.drawImage(rim,-width*.5,-height*.99,width,height);
-  }
   ctx.restore();
  }
  waveFlag(ctx,t){

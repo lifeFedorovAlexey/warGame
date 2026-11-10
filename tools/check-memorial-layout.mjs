@@ -21,7 +21,7 @@ for(const [w,h] of [[1440,900],[1366,768],[844,390],[390,211],[320,185]]){
  for(const g of layout.filter(g=>g.appearance.order<6))assert.equal(g.zone,'field','Enlisted ranks stay in the valley');
  const generals=layout.filter(g=>g.appearance.order>=15),privates=layout.filter(g=>g.appearance.order===0);
  assert(Math.min(...generals.map(g=>g.size))>Math.max(...privates.map(g=>g.size))*2,'Officers in front, privates in distant perspective');
- assert(Math.max(...layout.map(g=>g.size))<=view.art.ih*.089,'Compact foreground proportions');
+ assert(Math.max(...layout.map(g=>g.size))<=view.art.ih*.105,'Foreground stays proportional after the 18% size increase');
  const reversed=layoutMemorialGraves(crosses.slice().reverse(),view);
  for(const g of layout){const other=reversed.find(p=>p.soldier.id===g.soldier.id);assert.equal(other.x,g.x);assert.equal(other.y,g.y);}
 }
