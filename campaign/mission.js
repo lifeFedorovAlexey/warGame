@@ -46,7 +46,7 @@ import {configureCombat,configureArmyCombat,armyCombatPolicy,normalizeCombatPoli
 import {updateFactoryRepairs} from './factory-repair.js';
 import {updateFactoryVisit,insideFactory,factoryProductionPaused,tryEnterFactory} from './factory-garage.js';
 import {inFactoryInterior,shouldAutoRetreat} from './combat-retreat-state.js';
-import {interruptedCombatTargets,movementCombatTarget} from './combat-orders.js';
+import {blockingCombatTarget,interruptedCombatTargets,movementCombatTarget} from './combat-orders.js';
 import {cancelCombatDeployment,updateCombatDeployment,updateCombatParking,combatPositionConditions} from './combat-deployment.js';
 import {pickupTarget,orderPickup,updatePickupOrder} from './pickup-orders.js';
 import {roadTrafficRank,compareRoadTrafficRanks} from './traffic-priority.js';
@@ -2155,12 +2155,13 @@ export class Mission{
  *executeUnitSteps(unit,dt){
   if(unit.hp<=0)return;unit.previousX=unit.x;unit.previousY=unit.y;unit.previousHeading=unit.heading;unit.previousWheelDistance=unit.wheelDistance??0;unit.previousSteering=unit.steering??0;unit.cooldown=Math.max(0,unit.cooldown-dt);const spec=this.unitSpec(unit);
   updateSteeringDamage(this,unit);
-  // Turret fire is independent of withdrawal movement. Factory approaches
-  // and shared passing manoeuvres can both return from the dispatcher early.
-  // Only select a target already in range; never replace the retreat route.
-  if(spec.damage&&unit.cooldown<=0&&!inFactoryInterior(unit)
-   &&(unit.combatRetreat||unit.factoryVisit||shouldAutoRetreat(unit,spec))){
-   const enemy=automaticCombatTarget(this,unit,spec);if(enemy)this.attack(unit,enemy,spec);
+  // Clear the vehicle's own route before normal targeting. Withdrawal also
+  // keeps its turret active when traffic or garage handling returns early.
+  if(spec.damage&&unit.cooldown<=0&&!inFactoryInterior(unit)){
+   const blocker=blockingCombatTarget(this,unit,spec);
+   const retreating=unit.combatRetreat||unit.factoryVisit||shouldAutoRetreat(unit,spec);
+   const enemy=blocker??(retreating?automaticCombatTarget(this,unit,spec):null);
+   if(enemy)this.attack(unit,enemy,spec);
   }
   if(unit.factoryVisit&&['entering','inside','leaving','departure'].includes(unit.factoryVisit.phase)){
    const factory=this.state.buildings.find(b=>b.id===unit.factoryVisit.factoryId)??{...unit.factoryVisit.factory,hp:0};

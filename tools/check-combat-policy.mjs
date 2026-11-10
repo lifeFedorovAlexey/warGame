@@ -9,6 +9,62 @@ function fixture(){const m=new Mission({...config,startGrid:[64,56]},field);m.st
 const unit=(m,kind='bukhanka',owner='rai',x=0,y=0)=>m.addUnit(kind,owner,{x,y});
 const tick=(m,u)=>{m.state.time+=.1;m.updateUnit(u,.1);};
 const checks=[];
+function follow(u,goal,action='move'){
+ u.heading=0;u.task={type:action,...goal};u.routeOrder={destination:goal};u.path=[goal];
+}
+{
+ const m=fixture(),a=unit(m),b=unit(m,'bukhanka','rai',75,0);
+ const offRoute=unit(m,'raider','scavs',19,0),body=unit(m,'raider','scavs',75,28);
+ const fence=m.addStructure('scav-fence','scavs',{x:0,y:30},{completed:true,progress:1});
+ m.rebuildNavigation();
+ const aGoal={x:0,y:105},bGoal={x:75,y:105};
+ follow(a,aGoal);follow(b,bGoal,'attack-move');
+ const orders=[a.task,b.task];
+ tick(m,a);tick(m,b);
+ assert.deepEqual(m.drainEffects().filter(e=>e.type==='shot').map(e=>[e.from,e.targetId]),[[a.id,fence.id],[b.id,body.id]]);
+ assert.equal(offRoute.hp,offRoute.maxHp,'The closer enemy beside the route does not steal the shot');
+ assert.equal(a.task,orders[0]);assert.equal(b.task,orders[1]);
+ assert.deepEqual([a.routeOrder.destination,b.routeOrder.destination],[aGoal,bGoal]);
+ // Clear the accepted route. Ordinary targeting and driving resume using
+ // the same order on the next available shot.
+ fence.hp=0;body.x+=65;m.rebuildNavigation();a.cooldown=0;
+ tick(m,a);
+ assert.equal(m.drainEffects().find(e=>e.type==='shot')?.targetId,offRoute.id);
+ for(let i=0;i<90&&a.path.length;i++)tick(m,a);
+ assert(Math.hypot(a.x-aGoal.x,a.y-aGoal.y)<2);
+ checks.push('separate vehicles prioritize their own hostile fence or hull and keep the original order');
+}
+{
+ const m=fixture(),a=unit(m),blocker=unit(m,'raider','scavs',0,30),attacker=unit(m,'raider','scavs',-22,0);
+ follow(a,{x:0,y:105});
+ m.setCombatPolicy([a.id],{response:'ignore'});tick(m,a);
+ assert(!m.drainEffects().some(e=>e.type==='shot'),'Hold fire applies to an enemy in the lane');
+ m.setCombatPolicy([a.id],{response:'return'});m.damage(a,1,attacker);tick(m,a);
+ assert.equal(m.drainEffects().find(e=>e.type==='shot')?.targetId,attacker.id,'Return fire still requires the actual attacker');
+ m.setCombatPolicy([a.id],{response:'free'});m.visibleAt=(x,y)=>x!==blocker.x||y!==blocker.y;a.cooldown=0;tick(m,a);
+ assert.equal(m.drainEffects().find(e=>e.type==='shot')?.targetId,attacker.id,'A hidden blocker cannot be targeted');
+ checks.push('lane-clearing fire respects hold fire, retaliation and visibility');
+}
+{
+ const m=fixture(),a=unit(m),ally=unit(m,'bukhanka','rai',0,24),enemy=unit(m,'raider','scavs',0,39);
+ const side=unit(m,'raider','scavs',19,0);
+ follow(a,{x:0,y:105});tick(m,a);
+ assert.equal(m.drainEffects().find(e=>e.type==='shot')?.targetId,side.id,'The enemy behind the actual first blocker has no priority');
+ ally.x=95;a.cooldown=0;tick(m,a);
+ assert.equal(m.drainEffects().find(e=>e.type==='shot')?.targetId,enemy.id,'Priority follows the live obstruction');
+ checks.push('a closer friendly hull shields the lane from an automatic priority change');
+}
+{
+ const m=fixture(),a=unit(m),enemy=unit(m,'raider','scavs',0,28),side=unit(m,'raider','scavs',19,0);
+ const f=m.addStructure('factory','rai',{x:0,y:220},{completed:true,progress:1});
+ a.hp-=50;m.rebuildNavigation();assert(m.retreat([a.id]).ok);
+ a.combatRetreat.home={id:f.id,x:f.x,y:f.y};
+ follow(a,{x:0,y:139});tick(m,a);
+ assert.equal(m.drainEffects().find(e=>e.type==='shot')?.targetId,enemy.id);
+ assert.equal(side.hp,side.maxHp);assert.equal(a.combatRetreat.home.id,f.id);
+ assert.equal(a.factoryVisit?.factoryId,f.id,'Retreat to repair remains the active trip');
+ checks.push('a retreating vehicle fires at its blocker and keeps the selected factory');
+}
 {
  const m=fixture(),u=unit(m),enemy=unit(m,'raider','scavs',0,65),weak=unit(m,'raider','scavs',55,45);weak.hp=20;
  assert(m.order([u.id],'attack',enemy).ok);tick(m,u);assert(enemy.hp<enemy.maxHp);
