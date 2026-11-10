@@ -11,10 +11,12 @@ export function needsFactoryVisit(unit,factory){
  return unit.hp<unit.maxHp||!!factory.autoModernize;
 }
 
-function arrivalSeconds(m,u,f){
+function factoryDoor(m,f){
  const a=f.rotation??0,scale=m.config.worldScale;
- const door={x:f.x+Math.sin(a)*18*scale,y:f.y-Math.cos(a)*18*scale};
- return distance(u,door)/Math.max(1,m.unitSpec(u).speed*damageMobility(u.damage));
+ return {x:f.x+Math.sin(a)*18*scale,y:f.y-Math.cos(a)*18*scale};
+}
+function arrivalSeconds(m,u,f){
+ return distance(u,factoryDoor(m,f))/Math.max(1,m.unitSpec(u).speed*damageMobility(u.damage));
 }
 
 // Estimate the single repair bay and the entrance separately. Cars already
@@ -48,6 +50,22 @@ export function chooseRepairFactory(m,u){
   .map(factory=>({factory,seconds:repairCompletionSeconds(m,u,factory)}));
  rows.sort((a,b)=>a.seconds-b.seconds||distance(u,a.factory)-distance(u,b.factory)||a.factory.id.localeCompare(b.factory.id));
  const best=rows[0],current=rows.find(row=>row.factory.id===assignment(u));
+ // A stalled car already at another door can leave the conflicting stream
+ // between adjacent factories. Avoid switching in the middle of a transfer.
+ if(current&&!committed(u)&&u.navigation?.waitSeconds>=3){
+  const currentDistance=distance(u,factoryDoor(m,current.factory)),scale=m.config.worldScale;
+  const alternative=rows.find(row=>{
+   const door=factoryDoor(m,row.factory),d=distance(u,door);
+   const nearby=d<scale*8&&d+scale*2<currentDistance;
+   const opposing=u.navigation.waitCycle&&d+scale<currentDistance
+    &&assignment(m.entity(u.navigation.blockerId)??{})===row.factory.id;
+   return (nearby||opposing)&&m.nav.lineClear(u,door,false,true);
+  });
+  if(alternative)return alternative.factory;
+ }
+ // Once moving to a door, avoid crossing the other approaches just because
+ // the repair completion estimate changed. Re-route only to escape a stall.
+ if(current&&u.factoryVisit?.phase==='approach'&&u.navigation?.reason!=='factory-route-unavailable')return current.factory;
  // Preserve queue position for small differences. A car at the doorway or
  // inside the hall finishes its visit instead of changing factories mid-transfer.
  if(current&&(committed(u)||best.seconds+Math.max(4,current.seconds*.15)>=current.seconds))return current.factory;
@@ -57,6 +75,7 @@ export function chooseRepairFactory(m,u){
 export function repairChoiceDue(m,u){
  const retreat=u.combatRetreat;
  if(!retreat||retreat.service==='complete'||u.hp>=u.maxHp||committed(u)
+  ||u.factoryVisit?.phase==='approach'&&!(u.navigation?.waitSeconds>=3)
   ||u.pendingOrder||u.detour||u.yieldReturn||m.state.time<(retreat.factoryChoiceAt??-Infinity))return false;
  retreat.factoryChoiceAt=m.state.time+2;
  return true;

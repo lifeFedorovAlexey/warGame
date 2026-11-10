@@ -44,7 +44,7 @@ import {placeExtraCampGuards,updateScavReinforcements} from './scav-reinforcemen
 import {alertScavs,updateScavCombat} from './scav-ai.js';
 import {configureCombat,configureArmyCombat,armyCombatPolicy,normalizeCombatPolicy,rememberHostileHit,cancelCombatRetreat,automaticCombatTarget,forceCombatRetreat} from './combat-policy.js';
 import {updateFactoryRepairs} from './factory-repair.js';
-import {updateFactoryVisit,insideFactory,factoryProductionPaused} from './factory-garage.js';
+import {updateFactoryVisit,insideFactory,factoryProductionPaused,tryEnterFactory} from './factory-garage.js';
 import {inFactoryInterior,shouldAutoRetreat} from './combat-retreat-state.js';
 import {interruptedCombatTargets,movementCombatTarget} from './combat-orders.js';
 import {cancelCombatDeployment,updateCombatDeployment,updateCombatParking,combatPositionConditions} from './combat-deployment.js';
@@ -2166,6 +2166,12 @@ export class Mission{
    const factory=this.state.buildings.find(b=>b.id===unit.factoryVisit.factoryId)??{...unit.factoryVisit.factory,hp:0};
    yield* updateFactoryVisit(this,unit,factory,dt);return;
   }
+  // A checked shutter approach can finish from the live pose while a generic
+  // local turn is queued. Entering invalidates that search's route intent.
+  if(unit.factoryVisit?.phase==='approach'&&this.trafficCoordinator.routes?.get(unit.id)?.kind==='maneuver'){
+   const factory=this.entity(unit.factoryVisit.factoryId);
+   if(tryEnterFactory(this,unit,factory)){yield* updateFactoryVisit(this,unit,factory,dt);return;}
+  }
   if(yield* this.trafficCoordinator.prepareUnitSteps(this,unit,spec,dt))return;
   if(unit.task?.artifactId||unit.task?.salvageId){
    if(yield* updatePickupOrder(this,unit)){
@@ -2241,9 +2247,11 @@ export class Mission{
   }
  }
  clearFactoryApron(...args){this.finishPendingStep();return completeSteps(this.clearFactoryApronSteps(...args));}
- *clearFactoryApronSteps(building,departure,blockers,current=()=>true){
-  const idle=other=>other.owner===building.owner&&!other.task&&!other.path.length&&!other.detour&&!other.jointTraffic
-   &&!other.pendingOrder&&!other.yieldReturn&&!other.combatRetreat&&this.unitSpec(other).role!=='builder';
+ *clearFactoryApronSteps(building,departure,blockers,current=()=>true,entry=false){
+  const idle=other=>other.owner===building.owner&&!other.detour&&!other.jointTraffic
+   &&!other.pendingOrder&&!other.yieldReturn&&this.unitSpec(other).role!=='builder'
+   &&(!other.task&&!other.path.length&&!other.combatRetreat||entry&&other.factoryVisit?.phase==='approach'
+    &&!other.traffic&&!other.trafficHold&&(other.driveSpeed??0)<.01);
   if(![...blockers].every(idle))return;
   const scale=this.config.worldScale;
   const leader={...departure,path:[{
@@ -2255,13 +2263,14 @@ export class Mission{
    other.trafficRest=this.state.time+4;
    const world=this.state,revision=other.commandRevision,topology=this.nav.topologyRevision,
     pose={x:other.x,y:other.y,heading:other.heading};
-   const parking=yield* this.trafficCoordinator.currentIntentSteps(this,this.parkingManeuverSteps(other,leader,(from,to)=>this.vehicleMotionClear(other,from,to)),[other,leader]);
+   const parking=yield* this.trafficCoordinator.currentIntentSteps(this,this.parkingManeuverSteps(other,leader,(from,to)=>this.vehicleMotionClear(other,from,to),{requireInverse:!entry}),[other,leader]);
    if(this.state!==world||!current()||this.nav.topologyRevision!==topology)return;
    if(other.hp<=0||!idle(other)||other.commandRevision!==revision
     ||other.x!==pose.x||other.y!==pose.y||other.heading!==pose.heading)continue;
    if(!parking)continue;
    other.detour={legs:parking.legs,parking:true,idleYield:true,blocked:0,factoryExit:building.id};
-   building.exitYield=other.id;
+   if(entry)this.trafficCoordinator.routes?.delete(other.id);
+   else building.exitYield=other.id;
    return;
   }
  }

@@ -172,6 +172,17 @@ for(const response of ['return','ignore']){
  checks.push(`busy factory: bypass, cover and re-entry (${response}, out of range in ${leftRangeAt.toFixed(1)}s, ${rollingShots} shots while moving, gap ${minimumGap.toFixed(2)})`);
 }
 {
+ const {m,car,owner,factory}=withdrawalScene('return');
+ Object.assign(owner,{x:factory.x,y:factory.y-13.5});
+ owner.factoryVisit.phase='inside';
+ factory.workPriority='production';factory.queue=[{kind:'bukhanka',progress:.2}];
+ tick(m,car);
+ assert.equal(car.factoryVisit?.phase,'approach');
+ assert.equal(car.combatRetreat.phase,'home','An occupied repair bay and production must not block driving to the factory');
+ assert.deepEqual(car.routeOrder?.destination,{x:factory.x,y:factory.y-config.worldScale*18});
+ checks.push('occupied interior and active production allow an approach under fire');
+}
+{
  const {m,car}=withdrawalScene('return',false);
  // Restore the controller state of a car that lost its approach without a
  // competing garage visitor. The recovery uses the same real movement solver.

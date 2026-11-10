@@ -230,8 +230,8 @@ function* currentRetreatSteps(iterator,current){
 
 function repairBlocker(mission,unit,factory){
   const owner=factoryVisitors(mission,factory).find(other=>other!==unit&&
-    ['gate','entering','inside','leaving','departure'].includes(other.factoryVisit.phase));
-  return owner?.id??(factory.workPriority==='production'&&factory.queue?.length?factory.id:null);
+    ['gate','entering'].includes(other.factoryVisit.phase));
+  return owner?.id??null;
 }
 
 function withdrawalPoints(origin,home,away,travel,turns=[0,.45,-.45,.9,-.9,1.35,-1.35]){
@@ -331,7 +331,7 @@ export function* updateCombatRetreat(mission, unit, spec, dt) {
   const stalled=unit.navigation?.waitSeconds>=.6||retreat.status==='blocked';
   const stoppedInCover=inCover&&!unit.path.length;
   // A vehicle in the doorway finishes that checked transfer. Outside, keep
-  // the old route and gate ownership until an alternative has been found.
+  // the old route until an alternative has been found.
   const visit=unit.factoryVisit;
   if(!inFactoryInterior(unit)&&visit?.phase!=='departure'&&!unit.detour&&!unit.yieldReturn&&!unit.jointTraffic
     &&(stalled||stoppedInCover||busy&&!inCover)&&mission.state.time>=(retreat.nextCoverSearchAt??0)){
@@ -369,9 +369,7 @@ export function* updateCombatRetreat(mission, unit, spec, dt) {
     delete retreat.destination;
     retreat.status='planning';
   }
-  // Garage queues may extend beyond the repair radius. Their waiting spots
-  // are validated by factoryWaitingPoint against the apron and topology;
-  // applying the service radius here cancelled the same route every tick.
+  // The garage uses checked doorway routes, independent of the repair radius.
   if(serviceBase?.kind!=='factory'&&retreat.phase==='home'&&retreat.destination&&serviceBase&&mission.buildingSpec(serviceBase).repair
    &&!factoryCanRepair(mission,serviceBase,retreat.destination)){
     const rejected={...retreat.destination};clearMotion(unit);retreat.status='planning';
