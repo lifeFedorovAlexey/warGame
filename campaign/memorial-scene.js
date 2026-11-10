@@ -124,7 +124,7 @@ export class MemorialScene{
  constructor(canvas){
   this.canvas=canvas;this.ctx=canvas.getContext('2d');this.cache=document.createElement('canvas');this.cacheCtx=this.cache.getContext('2d');
   this.graveSprites=new WeakMap();
-  this.image=new Image();this.image.src='../assets/campaign/personnel/memorial-hill-earth-v3.png';this.image.onload=()=>this.resize();
+  this.image=new Image();this.image.src='../assets/campaign/personnel/memorial-hill-calm-v4.png';this.image.onload=()=>this.resize();
   this.graveImage=new Image();this.graveImage.src='../assets/campaign/personnel/grave-private-v2.png';this.graveImage.onload=()=>this.resize();
   this.graveArt=new MemorialGraveArt(()=>this.resize());
   this.flagImage=new Image();this.flagImage.src='../assets/campaign/personnel/rai-flag-cloth.png';this.flagImage.onload=()=>{
