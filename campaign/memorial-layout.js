@@ -2,6 +2,7 @@ import {graveAppearance} from './memorial-graves.js';
 
 const mix=(a,b,t)=>a+(b-a)*t;
 const random=i=>{const x=Math.sin(i*127.1+13.7)*43758.5453;return x-Math.floor(x);};
+const halton=(n,b)=>{let value=0,f=1;for(;n;n=Math.floor(n/b)){f/=b;value+=f*(n%b);}return value;};
 export function memorialRidge(x){
  const points=[[0,.95],[.4,.72],[.58,.62],[.7,.51],[.8,.40],[.9,.34],[1,.36]];
  for(let i=1;i<points.length;i++)if(x<=points[i][0]){const [a,b]=points[i-1],[c,d]=points[i];return mix(b,d,(x-a)/(c-a));}
@@ -15,22 +16,27 @@ const overlaps=(a,b,gap=0)=>a.left<b.right+gap&&a.right>b.left-gap&&a.top<b.bott
 
 function candidates({width,height,art},density){
  const {ox,oy,iw,ih}=art,hill=[],field=[];
- const add=(target,x,y,size,depth,seed)=>{
-  const p={x:ox+x*iw,y:oy+y*ih,size:size*ih*density,depth,zone:target===field?'field':'hill',balance:.91+random(seed+29)*.18,
+ const add=(target,x,y,size,depth,seed,anchor=-1)=>{
+  const p={x:ox+x*iw,y:oy+y*ih,size:size*ih*density,depth,zone:target===field?'field':'hill',anchor,
    yaw:(random(seed)-.5)*.30,rotation:(random(seed+7)-.5)*.026};
   const b=graveBounds(p);
   if(b.left>=8&&b.right<=width-8&&b.top>=4&&b.bottom<=height-8)target.push({...p,bounds:b});
  };
- // Cover the whole foreground slope, including the lower left bank and the
- // upper ridge. Point selection below distributes plots before assigning rank.
+ // Secondary monuments recede through three readable planes. The few larger
+ // foreground accents below establish scale; the rest must not compete with them.
  const samples=Math.min(64000,Math.ceil(1800/(density*density)));
  for(let i=0;i<samples;i++){
   const x=.10+random(i*5+801)*.875,depth=.045+random(i*5+802)*.815;
-  // A gentle foreground lift: up to 18%, fading out on the middle slope.
-  const near=Math.max(0,(depth-.45)/.41),nearScale=1+.18*near*near*(3-2*near);
-  const size=(.022+.059*depth)*(.96+random(i*5+803)*.08)*nearScale*1.18;
+  const size=(.023+.060*Math.pow(depth,1.35))*(.94+random(i*5+803)*.12);
   const y=mix(memorialRidge(x)+.025,.965,depth);
   add(hill,x,y,size,depth,i+1200);
+ }
+ // Asymmetric foreground triangle, with one principal memorial and two
+ // supporting ones. Small alternate positions let the layout avoid UI/cropping.
+ const accents=[[.78,.93,.130,.99],[.66,.87,.108,.94],[.91,.88,.112,.96]];
+ for(let anchor=0;anchor<accents.length;anchor++)for(let i=0;i<48;i++){
+  const [ax,ay,size,depth]=accents[anchor],radius=i?Math.sqrt(i/47):0,angle=i*2.399963;
+  add(hill,ax+Math.cos(angle)*radius*.055,ay+Math.sin(angle)*radius*.035,size,depth,9000+anchor*80+i,anchor);
  }
  // The distant valley is a separate burial field, below the city and behind
  // the near slope. Privates and NCOs never consume the foreground by default.
@@ -47,6 +53,28 @@ function candidates({width,height,art},density){
  return {hill,field};
 }
 
+// Loose burial groups follow the ground rather than forming an evenly spaced
+// screen ornament. Their centres cover both banks, the ridge and the middle
+// slope; an irregular cadence leaves breathing room between neighbouring groups.
+const hillGroups=[[.20,.66],[.39,.66],[.55,.49],[.65,.24],[.73,.63],[.84,.41],[.93,.14],[.95,.66],[.57,.83]];
+function compositionTarget(index,zone,{art}){
+ const {ox,oy,iw,ih}=art;
+ let x,y;
+ if(zone==='hill'){
+  const [cx,cd]=hillGroups[(index*5)%hillGroups.length],pass=Math.floor(index/hillGroups.length);
+  x=Math.max(.105,Math.min(.97,cx+(random(index*13+42)-.5)*(.055+Math.min(3,pass)*.018)));
+  const depth=Math.max(.055,Math.min(.85,cd+(random(index*17+78)-.5)*(.12+Math.min(3,pass)*.045)));
+  y=mix(memorialRidge(x)+.025,.965,depth);
+ }else{
+  // Low-discrepancy targets fill the entire valley without the quasi-hexagonal
+  // spacing produced by repeatedly taking the largest empty circle.
+  x=.08+halton(index+5,2)*.60;
+  const near=memorialRidge(x)-.024,far=x<.4?mix(.77,.565,(x-.08)/.32):mix(.565,.522,(x-.4)/.28);
+  y=mix(far,Math.max(far+.005,near),.06+halton(index+7,3)*.88);
+ }
+ return {x:ox+x*iw,y:oy+y*ih};
+}
+
 export function layoutMemorialGraves(graves,viewport){
  if(!graves.length)return [];
  const ordered=graves.map((soldier,index)=>({soldier,index,appearance:graveAppearance(soldier)})).sort((a,b)=>
@@ -59,32 +87,47 @@ export function layoutMemorialGraves(graves,viewport){
  for(let attempt=0;attempt<24;attempt++){
   const density=initialDensity*Math.pow(.82,attempt),pool=candidates(viewport,density),placed=[],cells=new Map(),cellSize=32;
   const keys=b=>{const out=[];for(let y=Math.floor(b.top/cellSize);y<=Math.floor(b.bottom/cellSize);y++)for(let x=Math.floor(b.left/cellSize);x<=Math.floor(b.right/cellSize);x++)out.push(x+':'+y);return out;};
-  const occupied=(box,gap)=>{
+  const occupied=(box,gap,stagger=false)=>{
    const padded={left:box.left-gap,right:box.right+gap,top:box.top-gap,bottom:box.bottom+gap};
    if(excluded.some(b=>overlaps(padded,b)))return true;
-   const seen=new Set();for(const key of keys(padded))for(const b of cells.get(key)??[]){if(!seen.has(b)&&overlaps(padded,b))return true;seen.add(b);}return false;
+   const height=(box.bottom-box.top)/1.035,reach=stagger?height*.65:0;
+   const search={...padded,left:padded.left-reach,right:padded.right+reach};
+   const seen=new Set();for(const key of keys(search))for(const b of cells.get(key)??[]){
+    if(seen.has(b))continue;seen.add(b);
+    if(overlaps(padded,b))return true;
+    // Closely neighbouring feet on one horizontal baseline read as a row of
+    // icons. Stagger their depth while keeping the broader burial group intact.
+    const otherHeight=(b.bottom-b.top)/1.035;
+    if(stagger&&Math.abs(box.bottom-b.bottom)<Math.min(height,otherHeight)*.30&&Math.abs((box.left+box.right-b.left-b.right)*.5)<Math.max(height,otherHeight)*1.45)return true;
+   }
+   return false;
   };
-  const placeGroup=(people,list)=>{
+  const placeGroup=(people,list,zone)=>{
    if(!people.length)return true;
    const available=list.filter(p=>!excluded.some(b=>overlaps(p.bounds,b,Math.max(.5,p.size*.13))));
    if(!available.length)return false;
-   const nearest=new Float64Array(available.length).fill(Infinity),used=new Uint8Array(available.length),plots=[];
-   const xs=Float64Array.from(available,p=>p.x),ys=Float64Array.from(available,p=>p.y),weights=Float64Array.from(available,p=>p.balance);
-   const centre=available.reduce((s,p)=>({x:s.x+p.x/available.length,y:s.y+p.y/available.length}),{x:0,y:0});
+   const used=new Uint8Array(available.length),plots=[];
+   const xs=Float64Array.from(available,p=>p.x),ys=Float64Array.from(available,p=>p.y);
+   const accents=zone==='hill'?Math.min(3,Math.ceil(people.length/10)):0;
+   for(let accent=0;accent<accents;accent++){
+    const idx=available.findIndex((p,i)=>p.anchor===accent&&!used[i]&&!occupied(p.bounds,Math.max(.5,p.size*.18)));
+    if(idx<0)continue;
+    const p=available[idx];used[idx]=1;plots.push(p);for(const key of keys(p.bounds)){if(!cells.has(key))cells.set(key,[]);cells.get(key).push(p.bounds);}
+   }
+   let targetIndex=0;
    while(plots.length<people.length){
+    const target=compositionTarget(targetIndex,zone,viewport);
     let best=-1,score=-Infinity;
     for(let i=0;i<available.length;i++){
-     if(used[i])continue;
-     const candidateScore=plots.length?nearest[i]*weights[i]:-Math.hypot(xs[i]-centre.x,ys[i]-centre.y);
+     if(used[i]||available[i].anchor>=0)continue;
+     const dx=xs[i]-target.x,dy=ys[i]-target.y,candidateScore=-(dx*dx+dy*dy*1.3);
      if(candidateScore>score){best=i;score=candidateScore;}
     }
     if(best<0)return false;
     used[best]=1;const p=available[best],box=p.bounds;
-    if(occupied(box,Math.max(.5,p.size*.13)))continue;
+    if(occupied(box,Math.max(.5,p.size*.20),zone==='hill'))continue;
     plots.push(p);for(const key of keys(box)){if(!cells.has(key))cells.set(key,[]);cells.get(key).push(box);}
-    // Farthest-point sampling fills the largest remaining open patch. Small
-    // deterministic variation avoids a regular lattice without creating clumps.
-    for(let i=0;i<available.length;i++)if(!used[i]){const dx=xs[i]-p.x,dy=ys[i]-p.y,d=dx*dx+dy*dy;if(d<nearest[i])nearest[i]=d;}
+    targetIndex++;
    }
    // Rank affects who occupies the selected plots, not whether the back or
    // left side of the landscape remains empty. Preserve original archive indices.
@@ -92,7 +135,7 @@ export function layoutMemorialGraves(graves,viewport){
    for(let i=0;i<people.length;i++)placed.push({...people[i],...plots[i]});
    return true;
   };
-  if(!placeGroup(senior,pool.hill)||!placeGroup(enlisted,pool.field))continue;
+  if(!placeGroup(senior,pool.hill,'hill')||!placeGroup(enlisted,pool.field,'field'))continue;
   if(placed.length===graves.length)return placed.sort((a,b)=>a.y-b.y||a.x-b.x);
  }
  throw new Error('Недостаточно места для мемориала');

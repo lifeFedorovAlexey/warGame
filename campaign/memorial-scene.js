@@ -206,11 +206,12 @@ export class MemorialScene{
   const height=g.size,width=image.width/image.height*height;
   ctx.save();ctx.translate(g.x,g.y);ctx.rotate(g.rotation);
   ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
-  const hill=g.zone==='hill',brightness=((hill?.82:.53)+g.depth*(hill?.10:.22)+(active?.04:0))*(g.appearance??graveAppearance(g.soldier)).light;
-  // Use the material's baked side light rather than outlining the silhouette.
-  // Near monuments are opaque; only the distant field fades into the haze.
+  const hill=g.zone==='hill',distance=Math.max(0,Math.min(1,(g.depth-.52)/.43)),near=distance*distance*(3-2*distance);
+  const brightness=((hill?.74+near*.16+g.depth*.05:.53+g.depth*.22)+(active?.04:0))*(g.appearance??graveAppearance(g.soldier)).light;
+  // Three tonal planes: full material contrast in front, quiet solid forms
+  // on the middle slope, then silhouettes in the valley haze. No glowing rims.
   ctx.globalAlpha=hill?1:.72+g.depth*.27;
-  ctx.filter=`saturate(${hill?.76:.54}) brightness(${brightness}) contrast(${hill?1.04:.87}) blur(${hill?.18-g.depth*.09:.36-g.depth*.24}px)`;
+  ctx.filter=`sepia(${hill?.14:0}) saturate(${hill?.55+near*.21:.50}) brightness(${brightness}) contrast(${hill?1+near*.05:.85}) blur(${hill?.34-near*.25:.36-g.depth*.24}px)`;
   ctx.drawImage(image,-width*.5,-height*.99,width,height);
   ctx.restore();
  }
@@ -241,10 +242,12 @@ export class MemorialScene{
   }
   const gust=Math.sin(t*.61)*1.4+Math.sin(t*1.17)*.5;
   for(const g of this.windPlots??[]){
-   for(let i=0;i<7;i++){
-    const x=g.x+(random(g.index*11+i)-.1)*g.size*.64,y=g.y+g.size*(.12+random(i+g.index*3)*.22),len=g.size*(.035+random(i+30)*.055);
-    ctx.strokeStyle=i%3?'#74765766':'#b3a37566';ctx.lineWidth=.7;
-    ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo(x+gust*len*.3,y-len*.7,x+gust*len*.65+len*.3,y-len);ctx.stroke();
+   if(g.size<48)continue;
+   for(let i=0;i<4;i++){
+    // Sparse tufts grow at the soil edge, not in a detached stripe below it.
+    const side=i%2?1:-1,x=g.x+side*g.size*(.25+random(g.index*11+i)*.09),y=g.y-g.size*(.012+random(i+g.index*3)*.025),len=g.size*(.018+random(i+30)*.022);
+    ctx.strokeStyle=i%3?'#78604855':'#9d774944';ctx.lineWidth=Math.max(.35,Math.min(.7,g.size*.006));
+    ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo(x+gust*len*.16,y-len*.7,x+gust*len*.30+side*len*.2,y-len);ctx.stroke();
    }
   }
   for(let i=0;i<42;i++){
