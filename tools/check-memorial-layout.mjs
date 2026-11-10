@@ -26,7 +26,19 @@ for(const [w,h] of [[1440,900],[1366,768],[844,390],[390,211],[320,185]]){
  for(const g of layout){const other=reversed.find(p=>p.soldier.id===g.soldier.id);assert.equal(other.x,g.x);assert.equal(other.y,g.y);}
 }
 const crowded=Array.from({length:2000},(_,i)=>({id:'private-'+i,rank:'private',death:{at:i}}));
+// Coverage is independent of rank preference: a populated cemetery must use
+// both banks, the upper slope and the distant valley, not just a near cluster.
+for(const [w,h] of [[1440,900],[390,211]]){
+ const view=viewport(w,h),{layout}=check([...crosses,...crowded.slice(0,41)],view),hill=layout.filter(g=>g.zone==='hill'),field=layout.filter(g=>g.zone==='field');
+ const span=(rows,key)=>Math.max(...rows.map(g=>g[key]))-Math.min(...rows.map(g=>g[key]));
+ assert(span(hill,'x')>w*.75,'Use the whole hill width');assert(span(hill,'y')>h*.40,'Use the ridge and the lower slope');
+ assert(span(field,'x')>w*.50,'Use the whole distant valley');assert(span(field,'y')>h*.22,'Do not compress the valley into a stripe');
+ for(const [x,y] of [[.18,.91],[.4,.86],[.55,.80],[.7,.7],[.8,.55],[.92,.42],[.92,.88]]){
+  const px=view.art.ox+x*view.art.iw,py=view.art.oy+y*view.art.ih;
+  assert(Math.min(...hill.map(g=>Math.hypot(g.x-px,g.y-py)))<view.art.ih*.18,'No large empty patch on the hill');
+ }
+}
 const stress=check(crowded,{...viewport(1440,900),excluded:[{left:30,right:840,top:20,bottom:490}]});
 assert(stress.layout.every(g=>g.zone==='field'),'Even a large enlisted memorial stays in the distant field');
 for(const n of [0,1,8,200])check(crowded.slice(0,n),viewport(390,211));
-console.log(`PASS compact perspective, rank priority, distant enlisted field, no overlaps/clipping, stable identity, 5 viewports; 2,000 graves in ${Math.round(stress.ms)} ms`);
+console.log(`PASS full hill/valley coverage, compact perspective, rank priority, no overlaps/clipping, stable identity, 5 viewports; 2,000 graves in ${Math.round(stress.ms)} ms`);

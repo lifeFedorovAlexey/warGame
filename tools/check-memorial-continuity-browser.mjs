@@ -38,11 +38,14 @@ try{
   const check=await page.evaluate(()=>{
    const scene=rankMemorial,list=scene.hitAreas,overlap=(a,b)=>a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top;
    const pairs=[];for(let i=0;i<list.length;i++)for(let j=0;j<i;j++)if(overlap(list[i].bounds,list[j].bounds))pairs.push([list[i].soldier.id,list[j].soldier.id]);
+   const span=(zone,key)=>{const points=list.filter(g=>g.zone===zone).map(g=>g[key]);return (Math.max(...points)-Math.min(...points))/(key==='x'?scene.width:scene.height);};
    return {count:list.length,unique:new Set(list.map(g=>g.soldier.id)).size,pairs,privates:list.filter(g=>g.appearance.order===0).map(g=>g.zone),
+    hillWidth:span('hill','x'),hillHeight:span('hill','y'),fieldWidth:span('field','x'),
     largest:Math.max(...list.map(g=>g.size)),ratio:Math.max(...list.filter(g=>g.appearance.order>=15).map(g=>g.size))/Math.max(...list.filter(g=>g.appearance.order===0).map(g=>g.size)),
     overflow:document.documentElement.scrollWidth>innerWidth||document.querySelector('#result').scrollHeight>innerHeight};
   });
   assert.equal(check.count,80);assert.equal(check.unique,80);assert.deepEqual(check.pairs,[]);assert(check.privates.every(z=>z==='field'));assert(check.ratio>2);assert(!check.overflow);
+  assert(check.hillWidth>.65&&check.hillHeight>.4,'Graves cover the whole visible hill');assert(check.fieldWidth>.45,'Graves cover the valley beyond the hill');
   await page.screenshot({path:folder+'/'+name+'.png'});return check;
  }
  const wide=await layoutCheck('wide',1440,900),narrow=await layoutCheck('narrow',390,844);

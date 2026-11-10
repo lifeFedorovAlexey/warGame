@@ -130,7 +130,7 @@ export class MemorialScene{
   this.observer=new ResizeObserver(()=>this.resize());this.observer.observe(canvas);
   document.addEventListener('visibilitychange',()=>{if(document.hidden)this.stop();else if(!this.canvas.closest('[hidden]'))this.start();});
  }
- setData(graves){this.graves=graves;this.current=-1;this.time=0;this.graveArt.ensure(graves);this.resize();}
+ setData(graves){this.graves=graves;this.layoutKey=null;this.current=-1;this.time=0;this.graveArt.ensure(graves);this.resize();}
  start(){if(this.running)return;this.running=true;this.last=performance.now();this.resize();if(!this.motion.matches)this.raf=requestAnimationFrame(t=>this.animate(t));}
  stop(){this.running=false;cancelAnimationFrame(this.raf);this.raf=null;}
  animate(now){
@@ -155,7 +155,8 @@ export class MemorialScene{
   const canvasBox=this.canvas.getBoundingClientRect(),root=this.canvas.closest('#result');
   const excluded=[...root?.querySelectorAll('.result-copy h1,#result-message,.result-copy dl,.result-copy h2,.result-rank,.result-honour,#result-history-note,.result-actions')??[]]
    .filter(node=>node.getClientRects().length).map(node=>{const r=node.getBoundingClientRect();return {left:r.left-canvasBox.left-5,right:r.right-canvasBox.left+5,top:r.top-canvasBox.top-4,bottom:r.bottom-canvasBox.top+4};});
-  this.hitAreas=layoutMemorialGraves(this.graves,{width:w,height:h,art:this.art,excluded});
+  const layoutKey=JSON.stringify([w,h,ox,oy,iw,ih,excluded]);
+  if(this.layoutKey!==layoutKey){this.hitAreas=layoutMemorialGraves(this.graves,{width:w,height:h,art:this.art,excluded});this.layoutKey=layoutKey;}
   this.windPlots=this.hitAreas.filter(g=>g.size>=35).sort((a,b)=>b.size-a.size).slice(0,24);
   for(const g of this.hitAreas){shadow(ctx,g);this.drawGrave(ctx,g);}
   this.draw();
