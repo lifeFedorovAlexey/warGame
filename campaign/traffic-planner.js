@@ -1,5 +1,5 @@
 import {trafficCollisionRequired} from './vehicle-collision.js';
-import {UnitSpatialIndex} from './unit-spatial-index.js';
+import {createTrafficBuffer,captureTrafficState} from './traffic-snapshot.js';
 import {recoverWaitCycle} from './traffic-cycle.js';
 import {invalidateTrafficCorridors} from './traffic-corridor.js';
 import {checkManeuverSteps} from './vehicle-motion.js';
@@ -67,7 +67,7 @@ function* passageStillClear(mission,job,deadline){
 // ticks never drain this queue. Only the dispatcher publishes a finished patch
 // at a tick boundary, after checking all bodies in the inspected region.
 export class TrafficPlanner{
- constructor(){this.queued=new Map();this.failures=new Map();this.active=null;this.ready=[];this.navPool=[];this.sequence=0;
+ constructor(){this.queued=new Map();this.failures=new Map();this.active=null;this.ready=[];this.navPool=[];this.snapshotPool=[];this.sequence=0;
   this.stats={started:0,applied:0,failed:0,discarded:0,revalidated:0,slices:0,maxSliceMs:0,maxSnapshotMs:0,maxPublishMs:0,
    snapshotMs:0,searchMs:0,revalidationMs:0,publishMs:0,maxNextMs:0,maxSearchNextMs:0,maxRevalidationNextMs:0,
    negativeCacheHits:0,maxQueueWaitMs:0,maxServiceGapMs:0,maxJobAge:0,cancellations:{},cacheInvalidations:{},outcomes:{}};}
@@ -116,6 +116,8 @@ export class TrafficPlanner{
  dispose(job){
   job.iterator?.return();job.validation?.return();
   if(job.shadow?.nav){this.navPool.push(job.shadow.nav);if(this.navPool.length>4)this.navPool.shift();}
+  if(job.buffer){if(this.snapshotPool.length<4)this.snapshotPool.push(job.buffer);job.buffer=null;}
+  job.shadow=null;
  }
  discard(mission,job,reason,details={}){
   this.dispose(job);this.stats.discarded++;this.stats.outcomes.STALE=(this.stats.outcomes.STALE??0)+1;
@@ -185,12 +187,13 @@ export class TrafficPlanner{
   const started=performance.now();
   const pooled=this.navPool.findIndex(nav=>nav.baseNavigator===mission.nav);
   const nav=pooled<0?mission.nav.createSearchContext():this.navPool.splice(pooled,1)[0];
-  const shadow=Object.create(mission),state=structuredClone(mission.state);nav.refreshContext();
-  const unitIndex=new UnitSpatialIndex();unitIndex.rebuild(state.units);
+  const buffer=job.buffer=this.snapshotPool.pop()??createTrafficBuffer();
+  const shadow=Object.create(mission),state=captureTrafficState(mission,buffer);nav.refreshContext();
+  const unitIndex=buffer.unitIndex;
   const coordinator=Object.create(mission.trafficCoordinator);
   for(const key of ['decisions','intents','passageDecisions','queues','groups','statistics'])coordinator[key]=structuredClone(mission.trafficCoordinator[key]);
-  coordinator.updatedState=state;coordinator.updatedAt=state.time;coordinator.planner=null;
-  Object.assign(shadow,{state,nav,unitIndex,unitIndexActive:true,trafficCoordinator:coordinator,pendingTick:null,
+  coordinator.updatedState=state;coordinator.updatedAt=state.time;coordinator.planner=null;coordinator.liveMission=shadow;
+  Object.assign(shadow,{state,nav,unitIndex,visible:buffer.visible,unitIndexActive:true,trafficCoordinator:coordinator,pendingTick:null,
    commandPlanner:null,events:[],effects:[],finishPendingStep:()=>{},navigationDiagnostics:structuredClone(mission.navigationDiagnostics)});
   job.region={left:Infinity,right:-Infinity,bottom:Infinity,top:-Infinity};job.blockers=new Set();
   const observe=(point,radius)=>{

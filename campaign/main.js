@@ -1,3 +1,4 @@
+import {perf} from './performance.js';
 import {setButtonIcon, speedIcon} from '../assets/ui/icons.js';
 import {createCampaignWorld} from './world.js';
 import {Mission} from './mission.js';
@@ -40,7 +41,7 @@ let pausedBeforeDesigner = false;
 let buildOpen = false, buildKind = null, rotation = 0, orderMode = null;
 let snapBuildings = true, freePlacement = false;
 let pointer = null, drag = null, site = null, placing = null;
-let last = performance.now(), lastUi = 0, toastUntil = 0;
+let last = performance.now(), lastUi = 0, toastUntil = 0,uiPending=false;
 let actionKey = '', rosterKey = '', paletteKey = '', taskKey = '', queueKey = '';
 let blockedOrders = new Set(), blockedUntil = 0;
 let lastCommandRevision=null,lastCommandFeedback='';
@@ -685,14 +686,19 @@ function updatePalette() {
     return b;
   }));
 }
+let rosterColumns=6;
+const rosterObserver=new ResizeObserver(()=>{
+  const roster=$('roster'),style=getComputedStyle(roster),tileWidth=roster.firstElementChild?.offsetWidth||parseFloat(style.gridTemplateColumns)||40;
+  const gap=parseFloat(style.columnGap)||0;
+  rosterColumns=Math.max(1,Math.min(6,Math.floor((roster.clientWidth+gap)/(tileWidth+gap))));
+});
+rosterObserver.observe($('roster'));
 function updateRoster() {
   const units=vehicles(),roster=$('roster');
   const army=armySelectionIds(mission),armyButton=$('select-army');
   armyButton.disabled=!army.length;
   armyButton.setAttribute('aria-pressed',String(army.length>0&&selected.size===army.length&&army.every(id=>selected.has(id))));
-  const tileWidth=roster.firstElementChild?.offsetWidth||40;
-  const gap=parseFloat(getComputedStyle(roster).columnGap)||0;
-  const columns=Math.max(1,Math.min(6,Math.floor((roster.clientWidth+gap)/(tileWidth+gap))));
+  const columns=rosterColumns;
   const groups=new Map(),types=new Map();
   const stack=units.length>columns;
   const counts={};
@@ -837,10 +843,12 @@ function updateContext(first) {
     queue.querySelector('progress').value=flow.progress;
   }
 }
+let radioBottom=42;
 function positionFieldTasks(){
-  $('field-tasks').style.top=($('radio').hidden?54:$('radio').offsetTop+$('radio').offsetHeight+12)+'px';
+  $('field-tasks').style.top=($('radio').hidden?54:radioBottom+12)+'px';
 }
-function updateUi() {
+function updateUi(){uiPending=true;}
+function flushUi() {
   if (!active) return;
   if(performance.now()>=blockedUntil){blockedOrders.clear();$('order-feedback').hidden=true;}
   const s = mission.state;
@@ -979,7 +987,10 @@ function frame(now) {
     sound.update();
     return;
   }
+  perf?.begin(now);
   const frameWorkStarted=performance.now();
+  // Preserve the original input order: advance camera controls in world.update
+  // AFTER simulation. This read reuses the previous render's visibility cache.
   world.updateTrafficVisibility(mission);
   if (active || openingPlaying) {
     if (!paused) mission.advance(dt * speed,{budgetMs:mission.config.simulationCpuBudgetMs,rate:speed});
@@ -1010,6 +1021,7 @@ function frame(now) {
       updateUi();
       commandFeedback();
     }
+    if(uiPending){uiPending=false;flushUi();}
     if (mission.state.status !== 'running' && !resultShown) {
       resultShown = true;
       const victory=mission.state.status==='victory';
@@ -1021,6 +1033,7 @@ function frame(now) {
   }
   if (now >= toastUntil) $('toast').hidden = true;
   const frameFinished=performance.now();
+  perf?.end(world);
   navigationTelemetry?.frameWork({simulationAndEvents:renderStarted-frameWorkStarted,render:debugStarted-renderStarted,
    diagnostics:uiStarted-debugStarted,ui:frameFinished-uiStarted,total:frameFinished-frameWorkStarted});
 }
@@ -1041,6 +1054,19 @@ try {
   navigationTelemetry=installNavigationTelemetry(mission,()=>({active,paused,speed,openingPlaying,
    camera:{x:Math.round(world.controls.target.x),y:Math.round(world.controls.target.y),distance:Math.round(world.camera.position.distanceTo(world.controls.target))},
    designerVisible:!!designer?.visible,renderSuspended:!!window.campaign?.renderSuspended,selected:[...selected],renderer:{programs:world.renderer.info.programs.length,...world.shaderPreparation}}));
+  if(perf){
+    perf.wrap(mission,'advance','simulation');perf.wrap(mission,'updateFog','visibility');
+    perf.wrap(world,'update','world');perf.wrap(world.renderer,'render','render');
+    const instrumentPlanning=()=>{
+      perf.wrap(mission.trafficCoordinator,'advancePlanning','traffic planning');
+      perf.wrap(mission.trafficCoordinator.planner,'snapshot','snapshot');
+    };
+    instrumentPlanning();
+    const load=mission.load;mission.load=function(...args){const result=load.apply(this,args);instrumentPlanning();return result;};
+    if(navigationTelemetry)perf.wrap(navigationTelemetry,'rendered','telemetry');
+    perf.wrap(minimapView,'render','minimap');
+    const originalUi=flushUi;flushUi=(...args)=>perf.measure('ui',()=>originalUi(...args));
+  }
   world.damage.bindMission(mission);
   await mainMenu.loading.stage('graphics');
   await world.prepareRendering?.(mission);
@@ -1075,7 +1101,10 @@ try {
     onFocus:focusSignal,
   });
   sound.configureStoryVoices(story,mission,()=>!!radio.entry);
-  new ResizeObserver(positionFieldTasks).observe($('radio'));
+  const cacheRadioPosition=()=>{radioBottom=Math.max($('radio').getBoundingClientRect().bottom,radio.portrait.hidden?0:radio.portrait.getBoundingClientRect().bottom);positionFieldTasks();uiPending=true;};
+  new ResizeObserver(cacheRadioPosition).observe($('radio'));
+  new ResizeObserver(cacheRadioPosition).observe(radio.portrait);
+  window.addEventListener('resize',cacheRadioPosition,{passive:true});
   window.campaign = {
     ready: true, mission, world, select, radio,
     get drivingAudio() { return {running:sound.ready(), recordings:!!sound.recordings}; },

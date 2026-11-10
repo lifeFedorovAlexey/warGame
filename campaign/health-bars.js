@@ -1,12 +1,16 @@
 import {buildLayerHeight} from './builder-optics.js';
 import {SCAV_PROFILES} from './scav-unit-profiles.js';
+const poseComponents=[8,9,10,12,13,14];
 
 // Render health in the same WebGL frame as the map. A separate DOM canvas can
 // be composited against an older map frame while the camera is moving.
 export function createHealthBars(T,scene,field,config,transforms,buildings){
  const geometry=new T.InstancedBufferGeometry();
  geometry.setAttribute('position',new T.Float32BufferAttribute([0,0,0,1,0,0,0,1,0,0,1,0,1,0,0,1,1,0],3));
- let capacity=0,rects,values;
+ let capacity=0,rects,values,previousEnabled=null,lastCount=-1;
+ const cameraElements=new Float64Array(16),projectionElements=new Float64Array(16),inputs=new WeakMap();
+ let lastWidth=0,lastHeight=0,lastRelevant=-1;
+ const candidates=[],candidateOrder=[];
  const viewport=new T.Vector2(),point=new T.Vector3(),ground=new T.Vector3();
  const material=new T.RawShaderMaterial({
   uniforms:{viewport:{value:viewport}},depthTest:false,depthWrite:false,transparent:true,toneMapped:false,side:T.DoubleSide,
@@ -50,16 +54,39 @@ export function createHealthBars(T,scene,field,config,transforms,buildings){
  });
  const root=new T.Mesh(geometry,material);root.name='unit_health_bars';root.frustumCulled=false;root.renderOrder=10000;root.visible=false;scene.add(root);
  function update(mission,selected,camera,width,height,enabled=true){
-  const entities=[...mission.state.units,...mission.state.buildings];
-  if(entities.length>capacity){
+  const units=mission.state.units,structures=mission.state.buildings,total=units.length+structures.length;
+  let changed=enabled!==previousEnabled||total!==lastCount||width!==lastWidth||height!==lastHeight;
+  previousEnabled=enabled;lastCount=total;lastWidth=width;lastHeight=height;
+  for(let i=0;i<16;i++){
+   if(cameraElements[i]!==camera.matrixWorldInverse.elements[i]||projectionElements[i]!==camera.projectionMatrix.elements[i])changed=true;
+   cameraElements[i]=camera.matrixWorldInverse.elements[i];projectionElements[i]=camera.projectionMatrix.elements[i];
+  }
+  candidates.length=0;
+  if(enabled)for(let i=0;i<total;i++){
+   const e=i<units.length?units[i]:structures[i-units.length],chosen=selected.has(e.id);
+   if(e.hp<=0||e.hp===e.maxHp&&!chosen&&e.completed!==false||config.buildings[e.kind]?.storyOnly||e.factoryVisit?.phase==='inside')continue;
+   const visible=e.owner==='rai'||mission.visibleAt(e.x,e.y);if(!visible)continue;
+   const pose=transforms.get(e.id);if(config.units[e.kind]&&!pose)continue;
+   if(candidateOrder[candidates.length]!==e)changed=true;
+   candidateOrder[candidates.length]=e;candidates.push(e);const m=pose?.matrix.elements;
+   let saved=inputs.get(e);if(!saved){saved={};inputs.set(e,saved);changed=true;}
+   const inside=false;
+   if(saved.kind!==e.kind||saved.owner!==e.owner||saved.hp!==e.hp||saved.maxHp!==e.maxHp||saved.chosen!==chosen||saved.visible!==visible||saved.inside!==inside||saved.progress!==e.progress||saved.completed!==e.completed||saved.x!==e.x||saved.y!==e.y||saved.z!==e.groundHeight)changed=true;
+   saved.kind=e.kind;saved.owner=e.owner;saved.hp=e.hp;saved.maxHp=e.maxHp;saved.chosen=chosen;saved.visible=visible;saved.inside=inside;saved.progress=e.progress;saved.completed=e.completed;saved.x=e.x;saved.y=e.y;saved.z=e.groundHeight;
+   for(const j of poseComponents){if(saved[j]!==m?.[j])changed=true;saved[j]=m?.[j];}
+  }
+  if(candidates.length!==lastRelevant)changed=true;lastRelevant=candidates.length;candidateOrder.length=lastRelevant;
+  if(!changed)return;
+  if(total>capacity){
    if(capacity)geometry.dispose();
-   capacity=Math.max(64,2**Math.ceil(Math.log2(entities.length)));
+   capacity=Math.max(64,2**Math.ceil(Math.log2(total)));
    rects=new T.InstancedBufferAttribute(new Float32Array(capacity*4),4).setUsage(T.DynamicDrawUsage);
    values=new T.InstancedBufferAttribute(new Float32Array(capacity*4),4).setUsage(T.DynamicDrawUsage);
    geometry.setAttribute('barRect',rects);geometry.setAttribute('barValues',values);
   }
   viewport.set(width,height);let count=0;
-  if(enabled)for(const entity of entities){
+  let rectChanged=false,valueChanged=false;
+  if(enabled)for(const entity of candidates){
    const spec=config.buildings[entity.kind],unit=config.units[entity.kind];
    if(entity.factoryVisit?.phase==='inside'||spec?.storyOnly||entity.hp<=0||entity.owner!=='rai'&&!mission.visibleAt(entity.x,entity.y))continue;
    if(entity.hp===entity.maxHp&&!selected.has(entity.id)&&entity.completed!==false)continue;
@@ -78,11 +105,13 @@ export function createHealthBars(T,scene,field,config,transforms,buildings){
    const visibleHeight=Math.hypot((point.x-ground.x)*width/2,(point.y-ground.y)*height/2);
    if(point.z<=-1||point.z>=1||visibleHeight<6||x<0||x>width||y<45||y>height)continue;
    const w=Math.round(Math.max(27,Math.min(53,visibleHeight*1.75))),h=visibleHeight>16?7:6;
-   rects.setXYZW(count,Math.round(x-w/2),Math.round(y-h-3),w,h);
-   values.setXYZW(count,Math.max(0,Math.min(1,entity.hp/entity.maxHp)),entity.maxHp,Number(entity.owner!=='rai'),entity.completed===false?entity.progress:-1);count++;
+   const rx=Math.round(x-w/2),ry=Math.round(y-h-3),ratio=Math.fround(Math.max(0,Math.min(1,entity.hp/entity.maxHp))),hostile=Number(entity.owner!=='rai'),progress=entity.completed===false?Math.fround(entity.progress):-1;
+   if(rects.getX(count)!==rx||rects.getY(count)!==ry||rects.getZ(count)!==w||rects.getW(count)!==h){rects.setXYZW(count,rx,ry,w,h);rectChanged=true;}
+   if(values.getX(count)!==ratio||values.getY(count)!==entity.maxHp||values.getZ(count)!==hostile||values.getW(count)!==progress){values.setXYZW(count,ratio,entity.maxHp,hostile,progress);valueChanged=true;}
+   count++;
   }
   geometry.instanceCount=count;root.visible=count>0;
-  if(count){rects.needsUpdate=true;values.needsUpdate=true;}
+  if(count){if(rectChanged)rects.needsUpdate=true;if(valueChanged)values.needsUpdate=true;}
  }
  return {update,root};
 }

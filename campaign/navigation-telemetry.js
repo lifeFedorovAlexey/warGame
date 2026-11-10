@@ -8,7 +8,7 @@ const endpoint='http://127.0.0.1:8767/navigation';
 const round=value=>Number.isFinite(value)?Math.round(value*1000)/1000:null;
 const point=p=>p&&{x:round(p.x),y:round(p.y)};
 export function installNavigationTelemetry(mission,context){
- if(!['127.0.0.1','localhost'].includes(location.hostname))return null;
+ if(!new URLSearchParams(location.search).has('navigationTelemetry')||!['127.0.0.1','localhost'].includes(location.hostname))return null;
  const session=crypto.randomUUID(),queue=[],started=performance.now();
  let sequence=0,busy=false,dropped=0,lastSample=started,lastIssue=-Infinity,lastState='',lastSim=mission.state.time;
  let maximumAdvance=0,maximumTick=0,tickCpu=0,maximumFrameGap=0,lastFrame=started,observer;
