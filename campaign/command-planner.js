@@ -25,7 +25,7 @@ const travel=new Set(['move','attack-move','attack']);
 const pendingCommand=unit=>unit?.proposedOrder??unit?.pendingOrder;
 const ownsPending=(unit,revision)=>pendingCommand(unit)?.revision===revision;
 const plannedFields=['path','task','routeOrder','detour','traffic','trafficHold','driveWatch','reverseDebt','failedArcs','workEscapeRetryAt',
- 'passage','passingLane','factoryVisit','combatRetreat','combatDeployment','combatGroup','combatContactAt','combatResume','combatArrivalBlockedAt',
+ 'passage','passingLane','factoryVisit','combatRetreat','retreatPush','combatDeployment','combatGroup','combatContactAt','combatResume','combatArrivalBlockedAt',
  'combatArrivalGoal','combatParking','combatDisengage','retreatSuppressed','mergeTraffic','yieldReturn','resumeConstructionId','terrainEscape'];
 function coupledStarts(mission,units,target){
  const range=mission.config.worldScale*7,buckets=new Map(),eligible=units.filter(u=>!isInfantry(u)&&(u.driveSpeed??0)<=.1&&!(u.tool>0)&&!(u.foldTime>0)

@@ -1,0 +1,414 @@
+{
+  "issue": "WG-057",
+  "status": "На проверке владельца",
+  "targetedChecks": [
+    {
+      "case": "nearest free edge, persistent side, blocked-side alternative and attack centre",
+      "first": {
+        "x": 30.2470864436175,
+        "y": -8,
+        "ux": 0,
+        "uy": -1,
+        "path": "road",
+        "direction": -1,
+        "progress": -1955,
+        "retreatShoulder": true,
+        "retreatSide": -1
+      },
+      "alternative": {
+        "x": -30.2470864436175,
+        "y": -8,
+        "ux": 0,
+        "uy": -1,
+        "path": "road",
+        "direction": -1,
+        "progress": -1955,
+        "retreatShoulder": true,
+        "retreatSide": 1
+      }
+    },
+    {
+      "case": "public two-sided retreat and central advance, 16 simulation seconds",
+      "last": {
+        "time": 15.99999999999996,
+        "units": [
+          {
+            "id": "u182",
+            "x": -30.244908739182677,
+            "y": -214.03961603791015,
+            "speed": 22.5,
+            "side": 1,
+            "reason": "following-route",
+            "lane": {
+              "x": -30.2470864436175,
+              "y": -277.03961603791004,
+              "ux": 0,
+              "uy": -1,
+              "path": "road",
+              "direction": -1,
+              "progress": -1685.96038396209,
+              "retreatShoulder": true,
+              "retreatSide": 1
+            },
+            "intent": {
+              "point": {
+                "x": -8,
+                "y": -456
+              },
+              "waypoint": {
+                "x": -30.2470864436175,
+                "y": -274.78961604025744,
+                "ux": 0,
+                "uy": -1,
+                "path": "road",
+                "direction": -1,
+                "progress": -1688.2103839597426,
+                "retreatShoulder": true,
+                "retreatSide": 1
+              },
+              "roadLane": {
+                "x": -30.2470864436175,
+                "y": -274.78961604025744,
+                "ux": 0,
+                "uy": -1,
+                "path": "road",
+                "direction": -1,
+                "progress": -1688.2103839597426,
+                "retreatShoulder": true,
+                "retreatSide": 1
+              },
+              "trafficLimit": 22.5,
+              "course": {
+                "x": -3.619792135206646e-05,
+                "y": -0.9999999993448554
+              }
+            },
+            "path": [
+              {
+                "x": -8,
+                "y": -456
+              },
+              {
+                "x": -80,
+                "y": -536
+              }
+            ]
+          },
+          {
+            "id": "u183",
+            "x": 30.244908739182677,
+            "y": -214.03961603791015,
+            "speed": 22.5,
+            "side": -1,
+            "reason": "following-route",
+            "lane": {
+              "x": 30.2470864436175,
+              "y": -277.03961603791004,
+              "ux": 0,
+              "uy": -1,
+              "path": "road",
+              "direction": -1,
+              "progress": -1685.96038396209,
+              "retreatShoulder": true,
+              "retreatSide": -1
+            },
+            "intent": {
+              "point": {
+                "x": 8,
+                "y": -456
+              },
+              "waypoint": {
+                "x": 30.2470864436175,
+                "y": -274.78961604025744,
+                "ux": 0,
+                "uy": -1,
+                "path": "road",
+                "direction": -1,
+                "progress": -1688.2103839597426,
+                "retreatShoulder": true,
+                "retreatSide": -1
+              },
+              "roadLane": {
+                "x": 30.2470864436175,
+                "y": -274.78961604025744,
+                "ux": 0,
+                "uy": -1,
+                "path": "road",
+                "direction": -1,
+                "progress": -1688.2103839597426,
+                "retreatShoulder": true,
+                "retreatSide": -1
+              },
+              "trafficLimit": 22.5,
+              "course": {
+                "x": 3.619792135206646e-05,
+                "y": -0.9999999993448554
+              }
+            },
+            "path": [
+              {
+                "x": 8,
+                "y": -456
+              },
+              {
+                "x": 80,
+                "y": -536
+              }
+            ]
+          },
+          {
+            "id": "u184",
+            "x": 0,
+            "y": 472.2529055757735,
+            "speed": 37.847706800541786,
+            "reason": "following-route",
+            "lane": null,
+            "intent": {
+              "point": {
+                "x": 0,
+                "y": 500
+              },
+              "waypoint": {
+                "x": 0,
+                "y": 500
+              },
+              "roadLane": null,
+              "passingLane": null,
+              "trafficLimit": null,
+              "yieldTo": null,
+              "course": {
+                "x": 0,
+                "y": 1
+              }
+            },
+            "path": [
+              {
+                "x": 0,
+                "y": 500
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "case": "contact opens a short right-of-way until passage; saved and released"
+    }
+  ],
+  "browser": {
+    "scene": "20 native M02 opposing vehicles, combat enabled, 20 simulation seconds",
+    "movement": [
+      {
+        "id": "u358",
+        "alive": true,
+        "retreat": true,
+        "side": -1,
+        "distance": 329.21451237219435,
+        "wait": 0,
+        "reason": "following-route"
+      },
+      {
+        "id": "u359",
+        "alive": false,
+        "retreat": true,
+        "side": -1,
+        "distance": 175.82774823596006,
+        "wait": 0,
+        "reason": "following-route"
+      },
+      {
+        "id": "u360",
+        "alive": true,
+        "retreat": true,
+        "side": -1,
+        "distance": 140.5213784316385,
+        "wait": 0.10000000000000142,
+        "reason": "local-traffic"
+      },
+      {
+        "id": "u361",
+        "alive": true,
+        "retreat": true,
+        "side": -1,
+        "distance": 359.01797626436905,
+        "wait": 0,
+        "reason": "following-route"
+      },
+      {
+        "id": "u362",
+        "alive": true,
+        "retreat": true,
+        "side": 1,
+        "distance": 378.5085014801834,
+        "wait": 0,
+        "reason": "following-route"
+      },
+      {
+        "id": "u363",
+        "alive": true,
+        "retreat": true,
+        "side": -1,
+        "distance": 348.77932686121136,
+        "wait": 0,
+        "reason": "following-route"
+      },
+      {
+        "id": "u364",
+        "alive": true,
+        "retreat": true,
+        "side": 1,
+        "distance": 358.3360248441874,
+        "wait": 0,
+        "reason": "following-route"
+      },
+      {
+        "id": "u365",
+        "alive": true,
+        "retreat": true,
+        "side": -1,
+        "distance": 371.2031876745605,
+        "wait": 0,
+        "reason": "following-route"
+      },
+      {
+        "id": "u366",
+        "alive": true,
+        "retreat": true,
+        "side": 1,
+        "distance": 312.77505199581196,
+        "wait": 0,
+        "reason": "following-route"
+      },
+      {
+        "id": "u367",
+        "alive": true,
+        "retreat": true,
+        "side": -1,
+        "distance": 341.71603897249935,
+        "wait": 0,
+        "reason": "following-route"
+      },
+      {
+        "id": "u368",
+        "alive": true,
+        "retreat": true,
+        "side": -1,
+        "distance": 57.14902954123651,
+        "wait": 0,
+        "reason": "following-route"
+      },
+      {
+        "id": "u369",
+        "alive": true,
+        "retreat": true,
+        "side": 1,
+        "distance": 193.12733165422577,
+        "wait": 0,
+        "reason": "following-route"
+      },
+      {
+        "id": "u370",
+        "alive": true,
+        "retreat": false,
+        "distance": 229.55643694892632,
+        "wait": 0,
+        "reason": "following-route"
+      },
+      {
+        "id": "u371",
+        "alive": true,
+        "retreat": false,
+        "distance": 90.16045589615527,
+        "wait": 0,
+        "reason": "following-route"
+      },
+      {
+        "id": "u372",
+        "alive": true,
+        "retreat": false,
+        "distance": 199.6528667194507,
+        "wait": 0.20000000000000284,
+        "reason": "local-traffic"
+      },
+      {
+        "id": "u373",
+        "alive": true,
+        "retreat": false,
+        "distance": 265.7138604857333,
+        "wait": 0,
+        "reason": "following-route"
+      },
+      {
+        "id": "u374",
+        "alive": true,
+        "retreat": false,
+        "distance": 267.5431907194481,
+        "wait": 0,
+        "reason": "following-route"
+      },
+      {
+        "id": "u375",
+        "alive": true,
+        "retreat": false,
+        "distance": 31.817131229450837,
+        "wait": 0,
+        "reason": "following-route"
+      },
+      {
+        "id": "u376",
+        "alive": true,
+        "retreat": false,
+        "distance": 264.547687641842,
+        "wait": 0,
+        "reason": "following-route"
+      },
+      {
+        "id": "u377",
+        "alive": true,
+        "retreat": false,
+        "distance": 199.1540059203067,
+        "wait": 0,
+        "reason": "following-route"
+      }
+    ],
+    "errors": [],
+    "contactYieldSamples": 156,
+    "reportCorrection": "A vehicle destroyed during combat uses its last living position, rather than fabricated zero displacement.",
+    "initialReportFailure": "AssertionError [ERR_ASSERTION]: Every member of this opposing-flow scene must make physical progress\n    at file:///D:/warGame/tools/check-wg057-browser.mjs:32:39",
+    "performance": {
+      "frameMs": {
+        "count": 1729,
+        "p50": 16.69999998807907,
+        "p95": 16.899999976158142,
+        "p99": 18.30000001192093,
+        "max": 36.10000002384186,
+        "total": 28834
+      },
+      "cpuMs": {
+        "count": 1730,
+        "p50": 11.399999976158142,
+        "p95": 15,
+        "p99": 17.899999976158142,
+        "max": 35.60000002384186,
+        "total": 19658.800000190735
+      },
+      "over33": 1,
+      "over50": 0
+    },
+    "screens": [
+      [
+        1440,
+        900
+      ],
+      [
+        844,
+        390
+      ],
+      [
+        667,
+        375
+      ]
+    ]
+  },
+  "scope": "Focused flow checks only, per owner instruction; no repeat of the full regression suite."
+}

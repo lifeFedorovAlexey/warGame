@@ -10,9 +10,12 @@ const cached = new WeakMap();
 export const collisionStatistics={queries:0,axisSeparated:0,penetrationQueries:0,poseGapCacheHits:0,radiusSeparated:0};
 const exactPoseGaps=new WeakMap(),solidEnvelopes=new WeakMap();
 const skin = .055;
+// Owner-requested close-passing tolerance for every vehicle assembly.
+// Rendering keeps the full model size; people keep their existing footprint.
+export const VEHICLE_COLLISION_SCALE = .9;
 export const vehicleLocalBoxes = kind => SCAV_PROFILES[kind]?.boxes ?? (kind === 'command' || kind === 'raider' ? fieldCar : modular);
 // XY extrema measured from the rendered LOD0 chassis/body meshes, before the
-// instance scale. Turret aim, suspension animation and damage do not resize traffic.
+// instance scale and the common collision reduction below.
 const modelBounds={
  modular:[-1.161099911,-2.410000086,1.161099911,2.394432306],
  command:[-.94,-2.255500078,.94,2.108999968],raider:[-.94,-2.095000029,.94,2.108999968],
@@ -27,7 +30,8 @@ function localFootprint(kind){
  const ellipse=!SCAV_PROFILES[kind]?.infantry;
  if(!ellipse){const boxes=vehicleLocalBoxes(kind);bounds=[-Math.max(...boxes.map(b=>b[0])),Math.min(...boxes.map(b=>b[1]-b[2])),Math.max(...boxes.map(b=>b[0])),Math.max(...boxes.map(b=>b[1]+b[2]))];}
  const factor=vehicleSizeScale(kind),[left,back,right,front]=bounds;
- result={ellipse,x:(left+right)*factor/2,y:(back+front)*factor/2,width:(right-left)*factor/2,depth:(front-back)*factor/2};
+ const collisionScale=ellipse?VEHICLE_COLLISION_SCALE:1;
+ result={ellipse,x:(left+right)*factor/2,y:(back+front)*factor/2,width:(right-left)*factor/2*collisionScale,depth:(front-back)*factor/2*collisionScale};
  dimensions.set(kind,result);return result;
 }
 export function vehicleRadiusBound(kind,scale){
