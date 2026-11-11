@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {createStabilityGraph} from '../campaign/stability-graph.js';
+const text=[],bars=[];
+const ctx={setTransform(){},clearRect(){},strokeText(){},fillText(value){text.push(value);},setLineDash(){},beginPath(){},moveTo(){},lineTo(){},stroke(){},fillRect(...args){bars.push(args);}};
+let canvas;
+globalThis.window={devicePixelRatio:1};
+globalThis.document={body:{append(c){canvas=c;}},createElement(){return {style:{},setAttribute(){},getContext(){return ctx;},getBoundingClientRect(){return {width:220,height:76};}};}};
+const graph=createStabilityGraph();
+graph.sample(1000);assert.equal(canvas,undefined,'Disabled graph must not create a canvas');
+assert.equal(graph.toggle(),true);graph.sample(1000);graph.sample(1016.6667);
+assert.match(text.at(-1),/^60 FPS\s+·\s+16\.7 мс$/);assert(bars.length>0);
+graph.sample(1300);assert.match(text.at(-1),/^4 FPS\s+·\s+283\.3 мс$/);
+const paints=text.length;assert.equal(graph.toggle(),false);assert.equal(canvas.hidden,true);
+graph.sample(5000);graph.sample(5500);assert.equal(text.length,paints,'Hidden graph must not draw');
+graph.toggle();graph.sample(6000);graph.sample(6016.6667);
+assert.match(text.at(-1),/^60 FPS\s+·\s+16\.7 мс$/,'Reopening resets frame timing');
+console.log('PASS: frame intervals, long frames, disabled mode and reopening');

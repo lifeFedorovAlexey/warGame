@@ -1,6 +1,7 @@
 import {missionResults,campaignMemorial,setPersonnelRank} from './personnel.js';
 import {MissionResultsView,resultsPresentationReady} from './mission-results.js';
 import {perf} from './performance.js';
+import {createStabilityGraph} from './stability-graph.js';
 import {setButtonIcon, speedIcon} from '../assets/ui/icons.js';
 import {createCampaignWorld} from './world.js';
 import {Mission} from './mission.js';
@@ -30,6 +31,7 @@ import {oilPowerStatus,oilReserved,oilFundingRemaining,oilOrderProgress} from '.
 import {installNavigationTelemetry} from './navigation-telemetry.js';
 
 const $ = id => document.getElementById(id);
+const stabilityGraph=createStabilityGraph();
 const saveKey = 'warGame.alpha.mission01.v1';
 const dataUrl = '../assets/campaign/alpha/mission01/gameplay.json';
 const selected = new Set();
@@ -633,6 +635,7 @@ function installInput() {
       return;
     }
     if(event.ctrlKey||event.metaKey||event.altKey)return;
+    if(code==='F7'){event.preventDefault();if(!event.repeat)stabilityGraph.toggle();return;}
     if(code==='F2'){event.preventDefault();if(!event.repeat)selectArmy();return;}
     if(code==='KeyG'&&!event.repeat){
       const first=selection().find(liveMobile),group=first&&mission.state.commandGroups?.find(g=>g.id===first.commandGroupId);
@@ -994,6 +997,7 @@ function frame(now) {
     sound.update();
     return;
   }
+  stabilityGraph.sample(now);
   perf?.begin(now);
   const frameWorkStarted=performance.now();
   // Preserve the original input order: advance camera controls in world.update
