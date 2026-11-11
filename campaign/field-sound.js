@@ -1,4 +1,5 @@
 import {setButtonIcon} from '../assets/ui/icons.js';
+import {twinBarrelDelay} from './mg-burst.js';
 const clampLevel = value => Number.isFinite(value) ? Math.max(0, Math.min(1, value)) : 0;
 
 // Dry sand movement and short irregular scanning passes, generated once
@@ -562,13 +563,13 @@ export class FieldSound {
     source.stop(now + duration + .01);
   }
 
-  playCombat(kind, level, pan) {
+  playCombat(kind, level, pan, {delay=0,rate}={}) {
     const clip = this.combatClips.get(kind);
     if (!clip || this.combatVoices.size >= combatVoiceLimit) return;
     const ctx = this.context, source = ctx.createBufferSource();
     const gain = ctx.createGain(), stereo = ctx.createStereoPanner();
     source.buffer = clip;
-    source.playbackRate.value = .96 + Math.random() * .08;
+    source.playbackRate.value = rate ?? .96 + Math.random() * .08;
     gain.gain.value = level;
     stereo.pan.value = Number.isFinite(pan) ? Math.max(-1, Math.min(1, pan)) : 0;
     source.connect(gain).connect(stereo).connect(this.combatOutput);
@@ -579,14 +580,21 @@ export class FieldSound {
       gain.disconnect();
       stereo.disconnect();
     };
-    source.start();
+    source.start(ctx.currentTime+delay);
   }
 
-  shot(weapon, level, pan) {
+  shot(weapon, level, pan, barrels=1) {
     if(weapon==='grenade')return;
     const kind = weapon === 'flame' ? 'flame' : 'mg';
     const volume = clampLevel(level);
     if (volume < .012 || !this.limit('shot-' + kind, .044)) return;
+    if(weapon==='mg'&&barrels===2){
+      // Reuse the three-round recording for each barrel, staggered with the
+      // visual pulses. Keep the combined energy near the single-gun level.
+      this.playCombat(kind,volume*.65,pan,{rate:1});
+      this.playCombat(kind,volume*.65,pan,{rate:1,delay:twinBarrelDelay});
+      return;
+    }
     this.playCombat(kind, volume * (kind === 'flame' ? .61 : weapon==='rifle'?.40:.92), pan);
   }
 
