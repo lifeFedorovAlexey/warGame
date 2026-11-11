@@ -34,7 +34,7 @@ resource.owner='rai';pulse();assert.equal(wall.hp,0);assert(resource.hp>0);
 // Complete an earned chain after victory without resuming combat/production.
 const finalWalls=Array.from({length:8},(_,i)=>m.addStructure('scav-fence','scavs',{x:-1800+i*30,y:-1900},{m02Base:sample,campId:base.id}));
 m.state.status='victory';const units=JSON.stringify(m.state.units),energy=m.state.energy;m.load(m.save());
-assert(hasPendingCampDemolition(m));m.drainEffects();m.advance(1);const blasts=m.drainEffects().filter(e=>e.type==='explosion');
+assert(hasPendingCampDemolition(m));m.drainEffects();m.advance(8);const blasts=m.drainEffects().filter(e=>e.type==='explosion');
 assert.equal(blasts.length,finalWalls.length);assert(!hasPendingCampDemolition(m));assert.equal(JSON.stringify(m.state.units),units);assert.equal(m.state.energy,energy);assert.equal(m.state.status,'victory');
 m.advance(1);assert.equal(m.drainEffects().length,0);
 fs.mkdirSync('campaign/previews/playtest-WG-026',{recursive:true});fs.writeFileSync('campaign/previews/playtest-WG-026/verification.json',JSON.stringify({results,totalSegments:results.reduce((s,r)=>s+r.segments,0),resourceCapturePreserved:true,victoryFinishesChain:true,noRepeatedBlasts:true},null,2));

@@ -1,0 +1,23 @@
+{
+  "army": 20,
+  "visits": [
+    {
+      "id": "east_factory",
+      "arrived": true,
+      "seconds": 158,
+      "maxDistance": 153.43920735496351
+    },
+    {
+      "id": "sensor_outpost",
+      "arrived": true,
+      "seconds": 60,
+      "maxDistance": 168.80247268808574
+    },
+    {
+      "id": "energy_hub",
+      "arrived": false,
+      "seconds": 600,
+      "maxDistance": 443.4412944477899
+    }
+  ]
+}

@@ -5,6 +5,7 @@ import {vehicleDynamics} from './vehicle-dynamics.js';
 import {CommandPlanner} from './command-planner.js';
 import {retreatReturnOrder} from './factory-repair.js';
 import {corridorBlocker,invalidateTrafficCorridors} from './traffic-corridor.js';
+import {needsModernization,modernizeAfterRepair} from './factory-modernization.js';
 
 export const insideFactory=u=>u.factoryVisit?.phase==='inside';
 export const factoryPriority=f=>f.workPriority??'repair';
@@ -22,7 +23,7 @@ export function setFactoryPriority(m,id,priority){
 function resetDrive(u){u.path=[];u.task=null;u.driveSpeed=0;for(const k of ['detour','yieldReturn','traffic','trafficHold','passingLane','driveWatch','routeOrder','routeContinuation','combatParking'])delete u[k];}
 function exitOwner(m,f){
  const visitors=factoryVisitors(m,f),current=visitors.find(u=>['leaving','departure'].includes(u.factoryVisit.phase));
- const ready=visitors.filter(u=>insideFactory(u)&&(u.hp>=u.maxHp||f.hp<=0)).sort((a,b)=>a.factoryVisit.arrived-b.factoryVisit.arrived);
+ const ready=visitors.filter(u=>insideFactory(u)&&(u.hp>=u.maxHp&&!needsModernization(m,f,u)||f.hp<=0)).sort((a,b)=>a.factoryVisit.arrived-b.factoryVisit.arrived);
  const owner=current??ready[0];f.garageExit=owner?.id;return owner;
 }
 function terrainSegmentClear(terrain,field,a,b){
@@ -194,6 +195,7 @@ export function* updateFactoryVisit(m,u,f,dt){
  const current=()=>u.hp>0&&u.factoryVisit===visit;
  if(f.id!==visit.factoryId){resetDrive(u);delete u.factoryVisit;return false;}
  if(!f.hp&&['approach','waiting','gate'].includes(visit.phase)){resetDrive(u);delete u.factoryVisit;return false;}
+ modernizeAfterRepair(m,f,u);
  const entering=factoryVisitors(m,f).find(other=>other.factoryVisit.phase==='entering');
  f.garageGate=entering?.id;
  const outgoing=exitOwner(m,f);

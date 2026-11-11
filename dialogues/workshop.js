@@ -1,5 +1,6 @@
 import {iconElement, setButtonIcon} from '../assets/ui/icons.js';
 import {mergeDrafts, sameDraft} from './draft-merge.js';
+import {DynamicWorkshop} from './dynamic-radio.js';
 
 const $ = selector => document.querySelector(selector);
 const state = {document:null, baseDocument:null, revision:0, serial:0, savedSerial:0, mode:'sequence', scene:null, query:'', history:[], saving:null, conflict:false};
@@ -39,6 +40,9 @@ function status(text, error = false) {
   $('#save-status').dataset.state = error ? 'error' : 'saved';
 }
 function showError(message) { $('#error').textContent = message; $('#error').hidden = !message; }
+const dynamic = new DynamicWorkshop({button,status,error:showError,openLegacy:id=>{
+  stop();state.mode='situation';state.scene=id;renderScenes();renderEditor();
+}});
 async function request(path, options = {}) {
   const response = await fetch(path, {...options, headers:{'X-Dialogue-Editor':'1', ...options.headers}});
   if (!response.ok) {
@@ -170,6 +174,11 @@ function matchingScenes() {
     })].join(' ').toLocaleLowerCase('ru').includes(query)));
 }
 function renderScenes() {
+  dynamic.setActive(state.mode==='dynamic');
+  if(state.mode==='dynamic'){
+    document.querySelectorAll('[data-mode]').forEach(link=>link.setAttribute('aria-current',link.dataset.mode==='dynamic'?'page':'false'));
+    dynamic.query=state.query;dynamic.renderList();return;
+  }
   const nav = $('#scenes'), scroll = nav.scrollTop; nav.replaceChildren();
   document.querySelectorAll('[data-mode]').forEach(link => link.setAttribute('aria-current', link.dataset.mode === state.mode ? 'page' : 'false'));
   $('#add-scene').hidden = state.mode === 'portraits' || state.mode === 'archive';
@@ -215,7 +224,10 @@ function moveScene(scene, direction) {
   });
 }
 function renderEditor() {
+  dynamic.setActive(state.mode==='dynamic');
+  if(state.mode==='dynamic'){dynamic.render();return;}
   const main = $('#editor'); main.replaceChildren();
+  main.classList.remove('dynamic-editor');
   if (!state.document) return;
   if (state.mode === 'portraits') {renderCharacters(main); return;}
   const scene = state.document.scenes.find(s => s.id === state.scene);
@@ -465,8 +477,9 @@ $('#save').title = 'Сохранить черновик · Ctrl+S';
 setIcon($('#export'),'download','Скачать слепок с записями и портретами');
 $('#game-link').append(iconElement('home'));
 setIcon($('#add-scene'),'plus','Добавить диалог');
-$('#save').onclick = () => flush().catch(() => {});
+$('#save').onclick = () => (state.mode==='dynamic'?dynamic.save():flush()).catch(() => {});
 $('#undo').onclick = () => {
+  if(state.mode==='dynamic'){dynamic.history();return;}
   if (uploadCount) {showError('Дождитесь загрузки файла, затем можно отменить изменение.'); return;}
   if (!state.history.length) return;
   stop(); state.document = state.history.pop(); $('#undo').disabled = !state.history.length;
@@ -474,6 +487,7 @@ $('#undo').onclick = () => {
   changed(); renderScenes(); renderEditor();
 };
 $('#export').onclick = async () => {
+  if(state.mode==='dynamic'){dynamic.export();return;}
   if (!state.document) return;
   const name = state.document.id + '-dialogues';
   try {
@@ -487,6 +501,7 @@ $('#export').onclick = async () => {
   } finally {$('#export').disabled = false;}
 };
 $('#add-scene').onclick = () => {
+  if(state.mode==='dynamic'){dynamic.newRule();return;}
   if (!state.document) return;
   stop(); mutate(() => {
     const scene = {id:'scene-' + crypto.randomUUID(),title:'Новый диалог',kind:state.mode,section:'Новые диалоги',trigger:'',notes:'',enabled:true,cues:[]};
@@ -500,11 +515,11 @@ document.querySelectorAll('[data-mode]').forEach(link => link.onclick = event =>
   renderScenes(); renderEditor();
 });
 window.addEventListener('keydown',event => {
-  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') {event.preventDefault(); flush().catch(() => {});}
-  if (event.key === 'Escape') stop();
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') {event.preventDefault(); (state.mode==='dynamic'?dynamic.save():flush()).catch(() => {});}
+  if (event.key === 'Escape') {stop();if(state.mode==='dynamic')dynamic.stopPlayback();}
 });
 window.addEventListener('beforeunload',event => {
-  if (state.savedSerial !== state.serial || uploadCount) {event.preventDefault(); event.returnValue = '';}
+  if (state.savedSerial !== state.serial || uploadCount || dynamic.dirty) {event.preventDefault(); event.returnValue = '';}
 });
 window.addEventListener('online',() => flush().catch(() => {}));
 let editorWidth = 0;
@@ -518,6 +533,9 @@ try {
   const result = await request('/api/dialogues'); missionList = result.missions; renderMissionLinks();
   if (missionList.length) await loadMission(missionList[0].id);
   else $('#editor').replaceChildren(element('p','empty','В проекте пока нет миссий со сценарием.'));
+  if(location.hash==='#dynamic'||location.hash==='#situation'){
+    state.mode='dynamic';renderScenes();renderEditor();
+  }
 } catch (error) {
   showError(error.message); status('Сервер редактора недоступен',true);
   $('#editor').replaceChildren(element('p','empty','Для редактора нужен сервер проекта: python tools/serve.py. Адрес: /dialogues/ на том же порте, что и игра.'));

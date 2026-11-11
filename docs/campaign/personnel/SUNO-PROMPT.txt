@@ -1,0 +1,10 @@
+Название: «Те, кто не вернулся»
+
+Инструментальная бардовская гитара на первом плане; эмбиент только тихой подложкой.
+Оригинальные мотивы с отсылкой к гитарной манере Высоцкого, без цитирования песен.
+
+PROMPT:
+Instrumental Soviet bard guitar elegy with a very quiet dark ambient background. A raw, intimate Russian seven-string acoustic guitar is the unmistakable lead: tense minor-key phrases, descending bass runs, alternating bass and chords, rough uneven strumming, sharp dry string attacks, restrained rasgueado, expressive pauses as if between lines of a spoken ballad. Original motifs, weathered and human, sorrowful but dignified. Around 52 BPM, loose human timing, audible fingers and strings. The guitar stays close and dry; only a faint low drone and distant natural reverberation surround it. A lonely musician remembering fallen comrades after the battle. Sparse arrangement, slow development, no dramatic climax. Three to four minutes; soft beginning and a quiet tail suitable for looping. No singing, no lyrics, no choir, no orchestral strings, no drums, no heroic brass, no trailer impacts, no sound effects.
+
+Трек для экрана памяти. Ветер и вороны оформляются отдельно в самой игре.
+Поэтому шум ветра и крики птиц в музыку добавлять не нужно.

@@ -26,6 +26,14 @@ export async function setCharacterPortrait(canvas, speaker, state) {
   delete canvas.dataset.state;
   if (!speaker) return false;
   try {
+    if(state?.file){
+      const image=await imageFor('/'+state.file);
+      if(canvas.portraitRequest!==request)return false;
+      canvas.width=image.naturalWidth;canvas.height=image.naturalHeight;
+      canvas.style.aspectRatio=`${canvas.width} / ${canvas.height}`;
+      canvas.getContext('2d').drawImage(image,0,0);
+      canvas.dataset.speaker=speaker;canvas.hidden=false;return true;
+    }
     const character = (await portraitCatalog()).characters[speaker];
     if (!character) return false;
     const selected = character.states[state] ? state : character.sceneStates?.[state] ?? character.defaultState;

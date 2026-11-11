@@ -1,0 +1,34 @@
+{
+  "passed": [
+    "8 exact vehicle occupancy masks and clean grid across yield/cancellation",
+    "responsive input: 5 scenarios",
+    "arrival reservations: 20 exact destinations and occupied stopped slot",
+    "shift order queue: 13 scenarios",
+    "scav AI: 7 scenarios",
+    "order markers: 15 scenarios",
+    "dynamic radio: 49 scenarios",
+    "radio choices/state identical for 1, 5, 20 and 100 crews (44 candidates)",
+    "M02 determinism: 8 runs, each 600 ticks, different budgets/cameras, order and submitOrder",
+    "real Edge screenshots: 1440x900, 844x390, 667x375"
+  ],
+  "knownBaselineFailures": [
+    "check-combat-sight.mjs: 6 and 20 vehicle formation cases fail both before and after; all vehicles fire, no invalid shots or wall contacts. Friendly overlap and unknown navigation assertions fail."
+  ],
+  "browserPageErrors": [],
+  "limitations": [
+    "Synthetic saved stress scenes, not the owner freeze save.",
+    "45 seconds wall time per long run, CPU profiler enabled, one machine.",
+    "M02 still has frames up to 87.1ms and simulates 31.2 seconds in 45 wall seconds in the battle stress scene.",
+    "No claim of resolving all WG-045 / WG-047 traffic jams."
+  ],
+  "changedSources": {
+    "campaign/mission.js": {
+      "before": "abad8810b626a53e43926436f6e4481a63c4fae1e95e699f00404547f5ca0a85",
+      "after": "0f34ef38420c04a5306691c715772c09bde3882b66af18af651c83379f0f44f0"
+    },
+    "campaign/radio/engine.js": {
+      "before": "bed3ece1ed2b7981d6b88d9588d94fa91d83af1ff350d357e3d4d05eeb0a8ade",
+      "after": "ba6a3b3c295989fd1a9d1e2baad8360f6df8dda160ef68c262f25756520590c5"
+    }
+  }
+}

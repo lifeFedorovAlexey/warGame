@@ -1,0 +1,322 @@
+{
+  "checks": [
+    "actual Mission.order -> audible temporary voice buffer + dynamic subtitles, desktop and 390px screenshots",
+    "actual light Mission damage -> rewritten hit wording in audible speech and subtitles",
+    "actual destroyed Mission vehicle -> one audible loss report",
+    "actual female crew + two source-specific damage hooks -> tactical exchange and nonempty female voice buffer"
+  ],
+  "errors": [],
+  "consoleErrors": [],
+  "game": {
+    "accepted": true,
+    "assigned": 5,
+    "entry": {
+      "id": "command.move.group.written-v7.1",
+      "text": "Беркут. Двигаем на точку.",
+      "role": "driver",
+      "kind": "report",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "calm",
+      "bodyText": "Двигаем на точку.",
+      "repeatText": "двигаем на точку",
+      "speakerName": "Григорий",
+      "callSign": "Беркут",
+      "addresseeId": "soldier-4",
+      "addresseeCallSign": "Сокол",
+      "speakerSlot": 0,
+      "speaker": "builder",
+      "speakerRole": "builder",
+      "station": "Беркут",
+      "crewId": "soldier-5",
+      "unitId": "u5",
+      "clip": {
+        "file": "api/radio/speech?voice=voice-4&text=%D0%91%D0%B5%D1%80%D0%BA%D1%83%D1%82.+%D0%94%D0%B2%D0%B8%D0%B3%D0%B0%D0%B5%D0%BC+%D0%BD%D0%B0+%D1%82%D0%BE%D1%87%D0%BA%D1%83.&emotion=calm",
+        "base": "/",
+        "text": "Беркут. Двигаем на точку.",
+        "voice": "voice-4",
+        "emotion": "calm",
+        "origin": "temporary-synthesis",
+        "generator": "local Piper + FFmpeg"
+      },
+      "dynamic": true,
+      "dialogue": true,
+      "chapter": "dynamic:command.move:global:direct-7|group|open",
+      "token": "command.move:global:direct-7|group|open:0",
+      "priority": 10,
+      "volume": 0.85
+    },
+    "diagnostics": {
+      "ingested": 10,
+      "filtered": 5,
+      "candidates": 2,
+      "published": 1,
+      "reasons": {
+        "no-game-source": 5
+      },
+      "decisions": 1,
+      "packets": 1,
+      "pending": 7,
+      "queued": 0,
+      "queuedDuration": 0,
+      "active": "command.move:global:direct-7|group|open",
+      "lastPacket": {
+        "at": 85.7999999999994,
+        "priority": 10,
+        "events": [
+          "command.move"
+        ]
+      }
+    }
+  },
+  "gameVoice": {
+    "audio": {
+      "playing": true,
+      "enabled": true,
+      "chapter": "dynamic:command.move:global:direct-7|group|open",
+      "cueId": "command.move.group.written-v7.1",
+      "urgent": false
+    },
+    "buffers": [
+      {
+        "id": "command.move.group.written-v7.1",
+        "duration": 2.089024943310658,
+        "peak": 0.6685637831687927,
+        "context": "running"
+      }
+    ],
+    "completed": true
+  },
+  "layout": {
+    "width": 844,
+    "height": 390,
+    "radio": {
+      "x": 12,
+      "y": 52,
+      "width": 284.421875,
+      "height": 84,
+      "top": 52,
+      "right": 296.421875,
+      "bottom": 136,
+      "left": 12
+    },
+    "scroll": 844,
+    "canvas": {
+      "x": 0,
+      "y": 0,
+      "width": 844,
+      "height": 390,
+      "top": 0,
+      "right": 844,
+      "bottom": 390,
+      "left": 0
+    }
+  },
+  "gameHit": {
+    "id": "damage.hit.single.crew-exchange-v2.1",
+    "text": "Буран. По машине попали.",
+    "body": "По машине попали.",
+    "clip": {
+      "file": "api/radio/speech?voice=voice-2&text=%D0%91%D1%83%D1%80%D0%B0%D0%BD.+%D0%9F%D0%BE+%D0%BC%D0%B0%D1%88%D0%B8%D0%BD%D0%B5+%D0%BF%D0%BE%D0%BF%D0%B0%D0%BB%D0%B8.&emotion=urgent",
+      "base": "/",
+      "text": "Буран. По машине попали.",
+      "voice": "voice-2",
+      "emotion": "urgent",
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg"
+    }
+  },
+  "gameLoss": {
+    "text": "Сокол. Есть один двухсотый.",
+    "body": "Есть один двухсотый.",
+    "clip": {
+      "file": "api/radio/speech?voice=voice-3&text=%D0%A1%D0%BE%D0%BA%D0%BE%D0%BB.+%D0%95%D1%81%D1%82%D1%8C+%D0%BE%D0%B4%D0%B8%D0%BD+%D0%B4%D0%B2%D1%83%D1%85%D1%81%D0%BE%D1%82%D1%8B%D0%B9.&emotion=urgent",
+      "base": "/",
+      "text": "Сокол. Есть один двухсотый.",
+      "voice": "voice-3",
+      "emotion": "urgent",
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg"
+    },
+    "voice": {
+      "playing": true,
+      "enabled": true,
+      "chapter": "dynamic:damage.vehicle_destroyed:global:damage.vehicle_destroyed:global:23|single|open",
+      "cueId": "damage.vehicle_destroyed.single.dead-v2.1",
+      "urgent": false
+    }
+  },
+  "tacticalFixture": {
+    "unit": "u4",
+    "crew": "soldier-4",
+    "gender": "f",
+    "sources": [
+      "b202",
+      "b203"
+    ],
+    "entry": {
+      "id": "damage.hit.single.intel-v3.1",
+      "text": "Сокол. Нас шили: две пулемётные вышки.",
+      "role": "driver",
+      "kind": "report",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "urgent",
+      "bodyText": "Нас шили: две пулемётные вышки.",
+      "repeatText": "нас шили две пулеметные вышки",
+      "speakerName": "Валентина",
+      "callSign": "Сокол",
+      "addresseeId": null,
+      "addresseeCallSign": null,
+      "speakerSlot": 0,
+      "speaker": "crew-female",
+      "speakerRole": "builder",
+      "station": "Сокол",
+      "crewId": "soldier-4",
+      "unitId": "u4",
+      "clip": {
+        "file": "api/radio/speech?voice=voice-3&text=%D0%A1%D0%BE%D0%BA%D0%BE%D0%BB.+%D0%9D%D0%B0%D1%81+%D1%88%D0%B8%D0%BB%D0%B8%3A+%D0%B4%D0%B2%D0%B5+%D0%BF%D1%83%D0%BB%D0%B5%D0%BC%D1%91%D1%82%D0%BD%D1%8B%D0%B5+%D0%B2%D1%8B%D1%88%D0%BA%D0%B8.&emotion=urgent",
+        "base": "/",
+        "text": "Сокол. Нас шили: две пулемётные вышки.",
+        "voice": "voice-3",
+        "emotion": "urgent",
+        "origin": "temporary-synthesis",
+        "generator": "local Piper + FFmpeg"
+      },
+      "dynamic": true,
+      "dialogue": true,
+      "chapter": "dynamic:damage.hit:global:damage.hit:direct-7:27|single|open",
+      "token": "damage.hit:global:damage.hit:direct-7:27|single|open:0",
+      "priority": 90,
+      "volume": 0.85
+    }
+  },
+  "femaleGame": {
+    "entry": {
+      "id": "damage.hit.single.intel-v3.1",
+      "text": "Сокол. Нас шили: две пулемётные вышки.",
+      "role": "driver",
+      "kind": "report",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "urgent",
+      "bodyText": "Нас шили: две пулемётные вышки.",
+      "repeatText": "нас шили две пулеметные вышки",
+      "speakerName": "Валентина",
+      "callSign": "Сокол",
+      "addresseeId": null,
+      "addresseeCallSign": null,
+      "speakerSlot": 0,
+      "speaker": "crew-female",
+      "speakerRole": "builder",
+      "station": "Сокол",
+      "crewId": "soldier-4",
+      "unitId": "u4",
+      "clip": {
+        "file": "api/radio/speech?voice=voice-3&text=%D0%A1%D0%BE%D0%BA%D0%BE%D0%BB.+%D0%9D%D0%B0%D1%81+%D1%88%D0%B8%D0%BB%D0%B8%3A+%D0%B4%D0%B2%D0%B5+%D0%BF%D1%83%D0%BB%D0%B5%D0%BC%D1%91%D1%82%D0%BD%D1%8B%D0%B5+%D0%B2%D1%8B%D1%88%D0%BA%D0%B8.&emotion=urgent",
+        "base": "/",
+        "text": "Сокол. Нас шили: две пулемётные вышки.",
+        "voice": "voice-3",
+        "emotion": "urgent",
+        "origin": "temporary-synthesis",
+        "generator": "local Piper + FFmpeg"
+      },
+      "dynamic": true,
+      "dialogue": true,
+      "chapter": "dynamic:damage.hit:global:damage.hit:direct-7:27|single|open",
+      "token": "damage.hit:global:damage.hit:direct-7:27|single|open:0",
+      "priority": 90,
+      "volume": 0.85
+    },
+    "buffers": [
+      {
+        "id": "damage.hit.single.intel-v3.1",
+        "duration": 3.9443310657596373,
+        "peak": 0.8159627318382263,
+        "context": "running"
+      }
+    ],
+    "lines": [
+      {
+        "id": "damage.hit.single.intel-v3.1",
+        "text": "Сокол. Нас шили: две пулемётные вышки.",
+        "role": "driver",
+        "kind": "report",
+        "source": "tts",
+        "audio": null,
+        "portrait": null,
+        "voiceId": null,
+        "pauseAfter": 0.18,
+        "archived": false,
+        "emotion": "urgent",
+        "bodyText": "Нас шили: две пулемётные вышки.",
+        "repeatText": "нас шили две пулеметные вышки",
+        "speakerName": "Валентина",
+        "callSign": "Сокол",
+        "addresseeId": null,
+        "addresseeCallSign": null,
+        "speakerSlot": 0,
+        "speaker": "crew-female",
+        "speakerRole": "builder",
+        "station": "Сокол",
+        "crewId": "soldier-4",
+        "unitId": "u4",
+        "clip": {
+          "file": "api/radio/speech?voice=voice-3&text=%D0%A1%D0%BE%D0%BA%D0%BE%D0%BB.+%D0%9D%D0%B0%D1%81+%D1%88%D0%B8%D0%BB%D0%B8%3A+%D0%B4%D0%B2%D0%B5+%D0%BF%D1%83%D0%BB%D0%B5%D0%BC%D1%91%D1%82%D0%BD%D1%8B%D0%B5+%D0%B2%D1%8B%D1%88%D0%BA%D0%B8.&emotion=urgent",
+          "base": "/",
+          "text": "Сокол. Нас шили: две пулемётные вышки.",
+          "voice": "voice-3",
+          "emotion": "urgent",
+          "origin": "temporary-synthesis",
+          "generator": "local Piper + FFmpeg"
+        }
+      },
+      {
+        "id": "damage.hit.single.intel-v3.2",
+        "text": "Под раздачу больше не лезьте.",
+        "role": "driver",
+        "kind": "ack",
+        "source": "tts",
+        "audio": null,
+        "portrait": null,
+        "voiceId": null,
+        "pauseAfter": 0.18,
+        "archived": false,
+        "emotion": "urgent",
+        "bodyText": "Под раздачу больше не лезьте.",
+        "repeatText": "под раздачу больше не лезьте",
+        "speakerName": "Аркадий",
+        "callSign": "Кедр",
+        "addresseeId": "soldier-4",
+        "addresseeCallSign": "Сокол",
+        "speakerSlot": 1,
+        "speaker": "scout",
+        "speakerRole": "driver",
+        "station": "Кедр",
+        "crewId": "soldier-2",
+        "unitId": "u2",
+        "clip": {
+          "file": "api/radio/speech?voice=voice-1&text=%D0%9F%D0%BE%D0%B4+%D1%80%D0%B0%D0%B7%D0%B4%D0%B0%D1%87%D1%83+%D0%B1%D0%BE%D0%BB%D1%8C%D1%88%D0%B5+%D0%BD%D0%B5+%D0%BB%D0%B5%D0%B7%D1%8C%D1%82%D0%B5.&emotion=urgent",
+          "base": "/",
+          "text": "Под раздачу больше не лезьте.",
+          "voice": "voice-1",
+          "emotion": "urgent",
+          "origin": "temporary-synthesis",
+          "generator": "local Piper + FFmpeg"
+        }
+      }
+    ]
+  }
+}

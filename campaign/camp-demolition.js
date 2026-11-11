@@ -17,7 +17,8 @@ function demolitionGroups(mission) {
   return [...camps.values()].filter(camp=>!camp.buildings&&camp.walls.length);
 }
 
-export const hasPendingCampDemolition = mission => demolitionGroups(mission).length>0;
+export const hasPendingCampDemolition = mission => demolitionGroups(mission).length>0
+  ||mission.state.buildings.some(b=>b.owner==='scavs'&&isCampPerimeter(b)&&Number.isFinite(b.campDemolitionAt));
 
 // Victory freezes combat/production, but finishes the already earned collapse.
 // Saved simulation timestamps are used before and after loading.

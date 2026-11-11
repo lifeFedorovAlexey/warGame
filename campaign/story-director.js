@@ -8,6 +8,8 @@ import {appendM02Story,m02RadioRules} from './mission02-radio.js';
 const terminal = status => ['done','skipped','cancelled'].includes(status);
 const sceneSignal = {r01:'intro',r14:'first-contact',r18:'raid-won',r36:'camp3-sighted',r41:'last-camp',r50:'outro'};
 const finalScene = id => ['r48','r49','r50','r54','u01','u02','u04'].includes(id);
+const milestoneScenes=new Set(['r25','r26','r27','r29','r30-alt','r32','r33','r38','r39','r47']);
+const followUp={r14:'r16',r25:'r26',r26:'r27',r27:'r29',r32:'r33',r38:'r39',r41:'r42'};
 const prologueScenes=['p01','p02','p03','p04'];
 const sceneGapMs=2000;
 
@@ -61,7 +63,7 @@ export class StoryDirector {
   end(status='done') {
     const d=this.data,id=d.active;if(!id)return;
     const record=this.record(id);record.status=status;record.endedAt=d.clock;
-    d.active=null;d.lastEnd=d.clock;
+    d.active=null;d.lastEnd=d.clock;d.lastScene=id;
     if(id==='r19'&&status==='done'&&!d.journal.some(item=>item.id==='outcasts'))
       d.journal.push({id:'outcasts',title:'Отбросы',text:'Местные вооружённые формирования. Живут на свалках и используют восстановленную технику.'});
   }
@@ -97,10 +99,15 @@ export class StoryDirector {
       }
       if(!rule.trigger||d.clock-d.lastEnd<sceneGapMs||rule.priority>0&&f.battle||rule.priority>=2&&(f.quiet<8000||d.clock-d.lastEnd<rule.gap*1000))continue;
       if(rule.priority===3&&d.clock-(d.facts.lastChatterAt??-Infinity)<45000)continue;
-      if(f.victory&&!finalScene(id)&&!id.startsWith('m02-'))continue;
+      if(f.victory&&!finalScene(id)&&!milestoneScenes.has(id)&&!id.startsWith('m02-'))continue;
       eligible.push({id,...rule});
     }
-    eligible.sort((a,b)=>a.priority-b.priority);
+    // Start the final contact on the march: acknowledge the third cleared camp,
+    // then introduce Petrovich and keep his whole exchange ahead of research.
+    // A recording already in progress still finishes intact.
+    const chiefContact=f.chief&&(f.firstThreeCleared||this.heard('r41'))&&!this.finished('r42');
+    const rank=id=>id==='r14'?0:chiefContact&&[f.chiefContactReport,'r41','r42'].includes(id)?1:id===followUp[d.lastScene]?2:3;
+    eligible.sort((a,b)=>a.priority-b.priority||rank(a.id)-rank(b.id));
     const next=eligible[0];
     if(next&&!d.active){
       d.active=next.id;this.record(next.id).status='playing';

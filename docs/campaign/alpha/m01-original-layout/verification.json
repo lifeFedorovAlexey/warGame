@@ -1,0 +1,94 @@
+{
+  "date": "2026-11-10",
+  "scope": "Original cam1a locations and m01 to m02 continuity",
+  "source": "references/terrain/alpha/original-cam1a/provenance.json",
+  "sourceBinaries": "references/terrain/alpha/original-cam1b/provenance.json",
+  "anchors": [
+    {
+      "camp": 1,
+      "label": "base1ArtifactPos",
+      "grid": [
+        29.5,
+        35.5
+      ],
+      "note": "The original first outpost has an artifact anchor, no factory."
+    },
+    {
+      "camp": 2,
+      "label": "base2Factory",
+      "sourceId": 8,
+      "grid": [
+        40,
+        16.5
+      ]
+    },
+    {
+      "camp": 3,
+      "label": "base3Factory",
+      "sourceId": 20,
+      "grid": [
+        14,
+        12.5
+      ]
+    },
+    {
+      "camp": 4,
+      "label": "base4Factory",
+      "sourceId": 1256,
+      "grid": [
+        19,
+        31.5
+      ]
+    }
+  ],
+  "layoutVersion": 3,
+  "bounds": [
+    0,
+    0,
+    53,
+    63
+  ],
+  "oldOverlap": {
+    "oldChief": [
+      13.25,
+      71.75
+    ],
+    "m02Factory": [
+      15,
+      71.5
+    ],
+    "resolution": "New games use the original northern headquarters. Old conquered plateau is inherited as neutralized; its missing technology remains collectable."
+  },
+  "retained": "Player base and economy, vehicles, health, resources, research, valid orders, captured wells, wrecks, personnel and kill totals. Old campaigns keep their saved geography.",
+  "adaptation": "Positions and authored towers follow original cam1a. Existing game models, story IDs, support buildings and road connections are adapted; this is not a one-to-one asset or balance port.",
+  "checks": {
+    "sourceCoordinates": true,
+    "allMainAndLocalRoadEdgesClear": true,
+    "localSweptSegments": 498,
+    "maximumRoadGrade": 0.1350034275292789,
+    "realDrive": "drive.json",
+    "browser": "browser.json",
+    "viewports": [
+      [
+        1440,
+        900
+      ],
+      [
+        390,
+        844
+      ]
+    ],
+    "fogAtNewGame": true,
+    "legacySaveRepair": true,
+    "idempotence": true,
+    "checkpointLayoutSwitches": true,
+    "chiefProductionProgression": true,
+    "m02TestsPassed": 15,
+    "storyV2": true,
+    "radioSave": true,
+    "personnel": true,
+    "petrovichBrowser": "../../../../campaign/previews/petrovich/verification.json"
+  },
+  "limitation": "The broad check-mission --full stops at the pre-existing Saved cliff pose receives a bounded exit route fixture. This failure was also reproduced with the old camp configuration and no new m01 layout. It is not counted as a passing full playthrough.",
+  "merged": false
+}

@@ -8,6 +8,7 @@ try{
  const page=await browser.newPage({viewport:{width:1440,height:900},deviceScaleFactor:1});
  page.on('pageerror',e=>report.errors.push(e.stack??e.message));page.on('console',m=>{if(m.type()==='error')report.errors.push(m.text());});
  await page.addInitScript(()=>{for(const k of ['fieldSound','fieldStoryVoice','fieldRadio'])localStorage.setItem('warGame.'+k,'off');});
+ await page.route('**/api/radio/published',r=>r.fulfill({json:{document:JSON.parse(fs.readFileSync('assets/radio/situations_catalog.json','utf8'))}}));
  if(baseline)await page.route('**/campaign/world.js',r=>r.fulfill({body:fs.readFileSync('campaign/previews/playtest-WG-014-015/before/world.js','utf8'),contentType:'text/javascript'}));
  await page.route('**/campaign/main.js',r=>r.fulfill({body:fs.readFileSync(baseline?'campaign/previews/playtest-WG-014-015/before/main.js':'campaign/main.js','utf8').replace('ready: true, mission, world, select, radio,',`ready: true, mission, world, select, radio,
  reviewRefresh(){flushUi();world.update(mission,selected,0,false,true);minimapView.render(performance.now());if(performance.now()>=Math.max(toastUntil,typeof milestoneToastUntil==='number'?milestoneToastUntil:0))$('toast').hidden=true;},`),contentType:'text/javascript'}));

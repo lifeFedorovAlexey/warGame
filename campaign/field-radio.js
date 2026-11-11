@@ -107,7 +107,8 @@ export class FieldRadio {
 
   dismiss() {
     const entry = this.entry;
-    if (entry?.story) this.director.skip();
+    if (entry?.dynamic) this.dynamic.engine.completeLine();
+    else if (entry?.story) this.director.skip();
     else if (entry?.dialogue) {
       const progress = this.mission.state.fieldDialogue ??= {};
       progress[entry.chapter] = entry.index + 1;
@@ -172,11 +173,21 @@ export class FieldRadio {
 
   consumeStory(mission,now) {
     this.mission=mission;
+    this.dynamic?.bind();
+    // Finish a complete recorded fragment before yielding the shared channel.
+    if(this.entry?.dynamic){
+      if(now<this.until)return;
+      this.dynamic.engine.completeLine();this.hide();
+    }
     // Legacy chapter flags still drive objectives and signals, but no longer enqueue duplicate speech.
     for(const chapter of [...mission.state.pendingCinematics])mission.finishCinematic(chapter);
     if(this.entry?.story&&now>=this.until){this.director.completeLine();this.hide();}
     const next=this.director.update(mission,now,{enabled:this.enabled});
-    if(!next){if(this.entry)this.hide();return;}
+    if(!next){
+      if(this.entry)this.hide();
+      if(this.enabled){const dynamic=this.dynamic?.next({storyLock:!!this.director.data?.active,audioBusy:this.audioBusy?.()});if(dynamic)this.present(dynamic,mission,now);}
+      return;
+    }
     if(this.entry?.story&&this.entry.token===next.token)return;
     this.present(next,mission,now);
   }

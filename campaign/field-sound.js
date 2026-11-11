@@ -251,7 +251,9 @@ export class FieldSound {
   storyClip(chapter, cue) {
     if(cue&&!cue.clip?.file)return Promise.resolve(null);
     if (cue) {
-      const key = 'line:' + cue.id;
+      // A dynamic phrase ID may realize different counts or a different crew voice.
+      const key = cue.dynamic?'dynamic:'+cue.clip.base+cue.clip.file:'line:'+cue.id;
+      if(cue.dynamic&&this.storyClips.size>=256)this.storyClips.delete(this.storyClips.keys().next().value);
       if (!this.storyClips.has(key)) this.storyClips.set(key,
         this.loadClip(cue.clip.base??dialogueBase, cue.clip.file).catch(error => {
           this.storyClips.delete(key);
@@ -322,7 +324,16 @@ export class FieldSound {
     source.buffer = request.buffer;
     gain.gain.value = 0;
     source.connect(gain).connect(this.output);
-    const playback = this.storyPlayback = {source, gain, chapter:request.chapter, cueId:request.cue?.id, urgent:request.urgent,
+    let volume=request.cue?.dynamic?Math.max(0,Math.min(1,request.cue.volume??1)):1;
+    if(request.cue?.dynamic&&request.cue.normalize){
+      this.radioNormalization??=new WeakMap();
+      if(!this.radioNormalization.has(request.buffer)){
+        let peak=0;for(let c=0;c<request.buffer.numberOfChannels;c++)for(const sample of request.buffer.getChannelData(c))peak=Math.max(peak,Math.abs(sample));
+        this.radioNormalization.set(request.buffer,peak>.001?Math.min(4,.85/peak):1);
+      }
+      volume*=this.radioNormalization.get(request.buffer);
+    }
+    const playback = this.storyPlayback = {source, gain, chapter:request.chapter, cueId:request.cue?.id, urgent:request.urgent,volume,
       releaseCaption:request.releaseCaption};
     const gap=Math.max(0,(request.cue?.pauseAfter??.18)-(request.cue?.clip?.trailingSilence??0));
     this.updateDialogueMix();
@@ -345,7 +356,7 @@ export class FieldSound {
     this.effectsOutput.gain.setTargetAtTime(urgent ? .46 : story ? .67 : 1, now, story ? .045 : .16);
     this.combatOutput.gain.setTargetAtTime(urgent ? .82 : 1, now, urgent ? .045 : .16);
     this.commandOutput.gain.setTargetAtTime(urgent ? .54 : 1, now, urgent ? .035 : .12);
-    story?.gain.gain.setTargetAtTime(urgent ? .94 : this.voiceSource ? .51 : .88, now, .035);
+    story?.gain.gain.setTargetAtTime((urgent ? .94 : this.voiceSource ? .51 : .88)*(story.volume??1), now, .035);
     this.updateMusicMix(story || this.voiceSource ? .08 : .7);
   }
 
@@ -364,6 +375,7 @@ export class FieldSound {
   }
 
   acknowledge(kind, ids) {
+    if(this.storyMission?.radioObserver?.owns('command.'+kind,ids.length))return;
     if(this.storyVoices)return this.storyAcknowledgement(kind,ids);
     if (!this.enabled || !ids.length || !voiceKinds.includes(kind)) return;
     const now = performance.now();
@@ -427,7 +439,9 @@ export class FieldSound {
   }
 
   async bark(event,{cooldown=60000}={}) {
+    if(this.storyMission.radioObserver?.warmingUp)return false;
     const cue=this.storyVoices?.get(event),id=cue?.id,now=performance.now(),story=this.storyMission.state.radioStory;
+    if(this.storyMission.radioObserver?.engine.enabled&&cue?.clip?.origin==='temporary-synthesis')return false;
     if(!cue||!this.ready()||!this.storyEnabled||this.storyBusy()||this.pendingStory||this.storyPlayback||this.voiceSource)return false;
     if(story&&story.clock-story.lastCombat<8000)return false;
     if(now-(this.lastBarkAt??-Infinity)<45000||now-(this.barkTimes.get(id)??-Infinity)<cooldown||story&&story.clock-(story.facts.lastChatterAt??-Infinity)<45000)return false;
@@ -436,7 +450,7 @@ export class FieldSound {
     // Low-priority responses expire instead of piling up behind a conversation.
     if(this.barkRequest!==request)return false;
     this.barkRequest=null;
-    if(!buffer||!this.ready()||!this.storyEnabled||this.storyBusy()||this.storyPlayback||this.pendingStory||performance.now()-now>1300||story&&story.clock-story.lastCombat<8000)return false;
+    if(!buffer||this.storyMission.radioObserver?.warmingUp||!this.ready()||!this.storyEnabled||this.storyBusy()||this.storyPlayback||this.pendingStory||performance.now()-now>1300||story&&story.clock-story.lastCombat<8000)return false;
     const source=this.context.createBufferSource();source.buffer=buffer;source.connect(this.commandOutput);
     this.voiceSource=source;this.voiceCueId=id;this.lastBarkAt=performance.now();this.barkTimes.set(id,this.lastBarkAt);
     if(story)story.facts.lastChatterAt=story.clock;
@@ -457,6 +471,8 @@ export class FieldSound {
   storyEvent(event) {
     if(!this.storyVoices)return;
     const mission=this.storyMission;
+    const dynamicType=event.type==='destroyed'&&event.kind==='command'?'damage.commander_down':{'factory-repair-start':'repair.start_factory','factory-repair-complete':'repair.complete','research-start':'research.start','research-complete':'research.complete','unit-produced':'factory.vehicle_complete','unit-damaged':'damage.hit'}[event.type];
+    if(dynamicType&&mission.radioObserver?.owns(dynamicType))return;
     if(event.type==='factory-repair-start'){
       const variant=(this.factoryBarkVariant??0)%2;this.factoryBarkVariant=variant+1;
       this.bark(variant?'factory-repair-start-alt':'factory-repair-start');
@@ -484,7 +500,7 @@ export class FieldSound {
     const discovered=visible.some(e=>!this.seenHostiles.has(e.id));
     for(const e of visible)this.seenHostiles.add(e.id);
     if(discovered&&mission.state.flags.raidWon)this.bark('a13');
-    if(now-this.lastOrderAt>45000&&this.idleIds?.some(id=>{const unit=mission.entity(id);return unit?.hp>0&&unit.kind!=='builder'&&!unit.task&&!unit.path?.length;}))this.bark('a10',{cooldown:90000});
+    if(!mission.radioObserver?.owns('idle.group_no_order')&&now-this.lastOrderAt>45000&&this.idleIds?.some(id=>{const unit=mission.entity(id);return unit?.hp>0&&unit.kind!=='builder'&&!unit.task&&!unit.path?.length;}))this.bark('a10',{cooldown:90000});
     if(mission.state.energy<=0&&mission.state.buildings.some(b=>b.owner==='rai'&&(b.queue.length||b.research)))this.bark('a06',{cooldown:90000});
     this.repairTargets??=new Map();
     for(const [id,hp] of this.repairTargets){

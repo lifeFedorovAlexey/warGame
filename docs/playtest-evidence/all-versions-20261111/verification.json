@@ -1,0 +1,42 @@
+{
+  "date": "2026-11-11",
+  "base": "29f7b61",
+  "ownerRequest": "Все версии и ветки в основную ветку, включая карту и радио, затем перезапустить",
+  "snapshots": [
+    {
+      "branch": "codex/snapshot-all-shared-20261111",
+      "commit": "77a42df43da11d3c35988e33d870a8f8a53be871",
+      "source": "D:/warGame",
+      "paths": 600
+    },
+    {
+      "branch": "codex/snapshot-older-wg045-20261111",
+      "commit": "5c6f2637568571ca314b6160af04c11f42fe3272",
+      "source": "C:/Users/Алексей/.codex/worktrees/wg-041-tower/warGame",
+      "paths": 5
+    }
+  ],
+  "included": [
+    "Latest shared river, connected roads and concrete compounds",
+    "Full dynamic radio library, editor, local temporary speech and M02 audio",
+    "WG-026, WG-055 radio and all previously local source changes",
+    "Shared personnel, factory modernization, construction health and frame diagnostics"
+  ],
+  "checks": {
+    "javascriptSyntax": 96,
+    "radioLogicPassed": 52,
+    "otherPassed": [
+      "check-wg055-panic-radio",
+      "check-playtest-simulation",
+      "check-wg026-demolition",
+      "check-m02-map",
+      "check-wg057-lanes"
+    ],
+    "browser": "M01 dynamic speech with nonempty AudioBuffers; all 24 M02 recordings decoded and two opening voices played; real map/radio at 1440x900, 844x390, 667x375; no page errors"
+  },
+  "integrationFixes": [
+    "Finish demolition wreck cleanup after victory, preserving WG-001 alongside WG-026",
+    "Resolve the shared Piper runtime junction before calling its native loader from a Cyrillic worktree path"
+  ],
+  "limitations": "Targeted integration checks, not exhaustive completion of every open playtest report."
+}

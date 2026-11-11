@@ -305,6 +305,7 @@ export class CommandPlanner{
      target:record.target,units:newlyRejected.map(id=>({id,...record.rejected[id],
       retainedRevision:m.entity(id)?.commandRevision,retainedGoal:m.entity(id)?.routeOrder?.destination})),keptPrevious:true});
     record.signature=this.signature(record);this.stats.applied+=record.assigned.length;this.active=null;
+    m.radioObserver?.order(record.action,record.assigned,'planned:'+record.revision);
     if(!active.runtime.retryIds?.size&&record.continuation&&m.state.units.some(u=>ownsContinuation(u,record.revision)&&u.routeContinuation.ready)){
      record.status='planning';record.awaitingTails=true;record.reportedAssignments=record.assigned.length;
     }

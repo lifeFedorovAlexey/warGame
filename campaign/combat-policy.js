@@ -139,6 +139,7 @@ export function startAutomaticRetreat(mission,unit,spec){
  unit.builderWorking=false;unit.builderContact=null;
  if(unit.tool>0)unit.foldTime=Math.max(unit.foldTime??0,2.6);
  unit.combatRetreat={status:'planning',resume,threat:threat?{...threat}:null,started:mission.state.time};
+ mission.radioObserver?.retreatOrder?.([unit.id],false);
  return unit.combatRetreat;
 }
 export function forceCombatRetreat(mission,ids){
@@ -152,6 +153,7 @@ export function forceCombatRetreat(mission,ids){
   if(unit.tool>0)unit.foldTime=Math.max(unit.foldTime??0,2.6);
   unit.combatRetreat={forced:true,status:'planning',threat:threat?{...threat}:null,started:mission.state.time};
  }
+ mission.radioObserver?.retreatOrder?.(units.map(unit=>unit.id),true);
  return {ok:true,assigned:units.length};
 }
 function retreatHome(mission,unit){

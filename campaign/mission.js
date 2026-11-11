@@ -1,5 +1,3 @@
-import {beginPersonnelMission,registerPersonnel,recordPersonnelDeath,restorePersonnel,finalizeMissionResults} from './personnel.js';
-import {fieldUnitSpec} from './field-modifications.js';
 import {TerrainNavigator} from './navigation.js';
 import {waterTower} from './threat-guidance.js';
 import {checkBuildingPlacement} from './building-placement.js';
@@ -14,6 +12,7 @@ import {vehicleRecipes,starterProjects,matchingRecipe,projectDesignation,designN
 import {vehiclePaint} from './vehicle-paint.js';
 import {chooseProductionFactory,productionCancellation,productionFactories,rebalanceProduction} from './factory-production.js';
 import {isCampPerimeter,updateCampPerimeters,advanceCampDemolition} from './camp-demolition.js';
+import {isBlueprint,restoreConstructionHealth,advanceConstruction} from './construction-health.js';
 import {availableOil,oilFundingRemaining,oilRefund,beginOilFlow,finishOilFlow,transferOil,fundedWorkTime,repairWithOil} from './oil-economy.js';
 import {angleDelta} from './builder-kinematics.js';
 import {workProjection,projectorHasSight} from './builder-optics.js';
@@ -23,6 +22,7 @@ import {clearCombatSight} from './combat-sight.js';
 import {recordDamage} from './damage-contact.js';
 import {destroyDamage,damageMobility,partMissing,upgradeDamageState} from './damage-state.js';
 import {ensureSalvage,updateSalvage,armorMultiplier,salvageFromWreck,availableFieldRecipes,modificationInstalled,touchesSalvage,salvagePickupReach,canInstallRecipe,syncFieldHp} from './vehicle-salvage.js';
+import {fieldUnitSpec} from './field-modifications.js';
 import {scheduleWreck,updateWrecks} from './wreck-lifecycle.js';
 import {updateBurning} from './burning.js';
 import {updateStreetFurniture} from './street-furniture.js';
@@ -71,6 +71,7 @@ import {m02SiteObstacles} from './mission02-site-plan.js';
 import {enterM02,updateM02,updateM02Steps,m02Objectives} from './mission02.js';
 import {restoreM02Continuity} from './mission02-continuity.js';
 import {installPowerModule,advancePowerModule} from './power-module.js';
+import {beginPersonnelMission,registerPersonnel,recordPersonnelDeath,restorePersonnel,finalizeMissionResults} from './personnel.js';
 
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 const routeOrderRevision=2;
@@ -186,7 +187,7 @@ export class Mission{
   }
  }
  random(){this.randomState=(Math.imul(this.randomState,1664525)+1013904223)>>>0;return this.randomState/4294967296;}
- emit(type,data={}){this.events.push({id:this.id('e'),type,time:this.state.time,...data});}
+ emit(type,data={}){const event={id:this.id('e'),type,time:this.state.time,...data};this.events.push(event);this.radioObserver?.note(event);}
  drainEvents(){return this.events.splice(0);}
  drainEffects(){return this.effects.splice(0);}
  cinematic(id){if(!this.state.seenCinematics.includes(id)&&!this.state.pendingCinematics.includes(id)){this.state.pendingCinematics.push(id);this.emit('cinematic',{chapter:id});}}
@@ -197,7 +198,7 @@ export class Mission{
  addUnit(kind,owner,point,extra={}){const spec=this.config.units[kind],unit={id:this.id('u'),kind,owner,x:point.x,y:point.y,previousX:point.x,previousY:point.y,hp:spec.hp,maxHp:spec.hp,heading:0,path:[],task:null,cooldown:0,tool:0,foldTime:0,...extra};
   if(owner==='rai'&&canAutoRetreat(spec))unit.combatPolicy={...armyCombatPolicy(this)};
   if(this.state.m02)unit.trafficOnScreen=true;this.state.units.push(unit);registerPersonnel(this,unit);if(this.unitIndexActive)this.unitIndex.insert(unit,this.state.units.length-1);return unit;}
- addStructure(kind,owner,point,extra={}){const spec=this.config.buildings[kind]??{},scale=this.config.worldScale,foot=spec.footprintMetres??[14,12],item={id:this.id('b'),kind,owner,x:point.x,y:point.y,rotation:0,hp:spec.hp??750,maxHp:spec.hp??750,halfWidth:foot[0]*scale/2,halfDepth:foot[1]*scale/2,progress:owner==='rai'?0:1,completed:owner!=='rai',queue:[],research:null,cooldown:0,...extra};item.maxHp=item.hp;this.state.buildings.push(item);return item;}
+ addStructure(kind,owner,point,extra={}){const spec=this.config.buildings[kind]??{},scale=this.config.worldScale,foot=spec.footprintMetres??[14,12],item={id:this.id('b'),kind,owner,x:point.x,y:point.y,rotation:0,hp:spec.hp??750,maxHp:spec.hp??750,halfWidth:foot[0]*scale/2,halfDepth:foot[1]*scale/2,progress:owner==='rai'?0:1,completed:owner!=='rai',queue:[],research:null,cooldown:0,...extra};item.maxHp=item.hp;restoreConstructionHealth(item);this.state.buildings.push(item);return item;}
  rebuildNavigation(){
   this.finishPendingStep();
   const changed=syncScavBaseRoads(this.field,this.config),southern=this.state.m02?.version>=2;
@@ -237,31 +238,38 @@ export class Mission{
  }
  *vehiclePathSteps(unit,goal,{avoidMoving=false,avoidPoint=null,fallback=true,ignoreUnits=null,obstacles=this.state.units,escapeSteepStart=unit.owner==='rai',...options}={}){
   const terrainEscape=escapeSteepStart?this.terrainEscapeFor(unit):null;
-  const occupied=this.nav.occupied,changed=[],scale=this.config.worldScale;
+  const occupied=this.nav.occupied,changed=[],pendingCells=new Set(),scale=this.config.worldScale;
+  // Preparing dense vehicle masks can outlast a frame. Keep these cells
+  // private across yields; only search.next() temporarily publishes them.
   const padding=vehicleRadiusBound(unit.kind,scale)+.1*scale;
   // Commands share a terrain/building corridor. Temporary bodies are handled
   // by endpoint reservation and swept local avoidance, not baked into A*.
   const staticCommand=this.commandJob&&!avoidMoving&&!avoidPoint;
   for(const other of staticCommand?[]:obstacles){
+   if(performance.now()>=(this.nav.workDeadline??Infinity))yield;
    if(other===unit||unit.id&&other.id===unit.id||ignoreUnits?.has(other)||!vehicleObstacle(other)||!trafficCollisionRequired(unit,other)||other.hp>0&&other.owner!==unit.owner&&!this.visibleAt(other.x,other.y))continue;
    if(other.hp>0&&other.path.length&&(!avoidMoving||distance(unit,other)>56))continue;
    const shape=vehicleEnvelope(other,scale,this.field),radius=vehicleRadiusBound(other.kind,scale)+padding;
    const gap=p=>footprintGap({x:p.x,y:p.y,radius:0},shape)-padding;
-   const startGap=gap(unit);
+   const bound=(shape.ellipse?Math.max(shape.width,shape.depth):Math.hypot(shape.width,shape.depth))+padding+1e-6;
+   const outside=p=>(p.x-shape.x)**2+(p.y-shape.y)**2>=bound*bound;
+   const startGap=outside(unit)?0:gap(unit);
    const [col,row]=this.nav.grid(other.x,other.y),r=Math.ceil(radius/this.nav.cell),size=this.nav.size;
    for(let y=Math.max(0,row-r);y<=Math.min(size-1,row+r);y++)for(let x=Math.max(0,col-r);x<=Math.min(size-1,col+r);x++){
+    if(performance.now()>=(this.nav.workDeadline??Infinity))yield;
     const i=y*size+x,p=this.nav.position(x,y);
+    if(occupied[i]||pendingCells.has(i)||distance(unit,p)<=this.nav.cell*.78||outside(p))continue;
     // Plan for the whole vehicle, not a point which drives into a neighbour's
     // side before it can turn. A close start can leave the inflated envelope.
     const clearance=gap(p),escape=startGap<0&&clearance>=startGap-.01&&distance(unit,p)<this.nav.cell*2.5;
-    if(!occupied[i]&&clearance<0&&!escape&&distance(unit,p)>this.nav.cell*.78){occupied[i]=1;changed.push(i);}
+    if(clearance<0&&!escape){pendingCells.add(i);changed.push(i);}
    }
   }
   if(avoidPoint){
    const [col,row]=this.nav.grid(avoidPoint.x,avoidPoint.y),size=this.nav.size;
    for(let y=Math.max(0,row-1);y<=Math.min(size-1,row+1);y++)for(let x=Math.max(0,col-1);x<=Math.min(size-1,col+1);x++){
     const i=y*size+x,p=this.nav.position(x,y);
-    if(!occupied[i]&&distance(p,unit)>this.nav.cell&&distance(p,goal)>this.nav.cell*2){occupied[i]=1;changed.push(i);}
+    if(!occupied[i]&&!pendingCells.has(i)&&distance(p,unit)>this.nav.cell&&distance(p,goal)>this.nav.cell*2){pendingCells.add(i);changed.push(i);}
    }
   }
   const search=this.nav.findPathSteps(unit,goal,{...options,escapeSteepStart,terrainEscape,occupancyKey:changed.slice().sort((a,b)=>a-b).join(',')});
@@ -545,7 +553,7 @@ export class Mission{
   if(result.ok&&!preserveQueue)clearQueuedOrders(this,result.assignedIds??[]);
   return result;
  }
- order(ids,action,target,{preserveQueue=false}={}){ids=selectedCommandIds(this,ids,action,target);this.finishPendingStep();const result=completeSteps(this.orderSteps(ids,action,target));if(result.ok){const accepted=result.assignedIds??ids.filter(id=>!result.unassigned?.includes(id));this.commandPlanner?.cancel(accepted);if(!preserveQueue)clearQueuedOrders(this,accepted);}return result;}
+ order(ids,action,target,{preserveQueue=false}={}){ids=selectedCommandIds(this,ids,action,target);this.finishPendingStep();const result=completeSteps(this.orderSteps(ids,action,target));if(result.ok){const accepted=result.assignedIds??ids.filter(id=>!result.unassigned?.includes(id));this.commandPlanner?.cancel(accepted);if(!preserveQueue)clearQueuedOrders(this,accepted);if(result.pickup)this.radioObserver?.order(action,result.assignedIds);}return result;}
  *orderSteps(ids,action,target){
   const check=orderCandidates(this,ids,action,target);if(!check.ok)return check;
   const {units,pickup}=check,assigned=new Set();
@@ -760,6 +768,7 @@ export class Mission{
    if(changedTraffic.size)this.state.parkingGoalReleases=[...new Set([...(this.state.parkingGoalReleases??[]),...changedTraffic])];
   }else yield* this.releaseParkingGoalsSteps(changedTraffic);
   if(action==='build'&&assigned.size){target.awaitingWorkers=false;delete target.builderIds;}
+  if(!this.commandJob&&assigned.size)this.radioObserver?.order(action,[...assigned]);
   return assigned.size?{ok:true,assigned:assigned.size,assignedIds:[...assigned],unassigned:units.filter(unit=>!assigned.has(unit.id)).map(unit=>unit.id)}:
    this.fail('Нет доступного пути или подходящего строителя');
  }
@@ -841,6 +850,7 @@ export class Mission{
   for(const [unit,revision] of this.pendingStops){
    if(unit.commandRevision!==revision||unit.pendingOrder?.type!=='stop')continue;
    delete unit.pendingOrder;unit.driveSpeed=0;
+   this.radioObserver?.order('stop',[unit.id],'stop:'+revision);
    delete unit.yieldReturn;delete unit.routeOrder;unit.task=null;unit.path=[];unit.builderWorking=false;
    cancelCombatRetreat(unit);cancelCombatDeployment(unit);delete unit.detour;delete unit.traffic;delete unit.trafficHold;delete unit.resumeConstructionId;
   }
@@ -909,9 +919,11 @@ export class Mission{
  lineOfSight(from,to){return clearCombatSight(this,from,to);}
  damage(target,amount,source,contact){
   this.finishPendingStep();if(insideFactory(target)||target.hp<=0||!Number.isFinite(amount)||amount<=0)return;
+  const blueprint=!!this.config.buildings[target.kind]&&isBlueprint(target);
   const previousFraction=target.hp/target.maxHp;
   const hit=recordDamage(this,target,amount,source,contact);
-  target.hp=Math.max(0,target.hp-amount*armorMultiplier(hit,target));
+  target.hp=blueprint?0:Math.max(0,target.hp-amount*armorMultiplier(hit,target));
+  if(blueprint)this.state.energy=Math.min(this.config.energyCapacity,this.state.energy+oilRefund(target));
   if(target.owner==='rai'&&source?.owner&&source.owner!=='rai'&&contact?.type!=='collision'&&this.state.time-(target.lastAttackNotice??-Infinity)>=1){
    target.lastAttackNotice=this.state.time;
    this.emit('under-attack',{target:target.id,x:target.x,y:target.y,building:!!this.config.buildings[target.kind]});
@@ -921,6 +933,7 @@ export class Mission{
   rememberHostileHit(this,target,source);
   alertScavs(this,target,source);
   if(!target.hp){
+   if(blueprint){delete target.damage;this.releaseSite(target);}
    recordPersonnelDeath(this,target,source,{cause:contact?.type==='collision'?'collision':undefined});
    if(this.config.units[target.kind]){
     this.freezeWreck(target);
@@ -931,11 +944,13 @@ export class Mission{
    }
    if(target.damage){destroyDamage(target.damage);if(!isInfantry(target))target.damage.burn=Math.max(target.damage.burn,.48);salvageFromWreck(this,target,hit);this.onDamageDestroyed?.(target,hit);}
    scheduleWreck(this,target);
-   this.explodeWreck(target);
+   if(!blueprint)this.explodeWreck(target);
+   this.radioObserver?.destroyedTarget?.(target,source,{exploded:!blueprint&&!isInfantry(target)});
    this.emit('destroyed',{target:target.id,owner:target.owner,kind:target.kind});
    if(target.owner==='scavs')this.state.statistics.enemiesDestroyed++;
    this.navigationDirty=true;
   }else if(target.owner==='rai'&&this.state.time-(target.lastDamageBark??-20)>12){target.lastDamageBark=this.state.time;this.emit('unit-damaged',{target:target.id});}
+  this.radioObserver?.hit(target,source,contact);
   return hit;
  }
  explodeWreck(target){
@@ -2178,7 +2193,7 @@ export class Mission{
    const moving=target&&this.config.units[target.kind]&&Math.hypot(target.x-target.previousX,target.y-target.previousY)>.05;
    if(!target||moving||!this.projectorAim(unit,target)){unit.builderWorking=false;unit.builderContact=null;continue;}
    if(unit.task.type==='build'&&!target.completed){
-    target.progress=Math.min(1,target.progress+(oilFundingRemaining(target)>0?0:dt)/this.buildingSpec(target).seconds);
+    advanceConstruction(target,target.progress+(oilFundingRemaining(target)>0?0:dt)/this.buildingSpec(target).seconds);
     if(target.progress>=1){target.completed=true;this.state.statistics.buildingsCompleted++;this.emit('construction-complete',{kind:target.kind,building:target.id});}
    }else if(unit.task.type==='repair'&&repairableBuilding(this,target)&&target.hp<target.maxHp){
     repairWithOil(this,target,dt);
@@ -2273,7 +2288,7 @@ export class Mission{
   else if(spec.damage){const enemy=automaticCombatTarget(this,unit,spec);if(enemy)this.attack(unit,enemy,spec);}
   const working=target&&['build','repair','demolish','upgrade-power'].includes(unit.task?.type)&&!unit.path.length&&distance(unit,this.workPoint(target,unit.task.workOffset??0))<=this.config.builderRangeMetres;
   if(working){unit.path=[];unit.tool=Math.min(1,unit.tool+dt/2.6);unit.aimTarget={x:target.x,y:target.y};if(unit.tool<.99)return;
-   if(unit.task.type==='build'&&!target.completed){target.progress=Math.min(1,target.progress+(oilFundingRemaining(target)>0?0:dt)/this.buildingSpec(target).seconds);if(target.progress>=1){target.completed=true;this.state.statistics.buildingsCompleted++;this.emit('construction-complete',{kind:target.kind,building:target.id});}}
+   if(unit.task.type==='build'&&!target.completed){advanceConstruction(target,target.progress+(oilFundingRemaining(target)>0?0:dt)/this.buildingSpec(target).seconds);if(target.progress>=1){target.completed=true;this.state.statistics.buildingsCompleted++;this.emit('construction-complete',{kind:target.kind,building:target.id});}}
    else if(unit.task.type==='repair'&&repairableBuilding(this,target)&&target.hp<target.maxHp){repairWithOil(this,target,dt);}
    if((unit.task.type==='build'&&target.completed)||(unit.task.type==='repair'&&target.hp>=target.maxHp)){unit.task=null;unit.foldTime=2.6;}
   }else{
@@ -2480,7 +2495,7 @@ export class Mission{
     const unit=pending.units[pending.cursor];
     pending.iterator??=this.updateUnitSteps(unit,dt);
     if(!pending.iterator.next().done){if(performance.now()>=deadline)return false;continue;}
-    pending.iterator=null;this.applyPendingStops();pending.cursor++;this.unitIndex.update(unit);
+    pending.iterator=null;this.applyPendingStops();pending.cursor++;this.unitIndex.update(unit);this.radioObserver?.unit(unit);
     if(pending.budgeted)this.unitFrameTimes.set(unit,performance.now());
     if(performance.now()>=deadline&&pending.cursor<pending.units.length)return false;
    }
@@ -2506,7 +2521,7 @@ export class Mission{
    pending.missionUpdated=true;pending.scenario=this.state.m02?updateM02Steps(this):null;
    }
    while(pending.scenario){if(pending.scenario.next().done){pending.scenario=null;break;}if(performance.now()>=deadline)return false;}
-   this.pendingTick=null;if(!this.state.m02){updateOpeningConstruction(this);updateScavReinforcements(this);}return true;
+   this.pendingTick=null;if(!this.state.m02){updateOpeningConstruction(this);updateScavReinforcements(this);}this.radioObserver?.tick();return true;
   }finally{this.unitIndexActive=false;this.nav.workDeadline=Infinity;}
  }
  vehicleCollision(unit,speed,blockers){
@@ -2583,6 +2598,8 @@ export class Mission{
   this.presentationRate=Math.max(.01,rate);
   this.accumulator+=Math.max(0,seconds);let ticks=0;
   const budgeted=Number.isFinite(budgetMs);
+  // During overload, drop old wall time instead of fast-forwarding later.
+  if(budgeted)this.accumulator=Math.min(this.accumulator,Math.max(0,this.config.simulationStep*2-(this.pendingTick?this.config.simulationStep:0)));
   const backlog=this.accumulator+(this.pendingTick?this.config.simulationStep:0);
   const catchup=budgetMs>0?Math.min(2.5,Math.max(0,backlog-.1)*20):0;
   const deadline=budgeted?frameStarted+budgetMs+catchup:Infinity;
@@ -2594,8 +2611,8 @@ export class Mission{
   return ticks;
  }
  renderUnitPhase(unit,nowMs){const at=this.unitFrameTimes.get(unit);return at===undefined?null:clamp((nowMs-at)*(this.presentationRate??1)/(this.config.simulationStep*1000),0,1);}
- save(){this.continueTick();this.updateFog();finalizeMissionResults(this);return JSON.stringify({version:1,mission:this.config.id,serial:this.serial,randomState:this.randomState,accumulator:this.accumulator,fogTimer:this.fogTimer,state:this.state,explored:Array.from(this.explored)});}
  objectives(){if(this.state.m02)return m02Objectives(this);const s=this.state,has=kind=>s.buildings.some(b=>b.owner==='rai'&&b.hp>0&&b.completed&&b.kind===kind);return [{id:'base',name:'Развернуть передовую базу',done:has('generator')&&has('factory')&&has('lab')&&this.defenseReady()},{id:'power',name:'Обеспечить энергоснабжение',done:s.powered},{id:'production',name:'Наладить производство техники',done:s.statistics.produced>0},{id:'research',name:'Организовать научные исследования',done:Object.keys(this.config.research).filter(key=>this.config.research[key].mission!=='m02').every(key=>s.research[key]),progress:Object.keys(s.research).length+'/3'},{id:'security',name:s.flags.contact?'Уничтожить четыре лагеря':'Обеспечить безопасность района',done:s.camps.every(c=>c.cleared)&&s.flags.raidWon,progress:s.camps.filter(c=>c.cleared).length+'/4'}];}
+ save(){this.continueTick();this.updateFog();finalizeMissionResults(this);this.radioObserver?.save();return JSON.stringify({version:1,mission:this.config.id,serial:this.serial,randomState:this.randomState,accumulator:this.accumulator,fogTimer:this.fogTimer,state:this.state,explored:Array.from(this.explored)});}
  async saveAsync(){
   const world=this.state;
   while(this.pendingTick){
@@ -2627,6 +2644,7 @@ export class Mission{
   restoreM01Layout(this);installM02Config(this.config);restorePersonnel(this);
   this.oilSpent=0;this.oilWorkTime=null;
   this.factoryBalanceAt=undefined;
+  for(const building of this.state.buildings)restoreConstructionHealth(building);
   this.commandPlanner=null;this.scavJob=null;this.pendingStops=null;
   this.pendingTick=null;this.unitFrameTimes=new WeakMap();this.unitIndexActive=false;this.collisionPairs=new Map();this.contactRockPairs=new Map();this.trafficCoordinator=new PredictiveTraffic();
   for(const unit of this.state.units)if(this.unitSpec(unit).role==='builder')releaseInvalidRepairTarget(this,unit);

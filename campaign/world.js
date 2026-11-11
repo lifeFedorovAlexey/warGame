@@ -166,6 +166,8 @@ export async function createCampaignWorld(host,config,sound,loading){
  }
  function ground(clientX,clientY){pointerRay(clientX,clientY);let lo=0,hi=20000;for(let i=0;i<28;i++){const middle=(lo+hi)/2,p=ray.ray.at(middle,vector);if(p.z>field.heightAt(p.x,p.y))lo=middle;else hi=middle;}const point=ray.ray.at((lo+hi)/2,new T.Vector3());return Math.abs(point.x)<=field.half&&Math.abs(point.y)<=field.half?{x:point.x,y:point.y,z:point.z}:null;}
  function pickEntity(mission,clientX,clientY){
+  const rank=healthBars.rankAt(clientX-viewport.left,clientY-viewport.top);
+  if(rank){const unit=mission.state.units.find(u=>u.id===rank.id&&u.hp>0&&u.owner==='rai'&&u.factoryVisit?.phase!=='inside');if(unit)return unit;}
   pointerRay(clientX,clientY);
   let selected=null,nearest=Infinity;
   for(const b of mission.state.buildings){
@@ -525,5 +527,5 @@ export async function createCampaignWorld(host,config,sound,loading){
   renderer.render(scene,camera);
   lastWorldTime=time;
  }
- return{renderer,scene,camera,controls,terrain,field,vehicles,damage,orderRoutes,setShadowQuality,prepareRendering,shaderPreparation,ground,pickEntity,screen,centre,focusStorySignal,setGhost,commandMarker,drawMinimapFog:fog.drawMinimap,storySignals,update,prepareFrame,updateTrafficVisibility,keys,buildingObjects:buildings,get minimumCameraHeight(){return minimumCameraHeight;},set minimumCameraHeight(value){minimumCameraHeight=value;},set fixedRenderScale(value){fixedRenderScale=value;},get fixedRenderScale(){return fixedRenderScale;},get statistics(){return{drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,vehicleDrawCalls:vehicles.drawCalls,vehicleLod:vehicles.lod,dustParticles:particles.length,dustLimit:256,...combat.statistics,...groundEffects.statistics,headlightBeams:headlightCount,projectors:construction.active,frameMs:frameAverage*1000,renderScale:renderer.getPixelRatio(),terrainMode,shadowUpdates,shadowQuality,shadowHz,fog:fog.stats,damage:damage.statistics};}};
+ return{renderer,scene,camera,controls,terrain,field,vehicles,damage,healthBars,orderRoutes,setShadowQuality,prepareRendering,shaderPreparation,ground,pickEntity,screen,centre,focusStorySignal,setGhost,commandMarker,drawMinimapFog:fog.drawMinimap,storySignals,update,prepareFrame,updateTrafficVisibility,keys,buildingObjects:buildings,get minimumCameraHeight(){return minimumCameraHeight;},set minimumCameraHeight(value){minimumCameraHeight=value;},set fixedRenderScale(value){fixedRenderScale=value;},get fixedRenderScale(){return fixedRenderScale;},get statistics(){return{drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,vehicleDrawCalls:vehicles.drawCalls,vehicleLod:vehicles.lod,dustParticles:particles.length,dustLimit:256,...combat.statistics,...groundEffects.statistics,headlightBeams:headlightCount,projectors:construction.active,frameMs:frameAverage*1000,renderScale:renderer.getPixelRatio(),terrainMode,shadowUpdates,shadowQuality,shadowHz,fog:fog.stats,damage:damage.statistics};}};
 }

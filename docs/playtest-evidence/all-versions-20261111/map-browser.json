@@ -1,0 +1,29 @@
+{
+  "errors": [],
+  "views": [
+    {
+      "width": 1440,
+      "height": 900,
+      "scroll": 1440,
+      "radio": true,
+      "river": true,
+      "fortifications": 4
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "scroll": 844,
+      "radio": true,
+      "river": true,
+      "fortifications": 4
+    },
+    {
+      "width": 667,
+      "height": 375,
+      "scroll": 667,
+      "radio": true,
+      "river": true,
+      "fortifications": 4
+    }
+  ]
+}

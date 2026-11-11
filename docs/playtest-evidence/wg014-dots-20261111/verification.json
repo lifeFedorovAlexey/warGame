@@ -1,0 +1,1150 @@
+{
+  "baseline": false,
+  "errors": [],
+  "cases": [
+    {
+      "width": 1440,
+      "height": 900,
+      "scenario": "queue",
+      "task": {
+        "type": "move",
+        "targetId": null,
+        "x": -1667.9999950364386,
+        "y": 290.00001150639696,
+        "workOffset": 0
+      },
+      "queue": [
+        {
+          "serial": 1,
+          "action": "move",
+          "target": {
+            "x": -1668.000000775651,
+            "y": 364.9999943809097
+          }
+        },
+        {
+          "serial": 2,
+          "action": "move",
+          "target": {
+            "x": -1552.9999986104697,
+            "y": 364.99999304568473
+          }
+        }
+      ],
+      "routes": [
+        {
+          "unit": "u2",
+          "units": [
+            "u2"
+          ],
+          "points": [
+            {
+              "action": "move",
+              "x": -1667.9999950364386,
+              "y": 290.00001150639696,
+              "state": "active"
+            },
+            {
+              "action": "move",
+              "x": -1668.000000775651,
+              "y": 364.9999943809097,
+              "state": "queued"
+            },
+            {
+              "action": "move",
+              "x": -1552.9999986104697,
+              "y": 364.99999304568473,
+              "state": "queued"
+            }
+          ],
+          "placements": [
+            {
+              "unit": "u2",
+              "x": -1667.9999950364386,
+              "y": 290.00001150639696,
+              "heading": 1.0303766135164683,
+              "width": 9.404909279100002,
+              "depth": 19.457951187600006
+            }
+          ]
+        }
+      ],
+      "stats": {
+        "routes": 1,
+        "points": 3,
+        "markers": 3,
+        "placements": 1,
+        "drawCalls": 1,
+        "rebuilds": 35
+      },
+      "layerMeshes": [
+        "order_destination_marks"
+      ],
+      "transient": false
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "scenario": "attack",
+      "task": {
+        "type": "attack-move",
+        "targetId": null,
+        "x": -1573.0000015263695,
+        "y": 364.9999792815304,
+        "workOffset": 0
+      },
+      "queue": [],
+      "routes": [
+        {
+          "unit": "u2",
+          "units": [
+            "u2"
+          ],
+          "points": [
+            {
+              "action": "attack-move",
+              "x": -1573.0000015263695,
+              "y": 364.9999792815304,
+              "state": "active"
+            }
+          ],
+          "placements": [
+            {
+              "unit": "u2",
+              "x": -1573.0000015263695,
+              "y": 364.9999792815304,
+              "heading": -0.40489184544695844,
+              "width": 9.404909279100002,
+              "depth": 19.457951187600006
+            }
+          ]
+        }
+      ],
+      "stats": {
+        "routes": 1,
+        "points": 1,
+        "markers": 1,
+        "placements": 1,
+        "drawCalls": 1,
+        "rebuilds": 39
+      },
+      "layerMeshes": [
+        "order_destination_marks"
+      ],
+      "transient": false
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "scenario": "group",
+      "task": {
+        "type": "move",
+        "targetId": null,
+        "x": -1674.5896126812083,
+        "y": 266.9223829606444,
+        "workOffset": -18
+      },
+      "queue": [
+        {
+          "serial": 3,
+          "action": "move",
+          "target": {
+            "x": -1668.0000007756505,
+            "y": 364.9999943809098
+          }
+        },
+        {
+          "serial": 4,
+          "action": "move",
+          "target": {
+            "x": -1552.9999986104692,
+            "y": 364.99999304568485
+          }
+        }
+      ],
+      "routes": [
+        {
+          "unit": "u1",
+          "units": [
+            "u1",
+            "u2",
+            "u3"
+          ],
+          "points": [
+            {
+              "action": "move",
+              "x": -1667.9999950364381,
+              "y": 290.000011506397,
+              "state": "active"
+            },
+            {
+              "action": "move",
+              "x": -1668.0000007756505,
+              "y": 364.9999943809098,
+              "state": "queued"
+            },
+            {
+              "action": "move",
+              "x": -1552.9999986104692,
+              "y": 364.99999304568485,
+              "state": "queued"
+            }
+          ],
+          "placements": [
+            {
+              "unit": "u1",
+              "x": -1661.410377391668,
+              "y": 313.0776400521496,
+              "heading": 1.2046552146488525,
+              "width": 9.404909279100002,
+              "depth": 19.457951187600006
+            },
+            {
+              "unit": "u2",
+              "x": -1674.5896126812083,
+              "y": 266.9223829606444,
+              "heading": 1.4490750196595377,
+              "width": 9.404909279100002,
+              "depth": 19.457951187600006
+            },
+            {
+              "unit": "u3",
+              "x": -1667.9999950364381,
+              "y": 290.000011506397,
+              "heading": 1.203622343147664,
+              "width": 9.404909279100002,
+              "depth": 19.457951187600006
+            }
+          ]
+        }
+      ],
+      "stats": {
+        "routes": 1,
+        "points": 3,
+        "markers": 5,
+        "placements": 3,
+        "drawCalls": 1,
+        "rebuilds": 45
+      },
+      "layerMeshes": [
+        "order_destination_marks"
+      ],
+      "transient": false
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "scenario": "attack-group",
+      "task": {
+        "type": "attack-move",
+        "targetId": null,
+        "x": -1573.000001526369,
+        "y": 364.99997928153044,
+        "workOffset": 0
+      },
+      "queue": [],
+      "routes": [
+        {
+          "unit": "u1",
+          "units": [
+            "u1",
+            "u2",
+            "u3"
+          ],
+          "points": [
+            {
+              "action": "attack-move",
+              "x": -1573.000001526369,
+              "y": 364.99997928153044,
+              "state": "active"
+            }
+          ],
+          "placements": [
+            {
+              "unit": "u1",
+              "x": -1594.4314316729883,
+              "y": 375.8024698217059,
+              "heading": -0.6443709342093557,
+              "width": 9.404909279100002,
+              "depth": 19.457951187600006
+            },
+            {
+              "unit": "u2",
+              "x": -1573.000001526369,
+              "y": 364.99997928153044,
+              "heading": -0.40489184544696194,
+              "width": 9.404909279100002,
+              "depth": 19.457951187600006
+            },
+            {
+              "unit": "u3",
+              "x": -1551.5685713797498,
+              "y": 354.19748874135496,
+              "heading": -0.3873734108174347,
+              "width": 9.404909279100002,
+              "depth": 19.457951187600006
+            }
+          ]
+        }
+      ],
+      "stats": {
+        "routes": 1,
+        "points": 1,
+        "markers": 3,
+        "placements": 3,
+        "drawCalls": 1,
+        "rebuilds": 49
+      },
+      "layerMeshes": [
+        "order_destination_marks"
+      ],
+      "transient": false
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "scenario": "enemy",
+      "task": {
+        "type": "attack",
+        "targetId": "u182",
+        "x": -1548,
+        "y": 360,
+        "workOffset": 0
+      },
+      "queue": [],
+      "routes": [
+        {
+          "unit": "u2",
+          "units": [
+            "u2"
+          ],
+          "points": [
+            {
+              "action": "attack",
+              "x": -1548,
+              "y": 360,
+              "state": "active",
+              "targetId": "u182",
+              "radius": 9.45899999325
+            }
+          ],
+          "placements": []
+        }
+      ],
+      "stats": {
+        "routes": 1,
+        "points": 1,
+        "markers": 1,
+        "placements": 0,
+        "drawCalls": 1,
+        "rebuilds": 53
+      },
+      "layerMeshes": [
+        "order_destination_marks"
+      ],
+      "transient": false
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "scenario": "queue",
+      "task": {
+        "type": "move",
+        "targetId": null,
+        "x": -1668.0000058306946,
+        "y": 290.000002694867,
+        "workOffset": 0
+      },
+      "queue": [
+        {
+          "serial": 5,
+          "action": "move",
+          "target": {
+            "x": -1667.9999948260663,
+            "y": 364.99999314528054
+          }
+        },
+        {
+          "serial": 6,
+          "action": "move",
+          "target": {
+            "x": -1553.000013304829,
+            "y": 364.9999905769374
+          }
+        }
+      ],
+      "routes": [
+        {
+          "unit": "u2",
+          "units": [
+            "u2"
+          ],
+          "points": [
+            {
+              "action": "move",
+              "x": -1668.0000058306946,
+              "y": 290.000002694867,
+              "state": "active"
+            },
+            {
+              "action": "move",
+              "x": -1667.9999948260663,
+              "y": 364.99999314528054,
+              "state": "queued"
+            },
+            {
+              "action": "move",
+              "x": -1553.000013304829,
+              "y": 364.9999905769374,
+              "state": "queued"
+            }
+          ],
+          "placements": [
+            {
+              "unit": "u2",
+              "x": -1668.0000058306946,
+              "y": 290.000002694867,
+              "heading": 1.030376838341219,
+              "width": 9.404909279100002,
+              "depth": 19.457951187600006
+            }
+          ]
+        }
+      ],
+      "stats": {
+        "routes": 1,
+        "points": 3,
+        "markers": 3,
+        "placements": 1,
+        "drawCalls": 1,
+        "rebuilds": 63
+      },
+      "layerMeshes": [
+        "order_destination_marks"
+      ],
+      "transient": false
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "scenario": "attack",
+      "task": {
+        "type": "attack-move",
+        "targetId": null,
+        "x": -1572.9999938994256,
+        "y": 364.99998309240743,
+        "workOffset": 0
+      },
+      "queue": [],
+      "routes": [
+        {
+          "unit": "u2",
+          "units": [
+            "u2"
+          ],
+          "points": [
+            {
+              "action": "attack-move",
+              "x": -1572.9999938994256,
+              "y": 364.99998309240743,
+              "state": "active"
+            }
+          ],
+          "placements": [
+            {
+              "unit": "u2",
+              "x": -1572.9999938994256,
+              "y": 364.99998309240743,
+              "heading": -0.40489189367222056,
+              "width": 9.404909279100002,
+              "depth": 19.457951187600006
+            }
+          ]
+        }
+      ],
+      "stats": {
+        "routes": 1,
+        "points": 1,
+        "markers": 1,
+        "placements": 1,
+        "drawCalls": 1,
+        "rebuilds": 67
+      },
+      "layerMeshes": [
+        "order_destination_marks"
+      ],
+      "transient": false
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "scenario": "group",
+      "task": {
+        "type": "move",
+        "targetId": null,
+        "x": -1674.5896183997245,
+        "y": 266.9223726997815,
+        "workOffset": -18
+      },
+      "queue": [
+        {
+          "serial": 7,
+          "action": "move",
+          "target": {
+            "x": -1667.9999948260659,
+            "y": 364.99999314528054
+          }
+        },
+        {
+          "serial": 8,
+          "action": "move",
+          "target": {
+            "x": -1553.0000133048286,
+            "y": 364.99999057693753
+          }
+        }
+      ],
+      "routes": [
+        {
+          "unit": "u1",
+          "units": [
+            "u1",
+            "u2",
+            "u3"
+          ],
+          "points": [
+            {
+              "action": "move",
+              "x": -1668.0000058306941,
+              "y": 290.00000269486713,
+              "state": "active"
+            },
+            {
+              "action": "move",
+              "x": -1667.9999948260659,
+              "y": 364.99999314528054,
+              "state": "queued"
+            },
+            {
+              "action": "move",
+              "x": -1553.0000133048286,
+              "y": 364.99999057693753,
+              "state": "queued"
+            }
+          ],
+          "placements": [
+            {
+              "unit": "u1",
+              "x": -1661.4103932616638,
+              "y": 313.0776326899528,
+              "heading": 1.20465597541092,
+              "width": 9.404909279100002,
+              "depth": 19.457951187600006
+            },
+            {
+              "unit": "u2",
+              "x": -1674.5896183997245,
+              "y": 266.9223726997815,
+              "heading": 1.4490752104860074,
+              "width": 9.404909279100002,
+              "depth": 19.457951187600006
+            },
+            {
+              "unit": "u3",
+              "x": -1668.0000058306941,
+              "y": 290.00000269486713,
+              "heading": 1.2036224879253015,
+              "width": 9.404909279100002,
+              "depth": 19.457951187600006
+            }
+          ]
+        }
+      ],
+      "stats": {
+        "routes": 1,
+        "points": 3,
+        "markers": 5,
+        "placements": 3,
+        "drawCalls": 1,
+        "rebuilds": 73
+      },
+      "layerMeshes": [
+        "order_destination_marks"
+      ],
+      "transient": false
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "scenario": "attack-group",
+      "task": {
+        "type": "attack-move",
+        "targetId": null,
+        "x": -1572.9999938994251,
+        "y": 364.99998309240755,
+        "workOffset": 0
+      },
+      "queue": [],
+      "routes": [
+        {
+          "unit": "u1",
+          "units": [
+            "u1",
+            "u2",
+            "u3"
+          ],
+          "points": [
+            {
+              "action": "attack-move",
+              "x": -1572.9999938994251,
+              "y": 364.99998309240755,
+              "state": "active"
+            }
+          ],
+          "placements": [
+            {
+              "unit": "u1",
+              "x": -1594.4314234954884,
+              "y": 375.8024747248497,
+              "heading": -0.6443709760557446,
+              "width": 9.404909279100002,
+              "depth": 19.457951187600006
+            },
+            {
+              "unit": "u2",
+              "x": -1572.9999938994251,
+              "y": 364.99998309240755,
+              "heading": -0.40489189367222383,
+              "width": 9.404909279100002,
+              "depth": 19.457951187600006
+            },
+            {
+              "unit": "u3",
+              "x": -1551.5685643033619,
+              "y": 354.1974914599654,
+              "heading": -0.38737346512566323,
+              "width": 9.404909279100002,
+              "depth": 19.457951187600006
+            }
+          ]
+        }
+      ],
+      "stats": {
+        "routes": 1,
+        "points": 1,
+        "markers": 3,
+        "placements": 3,
+        "drawCalls": 1,
+        "rebuilds": 77
+      },
+      "layerMeshes": [
+        "order_destination_marks"
+      ],
+      "transient": false
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "scenario": "enemy",
+      "task": {
+        "type": "attack",
+        "targetId": "u183",
+        "x": -1548,
+        "y": 360,
+        "workOffset": 0
+      },
+      "queue": [],
+      "routes": [
+        {
+          "unit": "u2",
+          "units": [
+            "u2"
+          ],
+          "points": [
+            {
+              "action": "attack",
+              "x": -1548,
+              "y": 360,
+              "state": "active",
+              "targetId": "u183",
+              "radius": 9.45899999325
+            }
+          ],
+          "placements": []
+        }
+      ],
+      "stats": {
+        "routes": 1,
+        "points": 1,
+        "markers": 1,
+        "placements": 0,
+        "drawCalls": 1,
+        "rebuilds": 81
+      },
+      "layerMeshes": [
+        "order_destination_marks"
+      ],
+      "transient": false
+    },
+    {
+      "width": 667,
+      "height": 375,
+      "scenario": "queue",
+      "task": {
+        "type": "move",
+        "targetId": null,
+        "x": -1667.9999979066367,
+        "y": 290.0000062349866,
+        "workOffset": 0
+      },
+      "queue": [
+        {
+          "serial": 9,
+          "action": "move",
+          "target": {
+            "x": -1667.9999867838917,
+            "y": 364.9999967992019
+          }
+        },
+        {
+          "serial": 10,
+          "action": "move",
+          "target": {
+            "x": -1553.000011207593,
+            "y": 364.9999904876479
+          }
+        }
+      ],
+      "routes": [
+        {
+          "unit": "u2",
+          "units": [
+            "u2"
+          ],
+          "points": [
+            {
+              "action": "move",
+              "x": -1667.9999979066367,
+              "y": 290.0000062349866,
+              "state": "active"
+            },
+            {
+              "action": "move",
+              "x": -1667.9999867838917,
+              "y": 364.9999967992019,
+              "state": "queued"
+            },
+            {
+              "action": "move",
+              "x": -1553.000011207593,
+              "y": 364.9999904876479,
+              "state": "queued"
+            }
+          ],
+          "placements": [
+            {
+              "unit": "u2",
+              "x": -1667.9999979066367,
+              "y": 290.0000062349866,
+              "heading": 1.0303767163624835,
+              "width": 9.404909279100002,
+              "depth": 19.457951187600006
+            }
+          ]
+        }
+      ],
+      "stats": {
+        "routes": 1,
+        "points": 3,
+        "markers": 3,
+        "placements": 1,
+        "drawCalls": 1,
+        "rebuilds": 89
+      },
+      "layerMeshes": [
+        "order_destination_marks"
+      ],
+      "transient": false
+    },
+    {
+      "width": 667,
+      "height": 375,
+      "scenario": "attack",
+      "task": {
+        "type": "attack-move",
+        "targetId": null,
+        "x": -1572.99999792286,
+        "y": 364.9999823898295,
+        "workOffset": 0
+      },
+      "queue": [],
+      "routes": [
+        {
+          "unit": "u2",
+          "units": [
+            "u2"
+          ],
+          "points": [
+            {
+              "action": "attack-move",
+              "x": -1572.99999792286,
+              "y": 364.9999823898295,
+              "state": "active"
+            }
+          ],
+          "placements": [
+            {
+              "unit": "u2",
+              "x": -1572.99999792286,
+              "y": 364.9999823898295,
+              "heading": -0.40489186372243985,
+              "width": 9.404909279100002,
+              "depth": 19.457951187600006
+            }
+          ]
+        }
+      ],
+      "stats": {
+        "routes": 1,
+        "points": 1,
+        "markers": 1,
+        "placements": 1,
+        "drawCalls": 1,
+        "rebuilds": 93
+      },
+      "layerMeshes": [
+        "order_destination_marks"
+      ],
+      "transient": false
+    },
+    {
+      "width": 667,
+      "height": 375,
+      "scenario": "group",
+      "task": {
+        "type": "move",
+        "targetId": null,
+        "x": -1674.5896129520395,
+        "y": 266.92237694700714,
+        "workOffset": -18
+      },
+      "queue": [
+        {
+          "serial": 11,
+          "action": "move",
+          "target": {
+            "x": -1667.9999867838915,
+            "y": 364.99999679920165
+          }
+        },
+        {
+          "serial": 12,
+          "action": "move",
+          "target": {
+            "x": -1553.0000112075925,
+            "y": 364.9999904876479
+          }
+        }
+      ],
+      "routes": [
+        {
+          "unit": "u1",
+          "units": [
+            "u1",
+            "u2",
+            "u3"
+          ],
+          "points": [
+            {
+              "action": "move",
+              "x": -1667.9999979066365,
+              "y": 290.0000062349864,
+              "state": "active"
+            },
+            {
+              "action": "move",
+              "x": -1667.9999867838915,
+              "y": 364.99999679920165,
+              "state": "queued"
+            },
+            {
+              "action": "move",
+              "x": -1553.0000112075925,
+              "y": 364.9999904876479,
+              "state": "queued"
+            }
+          ],
+          "placements": [
+            {
+              "unit": "u1",
+              "x": -1661.4103828612335,
+              "y": 313.0776355229657,
+              "heading": 1.2046555895290616,
+              "width": 9.404909279100002,
+              "depth": 19.457951187600006
+            },
+            {
+              "unit": "u2",
+              "x": -1674.5896129520395,
+              "y": 266.92237694700714,
+              "heading": 1.4490751249371492,
+              "width": 9.404909279100002,
+              "depth": 19.457951187600006
+            },
+            {
+              "unit": "u3",
+              "x": -1667.9999979066365,
+              "y": 290.0000062349864,
+              "heading": 1.2036224143498384,
+              "width": 9.404909279100002,
+              "depth": 19.457951187600006
+            }
+          ]
+        }
+      ],
+      "stats": {
+        "routes": 1,
+        "points": 3,
+        "markers": 5,
+        "placements": 3,
+        "drawCalls": 1,
+        "rebuilds": 99
+      },
+      "layerMeshes": [
+        "order_destination_marks"
+      ],
+      "transient": false
+    },
+    {
+      "width": 667,
+      "height": 375,
+      "scenario": "attack-group",
+      "task": {
+        "type": "attack-move",
+        "targetId": null,
+        "x": -1572.9999979228596,
+        "y": 364.99998238982954,
+        "workOffset": 0
+      },
+      "queue": [],
+      "routes": [
+        {
+          "unit": "u1",
+          "units": [
+            "u1",
+            "u2",
+            "u3"
+          ],
+          "points": [
+            {
+              "action": "attack-move",
+              "x": -1572.9999979228596,
+              "y": 364.99998238982954,
+              "state": "active"
+            }
+          ],
+          "placements": [
+            {
+              "unit": "u1",
+              "x": -1594.4314278729587,
+              "y": 375.8024733198879,
+              "heading": -0.6443709451204512,
+              "width": 9.404909279100002,
+              "depth": 19.457951187600006
+            },
+            {
+              "unit": "u2",
+              "x": -1572.9999979228596,
+              "y": 364.99998238982954,
+              "heading": -0.4048918637224433,
+              "width": 9.404909279100002,
+              "depth": 19.457951187600006
+            },
+            {
+              "unit": "u3",
+              "x": -1551.5685679727605,
+              "y": 354.1974914597712,
+              "heading": -0.3873734317308878,
+              "width": 9.404909279100002,
+              "depth": 19.457951187600006
+            }
+          ]
+        }
+      ],
+      "stats": {
+        "routes": 1,
+        "points": 1,
+        "markers": 3,
+        "placements": 3,
+        "drawCalls": 1,
+        "rebuilds": 103
+      },
+      "layerMeshes": [
+        "order_destination_marks"
+      ],
+      "transient": false
+    },
+    {
+      "width": 667,
+      "height": 375,
+      "scenario": "enemy",
+      "task": {
+        "type": "attack",
+        "targetId": "u184",
+        "x": -1548,
+        "y": 360,
+        "workOffset": 0
+      },
+      "queue": [],
+      "routes": [
+        {
+          "unit": "u2",
+          "units": [
+            "u2"
+          ],
+          "points": [
+            {
+              "action": "attack",
+              "x": -1548,
+              "y": 360,
+              "state": "active",
+              "targetId": "u184",
+              "radius": 9.45899999325
+            }
+          ],
+          "placements": []
+        }
+      ],
+      "stats": {
+        "routes": 1,
+        "points": 1,
+        "markers": 1,
+        "placements": 0,
+        "drawCalls": 1,
+        "rebuilds": 107
+      },
+      "layerMeshes": [
+        "order_destination_marks"
+      ],
+      "transient": false
+    }
+  ],
+  "rotation": {
+    "changedPixels": 890,
+    "targetId": "u182"
+  },
+  "lifecycle": [
+    "deselection hides",
+    "reselection restores",
+    "Stop clears"
+  ],
+  "saved": {
+    "before": [
+      [
+        {
+          "action": "move",
+          "x": -1618,
+          "y": 295,
+          "state": "active"
+        },
+        {
+          "action": "move",
+          "x": -1618,
+          "y": 335,
+          "state": "queued"
+        },
+        {
+          "action": "move",
+          "x": -1618,
+          "y": 375,
+          "state": "queued"
+        }
+      ]
+    ],
+    "after": [
+      [
+        {
+          "action": "move",
+          "x": -1618,
+          "y": 295,
+          "state": "active"
+        },
+        {
+          "action": "move",
+          "x": -1618,
+          "y": 335,
+          "state": "queued"
+        },
+        {
+          "action": "move",
+          "x": -1618,
+          "y": 375,
+          "state": "queued"
+        }
+      ]
+    ]
+  },
+  "progress": {
+    "visited": [
+      {
+        "x": -1618,
+        "y": 292.75421867939633
+      },
+      {
+        "x": -1618,
+        "y": 332.09621850144725
+      },
+      {
+        "x": -1618,
+        "y": 372.7555991202487
+      }
+    ],
+    "counts": [
+      3,
+      2,
+      1,
+      0
+    ],
+    "final": {
+      "routes": 0,
+      "points": 0,
+      "markers": 0,
+      "placements": 0,
+      "drawCalls": 0,
+      "rebuilds": 192
+    }
+  },
+  "zoom": [
+    {
+      "distance": 260,
+      "changed": 237,
+      "screen": {
+        "x": 719.999999999999,
+        "y": 448.09851014651514,
+        "visible": true
+      },
+      "drawCalls": 1
+    },
+    {
+      "distance": 700,
+      "changed": 220,
+      "screen": {
+        "x": 719.9999999999995,
+        "y": 449.29444359491066,
+        "visible": true
+      },
+      "drawCalls": 1
+    },
+    {
+      "distance": 1600,
+      "changed": 229,
+      "screen": {
+        "x": 719.9999999999999,
+        "y": 449.69142236402047,
+        "visible": true
+      },
+      "drawCalls": 1
+    }
+  ],
+  "passed": true
+}

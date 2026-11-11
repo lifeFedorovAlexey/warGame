@@ -30,7 +30,8 @@ export function installMinimapInput(canvas,{mission,enabled,mode,building,order,
  canvas.addEventListener('pointerdown',e=>{
   if(!enabled()||![0,2].includes(e.button))return;
   e.preventDefault();e.stopPropagation();
-  if(e.button===2||mode()==='attack'||mode()==='move'){
+  // Camera navigation stays on the left button in every command mode.
+  if(e.button===2){
    if(building()){cancel();return;}
    order(at(e),minimapTarget(mission,canvas.getBoundingClientRect(),e.clientX,e.clientY),mode(),e.shiftKey);return;
   }

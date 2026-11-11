@@ -1,5 +1,3 @@
-import {missionResults,campaignMemorial,setPersonnelRank} from './personnel.js';
-import {MissionResultsView,resultsPresentationReady} from './mission-results.js';
 import {perf} from './performance.js';
 import {createStabilityGraph} from './stability-graph.js';
 import {setButtonIcon, speedIcon} from '../assets/ui/icons.js';
@@ -9,6 +7,7 @@ import {canDemolish,demolitionWorkers,requestDemolition,cancelDemolition} from '
 import {productionFactories} from './factory-production.js';
 import {createFactoryRows,updateFactoryRows} from './factory-queues.js';
 import {FieldRadio, missionSignal} from './field-radio.js';
+import {MissionRadio,loadRadioLibrary} from './radio/adapter.js';
 import {raidApproachSignal, visibleRaidContact, warehouseAdvanceHint, waterTowerSignal} from './threat-guidance.js';
 import {restoreRadioStory} from './radio-save.js';
 import {FieldSound} from './field-sound.js';
@@ -19,6 +18,7 @@ import {OpeningCamera} from './opening-camera.js';
 import {mainMenu} from './main-menu.js';
 import {ENTRY_STAGES} from './loading-progress.js';
 import {storyObjectives} from './story-objectives.js';
+import {storyMilestoneNotice} from './story-milestones.js';
 import {createMinimap,installMinimapInput} from './minimap.js';
 import {VehicleDesigner} from './designer.js';
 import {CombatMenu} from './combat-menu.js';
@@ -29,6 +29,10 @@ import {isAutomaticRepair} from './combat-retreat-state.js';
 import {latestVehicleProject} from './vehicle-designs.js';
 import {oilPowerStatus,oilReserved,oilFundingRemaining,oilOrderProgress} from './oil-economy.js';
 import {installNavigationTelemetry} from './navigation-telemetry.js';
+import {personnelLabel,missionResults,campaignMemorial,setPersonnelRank} from './personnel.js';
+import {renderPersonnelSelection} from './personnel-presentation.js';
+import {PersonnelNotices} from './personnel-notices.js';
+import {MissionResultsView,resultsPresentationReady} from './mission-results.js';
 
 const $ = id => document.getElementById(id);
 const stabilityGraph=createStabilityGraph();
@@ -42,15 +46,16 @@ const selected = new Set();
 const miniBackground = new Image();
 let world, mission, config, radio, sound, designer, combatMenu, openingTelevision;
 let minimapView;
-let resultsView,resultPrepared=false;
-let active = false, paused = false, speed = 1, resultShown = false;
+let resultsView;
+const personnelNotices=new PersonnelNotices($('personnel-notice'),()=>sound?.signal('complete'));
+let active = false, paused = false, speed = 1, resultShown = false, resultPrepared=false;
 let openingPlaying = false;
 let openingCamera=null;
 let pausedBeforeDesigner = false;
 let buildOpen = false, buildKind = null, rotation = 0, orderMode = null;
 let snapBuildings = true, freePlacement = false;
 let pointer = null, drag = null, site = null, placing = null;
-let last = performance.now(), lastUi = 0, toastUntil = 0,uiPending=false;
+let last = performance.now(), lastUi = 0, toastUntil = 0,milestoneToastUntil=0,uiPending=false;
 let actionKey = '', rosterKey = '', paletteKey = '', taskKey = '', queueKey = '';
 let blockedOrders = new Set(), blockedUntil = 0;
 let lastCommandRevision=null,lastCommandFeedback='';
@@ -273,6 +278,7 @@ async function start(restore = false) {
   if(loadingGame)return;
   loadingGame=true;
   sound.unlock();
+  personnelNotices.reset();
   try {
   if(!restore&&diagnosticM02&&!mission.state.m02){const {prepareM02Diagnostic}=await import('./mission02-diagnostic.js');prepareM02Diagnostic(mission);}
   const continuing=restore||!!mission.state.m02;
@@ -311,7 +317,8 @@ async function start(restore = false) {
   minimapView.reset(restore);
   blockedOrders.clear();
   $('order-feedback').hidden=true;
-  resultsView?.hide();$('results-open').hidden=mission.state.status==='running';
+  resultsView?.hide();
+  $('results-open').hidden=mission.state.status==='running';
   $('mission-hud').hidden = false;
   document.querySelector('.settings').open = false;
   const worker = builders()[0];
@@ -534,7 +541,8 @@ function installInput() {
     freePlacement=event.altKey;
     site = null;
     const oil = !buildKind && !orderMode && oilAt(pointer.x,pointer.y);
-    canvas.title = oil ? 'Построить вышку' : '';
+    const rank=world.healthBars.rankAt(pointer.x,pointer.y);
+    canvas.title = oil ? 'Построить вышку' : rank ? rank.name+' · Нажмите на машину: личное дело' : '';
     if (buildKind) {
       updatePlacement();
       return;
@@ -775,13 +783,14 @@ function updateRoster() {
     b.removeAttribute('aria-disabled');
     b.classList.toggle('active',active);
     b.setAttribute('aria-pressed',String(active));
-    b.setAttribute('aria-label',units.length>1?label+' · '+units.length+' машин':label);
+    const displayLabel=units.length===1?personnelLabel(mission,units[0],label):label;
+    b.setAttribute('aria-label',units.length>1?label+' · '+units.length+' машин':displayLabel);
     const lowest=units.reduce((min,unit)=>unit.hp/unit.maxHp<min.hp/min.maxHp?unit:min);
     b.style.setProperty('--hp',100*lowest.hp/lowest.maxHp+'%');
     b.style.setProperty('--hp-color',hpColor(lowest.hp/lowest.maxHp));
     const blocked=recovering?0:units.filter(unit=>blockedOrders.has(unit.id)).length;
     b.classList.toggle('order-blocked',blocked>0);
-    b.title=label+(units.length>1?' ×'+units.length+' · минимум ':' · ')+Math.ceil(lowest.hp)+'/'+lowest.maxHp+' HP'+(recovering?' · Возвращаются в строй после полного ремонта':'')+(blocked?' · Без маршрута'+(blocked>1?' ×'+blocked:''):'');
+    b.title=displayLabel+(units.length>1?' ×'+units.length+' · минимум ':' · ')+Math.ceil(lowest.hp)+'/'+lowest.maxHp+' HP'+(recovering?' · Возвращаются в строй после полного ремонта':'')+(blocked?' · Без маршрута'+(blocked>1?' ×'+blocked:''):'');
   }
 }
 function updateContext(first) {
@@ -954,7 +963,7 @@ function flushUi() {
   const entityName = first && ((first.owner==='unknown'?'Неизвестные · сенсор':null)??projectLabel(first)
     ?? config.buildings[first.kind]?.name ?? config.camps.find(camp=>camp.id===first.campId)?.name ?? 'Лагерь');
   $('selection').parentElement.hidden=!first;
-  $('selection').textContent = group.length > 1 ? 'Группа · ' + group.length : entityName ?? '';
+  renderPersonnelSelection($('selection'),mission,group.length===1?first:null,group.length>1?'Группа · '+group.length:personnelLabel(mission,first,entityName)??'');
   const hp = group.reduce((sum,entity)=>sum+entity.hp,0), maxHp = group.reduce((sum,entity)=>sum+entity.maxHp,0);
   const wellStatus=group.length===1&&first?.owner==='rai'&&first.kind==='derrick'&&first.completed
     ? ' · '+(first.powered?'Качает':s.powered?'Лимит АЭС':'Нет питания'):'';
@@ -972,23 +981,27 @@ function flushUi() {
   combatMenu?.refresh();
 }
 function events() {
-  for (const event of mission.drainEvents()) {
+  const batch=mission.drainEvents(),ordinaryNotice=text=>{if(performance.now()>milestoneToastUntil)toast(text);};
+  personnelNotices.consume(batch,mission,performance.now());
+  for (const event of batch) {
     if(active)minimapView.alerts.event(event,performance.now());
     radio?.director?.note(event,mission);
     if(event.type==='construction-complete'&&config.buildings[event.kind]?.storyOnly)continue;
     sound?.storyEvent?.(event);
     if (event.type === 'construction-complete') {
-      toast('Построено · ' + config.buildings[event.kind].name);
+      ordinaryNotice('Построено · ' + config.buildings[event.kind].name);
       sound.signal('complete');
       saveGame(false);
     }
     if (event.type === 'navigation-command-rejected') toast('Новый маршрут недоступен · прежний приказ сохранён');
-    if (event.type === 'unit-produced') toast((event.name ?? config.units[event.kind].name) + ' · готово к выезду');
+    if (event.type === 'unit-produced') ordinaryNotice((event.name ?? config.units[event.kind].name) + ' · готово к выезду');
     if (event.type === 'field-modification') toast('Установлено · '+event.name+' · +'+event.massKg+' кг');
     if (event.type === 'construction-refused') toast(event.reason);
-    if (event.type === 'artifact-collected') toast('Артефакт доставлен в НИИ');
-    if (event.type === 'camp-cleared') toast('Лагерь зачищен');
+    if (mission.state.m02&&event.type === 'artifact-collected') toast('Артефакт доставлен в НИИ');
+    if (mission.state.m02&&event.type === 'camp-cleared') toast('Лагерь зачищен');
   }
+  const notice=storyMilestoneNotice(batch,mission);
+  if(notice){toast(notice,6000);milestoneToastUntil=performance.now()+6000;}
 }
 function presentSignal(signal,chapter) {
   if(active)minimapView.alerts.signal(signal,chapter,performance.now());
@@ -1009,7 +1022,8 @@ function frame(now) {
   last = now;
   if (loadingGame || !world || !mission || !$('welcome').hidden) return;
   if(window.campaign?.renderSuspended)return;
-  if(!$('result').hidden){sound.update();return;}
+  if(!$('result').hidden){personnelNotices.reset();sound.update();return;}
+  personnelNotices.update(now,{hidden:!!designer?.visible||!!openingTelevision?.active});
   if(openingTelevision?.active){
     openingTelevision.update(dt);
     return;
@@ -1018,14 +1032,14 @@ function frame(now) {
     sound.update();
     return;
   }
-  stabilityGraph.sample(now);
   perf?.begin(now);
   const frameWorkStarted=performance.now();
+  let stabilityTicks=0,stabilitySimulationMs=0;
   // Preserve the original input order: advance camera controls in world.update
   // AFTER simulation. This read reuses the previous render's visibility cache.
   world.updateTrafficVisibility(mission);
   if (active || openingPlaying) {
-    if (!paused) mission.advance(dt * speed,{budgetMs:mission.config.simulationCpuBudgetMs,rate:speed});
+    if (!paused) {const measuring=stabilityGraph.enabled,start=measuring?performance.now():0;const completed=mission.advance(dt * speed,{budgetMs:mission.config.simulationCpuBudgetMs,rate:speed});if(measuring){stabilityTicks=Number.isFinite(completed)?completed:0;stabilitySimulationMs=performance.now()-start;}}
     events();
     radio.consume(mission, now);
     if(openingPlaying&&openingCamera.update(dt,openingCanHandOver(mission,radio.director,radio.enabled))){
@@ -1062,6 +1076,7 @@ function frame(now) {
   }
   if (now >= toastUntil) $('toast').hidden = true;
   const frameFinished=performance.now();
+  if(stabilityGraph.enabled)stabilityGraph.sample(now,{mission,running:(active||openingPlaying)&&!paused&&mission.state.status==='running',speed,ticks:stabilityTicks,step:mission.config.simulationStep,finishedAt:frameFinished,simulationMs:stabilitySimulationMs,worldMs:debugStarted-renderStarted,otherMs:Math.max(0,frameFinished-frameWorkStarted-stabilitySimulationMs-(debugStarted-renderStarted))});
   perf?.end(world);
   navigationTelemetry?.frameWork({simulationAndEvents:renderStarted-frameWorkStarted,render:debugStarted-renderStarted,
    diagnostics:uiStarted-debugStarted,ui:frameFinished-uiStarted,total:frameFinished-frameWorkStarted});
@@ -1132,6 +1147,12 @@ try {
     onFocus:focusSignal,
   });
   sound.configureStoryVoices(story,mission,()=>!!radio.entry);
+  try {
+    const library=await loadRadioLibrary();
+    mission.radioObserver=new MissionRadio(mission,library,{legacyBarks:story.barks});
+    radio.dynamic=mission.radioObserver;
+    radio.audioBusy=()=>!!(sound.voiceSource||sound.pendingVoice||sound.storyPlayback||sound.pendingStory);
+  } catch(error) { console.warn('Динамический эфир недоступен:',error.message); }
   const cacheRadioPosition=()=>{radioBottom=Math.max($('radio').getBoundingClientRect().bottom,radio.portrait.hidden?0:radio.portrait.getBoundingClientRect().bottom);positionFieldTasks();uiPending=true;};
   new ResizeObserver(cacheRadioPosition).observe($('radio'));
   new ResizeObserver(cacheRadioPosition).observe(radio.portrait);
@@ -1140,8 +1161,8 @@ try {
     ready: true, mission, world, select, radio,
     getResults:id=>missionResults(mission,id),getMemorial:()=>campaignMemorial(mission),
     showResults:()=>resultsView.show(mission),setPersonnelRank:(id,rank)=>setPersonnelRank(mission,id,rank),
-    get memorialAudio(){return {active:!!sound.memorialMix,enabled:sound.enabled,playing:!!sound.memorialMusic&&!sound.memorialMusic.paused,src:sound.memorialMusic?.src??''};},
     get drivingAudio() { return {running:sound.ready(), recordings:!!sound.recordings}; },
+    get memorialAudio() {return {active:!!sound.memorialMix,enabled:sound.enabled,playing:!!sound.memorialMusic&&!sound.memorialMusic.paused,time:sound.memorialMusic?.currentTime??0,src:sound.memorialMusic?.src??''};},
     get storyAudio() { return {playing:!!sound.storyPlayback, enabled:sound.storyEnabled, chapter:sound.storyPlayback?.chapter, cueId:sound.storyPlayback?.cueId, urgent:!!sound.storyPlayback?.urgent}; },
     get unitVoice() {return {playing:!!sound.voiceSource,cueId:sound.voiceCueId};},
     get selected() { return [...selected]; },

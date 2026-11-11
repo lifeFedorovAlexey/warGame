@@ -1,4 +1,5 @@
 import {missionResults} from './personnel.js';
+import {hasPendingCampDemolition} from './camp-demolition.js';
 import {rankGroups,rankInsignia} from './personnel-ranks.js';
 import {personnelMissionName,personnelServiceDetails,personnelAwards,personnelAwardIcon,personnelAwardTypes} from './personnel-awards.js';
 import {renderPersonnelService} from './personnel-presentation.js';
@@ -9,6 +10,7 @@ const clock=seconds=>[Math.floor(seconds/3600),Math.floor(seconds/60)%60,Math.fl
 const missionName=personnelMissionName;
 export function resultsPresentationReady(mission,radio){
  if(mission.state.status==='running')return false;
+ if(mission.state.status==='victory'&&hasPendingCampDemolition(mission))return false;
  if(mission.state.status==='defeat'||!radio?.enabled||!radio.director)return true;
  const id=mission.state.m02?'m02-radio-victory':'r54',director=radio.director;
  // The final exchange keeps its portraits, captions and full recordings on

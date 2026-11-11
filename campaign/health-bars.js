@@ -1,5 +1,7 @@
 import {buildLayerHeight} from './builder-optics.js';
 import {SCAV_PROFILES} from './scav-unit-profiles.js';
+import {rankById} from './personnel-ranks.js';
+import {createRankAtlas,rankAtlasSlot,RANK_ATLAS_COLUMNS,RANK_ATLAS_ROWS} from './personnel-rank-atlas.js';
 const poseComponents=[8,9,10,12,13,14];
 
 // Render health in the same WebGL frame as the map. A separate DOM canvas can
@@ -7,33 +9,51 @@ const poseComponents=[8,9,10,12,13,14];
 export function createHealthBars(T,scene,field,config,transforms,buildings){
  const geometry=new T.InstancedBufferGeometry();
  geometry.setAttribute('position',new T.Float32BufferAttribute([0,0,0,1,0,0,0,1,0,0,1,0,1,0,0,1,1,0],3));
- let capacity=0,rects,values,previousEnabled=null,lastCount=-1;
+ let capacity=0,rects,values,ranks,previousEnabled=null,lastCount=-1;
+ const atlas=createRankAtlas(T),hitAreas=[];
+ const personnelRank=(mission,e)=>{
+  if(e.owner!=='rai')return null;
+  const p=mission.state.campaign?.personnel,crew=p?.crews[e.id];
+  let best=null;for(const id of crew?.memberIds??[]){const s=p.soldiers[id],r=!s?.death&&rankById(s?.rank);if(r&&(!best||r.order>best.order))best=r;}
+  return best&&(best.stars||best.bars)?best:null;
+ };
  const cameraElements=new Float64Array(16),projectionElements=new Float64Array(16),inputs=new WeakMap();
  let lastWidth=0,lastHeight=0,lastRelevant=-1;
  const candidates=[],candidateOrder=[];
  const viewport=new T.Vector2(),point=new T.Vector3(),ground=new T.Vector3();
  const material=new T.RawShaderMaterial({
-  uniforms:{viewport:{value:viewport}},depthTest:false,depthWrite:false,transparent:true,toneMapped:false,side:T.DoubleSide,
+  uniforms:{viewport:{value:viewport},rankAtlas:{value:atlas.texture}},depthTest:false,depthWrite:false,transparent:true,toneMapped:false,side:T.DoubleSide,
   vertexShader:`precision highp float;
    uniform vec2 viewport;
    attribute vec3 position;
    attribute vec4 barRect;
    attribute vec4 barValues;
+   attribute float barRank;
+   varying float rankSlot;
    varying vec2 pixel;
    varying vec4 rect;
    varying vec4 state;
    void main(){
-    rect=barRect;state=barValues;
-    pixel=position.xy*vec2(rect.z,rect.w+4.0);
+    rect=barRect;state=barValues;rankSlot=barRank;
+    pixel=position.xy*vec2(rect.z+(barRank>0.0?25.0:0.0),32.0)-vec2(0.0,12.0);
     vec2 screen=rect.xy+pixel;
     gl_Position=vec4(screen.x/viewport.x*2.0-1.0,1.0-screen.y/viewport.y*2.0,0.0,1.0);
    }`,
   fragmentShader:`precision highp float;
+   uniform sampler2D rankAtlas;
+   varying float rankSlot;
    varying vec2 pixel;
    varying vec4 rect;
    varying vec4 state;
    void main(){
     float w=rect.z,h=rect.w,inside=w-2.0;
+    if(pixel.x>=w){
+     if(rankSlot<.5||pixel.x<w+1.0)discard;
+     vec2 local=vec2((pixel.x-w-1.0)/24.0,(pixel.y+12.0)/32.0);
+     vec2 uv=vec2((mod(rankSlot,${RANK_ATLAS_COLUMNS}.0)+local.x)/${RANK_ATLAS_COLUMNS}.0,1.0-(floor(rankSlot/${RANK_ATLAS_COLUMNS}.0)+local.y)/${RANK_ATLAS_ROWS}.0);
+     gl_FragColor=texture2D(rankAtlas,uv);if(gl_FragColor.a<.01)discard;return;
+    }
+    if(pixel.y<0.0||pixel.y>=h+4.0)discard;
     vec3 color=vec3(21.0,26.0,22.0)/255.0;
     if(pixel.y>=h){
      if(state.z>0.5&&pixel.y<h+1.0)color=vec3(233.0,133.0,106.0)/255.0;
@@ -63,13 +83,14 @@ export function createHealthBars(T,scene,field,config,transforms,buildings){
   }
   candidates.length=0;
   if(enabled)for(let i=0;i<total;i++){
-   const e=i<units.length?units[i]:structures[i-units.length],chosen=selected.has(e.id);
-   if(e.hp<=0||e.hp===e.maxHp&&!chosen&&e.completed!==false||config.buildings[e.kind]?.storyOnly||e.factoryVisit?.phase==='inside')continue;
+   const e=i<units.length?units[i]:structures[i-units.length],chosen=selected.has(e.id),rank=personnelRank(mission,e);
+   if(e.hp<=0||e.hp===e.maxHp&&!chosen&&!rank&&e.completed!==false||config.buildings[e.kind]?.storyOnly||e.factoryVisit?.phase==='inside')continue;
    const visible=e.owner==='rai'||mission.visibleAt(e.x,e.y);if(!visible)continue;
    const pose=transforms.get(e.id);if(config.units[e.kind]&&!pose)continue;
    if(candidateOrder[candidates.length]!==e)changed=true;
    candidateOrder[candidates.length]=e;candidates.push(e);const m=pose?.matrix.elements;
    let saved=inputs.get(e);if(!saved){saved={};inputs.set(e,saved);changed=true;}
+   if(saved.rank!==rank?.id)changed=true;saved.rank=rank?.id;
    const inside=false;
    if(saved.kind!==e.kind||saved.owner!==e.owner||saved.hp!==e.hp||saved.maxHp!==e.maxHp||saved.chosen!==chosen||saved.visible!==visible||saved.inside!==inside||saved.progress!==e.progress||saved.completed!==e.completed||saved.x!==e.x||saved.y!==e.y||saved.z!==e.groundHeight)changed=true;
    saved.kind=e.kind;saved.owner=e.owner;saved.hp=e.hp;saved.maxHp=e.maxHp;saved.chosen=chosen;saved.visible=visible;saved.inside=inside;saved.progress=e.progress;saved.completed=e.completed;saved.x=e.x;saved.y=e.y;saved.z=e.groundHeight;
@@ -82,14 +103,17 @@ export function createHealthBars(T,scene,field,config,transforms,buildings){
    capacity=Math.max(64,2**Math.ceil(Math.log2(total)));
    rects=new T.InstancedBufferAttribute(new Float32Array(capacity*4),4).setUsage(T.DynamicDrawUsage);
    values=new T.InstancedBufferAttribute(new Float32Array(capacity*4),4).setUsage(T.DynamicDrawUsage);
+   ranks=new T.InstancedBufferAttribute(new Float32Array(capacity),1).setUsage(T.DynamicDrawUsage);
    geometry.setAttribute('barRect',rects);geometry.setAttribute('barValues',values);
+   geometry.setAttribute('barRank',ranks);
   }
   viewport.set(width,height);let count=0;
-  let rectChanged=false,valueChanged=false;
+  let rectChanged=false,valueChanged=false,rankChanged=false;hitAreas.length=0;
   if(enabled)for(const entity of candidates){
    const spec=config.buildings[entity.kind],unit=config.units[entity.kind];
    if(entity.factoryVisit?.phase==='inside'||spec?.storyOnly||entity.hp<=0||entity.owner!=='rai'&&!mission.visibleAt(entity.x,entity.y))continue;
-   if(entity.hp===entity.maxHp&&!selected.has(entity.id)&&entity.completed!==false)continue;
+   const rank=personnelRank(mission,entity);
+   if(entity.hp===entity.maxHp&&!selected.has(entity.id)&&!rank&&entity.completed!==false)continue;
    const pose=unit&&transforms.get(entity.id);
    if(unit&&!pose)continue;
    if(unit){
@@ -108,10 +132,13 @@ export function createHealthBars(T,scene,field,config,transforms,buildings){
    const rx=Math.round(x-w/2),ry=Math.round(y-h-3),ratio=Math.fround(Math.max(0,Math.min(1,entity.hp/entity.maxHp))),hostile=Number(entity.owner!=='rai'),progress=entity.completed===false?Math.fround(entity.progress):-1;
    if(rects.getX(count)!==rx||rects.getY(count)!==ry||rects.getZ(count)!==w||rects.getW(count)!==h){rects.setXYZW(count,rx,ry,w,h);rectChanged=true;}
    if(values.getX(count)!==ratio||values.getY(count)!==entity.maxHp||values.getZ(count)!==hostile||values.getW(count)!==progress){values.setXYZW(count,ratio,entity.maxHp,hostile,progress);valueChanged=true;}
+   const slot=rank?rankAtlasSlot(rank.id):0;
+   if(ranks.getX(count)!==slot){ranks.setX(count,slot);rankChanged=true;}
+   if(rank)hitAreas.push({id:entity.id,rank:rank.id,name:rank.name,x:rx+w+1,y:ry-12,width:24,height:32});
    count++;
   }
   geometry.instanceCount=count;root.visible=count>0;
-  if(count){if(rectChanged)rects.needsUpdate=true;if(valueChanged)values.needsUpdate=true;}
+  if(count){if(rectChanged)rects.needsUpdate=true;if(valueChanged)values.needsUpdate=true;if(rankChanged)ranks.needsUpdate=true;}
  }
- return {update,root};
+ return {update,root,ready:atlas.ready,hitAreas,rankAt:(x,y)=>root.visible?hitAreas.find(r=>x>=r.x&&x<=r.x+r.width&&y>=r.y&&y<=r.y+r.height):null};
 }

@@ -2,6 +2,7 @@ import {setButtonIcon} from '../assets/ui/icons.js';
 import {factoryPriority,setFactoryPriority} from './factory-garage.js';
 import {factoryRepairQueue} from './factory-routing.js';
 import {oilOrderProgress} from './oil-economy.js';
+import {setFactoryModernization,modernizationCost} from './factory-modernization.js';
 
 function indicators(control,label){
  const count=document.createElement('span');count.className='production-count';count.hidden=true;count.setAttribute('aria-hidden','true');control.append(count);
@@ -10,7 +11,7 @@ function indicators(control,label){
 
 export function createFactoryRows(mission,factories,projects,{act,focus}){
  const root=document.createElement('div');root.className='factory-queues';
- root.style.setProperty('--factory-projects',projects.length);
+ root.style.setProperty('--factory-projects',projects.length+Number(!!mission.state.research['twin-machinegun']));
  root.style.setProperty('--factory-short-rows',Math.min(factories.length,5));
  for(const [index,factory] of factories.entries()){
   const row=document.createElement('div');row.className='factory-line';row.dataset.factoryRow=factory.id;row.setAttribute('role','group');row.setAttribute('aria-label','Завод '+(index+1));
@@ -19,6 +20,11 @@ export function createFactoryRows(mission,factories,projects,{act,focus}){
   const priority=document.createElement('button');priority.dataset.factoryPriority='';
   priority.onclick=()=>act(()=>{const f=mission.entity(factory.id);return f?.hp>0?setFactoryPriority(mission,factory.id,factoryPriority(f)==='repair'?'production':'repair'):mission.fail('Завод недоступен');});
   indicators(priority,'Ремонт · Завод '+(index+1));row.append(priority);
+  if(mission.state.research['twin-machinegun']){
+   const upgrade=document.createElement('button');upgrade.dataset.factoryModernization='';
+   setButtonIcon(upgrade,'factory-upgrade','Автомодернизация после ремонта');
+   upgrade.onclick=()=>act(()=>setFactoryModernization(mission,factory.id,!mission.entity(factory.id)?.autoModernize));row.append(upgrade);
+  }
   for(const {id,kind,name,spec} of projects){
    const control=document.createElement('button');setButtonIcon(control,kind,name);control.dataset.factoryProduction=control.dataset.production=id;
    control.dataset.baseTitle=name+' · '+spec.cost+' нефти · Автовыбор свободного завода';
@@ -72,6 +78,12 @@ export function updateFactoryRows(root,mission,projects,paused){
   const count=control.querySelector('.production-count'),progress=control.querySelector('progress');
   count.hidden=!visits.length;count.textContent=String(visits.length);progress.hidden=!factory.activeRepair;progress.value=factory.activeRepair?.progress??0;
   control.setAttribute('aria-description',status);
+  const upgrade=row.querySelector('[data-factory-modernization]');
+  if(upgrade){
+   const enabled=!!factory.autoModernize;upgrade.setAttribute('aria-pressed',String(enabled));
+   upgrade.title='Автомодернизация после ремонта: '+(enabled?'включена':'выключена')+' · Обычный пулемёт → спаренный · '+modernizationCost(mission)+' нефти за машину';
+   upgrade.setAttribute('aria-description',upgrade.title);
+  }
   updateProductionButtons(row,mission,[factory],projects,paused);
  }
 }

@@ -20,12 +20,19 @@ export function createFactoryStatusBoards(T,addFog,removeFog=()=>{}){
   const paint=new T.MeshStandardMaterial({map:texture,roughness:1,metalness:0}),steel=new T.MeshStandardMaterial({color:'#655d50',roughness:1});
   addFog(paint);addFog(steel);
   const [w,d,h]=model.userData.dimensionsMetres??[26,20,9];
-  const root=new T.Group();root.name='factory_status_board';root.position.set(-w*.117,-d*.79*.16,.35+h*.59+.17);
+  const root=new T.Group();root.name='factory_status_board';root.position.set(-w*.117,-d*.79*.16,.35+h*.59+.23);
   // Low sheet metal fits between the existing roof monitors, flush with the
   // workshop roof instead of hiding its silhouette behind a raised board.
   const width=w*.37,depth=d*.10;
-  const plate=new T.Mesh(new T.BoxGeometry(width,depth,.08),steel);root.add(plate);
-  const face=new T.Mesh(new T.PlaneGeometry(width-.06,depth-.06),paint);face.position.z=.045;root.add(face);
+  // Paint the top face of the plate itself. A second plane only 5 mm above
+  // it loses depth precision as the camera pulls back and flickers into steel.
+  const geometry=new T.BoxGeometry(width,depth,.08),indices=Array.from(geometry.index.array);
+  const top=geometry.groups.find(g=>g.materialIndex===4);
+  const sides=geometry.groups.filter(g=>g!==top).flatMap(g=>indices.slice(g.start,g.start+g.count));
+  geometry.setIndex([...sides,...indices.slice(top.start,top.start+top.count)]);
+  // Keep one draw for the metal and one for the painted face.
+  geometry.clearGroups();geometry.addGroup(0,sides.length,0);geometry.addGroup(sides.length,top.count,1);
+  const plate=new T.Mesh(geometry,[steel,paint]);root.add(plate);
   model.add(root);
   return {root,ctx,texture,materials:[paint,steel],key:null};
  }

@@ -11,7 +11,9 @@ export function storyFacts(mission,d) {
   const shots=(mission.effects??[]).filter(e=>e.type==='shot');
   if(shots.length||s.projectiles?.length)d.lastCombat=d.clock;
   const raiders=s.units.filter(e=>e.owner==='scavs'&&live(e)&&s.flags.raidIds?.includes(e.id));
-  if(!d.facts.contact&&raiders.some(visible))d.facts.contact={ids:[...s.flags.raidIds],fired:false};
+  // The simulation already raises an approach warning outside weapon range.
+  // Waiting for direct visibility here wasted the whole conversation window.
+  if(!d.facts.contact&&raiders.length&&(s.flags.contact||raiders.some(visible)))d.facts.contact={ids:[...s.flags.raidIds],fired:false};
   const contact=d.facts.contact;
   if(contact&&shots.some(e=>contact.ids.includes(e.from)||contact.ids.includes(e.targetId)))contact.fired=true;
   if(s.flags.raidWon||contact?.fired&&!raiders.length)d.facts.firstWin=true;
@@ -20,6 +22,14 @@ export function storyFacts(mission,d) {
   const campFor=key=>s.camps.find(c=>(c.artifact??(mission.config.camps??[]).find(spec=>spec.id===c.id)?.artifact)===key);
   const tower=waterTower(mission),chiefCamp=s.camps[3];
   const chief=b.find(e=>e.owner==='scavs'&&e.campId===chiefCamp?.id&&e.kind==='camp-core');
+  const firstCamps=s.camps.slice(0,3),firstThreeCleared=firstCamps.length===3&&firstCamps.every(c=>c.cleared);
+  const newlyCleared=firstCamps.filter(c=>c.cleared&&!d.facts.clearedCamps?.includes(c.id));
+  if(firstThreeCleared&&!d.facts.chiefContact){
+    const last=newlyCleared.at(-1)??firstCamps[2];
+    const artifact=last.artifact??mission.config.camps.find(c=>c.id===last.id)?.artifact;
+    d.facts.chiefContact={report:{flamethrower:'r25','mg-ammo-1':'r32','mg-tower':'r38'}[artifact]};
+  }
+  d.facts.clearedCamps=firstCamps.filter(c=>c.cleared).map(c=>c.id);
   if(shots.some(e=>[...s.units,...b].some(target=>target.campId===chiefCamp?.id&&target.id===e.targetId)))d.facts.chiefAssault=true;
   d.facts.camps??={};
   for(const camp of s.camps){
@@ -63,7 +73,7 @@ export function storyFacts(mission,d) {
     campFor,seenCamp:key=>!!d.facts.camps[campFor(key)?.id],
     cleared:key=>!!campFor(key)?.cleared,
     tower:!!tower&&d.facts.tower===tower.id,chief:!!chief&&!chiefCamp?.cleared,
-    chiefReachable:!!chief&&visible(chief),victory:s.status==='victory',
+    chiefReachable:!!chief&&visible(chief),firstThreeCleared,chiefContactReport:d.facts.chiefContact?.report,victory:s.status==='victory',
     allCamps:s.camps.every(c=>c.cleared),moving:moving.length>=2,
     columnReady:moving.length>=2&&moving.length===movers.length&&moving.some(e=>e.kind==='bukhanka'),approachingFortification,
     flameStudied:!!s.research.flamethrower,ammoStudied:!!s.research['mg-ammo-1'],towerStudied:!!s.research['mg-tower']};
@@ -75,6 +85,8 @@ export function storyRules(director,f) {
   const p=(priority,trigger,valid=true,gap=0)=>({priority,trigger,valid,gap});
   const openingDone=director.anyFinished(['r01','r01a','r01b']);
   const flameDone=['r29','r30-alt'].some(done),fullFlame=heard('r27');
+  const flameReportPending=f.known('flamethrower')&&!done('r26');
+  const reportedCamp=(key,id)=>!f.cleared(key)||done(id);
   const firstWin=!!d.facts.firstWin;
   return {
     r01:p(1,!openingDone,!f.building('generator')),
@@ -88,10 +100,10 @@ export function storyRules(director,f) {
     r08:p(1,f.ready('factory')&&done('r06')),
     r09:p(1,!!d.facts.firstVan&&done('r08')),
     r10:p(2,f.ammoStudied&&after('r33',2),true,2),
-    r11:p(2,f.ready('factory')&&done('r08')),
-    r13:p(2,f.ready('lab')&&heard('r11')),
+    r11:p(0,f.ready('factory'),!f.building('lab')),
+    r13:p(2,f.ready('lab')),
     r14:p(0,!!f.contact,f.contactAlive),
-    r16:p(0,heard('r14')&&!!f.contact,!f.contact?.fired&&f.contactAlive&&!f.battle),
+    r16:p(0,heard('r14')&&!!f.contact,f.contactAlive),
     r18:p(1,firstWin&&!f.battle),
     r19:p(2,after('r18',10),!f.allCamps,0),
     r21:p(1,firstWin&&(done('r19')||f.allCamps||f.bunkers>0),!f.defense),
@@ -99,24 +111,24 @@ export function storyRules(director,f) {
     r23:p(1,firstWin&&f.defense&&done('r22'),!f.allCamps),
     r24:p(1,f.seenCamp('flamethrower'),!f.cleared('flamethrower')&&!s.camps.some(c=>c.cleared)),
     r24a:p(1,f.seenCamp('flamethrower')&&s.camps.some(c=>c.cleared)&&!heard('r24'),!f.cleared('flamethrower')),
-    r25:p(1,f.cleared('flamethrower'),!f.flameStudied&&!f.researching('flamethrower')),
-    r26:p(1,f.known('flamethrower'),!f.flameStudied&&!f.researching('flamethrower')),
-    r27:p(2,s.artifactKeys.includes('flamethrower')&&heard('r26'),!f.flameStudied&&!f.researching('flamethrower')),
-    r29:p(1,f.flameStudied&&!flameDone&&fullFlame),
-    'r30-alt':p(1,f.flameStudied&&!flameDone&&!fullFlame),
+    r25:p(0,f.cleared('flamethrower')),
+    r26:p(0,f.known('flamethrower')&&reportedCamp('flamethrower','r25')),
+    r27:p(0,s.artifactKeys.includes('flamethrower')&&heard('r26')),
+    r29:p(0,f.flameStudied&&!flameDone&&fullFlame&&reportedCamp('flamethrower','r25')),
+    'r30-alt':p(0,f.flameStudied&&!flameDone&&!fullFlame&&!flameReportPending&&(!heard('r26')||done('r27'))&&reportedCamp('flamethrower','r25')),
     r31:p(1,f.seenCamp('mg-ammo-1'),!f.cleared('mg-ammo-1')),
-    r32:p(1,f.cleared('mg-ammo-1')&&f.known('mg-ammo-1'),!f.ammoStudied),
-    r33:p(1,f.ammoStudied),
+    r32:p(0,f.cleared('mg-ammo-1')),
+    r33:p(0,f.ammoStudied&&reportedCamp('mg-ammo-1','r32')),
     r35:p(2,f.ammoStudied&&f.approachingFortification,!f.allCamps,35),
     r36:p(1,!!d.facts.tower,f.tower),
-    r38:p(1,!!d.facts.tower&&!f.tower&&f.known('mg-tower'),!f.towerStudied),
-    r39:p(1,f.towerStudied),
+    r38:p(0,f.cleared('mg-tower')),
+    r39:p(0,f.towerStudied&&reportedCamp('mg-tower','r38')),
     r40:p(2,after('r39',12),true,12),
-    r41:p(1,f.chiefReachable,f.chief),
-    r42:p(2,heard('r41'),f.chief),
+    r41:p(0,(f.firstThreeCleared&&(!f.chiefContactReport||done(f.chiefContactReport)))||f.chiefReachable,f.chief),
+    r42:p(0,heard('r41'),f.chief),
     r45:p(2,heard('r42')&&!!s.storyFacts?.enemyGarden&&!!s.storyFacts?.ownThreeHangarsRooflessLatrine,f.chief,35),
-    r46:p(0,!!d.facts.chiefAssault,f.chief),
-    r47:p(1,f.allCamps,!f.victory),
+    r46:p(0,!!d.facts.chiefAssault&&(!(f.firstThreeCleared||heard('r41'))||heard('r42')),f.chief),
+    r47:p(0,!!s.camps[3]?.cleared),
     r48:p(1,f.victory),
     r49:p(2,after('r48',5),f.victory,5),
     r50:p(1,after('r49',5),f.victory),
