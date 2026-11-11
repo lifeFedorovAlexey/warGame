@@ -5,8 +5,8 @@ import {smooth} from './dream-render-kit.js';
 const movie=new URL('../assets/campaign/alpha/mission01/opening-television.mp4',import.meta.url).href;
 
 export class OpeningTelevision {
- constructor(sound) {
-  this.sound=sound;this.active=false;this.reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
+ constructor(sound,{beforeReveal}={}) {
+  this.sound=sound;this.beforeReveal=beforeReveal;this.active=false;this.reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const root=this.root=document.createElement('section');root.className='opening-dream';root.hidden=true;root.setAttribute('aria-label','Сон: последняя ночь перед катастрофой');
   root.innerHTML=`<video class="dream-video-source" playsinline preload="metadata" aria-hidden="true" tabindex="-1"></video><canvas class="dream-blasts" aria-label="Ночная комната, ракеты над городом и Земля с орбиты"></canvas><p class="dream-time-card" aria-live="polite" hidden>Прошло 50 лет</p><p class="dream-status" role="status" hidden></p><div class="dream-controls"><button type="button" data-dream="pause"></button><button type="button" data-dream="sound"></button><button type="button" data-dream="skip"></button></div>`;
   document.querySelector('#game').append(root);
@@ -91,7 +91,10 @@ export class OpeningTelevision {
   disposeDreamBlasts(this.canvas);this.canvas.width=this.canvas.height=1;this.card.hidden=true;this.root.hidden=true;document.body.classList.remove('television-playing');
  }
  finish(status) {
-  if(!this.active)return;this.director.end(status);this.record.phase='finished';this.close();
+  if(!this.active)return;this.director.end(status);this.record.phase='finished';
+  // Refresh the held game frame before removing this cover, including after
+  // a viewport resize during the dream. All finish paths use the same draw.
+  this.beforeReveal?.();this.close();
   if(this.previousFocus?.isConnected&&!this.previousFocus.closest('[hidden]'))this.previousFocus.focus({preventScroll:true});
  }
 }
