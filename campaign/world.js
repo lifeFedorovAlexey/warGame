@@ -2,6 +2,7 @@ import {perf} from './performance.js';
 import {createTrafficVisibility} from './traffic-visibility.js';
 import * as T from 'three';
 import {OrbitControls} from '../demo/vendor/OrbitControls.js';
+import {campaignCameraLimits,keepCameraAboveTerrain} from './camera-limits.js';
 import {createAlphaMap} from '../demo/alpha-map.js';
 import {createDesertSky} from '../demo/sky.js';
 import {createVehicleLayer} from './vehicle-layer.js';
@@ -63,7 +64,7 @@ export async function createCampaignWorld(host,config,sound,loading){
  scene.add(new T.HemisphereLight('#c4d8e0','#79664d',2.3));const sun=new T.DirectionalLight('#ffdfb7',2.5);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-400,right:400,top:400,bottom:-400,near:1,far:1600});sun.shadow.bias=-.0001;sun.shadow.normalBias=.08;scene.add(sun,sun.target);const fill=new T.DirectionalLight('#a5b6c3',1);fill.position.set(100,-200,800);scene.add(fill);
  const [terrain,sky]=await Promise.all([createAlphaMap(T,{lightweightOverview:software}),createDesertSky(T,renderer,scene)]);scene.add(terrain.root);terrain.baseOutline.visible=false;terrain.path.visible=false;terrain.setViewMode('close');const field=terrain.field,start=field.gridToWorld(config.startGrid);
  const normalCameraLimit=Math.PI*.42;
- const controls=new OrbitControls(camera,renderer.domElement);controls.target.set(start.x,start.y,field.heightAt(start.x,start.y));camera.position.set(start.x+100,start.y-360,controls.target.z+360);controls.enableDamping=true;controls.minDistance=110;controls.maxDistance=5300;controls.minPolarAngle=.06;controls.maxPolarAngle=normalCameraLimit;controls.mouseButtons={LEFT:-1,MIDDLE:T.MOUSE.ROTATE,RIGHT:-1};controls.enablePan=false;
+ const controls=new OrbitControls(camera,renderer.domElement);controls.target.set(start.x,start.y,field.heightAt(start.x,start.y));camera.position.set(start.x+100,start.y-360,controls.target.z+360);controls.enableDamping=true;controls.minDistance=campaignCameraLimits.near;controls.maxDistance=campaignCameraLimits.far;controls.minPolarAngle=.06;controls.maxPolarAngle=normalCameraLimit;controls.mouseButtons={LEFT:-1,MIDDLE:T.MOUSE.ROTATE,RIGHT:-1};controls.enablePan=false;
  controls.addEventListener('start',()=>{controls.maxPolarAngle=normalCameraLimit;});
  const fog=createFogMask(T);if(perf)perf.wrap(fog,'update','fog');
  const storySignals=createStorySignals(T,scene,field);
@@ -317,11 +318,11 @@ export async function createCampaignWorld(host,config,sound,loading){
  function commandMarker(point,hostile=false){marker.position.set(point.x,point.y,field.heightAt(point.x,point.y)+.4);marker.material.color.set(hostile?'#f4a081':'#cfb473');marker.visible=true;markerUntil=performance.now()+1000;}
  const trafficVisibility=createTrafficVisibility(T,camera,field,config),updateTrafficVisibility=trafficVisibility.update;
  function prepareFrame(mission,dt){
-  const distance=camera.position.distanceTo(controls.target),pan=distance*dt*.7;let dx=(keys.has('KeyD')?1:0)-(keys.has('KeyA')?1:0),dy=(keys.has('KeyW')?1:0)-(keys.has('KeyS')?1:0);if(dx||dy){const right=panRight.setFromMatrixColumn(camera.matrixWorld,0);right.z=0;right.normalize();const forward=panForward.set(-right.y,right.x,0);const offset=right.multiplyScalar(dx*pan).addScaledVector(forward,dy*pan);camera.position.add(offset);controls.target.add(offset);}
+  const distance=camera.position.distanceTo(controls.target),pan=distance*dt*.7;let dx=(keys.has('KeyD')?1:0)-(keys.has('KeyA')?1:0),dy=(keys.has('KeyW')?1:0)-(keys.has('KeyS')?1:0);if(controls.enabled&&(dx||dy)){const right=panRight.setFromMatrixColumn(camera.matrixWorld,0);right.z=0;right.normalize();const forward=panForward.set(-right.y,right.x,0);const offset=right.multiplyScalar(dx*pan).addScaledVector(forward,dy*pan);camera.position.add(offset);controls.target.add(offset);}
   const bounds=mission.state.bounds,nw=field.gridToWorld(bounds.slice(0,2)),se=field.gridToWorld(bounds.slice(2));
-  const tx=T.MathUtils.clamp(controls.target.x,nw.x,se.x),ty=T.MathUtils.clamp(controls.target.y,se.y,nw.y);
+  const tx=controls.enabled?T.MathUtils.clamp(controls.target.x,nw.x,se.x):controls.target.x,ty=controls.enabled?T.MathUtils.clamp(controls.target.y,se.y,nw.y):controls.target.y;
   camera.position.x+=tx-controls.target.x;camera.position.y+=ty-controls.target.y;
-  controls.target.x=tx;controls.target.y=ty;controls.update();camera.position.z=Math.max(camera.position.z,field.heightAt(camera.position.x,camera.position.y)+minimumCameraHeight);
+  controls.target.x=tx;controls.target.y=ty;controls.update();keepCameraAboveTerrain(camera,controls,field,minimumCameraHeight);
   updateTrafficVisibility(mission);
  }
  function update(mission,selected,dt,live=false,showHealth=true){

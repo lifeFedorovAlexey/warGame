@@ -1,0 +1,15 @@
+{
+  "checks": [
+    "check-wg002-finale.mjs",
+    "check-wg030-camera.mjs",
+    "check-story-v2.mjs",
+    "check-story-playback.mjs",
+    "check-opening-camera.mjs",
+    "check-playtest-simulation.mjs",
+    "check-wg002-wg030-browser.mjs --baseline",
+    "check-wg002-wg030-browser.mjs"
+  ],
+  "result": "passed",
+  "browser": "Edge, ANGLE D3D11, 1440x900 / 844x390 / 667x375",
+  "limitations": "Prepared terminal scenarios, not a full playthrough; browser subtitles advanced for sequence validation; audio disabled."
+}

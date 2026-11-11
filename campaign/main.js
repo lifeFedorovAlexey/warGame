@@ -33,6 +33,7 @@ import {personnelLabel,missionResults,campaignMemorial,setPersonnelRank} from '.
 import {renderPersonnelSelection} from './personnel-presentation.js';
 import {PersonnelNotices} from './personnel-notices.js';
 import {MissionResultsView,resultsPresentationReady} from './mission-results.js';
+import {MissionEnding} from './mission-ending.js';
 
 const $ = id => document.getElementById(id);
 const stabilityGraph=createStabilityGraph();
@@ -46,7 +47,7 @@ const selected = new Set();
 const miniBackground = new Image();
 let world, mission, config, radio, sound, designer, combatMenu, openingTelevision;
 let minimapView;
-let resultsView;
+let resultsView,ending;
 const personnelNotices=new PersonnelNotices($('personnel-notice'),()=>sound?.signal('complete'));
 let active = false, paused = false, speed = 1, resultShown = false, resultPrepared=false;
 let openingPlaying = false;
@@ -231,6 +232,7 @@ function chooseBuilder(kind) {
   return current.length?current:live;
 }
 function toggleBuild() {
+  if(mission.state.status!=='running')return;
   combatMenu?.close();
   if (buildOpen || buildKind) return cancelMode();
   if (!builders().length) return toast('Нет строителей. Закажите машину на заводе.');
@@ -239,6 +241,7 @@ function toggleBuild() {
   updateUi();
 }
 function beginPlacement(kind) {
+  if(mission.state.status!=='running')return;
   const available = chooseBuilder(kind);
   if (!available.length) return;
   select(available.map(unit => unit.id), false, false);
@@ -250,6 +253,7 @@ function beginPlacement(kind) {
   updateUi();
 }
 function beginOrder(mode) {
+  if(mission.state.status!=='running')return;
   if (!(mode==='attack'?commandSelection():selection()).some(unit=>liveMobile(unit)&&(mode!=='attack'||config.units[unit.kind].damage>0))) {
     const unit = vehicles().find(unit => config.units[unit.kind].damage > 0) ?? (mode!=='attack'&&vehicles()[0]);
     if (!unit) return;
@@ -304,6 +308,7 @@ async function start(restore = false) {
   paused = false;
   resultShown = false;
   resultPrepared=false;
+  ending.reset();
   radio.reset();
   if(!continuing)radio.director.beginStory(mission);
   if(!continuing)startOpeningConstruction(mission);
@@ -343,6 +348,7 @@ async function start(restore = false) {
   finally {loadingGame=false;last=performance.now();}
 }
 function ordersAt(point, target, mode, append=false) {
+  if(mission.state.status!=='running')return;
   const chosen = selection();
   const factory = chosen.length === 1 && chosen[0]?.owner === 'rai' && chosen[0]?.kind === 'factory' && chosen[0]?.completed ? chosen[0] : null;
   if (factory && point && !mode) {
@@ -622,6 +628,12 @@ function installInput() {
   document.addEventListener('keydown', event => {
     if(!$('result').hidden){if(event.code==='Escape'){event.preventDefault();resultsView.hide();}return;}
     if (!active || designer.visible || event.target.isContentEditable || event.target.matches('input, select, textarea')) return;
+    if(mission.state.status!=='running'){
+      if(event.code==='Escape'){event.preventDefault();radio.dismiss();}
+      else if(event.code==='F7'&&!event.repeat){event.preventDefault();stabilityGraph.toggle();}
+      else if(!ending.presenting&&['KeyW','KeyA','KeyS','KeyD'].includes(event.code)){event.preventDefault();world.keys.add(event.code);}
+      return;
+    }
     const {code} = event;
     if(event.ctrlKey&&code==='KeyG'&&!event.repeat){
       event.preventDefault();
@@ -1009,6 +1021,7 @@ function presentSignal(signal,chapter) {
   if(signal?.kind==='anomaly')sound.anomaly?.();
 }
 function focusSignal(signal) {
+  if(ending?.presenting){ending.focus(signal);return;}
   world.focusStorySignal(signal,mission.state.camps[3]);
   if (buildKind) {
     site = pointer = null;
@@ -1052,6 +1065,11 @@ function frame(now) {
       saveGame(false);
     }
   }
+  if(active&&mission.state.status!=='running'&&!resultPrepared){
+    resultPrepared=true;paused=false;cancelMode();combatMenu?.close();world.keys.clear();
+    ending.begin(mission);saveGame(false);
+  }
+  ending.update(dt,radio.current);
   pruneSelection();
   const renderStarted=performance.now();
   world.update(mission, selected, dt, (active||openingPlaying) && !paused && mission.state.status==='running',active);
@@ -1069,9 +1087,8 @@ function frame(now) {
     }
     if(uiPending){uiPending=false;flushUi();}
     if (mission.state.status !== 'running' && !resultShown) {
-      if(!resultPrepared){resultPrepared=true;saveGame(false);}
       $('results-open').hidden=false;
-      if(resultsPresentationReady(mission,radio)){resultShown=true;saveGame(false);resultsView.show(mission);}
+      if(ending.ready&&resultsPresentationReady(mission,radio)){resultShown=true;ending.finish();saveGame(false);resultsView.show(mission);}
     }
   }
   if (now >= toastUntil) $('toast').hidden = true;
@@ -1094,6 +1111,7 @@ try {
     beforeReveal:()=>world.update(mission,selected,0,false,active),
   });
   world = await createCampaignWorld($('world'), config, sound, mainMenu.loading);
+  ending=new MissionEnding(world,$('mission-ending'));
   await mainMenu.loading.stage('simulation');
   mission = new Mission(config, world.field);
   minimapView=createMinimap($('minimap'),{world,mission,selected,background:miniBackground,notify:toast});
@@ -1221,17 +1239,17 @@ try {
   let enteringM02=false;
   resultsView=new MissionResultsView($('result'),{onVisibility:visible=>{
     sound.setMemorialMix(visible);
-    world.controls.enabled=!visible&&!openingPlaying;world.keys.clear();$('mission-hud').inert=visible;
+    world.controls.enabled=!visible&&!openingPlaying&&!ending.presenting;world.keys.clear();$('mission-hud').inert=visible;
     if(visible){cancelMode();document.querySelector('.settings').open=false;}
   }});
-  $('results-open').onclick=()=>resultsView.show(mission);
+  $('results-open').onclick=()=>{ending.finish();resultShown=true;resultsView.show(mission);};
   $('result-continue').onclick=async()=>{
     if(enteringM02||mission.state.m02||mission.state.status!=='victory')return;
     enteringM02=true;$('result-continue').disabled=true;
     try{
       try{localStorage.setItem(checkpointKey,await mission.saveAsync());}catch{return toast('Не удалось создать контрольное сохранение');}
       const result=mission.enterM02();if(!result.ok)return report(result);
-      resultShown=false;resultPrepared=false;resultsView.hide();$('results-open').hidden=true;radio.reset();taskKey='';actionKey='';world.storySignals.show(null);
+      resultShown=false;resultPrepared=false;ending.reset();resultsView.hide();$('results-open').hidden=true;radio.reset();taskKey='';actionKey='';world.storySignals.show(null);
       await saveGame(false);updateUi();
     }finally{enteringM02=false;$('result-continue').disabled=false;}
   };

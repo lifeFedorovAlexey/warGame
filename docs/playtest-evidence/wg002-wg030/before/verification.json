@@ -1,0 +1,80 @@
+{
+  "baseline": true,
+  "errors": [],
+  "networkFailures": [],
+  "views": [
+    {
+      "name": "near",
+      "width": 1440,
+      "height": 900,
+      "scroll": 1440
+    },
+    {
+      "name": "far",
+      "width": 1440,
+      "height": 900,
+      "scroll": 1440
+    },
+    {
+      "name": "finale",
+      "width": 1440,
+      "height": 900,
+      "scroll": 1440
+    }
+  ],
+  "near": {
+    "distance": 109.99999999999999,
+    "min": 110,
+    "max": 5300,
+    "clearance": 76.32339110467827,
+    "target": [
+      -1646,
+      260,
+      0.6000000238418579
+    ],
+    "position": [
+      -1624.7990580264782,
+      183.67660889532178,
+      76.92339112852012
+    ]
+  },
+  "picked": true,
+  "far": {
+    "distance": 5299.99999999993,
+    "min": 110,
+    "max": 5300,
+    "clearance": 3622.1407513727813,
+    "target": [
+      -1646,
+      260,
+      0.6000000238418579
+    ],
+    "position": [
+      -624.5000685484946,
+      -3417.399753225348,
+      3677.999753249207
+    ]
+  },
+  "finale": {
+    "status": "victory",
+    "remainingProjectiles": 1,
+    "ordinary": {
+      "enabled": true,
+      "target": [
+        -1646,
+        260,
+        0.6000000238418579
+      ]
+    }
+  },
+  "presentation": {
+    "controls": true,
+    "commands": "block",
+    "target": [
+      -1646,
+      260,
+      0.6000000238418579
+    ],
+    "story": null
+  }
+}

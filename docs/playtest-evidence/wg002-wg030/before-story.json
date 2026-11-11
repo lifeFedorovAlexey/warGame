@@ -1,0 +1,25 @@
+[
+  {
+    "mission": "m01",
+    "expected": [
+      "r48",
+      "r49",
+      "r50",
+      "r54"
+    ],
+    "seen": [],
+    "quiet": 0,
+    "remainingProjectiles": 1
+  },
+  {
+    "mission": "m02",
+    "expected": [
+      "m02-radio-victory"
+    ],
+    "seen": [
+      "m02-radio-victory"
+    ],
+    "quiet": 120000,
+    "remainingProjectiles": 1
+  }
+]
