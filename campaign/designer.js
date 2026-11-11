@@ -281,7 +281,7 @@ export class VehicleDesigner {
       hp:spec ? spec.hp : null,
       cost:spec && String(spec.cost),
       time:spec && spec.seconds + ' с',
-      speed:spec && new Intl.NumberFormat('ru-RU',{maximumFractionDigits:1}).format(spec.speed*effects.speed) + ' м/с',
+      speed:spec && new Intl.NumberFormat('ru-RU',{maximumFractionDigits:1}).format(spec.speed*effects.speed*3.6) + ' км/ч',
       range:spec?.range ? spec.range + ' м' : null,
       vision:spec && spec.vision + ' м',
       mass:total ? '≈ ' + tons.format((total+effects.massKg) / 1000) + ' т' : null,
