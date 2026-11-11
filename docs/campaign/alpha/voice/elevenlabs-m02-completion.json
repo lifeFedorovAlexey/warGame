@@ -1,0 +1,492 @@
+{
+  "mission": "alpha-m02",
+  "completedAt": "2026-11-11T19:59:29.540369+00:00",
+  "sourceDraftRevision": 0,
+  "savedDraftRevision": 1,
+  "generatedLines": 24,
+  "originalAudioFilesPreserved": 24,
+  "reservedCredits": 965,
+  "remainingTemporaryOrMissing": [],
+  "clips": {
+    "m02-radio-start-1": {
+      "file": "recordings/elevenlabs/m02-radio-start-1-84d48f6554e6.mp3",
+      "duration": 3.92,
+      "leadingSilence": 0.03,
+      "trailingSilence": 0.16999999999999993,
+      "speaker": "radio",
+      "text": "Альфа, источник сигнала к югу. Координаты передаю.",
+      "sha256": "84d48f6554e6f96960c97427611631ffcbfb21c75a565ddec8933d1ba8202411",
+      "bytes": 63990,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:58:27.080Z",
+      "draftRevision": 0
+    },
+    "m02-radio-start-2": {
+      "file": "recordings/elevenlabs/m02-radio-start-2-bafddb0be0d6.mp3",
+      "duration": 3.2,
+      "leadingSilence": 0.02,
+      "trailingSilence": 0.14000000000000012,
+      "speaker": "commander",
+      "text": "Базу прикрыть. Основной группе — на выезд.",
+      "sha256": "bafddb0be0d69e91f923b0c3f9e28d67e417d5a8b74e24b8e9d278f9206b2124",
+      "bytes": 52287,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:58:23.615Z",
+      "draftRevision": 0
+    },
+    "m02-radio-entrance-1": {
+      "file": "recordings/elevenlabs/m02-radio-entrance-1-8c79427eb926.mp3",
+      "duration": 2.8,
+      "leadingSilence": 0.04,
+      "trailingSilence": 0.16999999999999993,
+      "speaker": "scout",
+      "text": "Проход перекрыт. Впереди два ДОТа.",
+      "sha256": "8c79427eb92670d8afb3ee4889a81a4fc80a2c79f066d73b04e6628762758a57",
+      "bytes": 46018,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:58:24.979Z",
+      "draftRevision": 0
+    },
+    "m02-radio-entrance-2": {
+      "file": "recordings/elevenlabs/m02-radio-entrance-2-10cdc16e87da.mp3",
+      "duration": 3.04,
+      "leadingSilence": 0.03,
+      "trailingSilence": 0.18999999999999995,
+      "speaker": "commander",
+      "text": "Вижу. Сначала убираем укрепления.",
+      "sha256": "10cdc16e87da235a5934c42f59cfcc2df20206b8f18b933387d4742e38da4cb1",
+      "bytes": 49780,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:58:26.308Z",
+      "draftRevision": 0
+    },
+    "m02-radio-entrance-changed-1": {
+      "file": "recordings/elevenlabs/m02-radio-entrance-changed-1-674e70596d87.mp3",
+      "duration": 4.16,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.16000000000000014,
+      "speaker": "scout",
+      "text": "Укрепления в проходе подавлены частично. Проверяем дорогу.",
+      "sha256": "674e70596d87c9427b538d11baad29b7e522d1eb647ba179c1f1f9c23f8c154d",
+      "bytes": 67752,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:58:27.942Z",
+      "draftRevision": 0
+    },
+    "m02-radio-entrance-clear-1": {
+      "file": "recordings/elevenlabs/m02-radio-entrance-clear-1-9c87ec82daf7.mp3",
+      "duration": 3.76,
+      "leadingSilence": 0.01,
+      "trailingSilence": 0.1599999999999997,
+      "speaker": "scout",
+      "text": "ДОТы в проходе уничтожены. Дорога на юг открыта.",
+      "sha256": "9c87ec82daf70a85980ea1936a79948ceb15b61abe162dc8aeed8eea076b7689",
+      "bytes": 61065,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:58:28.588Z",
+      "draftRevision": 0
+    },
+    "m02-radio-factory-working-1": {
+      "file": "recordings/elevenlabs/m02-radio-factory-working-1-a79c339e6903.mp3",
+      "duration": 3.68,
+      "leadingSilence": 0.04,
+      "trailingSilence": 0.20000000000000018,
+      "speaker": "scout",
+      "text": "У них завод работает. Машины прямо из ворот идут.",
+      "sha256": "a79c339e69030678905ecdc169abb518c37e389a17d48127e42f45df3e05ed01",
+      "bytes": 59811,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:58:32.049Z",
+      "draftRevision": 0
+    },
+    "m02-radio-factory-working-2": {
+      "file": "recordings/elevenlabs/m02-radio-factory-working-2-f552a692b9ac.mp3",
+      "duration": 1.84,
+      "leadingSilence": 0.04,
+      "trailingSilence": 0.13000000000000012,
+      "speaker": "commander",
+      "text": "Тогда начнём с завода.",
+      "sha256": "f552a692b9accf0929734d09bd62926fa85415a75f1075a5793617724f4854b9",
+      "bytes": 30554,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:58:29.712Z",
+      "draftRevision": 0
+    },
+    "m02-radio-factory-destroyed-1": {
+      "file": "recordings/elevenlabs/m02-radio-factory-destroyed-1-5b9e120e29cb.mp3",
+      "duration": 1.76,
+      "leadingSilence": 0.02,
+      "trailingSilence": 0.17999999999999994,
+      "speaker": "scout",
+      "text": "Завод уничтожен.",
+      "sha256": "5b9e120e29cb511fe729274f4a7691b9581b4e5519337232ab2bffa3f4cc392e",
+      "bytes": 29300,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:58:30.739Z",
+      "draftRevision": 0
+    },
+    "m02-radio-factory-destroyed-2": {
+      "file": "recordings/elevenlabs/m02-radio-factory-destroyed-2-4b5d46d6cbd1.mp3",
+      "duration": 2.4,
+      "leadingSilence": 0.08,
+      "trailingSilence": 0.16999999999999993,
+      "speaker": "commander",
+      "text": "Принято. Осмотрите площадку.",
+      "sha256": "4b5d46d6cbd1f5c75c4148eed57a1e5df07ed57b46e9d9c7e098e0c27245d792",
+      "bytes": 39331,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:58:31.932Z",
+      "draftRevision": 0
+    },
+    "m02-radio-flamer-ready-1": {
+      "file": "recordings/elevenlabs/m02-radio-flamer-ready-1-d860b7eb9b6b.mp3",
+      "duration": 3.2,
+      "leadingSilence": 0.04,
+      "trailingSilence": 0.20000000000000018,
+      "speaker": "scientist",
+      "text": "Огнемёты доработали. Теперь мощнее.",
+      "sha256": "d860b7eb9b6b00def2e0a6548402da24d3011f7e26579208cddfcc4396662b25",
+      "bytes": 52287,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "1KGG4Q8LqRdNII9xBurw",
+      "voiceName": "M. Danisch - Narrator",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:58:33.381Z",
+      "draftRevision": 0
+    },
+    "m02-radio-twin-ready-1": {
+      "file": "recordings/elevenlabs/m02-radio-twin-ready-1-0563e236e0db.mp3",
+      "duration": 3.76,
+      "leadingSilence": 0.04,
+      "trailingSilence": 0.16999999999999993,
+      "speaker": "scientist",
+      "text": "Спаренный пулемёт готов. Можно ставить в конструкторе.",
+      "sha256": "0563e236e0dbaef068416b7ac7a36800a5861e325a1dfc3f54cce607001630e1",
+      "bytes": 61065,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "1KGG4Q8LqRdNII9xBurw",
+      "voiceName": "M. Danisch - Narrator",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:58:33.828Z",
+      "draftRevision": 0
+    },
+    "m02-radio-sensor-ready-1": {
+      "file": "recordings/elevenlabs/m02-radio-sensor-ready-1-8d6e1d7e9f43.mp3",
+      "duration": 4.24,
+      "leadingSilence": 0.03,
+      "trailingSilence": 0.16999999999999993,
+      "speaker": "scientist",
+      "text": "Сенсор готов. Ставится вместо оружия, видит дальше.",
+      "sha256": "8d6e1d7e9f43ca35d2824b366b32ace988d8a3934a25b98df68639e8eca13127",
+      "bytes": 69006,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "1KGG4Q8LqRdNII9xBurw",
+      "voiceName": "M. Danisch - Narrator",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:58:37.881Z",
+      "draftRevision": 0
+    },
+    "m02-radio-sensor-ready-2": {
+      "file": "recordings/elevenlabs/m02-radio-sensor-ready-2-cbc9fa1a891b.mp3",
+      "duration": 2.08,
+      "leadingSilence": 0.11,
+      "trailingSilence": 0.3800000000000001,
+      "speaker": "warrant",
+      "text": "То есть стрелять нечем?",
+      "sha256": "cbc9fa1a891bd14ca649fd4b5aa6137e946e78c4be5372ee07772d62b5c76491",
+      "bytes": 34315,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "6A9D8WSMm4rFsg2DWFeE",
+      "voiceName": "Egor Gadzhiyev - Clear and Commanding",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:58:34.997Z",
+      "draftRevision": 0
+    },
+    "m02-radio-sensor-ready-3": {
+      "file": "recordings/elevenlabs/m02-radio-sensor-ready-3-2ac5c74d6923.mp3",
+      "duration": 3.12,
+      "leadingSilence": 0.12,
+      "trailingSilence": 0.33000000000000007,
+      "speaker": "scientist",
+      "text": "Зато раньше узнаете, что пора уезжать.",
+      "sha256": "2ac5c74d692302dbb5b8778df2670ea6059f1d77d1fd462d419584e6a458eb01",
+      "bytes": 51034,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "1KGG4Q8LqRdNII9xBurw",
+      "voiceName": "M. Danisch - Narrator",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:58:36.384Z",
+      "draftRevision": 0
+    },
+    "m02-radio-observer-seen-1": {
+      "file": "recordings/elevenlabs/m02-radio-observer-seen-1-aacc79355fea.mp3",
+      "duration": 3.84,
+      "leadingSilence": 0.04,
+      "trailingSilence": 0.1299999999999999,
+      "speaker": "scout",
+      "text": "Командир, чужая машина. На тех отбросов не похожа.",
+      "sha256": "aacc79355fea06141edcfe025131e7f24b2abd6ff16cc7465725079566cc8d1f",
+      "bytes": 62318,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:58:37.798Z",
+      "draftRevision": 0
+    },
+    "m02-radio-observer-seen-2": {
+      "file": "recordings/elevenlabs/m02-radio-observer-seen-2-4bb5e22dd184.mp3",
+      "duration": 1.68,
+      "leadingSilence": 0.04,
+      "trailingSilence": 0.34999999999999987,
+      "speaker": "commander",
+      "text": "Попробуйте перехватить.",
+      "sha256": "4bb5e22dd18459c6eb01d1775f6bb82599e6f2d1dbe6af64c8a6b2b53f6340e8",
+      "bytes": 28046,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:58:38.759Z",
+      "draftRevision": 0
+    },
+    "m02-radio-observer-escaped-1": {
+      "file": "recordings/elevenlabs/m02-radio-observer-escaped-1-dd42dfd5fd26.mp3",
+      "duration": 2.56,
+      "leadingSilence": 0.04,
+      "trailingSilence": 0.16999999999999993,
+      "speaker": "scout",
+      "text": "Ушла из района. След потеряли.",
+      "sha256": "dd42dfd5fd268c253f72ac237011f200ea04f0ecbbe8c4b392d0fcca893d3187",
+      "bytes": 41838,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:58:39.169Z",
+      "draftRevision": 0
+    },
+    "m02-radio-observer-destroyed-1": {
+      "file": "recordings/elevenlabs/m02-radio-observer-destroyed-1-50b6b9509405.mp3",
+      "duration": 3.28,
+      "leadingSilence": 0.04,
+      "trailingSilence": 0.17999999999999972,
+      "speaker": "scout",
+      "text": "Разведчик уничтожен. Маркировку записали.",
+      "sha256": "50b6b95094054a32f7a836823047795a21a0fc500b50e5ae20fcaa716a5b6374",
+      "bytes": 53541,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:58:42.261Z",
+      "draftRevision": 0
+    },
+    "m02-radio-energy-source-1": {
+      "file": "recordings/elevenlabs/m02-radio-energy-source-1-72040456e699.mp3",
+      "duration": 3.52,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.16999999999999993,
+      "speaker": "scout",
+      "text": "Источник нашли. Работает старый энергоузел.",
+      "sha256": "72040456e69985b5ce8921ad67dab00049e316635fd49ecabbbbebf1c10392e1",
+      "bytes": 57303,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:58:40.585Z",
+      "draftRevision": 0
+    },
+    "m02-radio-energy-source-2": {
+      "file": "recordings/elevenlabs/m02-radio-energy-source-2-d6c1662efecc.mp3",
+      "duration": 3.6,
+      "leadingSilence": 0.03,
+      "trailingSilence": 0.18000000000000016,
+      "speaker": "commander",
+      "text": "Охрану убрать. После боя осмотреть оборудование.",
+      "sha256": "d6c1662efecc9855297c4e385d658869fb391d44bfd5fd266ea041dee0dd83c8",
+      "bytes": 58557,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:58:42.088Z",
+      "draftRevision": 0
+    },
+    "m02-radio-power-recovered-1": {
+      "file": "recordings/elevenlabs/m02-radio-power-recovered-1-e8127cb8f5f9.mp3",
+      "duration": 3.84,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.1599999999999997,
+      "speaker": "scout",
+      "text": "Энергомодуль нашли. Данные передали в НИИ.",
+      "sha256": "e8127cb8f5f9204eb2ddb44a66549d65da0387999ce9cd825841669026f54b41",
+      "bytes": 62318,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:58:43.869Z",
+      "draftRevision": 0
+    },
+    "m02-radio-victory-1": {
+      "file": "recordings/elevenlabs/m02-radio-victory-1-5f2ecaea4a14.mp3",
+      "duration": 3.36,
+      "leadingSilence": 0.03,
+      "trailingSilence": 0.17999999999999972,
+      "speaker": "commander",
+      "text": "Район зачищен. Все четыре образца у нас.",
+      "sha256": "5f2ecaea4a14299ebd926055d907057eb872d07780d93f30291106bfd70eb20b",
+      "bytes": 54795,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:58:44.055Z",
+      "draftRevision": 0
+    },
+    "m02-radio-power-researched-1": {
+      "file": "recordings/elevenlabs/m02-radio-power-researched-1-c2df7c7b64e1.mp3",
+      "duration": 4.4,
+      "leadingSilence": 0.03,
+      "trailingSilence": 0.16999999999999993,
+      "speaker": "scientist",
+      "text": "Энергомодуль изучен. Теперь можно усилить нашу станцию.",
+      "sha256": "c2df7c7b64e12b0be80790f3a9b57d2820b889cc86cb644294304d5e9a0e50b0",
+      "bytes": 71514,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "1KGG4Q8LqRdNII9xBurw",
+      "voiceName": "M. Danisch - Narrator",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:58:48.379Z",
+      "draftRevision": 0
+    }
+  }
+}

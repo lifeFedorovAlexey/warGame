@@ -1,0 +1,402 @@
+{
+  "baseline": false,
+  "errors": [],
+  "networkFailures": [],
+  "views": [
+    {
+      "name": "near",
+      "width": 1440,
+      "height": 900,
+      "scroll": 1440
+    },
+    {
+      "name": "near",
+      "width": 844,
+      "height": 390,
+      "scroll": 844
+    },
+    {
+      "name": "near",
+      "width": 667,
+      "height": 375,
+      "scroll": 667
+    },
+    {
+      "name": "far",
+      "width": 1440,
+      "height": 900,
+      "scroll": 1440
+    },
+    {
+      "name": "far",
+      "width": 844,
+      "height": 390,
+      "scroll": 844
+    },
+    {
+      "name": "far",
+      "width": 667,
+      "height": 375,
+      "scroll": 667
+    },
+    {
+      "name": "finale",
+      "width": 1440,
+      "height": 900,
+      "scroll": 1440
+    },
+    {
+      "name": "finale",
+      "width": 844,
+      "height": 390,
+      "scroll": 844
+    },
+    {
+      "name": "finale",
+      "width": 667,
+      "height": 375,
+      "scroll": 667
+    },
+    {
+      "name": "final-signal",
+      "width": 1440,
+      "height": 900,
+      "scroll": 1440
+    },
+    {
+      "name": "final-signal",
+      "width": 844,
+      "height": 390,
+      "scroll": 844
+    },
+    {
+      "name": "final-signal",
+      "width": 667,
+      "height": 375,
+      "scroll": 667
+    },
+    {
+      "name": "choices",
+      "width": 1440,
+      "height": 900,
+      "scroll": 1440
+    },
+    {
+      "name": "choices",
+      "width": 844,
+      "height": 390,
+      "scroll": 844
+    },
+    {
+      "name": "choices",
+      "width": 667,
+      "height": 375,
+      "scroll": 667
+    }
+  ],
+  "near": {
+    "distance": 64.99999999999999,
+    "min": 65,
+    "max": 1600,
+    "clearance": 45.10018565276443,
+    "target": [
+      -1646,
+      260,
+      0.6000000238418579
+    ],
+    "position": [
+      -1633.47217065201,
+      214.89981434723558,
+      45.70018567660629
+    ]
+  },
+  "picked": true,
+  "far": {
+    "distance": 1599.9999999999789,
+    "min": 65,
+    "max": 1600,
+    "clearance": 1076.9213985787012,
+    "target": [
+      -1646,
+      260,
+      0.6000000238418579
+    ],
+    "position": [
+      -1337.6226622033216,
+      -850.1584160680336,
+      1110.7584160918734
+    ]
+  },
+  "pinch": [
+    {
+      "distance": 64.99999999999999,
+      "min": 65,
+      "max": 1600,
+      "clearance": 45.1001856527643,
+      "target": [
+        -1646,
+        260,
+        0.6000000238418579
+      ],
+      "position": [
+        -1633.4721706520095,
+        214.89981434723558,
+        45.70018567660616
+      ]
+    },
+    {
+      "distance": 1599.9999999999839,
+      "min": 65,
+      "max": 1600,
+      "clearance": 1076.9213985787005,
+      "target": [
+        -1646,
+        260,
+        0.6000000238418579
+      ],
+      "position": [
+        -1337.6226622033091,
+        -850.1584160680363,
+        1110.7584160918743
+      ]
+    }
+  ],
+  "finale": {
+    "status": "victory",
+    "remainingProjectiles": 1,
+    "ordinary": {
+      "enabled": true,
+      "target": [
+        -1646,
+        260,
+        0.6000000238418579
+      ]
+    },
+    "lastObjective": {
+      "x": -1424,
+      "y": 1024
+    }
+  },
+  "presentation": {
+    "controls": false,
+    "choicesHidden": true,
+    "cornerHeading": false,
+    "commands": "none",
+    "target": [
+      -1424,
+      1024,
+      12.976903438568119
+    ],
+    "story": "r48"
+  },
+  "blockedCommands": true,
+  "loadedEnding": true,
+  "dialogues": [
+    "r48",
+    "r49",
+    "r50",
+    "r54"
+  ],
+  "autoChoices": true,
+  "choiceLayouts": [
+    {
+      "width": 1440,
+      "height": 900,
+      "x": 720,
+      "y": 450,
+      "background": "rgba(0, 0, 0, 0)",
+      "shadow": "none",
+      "resultHidden": true,
+      "icons": 3,
+      "buttons": [
+        {
+          "text": "",
+          "label": "Продолжить",
+          "title": "Продолжить · Продолжить",
+          "icon": "http://127.0.0.1:8777/assets/ui/controls.svg#play",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "0px",
+          "shadow": "none",
+          "x": 620,
+          "y": 422,
+          "width": 56,
+          "height": 56
+        },
+        {
+          "text": "",
+          "label": "Заново",
+          "title": "Начать эту операцию заново",
+          "icon": "http://127.0.0.1:8777/assets/ui/controls.svg#restart",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "0px",
+          "shadow": "none",
+          "x": 692,
+          "y": 422,
+          "width": 56,
+          "height": 56
+        },
+        {
+          "text": "",
+          "label": "В меню",
+          "title": "В меню · Сохранить и выйти в главное меню",
+          "icon": "http://127.0.0.1:8777/assets/ui/controls.svg#menu",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "0px",
+          "shadow": "none",
+          "x": 764,
+          "y": 422,
+          "width": 56,
+          "height": 56
+        }
+      ]
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "x": 422,
+      "y": 195,
+      "background": "rgba(0, 0, 0, 0)",
+      "shadow": "none",
+      "resultHidden": true,
+      "icons": 3,
+      "buttons": [
+        {
+          "text": "",
+          "label": "Продолжить",
+          "title": "Продолжить · Продолжить",
+          "icon": "http://127.0.0.1:8777/assets/ui/controls.svg#play",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "0px",
+          "shadow": "none",
+          "x": 338,
+          "y": 171,
+          "width": 48,
+          "height": 48
+        },
+        {
+          "text": "",
+          "label": "Заново",
+          "title": "Начать эту операцию заново",
+          "icon": "http://127.0.0.1:8777/assets/ui/controls.svg#restart",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "0px",
+          "shadow": "none",
+          "x": 398,
+          "y": 171,
+          "width": 48,
+          "height": 48
+        },
+        {
+          "text": "",
+          "label": "В меню",
+          "title": "В меню · Сохранить и выйти в главное меню",
+          "icon": "http://127.0.0.1:8777/assets/ui/controls.svg#menu",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "0px",
+          "shadow": "none",
+          "x": 458,
+          "y": 171,
+          "width": 48,
+          "height": 48
+        }
+      ]
+    },
+    {
+      "width": 667,
+      "height": 375,
+      "x": 333.5,
+      "y": 187.5,
+      "background": "rgba(0, 0, 0, 0)",
+      "shadow": "none",
+      "resultHidden": true,
+      "icons": 3,
+      "buttons": [
+        {
+          "text": "",
+          "label": "Продолжить",
+          "title": "Продолжить · Продолжить",
+          "icon": "http://127.0.0.1:8777/assets/ui/controls.svg#play",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "0px",
+          "shadow": "none",
+          "x": 249.5,
+          "y": 163.5,
+          "width": 48,
+          "height": 48
+        },
+        {
+          "text": "",
+          "label": "Заново",
+          "title": "Начать эту операцию заново",
+          "icon": "http://127.0.0.1:8777/assets/ui/controls.svg#restart",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "0px",
+          "shadow": "none",
+          "x": 309.5,
+          "y": 163.5,
+          "width": 48,
+          "height": 48
+        },
+        {
+          "text": "",
+          "label": "В меню",
+          "title": "В меню · Сохранить и выйти в главное меню",
+          "icon": "http://127.0.0.1:8777/assets/ui/controls.svg#menu",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "0px",
+          "shadow": "none",
+          "x": 369.5,
+          "y": 163.5,
+          "width": 48,
+          "height": 48
+        }
+      ]
+    }
+  ],
+  "review": {
+    "controls": true,
+    "commands": "none",
+    "ending": false
+  },
+  "manualReport": true,
+  "nextMission": {
+    "controls": true,
+    "ending": true,
+    "commands": "block"
+  },
+  "ordinaryDialogue": {
+    "scene": "m02-radio-start",
+    "controls": true
+  },
+  "defeat": {
+    "status": "defeat",
+    "continueHidden": true,
+    "restartEnabled": true,
+    "resultHidden": true
+  },
+  "restartM02": {
+    "backup": "defeat",
+    "builders": 2,
+    "controls": true
+  },
+  "radioOff": {
+    "status": "victory",
+    "radio": false,
+    "continueHidden": true,
+    "resultHidden": true
+  },
+  "menu": {
+    "welcome": true,
+    "savedStatus": "victory"
+  },
+  "restartM01": {
+    "backup": "victory",
+    "opening": true,
+    "buildings": [
+      {
+        "kind": "base-sign",
+        "completed": false
+      }
+    ]
+  }
+}

@@ -14,7 +14,7 @@ export function resultsPresentationReady(mission,radio){
  if(mission.state.status==='defeat'||!radio?.enabled||!radio.director)return true;
  const id=mission.state.m03?'m03-s11':mission.state.m02?'m02-radio-victory':'r54',director=radio.director;
  // The final exchange keeps its portraits, captions and full recordings on
- // the map. The memorial opens after it ends; the menu can open it sooner.
+ // the map. End-of-operation choices wait for the exchange to finish.
  return !director.scenes.has(id)||director.finished(id);
 }
 export class MissionResultsView{

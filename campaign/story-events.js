@@ -9,7 +9,9 @@ export function storyFacts(mission,d) {
   const building=kind=>own.find(e=>e.kind===kind),ready=kind=>own.some(e=>e.kind===kind&&e.completed);
   const visible=e=>mission.visibleAt?.(e.x,e.y)??false;
   const shots=(mission.effects??[]).filter(e=>e.type==='shot');
-  if(shots.length||s.projectiles?.length)d.lastCombat=d.clock;
+  // Combat stops with the mission. A shell frozen in flight must not keep
+  // the victory exchange waiting for a quiet interval forever.
+  if(s.status==='running'&&(shots.length||s.projectiles?.length))d.lastCombat=d.clock;
   const raiders=s.units.filter(e=>e.owner==='scavs'&&live(e)&&s.flags.raidIds?.includes(e.id));
   // The simulation already raises an approach warning outside weapon range.
   // Waiting for direct visibility here wasted the whole conversation window.

@@ -73,7 +73,7 @@
               <button id="tempo" title="Скорость симуляции" data-icon="speed-one" aria-label="Скорость симуляции"></button>
               <button id="home" title="К начальной базе · Home" data-icon="home" aria-label="К базе"></button>
               <button id="main-menu-return" data-icon="menu" aria-label="Сохранить и выйти в главное меню"></button>
-              <button id="results-open" hidden data-icon="memorial" aria-label="Итоги операции и холм памяти" title="Итоги операции и холм памяти"></button>
+              <button id="results-open" class="icon-button" hidden aria-label="Итоги операции" title="Итоги операции"><svg class="game-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h7l2 2 2-2h7v17h-7l-2 1-2-1H3z" fill="none" stroke="#d9c69b" stroke-width="2"/><path d="M12 5v15M6 8h3m-3 4h3m6-4h3m-3 4h3" stroke="#f3ae54" stroke-width="1.5"/></svg></button>
             </div>
           </section>
           <section id="operation-audio" class="operation-pane" aria-labelledby="communication-controls" hidden>
@@ -118,6 +118,11 @@
       </div>
     </aside>
 
+    <nav id="mission-ending" aria-label="После операции" hidden>
+      <button id="ending-continue" type="button" data-icon="play" aria-label="Продолжить" title="Продолжить"></button>
+      <button id="ending-restart" type="button" data-icon="restart" aria-label="Заново" title="Начать эту операцию заново"></button>
+      <button id="ending-menu" type="button" data-icon="menu" aria-label="В меню" title="Сохранить и выйти в главное меню"></button>
+    </nav>
     <aside id="field-tasks" aria-label="Текущие задачи" hidden><ol id="field-objectives"></ol></aside>
     <div class="command-deck">
     <section class="squad" aria-label="Выбранная техника">

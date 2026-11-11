@@ -33,6 +33,8 @@ import {personnelLabel,missionResults,campaignMemorial,setPersonnelRank} from '.
 import {renderPersonnelSelection} from './personnel-presentation.js';
 import {PersonnelNotices} from './personnel-notices.js';
 import {MissionResultsView,resultsPresentationReady} from './mission-results.js';
+import {MissionEnding} from './mission-ending.js';
+import {rememberMissionStart,missionRestartPlan,beforeRestartKey} from './mission-restart.js';
 
 const $ = id => document.getElementById(id);
 const stabilityGraph=createStabilityGraph();
@@ -55,7 +57,7 @@ const selected = new Set();
 const miniBackground = new Image();
 let world, mission, config, radio, sound, designer, combatMenu, openingTelevision;
 let minimapView;
-let resultsView;
+let resultsView,ending;
 const personnelNotices=new PersonnelNotices($('personnel-notice'),()=>sound?.signal('complete'));
 let active = false, paused = false, speed = 1, resultShown = false, resultPrepared=false;
 let openingPlaying = false;
@@ -241,6 +243,7 @@ function chooseBuilder(kind) {
   return current.length?current:live;
 }
 function toggleBuild() {
+  if(mission.state.status!=='running')return;
   combatMenu?.close();
   if (buildOpen || buildKind) return cancelMode();
   if (!builders().length) return toast('Нет строителей. Закажите машину на заводе.');
@@ -249,6 +252,7 @@ function toggleBuild() {
   updateUi();
 }
 function beginPlacement(kind) {
+  if(mission.state.status!=='running')return;
   const available = chooseBuilder(kind);
   if (!available.length) return;
   select(available.map(unit => unit.id), false, false);
@@ -260,6 +264,7 @@ function beginPlacement(kind) {
   updateUi();
 }
 function beginOrder(mode) {
+  if(mission.state.status!=='running')return;
   if (!(mode==='attack'?commandSelection():selection()).some(unit=>liveMobile(unit)&&(mode!=='attack'||config.units[unit.kind].damage>0))) {
     const unit = vehicles().find(unit => config.units[unit.kind].damage > 0) ?? (mode!=='attack'&&vehicles()[0]);
     if (!unit) return;
@@ -284,16 +289,17 @@ async function saveGame(notify = true) {
   }
 }
 let loadingGame=false;
-async function start(restore = false) {
+async function start(restore = false,{useDiagnostic=true}={}) {
   if(!restore&&activeMap==='m03'){const url=new URL(location.href);url.searchParams.delete('map');location.replace(url.href);return;}
   if(loadingGame)return;
   loadingGame=true;
   sound.unlock();
   personnelNotices.reset();
   try {
-  if(!restore&&diagnosticM02&&!mission.state.m02){const {prepareM02Diagnostic}=await import('./mission02-diagnostic.js');prepareM02Diagnostic(mission);}
+  if(!restore&&useDiagnostic&&diagnosticM02&&!mission.state.m02){const {prepareM02Diagnostic}=await import('./mission02-diagnostic.js');prepareM02Diagnostic(mission);}
+  if(!restore&&mission.state.m02)try{await rememberMissionStart(mission,localStorage);}catch(error){console.warn('Начало операции не сохранено:',error.message);}
   const continuing=restore||!!mission.state.m02;
-  if (restore) {
+  if (restore&&restore!=='current') {
     try {
       const data = restore==='map-backup'?localStorage.getItem('warGame.alpha.before-map-v2.v1'):restore==='checkpoint'?localStorage.getItem(checkpointKey):restore==='manual'?localStorage.getItem(saveKey):resumeData();
       if (!data) return toast('Сохранения ещё нет');
@@ -318,6 +324,7 @@ async function start(restore = false) {
   paused = false;
   resultShown = false;
   resultPrepared=false;
+  ending.reset();
   radio.reset();
   if(!continuing)radio.director.beginStory(mission);
   if(!continuing)startOpeningConstruction(mission);
@@ -357,6 +364,7 @@ async function start(restore = false) {
   finally {loadingGame=false;last=performance.now();}
 }
 function ordersAt(point, target, mode, append=false) {
+  if(mission.state.status!=='running')return;
   const chosen = selection();
   const factory = chosen.length === 1 && chosen[0]?.owner === 'rai' && chosen[0]?.kind === 'factory' && chosen[0]?.completed ? chosen[0] : null;
   if (factory && point && !mode) {
@@ -636,6 +644,12 @@ function installInput() {
   document.addEventListener('keydown', event => {
     if(!$('result').hidden){if(event.code==='Escape'){event.preventDefault();resultsView.hide();}return;}
     if (!active || designer.visible || event.target.isContentEditable || event.target.matches('input, select, textarea')) return;
+    if(mission.state.status!=='running'){
+      if(event.code==='Escape'){event.preventDefault();if(!ending.panel.hidden)ending.closeChoices();else if(resultShown)ending.showChoices(mission,!!missionRestartPlan(mission,localStorage));else radio.dismiss();}
+      else if(event.code==='F7'&&!event.repeat){event.preventDefault();stabilityGraph.toggle();}
+      else if(!ending.presenting&&['KeyW','KeyA','KeyS','KeyD'].includes(event.code)){event.preventDefault();world.keys.add(event.code);}
+      return;
+    }
     const {code} = event;
     if(event.ctrlKey&&code==='KeyG'&&!event.repeat){
       event.preventDefault();
@@ -1024,6 +1038,7 @@ function presentSignal(signal,chapter) {
   if(signal?.kind==='anomaly')sound.anomaly?.();
 }
 function focusSignal(signal) {
+  if(ending?.presenting){ending.focus(signal);return;}
   world.focusStorySignal(signal,mission.state.camps[3]);
   if (buildKind) {
     site = pointer = null;
@@ -1038,7 +1053,7 @@ function frame(now) {
   if (loadingGame || !world || !mission || !$('welcome').hidden) return;
   if(window.campaign?.renderSuspended)return;
   if(!$('result').hidden){personnelNotices.reset();sound.update();return;}
-  personnelNotices.update(now,{hidden:!!designer?.visible||!!openingTelevision?.active});
+  personnelNotices.update(now,{hidden:!!designer?.visible||!!openingTelevision?.active||!ending.panel.hidden});
   if(openingTelevision?.active){
     openingTelevision.update(dt);
     return;
@@ -1056,7 +1071,7 @@ function frame(now) {
   if (active || openingPlaying) {
     if (!paused) {const measuring=stabilityGraph.enabled,start=measuring?performance.now():0;const completed=mission.advance(dt * speed,{budgetMs:mission.config.simulationCpuBudgetMs,rate:speed});if(measuring){stabilityTicks=Number.isFinite(completed)?completed:0;stabilitySimulationMs=performance.now()-start;}}
     events();
-    radio.consume(mission, now);
+    if(!resultShown)radio.consume(mission, now);
     if(openingPlaying&&openingCamera.update(dt,openingCanHandOver(mission,radio.director,radio.enabled))){
       mission.state.openingScene.handedOver=true;
       openingPlaying=false;active=true;world.controls.enabled=true;
@@ -1067,6 +1082,12 @@ function frame(now) {
       saveGame(false);
     }
   }
+  if(active&&mission.state.status!=='running'&&!resultPrepared){
+    resultPrepared=true;paused=false;cancelMode();combatMenu?.close();world.keys.clear();
+    toast(mission.state.status==='victory'?'Задание выполнено':'Операция прервана',2400);
+    ending.begin(mission);saveGame(false);
+  }
+  ending.update(dt,radio.current);
   pruneSelection();
   const renderStarted=performance.now();
   world.update(mission, selected, dt, (active||openingPlaying) && !paused && mission.state.status==='running',active);
@@ -1084,9 +1105,11 @@ function frame(now) {
     }
     if(uiPending){uiPending=false;flushUi();}
     if (mission.state.status !== 'running' && !resultShown) {
-      if(!resultPrepared){resultPrepared=true;saveGame(false);}
       $('results-open').hidden=false;
-      if(resultsPresentationReady(mission,radio)){resultShown=true;saveGame(false);resultsView.show(mission);}
+      if(ending.ready&&resultsPresentationReady(mission,radio)){
+        ending.prepareChoices();
+        if(ending.ready){resultShown=true;ending.showChoices(mission,!!missionRestartPlan(mission,localStorage));saveGame(false);}
+      }
     }
   }
   if (now >= toastUntil) $('toast').hidden = true;
@@ -1110,6 +1133,7 @@ try {
     beforeReveal:()=>world.update(mission,selected,0,false,active),
   });
   world = await createCampaignWorld($('world'), config, sound, mainMenu.loading);
+  ending=new MissionEnding(world,$('mission-ending'));
   await mainMenu.loading.stage('simulation');
   mission = new Mission(config, world.field);
   try{
@@ -1245,25 +1269,44 @@ try {
     if(live.length===1)focusUnit(live[0]);
     else if(live.length)select(live.map(unit=>unit.id));
   };
-  let enteringM02=false;
+  let enteringM02=false,restartingMission=false;
   resultsView=new MissionResultsView($('result'),{onVisibility:visible=>{
     sound.setMemorialMix(visible);
-    world.controls.enabled=!visible&&!openingPlaying;world.keys.clear();$('mission-hud').inert=visible;
+    world.controls.enabled=!visible&&!openingPlaying&&!ending.presenting&&ending.panel.hidden;world.keys.clear();$('mission-hud').inert=visible;
     if(visible){cancelMode();document.querySelector('.settings').open=false;}
   }});
-  $('results-open').onclick=()=>resultsView.show(mission);
-  $('result-continue').onclick=async()=>{
-    if(enteringM02||mission.state.m03||mission.state.status!=='victory')return;
-    enteringM02=true;$('result-continue').disabled=true;
+  $('results-open').onclick=()=>{ending.finish();ending.closeChoices();resultShown=true;resultsView.show(mission);};
+  const continueMission=async()=>{
+    if(enteringM02||restartingMission||mission.state.m03||mission.state.status!=='victory')return;
+    enteringM02=true;$('result-continue').disabled=$('ending-continue').disabled=true;
     try{
-      try{localStorage.setItem(checkpointKey,await mission.saveAsync());}catch{return toast('Не удалось создать контрольное сохранение');}
+      try{localStorage.setItem(mission.state.m02?'warGame.alpha.before-m03.v1':checkpointKey,await mission.saveAsync());}catch{return toast('Не удалось создать контрольное сохранение');}
       loadingGame=true;
       const result=mission.state.m02?mission.enterM03():mission.enterM02();if(!result.ok)return report(result);
       await mission.nav.routeAdvisor?.prepareForPlay(mission.nav,activeMap==='m03'?mission.state.bounds:mission.config.finalMapBounds);
-      resultShown=false;resultPrepared=false;resultsView.hide();$('results-open').hidden=true;radio.reset();taskKey='';actionKey='';world.storySignals.show(null);
+      try{await rememberMissionStart(mission,localStorage);}catch(error){console.warn('Начало операции не сохранено:',error.message);}
+      resultShown=false;resultPrepared=false;ending.reset();resultsView.hide();$('results-open').hidden=true;radio.reset();taskKey='';actionKey='';world.storySignals.show(null);
       await saveGame(false);updateUi();
-    }finally{loadingGame=false;last=performance.now();enteringM02=false;$('result-continue').disabled=false;}
+    }finally{loadingGame=false;last=performance.now();enteringM02=false;$('result-continue').disabled=$('ending-continue').disabled=false;}
   };
+  $('result-continue').onclick=$('ending-continue').onclick=continueMission;
+  $('ending-restart').onclick=async()=>{
+    if(loadingGame||enteringM02||restartingMission)return;
+    const plan=missionRestartPlan(mission,localStorage);if(!plan)return;
+    restartingMission=true;$('ending-restart').disabled=true;
+    try{
+      localStorage.setItem(beforeRestartKey,await mission.saveAsync());
+      if(plan.kind==='fresh')mission.load(new Mission(structuredClone(config),world.field).save());
+      else {
+        const destination=JSON.parse(plan.data).state.m03?.location==='expedition'?'m03':'home';
+        if(destination!==activeMap){transferMap(plan.data);return;}
+        mission.load(plan.data);if(plan.kind==='checkpoint'){const result=mission.enterM02();if(!result.ok)return report(result);}
+      }
+      await start(plan.kind==='fresh'?false:'current',{useDiagnostic:false});
+    }catch(error){toast('Не удалось начать заново: '+error.message);}
+    finally{restartingMission=false;$('ending-restart').disabled=false;}
+  };
+  $('ending-menu').onclick=()=>{if(!enteringM02&&!restartingMission)$('main-menu-return').click();};
   $('result-close').onclick = () => resultsView.hide();
   $('result-menu').onclick = () => {resultsView.hide();$('main-menu-return').click();};
   if(sessionStorage.getItem(mapKey)==='resume'){sessionStorage.removeItem(mapKey);await start(true);}
