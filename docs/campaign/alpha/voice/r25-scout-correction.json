@@ -1,0 +1,45 @@
+{
+  "scene": "r25",
+  "lineId": "m01-v3-r25-l001",
+  "text": "Лагерь зачищен. Нашли установку: бак, шланги, довоенный блок. На самогонный аппарат похоже.",
+  "previousText": "Лагерь зачищен. Нашли довоенное оборудование. Отбросы пытались переделать его в самогонный аппарат.",
+  "clip": {
+    "file": "recordings/elevenlabs/m01-v3-r25-l001-12ab4f065f10.mp3",
+    "speaker": "scout",
+    "text": "Лагерь зачищен. Нашли установку: бак, шланги, довоенный блок. На самогонный аппарат похоже.",
+    "origin": "elevenlabs-synthesis",
+    "voiceId": "RLRdvNFwJJct2XZOgfzy",
+    "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+    "modelId": "eleven_v4",
+    "voiceSettings": {
+      "stability": 0.5,
+      "similarityBoost": 0.75
+    },
+    "sha256": "12ab4f065f10188a63b9eeb18e4c3c98f9c432e8672cab47b5970e4b9833d010",
+    "bytes": 113727,
+    "duration": 7.04,
+    "leadingSilence": 0.04,
+    "trailingSilence": 0.16000000000000014,
+    "generatedAt": "2026-11-11T23:54:51.660Z",
+    "replaces": "recordings/reviewed/m01-v3-r25-l001-dd44a3c494ba.mp3"
+  },
+  "reusedCommander": {
+    "file": "recordings/reviewed/m01-v3-r25-l002-2eb2e25e06c8.mp3",
+    "duration": 3.78775,
+    "leadingSilence": 0.14,
+    "trailingSilence": 0.28774999999999995,
+    "speaker": "commander",
+    "sha256": "2eb2e25e06c898198aea3fe9e17eaa68a13d4e08b7d29ae853167d0d927f20c4",
+    "bytes": 77541,
+    "origin": "user-recording",
+    "sourceName": "ElevenLabs_2026-11-10T18_29_16_comandorNig_gen_s50_sim75_v4.mp3",
+    "draftRevision": 184,
+    "transcriptSource": "owner-workshop",
+    "text": "Учёным отправь. И прапорщику про аппарат ни слова."
+  },
+  "originalAudioPreserved": true,
+  "reservedCredits": 91,
+  "sourceDraftRevision": 220,
+  "savedDraftRevision": 221,
+  "note": "One request, no retries. Conservative credit reservation, not verified account debit."
+}

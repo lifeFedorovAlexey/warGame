@@ -28,7 +28,7 @@ for(const cue of [...source.dialogue,...source.barks]){
  assert(clip.duration>0);
  if(cue.speaker!=='past')assert(portraits.characters[cue.speaker],cue.speaker);
 }
-assert.equal(userCount,107);assert.equal(elevenlabsCount,59);
+assert.equal(userCount,106);assert.equal(elevenlabsCount,60);
 assert.equal(audio.clips['m01-s07-l014'].voiceName,'Mishka Yaponcik - Odessa Rogue Charm');
 assert.equal(hash(fs.readFileSync(base+'recordings/reviewed/m01-s07-l014-4e14be06b9b1.mp3')),'4e14be06b9b1155f9d172d2ad351ef622770b629d1241313303b233a4ca38308');
 for(const id of ['m01-v3-r24-l001','m01-v3-r24-l002','m01-v3-r24-l003'])assert.equal(audio.clips[id].origin,'user-recording',id);
@@ -37,7 +37,7 @@ assert.equal(source.dialogue.find(c=>c.id==='m01-s05-l004').text,'Учёные �
 assert.deepEqual(source.scenes.find(s=>s.id==='p04').cues,['m01-s03-l001','m01-v3-builder-crooked-plinth']);
 assert(!source.dialogue.some(c=>c.id==='m01-s03-l003'),'The disabled sign reply must not play');
 for(const sceneId of ['r21','r22','r23','r24','r24a','r25','r26','r27','r29','r30-alt','r31','r32','r33','r35','r36']){
- for(const id of source.scenes.find(s=>s.id===sceneId).cues)assert.equal(audio.clips[id].origin,'user-recording',id);
+ for(const id of source.scenes.find(s=>s.id===sceneId).cues)assert.equal(audio.clips[id].origin,id==='m01-v3-r25-l001'?'elevenlabs-synthesis':'user-recording',id);
 }
 assert.equal(source.dialogue.find(c=>c.id==='m01-s07-l016').text,'Нам и прикрученное надо. Дай отвёртку.');
 assert.equal(source.dialogue.find(c=>c.id==='m01-s07-l016').speaker,'builder');

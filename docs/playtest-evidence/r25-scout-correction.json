@@ -1,0 +1,35 @@
+{
+  "errors": [],
+  "paidRequests": [],
+  "editor": [
+    "http://127.0.0.1:8769/assets/campaign/alpha/mission01/recordings/elevenlabs/m01-v3-r25-l001-12ab4f065f10.mp3",
+    "http://127.0.0.1:8769/docs/campaign/dialogue-drafts/alpha-m01/media/2eb2e25e06c898198aea3fe9e17eaa68a13d4e08b7d29ae853167d0d927f20c4.mp3"
+  ],
+  "game": [
+    {
+      "id": "m01-v3-r25-l001",
+      "file": "recordings/elevenlabs/m01-v3-r25-l001-12ab4f065f10.mp3",
+      "state": "running",
+      "duration": 7.04
+    }
+  ],
+  "scene": "r25",
+  "lineId": "m01-v3-r25-l001",
+  "scope": "Only the approved scout text and recording changed; commander and triggers preserved.",
+  "viewports": [
+    [
+      1440,
+      900
+    ],
+    [
+      844,
+      390
+    ],
+    [
+      667,
+      375
+    ]
+  ],
+  "newPaidRequests": 1,
+  "reservedCredits": 91
+}

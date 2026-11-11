@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "draftRevision": 220,
+  "draftRevision": 221,
   "draftSha256": "1c5043ff3241222489be8ed397529c87ee35b77771d3939975d6458ba5943d11",
   "throughScene": "r36",
-  "appliedAt": "2026-11-11T22:00:11.180169+00:00",
+  "appliedAt": "2026-11-11T23:55:05.135292+00:00",
   "scenes": [
     {
       "id": "p01",
@@ -879,7 +879,7 @@
     {
       "id": "m01-v3-r25-l001",
       "speaker": "scout",
-      "text": "Лагерь зачищен. Нашли довоенное оборудование. Отбросы пытались переделать его в самогонный аппарат.",
+      "text": "Лагерь зачищен. Нашли установку: бак, шланги, довоенный блок. На самогонный аппарат похоже.",
       "pauseAfter": 0.2,
       "recordingStatus": "Т",
       "notes": ""
@@ -1991,18 +1991,24 @@
       "text": "Впереди ещё один лагерь. У ворот часовые, за ограждением какие-то баллоны таскают. Похоже, не самогон."
     },
     "m01-v3-r25-l001": {
-      "file": "recordings/reviewed/m01-v3-r25-l001-dd44a3c494ba.mp3",
-      "duration": 6.687333333333333,
-      "leadingSilence": 0.15,
-      "trailingSilence": 0.22733333333333317,
+      "file": "recordings/elevenlabs/m01-v3-r25-l001-12ab4f065f10.mp3",
       "speaker": "scout",
-      "sha256": "dd44a3c494ba6c28997a527a7f8e70bd6690fabaeefae5ff3b37bec5a9e86117",
-      "bytes": 123934,
-      "origin": "user-recording",
-      "sourceName": "ElevenLabs_2026-11-10T18_27_19_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
-      "draftRevision": 184,
-      "transcriptSource": "owner-workshop",
-      "text": "Лагерь зачищен. Нашли довоенное оборудование. Отбросы пытались переделать его в самогонный аппарат."
+      "text": "Лагерь зачищен. Нашли установку: бак, шланги, довоенный блок. На самогонный аппарат похоже.",
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "12ab4f065f10188a63b9eeb18e4c3c98f9c432e8672cab47b5970e4b9833d010",
+      "bytes": 113727,
+      "duration": 7.04,
+      "leadingSilence": 0.04,
+      "trailingSilence": 0.16000000000000014,
+      "generatedAt": "2026-11-11T23:54:51.660Z",
+      "replaces": "recordings/reviewed/m01-v3-r25-l001-dd44a3c494ba.mp3"
     },
     "m01-v3-r25-l002": {
       "file": "recordings/reviewed/m01-v3-r25-l002-2eb2e25e06c8.mp3",
