@@ -1,5 +1,6 @@
 import {perf} from './performance.js';
 import {createStabilityGraph} from './stability-graph.js';
+import {createAttackOverlay} from './attack-overlay.js';
 import {setButtonIcon, speedIcon} from '../assets/ui/icons.js';
 import {createCampaignWorld} from './world.js';
 import {Mission} from './mission.js';
@@ -45,7 +46,7 @@ const dataUrl = '../assets/campaign/alpha/mission01/gameplay.json';
 const selected = new Set();
 const miniBackground = new Image();
 let world, mission, config, radio, sound, designer, combatMenu, openingTelevision;
-let minimapView;
+let minimapView,attackOverlay;
 let resultsView;
 const personnelNotices=new PersonnelNotices($('personnel-notice'),()=>sound?.signal('complete'));
 let active = false, paused = false, speed = 1, resultShown = false, resultPrepared=false;
@@ -984,7 +985,7 @@ function events() {
   const batch=mission.drainEvents(),ordinaryNotice=text=>{if(performance.now()>milestoneToastUntil)toast(text);};
   personnelNotices.consume(batch,mission,performance.now());
   for (const event of batch) {
-    if(active)minimapView.alerts.event(event,performance.now());
+    if(active&&minimapView.alerts.event(event,performance.now()))sound.signal('attack');
     radio?.director?.note(event,mission);
     if(event.type==='construction-complete'&&config.buildings[event.kind]?.storyOnly)continue;
     sound?.storyEvent?.(event);
@@ -1020,15 +1021,17 @@ function frame(now) {
   navigationTelemetry?.frame(now);
   const dt = Math.min(.65, (now - last) / 1000);
   last = now;
-  if (loadingGame || !world || !mission || !$('welcome').hidden) return;
-  if(window.campaign?.renderSuspended)return;
-  if(!$('result').hidden){personnelNotices.reset();sound.update();return;}
+  if (loadingGame || !world || !mission || !$('welcome').hidden) {attackOverlay?.clear();return;}
+  if(window.campaign?.renderSuspended){attackOverlay?.clear();return;}
+  if(!$('result').hidden){attackOverlay?.clear();personnelNotices.reset();sound.update();return;}
   personnelNotices.update(now,{hidden:!!designer?.visible||!!openingTelevision?.active});
   if(openingTelevision?.active){
+    attackOverlay?.clear();
     openingTelevision.update(dt);
     return;
   }
   if (designer?.visible) {
+    attackOverlay?.clear();
     sound.update();
     return;
   }
@@ -1055,6 +1058,7 @@ function frame(now) {
   pruneSelection();
   const renderStarted=performance.now();
   world.update(mission, selected, dt, (active||openingPlaying) && !paused && mission.state.status==='running',active);
+  attackOverlay?.render(active?minimapView.alerts.active(now):[],now);
   const debugStarted=performance.now();
   navigationTelemetry?.rendered(world.vehicles.transforms);
   navigationDebug?.update();
@@ -1094,6 +1098,7 @@ try {
     beforeReveal:()=>world.update(mission,selected,0,false,active),
   });
   world = await createCampaignWorld($('world'), config, sound, mainMenu.loading);
+  attackOverlay=createAttackOverlay($('world'),(point,height)=>world.screen(point,height));
   await mainMenu.loading.stage('simulation');
   mission = new Mission(config, world.field);
   minimapView=createMinimap($('minimap'),{world,mission,selected,background:miniBackground,notify:toast});

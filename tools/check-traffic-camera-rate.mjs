@@ -14,8 +14,8 @@ for(const cameraChanges of [false,true]){
  for(;frames<300&&(u.routeTopologyPending||u.path.length||u.task);frames++){
   const visible=!cameraChanges||frames%2===0;
   u.trafficOnScreen=v.trafficOnScreen=visible;if(cameraChanges)flips++;
-  assert.equal(trafficCollisionRequired(u,v),visible,'Both hidden allies use the existing pass-through rule');
-  if(!visible){v.trafficOnScreen=true;assert(trafficCollisionRequired(u,v),'One visible body immediately restores collision');v.trafficOnScreen=false;}
+  assert(trafficCollisionRequired(u,v),'Camera visibility must not change collision rules');
+  if(!visible){v.trafficOnScreen=true;assert(trafficCollisionRequired(u,v));v.trafficOnScreen=false;}
   m.advance(.4,{rate:4});
   assert(!u.routeTopologyPending||u.routeTopologyPending===version,'Migration marker is stable across camera changes');
  }

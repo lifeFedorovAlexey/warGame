@@ -1,5 +1,6 @@
 export const MINIMAP_COLORS={friendlyUnit:'#43c768',friendlyBuilding:'#adeba2',enemyUnit:'#e34c43',enemyBuilding:'#e34c4399',artifact:'#62b7ff',objective:'#64ed84',attack:'#ff514b'};
 export const MINIMAP_PING_MS=3000;
+export const MINIMAP_ATTACK_PING_MS=5000;
 const point=p=>p&&Number.isFinite(p.x)&&Number.isFinite(p.y);
 
 export function objectiveLocation(mission,task){
@@ -29,7 +30,7 @@ export class MinimapAlerts{
   this.active(now);
   if(this.pings.some(a=>a.kind===kind&&Math.hypot(a.x-p.x,a.y-p.y)<72))return;
   if(this.pings.length>=16)this.pings.shift();
-  this.pings.push({kind,x:p.x,y:p.y,born:now,until:now+MINIMAP_PING_MS});
+  this.pings.push({kind,x:p.x,y:p.y,born:now,until:now+(kind==='attack'?MINIMAP_ATTACK_PING_MS:MINIMAP_PING_MS)});
  }
  active(now){this.pings=this.pings.filter(p=>now<p.until);return this.pings;}
  observe(mission,tasks,now){
@@ -61,6 +62,7 @@ export class MinimapAlerts{
   if(this.attacks.length>=32)this.attacks.shift();
   this.attacks.push({x:event.x,y:event.y,born:now});
   this.ping('attack',event,now);
+  return true;
  }
  signal(signal,chapter,now){
   if(!point(signal)||!chapter||signal.kind==='anomaly')return;

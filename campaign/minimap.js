@@ -1,4 +1,4 @@
-import {MinimapAlerts,MINIMAP_COLORS as colors,MINIMAP_PING_MS} from './minimap-alerts.js';
+import {MinimapAlerts,MINIMAP_COLORS as colors} from './minimap-alerts.js';
 
 export function minimapViewport(bounds=[0,0,127,127]){
  const [left,top,right,bottom]=bounds,span=Math.max(1,right-left,bottom-top);
@@ -88,13 +88,13 @@ export function createMinimap(canvas,{world,mission,selected,background,notify})
   // Background/fog only update at 5 Hz; light pulse and camera overlays are cheap.
   ctx.clearRect(0,0,size,size);ctx.drawImage(base,0,0);
   const [cx,cy]=position(world.controls.target);ctx.strokeStyle='#e3d4a3';ctx.lineWidth=scale*.7;ctx.strokeRect(cx-5*scale,cy-4*scale,10*scale,8*scale);
-  for(const p of pings){const [x,y]=position(p),age=(now-p.born)/MINIMAP_PING_MS,wave=(1-Math.cos(age*Math.PI*8))/2,r=(5+wave*3)*scale,arm=3*scale;
-   ctx.save();ctx.globalAlpha=.5+wave*.5;ctx.lineCap='square';ctx.strokeStyle=colors[p.kind];ctx.lineWidth=1.6*scale;
-   ctx.beginPath();
-   for(const sx of [-1,1])for(const sy of [-1,1]){
+  for(const p of pings){const [x,y]=position(p),age=(now-p.born)/(p.until-p.born),wave=(1-Math.cos(age*Math.PI*8))/2,attack=p.kind==='attack',r=(attack?8+wave*4:5+wave*3)*scale,arm=(attack?4:3)*scale;
+   ctx.save();ctx.globalAlpha=.5+wave*.5;ctx.lineCap='square';
+   const corners=()=>{ctx.beginPath();for(const sx of [-1,1])for(const sy of [-1,1]){
     ctx.moveTo(x+sx*(r-arm),y+sy*r);ctx.lineTo(x+sx*r,y+sy*r);ctx.lineTo(x+sx*r,y+sy*(r-arm));
-   }
-   ctx.stroke();ctx.restore();
+   }};
+   if(attack){ctx.strokeStyle='rgba(22,15,13,.9)';ctx.lineWidth=3.6*scale;corners();ctx.stroke();}
+   ctx.strokeStyle=colors[p.kind];ctx.lineWidth=(attack?2:1.6)*scale;corners();ctx.stroke();ctx.restore();
   }
  }
  return {alerts,render,observe:(tasks,now)=>alerts.observe(mission,tasks,now),reset(silent){alerts.reset(silent);refreshed=-Infinity;},invalidate(){refreshed=-Infinity;}};

@@ -153,6 +153,9 @@ export class FieldSound {
     }
     this.loadRecordings();
     this.loadVoices();
+    this.loadClip(combatBase,'attack-warning.ogg')
+      .then(buffer=>{this.attackAlert=buffer;})
+      .catch(error=>console.warn('Сигнал нападения недоступен:',error.message));
     this.loadClip(warrantBase, 'stop.mp3')
       .then(buffer => { this.warrantStop = buffer; })
       .catch(error => console.warn('Реплика прапорщика недоступна:', error.message));
@@ -654,6 +657,13 @@ export class FieldSound {
   }
 
   signal(kind) {
+    if(kind==='attack'){
+      if(!this.attackAlert||!this.limit('attack',8))return;
+      const ctx=this.context,source=ctx.createBufferSource();
+      source.buffer=this.attackAlert;
+      source.connect(this.effectsOutput);source.onended=()=>source.disconnect();source.start();
+      return;
+    }
     if (!this.limit(kind, .18)) return;
     if (kind === 'radio') this.transient({duration:.13, frequency:1180, end:710, level:.055});
     else if (kind === 'complete') this.transient({duration:.25, frequency:320, end:480, level:.048, tone:'sine'});
