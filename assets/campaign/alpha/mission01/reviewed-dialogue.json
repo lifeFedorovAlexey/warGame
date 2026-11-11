@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "draftRevision": 216,
-  "draftSha256": "fd1840ef3a51f0e2eec699b76944b0b727a7d8ab3886f3b9bb22fe5332c424c6",
+  "draftRevision": 217,
+  "draftSha256": "1c5043ff3241222489be8ed397529c87ee35b77771d3939975d6458ba5943d11",
   "throughScene": "r36",
   "appliedAt": "2026-11-10T19:29:39.572467+00:00",
   "scenes": [
@@ -617,7 +617,7 @@
     {
       "id": "m01-s10-l007",
       "speaker": "scout",
-      "text": "думаю Инструкцию нашли.",
+      "text": "Думаю, инструкцию нашли.",
       "pauseAfter": 0.2,
       "recordingStatus": "Т",
       "notes": ""
@@ -625,7 +625,7 @@
     {
       "id": "m01-s10-l008",
       "speaker": "commander",
-      "text": "Прочитали чтоли?",
+      "text": "Прочитали, что ли?",
       "pauseAfter": 0.2,
       "recordingStatus": "Т",
       "notes": ""
@@ -665,7 +665,7 @@
     {
       "id": "m01-s08-l019",
       "speaker": "scientist",
-      "text": "Если учесть все нюансы конструкции и использованные детали... вывод очевиден...сИНЯЯ ИЗОЛЕНТА НУЖНА - Чтобы жёлтая не разматывалась.",
+      "text": "Если учесть все нюансы конструкции и использованные детали... Вывод очевиден... Синяя изолента нужна, чтобы жёлтая не разматывалась.",
       "pauseAfter": 0.2,
       "recordingStatus": "Т",
       "notes": ""
@@ -745,7 +745,7 @@
     {
       "id": "m01-s09-l009",
       "speaker": "commander",
-      "text": "А в чем подвох?",
+      "text": "А в чём подвох?",
       "pauseAfter": 0.2,
       "recordingStatus": "Т",
       "notes": ""
@@ -753,7 +753,7 @@
     {
       "id": "m01-s09-l010",
       "speaker": "scientist",
-      "text": "Патроны теперь кончаются еще быстрее. Но это уже проблема снабженцев.",
+      "text": "Патроны теперь кончаются ещё быстрее. Но это уже проблема снабженцев.",
       "pauseAfter": 0.2,
       "recordingStatus": "Т",
       "notes": ""
@@ -825,7 +825,7 @@
     {
       "id": "m01-v3-r25-l002",
       "speaker": "commander",
-      "text": "уЧЕНЫМ  отправь. И прапорщику про аппарат ни слова.",
+      "text": "Учёным отправь. И прапорщику про аппарат ни слова.",
       "pauseAfter": 0.2,
       "recordingStatus": "Т",
       "notes": ""
@@ -977,7 +977,7 @@
     {
       "id": "m01-v3-r23-l001",
       "speaker": "radio",
-      "text": "оБНАРУЖЕНО Четыре лагеря. Противник на связь не выходит.",
+      "text": "Обнаружено четыре лагеря. Противник на связь не выходит.",
       "pauseAfter": 0.2,
       "recordingStatus": "Т",
       "notes": ""
@@ -1033,7 +1033,7 @@
     {
       "id": "m01-s02-l008",
       "speaker": "warrant",
-      "text": "Значит ВОСПОМИНАНИЯ,  Спи дальше.",
+      "text": "Значит, воспоминания. Спи дальше.",
       "pauseAfter": 0.2,
       "recordingStatus": "Т",
       "notes": ""
@@ -1105,7 +1105,7 @@
     {
       "id": "m01-s07-l009",
       "speaker": "commander",
-      "text": "Уже!\nКак раз выезное голосование - проходите в буханку... ",
+      "text": "Уже!\nКак раз выездное голосование — проходите в «Буханку»...",
       "pauseAfter": 0.2,
       "recordingStatus": "Т",
       "notes": ""
@@ -1113,7 +1113,7 @@
     {
       "id": "field:raid-won",
       "speaker": "commander",
-      "text": "Голосование закончено.\n112 процентов за!\nПроверьте машины может еще что найдем!?",
+      "text": "Голосование закончено.\n112 процентов за!\nПроверьте машины — может, ещё что найдём?!",
       "pauseAfter": 0.2,
       "recordingStatus": "Т",
       "notes": ""
@@ -1177,7 +1177,7 @@
     {
       "id": "m01-s05-l003",
       "speaker": "warrant",
-      "text": "А это, зачем ... а главное на...ху-... ...ой - куда, нам эти дармоеды?",
+      "text": "А это зачем?.. А главное — на... ху... Ой, куда нам эти дармоеды?",
       "pauseAfter": 0.2,
       "recordingStatus": "Т",
       "notes": ""
@@ -1185,7 +1185,7 @@
     {
       "id": "m01-s05-l004",
       "speaker": "general",
-      "text": "Учёные будут изучать находки. пОЛУЧАТ новые чертежи — смоГУТ другую технику собирать.",
+      "text": "Учёные будут изучать находки. Получат новые чертежи — смогут другую технику собирать.",
       "pauseAfter": 0.2,
       "recordingStatus": "Т",
       "notes": ""
@@ -1201,7 +1201,7 @@
     {
       "id": "m01-s05-l006",
       "speaker": "general",
-      "text": "Всё непонятное, что найдёте, отправляйте в ИНСТИТУТ. Пусть учёные разбираются.",
+      "text": "Всё непонятное, что найдёте, отправляйте в институт. Пусть учёные разбираются.",
       "pauseAfter": 0.2,
       "recordingStatus": "Т",
       "notes": ""
@@ -1217,7 +1217,7 @@
     {
       "id": "m01-s05-l008",
       "speaker": "general",
-      "text": "Приказы - выполнять! Железки. - им везите!",
+      "text": "Приказы — выполнять! Железки им везите!",
       "pauseAfter": 0.2,
       "recordingStatus": "Т",
       "notes": ""
@@ -1369,7 +1369,7 @@
     {
       "id": "m01-s05-l012",
       "speaker": "commander",
-      "text": "Не получится из букв «Ж», «О», «П», «А»...тоесть «УАЗ» — собрать слово «счастье»...я имел ввиду -  танк.",
+      "text": "Не получится из букв «Ж», «О», «П», «А»... То есть «УАЗ» — собрать слово «счастье»... Я имел в виду — танк.",
       "pauseAfter": 0.2,
       "recordingStatus": "Т",
       "notes": ""
@@ -1377,7 +1377,7 @@
     {
       "id": "m01-s05-l013",
       "speaker": "general",
-      "text": "Читайте мелкий шрифт в доступных чертежах:«Доработать напильником».",
+      "text": "Читайте мелкий шрифт в доступных чертежах: «Доработать напильником».",
       "pauseAfter": 0.2,
       "recordingStatus": "Т",
       "notes": ""
@@ -1385,7 +1385,7 @@
     {
       "id": "m01-b005",
       "speaker": "builder",
-      "text": "Завод готов. Напильник я, правда, не нашёл. Так что пока без танка.\nЗато нашёл пару вёдер краски и чёрные саморезы. Профессиональные.Найдёте железяку — прикрутим к борту, покрасим. Будет вам дополнительная броня.Краска и саморезы входят в зип каждой машины. Собственно, это весь её зип.",
+      "text": "Завод готов. Напильник я, правда, не нашёл. Так что пока без танка.\nЗато нашёл пару вёдер краски и чёрные саморезы. Профессиональные. Найдёте железяку — прикрутим к борту, покрасим. Будет вам дополнительная броня. Краска и саморезы входят в ЗИП каждой машины. Собственно, это весь её ЗИП.",
       "pauseAfter": 0.2,
       "recordingStatus": "Т",
       "notes": ""
@@ -1448,7 +1448,7 @@
       "sourceName": "ElevenLabs_2026-11-10T19_16_30_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
       "draftRevision": 216,
       "transcriptSource": "owner-workshop",
-      "text": "думаю Инструкцию нашли."
+      "text": "Думаю, инструкцию нашли."
     },
     "m01-s10-l008": {
       "file": "recordings/reviewed/m01-s10-l008-2eda89d7f2a1.mp3",
@@ -1462,7 +1462,7 @@
       "sourceName": "ElevenLabs_2026-11-10T19_17_06_comandorNig_gen_s50_sim75_v4.mp3",
       "draftRevision": 216,
       "transcriptSource": "owner-workshop",
-      "text": "Прочитали чтоли?"
+      "text": "Прочитали, что ли?"
     },
     "m01-s10-l009": {
       "file": "recordings/reviewed/m01-s10-l009-c21a093b4be2.mp3",
@@ -1534,7 +1534,7 @@
       "sourceName": "ElevenLabs_2026-11-10T18_45_24_M. Danisch - Narrator_pvc_s50_sim75_v4.mp3",
       "draftRevision": 215,
       "transcriptSource": "owner-workshop",
-      "text": "Если учесть все нюансы конструкции и использованные детали... вывод очевиден...сИНЯЯ ИЗОЛЕНТА НУЖНА - Чтобы жёлтая не разматывалась."
+      "text": "Если учесть все нюансы конструкции и использованные детали... Вывод очевиден... Синяя изолента нужна, чтобы жёлтая не разматывалась."
     },
     "m01-v3-r31-l001": {
       "file": "recordings/reviewed/m01-v3-r31-l001-4bcc26bf2743.mp3",
@@ -1674,7 +1674,7 @@
       "sourceName": "ElevenLabs_2026-11-10T19_00_38_comandorNig_gen_s50_sim75_v4.mp3",
       "draftRevision": 215,
       "transcriptSource": "owner-workshop",
-      "text": "А в чем подвох?"
+      "text": "А в чём подвох?"
     },
     "m01-s09-l010": {
       "file": "recordings/reviewed/m01-s09-l010-61771db7da4b.mp3",
@@ -1688,7 +1688,7 @@
       "sourceName": "ElevenLabs_2026-11-10T19_01_31_M. Danisch - Narrator_pvc_s50_sim75_v4.mp3",
       "draftRevision": 215,
       "transcriptSource": "owner-workshop",
-      "text": "Патроны теперь кончаются еще быстрее. Но это уже проблема снабженцев."
+      "text": "Патроны теперь кончаются ещё быстрее. Но это уже проблема снабженцев."
     },
     "m01-v3-r35-l001": {
       "file": "recordings/reviewed/m01-v3-r35-l001-fba49a5627c1.mp3",
@@ -1814,7 +1814,7 @@
       "sourceName": "ElevenLabs_2026-11-10T18_29_16_comandorNig_gen_s50_sim75_v4.mp3",
       "draftRevision": 184,
       "transcriptSource": "owner-workshop",
-      "text": "уЧЕНЫМ  отправь. И прапорщику про аппарат ни слова."
+      "text": "Учёным отправь. И прапорщику про аппарат ни слова."
     },
     "m01-s08-l001": {
       "file": "recordings/reviewed/m01-s08-l001-1b2c29465e86.mp3",
@@ -2086,7 +2086,7 @@
       "sourceName": "ElevenLabs_2026-11-10T18_03_49_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
       "draftRevision": 148,
       "transcriptSource": "owner-workshop",
-      "text": "оБНАРУЖЕНО Четыре лагеря. Противник на связь не выходит."
+      "text": "Обнаружено четыре лагеря. Противник на связь не выходит."
     },
     "m01-v3-r23-l002": {
       "file": "recordings/reviewed/m01-v3-r23-l002-a2b2eef294d0.mp3",
@@ -2192,7 +2192,7 @@
       "sourceName": "ElevenLabs_2026-11-10T17_29_53_Egor Gadzhiyev - Clear and Commanding_pvc_s50_sim75_v4.mp3",
       "draftRevision": 148,
       "transcriptSource": "owner-workshop",
-      "text": "Значит ВОСПОМИНАНИЯ,  Спи дальше."
+      "text": "Значит, воспоминания. Спи дальше."
     },
     "m01-s07-l001": {
       "file": "recordings/reviewed/m01-s07-l001-efb6cf71e8a6.mp3",
@@ -2325,7 +2325,7 @@
       "sourceName": "ElevenLabs_2026-11-10T08_55_54_comandorNig_gen_s50_sim75_v4.mp3",
       "draftRevision": 120,
       "transcriptSource": "owner-workshop",
-      "text": "Уже!\nКак раз выезное голосование - проходите в буханку... "
+      "text": "Уже!\nКак раз выездное голосование — проходите в «Буханку»..."
     },
     "field:raid-won": {
       "file": "recordings/reviewed/field-raid-won-ec0adabee02e.mp3",
@@ -2339,7 +2339,7 @@
       "sourceName": "ElevenLabs_2026-11-10T09_00_23_comandorNig_gen_s50_sim75_v4.mp3",
       "draftRevision": 120,
       "transcriptSource": "owner-workshop",
-      "text": "Голосование закончено.\n112 процентов за!\nПроверьте машины может еще что найдем!?"
+      "text": "Голосование закончено.\n112 процентов за!\nПроверьте машины — может, ещё что найдём?!"
     },
     "m01-s07-l010": {
       "file": "recordings/reviewed/m01-s07-l010-33b68facef4e.mp3",
@@ -2451,7 +2451,7 @@
       "sourceName": "ElevenLabs_2026-11-09T20_14_28_Egor Gadzhiyev - Clear and Commanding_pvc_s50_sim75_v4.mp3",
       "draftRevision": 86,
       "transcriptSource": "owner-workshop",
-      "text": "А это, зачем ... а главное на...ху-... ...ой - куда, нам эти дармоеды?"
+      "text": "А это зачем?.. А главное — на... ху... Ой, куда нам эти дармоеды?"
     },
     "m01-s05-l004": {
       "file": "recordings/reviewed/m01-s05-l004-f72d2f650537.mp3",
@@ -2465,7 +2465,7 @@
       "sourceName": "ElevenLabs_2026-11-09T20_17_12_Artem Lebedev - Captivating and Engaging_pvc_s50_sim75_v4.mp3",
       "draftRevision": 86,
       "transcriptSource": "owner-workshop",
-      "text": "Учёные будут изучать находки. пОЛУЧАТ новые чертежи — смоГУТ другую технику собирать."
+      "text": "Учёные будут изучать находки. Получат новые чертежи — смогут другую технику собирать."
     },
     "m01-s05-l005": {
       "file": "recordings/reviewed/m01-s05-l005-4adf21ab7f7b.mp3",
@@ -2493,7 +2493,7 @@
       "sourceName": "ElevenLabs_2026-11-09T20_25_36_Artem Lebedev - Captivating and Engaging_pvc_s50_sim75_v4.mp3",
       "draftRevision": 86,
       "transcriptSource": "owner-workshop",
-      "text": "Всё непонятное, что найдёте, отправляйте в ИНСТИТУТ. Пусть учёные разбираются."
+      "text": "Всё непонятное, что найдёте, отправляйте в институт. Пусть учёные разбираются."
     },
     "m01-s05-l007": {
       "file": "recordings/reviewed/m01-s05-l007-91a3a65e5c13.mp3",
@@ -2521,7 +2521,7 @@
       "sourceName": "ElevenLabs_2026-11-09T20_27_13_Artem Lebedev - Captivating and Engaging_pvc_s50_sim75_v4.mp3",
       "draftRevision": 86,
       "transcriptSource": "owner-workshop",
-      "text": "Приказы - выполнять! Железки. - им везите!"
+      "text": "Приказы — выполнять! Железки им везите!"
     },
     "m01-s02-l013": {
       "file": "recordings/reviewed/m01-s02-l013-09a7b8618ab7.mp3",
@@ -2805,7 +2805,7 @@
       "sourceName": "ElevenLabs_2026-11-09T18_44_56_Artem Lebedev - Captivating and Engaging_pvc_s50_sim75_v4.mp3",
       "draftRevision": 70,
       "transcriptSource": "owner-workshop",
-      "text": "Читайте мелкий шрифт в доступных чертежах:«Доработать напильником»."
+      "text": "Читайте мелкий шрифт в доступных чертежах: «Доработать напильником»."
     },
     "m01-b005": {
       "file": "recordings/reviewed/m01-b005-6abfe5e83bb0.mp3",

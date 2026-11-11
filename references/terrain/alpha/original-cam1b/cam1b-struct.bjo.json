@@ -1,0 +1,722 @@
+[
+  {
+    "id": 42,
+    "kind": "A0BaBaPowerGenerator",
+    "grid": [
+      35.5,
+      77.5
+    ],
+    "owner": 6
+  },
+  {
+    "id": 43,
+    "kind": "A0BaBaFactory",
+    "grid": [
+      33.0,
+      76.5
+    ],
+    "owner": 6
+  },
+  {
+    "id": 44,
+    "kind": "A0BaBaHorizontalWall",
+    "grid": [
+      33.5,
+      75.5
+    ],
+    "owner": 6
+  },
+  {
+    "id": 45,
+    "kind": "A0BaBaHorizontalWall",
+    "grid": [
+      34.5,
+      75.5
+    ],
+    "owner": 6
+  },
+  {
+    "id": 46,
+    "kind": "A0BaBaHorizontalWall",
+    "grid": [
+      32.5,
+      75.5
+    ],
+    "owner": 6
+  },
+  {
+    "id": 47,
+    "kind": "A0BaBaHorizontalWall",
+    "grid": [
+      35.5,
+      75.5
+    ],
+    "owner": 6
+  },
+  {
+    "id": 48,
+    "kind": "A0BaBaHorizontalWall",
+    "grid": [
+      33.5,
+      78.5
+    ],
+    "owner": 6
+  },
+  {
+    "id": 49,
+    "kind": "A0BaBaHorizontalWall",
+    "grid": [
+      36.5,
+      76.5
+    ],
+    "owner": 6
+  },
+  {
+    "id": 50,
+    "kind": "A0BaBaHorizontalWall",
+    "grid": [
+      36.5,
+      77.5
+    ],
+    "owner": 6
+  },
+  {
+    "id": 51,
+    "kind": "A0BaBaHorizontalWall",
+    "grid": [
+      31.5,
+      76.5
+    ],
+    "owner": 6
+  },
+  {
+    "id": 52,
+    "kind": "A0BaBaHorizontalWall",
+    "grid": [
+      31.5,
+      77.5
+    ],
+    "owner": 6
+  },
+  {
+    "id": 53,
+    "kind": "A0BaBaGunTower",
+    "grid": [
+      36.5,
+      75.5
+    ],
+    "owner": 6
+  },
+  {
+    "id": 54,
+    "kind": "A0BaBaGunTower",
+    "grid": [
+      36.5,
+      78.5
+    ],
+    "owner": 6
+  },
+  {
+    "id": 56,
+    "kind": "A0BaBaGunTower",
+    "grid": [
+      31.5,
+      75.5
+    ],
+    "owner": 6
+  },
+  {
+    "id": 61,
+    "kind": "A0BaBaPowerGenerator",
+    "grid": [
+      25.5,
+      106.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 62,
+    "kind": "A0PowerGenerator",
+    "grid": [
+      24.0,
+      109.0
+    ],
+    "owner": 7
+  },
+  {
+    "id": 69,
+    "kind": "A0BaBaHorizontalWall",
+    "grid": [
+      22.5,
+      109.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 71,
+    "kind": "A0BaBaHorizontalWall",
+    "grid": [
+      22.5,
+      108.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 72,
+    "kind": "A0BaBaHorizontalWall",
+    "grid": [
+      22.5,
+      107.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 73,
+    "kind": "A0BaBaHorizontalWall",
+    "grid": [
+      22.5,
+      106.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 74,
+    "kind": "A0BaBaHorizontalWall",
+    "grid": [
+      23.5,
+      105.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 75,
+    "kind": "A0BaBaHorizontalWall",
+    "grid": [
+      24.5,
+      105.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 76,
+    "kind": "A0BaBaHorizontalWall",
+    "grid": [
+      25.5,
+      105.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 84,
+    "kind": "A0BaBaHorizontalWall",
+    "grid": [
+      27.5,
+      109.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 97,
+    "kind": "A0BaBaFactory",
+    "grid": [
+      24.0,
+      106.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 247,
+    "kind": "A0BaBaHorizontalWall",
+    "grid": [
+      26.5,
+      105.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 248,
+    "kind": "A0BaBaGunTower",
+    "grid": [
+      27.5,
+      108.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 249,
+    "kind": "A0BaBaGunTower",
+    "grid": [
+      27.5,
+      106.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 269,
+    "kind": "A0BabaCornerWall",
+    "grid": [
+      22.5,
+      110.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 271,
+    "kind": "A0BaBaHorizontalWall",
+    "grid": [
+      24.5,
+      110.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 272,
+    "kind": "A0BaBaHorizontalWall",
+    "grid": [
+      23.5,
+      110.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 274,
+    "kind": "A0BaBaHorizontalWall",
+    "grid": [
+      26.5,
+      111.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 275,
+    "kind": "A0BabaCornerWall",
+    "grid": [
+      27.5,
+      111.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 933,
+    "kind": "A0ResourceExtractor",
+    "grid": [
+      26.5,
+      109.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 961,
+    "kind": "A0BaBaGunTower",
+    "grid": [
+      22.5,
+      105.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 986,
+    "kind": "A0BaBaHorizontalWall",
+    "grid": [
+      35.5,
+      78.5
+    ],
+    "owner": 6
+  },
+  {
+    "id": 987,
+    "kind": "A0BaBaHorizontalWall",
+    "grid": [
+      34.5,
+      78.5
+    ],
+    "owner": 6
+  },
+  {
+    "id": 989,
+    "kind": "A0BaBaBunker",
+    "grid": [
+      40.5,
+      68.5
+    ],
+    "owner": 6
+  },
+  {
+    "id": 990,
+    "kind": "A0BaBaBunker",
+    "grid": [
+      36.5,
+      68.5
+    ],
+    "owner": 6
+  },
+  {
+    "id": 1016,
+    "kind": "A0BabaCornerWall",
+    "grid": [
+      27.5,
+      105.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 1017,
+    "kind": "A0BaBaBunker",
+    "grid": [
+      36.5,
+      108.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 1018,
+    "kind": "A0BaBaBunker",
+    "grid": [
+      35.5,
+      105.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 1019,
+    "kind": "A0CannonTower",
+    "grid": [
+      20.5,
+      111.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 1272,
+    "kind": "A0BaBaBunker",
+    "grid": [
+      39.5,
+      107.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 3233,
+    "kind": "A0BabaCornerWall",
+    "grid": [
+      25.5,
+      110.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 3234,
+    "kind": "A0BabaCornerWall",
+    "grid": [
+      25.5,
+      111.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 3235,
+    "kind": "A0BaBaHorizontalWall",
+    "grid": [
+      27.5,
+      110.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 3236,
+    "kind": "Sys-SensoTower01",
+    "grid": [
+      30.5,
+      88.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 3237,
+    "kind": "A0BaBaBunker",
+    "grid": [
+      28.5,
+      81.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 3238,
+    "kind": "A0BaBaBunker",
+    "grid": [
+      26.5,
+      91.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 3239,
+    "kind": "A0BaBaBunker",
+    "grid": [
+      32.5,
+      85.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 3252,
+    "kind": "A0BaBaBunker",
+    "grid": [
+      6.5,
+      82.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 3253,
+    "kind": "A0BaBaBunker",
+    "grid": [
+      22.5,
+      79.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 3425,
+    "kind": "A0BaBaBunker",
+    "grid": [
+      8.5,
+      79.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 3426,
+    "kind": "A0BaBaBunker",
+    "grid": [
+      26.5,
+      103.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 3427,
+    "kind": "A0BaBaBunker",
+    "grid": [
+      24.5,
+      98.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 3428,
+    "kind": "A0BaBaBunker",
+    "grid": [
+      21.5,
+      103.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 3434,
+    "kind": "A0BaBaFactory",
+    "grid": [
+      15.0,
+      71.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 3450,
+    "kind": "A0BaBaGunTower",
+    "grid": [
+      31.5,
+      78.5
+    ],
+    "owner": 6
+  },
+  {
+    "id": 3453,
+    "kind": "A0BaBaGunTower",
+    "grid": [
+      13.5,
+      73.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 3454,
+    "kind": "A0BaBaGunTower",
+    "grid": [
+      13.5,
+      70.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 3456,
+    "kind": "A0BaBaFlameTower",
+    "grid": [
+      17.5,
+      71.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 3457,
+    "kind": "A0BaBaHorizontalWall",
+    "grid": [
+      14.5,
+      73.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 3458,
+    "kind": "A0BaBaHorizontalWall",
+    "grid": [
+      15.5,
+      73.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 3460,
+    "kind": "A0BaBaHorizontalWall",
+    "grid": [
+      14.5,
+      70.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 3461,
+    "kind": "A0BaBaHorizontalWall",
+    "grid": [
+      15.5,
+      70.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 3462,
+    "kind": "A0BaBaHorizontalWall",
+    "grid": [
+      16.5,
+      73.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 3463,
+    "kind": "A0BaBaHorizontalWall",
+    "grid": [
+      13.5,
+      71.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 3464,
+    "kind": "A0BaBaHorizontalWall",
+    "grid": [
+      17.5,
+      70.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 3465,
+    "kind": "A0BaBaHorizontalWall",
+    "grid": [
+      17.5,
+      73.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 3466,
+    "kind": "A0BaBaHorizontalWall",
+    "grid": [
+      18.5,
+      71.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 3467,
+    "kind": "A0BaBaHorizontalWall",
+    "grid": [
+      18.5,
+      72.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 3468,
+    "kind": "A0BaBaHorizontalWall",
+    "grid": [
+      13.5,
+      72.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 3475,
+    "kind": "A0BaBaGunTower",
+    "grid": [
+      18.5,
+      70.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 3476,
+    "kind": "A0BaBaGunTower",
+    "grid": [
+      18.5,
+      73.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 3477,
+    "kind": "A0BaBaFlameTower",
+    "grid": [
+      9.5,
+      77.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 3478,
+    "kind": "A0BaBaFlameTower",
+    "grid": [
+      15.5,
+      69.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 3479,
+    "kind": "A0BaBaFlameTower",
+    "grid": [
+      31.5,
+      105.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 3480,
+    "kind": "A0BaBaFlameTower",
+    "grid": [
+      29.5,
+      109.5
+    ],
+    "owner": 7
+  },
+  {
+    "id": 3576,
+    "kind": "A0PowMod1",
+    "grid": [
+      24.0,
+      109.0
+    ],
+    "owner": 7
+  }
+]

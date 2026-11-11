@@ -1,0 +1,192 @@
+{
+  "errors": [],
+  "checks": [
+    "24 clips decode; two opening lines start playing"
+  ],
+  "opening": [
+    {
+      "id": "m02-radio-start-1",
+      "text": "Альфа, источник сигнала к югу. Координаты передаю.",
+      "clip": {
+        "file": "audio-temp/m02-radio-start-1-475729c471bc.ogg",
+        "speaker": "radio",
+        "text": "Альфа, источник сигнала к югу. Координаты передаю.",
+        "voice": "voice-6",
+        "emotion": "calm",
+        "duration": 3.28225,
+        "sha256": "475729c471bc89cc373f37a7361ec7dad410471e17384ba4fe8761ad37c43ee7",
+        "origin": "temporary-synthesis",
+        "generator": "local Piper + FFmpeg",
+        "base": "http://127.0.0.1:8797/assets/campaign/alpha/mission02/"
+      },
+      "duration": 3.282244897959184,
+      "peak": 0.78549724817276,
+      "context": "running"
+    },
+    {
+      "id": "m02-radio-start-2",
+      "text": "Базу прикрыть. Основной группе — на выезд.",
+      "clip": {
+        "file": "audio-temp/m02-radio-start-2-36e5fb5e0248.ogg",
+        "speaker": "commander",
+        "text": "Базу прикрыть. Основной группе — на выезд.",
+        "voice": "voice-1",
+        "emotion": "calm",
+        "duration": 3.1346666666666665,
+        "sha256": "36e5fb5e02486d972cdbd4db22ee22364d5c886fdf27e18cd8b5d76857048c73",
+        "origin": "temporary-synthesis",
+        "generator": "local Piper + FFmpeg",
+        "base": "http://127.0.0.1:8797/assets/campaign/alpha/mission02/"
+      },
+      "duration": 3.1346485260770973,
+      "peak": 0.8167588710784912,
+      "context": "running"
+    }
+  ],
+  "decoded": [
+    {
+      "id": "m02-radio-start-1",
+      "duration": 3.282244897959184,
+      "expected": 3.28225,
+      "peak": 0.78549724817276
+    },
+    {
+      "id": "m02-radio-start-2",
+      "duration": 3.1346485260770973,
+      "expected": 3.1346666666666665,
+      "peak": 0.8167588710784912
+    },
+    {
+      "id": "m02-radio-entrance-1",
+      "duration": 2.3444444444444446,
+      "expected": 2.3444583333333333,
+      "peak": 0.7854912281036377
+    },
+    {
+      "id": "m02-radio-entrance-2",
+      "duration": 2.93702947845805,
+      "expected": 2.9370416666666666,
+      "peak": 0.7182972431182861
+    },
+    {
+      "id": "m02-radio-entrance-changed-1",
+      "duration": 3.7957369614512473,
+      "expected": 3.79575,
+      "peak": 0.7746739983558655
+    },
+    {
+      "id": "m02-radio-entrance-clear-1",
+      "duration": 3.3774149659863943,
+      "expected": 3.3774166666666665,
+      "peak": 0.7878307104110718
+    },
+    {
+      "id": "m02-radio-factory-working-1",
+      "duration": 3.203151927437642,
+      "expected": 3.2031666666666667,
+      "peak": 0.782902717590332
+    },
+    {
+      "id": "m02-radio-factory-working-2",
+      "duration": 1.7715192743764172,
+      "expected": 1.7715416666666666,
+      "peak": 0.8228724002838135
+    },
+    {
+      "id": "m02-radio-factory-destroyed-1",
+      "duration": 1.295532879818594,
+      "expected": 1.2955416666666666,
+      "peak": 0.5811065435409546
+    },
+    {
+      "id": "m02-radio-factory-destroyed-2",
+      "duration": 2.646190476190476,
+      "expected": 2.6462083333333335,
+      "peak": 0.7826230525970459
+    },
+    {
+      "id": "m02-radio-flamer-ready-1",
+      "duration": 2.6324489795918367,
+      "expected": 2.632458333333333,
+      "peak": 0.6910845637321472
+    },
+    {
+      "id": "m02-radio-twin-ready-1",
+      "duration": 3.0036961451247164,
+      "expected": 3.0037083333333334,
+      "peak": 0.8269809484481812
+    },
+    {
+      "id": "m02-radio-sensor-ready-1",
+      "duration": 3.2359410430839004,
+      "expected": 3.2359583333333335,
+      "peak": 0.7823487520217896
+    },
+    {
+      "id": "m02-radio-sensor-ready-2",
+      "duration": 1.3211111111111111,
+      "expected": 1.321125,
+      "peak": 0.7605888843536377
+    },
+    {
+      "id": "m02-radio-sensor-ready-3",
+      "duration": 2.0827437641723354,
+      "expected": 2.08275,
+      "peak": 0.7474080324172974
+    },
+    {
+      "id": "m02-radio-observer-seen-1",
+      "duration": 3.481814058956916,
+      "expected": 3.4818333333333333,
+      "peak": 0.7506417036056519
+    },
+    {
+      "id": "m02-radio-observer-seen-2",
+      "duration": 1.7137868480725624,
+      "expected": 1.7137916666666666,
+      "peak": 0.7552615404129028
+    },
+    {
+      "id": "m02-radio-observer-escaped-1",
+      "duration": 2.506780045351474,
+      "expected": 2.5067916666666665,
+      "peak": 0.7912756204605103
+    },
+    {
+      "id": "m02-radio-observer-destroyed-1",
+      "duration": 3.110702947845805,
+      "expected": 3.110708333333333,
+      "peak": 0.8019171953201294
+    },
+    {
+      "id": "m02-radio-energy-source-1",
+      "duration": 3.1685714285714286,
+      "expected": 3.1685833333333333,
+      "peak": 0.7608100175857544
+    },
+    {
+      "id": "m02-radio-energy-source-2",
+      "duration": 3.4944897959183674,
+      "expected": 3.4945,
+      "peak": 0.6749008297920227
+    },
+    {
+      "id": "m02-radio-power-recovered-1",
+      "duration": 3.064104308390023,
+      "expected": 3.064125,
+      "peak": 0.7559688091278076
+    },
+    {
+      "id": "m02-radio-victory-1",
+      "duration": 3.262358276643991,
+      "expected": 3.262375,
+      "peak": 0.6734750270843506
+    },
+    {
+      "id": "m02-radio-power-researched-1",
+      "duration": 3.456984126984127,
+      "expected": 3.457,
+      "peak": 0.7722702622413635
+    }
+  ]
+}

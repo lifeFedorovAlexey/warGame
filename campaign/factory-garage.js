@@ -5,12 +5,16 @@ import {vehicleDynamics} from './vehicle-dynamics.js';
 import {CommandPlanner} from './command-planner.js';
 import {retreatReturnOrder} from './factory-repair.js';
 import {corridorBlocker,invalidateTrafficCorridors} from './traffic-corridor.js';
+import {needsModernization,modernizeAfterRepair} from './factory-modernization.js';
 
 export const insideFactory=u=>u.factoryVisit?.phase==='inside';
 export const factoryPriority=f=>f.workPriority??'repair';
 export function factoryPoint(m,f,x,y){const a=f.rotation??0,c=Math.cos(a),s=Math.sin(a),scale=m.config.worldScale;return{x:f.x+(x*c-y*s)*scale,y:f.y+(x*s+y*c)*scale};}
 export function factoryVisitors(m,f){return m.state.units.filter(u=>u.hp>0&&u.factoryVisit?.factoryId===f.id);}
-export function factoryProductionPaused(m,f){return factoryVisitors(m,f).some(u=>['entering','leaving','departure'].includes(u.factoryVisit.phase)||insideFactory(u)&&u.hp<u.maxHp&&factoryPriority(f)==='repair');}
+export function factoryProductionPaused(m,f){
+ const canRepair=m.state.energy>0||(m.buildingSpec(f).repair?.energyPerSecond??1.5)===0;
+ return factoryPriority(f)==='repair'&&canRepair&&factoryVisitors(m,f).some(u=>insideFactory(u)&&u.hp<u.maxHp);
+}
 export function setFactoryPriority(m,id,priority){
  m.finishPendingStep();const f=m.entity(id);
  if(!f||f.kind!=='factory'||f.owner!=='rai'||!f.completed||!['repair','production'].includes(priority))return m.fail('Нужен работающий завод');
@@ -19,7 +23,7 @@ export function setFactoryPriority(m,id,priority){
 function resetDrive(u){u.path=[];u.task=null;u.driveSpeed=0;for(const k of ['detour','yieldReturn','traffic','trafficHold','passingLane','driveWatch','routeOrder','routeContinuation','combatParking'])delete u[k];}
 function exitOwner(m,f){
  const visitors=factoryVisitors(m,f),current=visitors.find(u=>['leaving','departure'].includes(u.factoryVisit.phase));
- const ready=visitors.filter(u=>insideFactory(u)&&(u.hp>=u.maxHp||f.hp<=0)).sort((a,b)=>a.factoryVisit.arrived-b.factoryVisit.arrived);
+ const ready=visitors.filter(u=>insideFactory(u)&&(u.hp>=u.maxHp&&!needsModernization(m,f,u)||f.hp<=0)).sort((a,b)=>a.factoryVisit.arrived-b.factoryVisit.arrived);
  const owner=current??ready[0];f.garageExit=owner?.id;return owner;
 }
 function terrainSegmentClear(terrain,field,a,b){
@@ -85,6 +89,8 @@ function* driveTo(m,u,goal,dt,current,approaching=false){
   if(path){u.path=path;u.task={type:'move',...goal};u.routeOrder={revision:2,type:'retreat',request:{...goal},destination:{...goal}};}
   else {
    const visit=u.factoryVisit;visit.retryAt=m.state.time+.25;
+   if(approaching&&u.combatRetreat)(u.combatRetreat.unavailableFactories??={})[visit.factoryId]=
+    {at:m.state.time,revision:m.nav.topologyRevision,x:u.x,y:u.y};
    if(visit.phase==='departure'){
     (visit.rejectedWaitPoints??=[]).push(goal.x+','+goal.y);delete visit.waitingPoint;delete visit.waitGeometry;
    }
@@ -189,6 +195,7 @@ export function* updateFactoryVisit(m,u,f,dt){
  const current=()=>u.hp>0&&u.factoryVisit===visit;
  if(f.id!==visit.factoryId){resetDrive(u);delete u.factoryVisit;return false;}
  if(!f.hp&&['approach','waiting','gate'].includes(visit.phase)){resetDrive(u);delete u.factoryVisit;return false;}
+ modernizeAfterRepair(m,f,u);
  const entering=factoryVisitors(m,f).find(other=>other.factoryVisit.phase==='entering');
  f.garageGate=entering?.id;
  const outgoing=exitOwner(m,f);

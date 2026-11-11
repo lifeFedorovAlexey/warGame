@@ -1,0 +1,26 @@
+[
+  {
+    "file": "oswald-OFL.txt",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/oswald/OFL.txt",
+    "sha256": "0fd731a904b729a4e02eaf5e8ebd06783edd9abe400e8882760160230675b652",
+    "gitBlob": "4d4e319b6114be0174e6de5d8090408f78dc65b8"
+  },
+  {
+    "file": "oswald-variable.ttf",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/oswald/Oswald%5Bwght%5D.ttf",
+    "sha256": "5b38c246e255a12f5712d640d56bcced0472466fc68983d2d0410ec0457c2817",
+    "gitBlob": "d1a3b9cb1325bf20b3a06ef9849d21c411212a3b"
+  },
+  {
+    "file": "literata-variable.ttf",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/literata/Literata%5Bopsz%2Cwght%5D.ttf",
+    "sha256": "b41138c9373112f32abb589cc22e8674b06ed4048b0c513be922bdd26f274440",
+    "gitBlob": "0a81b4984a4a4eb101e0ddc28babc85bb137efef"
+  },
+  {
+    "file": "literata-OFL.txt",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/literata/OFL.txt",
+    "sha256": "8742963604cd89dc81437811a850018fc03b2bfad686d7422c8235967c87614e",
+    "gitBlob": "9d3b4e3b1e9068fbda799f57833ff831d05cc271"
+  }
+]

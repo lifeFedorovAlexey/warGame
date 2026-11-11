@@ -38,13 +38,15 @@ try {
   const draftResponse = await page.request.get(base + '/api/dialogues/alpha-m01');
   const original = await draftResponse.json();
   const d = original.document;
-  assert.equal(d.scenes.length,125); assert.equal(Object.keys(d.lines).length,501);
+  // The author's current catalog had 500 lines before the radio migration
+  // (also preserved in migration-v1.json); the former 501 expectation was stale.
+  assert.equal(d.scenes.length,125); assert.equal(Object.keys(d.lines).length,500);
   const opening = d.scenes.find(scene => scene.id === 'p01');
   assert.deepEqual(opening.cues,[]);
   assert.equal(opening.presentation.type,'video');
   assert(!d.lines['m01-s01-l003'] && !d.lines['m01-s01-l004']);
   assert.equal(new Set(d.scenes.flatMap(scene => scene.cues)).size,Object.keys(d.lines).length,'Every catalog line must be discoverable');
-  console.log('Catalog: 48 ordered scenes (including television), 25 situations, 52 archive groups; all 501 lines reachable.');
+  console.log('Catalog: 48 ordered scenes (including television), 25 situations, 52 archive groups; all 500 lines reachable.');
   await page.locator('[data-scene="p01"]').click();
   assert.equal(await page.locator('.cue').count(),0);
   await page.getByRole('button',{name:'Воспроизвести видео',exact:true}).click();
@@ -124,7 +126,9 @@ try {
   await page.getByLabel('Текст реплики',{exact:true}).last().fill('Новая тестовая реплика.');
   await page.getByRole('button',{name:'Исключить реплику',exact:true}).last().click();
   assert.equal(await page.locator('.cue.is-disabled').count(),1);
-  await page.locator('[data-mode="situation"]').click();
+  await page.locator('[data-mode="dynamic"]').click();
+  await page.locator('[data-radio-rule="command.move"]').click();
+  await page.locator('.radio-legacy a').first().click();
   assert.equal(await page.locator('.scene-link').count(),25);
   await page.getByLabel('Найти диалог или реплику').fill('заводе');
   assert((await page.locator('.scene-link').count())>=1);
@@ -211,7 +215,7 @@ try {
     assert.deepEqual(gameErrors,[]);
     await game.close();
   }
-  fs.writeFileSync(path.join(reports,'result.json'),JSON.stringify({ok:true,scenes:125,lines:501,checks:['catalog completeness','television replaces legacy cues','video preview','playback','sequential playback','save/reload','replace audio/image','order/undo','add/disable','search','portraits','archive','narrow layout','portable export','conflict protection','write validation'],screenshots:previews},null,2));
+  fs.writeFileSync(path.join(reports,'result.json'),JSON.stringify({ok:true,scenes:125,lines:500,checks:['catalog completeness','television replaces legacy cues','video preview','playback','sequential playback','save/reload','replace audio/image','order/undo','add/disable','search','portraits','archive','narrow layout','portable export','conflict protection','write validation'],screenshots:previews},null,2));
   console.log('Dialogue workshop checks passed. Screenshots: ' + previews);
 } finally {
   await browser?.close(); server.kill();

@@ -1,0 +1,126 @@
+{
+  "coverage": [
+    {
+      "site": "east_factory",
+      "edge": 0,
+      "guns": 4
+    },
+    {
+      "site": "east_factory",
+      "edge": 1,
+      "guns": 2
+    },
+    {
+      "site": "east_factory",
+      "edge": 2,
+      "guns": 2
+    },
+    {
+      "site": "east_factory",
+      "edge": 3,
+      "guns": 2
+    },
+    {
+      "site": "hill_factory",
+      "edge": 0,
+      "guns": 2
+    },
+    {
+      "site": "hill_factory",
+      "edge": 1,
+      "guns": 2
+    },
+    {
+      "site": "hill_factory",
+      "edge": 2,
+      "guns": 2
+    },
+    {
+      "site": "hill_factory",
+      "edge": 3,
+      "guns": 2
+    },
+    {
+      "site": "sensor_outpost",
+      "edge": 0,
+      "guns": 3
+    },
+    {
+      "site": "sensor_outpost",
+      "edge": 1,
+      "guns": 3
+    },
+    {
+      "site": "sensor_outpost",
+      "edge": 2,
+      "guns": 2
+    },
+    {
+      "site": "sensor_outpost",
+      "edge": 3,
+      "guns": 5
+    },
+    {
+      "site": "energy_hub",
+      "edge": 0,
+      "guns": 2
+    },
+    {
+      "site": "energy_hub",
+      "edge": 1,
+      "guns": 6
+    },
+    {
+      "site": "energy_hub",
+      "edge": 2,
+      "guns": 2
+    },
+    {
+      "site": "energy_hub",
+      "edge": 3,
+      "guns": 3
+    }
+  ],
+  "drives": [
+    {
+      "site": "east_factory",
+      "direction": "in",
+      "seconds": 8
+    },
+    {
+      "site": "east_factory",
+      "direction": "out",
+      "seconds": 16
+    },
+    {
+      "site": "hill_factory",
+      "direction": "in",
+      "seconds": 8
+    },
+    {
+      "site": "hill_factory",
+      "direction": "out",
+      "seconds": 62
+    },
+    {
+      "site": "sensor_outpost",
+      "direction": "in",
+      "seconds": 7
+    },
+    {
+      "site": "sensor_outpost",
+      "direction": "out",
+      "seconds": 8
+    },
+    {
+      "site": "energy_hub",
+      "direction": "in",
+      "seconds": 9
+    },
+    {
+      "site": "energy_hub",
+      "direction": "out",
+      "seconds": 23
+    }
+  ]
+}

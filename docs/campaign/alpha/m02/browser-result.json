@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "viewports": [
+    [
+      1440,
+      900
+    ],
+    [
+      560,
+      840
+    ],
+    [
+      390,
+      844
+    ]
+  ],
+  "errors": [],
+  "continuation": true,
+  "manualSaveRestored": true,
+  "realVictorySave": true
+}

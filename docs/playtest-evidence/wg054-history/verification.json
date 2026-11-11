@@ -1,0 +1,30 @@
+{
+  "passed": true,
+  "running": [
+    "30 FPS · p95 33 · пик 15с 33 мс",
+    "Игра: замер…",
+    "CPU 15с: сим 0.1 · мир 5.5 · проч 0.3 мс",
+    "Юниты — · пик 15с —"
+  ],
+  "stalled": [
+    "1 FPS · p95 1450 · пик 15с 1450 мс",
+    "Игра 0.0× / 1× · мин 0.0×",
+    "CPU 15с: сим 0.1 · мир 971.8 · проч 0.9 мс",
+    "Юниты — · пик 15с —"
+  ],
+  "simulatedStall": true,
+  "tests": [
+    "frame intervals",
+    "simulation halt",
+    "CPU stages",
+    "pause",
+    "toggle",
+    "click-through"
+  ],
+  "sizes": [
+    "1440x900",
+    "844x390",
+    "667x375"
+  ],
+  "errors": []
+}

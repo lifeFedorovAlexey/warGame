@@ -1,0 +1,52 @@
+{
+  "birches": 93,
+  "pines": 67,
+  "southernBirches": 44,
+  "southernPines": 15,
+  "birchesPerRegion": [
+    [
+      4,
+      3,
+      4
+    ],
+    [
+      4,
+      6,
+      3
+    ],
+    [
+      7,
+      4,
+      2
+    ],
+    [
+      2,
+      6,
+      4
+    ],
+    [
+      4,
+      3,
+      4
+    ],
+    [
+      3,
+      4,
+      3
+    ],
+    [
+      4,
+      4,
+      4
+    ],
+    [
+      3,
+      4,
+      4
+    ]
+  ],
+  "minRoadGap": 40.657468152293106,
+  "maxGrade": 0.4196310052672422,
+  "movedForRoad": 2,
+  "unchangedTerrainAndCollisions": true
+}

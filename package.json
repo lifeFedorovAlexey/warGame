@@ -4,6 +4,8 @@
   "private": true,
   "description": "Modular vehicle game assets and local review arena",
   "scripts": {
+    "check:radio": "node tools/check-dynamic-radio.mjs",
+    "check:radio:browser": "node tools/check-dynamic-radio-browser.mjs",
     "check:assets": "python tools/reference_pack.py --check",
     "check:demo": "node tools/demo-smoke.cjs",
     "export:models": "node tools/export-production.cjs",
@@ -49,7 +51,16 @@
     "build:map": "python tools/build-alpha-map.py",
     "build:map-textures": "node tools/build-alpha-texture.cjs",
     "build:roads": "node tools/build-roads.cjs",
-    "check:frame-optimizations": "node tools/check-frame-optimizations.mjs && node tools/check-health-cache.mjs && node tools/check-minimap-partial.mjs && node tools/check-snapshot-fields.mjs && node tools/check-traffic-visibility-cache.mjs && node tools/check-traffic-camera-rate.mjs"
+    "check:frame-optimizations": "node tools/check-frame-optimizations.mjs && node tools/check-health-cache.mjs && node tools/check-minimap-partial.mjs && node tools/check-snapshot-fields.mjs && node tools/check-traffic-visibility-cache.mjs && node tools/check-traffic-camera-rate.mjs",
+    "check:m02": "node tools/check-m02.mjs && node tools/check-m02-determinism.mjs",
+    "check:m02:browser": "node tools/check-m02-browser.mjs",
+    "play:m02": "node tools/play-m02.mjs 20 --audit --defend",
+    "check:m02:50": "node tools/play-m02.mjs 50 --sortie && node tools/check-m02-group-return.mjs",
+    "check:m02:regressions": "node tools/check-m02-regressions.mjs",
+    "bench:m02": "node tools/bench-m02-load.mjs",
+    "check:m02:map": "node tools/check-m02-map.mjs",
+    "check:m02:map-drive": "node tools/check-m02-map-drive.mjs",
+    "check:m02:map-browser": "node tools/check-m02-map-browser.mjs"
   },
   "devDependencies": {
     "gltf-validator": "^2.0.0-dev.3.10"

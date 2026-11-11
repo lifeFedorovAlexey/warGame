@@ -1,4 +1,5 @@
 import {buildingGridStep,buildingExit,rectanglesOverlap} from './building-placement.js';
+import {transportReservation} from './transport-site.js';
 
 export function createPlacementGrid(T,scene,field,config){
  const root=new T.Group();root.name='building_placement_grid';root.visible=false;scene.add(root);
@@ -45,7 +46,7 @@ export function createPlacementGrid(T,scene,field,config){
    if(!mission.inBounds(tile.x,tile.y)||!mission.exploredAt(tile.x,tile.y))continue;
    edge([x,y],[x+step,y]);edge([x,y+step],[x+step,y+step]);edge([x,y],[x,y+step]);edge([x+step,y],[x+step,y+step]);
    const slope=field.gradientAt(tile.x,tile.y),blocked=Math.hypot(slope.x,slope.y)>maxGrade
-    ||nearby.some(b=>rectanglesOverlap(tile,b))||oil.some(b=>rectanglesOverlap(tile,b));
+    ||nearby.some(b=>rectanglesOverlap(tile,b))||oil.some(b=>rectanglesOverlap(tile,b))||transportReservation(field,config,tile);
    const under=rectanglesOverlap(tile,place),reserved=exits.some(b=>rectanglesOverlap(tile,b));
    const color=under?(place.ok?green:red):blocked?red:reserved?amber:null;
    if(!color)continue;

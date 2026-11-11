@@ -14,6 +14,7 @@
 <link rel="stylesheet" href="combat-menu.css">
 <link rel="stylesheet" href="opening-television.css">
 <link rel="stylesheet" href="main-menu.css">
+<link rel="stylesheet" href="mission-results.css">
 </head>
 <body>
 <main id="game">
@@ -67,10 +68,12 @@
             <h2 id="operation-controls">Операция</h2>
             <div class="settings-actions">
               <button id="save" data-icon="save" aria-label="Сохранить"></button>
-              <button id="load" data-icon="load" aria-label="Загрузить"></button>
+              <button id="load" data-icon="load" aria-label="Загрузить ручное сохранение"></button>
+              <button id="m02-checkpoint" hidden data-icon="restart" aria-label="Вернуться к началу второй миссии на исправленной карте" title="Вернуться к началу второй миссии на исправленной карте. Текущая партия останется в резервной копии."></button>
               <button id="tempo" title="Скорость симуляции" data-icon="speed-one" aria-label="Скорость симуляции"></button>
               <button id="home" title="К начальной базе · Home" data-icon="home" aria-label="К базе"></button>
               <button id="main-menu-return" data-icon="menu" aria-label="Сохранить и выйти в главное меню"></button>
+              <button id="results-open" hidden data-icon="memorial" aria-label="Итоги операции и холм памяти" title="Итоги операции и холм памяти"></button>
             </div>
           </section>
           <section id="operation-audio" class="operation-pane" aria-labelledby="communication-controls" hidden>
@@ -91,9 +94,11 @@
               <dt>ЛКМ</dt><dd>Выбрать</dd>
               <dt>2× ЛКМ</dt><dd>Весь тип на экране</dd>
               <dt>ПКМ</dt><dd>Отдать приказ</dd>
+              <dt><kbd>Shift</kbd> + ПКМ</dt><dd>Добавить приказ в очередь</dd>
               <dt>Колесо</dt><dd>Масштаб</dd>
               <dt><abbr title="Средняя кнопка мыши">СКМ</abbr></dt><dd>Поворот камеры</dd>
               <dt><kbd>WASD</kbd></dt><dd>Движение камеры</dd>
+              <dt><kbd>F7</kbd></dt><dd>График стабильности</dd>
               <dt><kbd>B</kbd> / <kbd>M</kbd> / <kbd>F</kbd></dt><dd>Стройка / ход / атака</dd>
               <dt><kbd>Q</kbd> / <kbd>E</kbd></dt><dd>Поворот здания влево / вправо на 90°</dd>
               <dt><kbd>Shift</kbd> + колесо</dt><dd>Повернуть здание</dd>
@@ -229,6 +234,10 @@
   </dialog>
   <div id="toast" role="status" hidden></div>
   <section id="welcome" class="main-menu is-loading" aria-busy="true" aria-label="Операция «Рай» — главное меню">
+    <picture class="loading-scenery" aria-hidden="true">
+      <source media="(max-aspect-ratio: 4/5)" srcset="../assets/menu/loading-wasteland-portrait.webp">
+      <img src="../assets/menu/loading-wasteland.webp" alt="" width="1672" height="941" fetchpriority="high" draggable="false">
+    </picture>
     <audio id="menu-music" data-src="../assets/music/wasteland-menu.mp3" loop preload="auto"></audio>
     <div class="menu-art" inert>
       <img src="../assets/menu/desert-main-menu.png" alt="" draggable="false">
@@ -247,7 +256,7 @@
       <button id="menu-settings-close" data-icon="previous" aria-label="Назад в меню"></button>
     </section>
     <div id="loading" class="startup-loading">
-      <h1 class="loading-title"><span>Операция</span>Рай</h1>
+      <h1 class="loading-title"><span>Операция</span><strong>Рай</strong></h1>
       <div class="loading-action">
         <button id="loading-sound" data-icon="play" aria-label="Открыть меню" aria-describedby="loading-status" disabled></button>
         <button id="loading-retry" data-icon="restart" aria-label="Повторить загрузку" hidden></button>
@@ -258,13 +267,38 @@
       </div>
     </div>
   </section>
-  <section id="result" class="corner-card panel" hidden>
-    <h1 id="result-title"></h1>
-    <p id="result-message"></p>
-    <button id="result-close" data-icon="map" aria-label="Карта"></button>
-    <button id="result-signal" hidden data-icon="radar" aria-label="К сигналу"></button>
-    <button id="restart" data-icon="restart" aria-label="Заново"></button>
+  <section id="result" role="dialog" aria-modal="true" aria-labelledby="result-title" hidden>
+    <div class="result-copy">
+      <p class="result-eyebrow">Операция «Рай» · Боевой журнал</p>
+      <h1 id="result-title"></h1><p id="result-message"></p>
+      <div class="result-columns">
+        <div>
+          <section class="result-section"><h2>Статистика операции</h2><dl>
+            <div><dt>Уничтожено противников</dt><dd id="result-enemies"></dd></div>
+            <div><dt>Разрушено сооружений</dt><dd id="result-buildings"></dd></div>
+            <div><dt>Время операции</dt><dd id="result-time"></dd></div>
+          </dl></section>
+          <section class="result-section"><h2>Остались в строю · <span id="result-alive"></span></h2><div id="result-survivor-ranks"></div></section>
+        </div>
+        <div>
+          <section class="result-section"><h2>Наши потери</h2><dl><div><dt>За эту миссию</dt><dd id="result-lost"></dd></div></dl><div id="result-loss-ranks"></div></section>
+          <section class="result-section"><h2>Память кампании</h2><dl><div><dt>Всего погибло</dt><dd id="result-total-lost"></dd></div></dl></section>
+          <section id="result-honours" class="result-section" hidden><h2>Награждены</h2><div></div></section>
+        </div>
+      </div>
+      <p id="result-history-note" hidden></p>
+    </div>
+    <canvas class="memorial-scene" tabindex="0" role="img" aria-label="Холм памяти"></canvas>
+    <p id="result-empty" hidden>Все вернулись. Холм памяти пуст.</p>
+    <aside id="result-person" role="status" hidden><h3></h3><p class="result-person-callsign"></p><div class="result-person-unit"><span class="result-person-rank"></span><p class="result-person-service"></p></div><p class="result-person-score"></p><p class="result-person-mission"></p></aside>
+    <nav class="result-actions" aria-label="После операции">
+      <button id="result-continue" hidden data-icon="play" aria-label="Продолжить: Энергетический всплеск" title="Продолжить: Энергетический всплеск"></button>
+      <button id="result-close" data-icon="map" aria-label="Вернуться к карте" title="Вернуться к карте"></button>
+      <button id="result-menu" data-icon="menu" aria-label="Сохранить итоги и выйти в главное меню" title="Сохранить итоги и выйти в главное меню"></button>
+      <span id="result-campaign-end" hidden>Доступные миссии завершены.<br>Итоги кампании сохранены.</span>
+    </nav>
   </section>
+  <aside id="personnel-notice" role="status" aria-live="polite" aria-atomic="true" hidden></aside>
 </main>
 <script type="module" src="main.js"></script>
 <script type="module" src="../assets/ui/icons.js"></script>

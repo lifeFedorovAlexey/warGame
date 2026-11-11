@@ -25,7 +25,7 @@ const travel=new Set(['move','attack-move','attack']);
 const pendingCommand=unit=>unit?.proposedOrder??unit?.pendingOrder;
 const ownsPending=(unit,revision)=>pendingCommand(unit)?.revision===revision;
 const plannedFields=['path','task','routeOrder','detour','traffic','trafficHold','driveWatch','reverseDebt','failedArcs','workEscapeRetryAt',
- 'passage','passingLane','factoryVisit','combatRetreat','combatDeployment','combatGroup','combatContactAt','combatResume','combatArrivalBlockedAt',
+ 'passage','passingLane','factoryVisit','combatRetreat','retreatPush','combatDeployment','combatGroup','combatContactAt','combatResume','combatArrivalBlockedAt',
  'combatArrivalGoal','combatParking','combatDisengage','retreatSuppressed','mergeTraffic','yieldReturn','resumeConstructionId','terrainEscape'];
 function coupledStarts(mission,units,target){
  const range=mission.config.worldScale*7,buckets=new Map(),eligible=units.filter(u=>!isInfantry(u)&&(u.driveSpeed??0)<=.1&&!(u.tool>0)&&!(u.foldTime>0)
@@ -101,7 +101,7 @@ export class CommandPlanner{
   if(previous&&!(action==='attack-move'&&units.some(movementEngaged))&&units.every(u=>u.commandRevision===previous.revision||ownsPending(u,previous.revision))
    &&(['queued','planning'].includes(previous.status)&&units.some(u=>ownsPending(u,previous.revision)||ownsContinuation(u,previous.revision))
     ||previous.status==='complete'&&previous.signature===this.signature(previous))){
-   this.stats.reused++;return {ok:true,assigned:units.length,pending:units.filter(u=>ownsPending(u,previous.revision)).length,revision:previous.revision,reused:true};
+   this.stats.reused++;return {ok:true,assigned:units.length,assignedIds:units.map(u=>u.id),pending:units.filter(u=>ownsPending(u,previous.revision)).length,revision:previous.revision,reused:true};
   }
   const stopped=new Set(units.filter(unit=>unit.pendingOrder?.type==='stop').map(unit=>unit.id));
   const preserveAccepted=unit=>!stopped.has(unit.id)&&!!(unit.path?.length||unit.task||unit.detour||unit.yieldReturn||unit.jointTraffic);
@@ -131,7 +131,7 @@ export class CommandPlanner{
    // continues live; no saved pose or stale motion snapshot is restored later.
    if(preserve)unit.proposedOrder=pending;else unit.pendingOrder=pending;
   }
-  return {ok:true,assigned:units.length,pending:units.length,revision};
+  return {ok:true,assigned:units.length,assignedIds:units.map(u=>u.id),pending:units.length,revision};
  }
  start(record){
   const m=this.mission;this.nav.refreshContext();
@@ -240,9 +240,9 @@ export class CommandPlanner{
   const applied=[...new Set(record.assigned)].filter(id=>{const u=m.entity(id);return u?.hp>0&&u.commandRevision===record.revision&&!u.pendingOrder;});
   record.assigned.splice(0,record.assigned.length,...applied);record.status='queued';this.active=null;
  }
- advance(budgetMs=2){
+ advance(budgetMs=2,steps=Infinity){
   if(!(budgetMs>0))return 0;
-  const m=this.mission,started=performance.now(),deadline=started+Math.max(0,Math.min(2,budgetMs));
+  const m=this.mission,started=performance.now(),fixed=Number.isFinite(steps),deadline=fixed?Infinity:started+Math.max(0,Math.min(2,budgetMs));
   for(const record of m.state.commandOrders)if(record.awaitingTails&&!m.state.units.some(u=>ownsContinuation(u,record.revision)&&u.routeContinuation.ready)){
    delete record.awaitingTails;
    this.stats.applied+=Math.max(0,record.assigned.length-(record.reportedAssignments??record.assigned.length));
@@ -258,8 +258,8 @@ export class CommandPlanner{
     for(const unit of m.state.units)if(unit.pendingOrder?.revision===record.revision)unit.pendingOrder.status='planning';
    }
   }
-  this.nav.workDeadline=deadline;
-  while(performance.now()<deadline){
+  this.nav.workDeadline=fixed?-Infinity:deadline;
+  while(steps-->0&&performance.now()<deadline){
    if(this.active){
     const {record}=this.active;
     // A revision uniquely owns its pending members. Looking up every selected
@@ -305,6 +305,7 @@ export class CommandPlanner{
      target:record.target,units:newlyRejected.map(id=>({id,...record.rejected[id],
       retainedRevision:m.entity(id)?.commandRevision,retainedGoal:m.entity(id)?.routeOrder?.destination})),keptPrevious:true});
     record.signature=this.signature(record);this.stats.applied+=record.assigned.length;this.active=null;
+    m.radioObserver?.order(record.action,record.assigned,'planned:'+record.revision);
     if(!active.runtime.retryIds?.size&&record.continuation&&m.state.units.some(u=>ownsContinuation(u,record.revision)&&u.routeContinuation.ready)){
      record.status='planning';record.awaitingTails=true;record.reportedAssignments=record.assigned.length;
     }

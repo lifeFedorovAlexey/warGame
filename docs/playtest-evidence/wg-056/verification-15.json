@@ -1,0 +1,384 @@
+{
+  "issue": "WG-056",
+  "status": "На проверке владельца",
+  "change": "All vehicle ovals reduced 15% in width and length; overlap recovery and retreat contact use the same oval. Rendered model and infantry sizes unchanged.",
+  "sizesAndClosePass": {
+    "reports": [
+      {
+        "kind": "bukhanka",
+        "widthBefore": 2.0899798398000002,
+        "widthAfter": 1.77648286383,
+        "lengthBefore": 4.323989152800001,
+        "lengthAfter": 3.675390779880001,
+        "infantry": false
+      },
+      {
+        "kind": "builder",
+        "widthBefore": 2.0899798398000002,
+        "widthAfter": 1.77648286383,
+        "lengthBefore": 4.323989152800001,
+        "lengthAfter": 3.675390779880001,
+        "infantry": false
+      },
+      {
+        "kind": "command",
+        "widthBefore": 1.88,
+        "widthAfter": 1.5979999999999999,
+        "lengthBefore": 4.364500046,
+        "lengthAfter": 3.7098250390999996,
+        "infantry": false
+      },
+      {
+        "kind": "flamer",
+        "widthBefore": 2.0899798398000002,
+        "widthAfter": 1.77648286383,
+        "lengthBefore": 4.323989152800001,
+        "lengthAfter": 3.675390779880001,
+        "infantry": false
+      },
+      {
+        "kind": "raider",
+        "widthBefore": 1.88,
+        "widthAfter": 1.5979999999999999,
+        "lengthBefore": 4.203999997,
+        "lengthAfter": 3.5733999974499997,
+        "infantry": false
+      },
+      {
+        "kind": "scav-zaporozhets",
+        "widthBefore": 1.73,
+        "widthAfter": 1.4705,
+        "lengthBefore": 3.870000015,
+        "lengthAfter": 3.2895000127499996,
+        "infantry": false
+      },
+      {
+        "kind": "scav-firetruck",
+        "widthBefore": 2.700000048,
+        "widthAfter": 2.2950000408,
+        "lengthBefore": 7.414999962,
+        "lengthAfter": 6.3027499677,
+        "infantry": false
+      },
+      {
+        "kind": "scav-bus",
+        "widthBefore": 2.75,
+        "widthAfter": 2.3375,
+        "lengthBefore": 7.535000086,
+        "lengthAfter": 6.4047500731,
+        "infantry": false
+      },
+      {
+        "kind": "scav-rifleman",
+        "widthBefore": 0.64,
+        "widthAfter": 0.64,
+        "lengthBefore": 0.52,
+        "lengthAfter": 0.52,
+        "infantry": true
+      },
+      {
+        "kind": "scav-grenadier",
+        "widthBefore": 0.68,
+        "widthAfter": 0.68,
+        "lengthBefore": 0.58,
+        "lengthAfter": 0.58,
+        "infantry": true
+      }
+    ],
+    "scenes": [
+      {
+        "mode": "one",
+        "spacing": 8.394172887235001,
+        "finish": 5.4999999999999964,
+        "overlapCorrections": 0,
+        "units": [
+          {
+            "id": "u180",
+            "x": 0,
+            "y": 74.68130600243686,
+            "hp": 320
+          },
+          {
+            "id": "u181",
+            "x": -8.394172887235001,
+            "y": 0,
+            "hp": 320
+          },
+          {
+            "id": "u182",
+            "x": 8.394172887235001,
+            "y": 0,
+            "hp": 320
+          }
+        ]
+      },
+      {
+        "mode": "three",
+        "spacing": 8.394172887235001,
+        "finish": 9.99999999999998,
+        "overlapCorrections": 0,
+        "units": [
+          {
+            "id": "u180",
+            "x": -0.30322244150325495,
+            "y": 119.81937898928035,
+            "hp": 320
+          },
+          {
+            "id": "u181",
+            "x": -8.394172887235001,
+            "y": 75,
+            "hp": 320
+          },
+          {
+            "id": "u182",
+            "x": 8.625430119074995,
+            "y": 74.74141177202917,
+            "hp": 320
+          }
+        ]
+      },
+      {
+        "mode": "stop",
+        "spacing": 8.394172887235001,
+        "finish": 2.500000000000001,
+        "overlapCorrections": 0,
+        "units": [
+          {
+            "id": "u180",
+            "x": -18.64888241058022,
+            "y": -9.80041353388529,
+            "hp": 320
+          },
+          {
+            "id": "u181",
+            "x": -8.394172887235001,
+            "y": 0,
+            "hp": 320
+          },
+          {
+            "id": "u182",
+            "x": 8.394172887235001,
+            "y": 0,
+            "hp": 320
+          }
+        ]
+      },
+      {
+        "mode": "load",
+        "spacing": 8.394172887235001,
+        "finish": 6.999999999999991,
+        "overlapCorrections": 0,
+        "units": [
+          {
+            "id": "u180",
+            "x": -0.22884695096857988,
+            "y": 74.68341979848235,
+            "hp": 320
+          },
+          {
+            "id": "u181",
+            "x": -8.394172887235001,
+            "y": 0,
+            "hp": 320
+          },
+          {
+            "id": "u182",
+            "x": 8.394172887235001,
+            "y": 0,
+            "hp": 320
+          }
+        ]
+      }
+    ]
+  },
+  "browser": [
+    {
+      "name": "m01",
+      "scene": "close-exit",
+      "stats": [
+        {
+          "id": "u182",
+          "done": true,
+          "error": 0.3186939975630594,
+          "hp": 320,
+          "reason": "destination-reached"
+        }
+      ],
+      "drift": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "elapsed": 8.099999999999977,
+      "errors": []
+    },
+    {
+      "name": "m01",
+      "scene": "cluster-all",
+      "stats": [
+        {
+          "id": "u182",
+          "done": true,
+          "error": 0.48538324914861725,
+          "hp": 320,
+          "reason": "destination-reached"
+        },
+        {
+          "id": "u183",
+          "done": true,
+          "error": 0.2640700650223152,
+          "hp": 320,
+          "reason": "destination-reached"
+        },
+        {
+          "id": "u184",
+          "done": true,
+          "error": 0.415460749860848,
+          "hp": 320,
+          "reason": "destination-reached"
+        },
+        {
+          "id": "u185",
+          "done": true,
+          "error": 0.3930775385724978,
+          "hp": 320,
+          "reason": "destination-reached"
+        },
+        {
+          "id": "u186",
+          "done": true,
+          "error": 0.1873066225944052,
+          "hp": 320,
+          "reason": "destination-reached"
+        }
+      ],
+      "drift": [],
+      "elapsed": 16.3,
+      "errors": []
+    },
+    {
+      "name": "m01",
+      "scene": "group-reverse",
+      "stats": [
+        {
+          "id": "u182",
+          "done": true,
+          "error": 0.3454774497135725,
+          "hp": 320,
+          "reason": "destination-reached"
+        },
+        {
+          "id": "u183",
+          "done": true,
+          "error": 0.26205370286996893,
+          "hp": 320,
+          "reason": "destination-reached"
+        },
+        {
+          "id": "u184",
+          "done": true,
+          "error": 0.357110560414087,
+          "hp": 320,
+          "reason": "destination-reached"
+        },
+        {
+          "id": "u185",
+          "done": true,
+          "error": 0.4223655722886919,
+          "hp": 320,
+          "reason": "destination-reached"
+        },
+        {
+          "id": "u186",
+          "done": true,
+          "error": 0.29399179161245825,
+          "hp": 320,
+          "reason": "destination-reached"
+        },
+        {
+          "id": "u187",
+          "done": true,
+          "error": 0.312145751885487,
+          "hp": 320,
+          "reason": "destination-reached"
+        }
+      ],
+      "drift": [],
+      "elapsed": 37.10000000000029,
+      "errors": []
+    },
+    {
+      "name": "m02",
+      "scene": "group-reverse",
+      "stats": [
+        {
+          "id": "u432",
+          "done": true,
+          "error": 0.42859335727587067,
+          "hp": 320,
+          "reason": "destination-reached"
+        },
+        {
+          "id": "u433",
+          "done": true,
+          "error": 0.32880283230388807,
+          "hp": 320,
+          "reason": "destination-reached"
+        },
+        {
+          "id": "u434",
+          "done": true,
+          "error": 0.417515146929759,
+          "hp": 320,
+          "reason": "destination-reached"
+        },
+        {
+          "id": "u435",
+          "done": true,
+          "error": 0.4474866293380082,
+          "hp": 320,
+          "reason": "destination-reached"
+        },
+        {
+          "id": "u436",
+          "done": true,
+          "error": 0.2235201873576233,
+          "hp": 320,
+          "reason": "destination-reached"
+        },
+        {
+          "id": "u437",
+          "done": true,
+          "error": 0.4572088875204264,
+          "hp": 320,
+          "reason": "destination-reached"
+        }
+      ],
+      "drift": [],
+      "elapsed": 22.000000000000043,
+      "errors": []
+    }
+  ],
+  "checks": [
+    "4800 collision comparisons with independent support oracle",
+    "overlap recovery including actual overlap, walls, offscreen rules",
+    "8 M02 determinism runs, 600 ticks each",
+    "WG055 contact and nonlethal damage"
+  ],
+  "groupRecovery": [
+    {
+      "mission": "m01",
+      "separationFrames": 0,
+      "maxFinalError": 0.4223655722886919,
+      "stableAfterArrivalSeconds": 3
+    },
+    {
+      "mission": "m02",
+      "separationFrames": 0,
+      "maxFinalError": 0.4572088875204264,
+      "stableAfterArrivalSeconds": 3
+    }
+  ]
+}

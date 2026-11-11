@@ -1,0 +1,21 @@
+{
+  "stage": "after",
+  "missions": {
+    "m01": {
+      "heights": "7879ccd26886965a5d9f2d974a7134ac8c84ac48a49189fe1fb9871e5621704d",
+      "navigation": "ce0e70771b52ee53cd804e67f5c21cc0ec66b0340bf5ee097c3928f054ca9674",
+      "roads": "fa4828582dc676fc83dacd53d6a0a0109fc27ca96e437955b35d23cff3e3b2ac",
+      "buildings": "b608296b50bf9d37532277c302fa2c052d1331420b50d4e65d1f2cd28fae5674",
+      "triangles": 183512
+    },
+    "m02": {
+      "heights": "7879ccd26886965a5d9f2d974a7134ac8c84ac48a49189fe1fb9871e5621704d",
+      "navigation": "10351de85d3d3c43969a3965cfc46fe3866a341c17f78e33663a463564b1a440",
+      "roads": "8a051b99e6af82ce35534af1b6466c62547da9ac86cdb504b57e1aa6e0d687da",
+      "buildings": "50295580e97236a9bb36140bb7521c3efc9ae38779d07179461d06b7dafe14d1",
+      "triangles": 183512
+    }
+  },
+  "errors": [],
+  "resources": []
+}

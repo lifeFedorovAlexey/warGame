@@ -1,0 +1,2824 @@
+РАЙ — ЛИСТ ЗАПИСИ ДИНАМИЧЕСКОГО ЭФИРА
+
+Рекомендуется 6 дополнительных голосов. Вместе с прежними командиром и прапорщиком — 8.
+Из шести дополнительных голосов четыре мужских и два женских. Для первого прохода: водитель, строитель и один женский голос.
+Имена ролей здесь — режиссёрские ориентиры для актёров, а не добавленные в игру персонажи.
+Существующие пользовательские записи не перезаписывать. Фразы ниже — новый банк.
+Каждый пункт — отдельный цельный файл OGG/WAV/MP3, без музыки и радиоэффекта. Не записывать числа отдельными словами.
+Оставить примерно 100 мс тишины в начале и 120–180 мс в конце; одинаковое расстояние до микрофона.
+Загрузка: /dialogues/#dynamic → ситуация → вариант разговора → значок загрузки рядом с репликой.
+Затем: значок радио «Сохранить и применить в игре». Открытую игру нужно обновить.
+Общие фразы можно записать одним файлом и явно выбрать его для перечисленных ID.
+Файл привязан к тексту при загрузке. После изменения текста несовпадающая запись остаётся на диске, а новый текст произносит временный локальный голос.
+Пока свои записи не загружены, в игре и симуляторе работает временная озвучка Piper. Все фразы произносятся целиком, включая реальные числа.
+
+1. ВОДИТЕЛЬ — СПОКОЙНЫЙ, КОРОТКИЕ ПОДТВЕРЖДЕНИЯ — 304 записей
+
+01-001. Катим.
+ID: command.move.single.1
+
+01-002. Снимаюсь.
+ID: command.move.single.written-v2.1
+
+01-003. Выдвигаюсь на точку.
+ID: command.move.single.written-v3.1
+
+01-004. Маршрут принял.
+ID: command.move.single.written-v4.1
+
+01-005. Меняю позицию.
+ID: command.move.single.written-v5.1
+
+01-006. Выхожу.
+ID: command.move.single.written-v6.1
+
+01-007. Пошёл по маршруту.
+ID: command.move.single.written-v7.1
+
+01-008. Есть. Вперёд.
+ID: command.move.single.written-v8.1
+
+01-009. А у меня уже резина новая.
+ID: command.move.single.bawdy-v1.2, command.move.group.bawdy-v1.2, command.move.mass.bawdy-v1.2
+
+01-010. Сзади без предварительных ласк не подпирать.
+ID: command.move.single.bawdy-v2.2, command.move.group.bawdy-v2.2, command.move.mass.bawdy-v2.2
+
+01-011. Колонна, трогаемся.
+ID: command.move.group.1, command.move.mass.written-v4.1
+
+01-012. Двинули, мужики.
+ID: command.move.group.written-v2.1
+
+01-013. Снимаемся с места.
+ID: command.move.group.written-v3.1
+
+01-014. Колонна, на маршрут.
+ID: command.move.group.written-v5.1
+
+01-015. Пошли. Без обгонов.
+ID: command.move.group.written-v6.1
+
+01-016. Двигаем на точку.
+ID: command.move.group.written-v7.1
+
+01-017. Выходим.
+ID: command.move.group.written-v8.1
+
+01-018. Держи интервал, увидишь.
+ID: command.move.group.exchange-v1.3, command.move.mass.exchange-v1.3
+
+01-019. Колонна, на колёса.
+ID: command.move.group.exchange-v2.1, command.move.mass.exchange-v2.1
+
+01-020. Вот и довезём матчасть целой.
+ID: command.move.group.exchange-v2.3, command.move.mass.exchange-v2.3
+
+01-021. Выдвигаемся по вводной.
+ID: command.move.group.exchange-v3.1, command.move.mass.exchange-v3.1
+
+01-022. До точки. Дальше разберёмся.
+ID: command.move.group.exchange-v3.3, command.move.mass.exchange-v3.3
+
+01-023. Двигаем, мужики.
+ID: command.move.group.exchange-v4.1, command.move.mass.exchange-v4.1
+
+01-024. На маршрут.
+ID: command.move.group.exchange-v5.1, command.move.mass.exchange-v5.1
+
+01-025. Имущество всё на колёсах.
+ID: command.move.group.dry-v1.2, command.move.mass.dry-v1.2
+
+01-026. Тут других надобностей не бывает.
+ID: command.move.group.dry-v2.2, command.move.mass.dry-v2.2
+
+01-027. Вся колонна, на маршрут.
+ID: command.move.mass.1
+
+01-028. Массовый выход. Интервал!
+ID: command.move.mass.written-v2.1
+
+01-029. Всем машинам — вперёд.
+ID: command.move.mass.written-v3.1
+
+01-030. Общее выдвижение.
+ID: command.move.mass.written-v5.1
+
+01-031. Цель принял. Отработаю.
+ID: command.attack.single.1
+
+01-032. Беру цель.
+ID: command.attack.single.written-v2.1
+
+01-033. Есть. В атаку.
+ID: command.attack.single.written-v3.1
+
+01-034. Займусь этой.
+ID: command.attack.single.written-v4.1
+
+01-035. Выдвигаюсь на цель.
+ID: command.attack.single.written-v5.1
+
+01-036. Приказ на атаку принят.
+ID: command.attack.single.written-v6.1
+
+01-037. Отработаем.
+ID: command.attack.single.written-v7.1
+
+01-038. Берём их.
+ID: command.attack.single.written-v8.1, command.attack.group.written-v2.1
+
+01-039. Группа, по цели!
+ID: command.attack.group.1
+
+01-040. Цель принята. Начинаем.
+ID: command.attack.group.written-v3.1
+
+01-041. В атаку. По команде.
+ID: command.attack.group.written-v5.1
+
+01-042. Работаем по цели!
+ID: command.attack.group.written-v6.1
+
+01-043. Группа, атака.
+ID: command.attack.group.written-v7.1
+
+01-044. Заходим в бой.
+ID: command.attack.group.written-v8.1
+
+01-045. Цель взяли в работу.
+ID: command.attack.group.exchange-v1.1, command.attack.mass.exchange-v1.1
+
+01-046. По команде отработаем.
+ID: command.attack.group.exchange-v1.3, command.attack.mass.exchange-v1.3
+
+01-047. Группа, на раздачу.
+ID: command.attack.group.exchange-v2.1, command.attack.mass.exchange-v2.1
+
+01-048. Каждый свою линию держит.
+ID: command.attack.group.exchange-v2.3, command.attack.mass.exchange-v2.3
+
+01-049. Есть вводная. Отработать цель.
+ID: command.attack.group.exchange-v3.1, command.attack.mass.exchange-v3.1
+
+01-050. Работаем вместе.
+ID: command.attack.group.exchange-v3.3, command.attack.mass.exchange-v3.3
+
+01-051. Берём эту цель.
+ID: command.attack.group.exchange-v4.1, command.attack.mass.exchange-v4.1
+
+01-052. Выходим на работу.
+ID: command.attack.group.exchange-v5.1, command.attack.mass.exchange-v5.1
+
+01-053. Всем машинам — атака.
+ID: command.attack.mass.1
+
+01-054. Вся группа, на цель!
+ID: command.attack.mass.written-v2.1
+
+01-055. Атакуем всей группой.
+ID: command.attack.mass.written-v3.1
+
+01-056. Всем: работаем по цели.
+ID: command.attack.mass.written-v4.1
+
+01-057. Вперёд с боем.
+ID: command.attack_move.single.1, command.attack_move.group.exchange-v4.1, command.attack_move.mass.exchange-v4.1
+
+01-058. Иду. Контакты отработаю.
+ID: command.attack_move.single.written-v2.1
+
+01-059. Продвигаюсь с боем.
+ID: command.attack_move.single.written-v3.1
+
+01-060. Маршрут принял. Огонь по обстановке.
+ID: command.attack_move.single.written-v4.1
+
+01-061. Пробиваемся вперёд.
+ID: command.attack_move.single.written-v5.1
+
+01-062. По маршруту. Встречных отработаем.
+ID: command.attack_move.single.written-v6.1
+
+01-063. Продвигаемся с боем.
+ID: command.attack_move.group.1, command.attack_move.mass.1
+
+01-064. Вперёд. Контакты отрабатывать.
+ID: command.attack_move.group.written-v2.1, command.attack_move.mass.written-v2.1
+
+01-065. Идём по маршруту.
+ID: command.attack_move.group.written-v3.1, command.attack_move.mass.written-v3.1
+
+01-066. Группа, вперёд с боем.
+ID: command.attack_move.group.written-v4.1, command.attack_move.mass.written-v4.1
+
+01-067. Двигаем. По целям работаем.
+ID: command.attack_move.group.written-v5.1, command.attack_move.mass.written-v5.1
+
+01-068. Продвигаемся. Контакты отработать.
+ID: command.attack_move.group.exchange-v1.1, command.attack_move.mass.exchange-v1.1
+
+01-069. По живым целям. Обломки оставим.
+ID: command.attack_move.group.exchange-v1.3, command.attack_move.mass.exchange-v1.3
+
+01-070. Идём с боем.
+ID: command.attack_move.group.exchange-v2.1, command.attack_move.mass.exchange-v2.1
+
+01-071. Группу держим.
+ID: command.attack_move.group.exchange-v2.3, command.attack_move.mass.exchange-v2.3
+
+01-072. По маршруту с огоньком.
+ID: command.attack_move.group.exchange-v3.1, command.attack_move.mass.exchange-v3.1
+
+01-073. Стоп. Встаю.
+ID: command.stop.single.1
+
+01-074. Останавливаюсь.
+ID: command.stop.single.written-v2.1
+
+01-075. Стоять, так стоять.
+ID: command.stop.single.written-v3.1
+
+01-076. Торможу.
+ID: command.stop.single.written-v4.1
+
+01-077. Есть. Стоп машина.
+ID: command.stop.single.written-v5.1
+
+01-078. Ход сбрасываю.
+ID: command.stop.single.written-v6.1
+
+01-079. Группа, стоп.
+ID: command.stop.group.1
+
+01-080. Колонна, встать.
+ID: command.stop.group.written-v2.1
+
+01-081. Тормозим.
+ID: command.stop.group.written-v3.1
+
+01-082. Стоп всем машинам.
+ID: command.stop.group.written-v4.1
+
+01-083. Остановка.
+ID: command.stop.group.written-v5.1
+
+01-084. Колонна, отставить движение.
+ID: command.stop.group.exchange-v1.1, command.stop.mass.exchange-v1.1
+
+01-085. В бампер приёмку не устраивать.
+ID: command.stop.group.exchange-v1.3, command.stop.mass.exchange-v1.3
+
+01-086. Стоп машина.
+ID: command.stop.group.exchange-v2.1, command.stop.mass.exchange-v2.1
+
+01-087. Остановка. Без расшифровки.
+ID: command.stop.group.exchange-v2.3, command.stop.mass.exchange-v2.3
+
+01-088. Всем встать.
+ID: command.stop.group.exchange-v3.1, command.stop.mass.exchange-v3.1
+
+01-089. Вся колонна, стоп.
+ID: command.stop.mass.1
+
+01-090. Общая остановка.
+ID: command.stop.mass.written-v2.1
+
+01-091. Всем машинам — стоять.
+ID: command.stop.mass.written-v3.1
+
+01-092. Отходим!
+ID: command.retreat.single.1, command.retreat.group.1
+
+01-093. Разрываем контакт.
+ID: command.retreat.single.written-v2.1
+
+01-094. Из боя выхожу.
+ID: command.retreat.single.written-v3.1
+
+01-095. Сматываемся!
+ID: command.retreat.single.written-v4.1
+
+01-096. Хватит. Назад!
+ID: command.retreat.single.written-v5.1
+
+01-097. Снимаюсь с позиции!
+ID: command.retreat.single.written-v6.1
+
+01-098. Выходим из-под огня!
+ID: command.retreat.single.written-v7.1
+
+01-099. Отбой. Уходим.
+ID: command.retreat.single.written-v8.1
+
+01-100. Рвём контакт.
+ID: command.retreat.single.tactical-retreat.1, command.retreat.group.tactical-retreat.1, command.retreat.mass.tactical-retreat.1, command.auto_retreat.single.tactical-retreat.1, command.auto_retreat.group.tactical-retreat.1, command.auto_retreat.mass.tactical-retreat.1
+
+01-101. Отходим. Противник в контакте.
+ID: command.retreat.single.observed-retreat.1, command.retreat.group.observed-retreat.1, command.retreat.mass.observed-retreat.1, command.auto_retreat.single.observed-retreat.1, command.auto_retreat.group.observed-retreat.1, command.auto_retreat.mass.observed-retreat.1
+
+01-102. Группа, разрываем контакт.
+ID: command.retreat.group.written-v2.1
+
+01-103. Всё, сворачиваемся!
+ID: command.retreat.group.written-v3.1
+
+01-104. Назад! Здесь хватит.
+ID: command.retreat.group.written-v4.1
+
+01-105. Снимаемся с позиции.
+ID: command.retreat.group.written-v5.1
+
+01-106. Сматываемся. Живо!
+ID: command.retreat.group.written-v7.1
+
+01-107. Отход. Без остановок.
+ID: command.retreat.group.written-v8.1
+
+01-108. Контакт рвём. Выходим!
+ID: command.retreat.group.exchange-v1.1, command.retreat.mass.exchange-v1.1
+
+01-109. На выходе не зависать!
+ID: command.retreat.group.exchange-v1.3, command.retreat.mass.exchange-v1.3
+
+01-110. Сворачиваемся. Хватит размена.
+ID: command.retreat.group.exchange-v2.1, command.retreat.mass.exchange-v2.1
+
+01-111. Железо вытаскиваем!
+ID: command.retreat.group.exchange-v2.3, command.retreat.mass.exchange-v2.3
+
+01-112. Назад, мужики. Нас здесь разберут.
+ID: command.retreat.group.exchange-v3.1, command.retreat.mass.exchange-v3.1
+
+01-113. Колонну не рвите.
+ID: command.retreat.group.exchange-v3.3, command.retreat.mass.exchange-v3.3
+
+01-114. С позиции снимаемся.
+ID: command.retreat.group.exchange-v4.1, command.retreat.mass.exchange-v4.1
+
+01-115. Уходим из замеса.
+ID: command.retreat.group.exchange-v5.1, command.retreat.mass.exchange-v5.1
+
+01-116. Вовремя её спланировали.
+ID: command.retreat.group.dry-v1.2, command.retreat.mass.dry-v1.2
+
+01-117. Главное — подальше от этих тактиков.
+ID: command.retreat.group.dry-v2.2, command.retreat.mass.dry-v2.2
+
+01-118. Направление одобряю.
+ID: command.retreat.group.dry-v3.2, command.retreat.mass.dry-v3.2
+
+01-119. Общий отход!
+ID: command.retreat.mass.1
+
+01-120. Всем разорвать контакт.
+ID: command.retreat.mass.written-v2.1
+
+01-121. Вся группа, снимаемся.
+ID: command.retreat.mass.written-v3.1
+
+01-122. Массовый отход. Уходим!
+ID: command.retreat.mass.written-v4.1
+
+01-123. Объект взят.
+ID: command.capture.single.1
+
+01-124. Контроль наш.
+ID: command.capture.single.written-v2.1
+
+01-125. Заняли объект.
+ID: command.capture.single.written-v3.1
+
+01-126. Объект под нами.
+ID: command.capture.single.written-v4.1
+
+01-127. Забрали. Наше.
+ID: command.capture.single.written-v5.1
+
+01-128. Объекты под контролем.
+ID: command.capture.group.1, command.capture.mass.1
+
+01-129. Заняли.
+ID: command.capture.group.written-v2.1, command.capture.mass.written-v2.1
+
+01-130. Объекты наши.
+ID: command.capture.group.written-v3.1, command.capture.mass.written-v3.1
+
+01-131. Контроль у нас.
+ID: command.capture.group.written-v4.1, command.capture.mass.written-v4.1
+
+01-132. Туда не пройти.
+ID: command.rejected.single.1
+
+01-133. Нет маршрута.
+ID: command.rejected.single.written-v2.1
+
+01-134. Прохода нет. Нужна другая точка.
+ID: command.rejected.single.written-v3.1
+
+01-135. Отставить. Туда не добраться.
+ID: command.rejected.single.written-v4.1
+
+01-136. Маршрут не проложен.
+ID: command.rejected.single.written-v5.1
+
+01-137. Прохода нет.
+ID: command.rejected.group.1, command.rejected.mass.1
+
+01-138. На эту точку не выйти.
+ID: command.rejected.group.written-v2.1, command.rejected.mass.written-v2.1
+
+01-139. Маршрут не проложен. Стоим.
+ID: command.rejected.group.written-v3.1, command.rejected.mass.written-v3.1
+
+01-140. Упёрлись. Дальше не пройти.
+ID: command.rejected.group.written-v4.1, command.rejected.mass.written-v4.1
+
+01-141. Ухожу на ремонт.
+ID: command.auto_retreat.single.1
+
+01-142. Матчасть побита. Отхожу.
+ID: command.auto_retreat.single.written-v2.1
+
+01-143. Выхожу чиниться.
+ID: command.auto_retreat.single.written-v3.1
+
+01-144. Пора в ремонт. Снимаюсь.
+ID: command.auto_retreat.single.written-v4.1
+
+01-145. Отхожу на восстановление.
+ID: command.auto_retreat.single.written-v5.1
+
+01-146. Машину надо латать. Ухожу.
+ID: command.auto_retreat.single.written-v6.1
+
+01-147. Увожу матчасть в ремонт.
+ID: command.auto_retreat.single.crew-exchange-v1.1
+
+01-148. Отхожу лататься.
+ID: command.auto_retreat.single.crew-exchange-v2.1
+
+01-149. Уходим на ремонт.
+ID: command.auto_retreat.group.1, command.auto_retreat.mass.1
+
+01-150. Матчасть побита. Выходим.
+ID: command.auto_retreat.group.written-v2.1, command.auto_retreat.mass.written-v2.1
+
+01-151. Сворачиваемся к ремонтникам.
+ID: command.auto_retreat.group.written-v3.1, command.auto_retreat.mass.written-v3.1
+
+01-152. Машины в ремонт.
+ID: command.auto_retreat.group.written-v4.1, command.auto_retreat.mass.written-v4.1
+
+01-153. Надо лататься. Отходим.
+ID: command.auto_retreat.group.written-v5.1, command.auto_retreat.mass.written-v5.1
+
+01-154. Матчасть в ремзону. Снимаюсь.
+ID: command.auto_retreat.group.exchange-v1.1, command.auto_retreat.mass.exchange-v1.1
+
+01-155. Дай выйти сначала.
+ID: command.auto_retreat.group.exchange-v1.3, command.auto_retreat.mass.exchange-v1.3
+
+01-156. В ремонт отходим.
+ID: command.auto_retreat.group.exchange-v2.1, command.auto_retreat.mass.exchange-v2.1
+
+01-157. По одному зайдём.
+ID: command.auto_retreat.group.exchange-v2.3, command.auto_retreat.mass.exchange-v2.3
+
+01-158. Железо побито. Увожу.
+ID: command.auto_retreat.group.exchange-v3.1, command.auto_retreat.mass.exchange-v3.1
+
+01-159. Пора латать матчасть.
+ID: command.auto_retreat.group.exchange-v4.1, command.auto_retreat.mass.exchange-v4.1
+
+01-160. План, вижу, противник составил.
+ID: command.auto_retreat.group.dry-v1.2, command.auto_retreat.mass.dry-v1.2
+
+01-161. До ремзоны. И обратно.
+ID: command.auto_retreat.group.dry-v2.2, command.auto_retreat.mass.dry-v2.2
+
+01-162. На точке.
+ID: movement.arrived.single.1
+
+01-163. Позицию занял.
+ID: movement.arrived.single.written-v2.1
+
+01-164. Маршрут пройден.
+ID: movement.arrived.single.written-v3.1
+
+01-165. Доехал. Жду следующую.
+ID: movement.arrived.single.written-v4.1
+
+01-166. На месте.
+ID: movement.arrived.single.written-v5.1
+
+01-167. Группа на точке.
+ID: movement.arrived.group.1, movement.arrived.mass.1
+
+01-168. Прибыли.
+ID: movement.arrived.group.written-v2.1, movement.arrived.mass.written-v2.1
+
+01-169. На месте. Маршрут закрыт.
+ID: movement.arrived.group.written-v3.1, movement.arrived.mass.written-v3.1
+
+01-170. Точку заняли.
+ID: movement.arrived.group.written-v4.1, movement.arrived.mass.written-v4.1
+
+01-171. Срезаю по короткому.
+ID: movement.route_changed.single.1
+
+01-172. Меняю маршрут. Есть короче.
+ID: movement.route_changed.single.written-v2.1
+
+01-173. Обойдём без крюка.
+ID: movement.route_changed.single.written-v3.1
+
+01-174. Убираю лишний крюк.
+ID: movement.route_changed.single.written-v4.1
+
+01-175. Маршрут меняем. Есть короче.
+ID: movement.route_changed.group.1, movement.route_changed.mass.1
+
+01-176. Идём без этого крюка.
+ID: movement.route_changed.group.written-v2.1, movement.route_changed.mass.written-v2.1
+
+01-177. Срежем по короткому.
+ID: movement.route_changed.group.written-v3.1, movement.route_changed.mass.written-v3.1
+
+01-178. В хвост не дави. Разъезд нужен.
+ID: traffic.queue_blocked.single.crew-exchange-v1.2
+
+01-179. На встречку только не вылезай.
+ID: traffic.queue_blocked.single.crew-exchange-v2.2
+
+01-180. В сводке так и напишешь.
+ID: traffic.queue_blocked.single.dry-v1.2, traffic.queue_blocked.group.dry-v1.2, traffic.queue_blocked.mass.dry-v1.2
+
+01-181. И эти всё лезут без очереди.
+ID: traffic.queue_blocked.single.dry-v2.2, traffic.queue_blocked.group.dry-v2.2, traffic.queue_blocked.mass.dry-v2.2
+
+01-182. А отъехать некому.
+ID: traffic.queue_blocked.single.dry-v3.2, traffic.queue_blocked.group.dry-v3.2, traffic.queue_blocked.mass.dry-v3.2
+
+01-183. Заднюю без предупреждения не давай.
+ID: traffic.queue_blocked.group.2, traffic.queue_blocked.mass.2
+
+01-184. Не подпирай. Разъехаться негде.
+ID: traffic.queue_blocked.group.written-v2.2, traffic.queue_blocked.mass.written-v2.2
+
+01-185. Кто впереди — освобождайте проезд.
+ID: traffic.queue_blocked.group.written-v3.2, traffic.queue_blocked.mass.written-v3.2
+
+01-186. Без встречки. Ещё хуже встанем.
+ID: traffic.queue_blocked.group.written-v5.2, traffic.queue_blocked.mass.written-v5.2
+
+01-187. Сзади тоже очередь. Не дёргайся.
+ID: traffic.queue_blocked.group.written-v6.2, traffic.queue_blocked.mass.written-v6.2
+
+01-188. Тебя толкать никто не нанимался.
+ID: traffic.queue_blocked.group.exchange-v1.2, traffic.queue_blocked.mass.exchange-v1.2
+
+01-189. Назад без команды не дёргайся.
+ID: traffic.queue_blocked.group.exchange-v2.2, traffic.queue_blocked.mass.exchange-v2.2
+
+01-190. На встречку не лезь, второй затор соберёшь.
+ID: traffic.queue_blocked.group.exchange-v3.2, traffic.queue_blocked.mass.exchange-v3.2
+
+01-191. Гудком не раздвинешь.
+ID: traffic.queue_blocked.group.exchange-v4.2, traffic.queue_blocked.mass.exchange-v4.2
+
+01-192. Сзади тоже железо.
+ID: traffic.queue_blocked.group.exchange-v5.2, traffic.queue_blocked.mass.exchange-v5.2
+
+01-193. Редкий случай.
+ID: traffic.jam_resolved.single.dry-v1.2, traffic.jam_resolved.group.dry-v1.2, traffic.jam_resolved.mass.dry-v1.2
+
+01-194. Последнее слово лишнее.
+ID: traffic.jam_resolved.single.dry-v2.2, traffic.jam_resolved.group.dry-v2.2, traffic.jam_resolved.mass.dry-v2.2
+
+01-195. На выходе не тормози.
+ID: traffic.jam_resolved.group.2, traffic.jam_resolved.mass.2
+
+01-196. Проезд держите свободным.
+ID: traffic.jam_resolved.group.written-v2.2, traffic.jam_resolved.mass.written-v2.2
+
+01-197. Интервал. Второй раз не собираемся.
+ID: traffic.jam_resolved.group.written-v4.2, traffic.jam_resolved.mass.written-v4.2
+
+01-198. Сразу в хвост не прилипайте.
+ID: traffic.jam_resolved.group.exchange-v1.2, traffic.jam_resolved.mass.exchange-v1.2
+
+01-199. Только опять не закупорьте.
+ID: traffic.jam_resolved.group.exchange-v2.2, traffic.jam_resolved.mass.exchange-v2.2
+
+01-200. Теперь без объятий бамперами.
+ID: traffic.jam_resolved.group.exchange-v3.2, traffic.jam_resolved.mass.exchange-v3.2
+
+01-201. Газ убери. Не продавишь.
+ID: traffic.deadlock.group.2, traffic.deadlock.mass.2
+
+01-202. Сзади отожмитесь, нужен манёвр.
+ID: traffic.deadlock.group.written-v2.2, traffic.deadlock.mass.written-v2.2
+
+01-203. Дайте место сдать назад.
+ID: traffic.deadlock.group.written-v4.2, traffic.deadlock.mass.written-v4.2
+
+01-204. Кто сзади — дайте место.
+ID: traffic.deadlock.group.exchange-v1.2, traffic.deadlock.mass.exchange-v1.2
+
+01-205. На газ не дави. Железо не ужмётся.
+ID: traffic.deadlock.group.exchange-v2.2, traffic.deadlock.mass.exchange-v2.2
+
+01-206. Не газуйте вдвоём. Один сдаёт — второй ждёт.
+ID: traffic.deadlock.group.exchange-v3.2, traffic.deadlock.mass.exchange-v3.2
+
+01-207. Сзади не прижимайтесь.
+ID: traffic.reverse_started.group.2, traffic.reverse_started.mass.2
+
+01-208. На встречку не выставляйтесь.
+ID: traffic.reverse_started.group.written-v3.2, traffic.reverse_started.mass.written-v3.2
+
+01-209. Дальше по маршруту.
+ID: traffic.reverse_complete.group.2, traffic.reverse_complete.mass.2
+
+01-210. Не запирайте снова.
+ID: traffic.reverse_complete.group.written-v3.2, traffic.reverse_complete.mass.written-v3.2
+
+01-211. Цель обнулили.
+ID: combat.target_destroyed.single.1
+
+01-212. Минус цель.
+ID: combat.target_destroyed.single.written-v2.1
+
+01-213. Сняли эту.
+ID: combat.target_destroyed.single.written-v3.1
+
+01-214. Отработали. Цель уничтожена.
+ID: combat.target_destroyed.single.written-v4.1
+
+01-215. Всё. Цели нет.
+ID: combat.target_destroyed.single.written-v5.1
+
+01-216. Добили.
+ID: combat.target_destroyed.single.written-v6.1
+
+01-217. Готова.
+ID: combat.target_destroyed.single.written-v7.1
+
+01-218. Есть минус.
+ID: combat.target_destroyed.single.written-v8.1, combat.target_destroyed.group.exchange-v4.1, combat.target_destroyed.mass.exchange-v4.1
+
+01-219. Цель списываем.
+ID: combat.target_destroyed.single.pop-v1.2, combat.target_destroyed.group.pop-v1.2, combat.target_destroyed.mass.pop-v1.2
+
+01-220. Так в сводку и пиши.
+ID: combat.target_destroyed.single.pop-v2.2, combat.target_destroyed.group.pop-v2.2, combat.target_destroyed.mass.pop-v2.2
+
+01-221. Штатный бы она тоже не пережила.
+ID: combat.target_destroyed.single.pop-v3.2, combat.target_destroyed.group.pop-v3.2, combat.target_destroyed.mass.pop-v3.2
+
+01-222. Цели обнулили.
+ID: combat.target_destroyed.group.1, combat.target_destroyed.group.exchange-v2.1, combat.target_destroyed.mass.1, combat.target_destroyed.mass.exchange-v2.1
+
+01-223. Сняли.
+ID: combat.target_destroyed.group.written-v2.1, combat.target_destroyed.mass.written-v2.1
+
+01-224. Цели уничтожены.
+ID: combat.target_destroyed.group.written-v3.1, combat.target_destroyed.mass.written-v3.1
+
+01-225. Отработали. Минус.
+ID: combat.target_destroyed.group.written-v4.1, combat.target_destroyed.mass.written-v4.1
+
+01-226. Эти готовы.
+ID: combat.target_destroyed.group.written-v5.1, combat.target_destroyed.mass.written-v5.1
+
+01-227. С целями покончено.
+ID: combat.target_destroyed.group.written-v6.1, combat.target_destroyed.mass.written-v6.1
+
+01-228. Всё. Добили.
+ID: combat.target_destroyed.group.written-v7.1, combat.target_destroyed.mass.written-v7.1
+
+01-229. Минус цели.
+ID: combat.target_destroyed.group.written-v8.1, combat.target_destroyed.mass.written-v8.1
+
+01-230. Отработали. Минус цель.
+ID: combat.target_destroyed.group.exchange-v1.1, combat.target_destroyed.mass.exchange-v1.1
+
+01-231. Огонь с этой снят.
+ID: combat.target_destroyed.group.exchange-v1.3, combat.target_destroyed.mass.exchange-v1.3
+
+01-232. Переходим к следующей задаче.
+ID: combat.target_destroyed.group.exchange-v2.3, combat.target_destroyed.mass.exchange-v2.3
+
+01-233. С этими закончили.
+ID: combat.target_destroyed.group.exchange-v3.1, combat.target_destroyed.mass.exchange-v3.1
+
+01-234. База под огнём!
+ID: combat.base_attack.single.1, combat.base_attack.group.1, combat.base_attack.mass.1
+
+01-235. Работают по базе!
+ID: combat.base_attack.single.written-v2.1
+
+01-236. Бьют по нашим зданиям!
+ID: combat.base_attack.single.written-v3.1
+
+01-237. Базу обстреливают!
+ID: combat.base_attack.single.written-v4.1
+
+01-238. Удар по базе!
+ID: combat.base_attack.single.written-v5.1
+
+01-239. По объектам прилетает!
+ID: combat.base_attack.single.written-v6.1
+
+01-240. Работают по зданиям!
+ID: combat.base_attack.group.written-v2.1, combat.base_attack.mass.written-v2.1
+
+01-241. Бьют по базе!
+ID: combat.base_attack.group.written-v3.1, combat.base_attack.mass.written-v3.1
+
+01-242. Объекты под обстрелом!
+ID: combat.base_attack.group.written-v4.1, combat.base_attack.mass.written-v4.1
+
+01-243. Короче список исправного дай.
+ID: repair.start_factory.single.dry-v1.2, repair.start_factory.group.dry-v1.2, repair.start_factory.mass.dry-v1.2
+
+01-244. Главное, чтоб обратно собрали.
+ID: repair.start_factory.single.dry-v2.2, repair.start_factory.group.dry-v2.2, repair.start_factory.mass.dry-v2.2
+
+01-245. Заодно резину смени.
+ID: repair.start_factory.single.female-repair-v1.2, repair.start_factory.group.female-repair-v1.2, repair.start_factory.mass.female-repair-v1.2
+
+01-246. Без тебя тут никто и не матерится.
+ID: repair.start_factory.single.female-repair-v2.2, repair.start_factory.group.female-repair-v2.2, repair.start_factory.mass.female-repair-v2.2
+
+01-247. Счастливый конец входит?
+ID: repair.start_factory.single.bawdy-v1.2, repair.start_factory.group.bawdy-v1.2, repair.start_factory.mass.bawdy-v1.2
+
+01-248. Если заведётся — уже счастье.
+ID: repair.start_factory.single.bawdy-v1.3, repair.start_factory.group.bawdy-v1.3, repair.start_factory.mass.bawdy-v1.3
+
+01-249. Вот после этого всегда больно.
+ID: repair.start_factory.single.bawdy-v2.2, repair.start_factory.group.bawdy-v2.2, repair.start_factory.mass.bawdy-v2.2
+
+01-250. Нежные у нас в штабе. Здесь разводной ключ.
+ID: repair.start_factory.single.bawdy-v3.2, repair.start_factory.group.bawdy-v3.2, repair.start_factory.mass.bawdy-v3.2
+
+01-251. Расходная ведомость не согласна.
+ID: repair.complete.single.dry-v1.2, repair.complete.group.dry-v1.2, repair.complete.mass.dry-v1.2
+
+01-252. Гарантия до ворот?
+ID: repair.complete.single.dry-v2.2, repair.complete.group.dry-v2.2, repair.complete.mass.dry-v2.2
+
+01-253. Только не начинай хвастаться.
+ID: repair.complete.single.bawdy-v1.2, repair.complete.group.bawdy-v1.2, repair.complete.mass.bawdy-v1.2
+
+01-254. Сначала душ. Ты соляркой пахнешь.
+ID: repair.complete.single.bawdy-v2.2, repair.complete.group.bawdy-v2.2, repair.complete.mass.bawdy-v2.2
+
+01-255. Бумага закончилась. Повезло тебе.
+ID: construction.complete.single.dry-v1.2, construction.complete.group.dry-v1.2, construction.complete.mass.dry-v1.2
+
+01-256. Оставим это в отчёте.
+ID: construction.complete.single.dry-v2.2, construction.complete.group.dry-v2.2, construction.complete.mass.dry-v2.2
+
+01-257. Списание заранее не оформляйте.
+ID: factory.vehicle_complete.single.dry-v1.2, factory.vehicle_complete.group.dry-v1.2, factory.vehicle_complete.mass.dry-v1.2
+
+01-258. Опять вручную обкатывать.
+ID: factory.vehicle_complete.single.dry-v2.2, factory.vehicle_complete.group.dry-v2.2, factory.vehicle_complete.mass.dry-v2.2
+
+01-259. А слова «на свой страх»?
+ID: research.complete.single.dry-v1.2, research.complete.group.dry-v1.2, research.complete.mass.dry-v1.2
+
+01-260. Инструкцию короче названия сделали?
+ID: research.complete.single.dry-v2.2, research.complete.group.dry-v2.2, research.complete.mass.dry-v2.2
+
+01-261. Без задачи. Жду приказ.
+ID: idle.group_no_order.single.1
+
+01-262. Свободен. Куда дальше?
+ID: idle.group_no_order.single.written-v2.1
+
+01-263. Простой. Задачу дайте.
+ID: idle.group_no_order.single.written-v3.1
+
+01-264. Распоряжений нет.
+ID: idle.group_no_order.single.written-v4.1
+
+01-265. Тогда без самодеятельности.
+ID: idle.group_no_order.single.exchange-v1.3, idle.group_no_order.group.exchange-v1.3, idle.group_no_order.mass.exchange-v1.3
+
+01-266. Долго без задачи стоим.
+ID: idle.group_no_order.single.exchange-v2.1, idle.group_no_order.group.exchange-v2.1, idle.group_no_order.mass.exchange-v2.1
+
+01-267. Да я за простой докладываю.
+ID: idle.group_no_order.single.exchange-v2.3, idle.group_no_order.group.exchange-v2.3, idle.group_no_order.mass.exchange-v2.3
+
+01-268. Новых вводных не было?
+ID: idle.group_no_order.single.exchange-v3.1, idle.group_no_order.group.exchange-v3.1, idle.group_no_order.mass.exchange-v3.1
+
+01-269. Значит, ждём.
+ID: idle.group_no_order.single.exchange-v3.3, idle.group_no_order.group.exchange-v3.3, idle.group_no_order.mass.exchange-v3.3
+
+01-270. Без приказа сидим.
+ID: idle.group_no_order.single.exchange-v4.1, idle.group_no_order.group.exchange-v4.1, idle.group_no_order.mass.exchange-v4.1
+
+01-271. В отчёте — резерв.
+ID: idle.group_no_order.single.dry-v1.2, idle.group_no_order.group.dry-v1.2, idle.group_no_order.mass.dry-v1.2
+
+01-272. Редкий приказ, который не уточняют.
+ID: idle.group_no_order.single.dry-v2.2, idle.group_no_order.group.dry-v2.2, idle.group_no_order.mass.dry-v2.2
+
+01-273. Не мешай.
+ID: idle.group_no_order.single.dry-v3.2, idle.group_no_order.group.dry-v3.2, idle.group_no_order.mass.dry-v3.2
+
+01-274. Там хоть направление было.
+ID: idle.group_no_order.single.traffic-memory.2, idle.group_no_order.group.traffic-memory.2, idle.group_no_order.mass.traffic-memory.2
+
+01-275. Куда дальше?
+ID: idle.group_no_order.group.written-v2.1, idle.group_no_order.mass.written-v2.1
+
+01-276. Простой. Нужна задача.
+ID: idle.group_no_order.group.written-v3.1, idle.group_no_order.mass.written-v3.1
+
+01-277. Всем: пока ждём приказ.
+ID: idle.group_no_order.group.written-v4.1, idle.group_no_order.mass.written-v4.1
+
+01-278. Пока только ебёт.
+ID: idle.quiet.single.bawdy-v1.2, idle.quiet.group.bawdy-v1.2, idle.quiet.mass.bawdy-v1.2
+
+01-279. Если порвался — виноват сам.
+ID: idle.quiet.single.bawdy-v2.2, idle.quiet.group.bawdy-v2.2, idle.quiet.mass.bawdy-v2.2
+
+01-280. Им снизу не нравится.
+ID: idle.quiet.single.bawdy-v3.2, idle.quiet.group.bawdy-v3.2, idle.quiet.mass.bawdy-v3.2
+
+01-281. Да. Трахают регулярно.
+ID: idle.quiet.single.bawdy-v4.2, idle.quiet.group.bawdy-v4.2, idle.quiet.mass.bawdy-v4.2
+
+01-282. По приказу. Любовь потом спишут.
+ID: idle.quiet.single.bawdy-v5.2, idle.quiet.group.bawdy-v5.2, idle.quiet.mass.bawdy-v5.2
+
+01-283. Тогда знакомь их с домкратом.
+ID: idle.quiet.single.bawdy-v6.2, idle.quiet.group.bawdy-v6.2, idle.quiet.mass.bawdy-v6.2
+
+01-284. А тут начальство всем взводом.
+ID: idle.quiet.single.bawdy-v7.2, idle.quiet.group.bawdy-v7.2, idle.quiet.mass.bawdy-v7.2
+
+01-285. Как рация. Все слушают, никто не отвечает.
+ID: idle.quiet.single.bawdy-v8.2, idle.quiet.group.bawdy-v8.2, idle.quiet.mass.bawdy-v8.2
+
+01-286. Потом выдают разводной ключ.
+ID: idle.quiet.single.bawdy-v9.2, idle.quiet.group.bawdy-v9.2, idle.quiet.mass.bawdy-v9.2
+
+01-287. Особенно когда приказ сухой.
+ID: idle.quiet.single.bawdy-v10.2, idle.quiet.group.bawdy-v10.2, idle.quiet.mass.bawdy-v10.2
+
+01-288. С дистанцией. И без тарана.
+ID: idle.quiet.single.bawdy-v11.2, idle.quiet.group.bawdy-v11.2, idle.quiet.mass.bawdy-v11.2
+
+01-289. Мотор потрогай.
+ID: idle.quiet.single.bawdy-v12.2, idle.quiet.group.bawdy-v12.2, idle.quiet.mass.bawdy-v12.2
+
+01-290. У нас техосмотр. Тоже под юбку лезут.
+ID: idle.quiet.single.bawdy-v13.2, idle.quiet.group.bawdy-v13.2, idle.quiet.mass.bawdy-v13.2
+
+01-291. Да. Подъёбка.
+ID: idle.quiet.single.bawdy-v14.2, idle.quiet.group.bawdy-v14.2, idle.quiet.mass.bawdy-v14.2
+
+01-292. Зато ебут с фантазией.
+ID: idle.quiet.single.bawdy-v15.2, idle.quiet.group.bawdy-v15.2, idle.quiet.mass.bawdy-v15.2
+
+01-293. Это ты про строй?
+ID: idle.quiet.single.bawdy-v16.2, idle.quiet.group.bawdy-v16.2, idle.quiet.mass.bawdy-v16.2
+
+01-294. А ты уже о своём?
+ID: idle.quiet.single.bawdy-v16.3, idle.quiet.group.bawdy-v16.3, idle.quiet.mass.bawdy-v16.3
+
+01-295. Мы молча любуемся.
+ID: idle.quiet.single.female-bawdy-v1.2, idle.quiet.group.female-bawdy-v1.2, idle.quiet.mass.female-bawdy-v1.2
+
+01-296. Так вождению учили.
+ID: idle.quiet.single.female-bawdy-v2.2, idle.quiet.group.female-bawdy-v2.2, idle.quiet.mass.female-bawdy-v2.2
+
+01-297. Вот и не дай его в рапорт списать.
+ID: idle.driver_pair.single.green-v1.3, idle.driver_pair.group.green-v1.3, idle.driver_pair.mass.green-v1.3
+
+01-298. Пока звезду не получишь, имя запоминать рано.
+ID: idle.driver_pair.single.green-v2.1, idle.driver_pair.group.green-v2.1, idle.driver_pair.mass.green-v2.1
+
+01-299. Запомнили. Теперь возвращайся с ним.
+ID: idle.driver_pair.single.green-v3.3, idle.driver_pair.group.green-v3.3, idle.driver_pair.mass.green-v3.3
+
+01-300. Помолчать бы сейчас.
+ID: idle.crew_history.single.loss-afterword-v1.1, idle.crew_history.group.loss-afterword-v1.1, idle.crew_history.mass.loss-afterword-v1.1
+
+01-301. В рапорте строки. А по именам — тяжело.
+ID: idle.crew_history.single.loss-afterword-v2.1, idle.crew_history.group.loss-afterword-v2.1, idle.crew_history.mass.loss-afterword-v2.1
+
+01-302. Могли сберечь. Не сберегли.
+ID: idle.crew_history.single.loss-afterword-v3.1, idle.crew_history.group.loss-afterword-v3.1, idle.crew_history.mass.loss-afterword-v3.1
+
+01-303. Позывных в эфире меньше стало.
+ID: idle.crew_history.single.loss-afterword-v4.1, idle.crew_history.group.loss-afterword-v4.1, idle.crew_history.mass.loss-afterword-v4.1
+
+01-304. Говорили — имя потом запомним.
+ID: idle.crew_history.single.remembered-newcomer.1, idle.crew_history.group.remembered-newcomer.1, idle.crew_history.mass.remembered-newcomer.1
+
+2. ВОДИТЕЛЬ — СУХОЙ ЮМОР И ДОРОЖНЫЕ ДОКЛАДЫ — 212 записей
+
+02-001. Держи дистанцию. Мы ещё не встречаемся.
+ID: command.move.single.bawdy-v1.1, command.move.group.bawdy-v1.1, command.move.mass.bawdy-v1.1
+
+02-002. Колонна пошла.
+ID: command.move.single.bawdy-v2.1, command.move.group.bawdy-v2.1, command.move.mass.bawdy-v2.1
+
+02-003. Интервал держите.
+ID: command.move.group.2
+
+02-004. Хвост не растягивать.
+ID: command.move.group.written-v2.2, command.move.mass.2
+
+02-005. На перекрёстке не вставать.
+ID: command.move.group.written-v3.2
+
+02-006. В поворотах оставляй место.
+ID: command.move.group.written-v4.2
+
+02-007. Через встречку не лезьте.
+ID: command.move.group.written-v6.2
+
+02-008. Затор будет — сразу докладывай.
+ID: command.move.group.written-v7.2
+
+02-009. Не забивайте проезд.
+ID: command.move.group.written-v8.2
+
+02-010. Ты главное в пыль не уходи.
+ID: command.move.group.exchange-v1.2, command.move.mass.exchange-v1.2
+
+02-011. Без гонки. Тут все казённые.
+ID: command.move.group.exchange-v2.2, command.move.mass.exchange-v2.2
+
+02-012. Крюки опять нарезать?
+ID: command.move.group.exchange-v3.2, command.move.mass.exchange-v3.2
+
+02-013. Узкие места по одному. Не клиньте колонну.
+ID: command.move.group.exchange-v4.2, command.move.mass.exchange-v4.2
+
+02-014. Хвостом не виляйте. Сзади тоже техника.
+ID: command.move.group.exchange-v5.2, command.move.mass.exchange-v5.2
+
+02-015. Опять переезд.
+ID: command.move.group.dry-v1.1, command.move.mass.dry-v1.1
+
+02-016. Выдвигаемся. По служебной надобности.
+ID: command.move.group.dry-v2.1, command.move.mass.dry-v2.1
+
+02-017. Перекрёстки не запирайте.
+ID: command.move.mass.written-v2.2
+
+02-018. В эфир только срочное.
+ID: command.move.mass.written-v3.2
+
+02-019. Встречку не занимать.
+ID: command.move.mass.written-v4.2
+
+02-020. Своим огонь не перекрывать.
+ID: command.attack.group.2, command.attack.mass.2
+
+02-021. Без кучи. Разнеситесь.
+ID: command.attack.group.written-v2.2
+
+02-022. С потерями — сразу в эфир.
+ID: command.attack.group.written-v3.2
+
+02-023. Принял. С линии огня уйди.
+ID: command.attack.group.written-v4.2
+
+02-024. Только под своих не подставляйтесь.
+ID: command.attack.group.written-v5.2
+
+02-025. В проходе не вставать.
+ID: command.attack.group.written-v7.2
+
+02-026. Срочные доклады — первыми.
+ID: command.attack.group.written-v8.2
+
+02-027. Своим стволы не закройте.
+ID: command.attack.group.exchange-v1.2, command.attack.mass.exchange-v1.2
+
+02-028. Не выскакивайте друг перед другом.
+ID: command.attack.group.exchange-v2.2, command.attack.mass.exchange-v2.2
+
+02-029. Без самодеятельности, мужики.
+ID: command.attack.group.exchange-v3.2, command.attack.mass.exchange-v3.2
+
+02-030. С разбегу под стволы не суйтесь.
+ID: command.attack.group.exchange-v4.2, command.attack.mass.exchange-v4.2
+
+02-031. Матчасть берегите. Наглость броню не заменяет.
+ID: command.attack.group.exchange-v5.2, command.attack.mass.exchange-v5.2
+
+02-032. По одному в проход не толпитесь.
+ID: command.attack.mass.written-v2.2
+
+02-033. С потерями — первыми в эфир.
+ID: command.attack.mass.written-v3.2
+
+02-034. От группы не отрываться.
+ID: command.attack_move.group.2, command.attack_move.mass.2
+
+02-035. Дорогу своим не перекрывайте.
+ID: command.attack_move.group.written-v2.2, command.attack_move.mass.written-v2.2
+
+02-036. По контакту — коротко в эфир.
+ID: command.attack_move.group.written-v3.2, command.attack_move.mass.written-v3.2
+
+02-037. Не лезьте под свои стволы.
+ID: command.attack_move.group.written-v5.2, command.attack_move.mass.written-v5.2
+
+02-038. На каждой куче лома не тормози.
+ID: command.attack_move.group.exchange-v1.2, command.attack_move.mass.exchange-v1.2
+
+02-039. По одному не отваливайтесь.
+ID: command.attack_move.group.exchange-v2.2, command.attack_move.mass.exchange-v2.2
+
+02-040. Пока без огонька. Сначала контакт.
+ID: command.attack_move.group.exchange-v3.2, command.attack_move.mass.exchange-v3.2
+
+02-041. Рванёте вразнобой — по частям разберут.
+ID: command.attack_move.group.exchange-v4.2, command.attack_move.mass.exchange-v4.2
+
+02-042. Сзади дистанцию держать.
+ID: command.stop.group.2
+
+02-043. Проезд не запирайте.
+ID: command.stop.group.written-v2.2
+
+02-044. Хвост, без наезда.
+ID: command.stop.group.written-v3.2
+
+02-045. Под бампер не подлезай.
+ID: command.stop.group.written-v5.2
+
+02-046. Сзади, тормози заранее.
+ID: command.stop.group.exchange-v1.2, command.stop.mass.exchange-v1.2
+
+02-047. Опять перекур?
+ID: command.stop.group.exchange-v2.2, command.stop.mass.exchange-v2.2
+
+02-048. Только проход не закупорить. Ещё выезжать.
+ID: command.stop.group.exchange-v3.2, command.stop.mass.exchange-v3.2
+
+02-049. Хвост, держи дистанцию.
+ID: command.stop.mass.2
+
+02-050. Проезды не запирать.
+ID: command.stop.mass.written-v2.2
+
+02-051. Кто прижал?
+ID: command.retreat.single.tactical-retreat.2, command.retreat.group.tactical-retreat.2, command.retreat.mass.tactical-retreat.2, command.auto_retreat.single.tactical-retreat.2, command.auto_retreat.group.tactical-retreat.2, command.auto_retreat.mass.tactical-retreat.2
+
+02-052. Состав?
+ID: command.retreat.single.observed-retreat.2, command.retreat.group.observed-retreat.2, command.retreat.mass.observed-retreat.2, command.auto_retreat.single.observed-retreat.2, command.auto_retreat.group.observed-retreat.2, command.auto_retreat.mass.observed-retreat.2
+
+02-053. Проход не забивай!
+ID: command.retreat.group.2
+
+02-054. Колонну не рвать.
+ID: command.retreat.group.written-v2.2, command.retreat.mass.written-v3.2
+
+02-055. Сзади не подпирайте.
+ID: command.retreat.group.written-v3.2
+
+02-056. На выходе не вставать!
+ID: command.retreat.group.written-v4.2, command.retreat.mass.2
+
+02-057. Повреждённым дорогу.
+ID: command.retreat.group.written-v5.2
+
+02-058. Оставь место для разворота.
+ID: command.retreat.group.written-v6.2
+
+02-059. Кто встал — сразу в эфир.
+ID: command.retreat.group.written-v8.2
+
+02-060. Кто на ходу — не запирай остальных.
+ID: command.retreat.group.exchange-v1.2, command.retreat.mass.exchange-v1.2
+
+02-061. Повреждённых не зажимайте.
+ID: command.retreat.group.exchange-v2.2, command.retreat.mass.exchange-v2.2
+
+02-062. Без кучи на выходе!
+ID: command.retreat.group.exchange-v3.2, command.retreat.mass.exchange-v3.2
+
+02-063. Под стволами не разворачивайся. Место ищи.
+ID: command.retreat.group.exchange-v4.2, command.retreat.mass.exchange-v4.2
+
+02-064. Матчасть выводите. Подвигов не заказывали.
+ID: command.retreat.group.exchange-v5.2, command.retreat.mass.exchange-v5.2
+
+02-065. Стратегическая перегруппировка.
+ID: command.retreat.group.dry-v1.1, command.retreat.mass.dry-v1.1
+
+02-066. Отходим. Тактический манёвр.
+ID: command.retreat.group.dry-v2.1, command.retreat.mass.dry-v2.1
+
+02-067. Перегруппировка. В обратную сторону.
+ID: command.retreat.group.dry-v3.1, command.retreat.mass.dry-v3.1
+
+02-068. Повреждённым — дорогу.
+ID: command.retreat.mass.written-v2.2
+
+02-069. С потерями — коротко в эфир.
+ID: command.retreat.mass.written-v4.2
+
+02-070. Проход своим оставьте.
+ID: command.capture.group.2, command.capture.mass.2
+
+02-071. До нового приказа — на месте.
+ID: command.capture.group.written-v2.2, command.capture.mass.written-v2.2
+
+02-072. Сзади не напирайте.
+ID: command.rejected.group.2, command.rejected.mass.2
+
+02-073. Нужна новая.
+ID: command.rejected.group.written-v2.2, command.rejected.mass.written-v2.2
+
+02-074. Тараном не решишь.
+ID: command.rejected.group.written-v4.2, command.rejected.mass.written-v4.2
+
+02-075. Повреждённому дорогу.
+ID: command.auto_retreat.single.crew-exchange-v1.2
+
+02-076. У ремзоны проход не запирайте.
+ID: command.auto_retreat.single.crew-exchange-v2.2
+
+02-077. Повреждённым проход.
+ID: command.auto_retreat.group.2, command.auto_retreat.mass.2
+
+02-078. На выезде не запирайте.
+ID: command.auto_retreat.group.written-v2.2, command.auto_retreat.mass.written-v2.2
+
+02-079. Кто встал — докладывайте.
+ID: command.auto_retreat.group.written-v3.2, command.auto_retreat.mass.written-v3.2
+
+02-080. До мастерской без гонки.
+ID: command.auto_retreat.group.written-v5.2, command.auto_retreat.mass.written-v5.2
+
+02-081. Тебе доехать надо. Газом не лечится.
+ID: command.auto_retreat.group.exchange-v1.2, command.auto_retreat.mass.exchange-v1.2
+
+02-082. На въезде не встаньте всей кучей.
+ID: command.auto_retreat.group.exchange-v2.2, command.auto_retreat.mass.exchange-v2.2
+
+02-083. Ремзону не проскочи.
+ID: command.auto_retreat.group.exchange-v3.2, command.auto_retreat.mass.exchange-v3.2
+
+02-084. У боксов не запирайте друг друга.
+ID: command.auto_retreat.group.exchange-v4.2, command.auto_retreat.mass.exchange-v4.2
+
+02-085. Ухожу в ремонт. Плановый.
+ID: command.auto_retreat.group.dry-v1.1, command.auto_retreat.mass.dry-v1.1
+
+02-086. Матчасть просится в отпуск.
+ID: command.auto_retreat.group.dry-v2.1, command.auto_retreat.mass.dry-v2.1
+
+02-087. Проезд оставьте.
+ID: movement.arrived.group.2, movement.arrived.mass.2
+
+02-088. Дальше по приказу.
+ID: movement.arrived.group.written-v2.2, movement.arrived.mass.written-v2.2
+
+02-089. На повороте интервал.
+ID: movement.route_changed.group.2, movement.route_changed.mass.2
+
+02-090. Только проезд не забейте.
+ID: movement.route_changed.group.written-v3.2, movement.route_changed.mass.written-v3.2
+
+02-091. Впереди стоят. Не проехать.
+ID: traffic.queue_blocked.single.1
+
+02-092. Уперлись в затор.
+ID: traffic.queue_blocked.single.written-v2.1
+
+02-093. Проезд забит.
+ID: traffic.queue_blocked.single.written-v3.1, traffic.queue_blocked.group.1, traffic.queue_blocked.mass.1
+
+02-094. Стою за машинами.
+ID: traffic.queue_blocked.single.written-v4.1
+
+02-095. Колонна встала.
+ID: traffic.queue_blocked.single.written-v5.1, traffic.queue_blocked.group.written-v3.1, traffic.queue_blocked.mass.written-v3.1
+
+02-096. Застряли в очереди.
+ID: traffic.queue_blocked.single.written-v6.1
+
+02-097. Нам бы дорогу освободить.
+ID: traffic.queue_blocked.single.written-v7.1
+
+02-098. Проезд забит. Уперся.
+ID: traffic.queue_blocked.single.crew-exchange-v1.1
+
+02-099. Стою в очереди.
+ID: traffic.queue_blocked.single.crew-exchange-v2.1
+
+02-100. Да мне бы вперёд выехать.
+ID: traffic.queue_blocked.single.crew-exchange-v2.3
+
+02-101. Стоим. Организованная задержка.
+ID: traffic.queue_blocked.single.dry-v1.1, traffic.queue_blocked.group.dry-v1.1, traffic.queue_blocked.mass.dry-v1.1
+
+02-102. Конец света был. Пробки остались.
+ID: traffic.queue_blocked.single.dry-v2.1, traffic.queue_blocked.group.dry-v2.1, traffic.queue_blocked.mass.dry-v2.1
+
+02-103. Дорога одна. Начальников много.
+ID: traffic.queue_blocked.single.dry-v3.1, traffic.queue_blocked.group.dry-v3.1, traffic.queue_blocked.mass.dry-v3.1
+
+02-104. Впереди всё стоит.
+ID: traffic.queue_blocked.group.written-v2.1, traffic.queue_blocked.group.exchange-v4.1, traffic.queue_blocked.mass.written-v2.1, traffic.queue_blocked.mass.exchange-v4.1
+
+02-105. Стоим в заторе.
+ID: traffic.queue_blocked.group.written-v4.1, traffic.queue_blocked.mass.written-v4.1
+
+02-106. Упёрлись. Пропустите технику.
+ID: traffic.queue_blocked.group.written-v5.1, traffic.queue_blocked.mass.written-v5.1
+
+02-107. Вот и держи просвет.
+ID: traffic.queue_blocked.group.exchange-v1.3, traffic.queue_blocked.mass.exchange-v1.3
+
+02-108. Кто запер проезд?
+ID: traffic.queue_blocked.group.exchange-v2.1, traffic.queue_blocked.mass.exchange-v2.1
+
+02-109. Так дай отъехать.
+ID: traffic.queue_blocked.group.exchange-v2.3, traffic.queue_blocked.mass.exchange-v2.3
+
+02-110. Колонну заклинило.
+ID: traffic.queue_blocked.group.exchange-v3.1, traffic.queue_blocked.mass.exchange-v3.1
+
+02-111. Стоим. Ждём проход.
+ID: traffic.queue_blocked.group.exchange-v3.3, traffic.queue_blocked.mass.exchange-v3.3
+
+02-112. Я по рации прошу, отъедьте.
+ID: traffic.queue_blocked.group.exchange-v4.3, traffic.queue_blocked.mass.exchange-v4.3
+
+02-113. Разъезд бы оставить.
+ID: traffic.queue_blocked.group.exchange-v5.1, traffic.queue_blocked.mass.exchange-v5.1
+
+02-114. Поэтому и прошу.
+ID: traffic.queue_blocked.group.exchange-v5.3, traffic.queue_blocked.mass.exchange-v5.3
+
+02-115. Проезд освободили.
+ID: traffic.jam_resolved.single.1, traffic.jam_resolved.group.written-v4.1, traffic.jam_resolved.mass.written-v4.1
+
+02-116. Разъехались. Двигаюсь.
+ID: traffic.jam_resolved.single.written-v2.1
+
+02-117. Затор прошёл.
+ID: traffic.jam_resolved.single.written-v3.1
+
+02-118. Движение пошло.
+ID: traffic.jam_resolved.single.written-v4.1, traffic.jam_resolved.group.written-v2.1, traffic.jam_resolved.mass.written-v2.1
+
+02-119. Выехал из затора.
+ID: traffic.jam_resolved.single.written-v5.1
+
+02-120. Разъехались. Без совещания.
+ID: traffic.jam_resolved.single.dry-v1.1, traffic.jam_resolved.group.dry-v1.1, traffic.jam_resolved.mass.dry-v1.1
+
+02-121. Проезд свободен. Пока.
+ID: traffic.jam_resolved.single.dry-v2.1, traffic.jam_resolved.group.dry-v2.1, traffic.jam_resolved.mass.dry-v2.1
+
+02-122. Разъехались.
+ID: traffic.jam_resolved.group.1, traffic.jam_resolved.mass.1
+
+02-123. Затор прошли.
+ID: traffic.jam_resolved.group.written-v3.1, traffic.jam_resolved.mass.written-v3.1
+
+02-124. Разъезд пошёл.
+ID: traffic.jam_resolved.group.exchange-v1.1, traffic.jam_resolved.mass.exchange-v1.1
+
+02-125. Даём колонне вытянуться.
+ID: traffic.jam_resolved.group.exchange-v1.3, traffic.jam_resolved.mass.exchange-v1.3
+
+02-126. Пробку продавили. Едем.
+ID: traffic.jam_resolved.group.exchange-v2.1, traffic.jam_resolved.mass.exchange-v2.1
+
+02-127. В проходе не встаём.
+ID: traffic.jam_resolved.group.exchange-v2.3, traffic.jam_resolved.mass.exchange-v2.3
+
+02-128. Выскочили из затора.
+ID: traffic.jam_resolved.group.exchange-v3.1, traffic.jam_resolved.mass.exchange-v3.1
+
+02-129. Встречка заперла.
+ID: traffic.deadlock.single.1
+
+02-130. Нос к носу. Не разойтись.
+ID: traffic.deadlock.single.written-v2.1
+
+02-131. Друг друга заперли.
+ID: traffic.deadlock.single.written-v3.1, traffic.deadlock.group.written-v2.1, traffic.deadlock.mass.written-v2.1
+
+02-132. Ни вперёд, ни назад.
+ID: traffic.deadlock.single.written-v4.1
+
+02-133. Нос к носу встали.
+ID: traffic.deadlock.group.1, traffic.deadlock.mass.1
+
+02-134. Встречка. Разъехаться негде.
+ID: traffic.deadlock.group.written-v3.1, traffic.deadlock.mass.written-v3.1
+
+02-135. Ни туда, ни сюда.
+ID: traffic.deadlock.group.written-v4.1, traffic.deadlock.mass.written-v4.1
+
+02-136. Мордой в морду. Ни туда ни сюда.
+ID: traffic.deadlock.group.exchange-v1.1, traffic.deadlock.mass.exchange-v1.1
+
+02-137. Нам разъезд, не таран нужен.
+ID: traffic.deadlock.group.exchange-v1.3, traffic.deadlock.mass.exchange-v1.3
+
+02-138. Проезд друг другу закрыли.
+ID: traffic.deadlock.group.exchange-v2.1, traffic.deadlock.mass.exchange-v2.1
+
+02-139. Сзади отойдите!
+ID: traffic.deadlock.group.exchange-v2.3, traffic.deadlock.mass.exchange-v2.3
+
+02-140. Встали намертво.
+ID: traffic.deadlock.group.exchange-v3.1, traffic.deadlock.mass.exchange-v3.1
+
+02-141. Сдаю назад. Сзади берегись.
+ID: traffic.reverse_started.single.1
+
+02-142. Задний ход.
+ID: traffic.reverse_started.single.written-v2.1
+
+02-143. Отхожу задним. Не подпирай.
+ID: traffic.reverse_started.single.written-v3.1
+
+02-144. Сзади место освободи. Сдаю.
+ID: traffic.reverse_started.single.written-v4.1
+
+02-145. Сдаём назад.
+ID: traffic.reverse_started.group.1, traffic.reverse_started.mass.1
+
+02-146. Задний ход. Места!
+ID: traffic.reverse_started.group.written-v2.1, traffic.reverse_started.mass.written-v2.1
+
+02-147. Отходим задним.
+ID: traffic.reverse_started.group.written-v3.1, traffic.reverse_started.mass.written-v3.1
+
+02-148. Задний ход закончил.
+ID: traffic.reverse_complete.single.1
+
+02-149. Манёвр выполнен.
+ID: traffic.reverse_complete.single.written-v2.1
+
+02-150. Назад сдал.
+ID: traffic.reverse_complete.single.written-v3.1
+
+02-151. Всё. Задним отработал.
+ID: traffic.reverse_complete.single.written-v4.1
+
+02-152. Манёвр закончили.
+ID: traffic.reverse_complete.group.1, traffic.reverse_complete.mass.1
+
+02-153. Назад сдали.
+ID: traffic.reverse_complete.group.written-v2.1, traffic.reverse_complete.mass.written-v2.1
+
+02-154. Задний ход окончен.
+ID: traffic.reverse_complete.group.written-v3.1, traffic.reverse_complete.mass.written-v3.1
+
+02-155. У цели произошёл хлопок.
+ID: combat.target_destroyed.single.pop-v1.1, combat.target_destroyed.group.pop-v1.1, combat.target_destroyed.mass.pop-v1.1
+
+02-156. Цель обнулили. Хлопком.
+ID: combat.target_destroyed.single.pop-v2.1, combat.target_destroyed.group.pop-v2.1, combat.target_destroyed.mass.pop-v2.1
+
+02-157. Цели больше нет. Нештатный хлопок.
+ID: combat.target_destroyed.single.pop-v3.1, combat.target_destroyed.group.pop-v3.1, combat.target_destroyed.mass.pop-v3.1
+
+02-158. По ним огонь прекратить.
+ID: combat.target_destroyed.group.2, combat.target_destroyed.mass.2
+
+02-159. По добитым не тратьтесь.
+ID: combat.target_destroyed.group.written-v2.2, combat.target_destroyed.mass.written-v2.2
+
+02-160. Следующие — по команде.
+ID: combat.target_destroyed.group.written-v4.2, combat.target_destroyed.mass.written-v4.2
+
+02-161. На обломки не лезьте.
+ID: combat.target_destroyed.group.written-v5.2, combat.target_destroyed.mass.written-v5.2
+
+02-162. Огонь по этим снять.
+ID: combat.target_destroyed.group.written-v7.2, combat.target_destroyed.mass.written-v7.2
+
+02-163. По обломкам бэка не жги.
+ID: combat.target_destroyed.group.exchange-v1.2, combat.target_destroyed.mass.exchange-v1.2
+
+02-164. Добивать уже нечего.
+ID: combat.target_destroyed.group.exchange-v2.2, combat.target_destroyed.mass.exchange-v2.2
+
+02-165. На лом не наезжай. Колёса ещё нужны.
+ID: combat.target_destroyed.group.exchange-v3.2, combat.target_destroyed.mass.exchange-v3.2
+
+02-166. Стволы с добитых уберите.
+ID: combat.target_destroyed.group.exchange-v4.2, combat.target_destroyed.mass.exchange-v4.2
+
+02-167. Несрочным — молчать.
+ID: combat.base_attack.group.2, combat.base_attack.mass.2
+
+02-168. Повреждения — в эфир.
+ID: combat.base_attack.group.written-v2.2, combat.base_attack.mass.written-v2.2
+
+02-169. Сдал машину. Список дефектов прилагается.
+ID: repair.start_factory.single.dry-v1.1, repair.start_factory.group.dry-v1.1, repair.start_factory.mass.dry-v1.1
+
+02-170. Ремонтники взялись.
+ID: repair.start_factory.single.dry-v2.1, repair.start_factory.group.dry-v2.1, repair.start_factory.mass.dry-v2.1
+
+02-171. В ремзону. Обещают полный сервис.
+ID: repair.start_factory.single.bawdy-v1.1, repair.start_factory.group.bawdy-v1.1, repair.start_factory.mass.bawdy-v1.1
+
+02-172. Ремонтники сказали: расслабься.
+ID: repair.start_factory.single.bawdy-v2.1, repair.start_factory.group.bawdy-v2.1, repair.start_factory.mass.bawdy-v2.1
+
+02-173. Только без грубых рук.
+ID: repair.start_factory.single.bawdy-v3.1, repair.start_factory.group.bawdy-v3.1, repair.start_factory.mass.bawdy-v3.1
+
+02-174. Залатали. Списывать рано.
+ID: repair.complete.single.dry-v1.1, repair.complete.group.dry-v1.1, repair.complete.mass.dry-v1.1
+
+02-175. Машину вернули в строй.
+ID: repair.complete.single.dry-v2.1, repair.complete.group.dry-v2.1, repair.complete.mass.dry-v2.1
+
+02-176. Из ремзоны. Вся смазка на месте.
+ID: repair.complete.single.bawdy-v1.1, repair.complete.group.bawdy-v1.1, repair.complete.mass.bawdy-v1.1
+
+02-177. Ремонт закончен. Теперь хоть на свидание.
+ID: repair.complete.single.bawdy-v2.1, repair.complete.group.bawdy-v2.1, repair.complete.mass.bawdy-v2.1
+
+02-178. Объект сдан. Претензии письменно.
+ID: construction.complete.single.dry-v1.1, construction.complete.group.dry-v1.1, construction.complete.mass.dry-v1.1
+
+02-179. Построили. Стоит.
+ID: construction.complete.single.dry-v2.1, construction.complete.group.dry-v2.1, construction.complete.mass.dry-v2.1
+
+02-180. Новая машина готова.
+ID: factory.vehicle_complete.single.dry-v1.1, factory.vehicle_complete.group.dry-v1.1, factory.vehicle_complete.mass.dry-v1.1
+
+02-181. Завод выдал технику.
+ID: factory.vehicle_complete.single.dry-v2.1, factory.vehicle_complete.group.dry-v2.1, factory.vehicle_complete.mass.dry-v2.1
+
+02-182. НИИ закончил. Можно применять.
+ID: research.complete.single.dry-v1.1, research.complete.group.dry-v1.1, research.complete.mass.dry-v1.1
+
+02-183. Разработка готова.
+ID: research.complete.single.dry-v2.1, research.complete.group.dry-v2.1, research.complete.mass.dry-v2.1
+
+02-184. Пока никаких. Сидим в резерве.
+ID: idle.group_no_order.single.exchange-v1.2, idle.group_no_order.group.exchange-v1.2, idle.group_no_order.mass.exchange-v1.2
+
+02-185. Успеешь ещё матчасть погонять.
+ID: idle.group_no_order.single.exchange-v2.2, idle.group_no_order.group.exchange-v2.2, idle.group_no_order.mass.exchange-v2.2
+
+02-186. Нет. Канал слушай.
+ID: idle.group_no_order.single.exchange-v3.2, idle.group_no_order.group.exchange-v3.2, idle.group_no_order.mass.exchange-v3.2
+
+02-187. Сам себе задачу не придумай.
+ID: idle.group_no_order.single.exchange-v4.2, idle.group_no_order.group.exchange-v4.2, idle.group_no_order.mass.exchange-v4.2
+
+02-188. У нас простой или резерв?
+ID: idle.group_no_order.single.dry-v1.1, idle.group_no_order.group.dry-v1.1, idle.group_no_order.mass.dry-v1.1
+
+02-189. Стоим без задачи.
+ID: idle.group_no_order.single.dry-v2.1, idle.group_no_order.group.dry-v2.1, idle.group_no_order.mass.dry-v2.1
+
+02-190. Начальство молчит.
+ID: idle.group_no_order.single.dry-v3.1, idle.group_no_order.group.dry-v3.1, idle.group_no_order.mass.dry-v3.1
+
+02-191. Пока команды нет.
+ID: idle.group_no_order.group.2, idle.group_no_order.mass.2
+
+02-192. Новых вводных не было.
+ID: idle.group_no_order.group.written-v2.2, idle.group_no_order.mass.written-v2.2
+
+02-193. Начальство обещало удовольствие от службы.
+ID: idle.quiet.single.bawdy-v1.1, idle.quiet.group.bawdy-v1.1, idle.quiet.mass.bawdy-v1.1
+
+02-194. Устав как презерватив.
+ID: idle.quiet.single.bawdy-v2.1, idle.quiet.group.bawdy-v2.1, idle.quiet.mass.bawdy-v2.1
+
+02-195. Командование опять сверху.
+ID: idle.quiet.single.bawdy-v3.1, idle.quiet.group.bawdy-v3.1, idle.quiet.mass.bawdy-v3.1
+
+02-196. С такой службой и бабы не надо.
+ID: idle.quiet.single.bawdy-v4.1, idle.quiet.group.bawdy-v4.1, idle.quiet.mass.bawdy-v4.1
+
+02-197. У нас тут всё по любви?
+ID: idle.quiet.single.bawdy-v5.1, idle.quiet.group.bawdy-v5.1, idle.quiet.mass.bawdy-v5.1
+
+02-198. Девки любят надёжных.
+ID: idle.quiet.single.bawdy-v6.1, idle.quiet.group.bawdy-v6.1, idle.quiet.mass.bawdy-v6.1
+
+02-199. Романтика — это когда вдвоём.
+ID: idle.quiet.single.bawdy-v7.1, idle.quiet.group.bawdy-v7.1, idle.quiet.mass.bawdy-v7.1
+
+02-200. Сначала обещают нежно.
+ID: idle.quiet.single.bawdy-v9.1, idle.quiet.group.bawdy-v9.1, idle.quiet.mass.bawdy-v9.1
+
+02-201. Смазка — великое дело.
+ID: idle.quiet.single.bawdy-v10.1, idle.quiet.group.bawdy-v10.1, idle.quiet.mass.bawdy-v10.1
+
+02-202. Я за близкие отношения.
+ID: idle.quiet.single.bawdy-v11.1, idle.quiet.group.bawdy-v11.1, idle.quiet.mass.bawdy-v11.1
+
+02-203. Мечтаю о тёплых руках.
+ID: idle.quiet.single.bawdy-v12.1, idle.quiet.group.bawdy-v12.1, idle.quiet.mass.bawdy-v12.1
+
+02-204. У кого-то после смены свидание.
+ID: idle.quiet.single.bawdy-v13.1, idle.quiet.group.bawdy-v13.1, idle.quiet.mass.bawdy-v13.1
+
+02-205. Есть у нас что-нибудь без подвоха?
+ID: idle.quiet.single.bawdy-v14.1, idle.quiet.group.bawdy-v14.1, idle.quiet.mass.bawdy-v14.1
+
+02-206. Обещали службу без напряга.
+ID: idle.quiet.single.bawdy-v15.1, idle.quiet.group.bawdy-v15.1, idle.quiet.mass.bawdy-v15.1
+
+02-207. Люблю, когда всё встаёт по команде.
+ID: idle.quiet.single.bawdy-v16.1, idle.quiet.group.bawdy-v16.1, idle.quiet.mass.bawdy-v16.1
+
+02-208. Имя-то хоть запомнили?
+ID: idle.driver_pair.single.green-v3.2, idle.driver_pair.group.green-v3.2, idle.driver_pair.mass.green-v3.2
+
+02-209. Да. Есть о ком.
+ID: idle.crew_history.single.loss-afterword-v1.2, idle.crew_history.group.loss-afterword-v1.2, idle.crew_history.mass.loss-afterword-v1.2
+
+02-210. Оставшихся сбережём.
+ID: idle.crew_history.single.loss-afterword-v3.2, idle.crew_history.group.loss-afterword-v3.2, idle.crew_history.mass.loss-afterword-v3.2
+
+02-211. Привыкнуть бы к этому не дай бог.
+ID: idle.crew_history.single.loss-afterword-v4.2, idle.crew_history.group.loss-afterword-v4.2, idle.crew_history.mass.loss-afterword-v4.2
+
+02-212. С таким опытом людей мало.
+ID: idle.crew_history.single.veteran-afterword.2, idle.crew_history.group.veteran-afterword.2, idle.crew_history.mass.veteran-afterword.2
+
+3. ЖЕНСКИЙ ГОЛОС — ПРЯМОЙ, БОЕВЫЕ ДОКЛАДЫ — 86 записей
+
+03-001. Попадание!
+ID: damage.hit.single.1
+
+03-002. Есть повреждения.
+ID: damage.hit.single.written-v2.1, damage.hit.single.crew-exchange-v4.1, damage.hit.group.written-v3.1
+
+03-003. Зацепило машину.
+ID: damage.hit.single.written-v3.1
+
+03-004. По машине попали!
+ID: damage.hit.single.written-v4.1
+
+03-005. Машина повреждена.
+ID: damage.hit.single.written-v5.1
+
+03-006. Чёрт, зацепило.
+ID: damage.hit.single.written-v6.1
+
+03-007. Попали. Матчасть побита.
+ID: damage.hit.single.written-v7.1
+
+03-008. Удар по машине!
+ID: damage.hit.single.written-v8.1
+
+03-009. Меня зацепило!
+ID: damage.hit.single.crew-exchange-v1.1
+
+03-010. По машине попали.
+ID: damage.hit.single.crew-exchange-v2.1
+
+03-011. Матчасть побита.
+ID: damage.hit.single.crew-exchange-v3.1
+
+03-012. Долбят без остановки!
+ID: damage.hit.single.concentrated-v1.1
+
+03-013. Машину решетят!
+ID: damage.hit.single.concentrated-v2.1
+
+03-014. Попадание за попаданием!
+ID: damage.hit.single.concentrated-v3.1
+
+03-015. Плотно по мне кладут!
+ID: damage.hit.single.concentrated-v4.1
+
+03-016. По нам работают!
+ID: damage.hit.single.enemy-fire-v1.1, damage.hit.group.enemy-fire-v1.1, damage.hit.mass.enemy-fire-v1.1
+
+03-017. Под обстрелом!
+ID: damage.hit.single.enemy-fire-v2.1, damage.hit.group.enemy-fire-v2.1, damage.hit.mass.enemy-fire-v2.1
+
+03-018. Взяли под огонь!
+ID: damage.hit.single.enemy-fire-v3.1, damage.hit.group.enemy-fire-v3.1, damage.hit.mass.enemy-fire-v3.1
+
+03-019. По технике бьют!
+ID: damage.hit.single.enemy-fire-v4.1, damage.hit.group.enemy-fire-v4.1, damage.hit.mass.enemy-fire-v4.1
+
+03-020. Насыпают по нам!
+ID: damage.hit.single.enemy-fire-v5.1, damage.hit.group.enemy-fire-v5.1, damage.hit.mass.enemy-fire-v5.1
+
+03-021. Под раздачу попали!
+ID: damage.hit.single.enemy-fire-v6.1, damage.hit.group.enemy-fire-v6.1, damage.hit.mass.enemy-fire-v6.1
+
+03-022. Критические повреждения!
+ID: damage.hit.single.critical-v1.1, damage.hit.group.critical-v1.1, damage.hit.mass.critical-v1.1
+
+03-023. Матчасть на пределе!
+ID: damage.hit.single.critical-v2.1, damage.hit.group.critical-v2.1, damage.hit.mass.critical-v2.1
+
+03-024. Машина на грани!
+ID: damage.hit.single.critical-v3.1
+
+03-025. По мне били.
+ID: damage.hit.single.intel-v1.1
+
+03-026. По мне работали.
+ID: damage.hit.single.intel-v2.1
+
+03-027. Попадания по группе!
+ID: damage.hit.group.1
+
+03-028. Машины зацепило.
+ID: damage.hit.group.written-v2.1
+
+03-029. По группе попали!
+ID: damage.hit.group.written-v4.1
+
+03-030. Технику побило.
+ID: damage.hit.group.written-v5.1
+
+03-031. Машины повреждены.
+ID: damage.hit.group.written-v6.1
+
+03-032. Группу зацепило!
+ID: damage.hit.group.written-v7.1
+
+03-033. Попадания!
+ID: damage.hit.group.written-v8.1
+
+03-034. Матчасть зацепило!
+ID: damage.hit.group.exchange-v1.1, damage.hit.mass.exchange-v1.1
+
+03-035. Остальным канал не забивать.
+ID: damage.hit.group.exchange-v1.3, damage.hit.mass.exchange-v1.3
+
+03-036. По группе попадания!
+ID: damage.hit.group.exchange-v2.1, damage.hit.mass.exchange-v2.1
+
+03-037. Проезд не зажимайте!
+ID: damage.hit.group.exchange-v2.3, damage.hit.mass.exchange-v2.3
+
+03-038. Технику посекло.
+ID: damage.hit.group.exchange-v3.1, damage.hit.mass.exchange-v3.1
+
+03-039. Разберусь — скажу.
+ID: damage.hit.group.exchange-v3.3, damage.hit.mass.exchange-v3.3
+
+03-040. Есть повреждения!
+ID: damage.hit.group.exchange-v4.1, damage.hit.mass.exchange-v4.1
+
+03-041. Железу досталось.
+ID: damage.hit.group.exchange-v5.1, damage.hit.mass.exchange-v5.1
+
+03-042. Есть тяжёлые повреждения!
+ID: damage.hit.group.critical-v3.1, damage.hit.mass.critical-v3.1
+
+03-043. По группе били.
+ID: damage.hit.group.intel-v1.1, damage.hit.mass.intel-v1.1
+
+03-044. По группе работали.
+ID: damage.hit.group.intel-v2.1, damage.hit.mass.intel-v2.1
+
+03-045. Много попаданий по группе!
+ID: damage.hit.mass.1
+
+03-046. Технику побило по всей группе.
+ID: damage.hit.mass.written-v2.1
+
+03-047. Повреждено много машин.
+ID: damage.hit.mass.written-v3.1
+
+03-048. Попадания по колонне!
+ID: damage.hit.mass.written-v4.1
+
+03-049. Рулевое выбило!
+ID: damage.mobility_lost.single.1
+
+03-050. Руль отказал. Нужен ремонт.
+ID: damage.mobility_lost.single.written-v2.1
+
+03-051. Управление не отвечает!
+ID: damage.mobility_lost.single.written-v3.1
+
+03-052. Машина не рулится.
+ID: damage.mobility_lost.single.written-v4.1
+
+03-053. Рулевое в отказе.
+ID: damage.mobility_lost.single.written-v5.1
+
+03-054. Чёрт. Управление выбито!
+ID: damage.mobility_lost.single.written-v6.1
+
+03-055. Рулевое выбито!
+ID: damage.mobility_lost.group.1, damage.mobility_lost.mass.1
+
+03-056. Машины не рулятся.
+ID: damage.mobility_lost.group.written-v2.1, damage.mobility_lost.mass.written-v2.1
+
+03-057. Управление в отказе!
+ID: damage.mobility_lost.group.written-v3.1, damage.mobility_lost.mass.written-v3.1
+
+03-058. Технику не удержать.
+ID: damage.mobility_lost.group.written-v4.1, damage.mobility_lost.mass.written-v4.1
+
+03-059. Рулевое выбито. Не рулится!
+ID: damage.mobility_lost.group.exchange-v1.1, damage.mobility_lost.mass.exchange-v1.1
+
+03-060. Нужен ремонт рулевого.
+ID: damage.mobility_lost.group.exchange-v1.3, damage.mobility_lost.mass.exchange-v1.3
+
+03-061. Управление в отказе.
+ID: damage.mobility_lost.group.exchange-v2.1, damage.mobility_lost.mass.exchange-v2.1
+
+03-062. Не выламываю. Докладываю.
+ID: damage.mobility_lost.group.exchange-v2.3, damage.mobility_lost.mass.exchange-v2.3
+
+03-063. Рулевое накрылось.
+ID: damage.mobility_lost.group.exchange-v3.1, damage.mobility_lost.mass.exchange-v3.1
+
+03-064. Командирскую потеряли!
+ID: damage.commander_down.single.1, damage.commander_down.group.1, damage.commander_down.mass.1
+
+03-065. Командирская уничтожена.
+ID: damage.commander_down.single.written-v2.1, damage.commander_down.group.written-v2.1, damage.commander_down.mass.written-v2.1
+
+03-066. Машину командира потеряли.
+ID: damage.commander_down.single.written-v3.1, damage.commander_down.group.written-v3.1, damage.commander_down.mass.written-v3.1
+
+03-067. Я в ремонт, мальчики.
+ID: repair.start_factory.single.female-repair-v1.1, repair.start_factory.group.female-repair-v1.1, repair.start_factory.mass.female-repair-v1.1
+
+03-068. Свои советы тоже смени.
+ID: repair.start_factory.single.female-repair-v1.3, repair.start_factory.group.female-repair-v1.3, repair.start_factory.mass.female-repair-v1.3
+
+03-069. В ремзону. Не скучайте.
+ID: repair.start_factory.single.female-repair-v2.1, repair.start_factory.group.female-repair-v2.1, repair.start_factory.mass.female-repair-v2.1
+
+03-070. Потренируйтесь пока.
+ID: repair.start_factory.single.female-repair-v2.3, repair.start_factory.group.female-repair-v2.3, repair.start_factory.mass.female-repair-v2.3
+
+03-071. В лом не отправьте.
+ID: loot.artifact_found.group.2, loot.artifact_found.mass.2
+
+03-072. Это в НИИ.
+ID: loot.artifact_found.group.written-v3.2, loot.artifact_found.mass.written-v3.2
+
+03-073. О результате — в эфир.
+ID: research.start.group.written-v2.2, research.start.mass.written-v2.2
+
+03-074. Передавайте на производство.
+ID: research.complete.group.2, research.complete.mass.2
+
+03-075. Что у них?
+ID: recon.enemy_first_seen.single.intel-v1.2, recon.enemy_first_seen.group.intel-v1.2, recon.enemy_first_seen.mass.intel-v1.2
+
+03-076. Состав группы?
+ID: recon.enemy_first_seen.single.intel-v2.2, recon.enemy_first_seen.group.intel-v2.2, recon.enemy_first_seen.mass.intel-v2.2
+
+03-077. Дистанцию держите.
+ID: recon.enemy_first_seen.single.intel-v3.2, recon.enemy_first_seen.group.intel-v3.2, recon.enemy_first_seen.mass.intel-v3.2
+
+03-078. Что ещё с ним?
+ID: recon.enemy_first_seen.single.flame-contact.2, recon.enemy_first_seen.group.flame-contact.2, recon.enemy_first_seen.mass.flame-contact.2
+
+03-079. Дальше по задаче.
+ID: recon.camp_cleared.group.written-v2.2, recon.camp_cleared.mass.written-v2.2
+
+03-080. Можно выдохнуть.
+ID: mission.victory.group.2, mission.victory.mass.2
+
+03-081. Ну всё. Отбой.
+ID: mission.victory.group.written-v2.2, mission.victory.mass.written-v2.2
+
+03-082. Чёрт.
+ID: mission.defeat.group.written-v2.2, mission.defeat.mass.written-v2.2
+
+03-083. Мальчики, слюни в эфир не пускайте.
+ID: idle.quiet.single.female-bawdy-v1.1, idle.quiet.group.female-bawdy-v1.1, idle.quiet.mass.female-bawdy-v1.1
+
+03-084. Вот молча и продолжайте.
+ID: idle.quiet.single.female-bawdy-v1.3, idle.quiet.group.female-bawdy-v1.3, idle.quiet.mass.female-bawdy-v1.3
+
+03-085. Водить умеете, ухаживать — нет.
+ID: idle.quiet.single.female-bawdy-v2.1, idle.quiet.group.female-bawdy-v2.1, idle.quiet.mass.female-bawdy-v2.1
+
+03-086. Заметно. Всё через заднюю.
+ID: idle.quiet.single.female-bawdy-v2.3, idle.quiet.group.female-bawdy-v2.3, idle.quiet.mass.female-bawdy-v2.3
+
+4. СТРОИТЕЛЬ — ПРАКТИК — 73 записей
+
+04-001. Беру стройку.
+ID: command.build.single.1
+
+04-002. На объект.
+ID: command.build.single.written-v2.1
+
+04-003. Задание на стройку принял.
+ID: command.build.single.written-v3.1
+
+04-004. Строим.
+ID: command.build.single.written-v4.1
+
+04-005. Есть. Займусь.
+ID: command.build.single.written-v5.1
+
+04-006. На строительную точку.
+ID: command.build.single.written-v6.1
+
+04-007. Строители, на объект.
+ID: command.build.group.1, command.build.mass.1
+
+04-008. Берём стройку.
+ID: command.build.group.written-v2.1, command.build.mass.written-v2.1
+
+04-009. Задание есть. Выдвигаемся.
+ID: command.build.group.written-v3.1, command.build.mass.written-v3.1
+
+04-010. Работа нам.
+ID: command.build.group.written-v4.1, command.build.mass.written-v4.1
+
+04-011. С дефектами разобрались?
+ID: repair.start_factory.single.crew-exchange-v1.2
+
+04-012. Мастерам дай работать. Советом только мешаешь.
+ID: repair.start_factory.single.crew-exchange-v2.2
+
+04-013. Выезд из боксов не занимайте.
+ID: repair.start_factory.group.2, repair.start_factory.mass.2
+
+04-014. Боевые, от ворот отойдите.
+ID: repair.start_factory.group.written-v3.2, repair.start_factory.mass.written-v3.2
+
+04-015. Долго в ремзоне?
+ID: repair.start_factory.group.exchange-v1.2, repair.start_factory.mass.exchange-v1.2
+
+04-016. Рук под инструмент не суй.
+ID: repair.start_factory.group.exchange-v2.2, repair.start_factory.mass.exchange-v2.2
+
+04-017. Очередь у ворот не стройте.
+ID: repair.start_factory.group.exchange-v3.2, repair.start_factory.mass.exchange-v3.2
+
+04-018. Дефекты перечисляй. По звуку не всё найдут.
+ID: repair.start_factory.group.exchange-v4.2, repair.start_factory.mass.exchange-v4.2
+
+04-019. Железо исправно?
+ID: repair.complete.single.crew-exchange-v1.2
+
+04-020. Сразу обратно не записывайся.
+ID: repair.complete.single.crew-exchange-v2.2
+
+04-021. При выезде не цепляйтесь.
+ID: repair.complete.group.2, repair.complete.mass.2
+
+04-022. Ворота освободите.
+ID: repair.complete.group.written-v3.2, repair.complete.mass.written-v3.2
+
+04-023. Опять на ту же работу?
+ID: repair.complete.group.exchange-v1.2, repair.complete.mass.exchange-v1.2
+
+04-024. Теперь не сразу обратно.
+ID: repair.complete.group.exchange-v2.2, repair.complete.mass.exchange-v2.2
+
+04-025. На выезде мастеров не раскатай.
+ID: repair.complete.group.exchange-v3.2, repair.complete.mass.exchange-v3.2
+
+04-026. Не гони через ворота. Только собрали.
+ID: repair.complete.group.exchange-v4.2, repair.complete.mass.exchange-v4.2
+
+04-027. При выезде интервал.
+ID: repair.mobility_restored.group.written-v2.2, repair.mobility_restored.mass.written-v2.2
+
+04-028. Стройку начали.
+ID: construction.start.single.1
+
+04-029. На объекте. Работаем.
+ID: construction.start.single.written-v2.1
+
+04-030. Монтаж пошёл.
+ID: construction.start.single.written-v3.1, construction.start.group.written-v2.1, construction.start.mass.written-v2.1
+
+04-031. Приступили к стройке.
+ID: construction.start.single.written-v4.1
+
+04-032. Объект в работе.
+ID: construction.start.single.written-v5.1, construction.start.group.exchange-v2.1, construction.start.mass.exchange-v2.1
+
+04-033. Стройка началась.
+ID: construction.start.group.1, construction.start.mass.1
+
+04-034. Объекты в работе.
+ID: construction.start.group.written-v3.1, construction.start.mass.written-v3.1
+
+04-035. Начали монтаж.
+ID: construction.start.group.exchange-v1.1, construction.start.mass.exchange-v1.1
+
+04-036. Тут работа, не стоянка.
+ID: construction.start.group.exchange-v1.3, construction.start.mass.exchange-v1.3
+
+04-037. Подъезд не перекрывать.
+ID: construction.start.group.exchange-v2.3, construction.start.mass.exchange-v2.3
+
+04-038. Стройка пошла.
+ID: construction.start.group.exchange-v3.1, construction.start.mass.exchange-v3.1
+
+04-039. Отбой по стройке.
+ID: construction.cancelled.single.1, construction.cancelled.group.1, construction.cancelled.mass.1
+
+04-040. Работы свёрнуты.
+ID: construction.cancelled.single.written-v2.1, construction.cancelled.group.written-v2.1, construction.cancelled.mass.written-v2.1
+
+04-041. Стройку отменили. Снимаюсь.
+ID: construction.cancelled.single.written-v3.1
+
+04-042. Здесь не строим.
+ID: construction.cancelled.single.written-v4.1
+
+04-043. Отставить стройку.
+ID: construction.cancelled.single.written-v5.1
+
+04-044. Стройка отменена.
+ID: construction.cancelled.group.written-v3.1, construction.cancelled.mass.written-v3.1
+
+04-045. Объект готов.
+ID: construction.complete.single.1
+
+04-046. Стройку закрыли.
+ID: construction.complete.single.written-v2.1, construction.complete.group.written-v2.1, construction.complete.group.exchange-v2.1, construction.complete.mass.written-v2.1, construction.complete.mass.exchange-v2.1
+
+04-047. Сдали. Принимайте.
+ID: construction.complete.single.written-v3.1, construction.complete.group.written-v3.1, construction.complete.mass.written-v3.1
+
+04-048. Построено.
+ID: construction.complete.single.written-v4.1
+
+04-049. Здесь закончили.
+ID: construction.complete.single.written-v5.1
+
+04-050. Готово. Строители свободны.
+ID: construction.complete.single.written-v6.1
+
+04-051. Объекты готовы.
+ID: construction.complete.group.1, construction.complete.mass.1
+
+04-052. Работу закончили.
+ID: construction.complete.group.written-v4.1, construction.complete.mass.written-v4.1
+
+04-053. Объект сдан.
+ID: construction.complete.group.exchange-v1.1, construction.complete.mass.exchange-v1.1
+
+04-054. Здесь всё. К следующей работе.
+ID: construction.complete.group.exchange-v1.3, construction.complete.mass.exchange-v1.3
+
+04-055. Объект готов. Принимай.
+ID: construction.complete.group.exchange-v2.3, construction.complete.mass.exchange-v2.3
+
+04-056. Закончили монтаж.
+ID: construction.complete.group.exchange-v3.1, construction.complete.mass.exchange-v3.1
+
+04-057. Стройку не начали.
+ID: construction.refused.single.1
+
+04-058. Построить не выходит.
+ID: construction.refused.single.written-v2.1
+
+04-059. Отказ по стройке.
+ID: construction.refused.single.written-v3.1
+
+04-060. Задание не пошло. Проверяйте.
+ID: construction.refused.single.written-v4.1
+
+04-061. Стройка не запущена.
+ID: construction.refused.single.written-v5.1
+
+04-062. Стройка не пошла.
+ID: construction.refused.group.1, construction.refused.mass.1
+
+04-063. Начать не удалось.
+ID: construction.refused.group.written-v2.1, construction.refused.mass.written-v2.1
+
+04-064. По стройке отказ.
+ID: construction.refused.group.written-v3.1, construction.refused.mass.written-v3.1
+
+04-065. Выезд не занимать.
+ID: factory.vehicle_complete.group.2, factory.vehicle_complete.mass.2
+
+04-066. Задачи для них найдутся.
+ID: factory.vehicle_complete.group.written-v3.2, factory.vehicle_complete.mass.written-v3.2
+
+04-067. На приёмке не угробьте.
+ID: factory.vehicle_complete.group.exchange-v1.2, factory.vehicle_complete.mass.exchange-v1.2
+
+04-068. Ворота держите свободными.
+ID: factory.vehicle_complete.group.exchange-v2.2, factory.vehicle_complete.mass.exchange-v2.2
+
+04-069. Обкатка, как обычно, по обстановке.
+ID: factory.vehicle_complete.group.exchange-v3.2, factory.vehicle_complete.mass.exchange-v3.2
+
+04-070. Проверим на деле.
+ID: factory.modernization_complete.group.2, factory.modernization_complete.mass.2
+
+04-071. Проверять когда?
+ID: factory.modernization_complete.group.exchange-v1.2, factory.modernization_complete.mass.exchange-v1.2
+
+04-072. Теперь бы инструкцию к доработке.
+ID: factory.modernization_complete.group.exchange-v2.2, factory.modernization_complete.mass.exchange-v2.2
+
+04-073. Казённое железо. Берегите хоть первое время.
+ID: factory.modernization_complete.group.exchange-v3.2, factory.modernization_complete.mass.exchange-v3.2
+
+5. ЖЕНСКИЙ ГОЛОС — СПОКОЙНЫЙ, РЕМОНТ И БЫТ — 74 записей
+
+05-001. Проезд под технику оставьте.
+ID: command.build.group.2, command.build.mass.2
+
+05-002. На площадке не толпиться.
+ID: command.build.group.written-v2.2, command.build.mass.written-v2.2
+
+05-003. Боевые, со стройплощадки уйдите.
+ID: command.build.group.written-v4.2, command.build.mass.written-v4.2
+
+05-004. Встала в ремонт.
+ID: repair.start_factory.single.1
+
+05-005. Матчасть в работе.
+ID: repair.start_factory.single.written-v2.1, repair.start_factory.group.written-v3.1, repair.start_factory.mass.written-v3.1
+
+05-006. Загнала на ремонт.
+ID: repair.start_factory.single.written-v3.1
+
+05-007. Ремонтники взялись.
+ID: repair.start_factory.single.written-v4.1, repair.start_factory.group.written-v2.1, repair.start_factory.group.exchange-v2.1, repair.start_factory.mass.written-v2.1, repair.start_factory.mass.exchange-v2.1
+
+05-008. Латают машину.
+ID: repair.start_factory.single.written-v5.1
+
+05-009. Сдала технику в ремонт.
+ID: repair.start_factory.single.written-v6.1
+
+05-010. Загнала матчасть в ремзону.
+ID: repair.start_factory.single.crew-exchange-v1.1
+
+05-011. Ремонт уже идёт.
+ID: repair.start_factory.single.crew-exchange-v1.3
+
+05-012. Меня латают.
+ID: repair.start_factory.single.crew-exchange-v2.1
+
+05-013. Машины в ремонте.
+ID: repair.start_factory.group.1, repair.start_factory.mass.1
+
+05-014. Загнали на ремонт.
+ID: repair.start_factory.group.written-v4.1, repair.start_factory.mass.written-v4.1
+
+05-015. Матчасть в ремзоне.
+ID: repair.start_factory.group.exchange-v1.1, repair.start_factory.mass.exchange-v1.1
+
+05-016. Как починят — выйду.
+ID: repair.start_factory.group.exchange-v1.3, repair.start_factory.mass.exchange-v1.3
+
+05-017. Я своё уже нарулила.
+ID: repair.start_factory.group.exchange-v2.3, repair.start_factory.mass.exchange-v2.3
+
+05-018. Машины латают.
+ID: repair.start_factory.group.exchange-v3.1, repair.start_factory.mass.exchange-v3.1
+
+05-019. Встали на восстановление.
+ID: repair.start_factory.group.exchange-v4.1, repair.start_factory.mass.exchange-v4.1
+
+05-020. Залатали. Снова в деле.
+ID: repair.complete.single.1
+
+05-021. Матчасть восстановлена.
+ID: repair.complete.single.written-v2.1
+
+05-022. Ремонт окончен.
+ID: repair.complete.single.written-v3.1, repair.complete.group.written-v3.1, repair.complete.mass.written-v3.1
+
+05-023. Машина готова.
+ID: repair.complete.single.written-v4.1
+
+05-024. Вернулась в строй.
+ID: repair.complete.single.written-v5.1
+
+05-025. Исправна. Можно работать.
+ID: repair.complete.single.written-v6.1
+
+05-026. Из ремзоны вышла.
+ID: repair.complete.single.crew-exchange-v1.1
+
+05-027. Ремонт закончен. Я в деле.
+ID: repair.complete.single.crew-exchange-v1.3
+
+05-028. Залатали машину.
+ID: repair.complete.single.crew-exchange-v2.1
+
+05-029. Матчасть восстановили.
+ID: repair.complete.group.1, repair.complete.group.exchange-v1.1, repair.complete.mass.1, repair.complete.mass.exchange-v1.1
+
+05-030. Залатали. Снова в строю.
+ID: repair.complete.group.written-v2.1, repair.complete.mass.written-v2.1
+
+05-031. Машины исправны.
+ID: repair.complete.group.written-v4.1, repair.complete.mass.written-v4.1
+
+05-032. Куда пошлют.
+ID: repair.complete.group.exchange-v1.3, repair.complete.mass.exchange-v1.3
+
+05-033. Из ремзоны выпустили.
+ID: repair.complete.group.exchange-v2.1, repair.complete.mass.exchange-v2.1
+
+05-034. Это противнику передай.
+ID: repair.complete.group.exchange-v2.3, repair.complete.mass.exchange-v2.3
+
+05-035. Залатали. Железо в строю.
+ID: repair.complete.group.exchange-v3.1, repair.complete.mass.exchange-v3.1
+
+05-036. Ремонт закрыт.
+ID: repair.complete.group.exchange-v4.1, repair.complete.mass.exchange-v4.1
+
+05-037. Рулевое восстановили.
+ID: repair.mobility_restored.single.1, repair.mobility_restored.group.1, repair.mobility_restored.mass.1
+
+05-038. Управление в норме.
+ID: repair.mobility_restored.single.written-v2.1, repair.mobility_restored.group.written-v2.1, repair.mobility_restored.mass.written-v2.1
+
+05-039. Руль снова работает.
+ID: repair.mobility_restored.single.written-v3.1
+
+05-040. Машина снова рулится.
+ID: repair.mobility_restored.single.written-v4.1
+
+05-041. Машины снова рулятся.
+ID: repair.mobility_restored.group.written-v3.1, repair.mobility_restored.mass.written-v3.1
+
+05-042. На площадке не парковаться.
+ID: construction.start.group.2, construction.start.mass.2
+
+05-043. Под технику оставьте проезд.
+ID: construction.start.group.written-v3.2, construction.start.mass.written-v3.2
+
+05-044. Боевые, со стройки съедьте.
+ID: construction.start.group.exchange-v1.2, construction.start.mass.exchange-v1.2
+
+05-045. За техникой место оставьте.
+ID: construction.start.group.exchange-v2.2, construction.start.mass.exchange-v2.2
+
+05-046. Не подпирайте строителей. Тут задним ходят.
+ID: construction.start.group.exchange-v3.2, construction.start.mass.exchange-v3.2
+
+05-047. На площадке ничего не бросать.
+ID: construction.cancelled.group.2, construction.cancelled.mass.2
+
+05-048. Строителям новую задачу.
+ID: construction.complete.group.2, construction.complete.mass.2
+
+05-049. Площадку освобождайте.
+ID: construction.complete.group.written-v4.2, construction.complete.mass.written-v4.2
+
+05-050. Матчасть выводите с площадки.
+ID: construction.complete.group.exchange-v1.2, construction.complete.mass.exchange-v1.2
+
+05-051. Недоделки не оставили?
+ID: construction.complete.group.exchange-v2.2, construction.complete.mass.exchange-v2.2
+
+05-052. Площадку не превращайте в парковку.
+ID: construction.complete.group.exchange-v3.2, construction.complete.mass.exchange-v3.2
+
+05-053. Нужны другие вводные.
+ID: construction.refused.group.2, construction.refused.mass.2
+
+05-054. Пополнение с завода.
+ID: factory.vehicle_complete.single.1
+
+05-055. Новая машина готова.
+ID: factory.vehicle_complete.single.written-v2.1
+
+05-056. Завод выдал технику.
+ID: factory.vehicle_complete.single.written-v3.1, factory.vehicle_complete.group.1, factory.vehicle_complete.mass.1
+
+05-057. Принимайте машину.
+ID: factory.vehicle_complete.single.written-v4.1
+
+05-058. Новая матчасть в строю.
+ID: factory.vehicle_complete.single.written-v5.1
+
+05-059. Пополнение готово.
+ID: factory.vehicle_complete.group.written-v2.1, factory.vehicle_complete.group.exchange-v2.1, factory.vehicle_complete.mass.written-v2.1, factory.vehicle_complete.mass.exchange-v2.1
+
+05-060. Новые машины в строю.
+ID: factory.vehicle_complete.group.written-v3.1, factory.vehicle_complete.mass.written-v3.1
+
+05-061. Завод выдал матчасть.
+ID: factory.vehicle_complete.group.exchange-v1.1, factory.vehicle_complete.mass.exchange-v1.1
+
+05-062. Пусть сначала выедет.
+ID: factory.vehicle_complete.group.exchange-v1.3, factory.vehicle_complete.mass.exchange-v1.3
+
+05-063. На заводском выезде не толпиться.
+ID: factory.vehicle_complete.group.exchange-v2.3, factory.vehicle_complete.mass.exchange-v2.3
+
+05-064. Новая техника в строю.
+ID: factory.vehicle_complete.group.exchange-v3.1, factory.vehicle_complete.mass.exchange-v3.1
+
+05-065. Доработка закончена.
+ID: factory.modernization_complete.single.1
+
+05-066. Матчасть обновили.
+ID: factory.modernization_complete.single.written-v2.1
+
+05-067. Машина доработана.
+ID: factory.modernization_complete.single.written-v3.1
+
+05-068. Модернизацию закрыли.
+ID: factory.modernization_complete.single.written-v4.1, factory.modernization_complete.group.exchange-v3.1, factory.modernization_complete.mass.exchange-v3.1
+
+05-069. Машины доработали.
+ID: factory.modernization_complete.group.1, factory.modernization_complete.mass.1
+
+05-070. Матчасть обновлена.
+ID: factory.modernization_complete.group.written-v2.1, factory.modernization_complete.mass.written-v2.1
+
+05-071. Модернизация окончена.
+ID: factory.modernization_complete.group.written-v3.1, factory.modernization_complete.mass.written-v3.1
+
+05-072. Матчасть доработали.
+ID: factory.modernization_complete.group.exchange-v1.1, factory.modernization_complete.mass.exchange-v1.1
+
+05-073. В деле проверим.
+ID: factory.modernization_complete.group.exchange-v1.3, factory.modernization_complete.mass.exchange-v1.3
+
+05-074. Из доработки вышли.
+ID: factory.modernization_complete.group.exchange-v2.1, factory.modernization_complete.mass.exchange-v2.1
+
+6. РАДИСТ — ЧЁТКИЙ ДИСПЕТЧЕР — 86 записей
+
+06-001. Эфир забит. Только срочное.
+ID: traffic.network_overload.single.1, traffic.network_overload.group.written-v2.1, traffic.network_overload.mass.written-v2.1
+
+06-002. По одному в эфир!
+ID: traffic.network_overload.single.written-v2.1, traffic.network_overload.group.1, traffic.network_overload.mass.1
+
+06-003. С потерями — первыми. Остальным ждать.
+ID: traffic.network_overload.single.written-v3.1
+
+06-004. Перекличку прекратить.
+ID: traffic.network_overload.single.written-v4.1, traffic.network_overload.group.written-v4.1, traffic.network_overload.mass.written-v4.1
+
+06-005. Короче доклады. Ничего не разобрать.
+ID: traffic.network_overload.single.written-v5.1
+
+06-006. С потерями — первыми.
+ID: traffic.network_overload.group.written-v3.1, traffic.network_overload.mass.written-v3.1
+
+06-007. Тяжёлый — сразу в эфир. Не тяни.
+ID: damage.hit.single.crew-exchange-v1.2
+
+06-008. Ходовую проверь, прежде чем рвать с места.
+ID: damage.hit.single.crew-exchange-v2.2
+
+06-009. Ремзона для того и есть. Не тяни до списания.
+ID: damage.hit.single.crew-exchange-v3.2
+
+06-010. По состоянию разберись. В эфире место оставим.
+ID: damage.hit.single.crew-exchange-v4.2
+
+06-011. Кто именно?
+ID: damage.hit.single.intel-v1.2, damage.hit.group.intel-v1.2, damage.hit.mass.intel-v1.2
+
+06-012. Состав?
+ID: damage.hit.single.intel-v2.2, damage.hit.group.intel-v2.2, damage.hit.mass.intel-v2.2
+
+06-013. Под раздачу больше не лезьте.
+ID: damage.hit.single.intel-v3.2, damage.hit.group.intel-v3.2, damage.hit.mass.intel-v3.2
+
+06-014. Не стойте под раздачей!
+ID: damage.hit.single.live-intel-v1.2, damage.hit.group.live-intel-v1.2, damage.hit.mass.live-intel-v1.2
+
+06-015. Дайте повреждённым выйти!
+ID: damage.hit.single.live-intel-v2.2, damage.hit.group.live-intel-v2.2, damage.hit.mass.live-intel-v2.2
+
+06-016. Тяжёлым дорогу!
+ID: damage.hit.single.critical-intel.2, damage.hit.group.critical-v1.2, damage.hit.group.critical-intel.2, damage.hit.mass.critical-v1.2, damage.hit.mass.critical-intel.2
+
+06-017. Кто встал — сразу в эфир.
+ID: damage.hit.group.2
+
+06-018. Повреждённым проход.
+ID: damage.hit.group.written-v2.2
+
+06-019. Состояние машин — коротко.
+ID: damage.hit.group.written-v3.2
+
+06-020. Не забивайте проезд.
+ID: damage.hit.group.written-v4.2
+
+06-021. Неисправным — дорогу.
+ID: damage.hit.group.written-v6.2
+
+06-022. Тяжёлые — первыми в эфир.
+ID: damage.hit.group.written-v8.2
+
+06-023. Кто тяжёлый — первым в эфир.
+ID: damage.hit.group.exchange-v1.2, damage.hit.mass.exchange-v1.2
+
+06-024. Повреждённым нужен выход.
+ID: damage.hit.group.exchange-v2.2, damage.hit.mass.exchange-v2.2
+
+06-025. С ходовой проблемы — сразу докладывай.
+ID: damage.hit.group.exchange-v3.2, damage.hit.mass.exchange-v3.2
+
+06-026. Колонна, не кучкуйтесь.
+ID: damage.hit.group.exchange-v4.2, damage.hit.mass.exchange-v4.2
+
+06-027. Состояние уточняйте. Без переклички на весь эфир.
+ID: damage.hit.group.exchange-v5.2, damage.hit.mass.exchange-v5.2
+
+06-028. Не собирайтесь в кучу!
+ID: damage.hit.group.enemy-fire-v1.2, damage.hit.mass.enemy-fire-v1.2
+
+06-029. Повреждённым дайте выйти.
+ID: damage.hit.group.enemy-fire-v2.2, damage.hit.mass.enemy-fire-v2.2
+
+06-030. Заткните их!
+ID: damage.hit.group.enemy-fire-v3.2, damage.hit.mass.enemy-fire-v3.2
+
+06-031. Блять, разнеситесь!
+ID: damage.hit.group.enemy-fire-v4.2, damage.hit.mass.enemy-fire-v4.2
+
+06-032. Не стойте кучей под раздачей!
+ID: damage.hit.group.enemy-fire-v5.2, damage.hit.mass.enemy-fire-v5.2
+
+06-033. Матчасть не зажимайте. Дайте маневрировать!
+ID: damage.hit.group.enemy-fire-v6.2, damage.hit.mass.enemy-fire-v6.2
+
+06-034. Не запирайте выход!
+ID: damage.hit.group.critical-v3.2, damage.hit.mass.critical-v3.2
+
+06-035. Кто встал — первыми в эфир.
+ID: damage.hit.mass.2
+
+06-036. Неисправным оставьте проход.
+ID: damage.hit.mass.written-v2.2
+
+06-037. Тяжёлые — первыми. Остальным ждать.
+ID: damage.hit.mass.written-v4.2
+
+06-038. Сзади не напирайте.
+ID: damage.mobility_lost.group.2, damage.mobility_lost.mass.2
+
+06-039. Аварийным оставьте место.
+ID: damage.mobility_lost.group.written-v2.2, damage.mobility_lost.mass.written-v2.2
+
+06-040. Проезд освободите.
+ID: damage.mobility_lost.group.written-v4.2, damage.mobility_lost.mass.written-v4.2
+
+06-041. Сзади не дави, ему маневрировать нечем.
+ID: damage.mobility_lost.group.exchange-v1.2, damage.mobility_lost.mass.exchange-v1.2
+
+06-042. Руль выламывать бесполезно.
+ID: damage.mobility_lost.group.exchange-v2.2, damage.mobility_lost.mass.exchange-v2.2
+
+06-043. Ремонтникам передай. Само не отойдёт.
+ID: damage.mobility_lost.group.exchange-v3.2, damage.mobility_lost.mass.exchange-v3.2
+
+06-044. Артефакт забрал.
+ID: loot.artifact_found.single.1
+
+06-045. Трофей у нас.
+ID: loot.artifact_found.single.written-v2.1
+
+06-046. Подобрал модуль.
+ID: loot.artifact_found.single.written-v3.1
+
+06-047. Есть артефакт.
+ID: loot.artifact_found.single.written-v4.1
+
+06-048. Трофеи у нас.
+ID: loot.artifact_found.group.1, loot.artifact_found.mass.1
+
+06-049. Модули забрали.
+ID: loot.artifact_found.group.written-v2.1, loot.artifact_found.mass.written-v2.1
+
+06-050. Артефакты подобраны.
+ID: loot.artifact_found.group.written-v3.1, loot.artifact_found.mass.written-v3.1
+
+06-051. НИИ начал работу.
+ID: research.start.single.1, research.start.group.1, research.start.mass.1
+
+06-052. Разработку запустили.
+ID: research.start.single.written-v2.1
+
+06-053. Исследование в работе.
+ID: research.start.single.written-v3.1
+
+06-054. Над разработкой работают.
+ID: research.start.single.written-v4.1
+
+06-055. Разработка в работе.
+ID: research.start.group.written-v2.1, research.start.mass.written-v2.1
+
+06-056. Исследование запущено.
+ID: research.start.group.written-v3.1, research.start.mass.written-v3.1
+
+06-057. Разработка готова.
+ID: research.complete.single.1
+
+06-058. НИИ закончил.
+ID: research.complete.single.written-v2.1, research.complete.group.written-v2.1, research.complete.mass.written-v2.1
+
+06-059. Исследование завершено.
+ID: research.complete.single.written-v3.1
+
+06-060. Есть новая разработка.
+ID: research.complete.single.written-v4.1
+
+06-061. НИИ выдал результат.
+ID: research.complete.single.written-v5.1
+
+06-062. Разработки готовы.
+ID: research.complete.group.1, research.complete.mass.1
+
+06-063. Исследования завершены.
+ID: research.complete.group.written-v3.1, research.complete.mass.written-v3.1
+
+06-064. Контакт.
+ID: recon.enemy_first_seen.single.intel-v1.1, recon.enemy_first_seen.group.intel-v1.1, recon.enemy_first_seen.mass.intel-v1.1
+
+06-065. Противника засекли.
+ID: recon.enemy_first_seen.single.intel-v2.1, recon.enemy_first_seen.group.intel-v2.1, recon.enemy_first_seen.mass.intel-v2.1
+
+06-066. В группе огнемёт.
+ID: recon.enemy_first_seen.single.flame-contact.1, recon.enemy_first_seen.group.flame-contact.1, recon.enemy_first_seen.mass.flame-contact.1
+
+06-067. Лагерь зачищен.
+ID: recon.camp_cleared.single.1
+
+06-068. С лагерем покончено.
+ID: recon.camp_cleared.single.written-v2.1
+
+06-069. Лагерь чист.
+ID: recon.camp_cleared.single.written-v3.1
+
+06-070. Лагерь закрыли.
+ID: recon.camp_cleared.single.written-v4.1
+
+06-071. Лагеря зачищены.
+ID: recon.camp_cleared.group.1, recon.camp_cleared.mass.1
+
+06-072. Здесь закончили.
+ID: recon.camp_cleared.group.written-v2.1, recon.camp_cleared.mass.written-v2.1
+
+06-073. Лагеря чисты.
+ID: recon.camp_cleared.group.written-v3.1, recon.camp_cleared.mass.written-v3.1
+
+06-074. Задача закрыта.
+ID: mission.victory.single.1
+
+06-075. Сделали. Всё.
+ID: mission.victory.single.written-v2.1
+
+06-076. Выстояли.
+ID: mission.victory.single.written-v3.1
+
+06-077. Есть. Дожали.
+ID: mission.victory.single.written-v4.1
+
+06-078. Справились, мужики.
+ID: mission.victory.single.written-v5.1
+
+06-079. Задача выполнена.
+ID: mission.victory.group.1, mission.victory.mass.1
+
+06-080. Дожали.
+ID: mission.victory.group.written-v2.1, mission.victory.mass.written-v2.1
+
+06-081. Сделали, мужики.
+ID: mission.victory.group.written-v3.1, mission.victory.mass.written-v3.1
+
+06-082. Не вывезли.
+ID: mission.defeat.single.1
+
+06-083. Задача сорвана.
+ID: mission.defeat.single.written-v2.1, mission.defeat.group.1, mission.defeat.mass.1
+
+06-084. Всё. Провал.
+ID: mission.defeat.single.written-v3.1, mission.defeat.group.written-v3.1, mission.defeat.mass.written-v3.1
+
+06-085. Чёрт. Не вытянули.
+ID: mission.defeat.single.written-v4.1
+
+06-086. Не вытянули.
+ID: mission.defeat.group.written-v2.1, mission.defeat.mass.written-v2.1
+
+ИТОГО: 835 коротких записей для полного подключённого банка.
+
+ПЕРЕМЕННЫЕ ЧИСЛА, ИМЕНА И ПОЗЫВНЫЕ — ВРЕМЕННАЯ ЛОКАЛЬНАЯ ОЗВУЧКА
+Не читайте фигурные скобки. Piper произносит целую готовую фразу с фактическим числом, именем и позывным живого участника. В мастерской у шаблона есть учебный пример для прослушивания.
+Для своей числовой сводки создайте цельные варианты 1/2/3/5/20 и условие равенства соответствующего счётчика. Для именной записи нужен конкретный адресат и совпадение полного текста.
+Временное вступление с позывным не приклеивается к вашей записи другим голосом. Если загружена цельная актёрская запись без позывного, она играет целиком; говорящий обозначен в субтитрах.
+Не заменяйте текст записи при сохранении без соответствующей перезаписи.
+
+command.move.group.written-v4.1
+{addresseeCallSign}, выдвигаемся.
+
+command.move.group.exchange-v1.1
+{addresseeCallSign}, снимаемся. Хвост не потеряй.
+
+command.move.mass.exchange-v1.1
+{addresseeCallSign}, снимаемся. Хвост не потеряй.
+
+command.attack.group.written-v4.1
+{addresseeCallSign}, на цель.
+
+command.retreat.single.tactical-retreat.3
+{facts.attackerReport}.
+
+command.retreat.single.observed-retreat.3
+{facts.enemyReport}.
+
+command.retreat.group.written-v6.1
+{addresseeCallSign}, выходим.
+
+command.retreat.group.tactical-retreat.3
+{facts.attackerReport}.
+
+command.retreat.group.observed-retreat.3
+{facts.enemyReport}.
+
+command.retreat.mass.tactical-retreat.3
+{facts.attackerReport}.
+
+command.retreat.mass.observed-retreat.3
+{facts.enemyReport}.
+
+command.auto_retreat.single.tactical-retreat.3
+{facts.attackerReport}.
+
+command.auto_retreat.single.observed-retreat.3
+{facts.enemyReport}.
+
+command.auto_retreat.group.tactical-retreat.3
+{facts.attackerReport}.
+
+command.auto_retreat.group.observed-retreat.3
+{facts.enemyReport}.
+
+command.auto_retreat.mass.tactical-retreat.3
+{facts.attackerReport}.
+
+command.auto_retreat.mass.observed-retreat.3
+{facts.enemyReport}.
+
+traffic.queue_blocked.group.written-v6.1
+{addresseeCallSign}, от бампера отойди.
+
+traffic.queue_blocked.group.exchange-v1.1
+{addresseeCallSign}, к бамперу не липни.
+
+traffic.queue_blocked.mass.written-v6.1
+{addresseeCallSign}, от бампера отойди.
+
+traffic.queue_blocked.mass.exchange-v1.1
+{addresseeCallSign}, к бамперу не липни.
+
+damage.hit.single.intel-v1.3
+{facts.attackerReport}.
+
+damage.hit.single.intel-v2.3
+{facts.attackerReport}.
+
+damage.hit.single.intel-v3.1
+Нас шили: {facts.attackerComposition}.
+
+damage.hit.single.live-intel-v1.1
+По мне огонь! {facts.attackerReport}.
+
+damage.hit.single.live-intel-v2.1
+Работают по нам! В контакте: {facts.attackerComposition}.
+
+damage.hit.single.critical-intel.1
+Критические повреждения! Били: {facts.attackerComposition}.
+
+damage.hit.group.intel-v1.3
+{facts.attackerReport}.
+
+damage.hit.group.intel-v2.3
+{facts.attackerReport}.
+
+damage.hit.group.intel-v3.1
+Нас шили: {facts.attackerComposition}.
+
+damage.hit.group.live-intel-v1.1
+По группе огонь! {facts.attackerReport}.
+
+damage.hit.group.live-intel-v2.1
+Работают по нам! В контакте: {facts.attackerComposition}.
+
+damage.hit.group.critical-intel.1
+Критические повреждения! Били: {facts.attackerComposition}.
+
+damage.hit.mass.intel-v1.3
+{facts.attackerReport}.
+
+damage.hit.mass.intel-v2.3
+{facts.attackerReport}.
+
+damage.hit.mass.intel-v3.1
+Нас шили: {facts.attackerComposition}.
+
+damage.hit.mass.live-intel-v1.1
+По группе огонь! {facts.attackerReport}.
+
+damage.hit.mass.live-intel-v2.1
+Работают по нам! В контакте: {facts.attackerComposition}.
+
+damage.hit.mass.critical-intel.1
+Критические повреждения! Били: {facts.attackerComposition}.
+
+damage.vehicle_destroyed.single.1
+Потеряли {destroyedVehicleCount:machineAcc}.
+
+damage.vehicle_destroyed.single.unknown-v2.1
+{destroyedVehicleCount:machineAcc} потеряли.
+
+damage.vehicle_destroyed.single.dead-v1.1
+{killedCrewCount:twoHundred}.
+
+damage.vehicle_destroyed.single.dead-v2.1
+Есть {killedCrewCount:twoHundred}.
+
+damage.vehicle_destroyed.group.1
+Потеряли {destroyedVehicleCount:machineAcc}.
+
+damage.vehicle_destroyed.group.unknown-v2.1
+{destroyedVehicleCount:machineAcc} потеряли.
+
+damage.vehicle_destroyed.group.dead-v1.1
+{killedCrewCount:twoHundred}.
+
+damage.vehicle_destroyed.group.dead-v2.1
+Есть {killedCrewCount:twoHundred}.
+
+damage.vehicle_destroyed.mass.1
+Потеряли {destroyedVehicleCount:machineAcc}.
+
+damage.vehicle_destroyed.mass.unknown-v2.1
+{destroyedVehicleCount:machineAcc} потеряли.
+
+damage.vehicle_destroyed.mass.dead-v1.1
+{killedCrewCount:twoHundred}.
+
+damage.vehicle_destroyed.mass.dead-v2.1
+Есть {killedCrewCount:twoHundred}.
+
+recon.enemy_first_seen.single.intel-v1.3
+{facts.enemyReport}.
+
+recon.enemy_first_seen.single.intel-v2.3
+{facts.enemyReport}.
+
+recon.enemy_first_seen.single.intel-v3.1
+В контакте: {facts.enemyComposition}.
+
+recon.enemy_first_seen.single.intel-v4.1
+Противник: {facts.enemyComposition}.
+
+recon.enemy_first_seen.single.flame-contact.3
+{facts.enemyReport}.
+
+recon.enemy_first_seen.group.intel-v1.3
+{facts.enemyReport}.
+
+recon.enemy_first_seen.group.intel-v2.3
+{facts.enemyReport}.
+
+recon.enemy_first_seen.group.intel-v3.1
+В контакте: {facts.enemyComposition}.
+
+recon.enemy_first_seen.group.intel-v4.1
+Противник: {facts.enemyComposition}.
+
+recon.enemy_first_seen.group.flame-contact.3
+{facts.enemyReport}.
+
+recon.enemy_first_seen.mass.intel-v1.3
+{facts.enemyReport}.
+
+recon.enemy_first_seen.mass.intel-v2.3
+{facts.enemyReport}.
+
+recon.enemy_first_seen.mass.intel-v3.1
+В контакте: {facts.enemyComposition}.
+
+recon.enemy_first_seen.mass.intel-v4.1
+Противник: {facts.enemyComposition}.
+
+recon.enemy_first_seen.mass.flame-contact.3
+{facts.enemyReport}.
+
+idle.group_no_order.single.exchange-v1.1
+{addresseeName}, какие вводные?
+
+idle.group_no_order.single.traffic-memory.1
+{addresseeName}, после той пробки стоять уже привычно.
+
+idle.group_no_order.group.1
+{addresseeName}, долго стоим.
+
+idle.group_no_order.group.exchange-v1.1
+{addresseeName}, какие вводные?
+
+idle.group_no_order.group.traffic-memory.1
+{addresseeName}, после той пробки стоять уже привычно.
+
+idle.group_no_order.mass.1
+{addresseeName}, долго стоим.
+
+idle.group_no_order.mass.exchange-v1.1
+{addresseeName}, какие вводные?
+
+idle.group_no_order.mass.traffic-memory.1
+{addresseeName}, после той пробки стоять уже привычно.
+
+idle.quiet.single.bawdy-v8.1
+{addresseeCallSign}, личная жизнь как?
+
+idle.quiet.group.bawdy-v8.1
+{addresseeCallSign}, личная жизнь как?
+
+idle.quiet.mass.bawdy-v8.1
+{addresseeCallSign}, личная жизнь как?
+
+idle.driver_pair.single.green-v1.1
+{addresseeName}, до первой звезды все мы зелень.
+
+idle.driver_pair.single.green-v1.2
+У меня имя есть. {speakerName}.
+
+idle.driver_pair.single.green-v2.2
+{speakerName}. Запомнишь, пока вернусь.
+
+idle.driver_pair.single.green-v3.1
+{addresseeName}, первую нашивку заработай — потом спорь.
+
+idle.driver_pair.group.green-v1.1
+{addresseeName}, до первой звезды все мы зелень.
+
+idle.driver_pair.group.green-v1.2
+У меня имя есть. {speakerName}.
+
+idle.driver_pair.group.green-v2.2
+{speakerName}. Запомнишь, пока вернусь.
+
+idle.driver_pair.group.green-v3.1
+{addresseeName}, первую нашивку заработай — потом спорь.
+
+idle.driver_pair.mass.green-v1.1
+{addresseeName}, до первой звезды все мы зелень.
+
+idle.driver_pair.mass.green-v1.2
+У меня имя есть. {speakerName}.
+
+idle.driver_pair.mass.green-v2.2
+{speakerName}. Запомнишь, пока вернусь.
+
+idle.driver_pair.mass.green-v3.1
+{addresseeName}, первую нашивку заработай — потом спорь.
+
+idle.crew_history.single.veteran-afterword.1
+{facts.lostCallSign}. Вот кого не хватит.
+
+idle.crew_history.single.remembered-newcomer.2
+{facts.lostName}. Теперь запомнили.
+
+idle.crew_history.group.veteran-afterword.1
+{facts.lostCallSign}. Вот кого не хватит.
+
+idle.crew_history.group.remembered-newcomer.2
+{facts.lostName}. Теперь запомнили.
+
+idle.crew_history.mass.veteran-afterword.1
+{facts.lostCallSign}. Вот кого не хватит.
+
+idle.crew_history.mass.remembered-newcomer.2
+{facts.lostName}. Теперь запомнили.
+

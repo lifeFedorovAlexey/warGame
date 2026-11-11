@@ -194,11 +194,23 @@ export function applyStructuralImpact(state,hit,regions,parts){
     const load=hit.power*transfer*(1-metric)**2;
     if(load<.01)continue;
     const damage=Math.min(2,before.damage+load/(part.strength??PROFILES[part.material]?.strength??150));
-    const detached=damage>=1;state.parts[id]={...before,damage,detached};changed=true;
+    const detached=damage>=1&&(!part.detachOnWreck||state.wreck);state.parts[id]={...before,damage,detached};changed=true;
     if(detached)failed.push(id);
   }
   if(changed)state.revision++;
   return failed;
+}
+// Restore live towers affected by older saves with prematurely detached parts.
+export function restoreDeferredParts(state,parts){
+  if(!state||state.wreck)return [];
+  const restored=[];
+  for(const [id,part] of Object.entries(parts)){
+    const damage=state.parts[id];
+    if(!part.detachOnWreck||!damage?.detached)continue;
+    damage.detached=false;restored.push(Number(id));
+  }
+  if(restored.length)state.revision++;
+  return restored;
 }
 export function applyDamageHit(state,hit,part={material:'metal'},options={deform:true}){
   if(!Number.isFinite(hit.power)||hit.power<=0)return {changed:false,detached:false,deformed:false};
@@ -206,7 +218,7 @@ export function applyDamageHit(state,hit,part={material:'metal'},options={deform
   const id=clamp(Math.trunc(hit.partId??0),0,MAX_PARTS-1),material=part.material??'metal',profile=PROFILES[material]??PROFILES.metal;
   const before=state.parts[id]??{damage:0,detached:false};
   const damage=before.damage+hit.power/(part.strength??profile.strength);
-  const detached=!!part.detachable&&damage>=1;
+  const detached=!!part.detachable&&damage>=1&&(!part.detachOnWreck||state.wreck);
   state.parts[id]={...before,damage:Math.min(2,damage),detached:before.detached||detached};
   state.total+=hit.power;state.hits++;state.revision++;
   const restPoint=hit.restPoint??undeformPoint(state,hit.point);

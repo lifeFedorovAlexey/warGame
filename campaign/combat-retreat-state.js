@@ -1,6 +1,8 @@
+export const canAutoRetreat=spec=>!!spec&&(spec.damage>0||spec.role==='builder');
+
 export function shouldAutoRetreat(unit,spec){
  const threshold={light:.8,heavy:.35}[unit.combatPolicy?.retreat];
- return unit.owner==='rai'&&unit.hp>0&&!!spec?.damage&&!!threshold&&!unit.retreatSuppressed
+ return unit.owner==='rai'&&unit.hp>0&&canAutoRetreat(spec)&&!!threshold&&!unit.retreatSuppressed
   &&unit.hp<=unit.maxHp*threshold;
 }
 

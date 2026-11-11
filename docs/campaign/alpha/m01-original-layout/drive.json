@@ -1,0 +1,30 @@
+{
+  "passed": true,
+  "visits": [
+    {
+      "id": "outpost",
+      "seconds": 45,
+      "distance": 22.57793555669983
+    },
+    {
+      "id": "east",
+      "seconds": 43,
+      "distance": 18.159870054137315
+    },
+    {
+      "id": "northwest",
+      "seconds": 40,
+      "distance": 15.983811279540975
+    },
+    {
+      "id": "hq",
+      "seconds": 26,
+      "distance": 16.641414783509763
+    },
+    {
+      "id": "home",
+      "seconds": 90,
+      "distance": 17.607016196136883
+    }
+  ]
+}

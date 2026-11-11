@@ -18,6 +18,7 @@ function oilOrders(state, activeOnly=false) {
   for(const b of state.buildings){
     if(b.owner!=='rai'||b.hp<=0)continue;
     if(!b.completed)orders.push(b);
+    if(b.moduleConstruction)orders.push(b.moduleConstruction);
     if(b.completed||!activeOnly){
       orders.push(...(activeOnly?(b.productionPaused?[]:b.queue.slice(0,1)):b.queue));
       if(b.research)orders.push(b.research);

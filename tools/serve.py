@@ -5,20 +5,21 @@ import os
 import re
 import socket
 from dialogue_editor import handle as handle_dialogues
+from radio_library import handle as handle_radio
 
 os.chdir(Path(__file__).resolve().parents[1])
 
 class ReviewHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
-        if not handle_dialogues(self):
+        if not handle_radio(self) and not handle_dialogues(self):
             super().do_GET()
 
     def do_PUT(self):
-        if not handle_dialogues(self):
+        if not handle_radio(self) and not handle_dialogues(self):
             self.send_error(404)
 
     def do_POST(self):
-        if not handle_dialogues(self):
+        if not handle_radio(self) and not handle_dialogues(self):
             self.send_error(404)
 
     def translate_path(self, path):

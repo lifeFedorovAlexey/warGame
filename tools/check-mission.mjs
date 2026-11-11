@@ -44,7 +44,7 @@ assert.equal(southernApproachSignal(scout),null,'Keep the southern approach lock
 scout.state.flags.lastRevealed=true;
 scout.state.bounds=config.finalMapBounds.slice();
 const finalCamp=config.camps[3],southRally=field.gridToWorld(finalCamp.approachGrid);
-const approachRoad=field.roadNetwork.paths.find(road=>road.to===finalCamp.id);
+const approachRoad=field.localRoads.find(road=>road.id==='m01-original-hq-approach');
 const roadEntry=approachRoad.points[0];
 scout.explored.fill(0);
 assert.equal(southernApproachSignal(scout),null,'Do not focus the camera on a fully uncharted road');

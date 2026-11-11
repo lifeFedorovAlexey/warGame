@@ -1,11 +1,13 @@
 import {SCAV_PROFILES,isInfantry} from './scav-unit-profiles.js';
 import {generatorLayout} from './generator-layout.js';
+import {M02_STATION_SCALE} from './mission02-base-layout.js';
 
 const profiles=new Map();
 // Local metres: [centre x, centre y, bottom, width, depth, top]. These are
 // opaque structural volumes from the existing prefabs, not the larger
 // construction exclusion footprint. Open pump/tower frames stay open.
 export function sightVolumes(building,spec,scale){
+ if(building.kind==='scav-gate'&&building.scavVariant==='m02-open-leaf')return [[0,0,.2,.2,building.fenceSpan,2.6],[0,-building.fenceSpan/2,0,.4,.42,3.9]];
  if(building.kind==='scav-fence'){
   const span=building.fenceSpan??7,profile=building.fenceProfile??[0,0,0],key='fence|'+span+'|'+profile;
   if(!profiles.has(key)){
@@ -15,7 +17,8 @@ export function sightVolumes(building,spec,scale){
   return profiles.get(key);
  }
  if(spec.sightVolumes)return spec.sightVolumes;
- const size=spec.realSizeMetres,key=building.kind+'|'+(building.campId??'')+'|'+(size?.join(',')??[building.halfWidth,building.halfDepth,scale].join(','));
+ const modelScale=building.kind==='generator'&&building.m02Base==='energy_hub'&&building.owner==='scavs'?M02_STATION_SCALE:1;
+ const size=spec.realSizeMetres,key=building.kind+'|'+(building.campId??'')+'|'+modelScale+'|'+(size?.join(',')??[building.halfWidth,building.halfDepth,scale].join(','));
  if(profiles.has(key))return profiles.get(key);
  let boxes=[];
  if(size){
@@ -32,6 +35,7 @@ export function sightVolumes(building,spec,scale){
   else if(building.campId==='west-south')boxes=[[-3.64,.85,.205,3.32,4.75,3.115],[2.85,.85,.205,4.44,4.75,3.115],[-.66,1.73,.205,2.63,2.95,3.115]];
   else boxes=[[0,0,0,building.halfWidth*1.7/scale,building.halfDepth*1.7/scale,3.2]];
  }
+ if(modelScale!==1)boxes=boxes.map(box=>box.map(value=>value*modelScale));
  profiles.set(key,boxes);return boxes;
 }
 

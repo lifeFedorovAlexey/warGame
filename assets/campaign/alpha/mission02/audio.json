@@ -1,0 +1,270 @@
+{
+  "version": 1,
+  "status": "temporary-synthesis",
+  "clips": {
+    "m02-radio-start-1": {
+      "file": "audio-temp/m02-radio-start-1-475729c471bc.ogg",
+      "speaker": "radio",
+      "text": "Альфа, источник сигнала к югу. Координаты передаю.",
+      "voice": "voice-6",
+      "emotion": "calm",
+      "duration": 3.28225,
+      "sha256": "475729c471bc89cc373f37a7361ec7dad410471e17384ba4fe8761ad37c43ee7",
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg"
+    },
+    "m02-radio-start-2": {
+      "file": "audio-temp/m02-radio-start-2-36e5fb5e0248.ogg",
+      "speaker": "commander",
+      "text": "Базу прикрыть. Основной группе — на выезд.",
+      "voice": "voice-1",
+      "emotion": "calm",
+      "duration": 3.1346666666666665,
+      "sha256": "36e5fb5e02486d972cdbd4db22ee22364d5c886fdf27e18cd8b5d76857048c73",
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg"
+    },
+    "m02-radio-entrance-1": {
+      "file": "audio-temp/m02-radio-entrance-1-ec5d5ce452b1.ogg",
+      "speaker": "scout",
+      "text": "Проход перекрыт. Впереди два ДОТа.",
+      "voice": "voice-4",
+      "emotion": "calm",
+      "duration": 2.3444583333333333,
+      "sha256": "ec5d5ce452b1f743d06bb639f4b3062c312937dcd6f0b5cef821d0f4c947e175",
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg"
+    },
+    "m02-radio-entrance-2": {
+      "file": "audio-temp/m02-radio-entrance-2-def541b9caec.ogg",
+      "speaker": "commander",
+      "text": "Вижу. Сначала убираем укрепления.",
+      "voice": "voice-1",
+      "emotion": "calm",
+      "duration": 2.9370416666666666,
+      "sha256": "def541b9caecee72744a401718e5e20a7b9ee77631c45e5eb791ff12d5a9daea",
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg"
+    },
+    "m02-radio-entrance-changed-1": {
+      "file": "audio-temp/m02-radio-entrance-changed-1-ddf9e334bbab.ogg",
+      "speaker": "scout",
+      "text": "Укрепления в проходе подавлены частично. Проверяем дорогу.",
+      "voice": "voice-4",
+      "emotion": "calm",
+      "duration": 3.79575,
+      "sha256": "ddf9e334bbabd6b2ce4ec796db41e1b45344f22c235072d63186eb735bd3c5ab",
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg"
+    },
+    "m02-radio-entrance-clear-1": {
+      "file": "audio-temp/m02-radio-entrance-clear-1-b126d6c2e7e1.ogg",
+      "speaker": "scout",
+      "text": "ДОТы в проходе уничтожены. Дорога на юг открыта.",
+      "voice": "voice-4",
+      "emotion": "calm",
+      "duration": 3.3774166666666665,
+      "sha256": "b126d6c2e7e1cddeb4ccb8b0fe717c36ffc1d5b8fa93fa7d61f2d06d4c18a618",
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg"
+    },
+    "m02-radio-factory-working-1": {
+      "file": "audio-temp/m02-radio-factory-working-1-13eeda3f5e8f.ogg",
+      "speaker": "scout",
+      "text": "У них завод работает. Машины прямо из ворот идут.",
+      "voice": "voice-4",
+      "emotion": "calm",
+      "duration": 3.2031666666666667,
+      "sha256": "13eeda3f5e8f58b33e643fcfdffa60631a01e17477cd3d3d4c0feb94759e9156",
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg"
+    },
+    "m02-radio-factory-working-2": {
+      "file": "audio-temp/m02-radio-factory-working-2-40ba5d6d2cde.ogg",
+      "speaker": "commander",
+      "text": "Тогда начнём с завода.",
+      "voice": "voice-1",
+      "emotion": "calm",
+      "duration": 1.7715416666666666,
+      "sha256": "40ba5d6d2cde4df32528c91aa01e717b82c04fa65a480a9082b14b20ab5b1342",
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg"
+    },
+    "m02-radio-factory-destroyed-1": {
+      "file": "audio-temp/m02-radio-factory-destroyed-1-9a91fdb8b154.ogg",
+      "speaker": "scout",
+      "text": "Завод уничтожен.",
+      "voice": "voice-4",
+      "emotion": "calm",
+      "duration": 1.2955416666666666,
+      "sha256": "9a91fdb8b15445eeda5c89b3dc4c12634df507febc808cc305723e1cde9d8d88",
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg"
+    },
+    "m02-radio-factory-destroyed-2": {
+      "file": "audio-temp/m02-radio-factory-destroyed-2-60c46f1c28d2.ogg",
+      "speaker": "commander",
+      "text": "Принято. Осмотрите площадку.",
+      "voice": "voice-1",
+      "emotion": "calm",
+      "duration": 2.6462083333333335,
+      "sha256": "60c46f1c28d2ed61fed825f5821aca121772412866c94e93eb9ddfc05d7f8d24",
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg"
+    },
+    "m02-radio-flamer-ready-1": {
+      "file": "audio-temp/m02-radio-flamer-ready-1-071d0a414562.ogg",
+      "speaker": "scientist",
+      "text": "Огнемёты доработали. Теперь мощнее.",
+      "voice": "voice-6",
+      "emotion": "calm",
+      "duration": 2.632458333333333,
+      "sha256": "071d0a41456263d3c4926cad556f7b3532ac243d321ef8684dc7c9aeab5bcadf",
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg"
+    },
+    "m02-radio-twin-ready-1": {
+      "file": "audio-temp/m02-radio-twin-ready-1-966be7594b3e.ogg",
+      "speaker": "scientist",
+      "text": "Спаренный пулемёт готов. Можно ставить в конструкторе.",
+      "voice": "voice-6",
+      "emotion": "calm",
+      "duration": 3.0037083333333334,
+      "sha256": "966be7594b3e8c342dc9fef5aabd67e6d47722a9c58bd73ce4ae0f48861d3a1f",
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg"
+    },
+    "m02-radio-sensor-ready-1": {
+      "file": "audio-temp/m02-radio-sensor-ready-1-75617923ee94.ogg",
+      "speaker": "scientist",
+      "text": "Сенсор готов. Ставится вместо оружия, видит дальше.",
+      "voice": "voice-6",
+      "emotion": "calm",
+      "duration": 3.2359583333333335,
+      "sha256": "75617923ee94a364c3cfcfbda6080c3ffe51df81637aec65036b162c5a14f374",
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg"
+    },
+    "m02-radio-sensor-ready-2": {
+      "file": "audio-temp/m02-radio-sensor-ready-2-3e5e379af826.ogg",
+      "speaker": "warrant",
+      "text": "То есть стрелять нечем?",
+      "voice": "voice-2",
+      "emotion": "dry",
+      "duration": 1.321125,
+      "sha256": "3e5e379af826e7fcec7b87cf438fa9090f9bfb848fcd704c614e40c731a25a14",
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg"
+    },
+    "m02-radio-sensor-ready-3": {
+      "file": "audio-temp/m02-radio-sensor-ready-3-d2594829846d.ogg",
+      "speaker": "scientist",
+      "text": "Зато раньше узнаете, что пора уезжать.",
+      "voice": "voice-6",
+      "emotion": "calm",
+      "duration": 2.08275,
+      "sha256": "d2594829846db07668eabc3926e3139024883150ec5abbfac8fd328622cbf09a",
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg"
+    },
+    "m02-radio-observer-seen-1": {
+      "file": "audio-temp/m02-radio-observer-seen-1-f3969c9d1a01.ogg",
+      "speaker": "scout",
+      "text": "Командир, чужая машина. На тех отбросов не похожа.",
+      "voice": "voice-4",
+      "emotion": "calm",
+      "duration": 3.4818333333333333,
+      "sha256": "f3969c9d1a012739a8f38cc8bea7b3c902d6df756098af7e23dde5e3af95ae76",
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg"
+    },
+    "m02-radio-observer-seen-2": {
+      "file": "audio-temp/m02-radio-observer-seen-2-d4c6aa554b41.ogg",
+      "speaker": "commander",
+      "text": "Попробуйте перехватить.",
+      "voice": "voice-1",
+      "emotion": "calm",
+      "duration": 1.7137916666666666,
+      "sha256": "d4c6aa554b41f4d142e8a60e77f53c04e84ec8af28036a2dc92473efbe98ebe7",
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg"
+    },
+    "m02-radio-observer-escaped-1": {
+      "file": "audio-temp/m02-radio-observer-escaped-1-2c9cebe6aa38.ogg",
+      "speaker": "scout",
+      "text": "Ушла из района. След потеряли.",
+      "voice": "voice-4",
+      "emotion": "calm",
+      "duration": 2.5067916666666665,
+      "sha256": "2c9cebe6aa383060131a908150d7524c9688d9a1a7b2063b4d72af1fb43c3175",
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg"
+    },
+    "m02-radio-observer-destroyed-1": {
+      "file": "audio-temp/m02-radio-observer-destroyed-1-9dd51fd14d1f.ogg",
+      "speaker": "scout",
+      "text": "Разведчик уничтожен. Маркировку записали.",
+      "voice": "voice-4",
+      "emotion": "calm",
+      "duration": 3.110708333333333,
+      "sha256": "9dd51fd14d1f06e1f1ccc0803c6803fdcf2e9087182288edcbc1913b2187c6d7",
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg"
+    },
+    "m02-radio-energy-source-1": {
+      "file": "audio-temp/m02-radio-energy-source-1-2498e672b85c.ogg",
+      "speaker": "scout",
+      "text": "Источник нашли. Работает старый энергоузел.",
+      "voice": "voice-4",
+      "emotion": "calm",
+      "duration": 3.1685833333333333,
+      "sha256": "2498e672b85c8344b8713358b6e55a4dd1cc1e4423b97753ace1760d6e4bc163",
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg"
+    },
+    "m02-radio-energy-source-2": {
+      "file": "audio-temp/m02-radio-energy-source-2-916078f25341.ogg",
+      "speaker": "commander",
+      "text": "Охрану убрать. После боя осмотреть оборудование.",
+      "voice": "voice-1",
+      "emotion": "calm",
+      "duration": 3.4945,
+      "sha256": "916078f253410b612814c62b7845832de6af32cf2f0bf8dfb52d0a6e1ebb9892",
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg"
+    },
+    "m02-radio-power-recovered-1": {
+      "file": "audio-temp/m02-radio-power-recovered-1-78fc687769fe.ogg",
+      "speaker": "scout",
+      "text": "Энергомодуль нашли. Данные передали в НИИ.",
+      "voice": "voice-4",
+      "emotion": "calm",
+      "duration": 3.064125,
+      "sha256": "78fc687769fe12ae64c4e63cdb55a7550bc57418ddbbb451fd02811562def019",
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg"
+    },
+    "m02-radio-victory-1": {
+      "file": "audio-temp/m02-radio-victory-1-f0b306b9eb7b.ogg",
+      "speaker": "commander",
+      "text": "Район зачищен. Все четыре образца у нас.",
+      "voice": "voice-1",
+      "emotion": "calm",
+      "duration": 3.262375,
+      "sha256": "f0b306b9eb7b06fb18c4bb620009c99a24cf9fce4ad7c27d3b94c4029a6d38d1",
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg"
+    },
+    "m02-radio-power-researched-1": {
+      "file": "audio-temp/m02-radio-power-researched-1-cdf459f94986.ogg",
+      "speaker": "scientist",
+      "text": "Энергомодуль изучен. Теперь можно усилить нашу станцию.",
+      "voice": "voice-6",
+      "emotion": "calm",
+      "duration": 3.457,
+      "sha256": "cdf459f949860894d01922bcdb35025719f52bed785c4d651b9865fccf460852",
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg"
+    }
+  }
+}

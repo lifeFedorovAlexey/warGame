@@ -17,7 +17,9 @@ function segmentBox(a,b,box,pad){
  return true;
 }
 export function factoryRoadNetwork(mission){
- const local=mission.field.localRoads??baseApproachRoads(mission.field,mission.config);
+ // Headless mission setup may already have southern extension roads before
+ // the renderer installs the player yard. Those do not replace its street.
+ const existing=mission.field.localRoads??[],local=existing.some(r=>r.kind==='street')?existing:[...baseApproachRoads(mission.field,mission.config),...existing];
  const replacement=local.find(r=>r.replaceRect)?.replaceRect,surveyed=[];
  // The terrain mask erases this old alignment. Joining it produced visible stubs.
  for(const road of mission.field.roadNetwork?.paths??[]){

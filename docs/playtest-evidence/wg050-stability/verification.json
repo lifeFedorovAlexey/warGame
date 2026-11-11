@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "sample": {
+    "pointer": "none",
+    "width": 220,
+    "height": 76,
+    "pixels": 1285
+  },
+  "screenSizes": [
+    "1440x900",
+    "844x390",
+    "667x375"
+  ],
+  "toggle": true,
+  "repeat": true,
+  "clickThrough": true,
+  "errors": []
+}

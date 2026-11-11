@@ -1,5 +1,6 @@
 import {campBaseLayout} from './scav-base-layout.js';
 import {vehicleClearance} from './vehicle-motion.js';
+import {M02} from './mission02-config.js';
 export const SCAV_PRODUCTION={seconds:30,vehicles:{size:3,cap:9},infantry:{size:4,cap:12}};
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const vehicles={
@@ -62,6 +63,7 @@ function* dispatch(mission,building,camp){
  mission.emit('scav-sortie',{camp:camp.id,building:building.id,group,count:units.length,productionType:production.type});
 }
 export function updateScavProduction(mission){
+ if(mission.state.m02)return; // m02 production is resumed inside the fixed logical tick.
  if(mission.state.openingScene&&!mission.state.openingScene.handedOver)return;
  const now=mission.state.time,deadline=performance.now()+1.5,baseNav=mission.nav;
  const step=job=>{
@@ -81,6 +83,15 @@ export function updateScavProduction(mission){
    const p=building.scavProduction;if(!p||building.hp<=0)continue;
    const camp=mission.state.camps.find(c=>c.id===building.campId);
    if(!camp||camp.cleared||!mission.inBounds(camp.x,camp.y))continue;
+   // The old southern boundary implicitly kept the chief's production asleep.
+   // Its original northern site is now in bounds from the start; preserve the
+   // campaign progression, while still responding to an early player assault.
+   if(camp.layoutVersion===3&&camp.requiresCamps&&!camp.productionActivated){
+    const ready=mission.state.camps.filter(c=>c!==camp&&c.cleared).length>=camp.requiresCamps;
+    const contacted=mission.state.units.some(u=>u.owner==='rai'&&u.hp>0&&distance(u,camp.gate)<300);
+    if(!ready&&!contacted)continue;
+    camp.productionActivated=true;
+   }
    p.nextAt??=now+SCAV_PRODUCTION.seconds;
    p.waiting=p.waiting.filter(id=>mission.entity(id)?.scavAssembly===building.id);
    if(p.retryAt>now)continue;
@@ -103,4 +114,45 @@ export function updateScavProduction(mission){
    if(mission.scavJob||performance.now()>=deadline)break;
   }
  }finally{mission.nav=baseNav;}
+}
+
+// Campaign producers share the player's checked factory exit, swept hulls,
+// route planner and move executor. Only enemy funding and batch policy differ.
+export function* updateCampaignProductionSteps(mission){
+ const s=mission.state,m=s.m02,now=s.time;
+ if(now+1e-7<(m.nextProductionCheckAt??0))return;
+ m.nextProductionCheckAt=now+.5;
+ const live=new Map(s.units.filter(u=>u.hp>0).map(u=>[u.id,u]));
+ m.groups=m.groups.filter(g=>g.units.some(id=>live.has(id)));
+ let population=[...live.values()].filter(u=>u.m02Produced).length;
+ for(const [id,base] of Object.entries(m.bases)){
+  const p=base.production,cfg=M02.factories[id],building=mission.entity(base.factoryId);
+  if(!p||!building||!p.active||p.stopped||now<(p.retryAt??0))continue;
+  p.waiting=p.waiting.filter(id=>live.has(id));
+  const patrol=!!cfg.patrolSize&&!p.alarmed,size=patrol?cfg.patrolSize:cfg.size;
+  if(p.waiting.length>=size){
+   if(!patrol&&m.groups.filter(g=>g.type==='raid').length>=M02.maxRaids)continue;
+   const members=p.waiting.map(id=>live.get(id));
+   if(members.some(u=>distance(u,u.assemblyPoint)>30||u.scavContact))continue;
+   const target=patrol?mission.field.gridToWorld([39.5,94]):mission.field.gridToWorld(mission.config.startGrid),paths=[];
+   for(const [i,unit] of members.entries()){
+    const goal={x:target.x+(i%3-1)*32,y:target.y+Math.floor(i/3)*32};
+    paths.push(yield* mission.vehiclePathSteps(unit,goal,{maxGoalDistance:48}));
+   }
+   if(paths.some(path=>!path?.length)){p.retryAt=now+2;continue;}
+   const group={id:'m02.group.'+id+'.'+p.waves++,type:patrol?'patrol':'raid',units:[...p.waiting],target};m.groups.push(group);
+   members.forEach((u,i)=>{u.path=paths[i];u.task={type:'move',...paths[i].at(-1)};u.raid=!patrol;u.guard=patrol?{...target}:undefined;u.scavWave=group.id;delete u.scavAssembly;delete u.routeOrder;delete u.scavResumeTask;});
+   p.waiting=[];mission.emit('scav-sortie',{building:building.id,group:group.id,count:members.length});
+  }
+  const local=[...live.values()].filter(u=>u.producerId===building.id).length;
+  if(now+1e-7<p.nextAt||population>=M02.globalCap||local>=cfg.cap||p.waiting.length>=size)continue;
+  const item=building.queue[0]??={kind:cfg.roster[p.count%cfg.roster.length],progress:1,cost:0};
+  const slot=base.rally[p.waiting.length];building.rally={...slot};
+  const count=s.units.length;
+  if(yield* mission.spawnProducedVehicleSteps(building,item,mission.buildingSpec(building))){
+   const unit=s.units[count];unit.producerId=building.id;unit.m02Produced=true;unit.m02Base=id;unit.scavAssembly=building.id;unit.assemblyPoint={...slot};unit.guard={...slot};
+   p.waiting.push(unit.id);p.count++;p.nextAt=now+cfg.seconds;population++;live.set(unit.id,unit);
+   if(mission.visibleAt(building.x,building.y)||mission.visibleAt(unit.x,unit.y))base.productionObserved=true;
+  }else p.retryAt=now+.5;
+ }
 }

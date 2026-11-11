@@ -8,9 +8,12 @@ import {createVehicleLayer} from './vehicle-layer.js';
 import {createHealthBars} from './health-bars.js';
 import {createFactoryServiceEffects,factoryShutterDamagePose} from './factory-service-effects.js';
 import {createFactoryRoadView} from './factory-road-view.js';
+import {createFactoryStatusBoards} from './factory-status-board.js';
 import {createBuildingPrefab} from './prefabs.js';
 import {createScavPrefab} from './scav-prefabs.js';
 import {createScavBasePrefab} from './scav-base-prefabs.js';
+import {createScavEmplacement} from './scav-emplacement.js';
+import {createScavYardSurface} from './scav-yard-surface.js';
 import {aimTowerWeapon,towerDamagePose} from './tower-weapon.js';
 import {mgRecoil} from './mg-burst.js';
 import {createShadowCasters} from './shadow-casters.js';
@@ -26,8 +29,12 @@ import {createConstructionEffects} from './construction-effects.js';
 import {createFogMask} from './fog-mask.js';
 import {createStorySignals} from './story-signals.js';
 import {createRallyFlags} from './rally-flags.js';
+import {createOrderRoutes} from './order-routes.js';
 import {createBaseYard} from './base-yard.js';
 import {scavBaseRoads} from './scav-base-roads.js';
+import {radarAngle} from './radar-animation.js';
+import {createM02Factory} from './mission02-factory.js';
+import {styleM02Workshop} from './mission02-workshop-style.js';
 import {createScavOilPrefab} from './scav-oil-prefab.js';
 import {createDamEnvironment} from './dam-environment.js';
 import {createDesertDressing} from './desert-dressing.js';
@@ -37,8 +44,14 @@ import {vehicleLocalBoxes} from './vehicle-collision.js';
 import {buildLayerHeight} from './builder-optics.js';
 import {createDamageSystem} from './damage-system.js';
 import {partMissing} from './damage-state.js';
+import {installM02Config} from './mission02-config.js';
+import {installM01Layout} from './mission01-layout.js';
+import {createMission02Sites} from './mission02-sites.js';
+import {createKorovnikView} from './korovnik-view.js';
 
 export async function createCampaignWorld(host,config,sound,loading){
+ installM01Layout(config);
+ installM02Config(config);
  await loading?.stage('terrain');
  const renderer=new T.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
  const gl=renderer.getContext(),debug=gl.getExtension('WEBGL_debug_renderer_info');
@@ -71,15 +84,18 @@ export async function createCampaignWorld(host,config,sound,loading){
  for(const material of terrain.terrainMaterials) addFog(material);
  const baseYard=createBaseYard(T,field,config,addFog);scene.add(baseYard.root);
  const dam=createDamEnvironment(T,field,config,addFog,sound,terrain);scene.add(dam.root);baseYard.roads.push(dam.road,...scavBaseRoads(field,config));terrain.setLocalRoads(baseYard.roads);
- field.localRoads=baseYard.roads;
- const dressing=createDesertDressing(T,field,config,[...terrain.roadPaths,...baseYard.roads],dam.layout,addFog);scene.add(dressing.root);
+ field.missionBaseRoads=baseYard.roads;field.localRoads=baseYard.roads;
+ const mission02Sites=createMission02Sites(T,field,addFog);scene.add(mission02Sites.root);
+ const scavYardSurface=createScavYardSurface(T,field,addFog);scene.add(scavYardSurface.root);
+ const dressing=createDesertDressing(T,field,config,[...terrain.roadPaths,...baseYard.roads,...field.m02Roads],dam.layout,addFog);scene.add(dressing.root);
  const factoryRoads=createFactoryRoadView(T,scene,field,terrain,baseYard.roads,addFog,roads=>{baseYard.setAccessRoads(roads);dressing.setAccessRoads(roads);});
  const damage=createDamageSystem(T,scene,field,config);
  await loading?.stage('vehicles');
  const vehicles=await createVehicleLayer(T,scene,field,config,damage,(completed,total)=>loading?.update('vehicles',completed,total)),buildingRoot=new T.Group();scene.add(buildingRoot);const buildings=new Map(),prefabs=new Map(),selectionRoot=new T.Group();scene.add(selectionRoot);
+ const korovnik=createKorovnikView(T,scene,field,config,vehicles,addFog);
  const healthBars=createHealthBars(T,scene,field,config,vehicles.transforms,buildings);if(perf)perf.wrap(healthBars,'update','health bars');
  damage.setTemplateProvider(entity=>{
-   const root=getPrefab(entity.kind,entity.owner,entity.campId,entity.scavVariant,entity.fenceSpan,entity.fenceProfile);root.updateMatrixWorld(true);
+   const root=getPrefab(entity.kind,entity.owner,prefabCamp(entity),entity.scavVariant,entity.fenceSpan,entity.fenceProfile);root.updateMatrixWorld(true);
    const bindings=[];root.traverse(node=>{if(node.isMesh)bindings.push(damage.prepare(node,'building',0));});
    return {bindings,parts:root.userData.damageParts??{0:{name:'structure',material:'concrete'}},pose:towerDamagePose(T,root,bindings,field,config.worldScale)??factoryShutterDamagePose(T,root,bindings)};
  });
@@ -109,6 +125,7 @@ export async function createCampaignWorld(host,config,sound,loading){
  const lightUp=new T.Vector3().crossVectors(lightRight,lightDirection).normalize(),stableTarget=new T.Vector3();
  const oilMarkers=config.oilFields.map(grid=>{const p=field.gridToWorld(grid),root=new T.Group();root.position.set(p.x,p.y,field.heightAt(p.x,p.y)+.25);const ring=new T.Mesh(new T.RingGeometry(10,11.5,24),new T.MeshBasicMaterial({color:'#baac72',transparent:true,opacity:.65,side:T.DoubleSide,depthWrite:false}));root.add(ring);const pipe=new T.Mesh(new T.CylinderGeometry(1.7,2,3,10),new T.MeshStandardMaterial({color:'#44463b',metalness:.6,roughness:.8}));pipe.rotation.x=Math.PI/2;pipe.position.z=1.5;root.add(pipe);scene.add(root);return{root,...p};});
  const artifactObjects=new Map();
+ const orderRoutes=createOrderRoutes(T,scene,field);
  const ringGeometry=new T.RingGeometry(1,1.08,64),selectedMaterial=new T.MeshBasicMaterial({color:'#c0ce93',transparent:true,opacity:.85,depthWrite:false,side:T.DoubleSide,polygonOffset:true,polygonOffsetFactor:-1}),selectionRings=[];
  const blockerMaterial=new T.MeshBasicMaterial({color:'#ff352b',transparent:true,opacity:.95,depthWrite:false,side:T.DoubleSide,polygonOffset:true,polygonOffsetFactor:-1});
  selectionRoot.name='selection_rings';
@@ -132,6 +149,7 @@ export async function createCampaignWorld(host,config,sound,loading){
  let headlightCount=0;
  const construction=createConstructionEffects(T,scene,config.worldScale);
  const factoryEffects=createFactoryServiceEffects(T,scene,config.worldScale);
+ const factoryBoards=createFactoryStatusBoards(T,addFog,material=>foggedMaterials.delete(material));
  const dustCanvas=document.createElement('canvas');dustCanvas.width=dustCanvas.height=64;const dc=dustCanvas.getContext('2d'),gradient=dc.createRadialGradient(32,32,0,32,32,30);gradient.addColorStop(0,'rgba(255,255,255,.7)');gradient.addColorStop(1,'rgba(255,255,255,0)');dc.fillStyle=gradient;dc.fillRect(0,0,64,64);const dustPositions=new Float32Array(256*3),dustGeometry=new T.BufferGeometry();dustGeometry.setAttribute('position',new T.BufferAttribute(dustPositions,3));dustGeometry.setDrawRange(0,0);const dust=new T.Points(dustGeometry,new T.PointsMaterial({map:new T.CanvasTexture(dustCanvas),color:'#b5a180',size:8,transparent:true,opacity:.13,depthWrite:false}));dust.frustumCulled=false;scene.add(dust);const particles=[];let dustTime=0;
  const ray=new T.Raycaster(),ndc=new T.Vector2(),vector=new T.Vector3();
  const localRay=new T.Ray(),inverse=new T.Matrix4(),pickBox=new T.Box3(),pickPoint=new T.Vector3();
@@ -147,6 +165,8 @@ export async function createCampaignWorld(host,config,sound,loading){
  }
  function ground(clientX,clientY){pointerRay(clientX,clientY);let lo=0,hi=20000;for(let i=0;i<28;i++){const middle=(lo+hi)/2,p=ray.ray.at(middle,vector);if(p.z>field.heightAt(p.x,p.y))lo=middle;else hi=middle;}const point=ray.ray.at((lo+hi)/2,new T.Vector3());return Math.abs(point.x)<=field.half&&Math.abs(point.y)<=field.half?{x:point.x,y:point.y,z:point.z}:null;}
  function pickEntity(mission,clientX,clientY){
+  const rank=healthBars.rankAt(clientX-viewport.left,clientY-viewport.top);
+  if(rank){const unit=mission.state.units.find(u=>u.id===rank.id&&u.hp>0&&u.owner==='rai'&&u.factoryVisit?.phase!=='inside');if(unit)return unit;}
   pointerRay(clientX,clientY);
   let selected=null,nearest=Infinity;
   for(const b of mission.state.buildings){
@@ -185,10 +205,13 @@ export async function createCampaignWorld(host,config,sound,loading){
   controls.update();
  }
  const prefabKey=(kind,owner='rai',camp='',variant='',span=7,profile=null)=>owner+':'+kind+':'+camp+':'+variant+':'+span+':'+profile;
+ function prefabCamp(entity){return entity.campId??(entity.m02Base?'m02.base.'+entity.m02Base:undefined);}
  function getPrefab(kind,owner='rai',camp='',variant='',span=7,profile=null){
   const key = prefabKey(kind,owner,camp,variant,span,profile);
   if (!prefabs.has(key)) {
-   const prefab = kind==='derrick'&&(owner==='scavs'||variant==='scav-oil')?createScavOilPrefab(T,config.buildings.derrick):owner === 'scavs' ? kind.startsWith('scav-')?createScavBasePrefab(T,kind,camp,span,variant,profile):createScavPrefab(T,kind,variant?camp+':'+variant:camp) : createBuildingPrefab(T,kind,config.buildings[kind]);
+   const southern=camp.startsWith('m02.base.');
+   const prefab = kind==='bunker'&&owner==='scavs'&&variant==='square-yard'?createScavEmplacement(T):kind==='scav-generator'?createBuildingPrefab(T,'generator',config.buildings[kind]):['scav-flame-tower','scav-cannon-tower'].includes(kind)?createBuildingPrefab(T,'mg-tower',config.buildings[kind]):['scav-sensor','generator','bunker'].includes(kind)&&owner==='scavs' ? createBuildingPrefab(T,kind,config.buildings[kind]) : kind==='scav-factory' ? createM02Factory(T) : kind==='derrick'&&(owner==='scavs'||variant==='scav-oil')?createScavOilPrefab(T,config.buildings.derrick):owner === 'scavs' ? kind.startsWith('scav-')?createScavBasePrefab(T,kind,camp,span,variant,profile):createScavPrefab(T,kind,southern&&kind==='mg-tower'?'west-south:watch-m02':variant?camp+':'+variant:camp) : createBuildingPrefab(T,kind,config.buildings[kind]);
+   if(southern&&owner==='scavs'&&['generator','scav-generator','scav-sensor','bunker','scav-flame-tower','scav-cannon-tower'].includes(kind))styleM02Workshop(T,prefab,kind,config.buildings[kind]);
    prefab.userData.kind = kind;
    prefab.userData.owner = owner;
    prefab.userData.prefabKey = key;
@@ -204,7 +227,7 @@ export async function createCampaignWorld(host,config,sound,loading){
   const definitions=[...Object.keys(config.buildings).filter(kind=>!config.buildings[kind].enemyOnly)
    .map(kind=>({kind,owner:'rai'})),...mission.state.buildings];
   for(const entity of definitions){
-   const {kind,owner='rai',campId,scavVariant,fenceSpan,fenceProfile}=entity;
+   const {kind,owner='rai',scavVariant,fenceSpan,fenceProfile}=entity,campId=prefabCamp(entity);
    const key=[kind,owner,campId,scavVariant,fenceSpan,fenceProfile].join(':');
    if(preparedBuildings.has(key))continue;preparedBuildings.add(key);
    const raw=getPrefab(kind,owner,campId,scavVariant,fenceSpan,fenceProfile).clone(true);
@@ -294,10 +317,15 @@ export async function createCampaignWorld(host,config,sound,loading){
  const trafficVisibility=createTrafficVisibility(T,camera,field,config),updateTrafficVisibility=trafficVisibility.update;
  function prepareFrame(mission,dt){
   const distance=camera.position.distanceTo(controls.target),pan=distance*dt*.7;let dx=(keys.has('KeyD')?1:0)-(keys.has('KeyA')?1:0),dy=(keys.has('KeyW')?1:0)-(keys.has('KeyS')?1:0);if(dx||dy){const right=panRight.setFromMatrixColumn(camera.matrixWorld,0);right.z=0;right.normalize();const forward=panForward.set(-right.y,right.x,0);const offset=right.multiplyScalar(dx*pan).addScaledVector(forward,dy*pan);camera.position.add(offset);controls.target.add(offset);}
-  controls.target.x=T.MathUtils.clamp(controls.target.x,-field.half,field.half);controls.target.y=T.MathUtils.clamp(controls.target.y,-field.half,field.half);controls.update();camera.position.z=Math.max(camera.position.z,field.heightAt(camera.position.x,camera.position.y)+minimumCameraHeight);
+  const bounds=mission.state.bounds,nw=field.gridToWorld(bounds.slice(0,2)),se=field.gridToWorld(bounds.slice(2));
+  const tx=T.MathUtils.clamp(controls.target.x,nw.x,se.x),ty=T.MathUtils.clamp(controls.target.y,se.y,nw.y);
+  camera.position.x+=tx-controls.target.x;camera.position.y+=ty-controls.target.y;
+  controls.target.x=tx;controls.target.y=ty;controls.update();camera.position.z=Math.max(camera.position.z,field.heightAt(camera.position.x,camera.position.y)+minimumCameraHeight);
   updateTrafficVisibility(mission);
  }
  function update(mission,selected,dt,live=false,showHealth=true){
+  mission02Sites.update(mission);
+  scavYardSurface.update(mission);
   factoryRoads.update(mission);
   const time=mission.state.time,now=performance.now()/1000,shotsThisFrame=mission.drainEffects();
   if(time<lastWorldTime){groundEffects.reset();shotTimes.clear();combat.reset();damage.reset();dustTime=0;particles.length=0;}
@@ -320,6 +348,7 @@ export async function createCampaignWorld(host,config,sound,loading){
   prepareFrame(mission,dt);
   sky.update(camera,false);
   if(baseYard.update(mission,time+(live?mission.accumulator:0)))renderer.shadowMap.needsUpdate=true;
+  if(korovnik.update(mission))renderer.shadowMap.needsUpdate=true;
   if(dam.update(mission,camera,time+(live?mission.accumulator:0),live))renderer.shadowMap.needsUpdate=true;
   storySignals.update(mission,camera,now);
   rallyFlags.update(mission,selected,camera);
@@ -346,12 +375,19 @@ export async function createCampaignWorld(host,config,sound,loading){
    if(!visibleIds.has(unit.id)&&!unit.damage?.wreck)continue;
    const transform=vehicles.transforms.get(unit.id);
    if(!transform)continue;
-   const {position,heading}=transform,aim=unit.aimTarget;
+   const representation=damage.records.get(unit.id);
+   if(representation&&!representation.visible)continue;
+   const {position,heading,matrix}=transform,aim=unit.aimTarget;
+   // Fading wrecks and moving attachments change the shadow silhouette even
+   // when their navigation position is fixed.
+   const fade=unit.damage?.wreck&&unit.removeAt>0?T.MathUtils.clamp(time-unit.removeAt+2,0,2):0;
+   const scan=unit.kind==='sensor'?radarAngle(unit,time+(live?mission.accumulator:0)):0;
    const shotAge=now-(shotTimes.get(unit.id)??-Infinity);
    const recoil=unit.kind==='bukhanka'||unit.kind==='raider'?mgRecoil(shotAge):shotAge<.065?now:0;
    shadowCasters.watch(unit.id,unit.kind,unit.damage?.wreck,position.x,position.y,position.z,heading,
     blend(unit.previousSteering,unit.steering),blend(unit.previousWheelDistance,unit.wheelDistance),
-    unit.projector?.yaw,unit.projector?.pitch,aim?.x,aim?.y,aim?.z,recoil);
+    unit.projector?.yaw,unit.projector?.pitch,aim?.x,aim?.y,aim?.z,recoil,
+    representation?.lod,fade,scan,matrix.elements[2],matrix.elements[6],matrix.elements[10]);
   }
   groundEffects.update(dt,vehicles.visible,distance);
   const near=distance<680?vehicles.visible.filter(unit=>unit.owner==='rai'&&unit.kind!=='command').sort((a,b)=>{
@@ -365,8 +401,13 @@ export async function createCampaignWorld(host,config,sound,loading){
    if(pose){root.matrix.copy(pose.matrix).multiply(lightLift);root.matrixWorldNeedsUpdate=true;const unit=mission.entity(near[i].id);spots.forEach((spot,j)=>{if(partMissing(unit?.damage,j+5))spot.intensity=0;else headlightCount++;});}
   });
   const buildingIds=new Set(mission.state.buildings.map(b=>b.id));for(const [id,object] of buildings)if(!buildingIds.has(id)){construction.release(object);damage.releaseBuilding(object);buildingRoot.remove(object);buildings.delete(id);}
-  for(const b of mission.state.buildings){let object=buildings.get(b.id);if(object&&object.userData.prefabKey!==prefabKey(b.kind,b.owner,b.campId,b.scavVariant,b.fenceSpan,b.fenceProfile)){construction.release(object);damage.releaseBuilding(object);buildingRoot.remove(object);buildings.delete(b.id);object=null;}if(!object){object=getPrefab(b.kind,b.owner,b.campId,b.scavVariant,b.fenceSpan,b.fenceProfile).clone(true);object.userData.entity=b.id;damage.attachBuilding(object,b);buildingRoot.add(object);buildings.set(b.id,object);}object.visible=(b.hp>0||b.damage?.wreck)&&(b.owner==='rai'||mission.exploredAt(b.x,b.y));if(!object.visible)continue;object.position.set(b.x,b.y,b.groundHeight??field.heightAt(b.x,b.y));object.rotation.z=b.rotation;object.scale.setScalar(config.worldScale);
+  for(const b of mission.state.buildings){const camp=prefabCamp(b);let object=buildings.get(b.id);if(object&&object.userData.prefabKey!==prefabKey(b.kind,b.owner,camp,b.scavVariant,b.fenceSpan,b.fenceProfile)){construction.release(object);damage.releaseBuilding(object);buildingRoot.remove(object);buildings.delete(b.id);object=null;}if(!object){object=getPrefab(b.kind,b.owner,camp,b.scavVariant,b.fenceSpan,b.fenceProfile).clone(true);object.userData.entity=b.id;damage.attachBuilding(object,b);buildingRoot.add(object);buildings.set(b.id,object);}object.visible=!!(b.hp>0||b.damage?.wreck)&&(b.owner==='rai'||mission.exploredAt(b.x,b.y));if(!object.visible)continue;object.position.set(b.x,b.y,b.groundHeight??field.heightAt(b.x,b.y));object.rotation.z=b.rotation;object.scale.setScalar(config.worldScale);
    fitBuildingFoundation(object,b,field,config);
+   if(b.kind==='generator'){const module=object.getObjectByName('power_module');if(module)module.visible=!!b.powerModule;}
+   if(b.kind==='scav-sensor'){
+    const mount=object.getObjectByName('radar_mount');
+    if(mount){const angle=radarAngle(b,time+(live?mission.accumulator:0));if(mount.rotation.z!==angle)renderer.shadowMap.needsUpdate=true;mount.rotation.z=angle;}
+   }
    if(b.kind==='mg-tower')aimTowerWeapon(object,b,field,config.worldScale,b.aimTarget,now-(shotTimes.get(b.id)??-Infinity));
    if(b.owner==='rai'&&b.hp>0)construction.building(object,b,config.buildings[b.kind]);
    damage.updateBuilding(object,b);
@@ -442,6 +483,7 @@ export async function createCampaignWorld(host,config,sound,loading){
   }
   if(time-dustTime>.16){dustTime=time;for(const unit of mission.state.units){if(unit.hp<=0||isInfantry(unit)||unit.owner!=='rai'&&!mission.visibleAt(unit.x,unit.y)||Math.hypot(unit.x-unit.previousX,unit.y-unit.previousY)<.15)continue;particles.push({x:unit.x+Math.sin(unit.heading)*9,y:unit.y-Math.cos(unit.heading)*9,z:field.heightAt(unit.x,unit.y)+1,born:time});}}while(particles.length>256)particles.shift();for(let i=particles.length-1;i>=0;i--)if(time-particles[i].born>2.5)particles.splice(i,1);particles.forEach((p,i)=>dustPositions.set([p.x+(time-p.born)*1.8,p.y,p.z+(time-p.born)*1.2],i*3));dustGeometry.attributes.position.needsUpdate=true;dustGeometry.setDrawRange(0,particles.length);marker.visible=performance.now()<markerUntil;
   if(factoryEffects.update(mission,buildings,time,dt,camera))renderer.shadowMap.needsUpdate=true;
+  factoryBoards.update(mission,buildings);
   if(now-lastAudioAt>=1/12||live!==lastAudioLive){
    lastAudioAt=now;lastAudioLive=live;
   let engine=0,rolling=0,slip=0,road=0;
@@ -472,14 +514,17 @@ export async function createCampaignWorld(host,config,sound,loading){
   const {textureRows}=damage.statistics;
   if(textureRows!==lastDamageRows){lastDamageRows=textureRows;renderer.shadowMap.needsUpdate=true;}
   shadowDirty=shadowCasters.end()||renderer.shadowMap.needsUpdate||time<lastWorldTime||shadowDirty;
-  renderer.shadowMap.needsUpdate=shadowDirty&&(now-lastShadowAt>=1/shadowHz||time<lastWorldTime);
+  // A hidden/removed caster must not leave a detached shadow until the next
+  // throttled refresh. Keep the rate limit for motion within the same set.
+  renderer.shadowMap.needsUpdate=shadowDirty&&(shadowCasters.membershipChanged||now-lastShadowAt>=1/shadowHz||time<lastWorldTime);
   if(renderer.shadowMap.needsUpdate){
    shadowCentre.copy(stableTarget);sun.position.copy(stableTarget).add(lightOffset);sun.target.position.copy(stableTarget);
    shadowUpdates++;shadowDirty=false;lastShadowAt=now;
   }
+  orderRoutes.update(mission,selected,camera,viewport.width,viewport.height,now);
   healthBars.update(mission,selected,camera,viewport.width,viewport.height,showHealth);
   renderer.render(scene,camera);
   lastWorldTime=time;
  }
- return{renderer,scene,camera,controls,terrain,field,vehicles,damage,setShadowQuality,prepareRendering,shaderPreparation,ground,pickEntity,screen,centre,focusStorySignal,setGhost,commandMarker,drawMinimapFog:fog.drawMinimap,storySignals,update,prepareFrame,updateTrafficVisibility,keys,buildingObjects:buildings,set minimumCameraHeight(value){minimumCameraHeight=value;},set fixedRenderScale(value){fixedRenderScale=value;},get fixedRenderScale(){return fixedRenderScale;},get statistics(){return{drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,vehicleDrawCalls:vehicles.drawCalls,vehicleLod:vehicles.lod,dustParticles:particles.length,dustLimit:256,...combat.statistics,...groundEffects.statistics,headlightBeams:headlightCount,projectors:construction.active,frameMs:frameAverage*1000,renderScale:renderer.getPixelRatio(),terrainMode,shadowUpdates,shadowQuality,shadowHz,fog:fog.stats,damage:damage.statistics};}};
+ return{renderer,scene,camera,controls,terrain,field,vehicles,damage,healthBars,orderRoutes,setShadowQuality,prepareRendering,shaderPreparation,ground,pickEntity,screen,centre,focusStorySignal,setGhost,commandMarker,drawMinimapFog:fog.drawMinimap,storySignals,update,prepareFrame,updateTrafficVisibility,keys,buildingObjects:buildings,get minimumCameraHeight(){return minimumCameraHeight;},set minimumCameraHeight(value){minimumCameraHeight=value;},set fixedRenderScale(value){fixedRenderScale=value;},get fixedRenderScale(){return fixedRenderScale;},get statistics(){return{drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,vehicleDrawCalls:vehicles.drawCalls,vehicleLod:vehicles.lod,dustParticles:particles.length,dustLimit:256,...combat.statistics,...groundEffects.statistics,headlightBeams:headlightCount,projectors:construction.active,frameMs:frameAverage*1000,renderScale:renderer.getPixelRatio(),terrainMode,shadowUpdates,shadowQuality,shadowHz,fog:fog.stats,damage:damage.statistics};}};
 }
