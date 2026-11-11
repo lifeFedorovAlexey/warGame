@@ -1405,6 +1405,41 @@
       "pauseAfter": 0.2,
       "recordingStatus": "Т",
       "notes": ""
+    },
+    {
+      "id": "m01-v3-r38-l001",
+      "speaker": "scout",
+      "text": "Башню подавили. Чертежи сохранились.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т"
+    },
+    {
+      "id": "m01-v3-r38-l002",
+      "speaker": "commander",
+      "text": "В НИИ. Пусть теперь наши такую сделают.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т"
+    },
+    {
+      "id": "m01-s10-l011",
+      "speaker": "scientist",
+      "text": "Мы установили принцип действия оборонительного сооружения.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т"
+    },
+    {
+      "id": "m01-v3-r47-l001",
+      "speaker": "scout",
+      "text": "Последний лагерь зачищен. Сопротивление прекращено.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т"
+    },
+    {
+      "id": "m01-v3-r47-l002",
+      "speaker": "commander",
+      "text": "Территорию проверить. Технику собрать у базы.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т"
     }
   ],
   "clips": {
@@ -2398,18 +2433,24 @@
       "text": "А мы?"
     },
     "m01-s07-l014": {
-      "file": "recordings/reviewed/m01-s07-l014-4e14be06b9b1.mp3",
-      "duration": 3.474291666666667,
-      "leadingSilence": 0.13,
-      "trailingSilence": 0.4142916666666667,
+      "file": "recordings/elevenlabs/m01-s07-l014-c93c7aaf2ed5.mp3",
+      "duration": 2.8,
+      "leadingSilence": 0.06,
+      "trailingSilence": 0.19999999999999973,
       "speaker": "radio",
-      "sha256": "4e14be06b9b1155f9d172d2ad351ef622770b629d1241313303b233a4ca38308",
-      "bytes": 72525,
-      "origin": "user-recording",
-      "sourceName": "ElevenLabs_2026-11-10T09_10_57_Egor Gadzhiyev - Clear and Commanding_pvc_s50_sim75_v4.mp3",
-      "draftRevision": 120,
-      "transcriptSource": "owner-workshop",
-      "text": "А мы цивилизацию восстанавливаем."
+      "text": "А мы цивилизацию восстанавливаем.",
+      "sha256": "c93c7aaf2ed567d99120ae8915369058cffcfbcc5c3c64236141e268128db0a3",
+      "bytes": 46018,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:22:53.752Z",
+      "draftRevision": 217
     },
     "m01-s07-l016": {
       "file": "recordings/reviewed/m01-s07-l016-afb6e8a76f18.mp3",

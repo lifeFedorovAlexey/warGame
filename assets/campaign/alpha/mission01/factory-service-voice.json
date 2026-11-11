@@ -6,16 +6,24 @@
       "speaker": "builder",
       "text": "Загоняй. Сейчас подварим.",
       "clip": {
-        "file": "audio-factory-service/factory-repair-start.ogg",
-        "duration": 2.5269583333333334,
-        "leadingSilence": 0.07,
-        "trailingSilence": 0.33695833333333347,
+        "file": "recordings/elevenlabs/factory-repair-start-35d9c73ef032.mp3",
+        "duration": 2.24,
+        "leadingSilence": 0.03,
+        "trailingSilence": 0.22999999999999998,
         "speaker": "builder",
-        "sha256": "3f75e31e72d987c23a4775f3e7fc87852b0187740aac055338dc916625c4d857",
-        "bytes": 12091,
-        "origin": "temporary-synthesis",
-        "generator": "local Piper + FFmpeg",
-        "voice": "denis"
+        "text": "Загоняй. Сейчас подварим.",
+        "sha256": "35d9c73ef0325bff48255bebd632455e9e8e56eed175c6368f540264050bc4c4",
+        "bytes": 36823,
+        "origin": "elevenlabs-synthesis",
+        "voiceId": "txnCCHHGKmYIwrn7HfHQ",
+        "voiceName": "Alexandr Vlasov - Vibrant and Energetic",
+        "modelId": "eleven_v4",
+        "voiceSettings": {
+          "stability": 0.5,
+          "similarityBoost": 0.75
+        },
+        "generatedAt": "2026-11-11T19:24:47.125Z",
+        "draftRevision": 217
       }
     },
     {
@@ -24,16 +32,24 @@
       "speaker": "warrant",
       "text": "Рано списывать. Эта ещё поездит.",
       "clip": {
-        "file": "audio-factory-service/factory-repair-start-alt.ogg",
-        "duration": 2.5869166666666668,
+        "file": "recordings/elevenlabs/factory-repair-start-alt-f41677c67520.mp3",
+        "duration": 2.72,
         "leadingSilence": 0.02,
-        "trailingSilence": 0.2869166666666665,
+        "trailingSilence": 0.20999999999999996,
         "speaker": "warrant",
-        "sha256": "43ebc203b815be64d7f655b11f5231122f2d7d723e6ee6c59947e0f61494ba2e",
-        "bytes": 12490,
-        "origin": "temporary-synthesis",
-        "generator": "local Piper + FFmpeg",
-        "voice": "dmitri"
+        "text": "Рано списывать. Эта ещё поездит.",
+        "sha256": "f41677c67520ae660c3d9bf7e75e8e4153aa5b96f6234dfdcc09808ec7cdc140",
+        "bytes": 44764,
+        "origin": "elevenlabs-synthesis",
+        "voiceId": "6A9D8WSMm4rFsg2DWFeE",
+        "voiceName": "Egor Gadzhiyev - Clear and Commanding",
+        "modelId": "eleven_v4",
+        "voiceSettings": {
+          "stability": 0.5,
+          "similarityBoost": 0.75
+        },
+        "generatedAt": "2026-11-11T19:24:48.569Z",
+        "draftRevision": 217
       }
     },
     {
@@ -42,16 +58,24 @@
       "speaker": "builder",
       "text": "Готово. Только краску не трогай.",
       "clip": {
-        "file": "audio-factory-service/factory-repair-complete.ogg",
-        "duration": 2.7359166666666668,
-        "leadingSilence": 0.04,
-        "trailingSilence": 0.4359166666666665,
+        "file": "recordings/elevenlabs/factory-repair-complete-26c7dada3b1e.mp3",
+        "duration": 2.56,
+        "leadingSilence": 0.02,
+        "trailingSilence": 0.20999999999999996,
         "speaker": "builder",
-        "sha256": "08057f46edce281a7857383294850595054310842508ed09dbe0ef7bbd9441f7",
-        "bytes": 13073,
-        "origin": "temporary-synthesis",
-        "generator": "local Piper + FFmpeg",
-        "voice": "denis"
+        "text": "Готово. Только краску не трогай.",
+        "sha256": "26c7dada3b1e1b5ab7f45ca334d4af903b2b69fa39951a7684fa08c3b4bd697a",
+        "bytes": 41838,
+        "origin": "elevenlabs-synthesis",
+        "voiceId": "txnCCHHGKmYIwrn7HfHQ",
+        "voiceName": "Alexandr Vlasov - Vibrant and Energetic",
+        "modelId": "eleven_v4",
+        "voiceSettings": {
+          "stability": 0.5,
+          "similarityBoost": 0.75
+        },
+        "generatedAt": "2026-11-11T19:24:49.897Z",
+        "draftRevision": 217
       }
     }
   ]

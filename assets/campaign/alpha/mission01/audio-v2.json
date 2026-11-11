@@ -573,187 +573,264 @@
       "textMatch": "exact"
     },
     "m01-v3-r38-l002": {
-      "file": "audio-v2/m01-v3-r38-l002.ogg",
-      "duration": 5.799833333333333,
-      "leadingSilence": 0.08,
-      "trailingSilence": 0.339833333333333,
+      "file": "recordings/elevenlabs/m01-v3-r38-l002-7716172ede8e.mp3",
+      "duration": 3.92,
+      "leadingSilence": 0.03,
+      "trailingSilence": 0.21999999999999975,
       "speaker": "commander",
-      "sha256": "2014bba857923b865f006e9beb2e54cb80015fc3e801d2cb453329962feaaf15",
-      "bytes": 28302,
-      "origin": "temporary-synthesis",
-      "generator": "local Piper + FFmpeg",
-      "voice": "denis"
+      "text": "В НИИ. Пусть теперь наши такую сделают.",
+      "sha256": "7716172ede8e7fd232d6469a21ba92aa3f255ad48d2d8e38541c1606fcbf4dcf",
+      "bytes": 63990,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:23:28.625Z",
+      "draftRevision": 217
     },
     "m01-s10-l012": {
-      "file": "audio/m01-s10-l012.ogg",
-      "duration": 1.3455,
-      "leadingSilence": 0.04,
-      "trailingSilence": 0.4254999999999999,
+      "file": "recordings/elevenlabs/m01-s10-l012-5a5a40b4973d.mp3",
+      "duration": 1.12,
+      "leadingSilence": 0.03,
+      "trailingSilence": 0.17000000000000004,
       "speaker": "commander",
-      "sha256": "5fda3b40677715e18d2dec477bc7c904e9f7fad3c10ae095e44bcb85d29223d2",
-      "bytes": 6342,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s10-l012"
+      "text": "Докладывайте.",
+      "sha256": "5a5a40b4973df3f8479716986875d0de637ac0c4eb0243da203beb6fdb8d84bf",
+      "bytes": 18851,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:23:31.748Z",
+      "draftRevision": 217
     },
     "m01-s10-l018": {
-      "file": "audio/m01-s10-l018.ogg",
-      "duration": 2.5297083333333332,
-      "leadingSilence": 0.06,
-      "trailingSilence": 0.32970833333333305,
+      "file": "recordings/elevenlabs/m01-s10-l018-f74910f03147.mp3",
+      "duration": 2.8,
+      "leadingSilence": 0.04,
+      "trailingSilence": 0.3299999999999996,
       "speaker": "commander",
-      "sha256": "93910cba4431354fdd5a613a46f635a6472a9a560466babe977275412e4aeac4",
-      "bytes": 12639,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s10-l018"
+      "text": "А ведь раньше целые институты были…",
+      "sha256": "f74910f03147b35022d24204a2f5ddc0f5c6a6ba616befc6552db7ecdea24e66",
+      "bytes": 46018,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:23:34.592Z",
+      "draftRevision": 217
     },
     "m01-s10-l020": {
-      "file": "audio/m01-s10-l020.ogg",
-      "duration": 1.438375,
-      "leadingSilence": 0.03,
-      "trailingSilence": 0.3583749999999999,
+      "file": "recordings/elevenlabs/m01-s10-l020-bfc15d79d640.mp3",
+      "duration": 1.2,
+      "leadingSilence": 0.02,
+      "trailingSilence": 0.07999999999999985,
       "speaker": "commander",
-      "sha256": "4870d707816b03c1ebaab0d73a60be78e996e6735473e72ffdae8a43e98ad97c",
-      "bytes": 6894,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s10-l020"
+      "text": "Вот я и говорю.",
+      "sha256": "bfc15d79d6407b885bc6518de6d915a737a6b6bf342fedaa665273e9a1b742d2",
+      "bytes": 20105,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:23:36.557Z",
+      "draftRevision": 217
     },
     "m01-v3-r41-l002": {
-      "file": "audio-v2/m01-v3-r41-l002.ogg",
-      "duration": 1.2758333333333334,
-      "leadingSilence": 0.04,
-      "trailingSilence": 0.4658333333333333,
+      "file": "recordings/elevenlabs/m01-v3-r41-l002-4c8da50d911e.mp3",
+      "duration": 1.12,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.16000000000000014,
       "speaker": "commander",
-      "sha256": "ef8aa86440e1f9e13245186503734f3c0522844780c3841225b0f31711289815",
-      "bytes": 6112,
-      "origin": "temporary-synthesis",
-      "generator": "local Piper + FFmpeg",
-      "voice": "denis"
+      "text": "Кто командует?",
+      "sha256": "4c8da50d911eb9fd559e1f3dc9e7a985b3b9a600ee4430f94f5e618005e09d70",
+      "bytes": 18851,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:23:39.216Z",
+      "draftRevision": 217
     },
     "m01-s11-l002": {
-      "file": "audio/m01-s11-l002.ogg",
-      "duration": 2.553,
-      "leadingSilence": 0.06,
-      "trailingSilence": 0.2629999999999999,
+      "file": "recordings/elevenlabs/m01-s11-l002-f67cdd75de30.mp3",
+      "duration": 2.64,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.10999999999999988,
       "speaker": "commander",
-      "sha256": "3e9c5de53335be261656ea87bdae55a790864720f8770736ddcdba41b03febd9",
-      "bytes": 12690,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s11-l002"
+      "text": "Какое у вас государственное образование?",
+      "sha256": "f67cdd75de306b365521e5bb310d73ad8bda47c392abaf226e2372655ff54186",
+      "bytes": 43510,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:23:43.515Z",
+      "draftRevision": 217
     },
     "m01-s11-l004": {
-      "file": "audio/m01-s11-l004.ogg",
-      "duration": 1.40425,
-      "leadingSilence": 0.06,
-      "trailingSilence": 0.36424999999999996,
+      "file": "recordings/elevenlabs/m01-s11-l004-4e300026b671.mp3",
+      "duration": 1.28,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.1499999999999999,
       "speaker": "commander",
-      "sha256": "33dd62364ae230e7053d7eb52e6074a00b4d7e10859982948332345799e5dc86",
-      "bytes": 6646,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s11-l004"
+      "text": "Кто у вас главный?",
+      "sha256": "4e300026b67107467d944d96082659b78685dc7cba1ef0250c18261ed1c2101f",
+      "bytes": 21358,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:23:45.350Z",
+      "draftRevision": 217
     },
     "m01-s11-l006": {
-      "file": "audio/m01-s11-l006.ogg",
-      "duration": 1.0204166666666667,
-      "leadingSilence": 0.07,
-      "trailingSilence": 0.4404166666666668,
+      "file": "recordings/elevenlabs/m01-s11-l006-563d746d9757.mp3",
+      "duration": 1.04,
+      "leadingSilence": 0.02,
+      "trailingSilence": 0.28,
       "speaker": "commander",
-      "sha256": "adeb835057cc29088d195a8f0f3e0f89d05e7d904098e649983805ec7c89c21a",
-      "bytes": 4742,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s11-l006"
+      "text": "Должность?",
+      "sha256": "563d746d9757bd8302c7848ca2bb8c56866007a4665f4a97fe1a0ca378b203ca",
+      "bytes": 17597,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:23:47.040Z",
+      "draftRevision": 217
     },
     "m01-s11-l008": {
-      "file": "audio/m01-s11-l008.ogg",
-      "duration": 1.7867083333333333,
-      "leadingSilence": 0.06,
-      "trailingSilence": 0.3667083333333334,
+      "file": "recordings/elevenlabs/m01-s11-l008-f972f8c51555.mp3",
+      "duration": 1.92,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.16999999999999993,
       "speaker": "commander",
-      "sha256": "33ff3f1493e5beb8a4a21bd5b83273d221fefde57dbbf35e9fc244b1dbd0d39d",
-      "bytes": 8708,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s11-l008"
+      "text": "Конституция имеется?",
+      "sha256": "f972f8c515553170d75b10bbc4095840ea08c110f8c1cdc3064d4193e851815a",
+      "bytes": 31807,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:23:49.272Z",
+      "draftRevision": 217
     },
     "m01-s11-l010": {
-      "file": "audio/m01-s11-l010.ogg",
-      "duration": 7.041416666666667,
-      "leadingSilence": 0.04,
-      "trailingSilence": 0.28141666666666687,
+      "file": "recordings/elevenlabs/m01-s11-l010-be5fa9a5184e.mp3",
+      "duration": 6.8,
+      "leadingSilence": 0.03,
+      "trailingSilence": 0.1899999999999995,
       "speaker": "commander",
-      "sha256": "740ef2a78a26dc747e97470739529a079f674679d2a7678c514dde9e9d526fb3",
-      "bytes": 34711,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s11-l010"
+      "text": "Запиши. Нелегитимное вооружённое формирование. Отсутствуют признаки государственного управления.",
+      "sha256": "be5fa9a5184e471535c124c4490fba7498337f1cb993300224850769b2216c51",
+      "bytes": 109966,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:23:52.309Z",
+      "draftRevision": 217
     },
     "m01-s11-l012": {
-      "file": "audio/m01-s11-l012.ogg",
-      "duration": 0.463125,
-      "leadingSilence": 0.06,
-      "trailingSilence": 0.193125,
+      "file": "recordings/elevenlabs/m01-s11-l012-dd27331c3fcd.mp3",
+      "duration": 0.56,
+      "leadingSilence": 0.03,
+      "trailingSilence": 0.19000000000000006,
       "speaker": "commander",
-      "sha256": "f52ec7639006bd85f32cf0920f5d78e2658d571c4c9869c3ddddbee013b9aed4",
-      "bytes": 2197,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s11-l012"
+      "text": "И?",
+      "sha256": "dd27331c3fcd8b30d0066737f61f8320ef7ff07feb2a2f4e9f301a5744bba0f9",
+      "bytes": 10074,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:23:52.956Z",
+      "draftRevision": 217
     },
     "m01-v3-r46-l002": {
-      "file": "audio-v2/m01-v3-r46-l002.ogg",
-      "duration": 3.434083333333333,
-      "leadingSilence": 0.04,
-      "trailingSilence": 0.31408333333333305,
+      "file": "recordings/elevenlabs/m01-v3-r46-l002-90ec711a5836.mp3",
+      "duration": 3.2,
+      "leadingSilence": 0.03,
+      "trailingSilence": 0.14000000000000012,
       "speaker": "commander",
-      "sha256": "5f098b1ba47a4d649160c6eb34d23f34330e340f0dd1fcfbbde2577512dd9787",
-      "bytes": 16703,
-      "origin": "temporary-synthesis",
-      "generator": "local Piper + FFmpeg",
-      "voice": "denis"
+      "text": "Пути отхода перекрыть. Продолжать наступление.",
+      "sha256": "90ec711a58366c906fad39d8836cc359dc1ed8de9636d604ad0e6fd29d49d0a1",
+      "bytes": 52287,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:23:55.671Z",
+      "draftRevision": 217
     },
     "m01-v3-r47-l002": {
-      "file": "audio-v2/m01-v3-r47-l002.ogg",
-      "duration": 5.00075,
+      "file": "recordings/elevenlabs/m01-v3-r47-l002-460efb735f42.mp3",
+      "duration": 3.28,
       "leadingSilence": 0.04,
-      "trailingSilence": 0.25075000000000003,
+      "trailingSilence": 0.17999999999999972,
       "speaker": "commander",
-      "sha256": "8988e3f451da57c28a8164e6803a3bc30594026db0c40e35da1c719fb75e2669",
-      "bytes": 24634,
-      "origin": "temporary-synthesis",
-      "generator": "local Piper + FFmpeg",
-      "voice": "denis"
+      "text": "Территорию проверить. Технику собрать у базы.",
+      "sha256": "460efb735f42aacde1d82de4425a20d66484f7b28aa623c39bbb55b8d97b6bfc",
+      "bytes": 53541,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:23:58.487Z",
+      "draftRevision": 217
     },
     "field:victory": {
       "file": "field-radio/victory.mp3",
@@ -771,193 +848,264 @@
       "textMatch": "exact"
     },
     "m01-s13-l002": {
-      "file": "audio/m01-s13-l002.ogg",
-      "duration": 5.013041666666667,
+      "file": "recordings/elevenlabs/m01-s13-l002-c46413b97d9d.mp3",
+      "duration": 4.8,
       "leadingSilence": 0.04,
-      "trailingSilence": 0.3730416666666674,
+      "trailingSilence": 0.17999999999999972,
       "speaker": "commander",
-      "sha256": "4323a9191384329aef50e85ffe76ebea519af6979cc05d3e5b56997b3b376e5d",
-      "bytes": 24778,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s13-l002"
+      "text": "Подняли, конечно. Только вот до войны, говорят, люди на Луну летали.",
+      "sha256": "c46413b97d9d39150e1072c03ec696fe853e5ccc2c8641181b8a9ac31dd633fe",
+      "bytes": 77783,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:24:01.463Z",
+      "draftRevision": 217
     },
     "m01-s14-l002": {
-      "file": "audio/m01-s14-l002.ogg",
-      "duration": 0.857875,
-      "leadingSilence": 0.04,
-      "trailingSilence": 0.37787500000000007,
+      "file": "recordings/elevenlabs/m01-s14-l002-ff2623c57b11.mp3",
+      "duration": 0.88,
+      "leadingSilence": 0.06,
+      "trailingSilence": 0.17999999999999994,
       "speaker": "commander",
-      "sha256": "94abfd1135321d3faf1dbfabd6debcae4b7322c2710d5e6bd331970c6d495a53",
-      "bytes": 4011,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s14-l002"
+      "text": "Что там?",
+      "sha256": "ff2623c57b11bcc9d2a3d27aa0fb0faa7cd7e8cdb10313da26756c94b2590fa2",
+      "bytes": 15089,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:24:04.489Z",
+      "draftRevision": 217
     },
     "m01-s14-l004": {
-      "file": "audio/m01-s14-l004.ogg",
-      "duration": 1.0204166666666667,
-      "leadingSilence": 0.06,
-      "trailingSilence": 0.3704166666666667,
+      "file": "recordings/elevenlabs/m01-s14-l004-1752180829c3.mp3",
+      "duration": 0.88,
+      "leadingSilence": 0.07,
+      "trailingSilence": 0.16000000000000003,
       "speaker": "commander",
-      "sha256": "ce9a38e2104ab4f17b2d4e8587fa78848f79c25037f229227e4485baff23f70d",
-      "bytes": 4808,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s14-l004"
+      "text": "Опасен?",
+      "sha256": "1752180829c351890c90d8b100af7411bdb89cbb96b459bf41f6000b96c6e666",
+      "bytes": 15089,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:24:07.104Z",
+      "draftRevision": 217
     },
     "m01-s14-l006": {
-      "file": "audio/m01-s14-l006.ogg",
-      "duration": 0.82375,
+      "file": "recordings/elevenlabs/m01-s14-l006-34ddd13968a1.mp3",
+      "duration": 0.8,
       "leadingSilence": 0.04,
-      "trailingSilence": 0.38375,
+      "trailingSilence": 0.24,
       "speaker": "commander",
-      "sha256": "77d522e6b01f42cbf0d4a96cb464b25da6b3ab674ac45951b6b7e9bd4a27d099",
-      "bytes": 3913,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s14-l006"
+      "text": "Ценный?",
+      "sha256": "34ddd13968a15eab4c8603be2984a5e5c1731d5237c4a997daa04fadbd1cbf5f",
+      "bytes": 13835,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:24:08.534Z",
+      "draftRevision": 217
     },
     "m01-s14-l008": {
-      "file": "audio/m01-s14-l008.ogg",
-      "duration": 0.730875,
+      "file": "recordings/elevenlabs/m01-s14-l008-1e6efaa63e76.mp3",
+      "duration": 0.64,
       "leadingSilence": 0.04,
-      "trailingSilence": 0.37087500000000007,
+      "trailingSilence": 0.15000000000000002,
       "speaker": "commander",
-      "sha256": "54866d0979f445d14bf38405d441294df50d452072e4a65eafd5cfead378a84c",
-      "bytes": 3321,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s14-l008"
+      "text": "Наш?",
+      "sha256": "1e6efaa63e76d04de8fff3eec32d446291b5467d149dcd5f0e2db9e341c7f81c",
+      "bytes": 11327,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:24:09.928Z",
+      "draftRevision": 217
     },
     "m01-s14-l010": {
-      "file": "audio/m01-s14-l010.ogg",
-      "duration": 1.6242083333333333,
-      "leadingSilence": 0.06,
-      "trailingSilence": 0.3142083333333332,
+      "file": "recordings/elevenlabs/m01-s14-l010-324e3c7a603d.mp3",
+      "duration": 2.24,
+      "leadingSilence": 0.01,
+      "trailingSilence": 0.16000000000000014,
       "speaker": "commander",
-      "sha256": "96857d7239d6f4ab743b9347891a9491ba54154dd3c8859ed721b5da3a666554",
-      "bytes": 7997,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s14-l010"
+      "text": "Ну, значит, будет наш.",
+      "sha256": "324e3c7a603dc4fe59bef98a5ef814854f08066c1aa482b96b7cb7a394586a91",
+      "bytes": 36823,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:24:11.742Z",
+      "draftRevision": 217
     },
     "m01-s14-l016": {
-      "file": "audio/m01-s14-l016.ogg",
-      "duration": 3.865625,
-      "leadingSilence": 0.03,
-      "trailingSilence": 0.285625,
+      "file": "recordings/elevenlabs/m01-s14-l016-b7ae8a35276e.mp3",
+      "duration": 4.0,
+      "leadingSilence": 0.02,
+      "trailingSilence": 0.1200000000000001,
       "speaker": "commander",
-      "sha256": "af1441fe4a0bca079224d554cc8dceded23347fade3ac316a6bfac1ad3c8aae0",
-      "bytes": 19983,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s14-l016"
+      "text": "Тогда впервые за всю экспедицию ничего чинить не придётся.",
+      "sha256": "b7ae8a35276eaf0779b92b1d1d67b5b01b6af640eb6775e0e8076a9e6065970c",
+      "bytes": 65244,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:24:13.224Z",
+      "draftRevision": 217
     },
     "m01-v3-a01-l001": {
-      "file": "audio-v2/m01-v3-a01-l001.ogg",
-      "duration": 1.3810416666666667,
+      "file": "recordings/elevenlabs/m01-v3-a01-l001-17f7893953da.mp3",
+      "duration": 1.44,
       "leadingSilence": 0.06,
-      "trailingSilence": 0.3510416666666667,
+      "trailingSilence": 0.33999999999999986,
       "speaker": "commander",
-      "sha256": "28d55748042d62f185bb14f842a3c3bc0f5b7f7134409e69726576f6a46c7d5b",
-      "bytes": 6742,
-      "origin": "temporary-synthesis",
-      "generator": "local Piper + FFmpeg",
-      "voice": "denis"
+      "text": "Колонна готова?",
+      "sha256": "17f7893953daced14597352936df014b00e7e9f17e518688128253c34360a6f5",
+      "bytes": 24284,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:24:14.133Z",
+      "draftRevision": 217
     },
     "m01-v3-a03-l002": {
-      "file": "audio-v2/m01-v3-a03-l002.ogg",
-      "duration": 0.95075,
-      "leadingSilence": 0.05,
-      "trailingSilence": 0.33075,
+      "file": "recordings/elevenlabs/m01-v3-a03-l002-7634f2ae6cf3.mp3",
+      "duration": 0.72,
+      "leadingSilence": 0.06,
+      "trailingSilence": 0.13,
       "speaker": "commander",
-      "sha256": "578ce75c0e6e21a921cb096a4ca3dc06543ae043314f9c44d1a5c9a98899f96c",
-      "bytes": 4548,
-      "origin": "temporary-synthesis",
-      "generator": "local Piper + FFmpeg",
-      "voice": "denis"
+      "text": "Причина?",
+      "sha256": "7634f2ae6cf39390acbb248e530c0a4497f86d0b0ff8e7c54de74214f07dfc50",
+      "bytes": 12581,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:24:21.032Z",
+      "draftRevision": 217
     },
     "m01-s08-l020": {
-      "file": "audio/m01-s08-l020.ogg",
-      "duration": 2.249791666666667,
-      "leadingSilence": 0.04,
-      "trailingSilence": 0.4397916666666668,
+      "file": "recordings/elevenlabs/m01-s08-l020-9df10affdf6f.mp3",
+      "duration": 2.08,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.16000000000000014,
       "speaker": "commander",
-      "sha256": "f48091afc8699c1eb5579dae9f2d419cfcbadd11f7c8d7c62967fa50736b9318",
-      "bytes": 10528,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s08-l020"
+      "text": "Понятно. Испытывали?",
+      "sha256": "9df10affdf6ff7b03c4967b6a7935bea7cc81208c189e1800c7a80b859ba404f",
+      "bytes": 34315,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:24:25.926Z",
+      "draftRevision": 217
     },
     "m01-s08-l022": {
-      "file": "audio/m01-s08-l022.ogg",
-      "duration": 1.6242083333333333,
-      "leadingSilence": 0.06,
-      "trailingSilence": 0.46420833333333333,
+      "file": "recordings/elevenlabs/m01-s08-l022-75c88892e71c.mp3",
+      "duration": 1.6,
+      "leadingSilence": 0.02,
+      "trailingSilence": 0.14000000000000012,
       "speaker": "commander",
-      "sha256": "834595ab5cdb7f9953672f78d99f7398200dc1b655d7e029f931b22ad7f8b3ad",
-      "bytes": 7755,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s08-l022"
+      "text": "Значит, работает?",
+      "sha256": "75c88892e71cb1a0e686f47d5ec2e505ee0bedc85d413da771ef1d4374b1668f",
+      "bytes": 26792,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:24:28.407Z",
+      "draftRevision": 217
     },
     "m01-s12-l008": {
-      "file": "audio/m01-s12-l008.ogg",
-      "duration": 1.497125,
-      "leadingSilence": 0.06,
-      "trailingSilence": 0.39712499999999995,
+      "file": "recordings/elevenlabs/m01-s12-l008-49aa3a9864e5.mp3",
+      "duration": 1.44,
+      "leadingSilence": 0.03,
+      "trailingSilence": 0.22999999999999998,
       "speaker": "commander",
-      "sha256": "e4d4de1a98c05abe6c6d412b861095477dbba2584084cccedae1e5a417be6b3e",
-      "bytes": 7180,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s12-l008"
+      "text": "Прапорщик пробует.",
+      "sha256": "49aa3a9864e5ae578ac1bf97bd5cf098e6794137ccdf50e15aa3ca95d4f59a8a",
+      "bytes": 24284,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:24:31.523Z",
+      "draftRevision": 217
     },
     "m01-b018": {
-      "file": "audio/m01-b018.ogg",
-      "duration": 1.5080416666666667,
-      "leadingSilence": 0.04,
-      "trailingSilence": 0.44804166666666667,
+      "file": "recordings/elevenlabs/m01-b018-29b1d90d86a6.mp3",
+      "duration": 1.12,
+      "leadingSilence": 0.03,
+      "trailingSilence": 0.1200000000000001,
       "speaker": "commander",
-      "sha256": "ec789a56d98575f877bdd0d2f3321a0980f8b2f9402c93c8be3ce1d05ab78eaa",
-      "bytes": 7165,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-b018"
+      "text": "Рацию спасли?",
+      "sha256": "29b1d90d86a684f3a6a01ba58edbc7af9dd7cd6f2f0e4ce477e4d5b64984bb07",
+      "bytes": 18851,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:24:43.533Z",
+      "draftRevision": 217
     },
     "m01-s02-l004": {
       "file": "recordings/warrant/m01-s02-l004.mp3",
@@ -1233,28 +1381,44 @@
       "textMatch": "exact"
     },
     "m01-v3-a02-l002": {
-      "file": "audio-v2/m01-v3-a02-l002.ogg",
-      "duration": 2.92475,
-      "leadingSilence": 0.02,
-      "trailingSilence": 0.3647499999999999,
+      "file": "recordings/elevenlabs/m01-v3-a02-l002-fdec6478a154.mp3",
+      "duration": 3.2,
+      "leadingSilence": 0.1,
+      "trailingSilence": 0.20999999999999996,
       "speaker": "warrant",
-      "sha256": "debc56c756d904b9194ccfe0731227fd0226e60574ca1fd7a782f9532c6596bd",
-      "bytes": 13956,
-      "origin": "temporary-synthesis",
-      "generator": "local Piper + FFmpeg",
-      "voice": "dmitri"
+      "text": "Правильно. Железо нынче дороже вежливости.",
+      "sha256": "fdec6478a1542bda5ba1c9b27ac1cc09a1da6148e02ab694fa8323c381a519d3",
+      "bytes": 52287,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "6A9D8WSMm4rFsg2DWFeE",
+      "voiceName": "Egor Gadzhiyev - Clear and Commanding",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:24:19.394Z",
+      "draftRevision": 217
     },
     "m01-v3-a04-l002": {
-      "file": "audio-v2/m01-v3-a04-l002.ogg",
-      "duration": 2.9120416666666666,
-      "leadingSilence": 0.0,
-      "trailingSilence": 0.3520416666666666,
+      "file": "recordings/elevenlabs/m01-v3-a04-l002-f6b4c25a1ab6.mp3",
+      "duration": 3.04,
+      "leadingSilence": 0.02,
+      "trailingSilence": 0.18000000000000016,
       "speaker": "warrant",
-      "sha256": "00ca08aaa48eacd9c189fd1e66ab4eb15d8a5e8b71f37dc527a232d010514a49",
-      "bytes": 14134,
-      "origin": "temporary-synthesis",
-      "generator": "local Piper + FFmpeg",
-      "voice": "dmitri"
+      "text": "Запомните это место. Тут у нас порядок был.",
+      "sha256": "f6b4c25a1ab6b65a756af0ff536f8e4361666f447839e61e9582aec947fb213a",
+      "bytes": 49780,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "6A9D8WSMm4rFsg2DWFeE",
+      "voiceName": "Egor Gadzhiyev - Clear and Commanding",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:24:24.664Z",
+      "draftRevision": 217
     },
     "m01-s12-l009": {
       "file": "recordings/warrant/m01-s12-l009.mp3",
@@ -1530,19 +1694,24 @@
       "textMatch": "exact"
     },
     "m01-s07-l014": {
-      "file": "audio/m01-s07-l014.ogg",
-      "duration": 2.4230833333333335,
+      "file": "recordings/elevenlabs/m01-s07-l014-c93c7aaf2ed5.mp3",
+      "duration": 2.8,
       "leadingSilence": 0.06,
-      "trailingSilence": 0.25308333333333355,
+      "trailingSilence": 0.19999999999999973,
       "speaker": "radio",
-      "sha256": "f017765c61f7556a7b172090943070ceb3a598b0e1f9f21971b613f03e3e9af8",
-      "bytes": 12057,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s07-l014"
+      "text": "А мы цивилизацию восстанавливаем.",
+      "sha256": "c93c7aaf2ed567d99120ae8915369058cffcfbcc5c3c64236141e268128db0a3",
+      "bytes": 46018,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:22:53.752Z",
+      "draftRevision": 217
     },
     "m01-v3-r23-l001": {
       "file": "audio-v2/m01-v3-r23-l001.ogg",
@@ -1557,136 +1726,184 @@
       "voice": "denis"
     },
     "m01-v3-r46-l001": {
-      "file": "audio-v2/m01-v3-r46-l001.ogg",
-      "duration": 3.3983333333333334,
-      "leadingSilence": 0.04,
-      "trailingSilence": 0.2783333333333333,
+      "file": "recordings/elevenlabs/m01-v3-r46-l001-aa664a692f39.mp3",
+      "duration": 3.52,
+      "leadingSilence": 0.02,
+      "trailingSilence": 0.18000000000000016,
       "speaker": "radio",
-      "sha256": "525e219e044d1bff883887f30e97de20629a4f3560ea71a55f2352c25cd7e5ba",
-      "bytes": 17107,
-      "origin": "temporary-synthesis",
-      "generator": "local Piper + FFmpeg",
-      "voice": "denis"
+      "text": "Альфа, противник стягивает оставшиеся силы к штабу.",
+      "sha256": "aa664a692f3916b697fe55530ba94ec9278093967ab4d4869d42da139e7ded7c",
+      "bytes": 57303,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:23:54.413Z",
+      "draftRevision": 217
     },
     "m01-s12-l001": {
-      "file": "audio/m01-s12-l001.ogg",
-      "duration": 1.9699583333333333,
-      "leadingSilence": 0.06,
-      "trailingSilence": 0.2999583333333333,
+      "file": "recordings/elevenlabs/m01-s12-l001-9c5041acf449.mp3",
+      "duration": 2.08,
+      "leadingSilence": 0.03,
+      "trailingSilence": 0.16999999999999993,
       "speaker": "radio",
-      "sha256": "744c9a879d3493ac8d5e49442b37595a0de12f582f4b7ed3f4ed8a112c581b34",
-      "bytes": 9653,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s12-l001"
+      "text": "Альфа, доложите обстановку.",
+      "sha256": "9c5041acf449b059194c3b50cdbab834c853f6063d48e8c86ed35e85572ed60b",
+      "bytes": 34315,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:23:59.641Z",
+      "draftRevision": 217
     },
     "m01-s14-l001": {
-      "file": "audio/m01-s14-l001.ogg",
-      "duration": 7.294333333333333,
-      "leadingSilence": 0.04,
-      "trailingSilence": 0.3043333333333331,
+      "file": "recordings/elevenlabs/m01-s14-l001-c004f1ed6c8c.mp3",
+      "duration": 7.28,
+      "leadingSilence": 0.03,
+      "trailingSilence": 0.1900000000000004,
       "speaker": "radio",
-      "sha256": "5172b1dcfdb3c49c1fd10e525ee89104fe2223ac59780f8fb7fdfb0e8bed9572",
-      "bytes": 35860,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s14-l001"
+      "text": "Альфа! Срочное сообщение! Разведка зафиксировала мощный энергетический всплеск к югу от ваших позиций.",
+      "sha256": "c004f1ed6c8cc1284eeac5d4296637c1ddf10b0f61911fcded8c39aa39a95edc",
+      "bytes": 117489,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:24:03.760Z",
+      "draftRevision": 217
     },
     "m01-s14-l003": {
-      "file": "audio/m01-s14-l003.ogg",
-      "duration": 4.5568333333333335,
-      "leadingSilence": 0.06,
-      "trailingSilence": 0.3768333333333338,
+      "file": "recordings/elevenlabs/m01-s14-l003-6af1dda50144.mp3",
+      "duration": 5.12,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.13999999999999968,
       "speaker": "radio",
-      "sha256": "65558d1b00304f9787f9e0c396de1d81fd91f06d9d34f813c37a917665a72273",
-      "bytes": 22418,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s14-l003"
+      "text": "Источник неизвестен. Возможно, довоенный технологический комплекс.",
+      "sha256": "6af1dda501448a19045b11dafd9db11aa6f5c0457e920c40be7ccd0d2884b40b",
+      "bytes": 82798,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:24:06.473Z",
+      "draftRevision": 217
     },
     "m01-s14-l005": {
-      "file": "audio/m01-s14-l005.ogg",
-      "duration": 1.3197916666666667,
-      "leadingSilence": 0.04,
-      "trailingSilence": 0.3397916666666667,
+      "file": "recordings/elevenlabs/m01-s14-l005-671ec857f380.mp3",
+      "duration": 1.2,
+      "leadingSilence": 0.02,
+      "trailingSilence": 0.1399999999999999,
       "speaker": "radio",
-      "sha256": "dfd278ba67a8a90ff21129bb4fbab28619a5bc98caf86081800008a834f62385",
-      "bytes": 6359,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s14-l005"
+      "text": "Не исключено.",
+      "sha256": "671ec857f3808b99e38541b5914d8bb12a692b730165ad6d0b126b98c1159c55",
+      "bytes": 20105,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:24:07.850Z",
+      "draftRevision": 217
     },
     "m01-s14-l007": {
-      "file": "audio/m01-s14-l007.ogg",
-      "duration": 1.15725,
-      "leadingSilence": 0.05,
-      "trailingSilence": 0.4272499999999999,
+      "file": "recordings/elevenlabs/m01-s14-l007-0718d8ab4817.mp3",
+      "duration": 0.96,
+      "leadingSilence": 0.04,
+      "trailingSilence": 0.12,
       "speaker": "radio",
-      "sha256": "c1fd1d19eef7c0d2a8777c1e26db29956bc0ba93abb9e9df3110fb789d1e7a28",
-      "bytes": 5252,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s14-l007"
+      "text": "Вероятно.",
+      "sha256": "0718d8ab48179f9d9668dbdf45ff0988d66cc996052d82429a9c1bc53ed288ec",
+      "bytes": 16343,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:24:09.316Z",
+      "draftRevision": 217
     },
     "m01-s14-l009": {
-      "file": "audio/m01-s14-l009.ogg",
-      "duration": 1.1459583333333334,
-      "leadingSilence": 0.06,
-      "trailingSilence": 0.5059583333333334,
+      "file": "recordings/elevenlabs/m01-s14-l009-a4db286b8f57.mp3",
+      "duration": 0.96,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.15999999999999992,
       "speaker": "radio",
-      "sha256": "83cdb328b143f889b3706e0587ec8c5f6bcc314e14d6b267a951fb0bac0933de",
-      "bytes": 5273,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s14-l009"
+      "text": "Пока нет.",
+      "sha256": "a4db286b8f5744aed8d737a21698dd42d982626d794689cb05bad27c7af32c55",
+      "bytes": 16343,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:24:10.686Z",
+      "draftRevision": 217
     },
     "m01-s12-l005": {
-      "file": "audio/m01-s12-l005.ogg",
-      "duration": 2.4575833333333335,
-      "leadingSilence": 0.04,
-      "trailingSilence": 0.31758333333333333,
+      "file": "recordings/elevenlabs/m01-s12-l005-acd0f57fa271.mp3",
+      "duration": 2.48,
+      "leadingSilence": 0.03,
+      "trailingSilence": 0.1200000000000001,
       "speaker": "radio",
-      "sha256": "fcf9e3e1d7361beeca065cc0e4b9798bf52f2bf0db96b209c6cb660ffa481a9e",
-      "bytes": 12154,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s12-l005"
+      "text": "Продовольствие пригодно к употреблению?",
+      "sha256": "acd0f57fa2716ca0fab3e1a5ce86d9cbd02d37588833d236c75a6c91f67faa28",
+      "bytes": 40585,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:24:30.480Z",
+      "draftRevision": 217
     },
     "m01-s12-l013": {
-      "file": "audio/m01-s12-l013.ogg",
-      "duration": 5.032541666666667,
+      "file": "recordings/elevenlabs/m01-s12-l013-ff6b7fa3029e.mp3",
+      "duration": 4.72,
       "leadingSilence": 0.04,
-      "trailingSilence": 0.32254166666666695,
+      "trailingSilence": 0.20999999999999996,
       "speaker": "radio",
-      "sha256": "b625e6673127766598fd0a32a337f8d19695d3d76a096ffed5cd8f2066f60f43",
-      "bytes": 24786,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s12-l013"
+      "text": "Продолжайте выполнение задачи. Трофейное продовольствие поставить на учёт.",
+      "sha256": "ff6b7fa3029e0bb3d188689385476058abd4e3856a6f4853066e4d2de05114a3",
+      "bytes": 76529,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:24:33.478Z",
+      "draftRevision": 217
     },
     "m01-s08-l013": {
       "file": "audio-v2/m01-s08-l013.ogg",
@@ -1782,106 +1999,144 @@
       "textMatch": "exact"
     },
     "m01-s10-l011": {
-      "file": "audio-v2/m01-s10-l011.ogg",
-      "duration": 5.577958333333333,
-      "leadingSilence": 0.04,
-      "trailingSilence": 0.37795833333333295,
+      "file": "recordings/elevenlabs/m01-s10-l011-aad99cc9f9e8.mp3",
+      "duration": 3.84,
+      "leadingSilence": 0.03,
+      "trailingSilence": 0.1599999999999997,
       "speaker": "scientist",
-      "sha256": "58588139b456c6c2e573d367435839d3ca78b401f3ed077cbf22b2924210b355",
-      "bytes": 27494,
-      "origin": "temporary-synthesis",
-      "generator": "local Piper + FFmpeg",
-      "voice": "dmitri"
+      "text": "Мы установили принцип действия оборонительного сооружения.",
+      "sha256": "aad99cc9f9e82b21049f2c75209fc040b85b65779ff03d5be946996e2c133350",
+      "bytes": 62318,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "1KGG4Q8LqRdNII9xBurw",
+      "voiceName": "M. Danisch - Narrator",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:23:30.619Z",
+      "draftRevision": 217
     },
     "m01-s10-l013": {
-      "file": "audio/m01-s10-l013.ogg",
-      "duration": 3.0605,
-      "leadingSilence": 0.02,
-      "trailingSilence": 0.3705000000000003,
+      "file": "recordings/elevenlabs/m01-s10-l013-d9bbe6f9253c.mp3",
+      "duration": 3.6,
+      "leadingSilence": 0.03,
+      "trailingSilence": 0.16000000000000014,
       "speaker": "scientist",
-      "sha256": "f9be334b2bab9dc3325f49b97d99b3103807b8c8d5b58e92a0323dd73a169895",
-      "bytes": 15187,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s10-l013"
+      "text": "Если пулемёт поставить повыше, он стреляет дальше.",
+      "sha256": "d9bbe6f9253cab120f93fc397da86de4b8c0e10359160f07ad9ce5f929dcfdc6",
+      "bytes": 58557,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "1KGG4Q8LqRdNII9xBurw",
+      "voiceName": "M. Danisch - Narrator",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:23:33.380Z",
+      "draftRevision": 217
     },
     "m01-s10-l019": {
-      "file": "audio/m01-s10-l019.ogg",
-      "duration": 1.4937083333333334,
-      "leadingSilence": 0.01,
-      "trailingSilence": 0.3737083333333333,
+      "file": "recordings/elevenlabs/m01-s10-l019-56e7d53cc21f.mp3",
+      "duration": 2.0,
+      "leadingSilence": 0.04,
+      "trailingSilence": 0.16999999999999993,
       "speaker": "scientist",
-      "sha256": "ca1d5f736cb211e3def88c9a4747005145965fb5cee13354cf0d6831a0893760",
-      "bytes": 7213,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s10-l019"
+      "text": "Так мы и есть институт.",
+      "sha256": "56e7d53cc21f1d04e08fdf040c9782f5001b3cc6d924a6d6ab3e3cb4af1accdc",
+      "bytes": 33061,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "1KGG4Q8LqRdNII9xBurw",
+      "voiceName": "M. Danisch - Narrator",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:23:35.688Z",
+      "draftRevision": 217
     },
     "m01-s08-l021": {
-      "file": "audio/m01-s08-l021.ogg",
-      "duration": 1.7113333333333334,
-      "leadingSilence": 0.01,
-      "trailingSilence": 0.3513333333333333,
+      "file": "recordings/elevenlabs/m01-s08-l021-50d9408ad37e.mp3",
+      "duration": 2.48,
+      "leadingSilence": 0.03,
+      "trailingSilence": 0.18999999999999995,
       "speaker": "scientist",
-      "sha256": "cf8cbe3083a416a6c419bc33396f555e6863671f84e44038abeadb187954ace6",
-      "bytes": 8843,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s08-l021"
+      "text": "Да. Сгорела лаборатория.",
+      "sha256": "50d9408ad37e40216d19c69c22acb24910ffab0ec134f4e34d17be2071cbc01d",
+      "bytes": 40585,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "1KGG4Q8LqRdNII9xBurw",
+      "voiceName": "M. Danisch - Narrator",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:24:27.405Z",
+      "draftRevision": 217
     },
     "m01-s08-l023": {
-      "file": "audio/m01-s08-l023.ogg",
-      "duration": 1.0404166666666668,
-      "leadingSilence": 0.04,
-      "trailingSilence": 0.3204166666666668,
+      "file": "recordings/elevenlabs/m01-s08-l023-29e521b9f5fd.mp3",
+      "duration": 1.44,
+      "leadingSilence": 0.06,
+      "trailingSilence": 0.3599999999999999,
       "speaker": "scientist",
-      "sha256": "95969e608a3cb4a26efbf4aa23683e9d1f2545975c46ae99d69e829a92d58521",
-      "bytes": 4949,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s08-l023"
+      "text": "Превосходно.",
+      "sha256": "29e521b9f5fd6c51fef0e311b29e4f459fce48df71e82d43e5e1b07d0a122ed3",
+      "bytes": 24284,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "1KGG4Q8LqRdNII9xBurw",
+      "voiceName": "M. Danisch - Narrator",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:24:29.302Z",
+      "draftRevision": 217
     },
     "m01-b014": {
-      "file": "audio/m01-b014.ogg",
-      "duration": 2.1782083333333335,
-      "leadingSilence": 0.01,
-      "trailingSilence": 0.36820833333333347,
+      "file": "recordings/elevenlabs/m01-b014-393d161fe461.mp3",
+      "duration": 2.72,
+      "leadingSilence": 0.06,
+      "trailingSilence": 0.18999999999999995,
       "speaker": "scientist",
-      "sha256": "9a061d1db4cb3e27acf18fa07074d7a4f771044dd07326ea465a62a9c1a3adb0",
-      "bytes": 10639,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-b014"
+      "text": "Сейчас посмотрим, что там накрутили.",
+      "sha256": "393d161fe46188f05fe16e8a8b1df35eaea1dfb97acaaef17fad72389732ec3b",
+      "bytes": 44764,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "1KGG4Q8LqRdNII9xBurw",
+      "voiceName": "M. Danisch - Narrator",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:24:38.863Z",
+      "draftRevision": 217
     },
     "m01-b015": {
-      "file": "audio/m01-b015.ogg",
-      "duration": 2.8844583333333333,
+      "file": "recordings/elevenlabs/m01-b015-bb4c3c6085a4.mp3",
+      "duration": 3.68,
       "leadingSilence": 0.04,
-      "trailingSilence": 0.39445833333333313,
+      "trailingSilence": 0.22999999999999998,
       "speaker": "scientist",
-      "sha256": "2c7be4f90f9cd7ea3952031a05a02ceae1b08393152c09367f8d000fa7bcc32e",
-      "bytes": 13630,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-b015"
+      "text": "Разобрались. Собрать обратно не обещаем.",
+      "sha256": "bb4c3c6085a4ae20cd5f9de028e06f226c21facb9ee66f890242881b8d86939f",
+      "bytes": 59811,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "1KGG4Q8LqRdNII9xBurw",
+      "voiceName": "M. Danisch - Narrator",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:24:40.491Z",
+      "draftRevision": 217
     },
     "m01-v3-r03-l001": {
       "file": "audio-v2/m01-v3-r03-l001.ogg",
@@ -2178,64 +2433,104 @@
       "textMatch": "exact"
     },
     "m01-v3-r38-l001": {
-      "file": "audio-v2/m01-v3-r38-l001.ogg",
-      "duration": 4.556291666666667,
-      "leadingSilence": 0.04,
-      "trailingSilence": 0.2562916666666668,
+      "file": "recordings/elevenlabs/m01-v3-r38-l001-adcedb038611.mp3",
+      "duration": 3.04,
+      "leadingSilence": 0.02,
+      "trailingSilence": 0.1299999999999999,
       "speaker": "scout",
-      "sha256": "02130e2fa65f38b03f33298d1382a65083244cb959fc235b64b9ad7150d8818f",
-      "bytes": 22549,
-      "origin": "temporary-synthesis",
-      "generator": "local Piper + FFmpeg",
-      "voice": "denis"
+      "text": "Башню подавили. Чертежи сохранились.",
+      "sha256": "adcedb038611a233510fa36485fce4951c5daf840ed2562d1b8bef3c4b549433",
+      "bytes": 49780,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:23:26.322Z",
+      "draftRevision": 217
     },
     "m01-v3-r41-l001": {
-      "file": "audio-v2/m01-v3-r41-l001.ogg",
-      "duration": 4.195875,
+      "file": "recordings/elevenlabs/m01-v3-r41-l001-ae62b480978e.mp3",
+      "duration": 4.0,
       "leadingSilence": 0.04,
-      "trailingSilence": 0.38587499999999997,
+      "trailingSilence": 0.16999999999999993,
       "speaker": "scout",
-      "sha256": "e2c73af0ac0034218504e3f5578c6a9f68d4f993f68bccb8b22bd6c70a2f3e23",
-      "bytes": 20556,
-      "origin": "temporary-synthesis",
-      "generator": "local Piper + FFmpeg",
-      "voice": "denis"
+      "text": "Командир, последний лагерь обнаружен. Укреплён серьёзно.",
+      "sha256": "ae62b480978ec008091db62ecf0d8e2bdc196902d3fd55b8f7431296474b9459",
+      "bytes": 65244,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:23:38.077Z",
+      "draftRevision": 217
     },
     "m01-v3-r41-l003": {
-      "file": "audio-v2/m01-v3-r41-l003.ogg",
-      "duration": 2.027833333333333,
-      "leadingSilence": 0.04,
-      "trailingSilence": 0.3278333333333332,
+      "file": "recordings/elevenlabs/m01-v3-r41-l003-d52e339dee9f.mp3",
+      "duration": 2.16,
+      "leadingSilence": 0.01,
+      "trailingSilence": 0.14000000000000012,
       "speaker": "scout",
-      "sha256": "996cd4230fbe21432a3e15e7fe92218a156e06a31828363697a315de21ed390b",
-      "bytes": 9929,
-      "origin": "temporary-synthesis",
-      "generator": "local Piper + FFmpeg",
-      "voice": "denis"
+      "text": "Местные говорят — Петрович.",
+      "sha256": "d52e339dee9f4d5d297b6e57595fb03e0d631fbcb2966c91783c4e69c8528122",
+      "bytes": 35569,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:23:40.170Z",
+      "draftRevision": 217
     },
     "m01-v3-r47-l001": {
-      "file": "audio-v2/m01-v3-r47-l001.ogg",
-      "duration": 4.729958333333333,
-      "leadingSilence": 0.08,
-      "trailingSilence": 0.3199583333333331,
+      "file": "recordings/elevenlabs/m01-v3-r47-l001-d0962092564f.mp3",
+      "duration": 3.6,
+      "leadingSilence": 0.04,
+      "trailingSilence": 0.16000000000000014,
       "speaker": "scout",
-      "sha256": "3aa35fa32d7ae723cfe11714cef56e13c4f2ccdf3e606587b3681e9c9133375f",
-      "bytes": 23486,
-      "origin": "temporary-synthesis",
-      "generator": "local Piper + FFmpeg",
-      "voice": "denis"
+      "text": "Последний лагерь зачищен. Сопротивление прекращено.",
+      "sha256": "d0962092564f2f96989e33327cdbaaba4cb33e45848795b5752fa14ab8b10f21",
+      "bytes": 58557,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:23:57.131Z",
+      "draftRevision": 217
     },
     "m01-v3-a01-l002": {
-      "file": "audio-v2/m01-v3-a01-l002.ogg",
-      "duration": 3.256,
-      "leadingSilence": 0.04,
-      "trailingSilence": 0.2959999999999998,
+      "file": "recordings/elevenlabs/m01-v3-a01-l002-0ae183483ca8.mp3",
+      "duration": 3.28,
+      "leadingSilence": 0.02,
+      "trailingSilence": 0.1599999999999997,
       "speaker": "scout",
-      "sha256": "983b76603a21bcb926a9f94d5e9243ec54ce0b74fe69393fdfb95135fce2c4e2",
-      "bytes": 15849,
-      "origin": "temporary-synthesis",
-      "generator": "local Piper + FFmpeg",
-      "voice": "denis"
+      "text": "Готова. Последняя «Буханка» тоже завелась.",
+      "sha256": "0ae183483ca8ce01b3caceeeb4b92241a6eb9bc81baf04c5dc3928dff189c8db",
+      "bytes": 53541,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:24:15.777Z",
+      "draftRevision": 217
     },
     "m01-v3-r24a-l001": {
       "file": "audio-v2/m01-v3-r24a-l001.ogg",
@@ -2250,79 +2545,104 @@
       "voice": "denis"
     },
     "m01-b013": {
-      "file": "audio/m01-b013.ogg",
-      "duration": 1.55125,
-      "leadingSilence": 0.06,
-      "trailingSilence": 0.29125,
+      "file": "recordings/elevenlabs/m01-b013-32242d88fd14.mp3",
+      "duration": 1.6,
+      "leadingSilence": 0.04,
+      "trailingSilence": 0.15000000000000013,
       "speaker": "scout",
-      "sha256": "2181cbd65db6a8c5bb79e3fc7b89e5845c00cc2e818e58359cc79806b0dd05be",
-      "bytes": 7495,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-b013"
+      "text": "Экономика встала.",
+      "sha256": "32242d88fd148baca1ba795a375b44b17f50dd772041cafdb22cdc4788aae34f",
+      "bytes": 26792,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:24:37.480Z",
+      "draftRevision": 217
     },
     "m01-b016": {
-      "file": "audio/m01-b016.ogg",
-      "duration": 1.9227916666666667,
-      "leadingSilence": 0.07,
-      "trailingSilence": 0.3427916666666666,
+      "file": "recordings/elevenlabs/m01-b016-1d138e4951cb.mp3",
+      "duration": 1.92,
+      "leadingSilence": 0.01,
+      "trailingSilence": 0.11999999999999988,
       "speaker": "scout",
-      "sha256": "32aa581b3f6df7dcd0d957b1eefdc3b220e3b555708d2ec46810ddecdcb59155",
-      "bytes": 9308,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-b016"
+      "text": "Да это ещё с завода было.",
+      "sha256": "1d138e4951cb813cc40481a798842f5a141a61a07fb2ed52e2bf63a102cc3fa2",
+      "bytes": 31807,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:24:41.671Z",
+      "draftRevision": 217
     },
     "m01-b017": {
-      "file": "audio/m01-b017.ogg",
-      "duration": 2.3847916666666666,
-      "leadingSilence": 0.1,
-      "trailingSilence": 0.3547916666666664,
+      "file": "recordings/elevenlabs/m01-b017-a16e713777d7.mp3",
+      "duration": 2.4,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.13999999999999968,
       "speaker": "scout",
-      "sha256": "f416e25cc6ed0a9dea25b9548f1a99452b73c9cdabb9c21fe8227a2e8ab1dfc9",
-      "bytes": 11224,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-b017"
+      "text": "Стоим. Никого не трогаем.",
+      "sha256": "a16e713777d7a19448b005e339f295ead073abc2bf550059819a49c3b990b830",
+      "bytes": 39331,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:24:42.725Z",
+      "draftRevision": 217
     },
     "m01-b019": {
-      "file": "audio/m01-b019.ogg",
-      "duration": 2.7011666666666665,
-      "leadingSilence": 0.06,
-      "trailingSilence": 0.2511666666666663,
+      "file": "recordings/elevenlabs/m01-b019-3e13e81df4fc.mp3",
+      "duration": 2.72,
+      "leadingSilence": 0.03,
+      "trailingSilence": 0.16000000000000014,
       "speaker": "scout",
-      "sha256": "4df66f788f25f67f7c17867558fa7c67f5c8a82a8ae3b2c97f209c3fea6b99a6",
-      "bytes": 13547,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-b019"
+      "text": "Обкатку проводить будем или сразу в бой?",
+      "sha256": "3e13e81df4fcc5127c11053357d6c6def8fd01abaabd8169d81d96517ceff4f9",
+      "bytes": 44764,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:24:44.922Z",
+      "draftRevision": 217
     },
     "m01-b020": {
-      "file": "audio/m01-b020.ogg",
-      "duration": 2.1439166666666667,
-      "leadingSilence": 0.04,
-      "trailingSilence": 0.2939166666666666,
+      "file": "recordings/elevenlabs/m01-b020-ca7c4e8aed21.mp3",
+      "duration": 2.64,
+      "leadingSilence": 0.02,
+      "trailingSilence": 0.1299999999999999,
       "speaker": "scout",
-      "sha256": "37b9b014f2cac768d1f3859c51af704b2fab225fd61b84a692b76c4bcde5a6d7",
-      "bytes": 10687,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-b020"
+      "text": "Опять местные без приглашения.",
+      "sha256": "ca7c4e8aed21b501e87694c1295290c9ad0c5357a215cf6ab8a77b3f950ae61f",
+      "bytes": 43510,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:24:46.112Z",
+      "draftRevision": 217
     },
     "m01-s07-l006": {
       "file": "audio/m01-s07-l006.ogg",
@@ -2355,79 +2675,104 @@
       "textMatch": "exact"
     },
     "m01-s11-l001": {
-      "file": "audio/m01-s11-l001.ogg",
-      "duration": 4.245625,
-      "leadingSilence": 0.01,
-      "trailingSilence": 0.38562500000000055,
+      "file": "recordings/elevenlabs/m01-s11-l001-b5757000d3f2.mp3",
+      "duration": 4.72,
+      "leadingSilence": 0.04,
+      "trailingSilence": 0.3099999999999996,
       "speaker": "chief",
-      "sha256": "1684b877d5a6451e37008ed5e4aafe090afa90ace021b2e04c1f86320604888f",
-      "bytes": 20628,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s11-l001"
+      "text": "Слышь, командир! Вы чё к нам пристали?! Мы тут уже сто лет живём!",
+      "sha256": "b5757000d3f2934c8cc3cc0af69bf3072a4bef4fea58c9144f822fc544991ce1",
+      "bytes": 76529,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "hD8aK7CmEPgH3mbFO08e",
+      "voiceName": "Ivo - Calming, chill and narrative",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:23:42.181Z",
+      "draftRevision": 217
     },
     "m01-s11-l003": {
-      "file": "audio/m01-s11-l003.ogg",
-      "duration": 0.6161666666666666,
-      "leadingSilence": 0.0,
-      "trailingSilence": 0.2761666666666666,
+      "file": "recordings/elevenlabs/m01-s11-l003-f55b022a480d.mp3",
+      "duration": 1.2,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.35,
       "speaker": "chief",
-      "sha256": "4d80d3841e1fd5ba222d9c7b4d2d271f0bab6297164c43bb2d49bb8e4b68aed9",
-      "bytes": 2989,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s11-l003"
+      "text": "Чего?",
+      "sha256": "f55b022a480db8f68dc157eb0cb1bf1adcf223efd6823f1fb9aa0fd89ef7db6b",
+      "bytes": 20105,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "hD8aK7CmEPgH3mbFO08e",
+      "voiceName": "Ivo - Calming, chill and narrative",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:23:44.433Z",
+      "draftRevision": 217
     },
     "m01-s11-l005": {
-      "file": "audio/m01-s11-l005.ogg",
-      "duration": 0.94125,
-      "leadingSilence": 0.04,
-      "trailingSilence": 0.32125000000000004,
+      "file": "recordings/elevenlabs/m01-s11-l005-dc2761e92dbd.mp3",
+      "duration": 1.36,
+      "leadingSilence": 0.06,
+      "trailingSilence": 0.18000000000000016,
       "speaker": "chief",
-      "sha256": "8d0470d995b90cfe8b183c4b9bca6bebb1c71a48b66ff6c6bf9a87b6b5475d4c",
-      "bytes": 4627,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s11-l005"
+      "text": "Петрович.",
+      "sha256": "dc2761e92dbd004751b2f871da368481a1982a57ca7f7a71919b235c622b2496",
+      "bytes": 23030,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "hD8aK7CmEPgH3mbFO08e",
+      "voiceName": "Ivo - Calming, chill and narrative",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:23:46.251Z",
+      "draftRevision": 217
     },
     "m01-s11-l007": {
-      "file": "audio/m01-s11-l007.ogg",
-      "duration": 1.0677083333333333,
-      "leadingSilence": 0.02,
-      "trailingSilence": 0.31770833333333326,
+      "file": "recordings/elevenlabs/m01-s11-l007-227f54bb39fa.mp3",
+      "duration": 2.24,
+      "leadingSilence": 0.03,
+      "trailingSilence": 0.18000000000000016,
       "speaker": "chief",
-      "sha256": "322fde95266c197f1309d2273adbc2481dd6ebfd24cd766602ac4cd8b221a107",
-      "bytes": 5301,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s11-l007"
+      "text": "Ну… Петрович.",
+      "sha256": "227f54bb39fa1f26489144b87892a4375a87442469e7a62aaeb735646fb938f3",
+      "bytes": 36823,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "hD8aK7CmEPgH3mbFO08e",
+      "voiceName": "Ivo - Calming, chill and narrative",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:23:48.043Z",
+      "draftRevision": 217
     },
     "m01-s11-l009": {
-      "file": "audio/m01-s11-l009.ogg",
-      "duration": 0.6625833333333333,
-      "leadingSilence": 0.0,
-      "trailingSilence": 0.24258333333333332,
+      "file": "recordings/elevenlabs/m01-s11-l009-df9a284f56aa.mp3",
+      "duration": 1.28,
+      "leadingSilence": 0.06,
+      "trailingSilence": 0.30000000000000004,
       "speaker": "chief",
-      "sha256": "68ee8f8fda06113a032ffee1445f1edd26ffda27af98e22e163332d5261fd2ff",
-      "bytes": 3169,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s11-l009"
+      "text": "Чего?!",
+      "sha256": "df9a284f56aa91dc50def9558f5d44ec59717bc3c8085a0acb4cf706f8561f9f",
+      "bytes": 21358,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "hD8aK7CmEPgH3mbFO08e",
+      "voiceName": "Ivo - Calming, chill and narrative",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:23:50.089Z",
+      "draftRevision": 217
     },
     "m01-s01-l003": {
       "file": "audio/m01-s01-l003.ogg",
@@ -2475,19 +2820,24 @@
       "textMatch": "exact"
     },
     "m01-s14-l018": {
-      "file": "audio/m01-s14-l018.ogg",
-      "duration": 3.460375,
-      "leadingSilence": 0.06,
-      "trailingSilence": 0.5103749999999998,
+      "file": "recordings/elevenlabs/m01-s14-l018-241e20bb4929.mp3",
+      "duration": 2.8,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.17999999999999972,
       "speaker": "soldier",
-      "sha256": "8d087fff6d62c9f96c96e3ff6ea5da2cb6f826ffc00b667ccb6cbadbd271cbb0",
-      "bytes": 16233,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s14-l018"
+      "text": "Товарищ прапорщик! Генератор опять встал!",
+      "sha256": "241e20bb49294673ef869f220c59fd24a5b4195553c6a4afdfd27978666e0d60",
+      "bytes": 46018,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "JKtNvDNrWu33P1xzttP2",
+      "voiceName": "Ivan - Energetic and Sassy",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:24:34.834Z",
+      "draftRevision": 217
     },
     "m01-v3-builder-crooked-plinth": {
       "file": "audio-v2/m01-v3-builder-crooked-plinth.ogg",
@@ -2595,67 +2945,104 @@
       "voice": "denis"
     },
     "m01-b012": {
-      "file": "audio/m01-b012.ogg",
-      "duration": 3.049166666666667,
-      "leadingSilence": 0.04,
-      "trailingSilence": 0.35916666666666686,
+      "file": "recordings/elevenlabs/m01-b012-900d26039fa4.mp3",
+      "duration": 2.8,
+      "leadingSilence": 0.02,
+      "trailingSilence": 0.1599999999999997,
       "speaker": "builder",
-      "sha256": "c5575bce80641131fd395e427dbcc279af42929a9a36c88f079efdaa22ebb3fb",
-      "bytes": 14776,
-      "origin": "temporary-synthesis",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-b012"
+      "text": "Держится. Только дверью не хлопайте.",
+      "sha256": "900d26039fa44ace3c319b30cae8630d8d7156ab91b5109ce67cc15de34e686f",
+      "bytes": 46018,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "txnCCHHGKmYIwrn7HfHQ",
+      "voiceName": "Alexandr Vlasov - Vibrant and Energetic",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact"
+      "generatedAt": "2026-11-11T19:24:36.515Z",
+      "draftRevision": 217
     },
     "m01-v3-a02-l001": {
-      "file": "audio-v2/m01-v3-a02-l001.ogg",
-      "duration": 1.7178333333333333,
-      "leadingSilence": 0.08,
-      "trailingSilence": 0.2978333333333334,
+      "file": "recordings/elevenlabs/m01-v3-a02-l001-da42f9fb4830.mp3",
+      "duration": 1.6,
+      "leadingSilence": 0.07,
+      "trailingSilence": 0.18000000000000016,
       "speaker": "driver",
-      "sha256": "4bd6f169b519b21e870393aed2a1d8879c702965dfe42241343992a221543b9b",
-      "bytes": 8565,
-      "origin": "temporary-synthesis",
-      "generator": "local Piper + FFmpeg",
-      "voice": "denis"
+      "text": "Встречного пропустили.",
+      "sha256": "da42f9fb48300edbaebbca5be71f928a8c760ad6a59e0c7398a723c79f8d272f",
+      "bytes": 26792,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "JKtNvDNrWu33P1xzttP2",
+      "voiceName": "Ivan - Energetic and Sassy",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:24:17.286Z",
+      "draftRevision": 217
     },
     "m01-v3-a03-l001": {
-      "file": "audio-v2/m01-v3-a03-l001.ogg",
-      "duration": 1.323125,
+      "file": "recordings/elevenlabs/m01-v3-a03-l001-a268365779a1.mp3",
+      "duration": 1.36,
       "leadingSilence": 0.05,
-      "trailingSilence": 0.3131250000000001,
+      "trailingSilence": 0.17000000000000015,
       "speaker": "driver",
-      "sha256": "e4d1fa89db0960f86a08fbe5fedc922b5130ffdfdea824f49aabd4d126cfc0c1",
-      "bytes": 6402,
-      "origin": "temporary-synthesis",
-      "generator": "local Piper + FFmpeg",
-      "voice": "denis"
+      "text": "Колонна встала.",
+      "sha256": "a268365779a19e76ecafc9ee6bd6478689f4b33ad2c4cbf2999c56ed762064ac",
+      "bytes": 23030,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "JKtNvDNrWu33P1xzttP2",
+      "voiceName": "Ivan - Energetic and Sassy",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:24:20.324Z",
+      "draftRevision": 217
     },
     "m01-v3-a03-l003": {
-      "file": "audio-v2/m01-v3-a03-l003.ogg",
-      "duration": 2.5854166666666667,
-      "leadingSilence": 0.11,
-      "trailingSilence": 0.37541666666666673,
+      "file": "recordings/elevenlabs/m01-v3-a03-l003-c04a8f5b6dab.mp3",
+      "duration": 2.4,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.1499999999999999,
       "speaker": "driver",
-      "sha256": "20ed81a74b249b77821da2514d5a0507284799c1ee75fe6cf339aca3fe740d10",
-      "bytes": 12319,
-      "origin": "temporary-synthesis",
-      "generator": "local Piper + FFmpeg",
-      "voice": "denis"
+      "text": "Впереди тоже колонна. Наша.",
+      "sha256": "c04a8f5b6dab03e798acc9822dd47439138cd749169cb2d612b44eb59d8bb959",
+      "bytes": 39331,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "JKtNvDNrWu33P1xzttP2",
+      "voiceName": "Ivan - Energetic and Sassy",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:24:22.167Z",
+      "draftRevision": 217
     },
     "m01-v3-a04-l001": {
-      "file": "audio-v2/m01-v3-a04-l001.ogg",
-      "duration": 1.7521666666666667,
-      "leadingSilence": 0.04,
-      "trailingSilence": 0.4321666666666666,
+      "file": "recordings/elevenlabs/m01-v3-a04-l001-519937be30a5.mp3",
+      "duration": 1.52,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.1399999999999999,
       "speaker": "driver",
-      "sha256": "5bea2c884dc03130520fcb5c7c473e88591e16ef797e7ed6e1f66b9a4beeef9d",
-      "bytes": 8418,
-      "origin": "temporary-synthesis",
-      "generator": "local Piper + FFmpeg",
-      "voice": "denis"
+      "text": "Проезд освободили.",
+      "sha256": "519937be30a5c83e44ae4f916745e6cffbe1af5571f7d033219a2534d3813587",
+      "bytes": 25538,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "JKtNvDNrWu33P1xzttP2",
+      "voiceName": "Ivan - Energetic and Sassy",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:24:23.058Z",
+      "draftRevision": 217
     }
   }
 }

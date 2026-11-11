@@ -1,6 +1,6 @@
 import {METRICS,validateLibrary} from '../campaign/radio/conditions.js';
 import {simulateRadio} from '../campaign/radio/simulator.js';
-import {radioClip} from '../campaign/radio/audio.js';
+import {radioClip,loadRecordedSpeech,recordedVoiceSample} from '../campaign/radio/audio.js';
 import {renderRadioLine} from '../campaign/radio/wording.js';
 
 const copy=structuredClone;
@@ -22,6 +22,7 @@ export class DynamicWorkshop{
   if(this.document)return;
   if(this.loading)return this.loading;
   this.loading=(async()=>{
+   await loadRecordedSpeech();
    try{const saved=await this.request('');this.document=saved.document;this.revision=saved.revision;this.offline=false;}
    catch{this.document=await (await fetch('/assets/radio/situations_catalog.json')).json();this.revision=0;this.offline=true;}
    try{this.legacy=await this.request('/legacy');}catch{this.legacy={mapping:{},scenes:{},lines:{}};}
@@ -127,14 +128,14 @@ export class DynamicWorkshop{
    const input=el('textarea');input.value=p.text;input.rows=2;input.setAttribute('aria-label','Реплика '+(i+1));input.onchange=()=>{this.stopPlayback();this.change(()=>p.text=input.value);};row.append(input);
    const media=el('div',undefined,'radio-turn-media');row.append(media);
    this.actions(media,[['upload','Загрузить запись реплики '+(i+1),()=>this.upload(p)]]);
-   media.append(el('span',p.audio&&(!p.audio.text||p.audio.text===p.text)?'Твоя запись':p.source==='text'?'Только субтитры':p.audio?'Текст изменён · временный голос':'Временный голос','radio-note'));
+   media.append(el('span',p.audio&&(!p.audio.text||p.audio.text===p.text)?'Твоя запись':p.source==='text'?'Только субтитры':this.audition()[i]?.clip?.origin==='elevenlabs-synthesis'?'Готовая озвучка':p.audio?'Текст изменён · временный голос':'Временный голос','radio-note'));
    if(p.text.includes('{'))row.append(el('p','Пример: '+(this.audition()[i]?.bodyText??p.text),'radio-example'));
    const extra=el('details',undefined,'radio-extra');extra.append(el('summary','Голос и запись'));row.append(extra);
    const fields=el('div',undefined,'radio-fields');extra.append(fields);
    this.field(fields,'Голос',p.voiceId??'',v=>this.change(()=>p.voiceId=v||null),{options:{'':'Голос экипажа',...Object.fromEntries(this.document.characters.map(c=>[c.voiceId,c.name]))}});
    this.field(fields,'Женская форма · реплика '+(i+1),p.femaleTextBase&&p.femaleTextBase!==p.text?'':p.femaleText??'',v=>this.change(()=>{p.femaleText=v||undefined;p.femaleTextBase=v?p.text:undefined;}));
    this.field(fields,'Подача',p.emotion??'calm',v=>this.change(()=>p.emotion=v),{options:{calm:'Спокойно',urgent:'Срочно',dry:'Сухой юмор',relieved:'С облегчением',somber:'Сдержанно, с грустью'}});
-   this.field(fields,'Озвучка',p.source,v=>this.change(()=>p.source=v,true),{options:{tts:'Временный голос',recording:'Моя запись',text:'Без голоса'}});
+   this.field(fields,'Озвучка',p.source,v=>this.change(()=>p.source=v,true),{options:{tts:'Голос экипажа',recording:'Моя запись',text:'Без голоса'}});
    this.field(fields,'Пауза после реплики, с',p.pauseAfter,v=>this.change(()=>p.pauseAfter=v),{type:'number',min:.06,max:2});
    this.field(fields,'Выровнять громкость записи',p.normalize??false,v=>this.change(()=>p.normalize=v),{type:'checkbox'});
    this.actions(extra,[['play','Прослушать реплику '+(i+1),()=>this.play(this.audition().slice(i,i+1))],['scout','Портрет реплики '+(i+1),()=>this.upload(p,'image')],['up','Поднять реплику '+(i+1),()=>{if(i)this.change(()=>[g.nodes[i-1],g.nodes[i]]=[g.nodes[i],g.nodes[i-1]],true);}],['close','Удалить реплику '+(i+1),()=>{if(g.nodes.length>1)this.change(()=>g.nodes.splice(i,1),true);}]]);
@@ -249,14 +250,14 @@ export class DynamicWorkshop{
   for(const [name,value] of Object.entries(this.document.dictionaries)){const label=el('label',name);const text=el('textarea');text.value=JSON.stringify(value,null,2);text.setAttribute('aria-label','Словарь '+name);text.onchange=()=>{try{const parsed=JSON.parse(text.value);this.change(()=>this.document.dictionaries[name]=parsed);}catch(e){this.error(e.message);}};label.append(text);main.append(label);}
  }
  voices(main){
-  main.append(el('p','Шесть временных голосов. Свои записи загружаются рядом с репликой в разговоре. Командир и прапорщик остаются в сюжетных диалогах.','radio-note'));
+  main.append(el('p','Шесть голосов экипажей. Готовые фразы воспроизводятся из записей, остальные — временным голосом. Свои записи загружаются рядом с репликой.','radio-note'));
   const c=this.document.characters.find(c=>c.id===this.characterId)??this.document.characters[0];
   this.field(main,'Выбрать голос',c.id,v=>{this.characterId=v;this.render();},{options:Object.fromEntries(this.document.characters.map(c=>[c.id,c.name]))});
   const fields=el('div',undefined,'radio-fields');main.append(fields);
   this.field(fields,'Название',c.name,v=>this.change(()=>c.name=v));
   this.field(fields,'Кто использует',c.role,v=>this.change(()=>c.role=v),{options:roleNames});
   this.field(fields,'Доступен',c.enabled,v=>this.change(()=>c.enabled=v),{type:'checkbox'});
-  this.actions(main,[['play','Прослушать голос',()=>this.play([{text:'На связи. Ну что, поехали. Только без гонки.',source:'tts',voiceId:c.voiceId,role:c.role}])],['stop','Остановить прослушивание',()=>this.stopPlayback()],['scout','Загрузить портрет голоса',()=>this.upload(c,'image')]]);
+  this.actions(main,[['play','Прослушать голос',()=>this.play([{text:recordedVoiceSample(c.voiceId)?.text??'На связи. Ну что, поехали. Только без гонки.',source:'tts',voiceId:c.voiceId,role:c.role}])],['stop','Остановить прослушивание',()=>this.stopPlayback()],['scout','Загрузить портрет голоса',()=>this.upload(c,'image')]]);
  }
  phrasePreview(p){
   const speaker={crewId:'example-a',callSign:'Кедр',name:'Алексей',voiceId:p.voiceId??'voice-1',role:p.role},other={crewId:'example-b',callSign:'Буран',name:'Сергей'};

@@ -3,6 +3,7 @@ import {stableHash} from './conditions.js';
 import {TacticalIntel} from './tactical-intel.js';
 import {CrewStories} from './crew-stories.js';
 import {CrewBanter,banterCrew} from './crew-banter.js';
+import {loadRecordedSpeech} from './audio.js';
 import {RetreatIncidents,mergeRetreatLibrary} from './retreat-incidents.js';
 
 export const ENGINE_EVENTS={
@@ -282,6 +283,7 @@ export class MissionRadio{
 }
 
 export async function loadRadioLibrary(){
+ await loadRecordedSpeech();
  const response=await fetch('/api/radio/published').catch(()=>null);
  const seed=await fetch(new URL('../../assets/radio/situations_catalog.json',import.meta.url));
  if(!seed.ok){if(response?.ok)return (await response.json()).document;throw Error('Библиотека радио недоступна');}

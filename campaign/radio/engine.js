@@ -202,6 +202,9 @@ export class RadioEngine{
     // Specialised builder/scout/etc. lines still prefer their actual role.
     const preferred=options.filter(s=>p.role==='driver'?s.role!=='commander':s.role===p.role);
     if(preferred.length)options=preferred;
+    // Keep each crew's voice, but use a distinct timbre for an unbound reply
+    // when another eligible participant is available.
+    if(prior?.voiceId){const distinct=options.filter(s=>s.voiceId&&s.voiceId!==prior.voiceId);if(distinct.length)options=distinct;}
     options.sort((a,b)=>speakerOrder(a,b,lines.length===0));
     const speaker=options[0];if(!speaker){valid=false;break;}
     if(node.speakerSlot!=null)slots.set(node.speakerSlot,speaker.crewId);
@@ -218,6 +221,11 @@ export class RadioEngine{
     eligible.push({...graph,humor,lines});
   }
   const specificity=Math.max(...eligible.map(g=>g.specificity??0));let pool=eligible.filter(g=>(g.specificity??0)===specificity);
+  // Prefer a complete recorded exchange within each tone. Facts, live speakers
+  // and repeat guards have already been checked; keep the original humor ratio.
+  const recorded=g=>g.lines.every(line=>line.clip&&['elevenlabs-synthesis','user-recording','editor-upload'].includes(line.clip.origin));
+  const recordedTone=new Map([false,true].map(h=>[h,pool.some(g=>g.humor===h&&recorded(g))]));
+  pool=pool.filter(g=>!recordedTone.get(g.humor)||recorded(g));
   // Draw from the least-used complete exchanges in each tone. Changing the
   // callsign or the graph ID must not give a familiar reply a fresh turn.
   const uses=g=>Math.max(...signatures(g.lines).map(s=>this.phraseUses.get(s)??0));
