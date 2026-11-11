@@ -1,7 +1,7 @@
 import {siteCourts} from '../assets/campaign/alpha/mission02/site-plan.js';
 import layout from '../assets/campaign/alpha/mission02/layout.js';
 
-export const M02_FORTIFICATION_VERSION=3;
+export const M02_FORTIFICATION_VERSION=4;
 // Tile complete edges, leaving only explicitly authored gate intervals.
 // Roads, parked vehicles and rally points must never silently delete walls.
 export function installM02Fortifications(mission){
@@ -58,7 +58,9 @@ export function installM02Fortifications(mission){
    }
    for(const g of gates){
     if(g.closed){add(site.id,'gate.'+g.id,'scav-fence',g.p,{width:g.width,depth:3.2,rotation,span:g.width/scale,hp:840,variant:'service-gate',gate:g.id});continue;}
-    const nx=uy,ny=-ux,leaf=g.width/2;
+    // The western loading court needs its full turning apron. Swing these
+    // leaves towards the approach, preserving the gate width and defenders.
+    const swing=g.openOutwards?-1:1,nx=uy*swing,ny=-ux*swing,leaf=g.width/2;
     for(const side of [-1,1])add(site.id,'gate.'+g.id+'.'+side,'scav-gate',{
      x:g.p.x+ux*side*g.width/2+nx*leaf/2,y:g.p.y+uy*side*g.width/2+ny*leaf/2,
     },{width:4,depth:leaf+4,rotation:Math.atan2(-nx,ny),span:leaf/scale,hp:420,variant:'m02-open-leaf',gate:g.id});

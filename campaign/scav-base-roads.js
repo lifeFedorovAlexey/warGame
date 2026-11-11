@@ -77,13 +77,13 @@ function originalCampRoads(field,config){
  return plans.map(([name,campId,width,grid])=>{
   const points=grid.map(p);if(['east-approach','northwest-approach','hq-approach'].includes(name))points[0]=junction(grid[0]);
   if(name==='outpost-approach'){
-   const trunk=source.paths.find(r=>r.id==='junction-1--junction-6-3'),target=points[0];
-   points[0]=trunk.points.reduce((best,q)=>Math.hypot(q.x-target.x,q.y-target.y)<Math.hypot(best.x-target.x,best.y-target.y)?q:best);
+   const trunk=source?.paths?.find(r=>r.id==='junction-1--junction-6-3'),target=points[0];
+   if(trunk)points[0]=trunk.points.reduce((best,q)=>Math.hypot(q.x-target.x,q.y-target.y)<Math.hypot(best.x-target.x,best.y-target.y)?q:best);
   }
   const road={id:'m01-original-'+name,campId,m01LayoutVersion:3,width,points:rounded(points,width)};
   if(name==='outpost-approach'){
    const a=p([34.5,36]),b=p([42.5,43.4]);road.cutSourcePaint=true;
-   road.replaceAreas=[{rect:[a.x,b.y,b.x,a.y],feather:2,preserveRoads:source.paths.filter(r=>['junction-1--junction-6-3','nw-east--junction-6-12'].includes(r.id))}];
+   road.replaceAreas=[{rect:[a.x,b.y,b.x,a.y],feather:2,preserveRoads:(source?.paths??[]).filter(r=>['junction-1--junction-6-3','nw-east--junction-6-12'].includes(r.id))}];
   }
   if(name==='hq-approach'){
    const sourceRoad=source?.paths?.find(r=>r.id==='nw-east--nw-west-13'),start=points[0];

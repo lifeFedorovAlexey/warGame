@@ -90,7 +90,7 @@
     {
       "site": "east_factory",
       "direction": "out",
-      "seconds": 19
+      "seconds": 12
     },
     {
       "site": "hill_factory",
@@ -100,7 +100,7 @@
     {
       "site": "hill_factory",
       "direction": "out",
-      "seconds": 62
+      "seconds": 11
     },
     {
       "site": "sensor_outpost",
@@ -120,7 +120,7 @@
     {
       "site": "energy_hub",
       "direction": "out",
-      "seconds": 28
+      "seconds": 26
     }
   ]
 }

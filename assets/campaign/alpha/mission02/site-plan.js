@@ -31,7 +31,7 @@ export const siteCourts=[
  {id:'east_factory',rect:[30.3,73.6,36.85,79.6],terraces:[[30.6,74.2,37,79.3]],tiles:[[31,77.6,36.8,79.3]],stores:[[32.6,74.8],[36.4,76.8]],gate:[33,79.6],axis:'y',
   gates:[{id:'main',edge:2,grid:[33,79.6],width:48}]},
  {id:'hill_factory',rect:[10,68,19.6,76],terraces:[[12.6,68.5,19.4,74.8],[10.8,73.7,12.6,75.4]],tiles:[[14,72.3,16.5,74.8]],stores:[[16.6,73.5],[14.4,69.3]],gate:[10,75],axis:'x',
-  gates:[{id:'main',edge:3,grid:[10,75],width:44},{id:'service',edge:0,grid:[17.5,68],width:40}]},
+  gates:[{id:'main',edge:3,grid:[10,75],width:44,openOutwards:true},{id:'service',edge:0,grid:[17.5,68],width:40}]},
  {id:'sensor_outpost',rect:[28.5,87,32.8,92],terraces:[[29.35,87.5,32.6,91.7]],tiles:[[29.35,87.5,32.6,90.5]],stores:[],gate:[32.8,90],axis:'x',
   gates:[{id:'main',edge:1,grid:[32.8,90],width:44},{id:'service',edge:3,grid:[28.5,90],width:44}]},
  {id:'energy_hub',rect:[18.5,102.5,33.1,114],terraces:[[22.1,104.2,29.5,111.75],[25.3,111.75,30.7,113.5]],tiles:[[22.7,104.2,25.4,105.5],[23.2,110,27.6,110.88],[27.6,108.8,28.2,110.88],[25.3,111.95,27.8,113]],stores:[[26,112.5],[27.1,112.5]],gate:[33.1,107.5],axis:'x',
