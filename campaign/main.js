@@ -310,7 +310,12 @@ async function start(restore = false) {
   openingCamera?.dispose();
   openingCamera=openingPlaying?new OpeningCamera(world,mission):null;
   select(worker&&!openingPlaying ? [worker.id] : [], false, false);
+  if(active){flushUi();uiPending=false;}
   await mainMenu.loading.finish();
+  // A completed intro bypasses beforeReveal. Replace the warm-up or previous
+  // save's frame while the loading cover still hides the game.
+  world.update(mission,selected,0,false,active);
+  if(active)minimapView.render(performance.now());
   mainMenu.loading.hide();
   $('welcome').hidden = true;
   if(!openingTelevision.start(mission,radio.director))radio.consume(mission, performance.now());
@@ -1045,7 +1050,9 @@ try {
   config = await response.json();
   const story = await loadMissionStory();
   sound = new FieldSound($('sound-toggle'), $('story-voice-toggle'));
-  openingTelevision = new OpeningTelevision(sound);
+  openingTelevision = new OpeningTelevision(sound,{
+    beforeReveal:()=>world.update(mission,selected,0,false,active),
+  });
   world = await createCampaignWorld($('world'), config, sound, mainMenu.loading);
   await mainMenu.loading.stage('simulation');
   mission = new Mission(config, world.field);
