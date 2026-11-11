@@ -46,7 +46,7 @@ export function installKorovnikControls(campaign){
   }
  }
  const names={absent:'Ожидание',approaching:'Подлёт',landing:'Посадка',opening:'Открытие рампы',ready:'Готов к погрузке',closing:'Закрытие рампы',spooling:'Раскрутка винтов',departing:'Вылет',departed:'В рейсе'};
- function update(){const t=m.state.transport,phase=t?.phase??'absent';root.hidden=!campaign.state.active||(!review&&!m.state.m03&&['absent','departed'].includes(phase));
+ function update(){const t=m.state.transport,phase=t?.phase??'absent';root.hidden=!campaign.state.active||m.state.status!=='running'||!!document.querySelector('.settings[open]')||!document.querySelector('#result')?.hidden||(!review&&!m.state.m03&&['absent','departed'].includes(phase));
   // Leave the objective list readable on a narrow screen, including extra rows.
   const top=innerWidth<=700?Math.max(106,(document.querySelector('#field-tasks')?.getBoundingClientRect().bottom??0)+10):95;
   root.style.top=top+'px';message.style.top=(top+45)+'px';

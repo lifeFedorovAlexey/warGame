@@ -5,12 +5,18 @@ const {chromium}=createRequire(import.meta.url)('C:/Users/Алексей/.cache/
 const folder='campaign/previews/m03',read=name=>JSON.parse(fs.readFileSync(folder+'/'+name+'.json','utf8'));
 const base=read('travel').state.m03.baseSnapshot;Object.assign(base.state.transport,{phase:'ready',elapsed:0,door:1});
 const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true,args:['--use-angle=d3d11']});
-const page=await browser.newPage({viewport:{width:1440,height:900}}),errors=[],steps=[];page.on('pageerror',e=>errors.push(e.message));
+const page=await browser.newPage({viewport:{width:1440,height:900}}),errors=[],steps=[];page.on('pageerror',e=>{errors.push(e.message);console.log('pageerror',e.message);});page.on('requestfailed',r=>console.log('requestfailed',r.url(),r.failure()?.errorText));
 async function paused(){if(!await page.evaluate(()=>campaign.state.paused))await page.locator('#pause').click();}
-async function ready(location){await page.waitForFunction(loc=>window.campaign?.ready&&campaign.state.active&&campaign.mission.state.m03?.location===loc,location,{timeout:90000});await paused();}
+async function ready(location){await page.waitForFunction(loc=>window.campaign?.ready&&campaign.state.active&&campaign.mission.state.m03?.location===loc,location,{timeout:90000});await paused();console.log('Ready:',location);}
 try{
  await page.addInitScript(data=>{if(sessionStorage.getItem('m03-browser-seeded'))return;sessionStorage.setItem('m03-browser-seeded','yes');localStorage.setItem('warGame.alpha.autosave.v1',JSON.stringify(data));localStorage.setItem('warGame.alpha.latest-save.v1','warGame.alpha.autosave.v1');sessionStorage.setItem('warGame.alpha.map-transition.v1','resume');for(const k of ['fieldSound','fieldStoryVoice','fieldRadio'])localStorage.setItem('warGame.'+k,'off');},base);
  await page.goto((process.env.WARGAME_URL??'http://127.0.0.1:8772')+'/campaign/',{waitUntil:'domcontentloaded'});await ready('home');
+ await page.setViewportSize({width:667,height:375});
+ await page.locator('.settings > summary').click();await page.locator('[aria-controls="operation-actions"]').click();
+ await page.waitForFunction(()=>document.querySelector('.korovnik-controls').hidden);
+ await page.screenshot({path:folder+'/14-menu-landscape.png'});
+ await page.locator('.settings > summary').click();await page.setViewportSize({width:1440,height:900});
+ steps.push('transport controls leave the operation menu accessible on a landscape phone');
  await page.locator('.korovnik-controls button[aria-label="Состав транспорта и доступная техника"]').click();
  await page.setViewportSize({width:390,height:844});await page.waitForTimeout(400);await page.screenshot({path:folder+'/05-cargo-narrow.png'});
  assert(await page.locator('.korovnik-roster button[data-boarded=true]').count()===10);
@@ -30,5 +36,13 @@ try{
  const rms=await page.evaluate(async()=>{const {createKorovnikAudio}=await import('./korovnik-audio.js'),context=new OfflineAudioContext(1,48000,48000),output=context.createGain();output.connect(context.destination);createKorovnikAudio({context,output}).update({active:true,speed:22,distance:100});const buffer=await context.startRendering();return Math.sqrt(buffer.getChannelData(0).reduce((s,v)=>s+v*v,0)/48000);});assert(rms>.01);steps.push('local helicopter audio produces a non-silent signal');
  const catalogue=await (await page.request.get((process.env.WARGAME_URL??'http://127.0.0.1:8772')+'/api/dialogues')).json();assert(catalogue.missions.some(m=>m.id==='alpha-m03'));
  const dialogue=await page.request.get((process.env.WARGAME_URL??'http://127.0.0.1:8772')+'/api/dialogues/alpha-m03');assert(dialogue.ok());steps.push('dialogue editor lists mission 03 and serves its editable data');
+ // Exercise the current main finale: M02 must expose the next operation,
+ // and its checkpoint must stay distinct from the earlier M01 checkpoint.
+ await page.evaluate(data=>{delete data.state.m03;data.state.status='victory';campaign.mission.load(data);},structuredClone(base));
+ await page.locator('#ending-continue').click({timeout:15000});
+ await page.waitForFunction(()=>campaign.mission.state.m03?.phase==='preparation'&&document.querySelector('#result').hidden&&!document.querySelector('#ending-continue').disabled&&document.querySelector('#mission-ending').hidden);
+ const restart=await page.evaluate(()=>JSON.parse(localStorage.getItem('warGame.alpha.mission-start.m03.v1')));
+ assert.equal(restart.state.m03.phase,'preparation');assert.equal(restart.state.m03.location,'home');
+ steps.push('M02 finale continues into M03 and preserves a separate restart snapshot');
  assert.deepEqual(errors,[]);fs.writeFileSync(folder+'/browser-flow.json',JSON.stringify({steps,errors},null,2));console.log('PASS',JSON.stringify({steps,errors}));
 }catch(error){await page.screenshot({path:folder+'/browser-flow-error.png'});console.log(await page.locator('body').innerText());throw error;}finally{await browser.close();}

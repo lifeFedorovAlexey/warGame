@@ -377,7 +377,7 @@ export class PredictiveTraffic extends TrafficCoordinator{
   // The next search must claim its pose before this tick drives the owner:
   // otherwise small reversing corrections cancel it before every first slice.
   // Keep that anchor until publication; later queued cars remain free to move.
-  const nextManeuver=!this.maneuverJob&&[...this.routes.values()].find(item=>item.kind==='maneuver'&&!item.finished);
+  const nextManeuver=job?.kind==='maneuver'&&!this.maneuverJob&&[...this.routes.values()].find(item=>item.kind==='maneuver'&&!item.finished);
   if(job?.kind==='maneuver'&&(job.iterator||job.finished||job===nextManeuver)&&this.validRoute(mission,job)){
    unit.driveSpeed=0;this.controls.delete(unit.id);
    navigationDecision(unit,'LOCAL_REPLAN',job.finished?'local-turn-publication':'local-turn-search',
