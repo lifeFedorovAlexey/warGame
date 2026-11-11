@@ -1,0 +1,2234 @@
+{
+  "revision": 1,
+  "savedAt": "2026-11-11T21:14:06.711117+00:00",
+  "document": {
+    "id": "alpha-m03",
+    "title": "Миссия 03 — Первый вылет",
+    "campaign": "Альфа",
+    "schemaVersion": 1,
+    "sourceRevision": 1,
+    "source": "assets/campaign/alpha/mission03/story.json",
+    "speakers": {
+      "narrator": {
+        "name": "Диктор",
+        "voice": "dmitri",
+        "lengthScale": 1.08,
+        "pitchSemitones": -0.8,
+        "effect": "clean"
+      },
+      "commander": {
+        "name": "Командир",
+        "voice": "denis",
+        "lengthScale": 1.04,
+        "pitchSemitones": -1.0,
+        "effect": "clean"
+      },
+      "warrant": {
+        "name": "Прапорщик",
+        "voice": "dmitri",
+        "lengthScale": 1.12,
+        "pitchSemitones": -1.6,
+        "effect": "clean"
+      },
+      "general": {
+        "name": "Генерал",
+        "voice": "dmitri",
+        "lengthScale": 1.16,
+        "pitchSemitones": -0.5,
+        "effect": "clean"
+      },
+      "radio": {
+        "name": "Радист",
+        "voice": "denis",
+        "lengthScale": 0.97,
+        "pitchSemitones": 0.5,
+        "effect": "radio"
+      },
+      "scientist": {
+        "name": "Учёный",
+        "voice": "dmitri",
+        "lengthScale": 1.06,
+        "pitchSemitones": 0.8,
+        "effect": "clean"
+      },
+      "scout": {
+        "name": "Разведчик",
+        "voice": "denis",
+        "lengthScale": 1.0,
+        "pitchSemitones": 0.8,
+        "effect": "radio"
+      },
+      "raider": {
+        "name": "Отброс",
+        "voice": "dmitri",
+        "lengthScale": 0.98,
+        "pitchSemitones": -1.4,
+        "effect": "radio"
+      },
+      "chief": {
+        "name": "Петрович",
+        "voice": "dmitri",
+        "lengthScale": 1.05,
+        "pitchSemitones": -1.7,
+        "effect": "radio"
+      },
+      "past": {
+        "name": "Голос из прошлого",
+        "voice": "dmitri",
+        "lengthScale": 1.26,
+        "pitchSemitones": -2.0,
+        "effect": "dream"
+      },
+      "soldier": {
+        "name": "Солдат",
+        "voice": "denis",
+        "lengthScale": 0.98,
+        "pitchSemitones": 1.2,
+        "effect": "room"
+      },
+      "officer": {
+        "name": "Офицер",
+        "voice": "denis",
+        "lengthScale": 1.03,
+        "pitchSemitones": -0.2,
+        "effect": "room"
+      },
+      "builder": {
+        "name": "Строитель",
+        "voice": "denis",
+        "lengthScale": 1.06,
+        "pitchSemitones": -0.4,
+        "effect": "radio"
+      },
+      "driver": {
+        "name": "Водитель",
+        "voice": "denis",
+        "lengthScale": 1.05,
+        "pitchSemitones": -0.8,
+        "effect": "radio"
+      },
+      "pilot": {
+        "name": "Пилот «Коровника»",
+        "voice": "denis",
+        "lengthScale": 0.97,
+        "pitchSemitones": 0.5,
+        "effect": "radio"
+      }
+    },
+    "scenes": [
+      {
+        "id": "m03-s01",
+        "title": "Приказ на экспедицию",
+        "cues": [
+          "m03-v2-s01-1",
+          "m03-v2-s01-2",
+          "m03-v2-s01-3"
+        ],
+        "triggerDescription": "начало третьей миссии, основная база.",
+        "presentation": {
+          "type": "radio"
+        },
+        "kind": "sequence",
+        "section": "Сюжет",
+        "trigger": "начало третьей миссии, основная база.",
+        "notes": "",
+        "enabled": true
+      },
+      {
+        "id": "m03-s02",
+        "title": "Знакомство с «Коровником»",
+        "cues": [
+          "m03-v2-s02-1",
+          "m03-v2-s02-2",
+          "m03-v2-s02-3",
+          "m03-v2-s02-4"
+        ],
+        "triggerDescription": "игрок впервые открывает транспортную площадку.",
+        "presentation": {
+          "type": "radio"
+        },
+        "kind": "sequence",
+        "section": "Сюжет",
+        "trigger": "игрок впервые открывает транспортную площадку.",
+        "notes": "",
+        "enabled": true
+      },
+      {
+        "id": "m03-s03",
+        "title": "Начало погрузки",
+        "cues": [
+          "m03-v2-s03-1",
+          "m03-v2-s03-2"
+        ],
+        "triggerDescription": "первый приказ на погрузку.",
+        "presentation": {
+          "type": "radio"
+        },
+        "kind": "sequence",
+        "section": "Сюжет",
+        "trigger": "первый приказ на погрузку.",
+        "notes": "",
+        "enabled": true
+      },
+      {
+        "id": "m03-s04",
+        "title": "Транспорт загружен",
+        "cues": [
+          "m03-v2-s04-1",
+          "m03-v2-s04-2"
+        ],
+        "triggerDescription": "необходимый состав готов к вылету.",
+        "presentation": {
+          "type": "radio"
+        },
+        "kind": "sequence",
+        "section": "Сюжет",
+        "trigger": "необходимый состав готов к вылету.",
+        "notes": "",
+        "enabled": true
+      },
+      {
+        "id": "m03-s05",
+        "title": "Высадка",
+        "cues": [
+          "m03-v2-s05-1",
+          "m03-v2-s05-2",
+          "m03-v2-s05-3"
+        ],
+        "triggerDescription": "первая посадка на карте экспедиции.",
+        "presentation": {
+          "type": "radio"
+        },
+        "kind": "sequence",
+        "section": "Сюжет",
+        "trigger": "первая посадка на карте экспедиции.",
+        "notes": "",
+        "enabled": true
+      },
+      {
+        "id": "m03-s06",
+        "title": "Первый контакт",
+        "cues": [
+          "m03-v2-s06-1",
+          "m03-v2-s06-2",
+          "m03-v2-s06-3"
+        ],
+        "triggerDescription": "патруль действительно обнаружен.",
+        "presentation": {
+          "type": "radio"
+        },
+        "kind": "sequence",
+        "section": "Сюжет",
+        "trigger": "патруль действительно обнаружен.",
+        "notes": "",
+        "enabled": true
+      },
+      {
+        "id": "m03-s07",
+        "title": "Обнаружен склад",
+        "cues": [
+          "m03-v2-s07-1",
+          "m03-v2-s07-2"
+        ],
+        "triggerDescription": "главный довоенный объект впервые попал в разведданные.",
+        "presentation": {
+          "type": "radio"
+        },
+        "kind": "sequence",
+        "section": "Сюжет",
+        "trigger": "главный довоенный объект впервые попал в разведданные.",
+        "notes": "",
+        "enabled": true
+      },
+      {
+        "id": "m03-s08",
+        "title": "Технология найдена",
+        "cues": [
+          "m03-v2-s08-1",
+          "m03-v2-s08-2"
+        ],
+        "triggerDescription": "артефакт подобран.",
+        "presentation": {
+          "type": "radio"
+        },
+        "kind": "sequence",
+        "section": "Сюжет",
+        "trigger": "артефакт подобран.",
+        "notes": "",
+        "enabled": true
+      },
+      {
+        "id": "m03-s09",
+        "title": "Странная находка",
+        "cues": [
+          "m03-v2-s09-1",
+          "m03-v2-s09-2"
+        ],
+        "triggerDescription": "игрок осмотрел центральный склад после взятия артефакта.",
+        "presentation": {
+          "type": "radio"
+        },
+        "kind": "sequence",
+        "section": "Сюжет",
+        "trigger": "игрок осмотрел центральный склад после взятия артефакта.",
+        "notes": "",
+        "enabled": true
+      },
+      {
+        "id": "m03-s10",
+        "title": "Вызов эвакуации",
+        "cues": [
+          "m03-v2-s10-1",
+          "m03-v2-s10-2"
+        ],
+        "triggerDescription": "отряд прибыл в зону посадки с артефактом.",
+        "presentation": {
+          "type": "radio"
+        },
+        "kind": "sequence",
+        "section": "Сюжет",
+        "trigger": "отряд прибыл в зону посадки с артефактом.",
+        "notes": "",
+        "enabled": true
+      },
+      {
+        "id": "m03-s11",
+        "title": "Возвращение",
+        "cues": [
+          "m03-v2-s11-1",
+          "m03-v2-s11-2"
+        ],
+        "triggerDescription": "транспорт вернулся на основную базу.",
+        "presentation": {
+          "type": "radio"
+        },
+        "kind": "sequence",
+        "section": "Сюжет",
+        "trigger": "транспорт вернулся на основную базу.",
+        "notes": "",
+        "enabled": true
+      },
+      {
+        "id": "m03-s12",
+        "title": "Итог исследования",
+        "cues": [
+          "m03-v2-s12-1",
+          "m03-v2-s12-2",
+          "m03-v2-s12-3",
+          "m03-v2-s12-4"
+        ],
+        "triggerDescription": "соответствующее исследование завершено, не раньше.",
+        "presentation": {
+          "type": "radio"
+        },
+        "kind": "sequence",
+        "section": "Сюжет",
+        "trigger": "соответствующее исследование завершено, не раньше.",
+        "notes": "",
+        "enabled": true
+      },
+      {
+        "id": "m03-five-minutes",
+        "title": "Осталось пять минут",
+        "cues": [
+          "m03-v2-five-minutes-1"
+        ],
+        "presentation": {
+          "type": "radio"
+        },
+        "kind": "sequence",
+        "section": "Сюжет",
+        "trigger": "",
+        "notes": "",
+        "enabled": true
+      },
+      {
+        "id": "m03-one-minute",
+        "title": "Осталась минута",
+        "cues": [
+          "m03-v2-one-minute-1"
+        ],
+        "presentation": {
+          "type": "radio"
+        },
+        "kind": "sequence",
+        "section": "Сюжет",
+        "trigger": "",
+        "notes": "",
+        "enabled": true
+      },
+      {
+        "id": "m03-s07-clear",
+        "title": "Склад без охраны",
+        "cues": [
+          "m03-v2-s07-clear-1"
+        ],
+        "presentation": {
+          "type": "radio"
+        },
+        "kind": "sequence",
+        "section": "Сюжет",
+        "trigger": "",
+        "notes": "",
+        "enabled": true
+      },
+      {
+        "id": "m03-s12-losses",
+        "title": "Исследование после потерь",
+        "cues": [
+          "m03-v2-s12-losses-1",
+          "m03-v2-s12-losses-2"
+        ],
+        "presentation": {
+          "type": "radio"
+        },
+        "kind": "sequence",
+        "section": "Сюжет",
+        "trigger": "",
+        "notes": "",
+        "enabled": true
+      }
+    ],
+    "lines": {
+      "m03-s01-1": {
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "id": "m03-s01-1",
+        "speaker": "general",
+        "text": "Альфа, разведка обнаружила довоенный объект за пределами нашего сектора. Есть основания полагать, что там сохранилось вооружение",
+        "emotion": "firm, measured, over radio",
+        "pauseAfter": 0.25,
+        "recordingStatus": "temporary-synthesis",
+        "key": "m03-s01-1",
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/audio-temp/m03-s01-1-cda36404c8a3.ogg",
+          "text": "Альфа, разведка обнаружила довоенный объект за пределами нашего сектора. Есть основания полагать, что там сохранилось вооружение",
+          "speaker": "general",
+          "duration": 7.357291666666667,
+          "origin": "temporary-synthesis",
+          "generator": "local Piper + FFmpeg",
+          "sha256": "cda36404c8a3478e68f1472675a800e194b1022b266dcfbd06e2009cd61e4e01"
+        }
+      },
+      "m03-s01-2": {
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "id": "m03-s01-2",
+        "speaker": "commander",
+        "text": "Наземным маршрутом?",
+        "emotion": "calm, businesslike",
+        "pauseAfter": 0.25,
+        "recordingStatus": "temporary-synthesis",
+        "key": "m03-s01-2",
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/audio-temp/m03-s01-2-17a71ad850a3.ogg",
+          "text": "Наземным маршрутом?",
+          "speaker": "commander",
+          "duration": 1.5282916666666666,
+          "origin": "temporary-synthesis",
+          "generator": "local Piper + FFmpeg",
+          "sha256": "17a71ad850a3a8f80d8cb14b378b4f940b5723e61594c0053bea94f13b51cf68"
+        }
+      },
+      "m03-s01-3": {
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "id": "m03-s01-3",
+        "speaker": "general",
+        "text": "Отрицательно. Для вас подготовлен транспорт. Задача — забрать технологию и вернуться",
+        "emotion": "confident",
+        "pauseAfter": 0.25,
+        "recordingStatus": "temporary-synthesis",
+        "key": "m03-s01-3",
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/audio-temp/m03-s01-3-a20e949c7c6f.ogg",
+          "text": "Отрицательно. Для вас подготовлен транспорт. Задача — забрать технологию и вернуться",
+          "speaker": "general",
+          "duration": 5.1786666666666665,
+          "origin": "temporary-synthesis",
+          "generator": "local Piper + FFmpeg",
+          "sha256": "a20e949c7c6f37580775d8e1b605492bc6df4613daae59b0dcbfafcb37255e54"
+        }
+      },
+      "m03-s02-1": {
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "id": "m03-s02-1",
+        "speaker": "commander",
+        "text": "Это и есть наш транспорт?",
+        "emotion": "curious, restrained",
+        "pauseAfter": 0.25,
+        "recordingStatus": "temporary-synthesis",
+        "key": "m03-s02-1",
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/audio-temp/m03-s02-1-c691e52b09b8.ogg",
+          "text": "Это и есть наш транспорт?",
+          "speaker": "commander",
+          "duration": 1.794875,
+          "origin": "temporary-synthesis",
+          "generator": "local Piper + FFmpeg",
+          "sha256": "c691e52b09b8c9474d43356b732873478d1c8c17dbb9355b0bbabad8de3a4857"
+        }
+      },
+      "m03-s02-2": {
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "id": "m03-s02-2",
+        "speaker": "warrant",
+        "text": "Ми-26. Модификация “Коровник”. Два винта, большая грузовая и аппетит соответствующий",
+        "emotion": "proud, matter-of-fact",
+        "pauseAfter": 0.25,
+        "recordingStatus": "temporary-synthesis",
+        "key": "m03-s02-2",
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/audio-temp/m03-s02-2-5e9617932949.ogg",
+          "text": "Ми-26. Модификация “Коровник”. Два винта, большая грузовая и аппетит соответствующий",
+          "speaker": "warrant",
+          "duration": 6.111458333333333,
+          "origin": "temporary-synthesis",
+          "generator": "local Piper + FFmpeg",
+          "sha256": "5e9617932949c1a08883e1299a8cd3a4ae250c1b451bbe280b82b89ab4eb51a9"
+        }
+      },
+      "m03-s02-3": {
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "id": "m03-s02-3",
+        "speaker": "commander",
+        "text": "Главное, чтоб обратно прилетел",
+        "emotion": "dry",
+        "pauseAfter": 0.25,
+        "recordingStatus": "temporary-synthesis",
+        "key": "m03-s02-3",
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/audio-temp/m03-s02-3-12ad3aad39dd.ogg",
+          "text": "Главное, чтоб обратно прилетел",
+          "speaker": "commander",
+          "duration": 2.154625,
+          "origin": "temporary-synthesis",
+          "generator": "local Piper + FFmpeg",
+          "sha256": "12ad3aad39dd57949ac040e49c698acb1d9511a8a051340556e4af72eebcc226"
+        }
+      },
+      "m03-s02-4": {
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "id": "m03-s02-4",
+        "speaker": "warrant",
+        "text": "Туда-то мы его точно заправили",
+        "emotion": "deadpan",
+        "pauseAfter": 0.25,
+        "recordingStatus": "temporary-synthesis",
+        "key": "m03-s02-4",
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/audio-temp/m03-s02-4-21783c577206.ogg",
+          "text": "Туда-то мы его точно заправили",
+          "speaker": "warrant",
+          "duration": 2.098,
+          "origin": "temporary-synthesis",
+          "generator": "local Piper + FFmpeg",
+          "sha256": "21783c5772063b17b70e43c2b01c0cba57f2ae191d5924afc56edc979d6ea46d"
+        }
+      },
+      "m03-s03-1": {
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "id": "m03-s03-1",
+        "speaker": "radio",
+        "text": "Коровник, приготовиться к приёму техники",
+        "emotion": "focused",
+        "pauseAfter": 0.25,
+        "recordingStatus": "temporary-synthesis",
+        "key": "m03-s03-1",
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/audio-temp/m03-s03-1-034cc7a65fd9.ogg",
+          "text": "Коровник, приготовиться к приёму техники",
+          "speaker": "radio",
+          "duration": 2.3030833333333334,
+          "origin": "temporary-synthesis",
+          "generator": "local Piper + FFmpeg",
+          "sha256": "034cc7a65fd9cfcaff1ed0a39e6220801c08abace3ed02d713a8ff211a6ae9dd"
+        }
+      },
+      "m03-s03-2": {
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "id": "m03-s03-2",
+        "speaker": "pilot",
+        "text": "Принял. Рампа открыта. Только без гонок",
+        "emotion": "over radio, relaxed",
+        "pauseAfter": 0.25,
+        "recordingStatus": "temporary-synthesis",
+        "key": "m03-s03-2",
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/audio-temp/m03-s03-2-58cae0b94081.ogg",
+          "text": "Принял. Рампа открыта. Только без гонок",
+          "speaker": "pilot",
+          "duration": 3.47525,
+          "origin": "temporary-synthesis",
+          "generator": "local Piper + FFmpeg",
+          "sha256": "58cae0b94081754ede1e90105ae77d5bc3bfcac422b4bd0e5e39b86b9ead5d33"
+        }
+      },
+      "m03-s04-1": {
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "id": "m03-s04-1",
+        "speaker": "pilot",
+        "text": "Груз закреплён. Машины на борту. К вылету готов",
+        "emotion": "professional",
+        "pauseAfter": 0.25,
+        "recordingStatus": "temporary-synthesis",
+        "key": "m03-s04-1",
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/audio-temp/m03-s04-1-ee23e86c4611.ogg",
+          "text": "Груз закреплён. Машины на борту. К вылету готов",
+          "speaker": "pilot",
+          "duration": 4.067125,
+          "origin": "temporary-synthesis",
+          "generator": "local Piper + FFmpeg",
+          "sha256": "ee23e86c4611c70c6484b90c1d933b6c890e8ce90bf3fd66d1ce0af53c48e592"
+        }
+      },
+      "m03-s04-2": {
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "id": "m03-s04-2",
+        "speaker": "commander",
+        "text": "Начинайте",
+        "emotion": "firm",
+        "pauseAfter": 0.25,
+        "recordingStatus": "temporary-synthesis",
+        "key": "m03-s04-2",
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/audio-temp/m03-s04-2-f2feef34a182.ogg",
+          "text": "Начинайте",
+          "speaker": "commander",
+          "duration": 0.970875,
+          "origin": "temporary-synthesis",
+          "generator": "local Piper + FFmpeg",
+          "sha256": "f2feef34a182dbedd5d227544cd59be174a2e4904226d666ce64098d1d951029"
+        }
+      },
+      "m03-s05-1": {
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "id": "m03-s05-1",
+        "speaker": "pilot",
+        "text": "Альфа, точка высадки. Рампа пошла",
+        "emotion": "focused, over radio",
+        "pauseAfter": 0.25,
+        "recordingStatus": "temporary-synthesis",
+        "key": "m03-s05-1",
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/audio-temp/m03-s05-1-d685c2e6e31b.ogg",
+          "text": "Альфа, точка высадки. Рампа пошла",
+          "speaker": "pilot",
+          "duration": 3.157,
+          "origin": "temporary-synthesis",
+          "generator": "local Piper + FFmpeg",
+          "sha256": "d685c2e6e31b6cefe0af3c92bcc6e2919714c96f3da4bf228dca75d8a338478b"
+        }
+      },
+      "m03-s05-2": {
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "id": "m03-s05-2",
+        "speaker": "scout",
+        "text": "Дорога рядом. Следы свежие. Похоже, район не пустой",
+        "emotion": "alert",
+        "pauseAfter": 0.25,
+        "recordingStatus": "temporary-synthesis",
+        "key": "m03-s05-2",
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/audio-temp/m03-s05-2-be08761a8195.ogg",
+          "text": "Дорога рядом. Следы свежие. Похоже, район не пустой",
+          "speaker": "scout",
+          "duration": 3.903583333333333,
+          "origin": "temporary-synthesis",
+          "generator": "local Piper + FFmpeg",
+          "sha256": "be08761a8195ca1752d10693e49a0388c6ac60665f945c8a7f3afa12f3b8accc"
+        }
+      },
+      "m03-s05-3": {
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "id": "m03-s05-3",
+        "speaker": "commander",
+        "text": "Осмотреться. Вперёд без лишнего шума",
+        "emotion": "commanding",
+        "pauseAfter": 0.25,
+        "recordingStatus": "temporary-synthesis",
+        "key": "m03-s05-3",
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/audio-temp/m03-s05-3-0355af8a9a4a.ogg",
+          "text": "Осмотреться. Вперёд без лишнего шума",
+          "speaker": "commander",
+          "duration": 3.0880833333333335,
+          "origin": "temporary-synthesis",
+          "generator": "local Piper + FFmpeg",
+          "sha256": "0355af8a9a4adf0dee1a5e341e6e7b3905106c86dc1d081713be2bb0f5030169"
+        }
+      },
+      "m03-s06-1": {
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "id": "m03-s06-1",
+        "speaker": "scout",
+        "text": "Впереди патруль. Несколько машин, идут по дороге",
+        "emotion": "quiet, reporting",
+        "pauseAfter": 0.25,
+        "recordingStatus": "temporary-synthesis",
+        "key": "m03-s06-1",
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/audio-temp/m03-s06-1-75b625585784.ogg",
+          "text": "Впереди патруль. Несколько машин, идут по дороге",
+          "speaker": "scout",
+          "duration": 3.0175833333333335,
+          "origin": "temporary-synthesis",
+          "generator": "local Piper + FFmpeg",
+          "sha256": "75b6255857847560751884f79ec006b7eda020980ff641f1148fe59f9ba18ef0"
+        }
+      },
+      "m03-s06-2": {
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "id": "m03-s06-2",
+        "speaker": "commander",
+        "text": "Обойти можем?",
+        "emotion": "calm",
+        "pauseAfter": 0.25,
+        "recordingStatus": "temporary-synthesis",
+        "key": "m03-s06-2",
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/audio-temp/m03-s06-2-c84b07797a9c.ogg",
+          "text": "Обойти можем?",
+          "speaker": "commander",
+          "duration": 1.3772916666666666,
+          "origin": "temporary-synthesis",
+          "generator": "local Piper + FFmpeg",
+          "sha256": "c84b07797a9cb65c96dda72010c98810599f3f0a253d995e39733ac7a47b3bd2"
+        }
+      },
+      "m03-s06-3": {
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "id": "m03-s06-3",
+        "speaker": "scout",
+        "text": "Есть грунтовка. Только она уходит за высоту",
+        "emotion": "measured",
+        "pauseAfter": 0.25,
+        "recordingStatus": "temporary-synthesis",
+        "key": "m03-s06-3",
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/audio-temp/m03-s06-3-94103205d10e.ogg",
+          "text": "Есть грунтовка. Только она уходит за высоту",
+          "speaker": "scout",
+          "duration": 3.110708333333333,
+          "origin": "temporary-synthesis",
+          "generator": "local Piper + FFmpeg",
+          "sha256": "94103205d10e7df1dc08354b58beb8815f2ad3b80942835a4aeb11647e3c4e52"
+        }
+      },
+      "m03-s07-1": {
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "id": "m03-s07-1",
+        "speaker": "scout",
+        "text": "Нашли объект. Старый склад, у ворот огнемётная башня",
+        "emotion": "reporting",
+        "pauseAfter": 0.25,
+        "recordingStatus": "temporary-synthesis",
+        "key": "m03-s07-1",
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/audio-temp/m03-s07-1-24b81f4fad8e.ogg",
+          "text": "Нашли объект. Старый склад, у ворот огнемётная башня",
+          "speaker": "scout",
+          "duration": 3.4126666666666665,
+          "origin": "temporary-synthesis",
+          "generator": "local Piper + FFmpeg",
+          "sha256": "24b81f4fad8e9a3d3241e912b4be34662f94a7c884b441be60f86ef6c8cb2a5e"
+        }
+      },
+      "m03-s07-2": {
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "id": "m03-s07-2",
+        "speaker": "commander",
+        "text": "Серьёзно встречают. Значит, есть что охранять",
+        "emotion": "dry, businesslike",
+        "pauseAfter": 0.25,
+        "recordingStatus": "temporary-synthesis",
+        "key": "m03-s07-2",
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/audio-temp/m03-s07-2-f74e662f9489.ogg",
+          "text": "Серьёзно встречают. Значит, есть что охранять",
+          "speaker": "commander",
+          "duration": 3.4356666666666666,
+          "origin": "temporary-synthesis",
+          "generator": "local Piper + FFmpeg",
+          "sha256": "f74e662f94893d03e89dee2f64ee9887b20d591c465aedc1d30c67214328a5ac"
+        }
+      },
+      "m03-s08-1": {
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "id": "m03-s08-1",
+        "speaker": "scout",
+        "text": "Командир, здесь оружейный модуль. Пулемёт тяжёлый, довоенный. Документы уцелели",
+        "emotion": "pleased, reporting",
+        "pauseAfter": 0.25,
+        "recordingStatus": "temporary-synthesis",
+        "key": "m03-s08-1",
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/audio-temp/m03-s08-1-a3ba2f30b5b1.ogg",
+          "text": "Командир, здесь оружейный модуль. Пулемёт тяжёлый, довоенный. Документы уцелели",
+          "speaker": "scout",
+          "duration": 4.995041666666666,
+          "origin": "temporary-synthesis",
+          "generator": "local Piper + FFmpeg",
+          "sha256": "a3ba2f30b5b14853f012ecca5e30b286345d2c9ba5116ad401d2b008213cf5d5"
+        }
+      },
+      "m03-s08-2": {
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "id": "m03-s08-2",
+        "speaker": "commander",
+        "text": "Отлично. Забираем и домой",
+        "emotion": "decisive",
+        "pauseAfter": 0.25,
+        "recordingStatus": "temporary-synthesis",
+        "key": "m03-s08-2",
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/audio-temp/m03-s08-2-3d624e6802cb.ogg",
+          "text": "Отлично. Забираем и домой",
+          "speaker": "commander",
+          "duration": 2.5539583333333336,
+          "origin": "temporary-synthesis",
+          "generator": "local Piper + FFmpeg",
+          "sha256": "3d624e6802cbd91cbf6e59bea079a342c4fe9461dfd71edf97972cee81aacc53"
+        }
+      },
+      "m03-s09-1": {
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "id": "m03-s09-1",
+        "speaker": "scout",
+        "text": "Тут ещё одна странность. Часть оборудования снята недавно. Причём аккуратно",
+        "emotion": "thoughtful, suspicious",
+        "pauseAfter": 0.25,
+        "recordingStatus": "temporary-synthesis",
+        "key": "m03-s09-1",
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/audio-temp/m03-s09-1-36c0236a84fd.ogg",
+          "text": "Тут ещё одна странность. Часть оборудования снята недавно. Причём аккуратно",
+          "speaker": "scout",
+          "duration": 4.832708333333334,
+          "origin": "temporary-synthesis",
+          "generator": "local Piper + FFmpeg",
+          "sha256": "36c0236a84fd2b71d98ee083ce42f265d3c8e83100a5616f1335c0af95ad062e"
+        }
+      },
+      "m03-s09-2": {
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "id": "m03-s09-2",
+        "speaker": "commander",
+        "text": "Отметь на карте. Вернёмся к этому позже",
+        "emotion": "calm, serious",
+        "pauseAfter": 0.25,
+        "recordingStatus": "temporary-synthesis",
+        "key": "m03-s09-2",
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/audio-temp/m03-s09-2-60be20fbe42f.ogg",
+          "text": "Отметь на карте. Вернёмся к этому позже",
+          "speaker": "commander",
+          "duration": 3.2157916666666666,
+          "origin": "temporary-synthesis",
+          "generator": "local Piper + FFmpeg",
+          "sha256": "60be20fbe42fab34682a48586498c845780b8696a6ab487a252b51e04369808f"
+        }
+      },
+      "m03-s10-1": {
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "id": "m03-s10-1",
+        "speaker": "commander",
+        "text": "Коровник, Альфа на точке. Готовы к эвакуации",
+        "emotion": "commanding, over radio",
+        "pauseAfter": 0.25,
+        "recordingStatus": "temporary-synthesis",
+        "key": "m03-s10-1",
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/audio-temp/m03-s10-1-68b5e33d797b.ogg",
+          "text": "Коровник, Альфа на точке. Готовы к эвакуации",
+          "speaker": "commander",
+          "duration": 3.9353333333333333,
+          "origin": "temporary-synthesis",
+          "generator": "local Piper + FFmpeg",
+          "sha256": "68b5e33d797b42200fa90585dc516735ac93e367cfb16595d6e580d276659087"
+        }
+      },
+      "m03-s10-2": {
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "id": "m03-s10-2",
+        "speaker": "pilot",
+        "text": "Вас понял. Захожу",
+        "emotion": "focused",
+        "pauseAfter": 0.25,
+        "recordingStatus": "temporary-synthesis",
+        "key": "m03-s10-2",
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/audio-temp/m03-s10-2-52e68afb4c67.ogg",
+          "text": "Вас понял. Захожу",
+          "speaker": "pilot",
+          "duration": 1.926625,
+          "origin": "temporary-synthesis",
+          "generator": "local Piper + FFmpeg",
+          "sha256": "52e68afb4c679330f5a49fa9628d0c92929e9a81864cd2f609c6139e95e3f09b"
+        }
+      },
+      "m03-s11-1": {
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "id": "m03-s11-1",
+        "speaker": "radio",
+        "text": "Альфа вернулась. Транспорт на площадке",
+        "emotion": "pleased, reporting",
+        "pauseAfter": 0.25,
+        "recordingStatus": "temporary-synthesis",
+        "key": "m03-s11-1",
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/audio-temp/m03-s11-1-0ac552b8aef2.ogg",
+          "text": "Альфа вернулась. Транспорт на площадке",
+          "speaker": "radio",
+          "duration": 2.539833333333333,
+          "origin": "temporary-synthesis",
+          "generator": "local Piper + FFmpeg",
+          "sha256": "0ac552b8aef21e2903cea1d69cdb88695df66e8c7edc199a818ba3cab62cc36a"
+        }
+      },
+      "m03-s11-2": {
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "id": "m03-s11-2",
+        "speaker": "commander",
+        "text": "Находку в НИИ. Технику осмотреть, экипажам отдых",
+        "emotion": "calm",
+        "pauseAfter": 0.25,
+        "recordingStatus": "temporary-synthesis",
+        "key": "m03-s11-2",
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/audio-temp/m03-s11-2-13e760d3f80f.ogg",
+          "text": "Находку в НИИ. Технику осмотреть, экипажам отдых",
+          "speaker": "commander",
+          "duration": 3.8420833333333335,
+          "origin": "temporary-synthesis",
+          "generator": "local Piper + FFmpeg",
+          "sha256": "13e760d3f80f50182a30b8352a95d520c619aa4c8ca38f717e9c3fe00edb8933"
+        }
+      },
+      "m03-s12-1": {
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "id": "m03-s12-1",
+        "speaker": "scientist",
+        "text": "Тяжёлый пулемёт восстановили по документации. Теперь можем производить свой",
+        "emotion": "professional, satisfied",
+        "pauseAfter": 0.25,
+        "recordingStatus": "temporary-synthesis",
+        "key": "m03-s12-1",
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/audio-temp/m03-s12-1-1f7068ebe965.ogg",
+          "text": "Тяжёлый пулемёт восстановили по документации. Теперь можем производить свой",
+          "speaker": "scientist",
+          "duration": 4.327166666666667,
+          "origin": "temporary-synthesis",
+          "generator": "local Piper + FFmpeg",
+          "sha256": "1f7068ebe9652a9b0ecd36bdab34e0339b1bcbd9fb1a6f2259118ad66d3985c8"
+        }
+      },
+      "m03-s12-2": {
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "id": "m03-s12-2",
+        "speaker": "commander",
+        "text": "Ну наконец-то. Хоть что-то новое без изоленты",
+        "emotion": "calm, slightly amused",
+        "pauseAfter": 0.25,
+        "recordingStatus": "temporary-synthesis",
+        "key": "m03-s12-2",
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/audio-temp/m03-s12-2-d0207a6d7acc.ogg",
+          "text": "Ну наконец-то. Хоть что-то новое без изоленты",
+          "speaker": "commander",
+          "duration": 3.5410833333333334,
+          "origin": "temporary-synthesis",
+          "generator": "local Piper + FFmpeg",
+          "sha256": "d0207a6d7acc4abe698742db66ead154f337d1234efe9e27780f92cb90debc76"
+        }
+      },
+      "m03-five-minutes-1": {
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "id": "m03-five-minutes-1",
+        "speaker": "pilot",
+        "text": "Альфа, до конца операции пять минут. Рассчитывайте время на погрузку.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "temporary-synthesis",
+        "key": "m03-five-minutes-1",
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/audio-temp/m03-five-minutes-1-4106dd3febcf.ogg",
+          "text": "Альфа, до конца операции пять минут. Рассчитывайте время на погрузку.",
+          "speaker": "pilot",
+          "duration": 4.9214166666666666,
+          "origin": "temporary-synthesis",
+          "generator": "local Piper + FFmpeg",
+          "sha256": "4106dd3febcf40c517f06ecacb30e48a29fa1a18dbc14f8ea304c598fd4595cb"
+        }
+      },
+      "m03-one-minute-1": {
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "id": "m03-one-minute-1",
+        "speaker": "pilot",
+        "text": "Альфа, осталась минута. Срочно на эвакуацию.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "temporary-synthesis",
+        "key": "m03-one-minute-1",
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/audio-temp/m03-one-minute-1-0d9a41ec122f.ogg",
+          "text": "Альфа, осталась минута. Срочно на эвакуацию.",
+          "speaker": "pilot",
+          "duration": 3.4469166666666666,
+          "origin": "temporary-synthesis",
+          "generator": "local Piper + FFmpeg",
+          "sha256": "0d9a41ec122fa280b9060e72f405cb5f30470a174342a913c7f07155b9de434d"
+        }
+      },
+      "m03-s07-clear-1": {
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "id": "m03-s07-clear-1",
+        "speaker": "scout",
+        "text": "Довоенный склад перед нами. Подступы свободны. Проверяем документацию.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "temporary-synthesis",
+        "key": "m03-s07-clear-1",
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/audio-temp/m03-s07-clear-1-896759206bd5.ogg",
+          "text": "Довоенный склад перед нами. Подступы свободны. Проверяем документацию.",
+          "speaker": "scout",
+          "duration": 4.728291666666666,
+          "origin": "temporary-synthesis",
+          "generator": "local Piper + FFmpeg",
+          "sha256": "896759206bd5eb7efe7fff03070ae2f1a70c2e9cf31dffe2e02ad098e550de15"
+        }
+      },
+      "m03-s12-losses-1": {
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "id": "m03-s12-losses-1",
+        "speaker": "scientist",
+        "text": "Тяжёлый пулемёт восстановили по документации. Теперь можем производить свой.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "temporary-synthesis",
+        "key": "m03-s12-losses-1",
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/audio-temp/m03-s12-losses-1-b4f46373de3b.ogg",
+          "text": "Тяжёлый пулемёт восстановили по документации. Теперь можем производить свой.",
+          "speaker": "scientist",
+          "duration": 4.397375,
+          "origin": "temporary-synthesis",
+          "generator": "local Piper + FFmpeg",
+          "sha256": "b4f46373de3b181eae6a7b8d48279ff924c4a95c4d96ee85358a2d55dd5c9251"
+        }
+      },
+      "m03-v2-s01-1": {
+        "id": "m03-v2-s01-1",
+        "speaker": "general",
+        "text": "Альфа, нашли довоенный склад. Забрать оружейную технологию.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m03-v2-s01-1",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s01-1-04d85ade51f7.mp3",
+          "text": "Альфа, нашли довоенный склад. Забрать оружейную технологию.",
+          "speaker": "general",
+          "origin": "elevenlabs-synthesis",
+          "sha256": "04d85ade51f7563f300b64f0f9141d65b29fe29713bc71e9930e03f849ced0d0",
+          "bytes": 70260,
+          "duration": 4.32,
+          "leadingSilence": 0.07,
+          "trailingSilence": 0.2400000000000002,
+          "voiceId": "rQOBu7YxCDxGiFdTm28w",
+          "voiceName": "Artem Lebedev - Captivating and Engaging",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "generatedAt": "2026-11-11T21:13:14.035Z"
+        }
+      },
+      "m03-v2-s01-2": {
+        "id": "m03-v2-s01-2",
+        "speaker": "commander",
+        "text": "А хозяева склада?",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m03-v2-s01-2",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s01-2-282b0cd5118e.mp3",
+          "text": "А хозяева склада?",
+          "speaker": "commander",
+          "origin": "elevenlabs-synthesis",
+          "sha256": "282b0cd5118e0ac0d41821d25f346bbfe465547b90de1cd3cdce77e89f328e3c",
+          "bytes": 24284,
+          "duration": 1.44,
+          "leadingSilence": 0.08,
+          "trailingSilence": 0.15999999999999992,
+          "voiceId": "5mJA7umOnM5ycymymd6P",
+          "voiceName": "comandorNig",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "generatedAt": "2026-11-11T21:13:13.634Z"
+        }
+      },
+      "m03-v2-s01-3": {
+        "id": "m03-v2-s01-3",
+        "speaker": "general",
+        "text": "По документам — мы. Документы оформим по возвращении.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m03-v2-s01-3",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s01-3-0a9cdc5f5bbd.mp3",
+          "text": "По документам — мы. Документы оформим по возвращении.",
+          "speaker": "general",
+          "origin": "elevenlabs-synthesis",
+          "sha256": "0a9cdc5f5bbd1294d804ffea6f4a797db0815f835634c519970951ca1861c530",
+          "bytes": 69006,
+          "duration": 4.24,
+          "leadingSilence": 0.09,
+          "trailingSilence": 0.21999999999999975,
+          "voiceId": "rQOBu7YxCDxGiFdTm28w",
+          "voiceName": "Artem Lebedev - Captivating and Engaging",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "generatedAt": "2026-11-11T21:13:15.070Z"
+        }
+      },
+      "m03-v2-s02-1": {
+        "id": "m03-v2-s02-1",
+        "speaker": "commander",
+        "text": "Это и есть наш транспорт?",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m03-v2-s02-1",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s02-1-0da2f5883106.mp3",
+          "text": "Это и есть наш транспорт?",
+          "speaker": "commander",
+          "origin": "elevenlabs-synthesis",
+          "sha256": "0da2f5883106da953b1801a21873a2336d24d73976f1f7b9eb5c56fa8f73bc7b",
+          "bytes": 33061,
+          "duration": 2.0,
+          "leadingSilence": 0.04,
+          "trailingSilence": 0.15999999999999992,
+          "voiceId": "5mJA7umOnM5ycymymd6P",
+          "voiceName": "comandorNig",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "generatedAt": "2026-11-11T21:13:15.060Z"
+        }
+      },
+      "m03-v2-s02-2": {
+        "id": "m03-v2-s02-2",
+        "speaker": "warrant",
+        "text": "Коровник. Два винта, жрёт за четверых.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m03-v2-s02-2",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s02-2-b98a1c0e2edc.mp3",
+          "text": "Коровник. Два винта, жрёт за четверых.",
+          "speaker": "warrant",
+          "origin": "elevenlabs-synthesis",
+          "sha256": "b98a1c0e2edc3111d6eef46ce55905ff846ffb1d7a063fefae4db580a76b7401",
+          "bytes": 57303,
+          "duration": 3.52,
+          "leadingSilence": 0.04,
+          "trailingSilence": 0.21999999999999975,
+          "voiceId": "6A9D8WSMm4rFsg2DWFeE",
+          "voiceName": "Egor Gadzhiyev - Clear and Commanding",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "generatedAt": "2026-11-11T21:13:16.293Z"
+        }
+      },
+      "m03-v2-s02-3": {
+        "id": "m03-v2-s02-3",
+        "speaker": "commander",
+        "text": "На обратный путь хватит?",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m03-v2-s02-3",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s02-3-a3fb8bde421c.mp3",
+          "text": "На обратный путь хватит?",
+          "speaker": "commander",
+          "origin": "elevenlabs-synthesis",
+          "sha256": "a3fb8bde421c84a363484e368a5df62ce053a17bc4b16e9a5fc12549b2ef8a7f",
+          "bytes": 30554,
+          "duration": 1.84,
+          "leadingSilence": 0.02,
+          "trailingSilence": 0,
+          "voiceId": "5mJA7umOnM5ycymymd6P",
+          "voiceName": "comandorNig",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "generatedAt": "2026-11-11T21:13:15.876Z"
+        }
+      },
+      "m03-v2-s02-4": {
+        "id": "m03-v2-s02-4",
+        "speaker": "warrant",
+        "text": "В приказе сказано вернуться. Значит, хватит.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m03-v2-s02-4",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s02-4-c6c56e857431.mp3",
+          "text": "В приказе сказано вернуться. Значит, хватит.",
+          "speaker": "warrant",
+          "origin": "elevenlabs-synthesis",
+          "sha256": "c6c56e857431eb5bfad9fb92e7799bcf46efebcf61d6cfd273b0059178eff654",
+          "bytes": 56049,
+          "duration": 3.44,
+          "leadingSilence": 0.11,
+          "trailingSilence": 0.17999999999999972,
+          "voiceId": "6A9D8WSMm4rFsg2DWFeE",
+          "voiceName": "Egor Gadzhiyev - Clear and Commanding",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "generatedAt": "2026-11-11T21:13:17.159Z"
+        }
+      },
+      "m03-v2-s03-1": {
+        "id": "m03-v2-s03-1",
+        "speaker": "radio",
+        "text": "Коровник, принимаешь машины?",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m03-v2-s03-1",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s03-1-e4e353c9581b.mp3",
+          "text": "Коровник, принимаешь машины?",
+          "speaker": "radio",
+          "origin": "elevenlabs-synthesis",
+          "sha256": "e4e353c9581bf942617d961753f546e91ee1f7dbde0910058af58b27c91997e2",
+          "bytes": 33061,
+          "duration": 2.0,
+          "leadingSilence": 0.05,
+          "trailingSilence": 0.18999999999999995,
+          "voiceId": "RLRdvNFwJJct2XZOgfzy",
+          "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "generatedAt": "2026-11-11T21:13:17.555Z"
+        }
+      },
+      "m03-v2-s03-2": {
+        "id": "m03-v2-s03-2",
+        "speaker": "pilot",
+        "text": "Рампа открыта. По одному! Это вертолёт, не маршрутка.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m03-v2-s03-2",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s03-2-809d5cea7c7b.mp3",
+          "text": "Рампа открыта. По одному! Это вертолёт, не маршрутка.",
+          "speaker": "pilot",
+          "origin": "elevenlabs-synthesis",
+          "sha256": "809d5cea7c7bf0c6bed33a615a9c5e96f37e59366122579803dd9285178099be",
+          "bytes": 67752,
+          "duration": 4.16,
+          "leadingSilence": 0.03,
+          "trailingSilence": 0.16000000000000014,
+          "voiceId": "JKtNvDNrWu33P1xzttP2",
+          "voiceName": "Ivan - Energetic and Sassy",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "generatedAt": "2026-11-11T21:13:18.608Z"
+        }
+      },
+      "m03-v2-s04-1": {
+        "id": "m03-v2-s04-1",
+        "speaker": "pilot",
+        "text": "Машины на борту. К вылету готов.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m03-v2-s04-1",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s04-1-344e5e56b568.mp3",
+          "text": "Машины на борту. К вылету готов.",
+          "speaker": "pilot",
+          "origin": "elevenlabs-synthesis",
+          "sha256": "344e5e56b568df7bc3eddb6c95a40f403056d8b8733356d3a3705eec9a61c237",
+          "bytes": 39331,
+          "duration": 2.4,
+          "leadingSilence": 0.03,
+          "trailingSilence": 0.20999999999999996,
+          "voiceId": "JKtNvDNrWu33P1xzttP2",
+          "voiceName": "Ivan - Energetic and Sassy",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "generatedAt": "2026-11-11T21:13:18.701Z"
+        }
+      },
+      "m03-v2-s04-2": {
+        "id": "m03-v2-s04-2",
+        "speaker": "commander",
+        "text": "Поднимай.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m03-v2-s04-2",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s04-2-ae1328946a74.mp3",
+          "text": "Поднимай.",
+          "speaker": "commander",
+          "origin": "elevenlabs-synthesis",
+          "sha256": "ae1328946a7488428cf50f16cdbafff0be90b91d844322504fdd5ba8f41b1fda",
+          "bytes": 13835,
+          "duration": 0.8,
+          "leadingSilence": 0.06,
+          "trailingSilence": 0.16000000000000003,
+          "voiceId": "5mJA7umOnM5ycymymd6P",
+          "voiceName": "comandorNig",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "generatedAt": "2026-11-11T21:13:19.236Z"
+        }
+      },
+      "m03-v2-s05-1": {
+        "id": "m03-v2-s05-1",
+        "speaker": "pilot",
+        "text": "На месте. Выгружаемся.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m03-v2-s05-1",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s05-1-591107b7b231.mp3",
+          "text": "На месте. Выгружаемся.",
+          "speaker": "pilot",
+          "origin": "elevenlabs-synthesis",
+          "sha256": "591107b7b231501ecafd186d31057f7a314cf7232edaa3dc8851b9e54927515d",
+          "bytes": 31807,
+          "duration": 1.92,
+          "leadingSilence": 0.03,
+          "trailingSilence": 0.16999999999999993,
+          "voiceId": "JKtNvDNrWu33P1xzttP2",
+          "voiceName": "Ivan - Energetic and Sassy",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "generatedAt": "2026-11-11T21:13:19.573Z"
+        }
+      },
+      "m03-v2-s05-2": {
+        "id": "m03-v2-s05-2",
+        "speaker": "scout",
+        "text": "На дороге свежие следы. Тут ездят.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m03-v2-s05-2",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s05-2-f83ac1b3b41f.mp3",
+          "text": "На дороге свежие следы. Тут ездят.",
+          "speaker": "scout",
+          "origin": "elevenlabs-synthesis",
+          "sha256": "f83ac1b3b41f8a74151afc08ae27341470e34b596b402e1bcc478eb734ca2154",
+          "bytes": 47272,
+          "duration": 2.88,
+          "leadingSilence": 0.02,
+          "trailingSilence": 0.1599999999999997,
+          "voiceId": "RLRdvNFwJJct2XZOgfzy",
+          "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "generatedAt": "2026-11-11T21:13:20.457Z"
+        }
+      },
+      "m03-v2-s05-3": {
+        "id": "m03-v2-s05-3",
+        "speaker": "commander",
+        "text": "Держаться вместе. Осмотреться.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m03-v2-s05-3",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s05-3-81ad26a4b51f.mp3",
+          "text": "Держаться вместе. Осмотреться.",
+          "speaker": "commander",
+          "origin": "elevenlabs-synthesis",
+          "sha256": "81ad26a4b51f469d34982457f4e0fe77331a95d30a42965812109d857be38421",
+          "bytes": 46018,
+          "duration": 2.8,
+          "leadingSilence": 0.03,
+          "trailingSilence": 0.17999999999999972,
+          "voiceId": "5mJA7umOnM5ycymymd6P",
+          "voiceName": "comandorNig",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "generatedAt": "2026-11-11T21:13:20.587Z"
+        }
+      },
+      "m03-v2-s06-1": {
+        "id": "m03-v2-s06-1",
+        "speaker": "scout",
+        "text": "Патруль на дороге. Несколько машин.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m03-v2-s06-1",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s06-1-ca763d3e2211.mp3",
+          "text": "Патруль на дороге. Несколько машин.",
+          "speaker": "scout",
+          "origin": "elevenlabs-synthesis",
+          "sha256": "ca763d3e2211911f8017982263d5a2636d73aad201696d1ce41028ccc229cf04",
+          "bytes": 43510,
+          "duration": 2.64,
+          "leadingSilence": 0.04,
+          "trailingSilence": 0.16000000000000014,
+          "voiceId": "RLRdvNFwJJct2XZOgfzy",
+          "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "generatedAt": "2026-11-11T21:13:21.630Z"
+        }
+      },
+      "m03-v2-s06-2": {
+        "id": "m03-v2-s06-2",
+        "speaker": "commander",
+        "text": "Обход есть?",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m03-v2-s06-2",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s06-2-153e3713015c.mp3",
+          "text": "Обход есть?",
+          "speaker": "commander",
+          "origin": "elevenlabs-synthesis",
+          "sha256": "153e3713015c7c7a05fc936a08c554efbe8bf5d7e8058b2d6aef9ec29a9846f0",
+          "bytes": 17597,
+          "duration": 1.04,
+          "leadingSilence": 0.04,
+          "trailingSilence": 0.16000000000000003,
+          "voiceId": "5mJA7umOnM5ycymymd6P",
+          "voiceName": "comandorNig",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "generatedAt": "2026-11-11T21:13:21.358Z"
+        }
+      },
+      "m03-v2-s06-3": {
+        "id": "m03-v2-s06-3",
+        "speaker": "scout",
+        "text": "Грунтовка за высотой. Можно попробовать.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m03-v2-s06-3",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s06-3-86649806b275.mp3",
+          "text": "Грунтовка за высотой. Можно попробовать.",
+          "speaker": "scout",
+          "origin": "elevenlabs-synthesis",
+          "sha256": "86649806b27598e8dc59e4901eee71363080dda9f4f8ad43251d8e49c3d8928d",
+          "bytes": 49780,
+          "duration": 3.04,
+          "leadingSilence": 0.02,
+          "trailingSilence": 0.1499999999999999,
+          "voiceId": "RLRdvNFwJJct2XZOgfzy",
+          "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "generatedAt": "2026-11-11T21:13:22.654Z"
+        }
+      },
+      "m03-v2-s07-1": {
+        "id": "m03-v2-s07-1",
+        "speaker": "scout",
+        "text": "Склад. У ворот огнемётная башня.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m03-v2-s07-1",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s07-1-3b0bee8cb6d3.mp3",
+          "text": "Склад. У ворот огнемётная башня.",
+          "speaker": "scout",
+          "origin": "elevenlabs-synthesis",
+          "sha256": "3b0bee8cb6d3232302980de1d152d776001a1d2bf949b7007642f6789b313388",
+          "bytes": 48526,
+          "duration": 2.96,
+          "leadingSilence": 0.04,
+          "trailingSilence": 0.16999999999999993,
+          "voiceId": "RLRdvNFwJJct2XZOgfzy",
+          "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "generatedAt": "2026-11-11T21:13:22.740Z"
+        }
+      },
+      "m03-v2-s07-2": {
+        "id": "m03-v2-s07-2",
+        "speaker": "commander",
+        "text": "Вот тебе и наше имущество.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m03-v2-s07-2",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s07-2-d7dede2659e8.mp3",
+          "text": "Вот тебе и наше имущество.",
+          "speaker": "commander",
+          "origin": "elevenlabs-synthesis",
+          "sha256": "d7dede2659e894f6a7b69bd052f63fb1ca660f0c9518aae2c25b15f1850e9b53",
+          "bytes": 36823,
+          "duration": 2.24,
+          "leadingSilence": 0.12,
+          "trailingSilence": 0.16000000000000014,
+          "voiceId": "5mJA7umOnM5ycymymd6P",
+          "voiceName": "comandorNig",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "generatedAt": "2026-11-11T21:13:23.693Z"
+        }
+      },
+      "m03-v2-s08-1": {
+        "id": "m03-v2-s08-1",
+        "speaker": "scout",
+        "text": "Тяжёлый пулемёт. Довоенный. Чертежи целы.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m03-v2-s08-1",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s08-1-b9a434fa9466.mp3",
+          "text": "Тяжёлый пулемёт. Довоенный. Чертежи целы.",
+          "speaker": "scout",
+          "origin": "elevenlabs-synthesis",
+          "sha256": "b9a434fa94665284591aad74e19e524682f3debf93876f33673ca7a076009dc6",
+          "bytes": 62318,
+          "duration": 3.84,
+          "leadingSilence": 0.06,
+          "trailingSilence": 0.16999999999999993,
+          "voiceId": "RLRdvNFwJJct2XZOgfzy",
+          "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "generatedAt": "2026-11-11T21:13:24.317Z"
+        }
+      },
+      "m03-v2-s08-2": {
+        "id": "m03-v2-s08-2",
+        "speaker": "commander",
+        "text": "Забирай. Теперь у нас тоже будут аргументы.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m03-v2-s08-2",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s08-2-5667321cea72.mp3",
+          "text": "Забирай. Теперь у нас тоже будут аргументы.",
+          "speaker": "commander",
+          "origin": "elevenlabs-synthesis",
+          "sha256": "5667321cea728212f46f41167f31a7556ca21acb718bae2fa64e8272cd63d685",
+          "bytes": 53541,
+          "duration": 3.28,
+          "leadingSilence": 0.24,
+          "trailingSilence": 0.1499999999999999,
+          "voiceId": "5mJA7umOnM5ycymymd6P",
+          "voiceName": "comandorNig",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "generatedAt": "2026-11-11T21:13:24.943Z"
+        }
+      },
+      "m03-v2-s09-1": {
+        "id": "m03-v2-s09-1",
+        "speaker": "scout",
+        "text": "Тут уже поработали. Оборудование сняли недавно. Чисто, без лома.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m03-v2-s09-1",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s09-1-badae815f08f.mp3",
+          "text": "Тут уже поработали. Оборудование сняли недавно. Чисто, без лома.",
+          "speaker": "scout",
+          "origin": "elevenlabs-synthesis",
+          "sha256": "badae815f08ff704874f8f287833e0f4d52a9d8d4ab46062ab8f852848c65703",
+          "bytes": 79037,
+          "duration": 4.88,
+          "leadingSilence": 0.04,
+          "trailingSilence": 0.21999999999999975,
+          "voiceId": "RLRdvNFwJJct2XZOgfzy",
+          "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "generatedAt": "2026-11-11T21:13:26.050Z"
+        }
+      },
+      "m03-v2-s09-2": {
+        "id": "m03-v2-s09-2",
+        "speaker": "commander",
+        "text": "Место отметь. И поглядывай по сторонам.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m03-v2-s09-2",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s09-2-4686d7af3943.mp3",
+          "text": "Место отметь. И поглядывай по сторонам.",
+          "speaker": "commander",
+          "origin": "elevenlabs-synthesis",
+          "sha256": "4686d7af3943e7e6cb459355c5c09dfc9d76510e019ac8f4c00b292c97044062",
+          "bytes": 47272,
+          "duration": 2.88,
+          "leadingSilence": 0.03,
+          "trailingSilence": 0.16999999999999993,
+          "voiceId": "5mJA7umOnM5ycymymd6P",
+          "voiceName": "comandorNig",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "generatedAt": "2026-11-11T21:13:26.094Z"
+        }
+      },
+      "m03-v2-s10-1": {
+        "id": "m03-v2-s10-1",
+        "speaker": "commander",
+        "text": "Коровник, мы у площадки. Забирай.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m03-v2-s10-1",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s10-1-f988a27acfb2.mp3",
+          "text": "Коровник, мы у площадки. Забирай.",
+          "speaker": "commander",
+          "origin": "elevenlabs-synthesis",
+          "sha256": "f988a27acfb2769eaf9597aa602c960202adbd10b1d48372065eec14da837301",
+          "bytes": 44764,
+          "duration": 2.72,
+          "leadingSilence": 0.03,
+          "trailingSilence": 0.15000000000000036,
+          "voiceId": "5mJA7umOnM5ycymymd6P",
+          "voiceName": "comandorNig",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "generatedAt": "2026-11-11T21:13:27.248Z"
+        }
+      },
+      "m03-v2-s10-2": {
+        "id": "m03-v2-s10-2",
+        "speaker": "pilot",
+        "text": "Захожу. Только без давки на рампе.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m03-v2-s10-2",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s10-2-064065f19d7c.mp3",
+          "text": "Захожу. Только без давки на рампе.",
+          "speaker": "pilot",
+          "origin": "elevenlabs-synthesis",
+          "sha256": "064065f19d7cacd49ca48b41e2dff78dbbae6150a6519fff742ee533df2a297e",
+          "bytes": 40585,
+          "duration": 2.48,
+          "leadingSilence": 0.03,
+          "trailingSilence": 0.19999999999999973,
+          "voiceId": "JKtNvDNrWu33P1xzttP2",
+          "voiceName": "Ivan - Energetic and Sassy",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "generatedAt": "2026-11-11T21:13:27.252Z"
+        }
+      },
+      "m03-v2-s11-1": {
+        "id": "m03-v2-s11-1",
+        "speaker": "radio",
+        "text": "Коровник на базе. Наши вернулись.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m03-v2-s11-1",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s11-1-e2b9dfe8f19d.mp3",
+          "text": "Коровник на базе. Наши вернулись.",
+          "speaker": "radio",
+          "origin": "elevenlabs-synthesis",
+          "sha256": "e2b9dfe8f19d38b7028da4074a2b4edcd0bfeca5478fa9829dbad5062aa6e816",
+          "bytes": 47272,
+          "duration": 2.88,
+          "leadingSilence": 0.04,
+          "trailingSilence": 0.16999999999999993,
+          "voiceId": "RLRdvNFwJJct2XZOgfzy",
+          "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "generatedAt": "2026-11-11T21:13:28.369Z"
+        }
+      },
+      "m03-v2-s11-2": {
+        "id": "m03-v2-s11-2",
+        "speaker": "commander",
+        "text": "Находку — в НИИ. Машины осмотреть. Людям отдых.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m03-v2-s11-2",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s11-2-53e48966d290.mp3",
+          "text": "Находку — в НИИ. Машины осмотреть. Людям отдых.",
+          "speaker": "commander",
+          "origin": "elevenlabs-synthesis",
+          "sha256": "53e48966d2908f181e113de992c5981a2935219e5a089b356e41c211c64afc30",
+          "bytes": 91994,
+          "duration": 5.68,
+          "leadingSilence": 0.02,
+          "trailingSilence": 0.17999999999999972,
+          "voiceId": "5mJA7umOnM5ycymymd6P",
+          "voiceName": "comandorNig",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "generatedAt": "2026-11-11T21:13:29.072Z"
+        }
+      },
+      "m03-v2-s12-1": {
+        "id": "m03-v2-s12-1",
+        "speaker": "scientist",
+        "text": "Пулемёт готов к производству. По довоенным чертежам.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m03-v2-s12-1",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s12-1-89215b0530cf.mp3",
+          "text": "Пулемёт готов к производству. По довоенным чертежам.",
+          "speaker": "scientist",
+          "origin": "elevenlabs-synthesis",
+          "sha256": "89215b0530cfe7a63e7275a2be2ac55f8031b3484872762a8ca2377a4918d636",
+          "bytes": 59811,
+          "duration": 3.68,
+          "leadingSilence": 0.05,
+          "trailingSilence": 0.18000000000000016,
+          "voiceId": "1KGG4Q8LqRdNII9xBurw",
+          "voiceName": "M. Danisch - Narrator",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "generatedAt": "2026-11-11T21:13:29.835Z"
+        }
+      },
+      "m03-v2-s12-2": {
+        "id": "m03-v2-s12-2",
+        "speaker": "general",
+        "text": "Запишите: разработан под моим руководством.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m03-v2-s12-2",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s12-2-1250145227b2.mp3",
+          "text": "Запишите: разработан под моим руководством.",
+          "speaker": "general",
+          "origin": "elevenlabs-synthesis",
+          "sha256": "1250145227b2a28c3d615b9498bff58786c2444a8bec8042eb169687c0933ebc",
+          "bytes": 57303,
+          "duration": 3.52,
+          "leadingSilence": 0.11,
+          "trailingSilence": 0.19999999999999973,
+          "voiceId": "rQOBu7YxCDxGiFdTm28w",
+          "voiceName": "Artem Lebedev - Captivating and Engaging",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "generatedAt": "2026-11-11T21:13:30.515Z"
+        }
+      },
+      "m03-v2-s12-3": {
+        "id": "m03-v2-s12-3",
+        "speaker": "commander",
+        "text": "До войны?",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m03-v2-s12-3",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s12-3-ba4c375652cf.mp3",
+          "text": "До войны?",
+          "speaker": "commander",
+          "origin": "elevenlabs-synthesis",
+          "sha256": "ba4c375652cff6bd5c691b4f6031391d06bfa2cde1a85197a2aa6fc2ddb76ec3",
+          "bytes": 15089,
+          "duration": 0.88,
+          "leadingSilence": 0.03,
+          "trailingSilence": 0.16000000000000003,
+          "voiceId": "5mJA7umOnM5ycymymd6P",
+          "voiceName": "comandorNig",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "generatedAt": "2026-11-11T21:13:30.609Z"
+        }
+      },
+      "m03-v2-s12-4": {
+        "id": "m03-v2-s12-4",
+        "speaker": "general",
+        "text": "Тем более. Сколько лет работы.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m03-v2-s12-4",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s12-4-9716030210ed.mp3",
+          "text": "Тем более. Сколько лет работы.",
+          "speaker": "general",
+          "origin": "elevenlabs-synthesis",
+          "sha256": "9716030210eda9b5c7cebd6b7ffa8a99895a9cbc0af03b4d4ef04d70fb63b8b7",
+          "bytes": 43510,
+          "duration": 2.64,
+          "leadingSilence": 0.04,
+          "trailingSilence": 0.2200000000000002,
+          "voiceId": "rQOBu7YxCDxGiFdTm28w",
+          "voiceName": "Artem Lebedev - Captivating and Engaging",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "generatedAt": "2026-11-11T21:13:31.621Z"
+        }
+      },
+      "m03-v2-five-minutes-1": {
+        "id": "m03-v2-five-minutes-1",
+        "speaker": "pilot",
+        "text": "Альфа, осталось пять минут. Не забудьте время на погрузку.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m03-v2-five-minutes-1",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-five-minutes-1-630660502455.mp3",
+          "text": "Альфа, осталось пять минут. Не забудьте время на погрузку.",
+          "speaker": "pilot",
+          "origin": "elevenlabs-synthesis",
+          "sha256": "6306605024559676a5a67368bfeb5f4ee6cae4997e4cbb9af7424e66ee73f84c",
+          "bytes": 59811,
+          "duration": 3.68,
+          "leadingSilence": 0.02,
+          "trailingSilence": 0.16000000000000014,
+          "voiceId": "JKtNvDNrWu33P1xzttP2",
+          "voiceName": "Ivan - Energetic and Sassy",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "generatedAt": "2026-11-11T21:13:32.174Z"
+        }
+      },
+      "m03-v2-one-minute-1": {
+        "id": "m03-v2-one-minute-1",
+        "speaker": "pilot",
+        "text": "Альфа, осталась минута! Всем к точке эвакуации!",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m03-v2-one-minute-1",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-one-minute-1-cfbaa9291d02.mp3",
+          "text": "Альфа, осталась минута! Всем к точке эвакуации!",
+          "speaker": "pilot",
+          "origin": "elevenlabs-synthesis",
+          "sha256": "cfbaa9291d02eb3c4e7160858736ad4589461ea942b01d430e6c6c16ddbcffe2",
+          "bytes": 56049,
+          "duration": 3.44,
+          "leadingSilence": 0.03,
+          "trailingSilence": 0.13999999999999968,
+          "voiceId": "JKtNvDNrWu33P1xzttP2",
+          "voiceName": "Ivan - Energetic and Sassy",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "generatedAt": "2026-11-11T21:13:33.009Z"
+        }
+      },
+      "m03-v2-s07-clear-1": {
+        "id": "m03-v2-s07-clear-1",
+        "speaker": "scout",
+        "text": "Склад перед нами. Подступы чистые. Проверим, что уцелело.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m03-v2-s07-clear-1",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s07-clear-1-76366992bdb9.mp3",
+          "text": "Склад перед нами. Подступы чистые. Проверим, что уцелело.",
+          "speaker": "scout",
+          "origin": "elevenlabs-synthesis",
+          "sha256": "76366992bdb9da4f2dadbe0f34d1663d65a4a1a50f6283f2f42cb768dd2c89f0",
+          "bytes": 71514,
+          "duration": 4.4,
+          "leadingSilence": 0.04,
+          "trailingSilence": 0.1900000000000004,
+          "voiceId": "RLRdvNFwJJct2XZOgfzy",
+          "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "generatedAt": "2026-11-11T21:13:33.809Z"
+        }
+      },
+      "m03-v2-s12-losses-1": {
+        "id": "m03-v2-s12-losses-1",
+        "speaker": "scientist",
+        "text": "Пулемёт готов к производству. По довоенным чертежам.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m03-v2-s12-losses-1",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s12-1-89215b0530cf.mp3",
+          "text": "Пулемёт готов к производству. По довоенным чертежам.",
+          "speaker": "scientist",
+          "origin": "elevenlabs-synthesis",
+          "sha256": "89215b0530cfe7a63e7275a2be2ac55f8031b3484872762a8ca2377a4918d636",
+          "bytes": 59811,
+          "duration": 3.68,
+          "leadingSilence": 0.05,
+          "trailingSilence": 0.18000000000000016,
+          "voiceId": "1KGG4Q8LqRdNII9xBurw",
+          "voiceName": "M. Danisch - Narrator",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "generatedAt": "2026-11-11T21:13:29.835Z"
+        }
+      },
+      "m03-v2-s12-losses-2": {
+        "id": "m03-v2-s12-losses-2",
+        "speaker": "commander",
+        "text": "Жаль, не все вернулись.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m03-v2-s12-losses-2",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s12-losses-2-bc33cae1b764.mp3",
+          "text": "Жаль, не все вернулись.",
+          "speaker": "commander",
+          "origin": "elevenlabs-synthesis",
+          "sha256": "bc33cae1b764d42328d78a96e3a74c3a72ee84cba242998f2a992ecd8750ed57",
+          "bytes": 41838,
+          "duration": 2.56,
+          "leadingSilence": 0.26,
+          "trailingSilence": 0.18999999999999995,
+          "voiceId": "5mJA7umOnM5ycymymd6P",
+          "voiceName": "comandorNig",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "generatedAt": "2026-11-11T21:13:34.134Z"
+        }
+      }
+    },
+    "portraits": {}
+  }
+}

@@ -67,8 +67,8 @@ for(const gender of ['m','f']){
  const rule=radio.library.rules.find(r=>r.id==='damage.panic_failed');
  for(const tier of rule.tiers)tier.graphs=tier.graphs.filter(g=>g.requires?.all.some(c=>c.field==='facts.casualtyGender'&&c.value===gender));
  m.damage(a,10000);const lines=say(m,radio);assert(lines.length);assert(lines.every(l=>l.unitId!==a.id));
- if(gender==='f')assert(lines.some(l=>/девчонку|Отмучилась/.test(l.text)));
- else assert(lines.some(l=>/пацана|Отмучился/.test(l.text)));
+ if(gender==='f')assert(lines.some(l=>/девчонку|Не успела уйти/.test(l.text)));
+ else assert(lines.some(l=>/пацана|Не успел уйти/.test(l.text)));
  results.push({case:'actual confirmed '+gender+' casualty gets matching witness wording',lines:lines.map(l=>l.text)});
 }
 {
@@ -91,4 +91,5 @@ for(const gender of ['m','f']){
  const rule=old.rules.find(r=>r.id===RETREAT_RULES[0]);rule.enabled=false;mergeRetreatLibrary(old,library);assert.equal(rule.enabled,false);assert.equal(old.rules.length,library.rules.length);
  results.push({case:'older published libraries receive new sources without replacing owner edits or disabled rules'});
 }
+fs.mkdirSync('campaign/previews/playtest-WG-055',{recursive:true});
 fs.writeFileSync('campaign/previews/playtest-WG-055/panic-radio-checks.json',JSON.stringify(results,null,2));console.log(JSON.stringify(results,null,2));

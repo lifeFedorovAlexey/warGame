@@ -6,9 +6,12 @@ import {renderRadioLine} from '../campaign/radio/wording.js';
 import {simulateRadio} from '../campaign/radio/simulator.js';
 const bank=JSON.parse(fs.readFileSync('assets/radio/recorded-speech.json','utf8'));
 const library=JSON.parse(fs.readFileSync('assets/radio/situations_catalog.json','utf8'));
-const report=JSON.parse(fs.readFileSync('docs/campaign/radio-voice-bank-10k.json','utf8'));
+const report=JSON.parse(fs.readFileSync('docs/campaign/radio-language-review.json','utf8'));
 installRecordedSpeech(bank);
-assert(bank.reservedCredits<=bank.budgetCredits&&bank.budgetCredits<=10000);
+assert.equal(bank.batches.length,2);
+for(const batch of bank.batches){assert(batch.reservedCredits<=batch.budgetCredits&&batch.budgetCredits<=10000);assert.equal(batch.radioCredits+batch.storyCredits,batch.reservedCredits);}
+assert.equal(bank.reservedCredits,bank.batches.reduce((n,b)=>n+b.reservedCredits,0));
+assert.equal(report.reservedCredits,9900);assert(report.reservedCredits<=report.budgetCredits);
 assert.equal(bank.profiles.length,6);assert.equal(bank.profiles.filter(p=>p.gender==='f').length,2);
 let count=0;
 for(const [voice,clips] of Object.entries(bank.clips))for(const [text,clip] of Object.entries(clips)){
@@ -20,7 +23,7 @@ for(const [voice,clips] of Object.entries(bank.clips))for(const [text,clip] of O
  const owned={source:'recording',text,audio:{file:'owner.mp3',text}};
  assert.equal(radioClip(owned,text,library.settings,voice).file,'owner.mp3');
 }
-assert.equal(count,548);assert.equal(count,report.recordings);
+assert.equal(count,1130);assert.equal(count,report.activeRadioRecordings);assert.equal(count,bank.recordings);
 const text='Помолчать бы сейчас.',files=new Set();
 for(const p of bank.profiles){
  const clip=recordedRadioClip(p.profile,text);assert(clip);files.add(clip.file);

@@ -28,7 +28,7 @@ for(const cue of [...source.dialogue,...source.barks]){
  assert(clip.duration>0);
  if(cue.speaker!=='past')assert(portraits.characters[cue.speaker],cue.speaker);
 }
-assert.equal(userCount,111);assert.equal(elevenlabsCount,66);
+assert.equal(userCount,109);assert.equal(elevenlabsCount,60);
 assert.equal(audio.clips['m01-s07-l014'].voiceName,'Mishka Yaponcik - Odessa Rogue Charm');
 assert.equal(hash(fs.readFileSync(base+'recordings/reviewed/m01-s07-l014-4e14be06b9b1.mp3')),'4e14be06b9b1155f9d172d2ad351ef622770b629d1241313303b233a4ca38308');
 for(const id of ['m01-v3-r24-l001','m01-v3-r24-l002','m01-v3-r24-l003'])assert.equal(audio.clips[id].origin,'user-recording',id);
@@ -47,7 +47,7 @@ assert.equal(audio.clips['m01-s06-l008'].file,'recordings/commander/m01-s07-l002
 assert.equal(audio.clips['m01-s07-l002'].file,'recordings/commander/m01-s07-l004.mp3');
 assert.equal(audio.clips['m01-s07-l004'].file,'recordings/commander/pending/m01-s07-l007.mp3');
 for(const clip of Object.values(original.clips).filter(c=>c.origin==='user-recording'))assert.equal(hash(fs.readFileSync(base+clip.file)),clip.sha256);
-assert.equal(source.scenes.find(s=>s.id==='r50').cues.length,10);
+assert.equal(source.scenes.find(s=>s.id==='r50').cues.length,4);
 assert.equal(source.scenes.find(s=>s.id==='r06').cues.length,3);
 assert.deepEqual(applyStoryEdits(source,audio,applied),{story:source,audio},'Applied snapshots are idempotent');
 assert.deepEqual(originalStory,read('story-v2.json'),'Applying a snapshot does not mutate the base');

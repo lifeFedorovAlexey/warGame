@@ -1,0 +1,85 @@
+{
+  "scope": "Russian dialogue revision, M01 satire ending and M03 recorded rewrite",
+  "dynamicRadioChecks": 52,
+  "otherPassed": [
+    "recorded radio lookup and budget",
+    "story-v2 triggers and original recordings",
+    "panic retreat real events",
+    "M01/M02 finale queues",
+    "radio save migration"
+  ],
+  "radio": {
+    "decodedRecordings": 1130,
+    "gameExchange": [
+      {
+        "id": "idle.quiet.group.bawdy-v2.1",
+        "text": "Опять начальство имеет?",
+        "voice": "voice-5",
+        "voiceName": "Sarah - Mature, Reassuring, Confident",
+        "origin": "elevenlabs-synthesis",
+        "duration": 2.08,
+        "peak": 0.5006777048110962,
+        "context": "running"
+      },
+      {
+        "id": "idle.quiet.group.bawdy-v2.2",
+        "text": "Даже смазку зажало.",
+        "voice": "voice-3",
+        "voiceName": "Ekaterina - Soft, Silky and Tender",
+        "origin": "elevenlabs-synthesis",
+        "duration": 2,
+        "peak": 0.24783459305763245,
+        "context": "running"
+      }
+    ],
+    "paidRuntimeRequests": []
+  },
+  "m01": {
+    "decodedRecordings": 84,
+    "newStoryRecordings": 15,
+    "editorScenes": [
+      "r42",
+      "r49",
+      "r50"
+    ]
+  },
+  "m03": {
+    "decodedRecordings": 35,
+    "activeLines": 36,
+    "gamePlayed": [
+      {
+        "id": "m03-v2-s01-1",
+        "file": "recordings/elevenlabs/m03-v2-s01-1-04d85ade51f7.mp3",
+        "state": "running"
+      },
+      {
+        "id": "m03-v2-s01-3",
+        "file": "recordings/elevenlabs/m03-v2-s01-3-0a9cdc5f5bbd.mp3",
+        "state": "running"
+      }
+    ],
+    "editorFinaleLines": 4,
+    "budgetCredits": 2000,
+    "reservedCredits": 1319,
+    "paidRuntimeRequests": []
+  },
+  "visualReview": {
+    "viewports": [
+      [
+        1440,
+        900
+      ],
+      [
+        844,
+        390
+      ],
+      [
+        667,
+        375
+      ]
+    ],
+    "screenshots": "campaign/previews/{radio-language-review,elevenlabs-language-review,elevenlabs-m03}",
+    "result": "Spoken subtitles and controls visible; no horizontal overflow."
+  },
+  "limits": "M03 was checked with a short audio/editor/game playback fixture, not a repeated full mission playthrough. Credit amounts are reservations, not verified account debits."
+}

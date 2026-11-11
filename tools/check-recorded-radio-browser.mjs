@@ -2,10 +2,10 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url),{chromium}=require('C:/Users/Алексей/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
-const base=process.env.WARGAME_URL||'http://127.0.0.1:8767',folder='campaign/previews/radio-elevenlabs';
+const base=process.env.WARGAME_URL||'http://127.0.0.1:8767',folder='campaign/previews/radio-language-review';
 fs.mkdirSync(folder,{recursive:true});const report={errors:[],paidRequests:[],checks:[]};let browser;
 try{
- browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true,args:['--enable-unsafe-swiftshader','--use-angle=swiftshader']});
+ browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true,args:['--use-angle=d3d11']});
  const page=await browser.newPage({viewport:{width:1440,height:1000}});page.on('pageerror',e=>report.errors.push(e.stack));
  page.on('request',r=>{if(r.url().includes('api.elevenlabs.io'))report.paidRequests.push(r.url());});
  await page.addInitScript(()=>{
@@ -26,8 +26,8 @@ try{
    rows.push({voice,file:clip.file,duration:buffer.duration,expected:clip.duration,peak});
   }await ctx.close();return rows;
  });
- assert.equal(report.decoded.length,548);assert(report.decoded.every(r=>r.peak>.01&&Math.abs(r.duration-r.expected)<.05));
- report.checks.push('all 548 files decode in browser; all six profiles have audible recordings');
+ assert.equal(report.decoded.length,1130);assert(report.decoded.every(r=>r.peak>.01&&Math.abs(r.duration-r.expected)<.05));
+ report.checks.push('all 1130 files decode in browser; all six profiles have audible recordings');
  await page.locator('[data-radio-rule="idle.quiet"]').click();await page.getByLabel('Масштаб',{exact:true}).selectOption('single');
  await page.getByLabel('Вариант разговора',{exact:true}).selectOption('0');
  assert.equal(await page.getByText('Готовая озвучка',{exact:true}).count(),2);

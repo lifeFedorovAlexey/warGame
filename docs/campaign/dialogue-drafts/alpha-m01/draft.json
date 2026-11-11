@@ -1,6 +1,6 @@
 {
-  "revision": 218,
-  "savedAt": "2026-11-11T19:28:22.113756+00:00",
+  "revision": 219,
+  "savedAt": "2026-11-11T21:01:51.020586+00:00",
   "document": {
     "id": "alpha-m01",
     "title": "Освоение целины",
@@ -848,18 +848,14 @@
       },
       {
         "id": "r42",
-        "title": "Первое обращение Петровича",
+        "title": "Два процента просят помощи",
         "cues": [
-          "m01-s11-l001",
-          "m01-s11-l002",
-          "m01-s11-l003",
-          "m01-s11-l004",
-          "m01-s11-l005",
-          "m01-s11-l006",
-          "m01-s11-l007",
-          "m01-s11-l008",
-          "m01-s11-l009",
-          "m01-s11-l010"
+          "m01-v4-r42-l001",
+          "m01-v4-r42-l002",
+          "m01-v4-r42-l003",
+          "m01-v4-r42-l004",
+          "m01-v4-r42-l005",
+          "m01-v4-r42-l006"
         ],
         "sourceLine": 747,
         "sections": [
@@ -944,11 +940,13 @@
       },
       {
         "id": "r49",
-        "title": "Восстановление цивилизации",
+        "title": "Город в отчёте",
         "cues": [
-          "m01-s13-l001",
-          "m01-s13-l002",
-          "m01-s13-l003"
+          "m01-v4-r49-l001",
+          "m01-v4-r49-l002",
+          "m01-v4-r49-l003",
+          "m01-v4-r49-l004",
+          "m01-v4-r49-l005"
         ],
         "sourceLine": 863,
         "sections": [
@@ -962,18 +960,12 @@
       },
       {
         "id": "r50",
-        "title": "Новый источник энергии",
+        "title": "Электростанция по отчёту",
         "cues": [
-          "m01-s14-l001",
-          "m01-s14-l002",
-          "m01-s14-l003",
-          "m01-s14-l004",
-          "m01-s14-l005",
-          "m01-s14-l006",
-          "m01-s14-l007",
-          "m01-s14-l008",
-          "m01-s14-l009",
-          "m01-s14-l010"
+          "m01-v4-r50-l001",
+          "m01-v4-r50-l002",
+          "m01-v4-r50-l003",
+          "m01-v4-r50-l004"
         ],
         "sourceLine": 883,
         "sections": [
@@ -14176,6 +14168,486 @@
         },
         "portrait": null,
         "portraitState": ""
+      },
+      "m01-v4-r42-l001": {
+        "id": "m01-v4-r42-l001",
+        "speaker": "chief",
+        "text": "У меня тут республика! Меня народ выбрал!",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m01-v4-r42-l001",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-v4-r42-l001-39ce575ac34e.mp3",
+          "text": "У меня тут республика! Меня народ выбрал!",
+          "voiceId": "hD8aK7CmEPgH3mbFO08e",
+          "voiceName": "Ivo - Calming, chill and narrative",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "origin": "elevenlabs-synthesis",
+          "sha256": "39ce575ac34ed065e4001184b25c5eb01ba8f01e7dd9c5eef3169766331678a3",
+          "bytes": 53541,
+          "duration": 3.28,
+          "leadingSilence": 0.03,
+          "trailingSilence": 0.17999999999999972,
+          "speaker": "chief",
+          "generatedAt": "2026-11-11T20:58:07.148Z",
+          "draftRevision": 218
+        }
+      },
+      "m01-v4-r42-l002": {
+        "id": "m01-v4-r42-l002",
+        "speaker": "commander",
+        "text": "И сколько набрал?",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m01-v4-r42-l002",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-v4-r42-l002-0af437e4200d.mp3",
+          "text": "И сколько набрал?",
+          "voiceId": "5mJA7umOnM5ycymymd6P",
+          "voiceName": "comandorNig",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "origin": "elevenlabs-synthesis",
+          "sha256": "0af437e4200d706603d7f1351e64c4d41d8114109b8be33b5800ab252829a71e",
+          "bytes": 21358,
+          "duration": 1.28,
+          "leadingSilence": 0.04,
+          "trailingSilence": 0.1299999999999999,
+          "speaker": "commander",
+          "generatedAt": "2026-11-11T20:58:06.488Z",
+          "draftRevision": 218
+        }
+      },
+      "m01-v4-r42-l003": {
+        "id": "m01-v4-r42-l003",
+        "speaker": "chief",
+        "text": "Девяносто восемь процентов!",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m01-v4-r42-l003",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-v4-r42-l003-d2114b0ee91c.mp3",
+          "text": "Девяносто восемь процентов!",
+          "voiceId": "hD8aK7CmEPgH3mbFO08e",
+          "voiceName": "Ivo - Calming, chill and narrative",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "origin": "elevenlabs-synthesis",
+          "sha256": "d2114b0ee91cce91cbdd583f1c8a1f1f53004801f86b1fdc96753b6989bb1389",
+          "bytes": 38077,
+          "duration": 2.32,
+          "leadingSilence": 0.0,
+          "trailingSilence": 0.3099999999999996,
+          "speaker": "chief",
+          "generatedAt": "2026-11-11T20:58:07.612Z",
+          "draftRevision": 218
+        }
+      },
+      "m01-v4-r42-l004": {
+        "id": "m01-v4-r42-l004",
+        "speaker": "commander",
+        "text": "Прапорщик, записывай: два процента населения просят нашей помощи.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m01-v4-r42-l004",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-v4-r42-l004-e667d6703f40.mp3",
+          "text": "Прапорщик, записывай: два процента населения просят нашей помощи.",
+          "voiceId": "5mJA7umOnM5ycymymd6P",
+          "voiceName": "comandorNig",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "origin": "elevenlabs-synthesis",
+          "sha256": "e667d6703f40e8a650ac77e807b1ae8232d33cd0cb4b7b378e086c716270ca9c",
+          "bytes": 74021,
+          "duration": 4.56,
+          "leadingSilence": 0.04,
+          "trailingSilence": 0.15999999999999925,
+          "speaker": "commander",
+          "generatedAt": "2026-11-11T20:58:08.878Z",
+          "draftRevision": 218
+        }
+      },
+      "m01-v4-r42-l005": {
+        "id": "m01-v4-r42-l005",
+        "speaker": "warrant",
+        "text": "А они знают?",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m01-v4-r42-l005",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-v4-r42-l005-3dbab5842e10.mp3",
+          "text": "А они знают?",
+          "voiceId": "6A9D8WSMm4rFsg2DWFeE",
+          "voiceName": "Egor Gadzhiyev - Clear and Commanding",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "origin": "elevenlabs-synthesis",
+          "sha256": "3dbab5842e1059db53060356d316d8dd39b55b54212024f7f3a4e17d8f315ad1",
+          "bytes": 20105,
+          "duration": 1.2,
+          "leadingSilence": 0.04,
+          "trailingSilence": 0.2599999999999999,
+          "speaker": "warrant",
+          "generatedAt": "2026-11-11T20:58:08.502Z",
+          "draftRevision": 218
+        }
+      },
+      "m01-v4-r42-l006": {
+        "id": "m01-v4-r42-l006",
+        "speaker": "commander",
+        "text": "Потом объясним.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m01-v4-r42-l006",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-v4-r42-l006-0ec03acaee8a.mp3",
+          "text": "Потом объясним.",
+          "voiceId": "5mJA7umOnM5ycymymd6P",
+          "voiceName": "comandorNig",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "origin": "elevenlabs-synthesis",
+          "sha256": "0ec03acaee8aea318e2a39ec0131d5cf1a1c432231b8283791b4eee73fadbe2c",
+          "bytes": 21358,
+          "duration": 1.28,
+          "leadingSilence": 0.09,
+          "trailingSilence": 0.27,
+          "speaker": "commander",
+          "generatedAt": "2026-11-11T20:58:09.363Z",
+          "draftRevision": 218
+        }
+      },
+      "m01-v4-r49-l001": {
+        "id": "m01-v4-r49-l001",
+        "speaker": "general",
+        "text": "Докладывайте. Город восстановлен?",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m01-v4-r49-l001",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-v4-r49-l001-748b8b06357d.mp3",
+          "text": "Докладывайте. Город восстановлен?",
+          "voiceId": "rQOBu7YxCDxGiFdTm28w",
+          "voiceName": "Artem Lebedev - Captivating and Engaging",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "origin": "elevenlabs-synthesis",
+          "sha256": "748b8b06357d3491445af9c8744792517bb860bbf5a60ff6044c79c2d2751fb3",
+          "bytes": 40585,
+          "duration": 2.48,
+          "leadingSilence": 0.01,
+          "trailingSilence": 0.20999999999999996,
+          "speaker": "general",
+          "generatedAt": "2026-11-11T20:58:10.395Z",
+          "draftRevision": 218
+        }
+      },
+      "m01-v4-r49-l002": {
+        "id": "m01-v4-r49-l002",
+        "speaker": "commander",
+        "text": "Пока ангары и сортир.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m01-v4-r49-l002",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-v4-r49-l002-94db6528bb3c.mp3",
+          "text": "Пока ангары и сортир.",
+          "voiceId": "5mJA7umOnM5ycymymd6P",
+          "voiceName": "comandorNig",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "origin": "elevenlabs-synthesis",
+          "sha256": "94db6528bb3cf47e3d91b9515b9c9beb4b2e9801013bb8458b1891c749a87785",
+          "bytes": 38077,
+          "duration": 2.32,
+          "leadingSilence": 0.05,
+          "trailingSilence": 0.13999999999999968,
+          "speaker": "commander",
+          "generatedAt": "2026-11-11T20:58:10.442Z",
+          "draftRevision": 218
+        }
+      },
+      "m01-v4-r49-l003": {
+        "id": "m01-v4-r49-l003",
+        "speaker": "general",
+        "text": "Записываем: город.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m01-v4-r49-l003",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-v4-r49-l003-4837edb23367.mp3",
+          "text": "Записываем: город.",
+          "voiceId": "rQOBu7YxCDxGiFdTm28w",
+          "voiceName": "Artem Lebedev - Captivating and Engaging",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "origin": "elevenlabs-synthesis",
+          "sha256": "4837edb2336770d2df1f45daf67238a62bcafd8bdea1a4b57beacc7a196cb13b",
+          "bytes": 31807,
+          "duration": 1.92,
+          "leadingSilence": 0.02,
+          "trailingSilence": 0.16999999999999993,
+          "speaker": "general",
+          "generatedAt": "2026-11-11T20:58:11.366Z",
+          "draftRevision": 218
+        }
+      },
+      "m01-v4-r49-l004": {
+        "id": "m01-v4-r49-l004",
+        "speaker": "warrant",
+        "text": "Сортир без крыши.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m01-v4-r49-l004",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-v4-r49-l004-2d5218090743.mp3",
+          "text": "Сортир без крыши.",
+          "voiceId": "6A9D8WSMm4rFsg2DWFeE",
+          "voiceName": "Egor Gadzhiyev - Clear and Commanding",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "origin": "elevenlabs-synthesis",
+          "sha256": "2d521809074337ee51cec6bdee011da7aa84a7f83999e27e7ad0b68c2fbbe6e6",
+          "bytes": 26792,
+          "duration": 1.6,
+          "leadingSilence": 0.05,
+          "trailingSilence": 0.29000000000000004,
+          "speaker": "warrant",
+          "generatedAt": "2026-11-11T20:58:11.414Z",
+          "draftRevision": 218
+        }
+      },
+      "m01-v4-r49-l005": {
+        "id": "m01-v4-r49-l005",
+        "speaker": "general",
+        "text": "Открытое общественное пространство.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m01-v4-r49-l005",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-v4-r49-l005-764fea3460a9.mp3",
+          "text": "Открытое общественное пространство.",
+          "voiceId": "rQOBu7YxCDxGiFdTm28w",
+          "voiceName": "Artem Lebedev - Captivating and Engaging",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "origin": "elevenlabs-synthesis",
+          "sha256": "764fea3460a9939a3ba835304d8b0f26acc4d7b3b24bc4a863947ffd96498576",
+          "bytes": 41838,
+          "duration": 2.56,
+          "leadingSilence": 0.04,
+          "trailingSilence": 0.16999999999999993,
+          "speaker": "general",
+          "generatedAt": "2026-11-11T20:58:12.440Z",
+          "draftRevision": 218
+        }
+      },
+      "m01-v4-r50-l001": {
+        "id": "m01-v4-r50-l001",
+        "speaker": "radio",
+        "text": "Альфа, на юге энергетический всплеск. Источник неизвестен.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m01-v4-r50-l001",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-v4-r50-l001-54d96c8fb253.mp3",
+          "text": "Альфа, на юге энергетический всплеск. Источник неизвестен.",
+          "voiceId": "RLRdvNFwJJct2XZOgfzy",
+          "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "origin": "elevenlabs-synthesis",
+          "sha256": "54d96c8fb25366f627262270cede3fc632acb0eed6499d063d2fef7ff8c62747",
+          "bytes": 75275,
+          "duration": 4.64,
+          "leadingSilence": 0.02,
+          "trailingSilence": 0.1299999999999999,
+          "speaker": "radio",
+          "generatedAt": "2026-11-11T20:58:13.215Z",
+          "draftRevision": 218
+        }
+      },
+      "m01-v4-r50-l002": {
+        "id": "m01-v4-r50-l002",
+        "speaker": "general",
+        "text": "Включите в отчёт. Новая электростанция.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m01-v4-r50-l002",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-v4-r50-l002-202d9f6b4794.mp3",
+          "text": "Включите в отчёт. Новая электростанция.",
+          "voiceId": "rQOBu7YxCDxGiFdTm28w",
+          "voiceName": "Artem Lebedev - Captivating and Engaging",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "origin": "elevenlabs-synthesis",
+          "sha256": "202d9f6b4794dcc06cb42f6bcbb313dffc9c488a086db4bdc247262a2000214e",
+          "bytes": 53541,
+          "duration": 3.28,
+          "leadingSilence": 0.05,
+          "trailingSilence": 0.19999999999999973,
+          "speaker": "general",
+          "generatedAt": "2026-11-11T20:58:13.751Z",
+          "draftRevision": 218
+        }
+      },
+      "m01-v4-r50-l003": {
+        "id": "m01-v4-r50-l003",
+        "speaker": "commander",
+        "text": "Она не наша.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m01-v4-r50-l003",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-v4-r50-l003-4e15a5d8f981.mp3",
+          "text": "Она не наша.",
+          "voiceId": "5mJA7umOnM5ycymymd6P",
+          "voiceName": "comandorNig",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "origin": "elevenlabs-synthesis",
+          "sha256": "4e15a5d8f981b7559cc3f211e5331287dbb7cbbff49a0164d1596f166891a011",
+          "bytes": 20105,
+          "duration": 1.2,
+          "leadingSilence": 0.06,
+          "trailingSilence": 0.1299999999999999,
+          "speaker": "commander",
+          "generatedAt": "2026-11-11T20:58:14.040Z",
+          "draftRevision": 218
+        }
+      },
+      "m01-v4-r50-l004": {
+        "id": "m01-v4-r50-l004",
+        "speaker": "general",
+        "text": "Вот поэтому и выезжайте.",
+        "pauseAfter": 0.25,
+        "recordingStatus": "Т",
+        "key": "m01-v4-r50-l004",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-v4-r50-l004-d591724b0266.mp3",
+          "text": "Вот поэтому и выезжайте.",
+          "voiceId": "rQOBu7YxCDxGiFdTm28w",
+          "voiceName": "Artem Lebedev - Captivating and Engaging",
+          "modelId": "eleven_v4",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "origin": "elevenlabs-synthesis",
+          "sha256": "d591724b0266b202b54920108a8310a411429f9aaa02a7ea523bc663b39dfcc6",
+          "bytes": 36823,
+          "duration": 2.24,
+          "leadingSilence": 0.03,
+          "trailingSilence": 0.1900000000000004,
+          "speaker": "general",
+          "generatedAt": "2026-11-11T20:58:14.903Z",
+          "draftRevision": 218
+        }
       }
     },
     "portraits": {

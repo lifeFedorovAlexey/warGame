@@ -233,9 +233,11 @@ def validate(document, info):
             if not isinstance(scene.get(key, ''), str) or len(scene.get(key, '')) > 20000:
                 raise ValueError('Слишком длинное описание сцены')
         if scene.get('presentation'):
-            if scene['presentation'].get('type') != 'video':
+            presentation_type = scene['presentation'].get('type')
+            if presentation_type == 'video':
+                asset_path(scene['presentation']['file'], info)
+            elif presentation_type != 'radio':
                 raise ValueError('Неизвестный формат сцены')
-            asset_path(scene['presentation']['file'], info)
     for key, line in lines.items():
         if not isinstance(line, dict) or line.get('key') != key or line.get('speaker') not in document['speakers']:
             raise ValueError('Неизвестный персонаж или реплика')

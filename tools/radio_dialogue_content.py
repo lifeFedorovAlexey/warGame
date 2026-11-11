@@ -515,17 +515,9 @@ def enrich(rules, phrases, dictionaries, settings):
                 for node in graph['nodes']:
                     phrases[node['phraseId']]['emotion']='dry' if graph.get('humor') else 'urgent' if rule['priority']>=80 else 'relieved' if rule['id'] in ('repair.complete','traffic.jam_resolved','combat.target_destroyed') else 'calm'
                     if rule['id']=='idle.crew_history':phrases[node['phraseId']]['emotion']='somber'
-    # Inflect first-person masculine lines for actual female operators.
-    forms={'Снялся':'Снялась','Пошёл':'Пошла','Услышал':'Услышала','Доехал':'Доехала','Выехал':'Выехала',
-      'Выбрался':'Выбралась','Вышел':'Вышла','Тронулся':'Тронулась','Загнал':'Загнала','Сдал':'Сдала',
-      'Встал':'Встала','Вернулся':'Вернулась','Подобрал':'Подобрала','Свободен':'Свободна','Исправен':'Исправна','Принял':'Приняла'}
-    for p in phrases.values():
-        text=p['text'];female=text
-        for male,fem in forms.items():
-            if female.startswith(male+' ' ) or female.startswith(male+'.') or female==male:female=fem+female[len(male):];break
-        for male,fem in [('Из ремзоны вышел','Из ремзоны вышла'),('Задний ход закончил','Задний ход закончила'),('Артефакт забрал','Артефакт забрала'),('На точке. Прибыл','На точке. Прибыла'),('Я своё уже нарулил','Я своё уже нарулила'),('Назад сдал','Назад сдала'),('Позицию занял','Позицию заняла'),('Маршрут принял','Маршрут приняла'),('Всё. Задним отработал','Всё. Задним отработала'),('Задание на стройку принял','Задание на стройку приняла'),('Цель принял','Цель приняла')]:
-            if female.startswith(male):female=female.replace(male,fem,1)
-        if female!=text:p.update(femaleText=female,femaleTextBase=text)
+    from radio_language_review import review, inflect
+    review(rules, phrases)
+    inflect(phrases)
     # Retired generated phrases stay available for old IDs, but out of the editor's normal bank.
     active={n['phraseId'] for r in rules for t in r['tiers'] for g in t['graphs'] for n in g['nodes']}
     for key,p in phrases.items():

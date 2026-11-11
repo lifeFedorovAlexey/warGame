@@ -1,0 +1,4098 @@
+{
+  "completedAt": "2026-11-11T21:01:52.843180+00:00",
+  "budgetCredits": 10000,
+  "reservedCredits": 9900,
+  "radioCredits": 9466,
+  "storyCredits": 434,
+  "generatedRadioRecordings": 690,
+  "generatedStoryRecordings": 15,
+  "activeRadioRecordings": 1130,
+  "reusedRadioRecordings": 440,
+  "retiredRadioRecordings": 108,
+  "preservedOriginalFiles": 996,
+  "sourceDraftRevision": 218,
+  "savedDraftRevision": 219,
+  "profiles": [
+    {
+      "profile": "voice-1",
+      "gender": "m",
+      "voiceId": "JKtNvDNrWu33P1xzttP2",
+      "voiceName": "Ivan - Energetic and Sassy"
+    },
+    {
+      "profile": "voice-2",
+      "gender": "m",
+      "voiceId": "6YjFofyVXU1ASguf2hTJ",
+      "voiceName": "Maxim - Conversational & Natural"
+    },
+    {
+      "profile": "voice-3",
+      "gender": "f",
+      "voiceId": "GN4wbsbejSnGSa1AzjH5",
+      "voiceName": "Ekaterina - Soft, Silky and Tender"
+    },
+    {
+      "profile": "voice-4",
+      "gender": "m",
+      "voiceId": "txnCCHHGKmYIwrn7HfHQ",
+      "voiceName": "Alexandr Vlasov - Vibrant and Energetic"
+    },
+    {
+      "profile": "voice-5",
+      "gender": "f",
+      "voiceId": "EXAVITQu4vr4xnSDxMaL",
+      "voiceName": "Sarah - Mature, Reassuring, Confident"
+    },
+    {
+      "profile": "voice-6",
+      "gender": "m",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm"
+    }
+  ],
+  "scenes": [
+    {
+      "id": "r42",
+      "title": "Два процента просят помощи",
+      "cues": [
+        "m01-v4-r42-l001",
+        "m01-v4-r42-l002",
+        "m01-v4-r42-l003",
+        "m01-v4-r42-l004",
+        "m01-v4-r42-l005",
+        "m01-v4-r42-l006"
+      ]
+    },
+    {
+      "id": "r49",
+      "title": "Город в отчёте",
+      "cues": [
+        "m01-v4-r49-l001",
+        "m01-v4-r49-l002",
+        "m01-v4-r49-l003",
+        "m01-v4-r49-l004",
+        "m01-v4-r49-l005"
+      ]
+    },
+    {
+      "id": "r50",
+      "title": "Электростанция по отчёту",
+      "cues": [
+        "m01-v4-r50-l001",
+        "m01-v4-r50-l002",
+        "m01-v4-r50-l003",
+        "m01-v4-r50-l004"
+      ]
+    }
+  ],
+  "storyClips": {
+    "m01-v4-r42-l001": {
+      "file": "recordings/elevenlabs/m01-v4-r42-l001-39ce575ac34e.mp3",
+      "text": "У меня тут республика! Меня народ выбрал!",
+      "voiceId": "hD8aK7CmEPgH3mbFO08e",
+      "voiceName": "Ivo - Calming, chill and narrative",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "origin": "elevenlabs-synthesis",
+      "sha256": "39ce575ac34ed065e4001184b25c5eb01ba8f01e7dd9c5eef3169766331678a3",
+      "bytes": 53541,
+      "duration": 3.28,
+      "leadingSilence": 0.03,
+      "trailingSilence": 0.17999999999999972,
+      "speaker": "chief",
+      "generatedAt": "2026-11-11T20:58:07.148Z",
+      "draftRevision": 218
+    },
+    "m01-v4-r42-l002": {
+      "file": "recordings/elevenlabs/m01-v4-r42-l002-0af437e4200d.mp3",
+      "text": "И сколько набрал?",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "origin": "elevenlabs-synthesis",
+      "sha256": "0af437e4200d706603d7f1351e64c4d41d8114109b8be33b5800ab252829a71e",
+      "bytes": 21358,
+      "duration": 1.28,
+      "leadingSilence": 0.04,
+      "trailingSilence": 0.1299999999999999,
+      "speaker": "commander",
+      "generatedAt": "2026-11-11T20:58:06.488Z",
+      "draftRevision": 218
+    },
+    "m01-v4-r42-l003": {
+      "file": "recordings/elevenlabs/m01-v4-r42-l003-d2114b0ee91c.mp3",
+      "text": "Девяносто восемь процентов!",
+      "voiceId": "hD8aK7CmEPgH3mbFO08e",
+      "voiceName": "Ivo - Calming, chill and narrative",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "origin": "elevenlabs-synthesis",
+      "sha256": "d2114b0ee91cce91cbdd583f1c8a1f1f53004801f86b1fdc96753b6989bb1389",
+      "bytes": 38077,
+      "duration": 2.32,
+      "leadingSilence": 0.0,
+      "trailingSilence": 0.3099999999999996,
+      "speaker": "chief",
+      "generatedAt": "2026-11-11T20:58:07.612Z",
+      "draftRevision": 218
+    },
+    "m01-v4-r42-l004": {
+      "file": "recordings/elevenlabs/m01-v4-r42-l004-e667d6703f40.mp3",
+      "text": "Прапорщик, записывай: два процента населения просят нашей помощи.",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "origin": "elevenlabs-synthesis",
+      "sha256": "e667d6703f40e8a650ac77e807b1ae8232d33cd0cb4b7b378e086c716270ca9c",
+      "bytes": 74021,
+      "duration": 4.56,
+      "leadingSilence": 0.04,
+      "trailingSilence": 0.15999999999999925,
+      "speaker": "commander",
+      "generatedAt": "2026-11-11T20:58:08.878Z",
+      "draftRevision": 218
+    },
+    "m01-v4-r42-l005": {
+      "file": "recordings/elevenlabs/m01-v4-r42-l005-3dbab5842e10.mp3",
+      "text": "А они знают?",
+      "voiceId": "6A9D8WSMm4rFsg2DWFeE",
+      "voiceName": "Egor Gadzhiyev - Clear and Commanding",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "origin": "elevenlabs-synthesis",
+      "sha256": "3dbab5842e1059db53060356d316d8dd39b55b54212024f7f3a4e17d8f315ad1",
+      "bytes": 20105,
+      "duration": 1.2,
+      "leadingSilence": 0.04,
+      "trailingSilence": 0.2599999999999999,
+      "speaker": "warrant",
+      "generatedAt": "2026-11-11T20:58:08.502Z",
+      "draftRevision": 218
+    },
+    "m01-v4-r42-l006": {
+      "file": "recordings/elevenlabs/m01-v4-r42-l006-0ec03acaee8a.mp3",
+      "text": "Потом объясним.",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "origin": "elevenlabs-synthesis",
+      "sha256": "0ec03acaee8aea318e2a39ec0131d5cf1a1c432231b8283791b4eee73fadbe2c",
+      "bytes": 21358,
+      "duration": 1.28,
+      "leadingSilence": 0.09,
+      "trailingSilence": 0.27,
+      "speaker": "commander",
+      "generatedAt": "2026-11-11T20:58:09.363Z",
+      "draftRevision": 218
+    },
+    "m01-v4-r49-l001": {
+      "file": "recordings/elevenlabs/m01-v4-r49-l001-748b8b06357d.mp3",
+      "text": "Докладывайте. Город восстановлен?",
+      "voiceId": "rQOBu7YxCDxGiFdTm28w",
+      "voiceName": "Artem Lebedev - Captivating and Engaging",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "origin": "elevenlabs-synthesis",
+      "sha256": "748b8b06357d3491445af9c8744792517bb860bbf5a60ff6044c79c2d2751fb3",
+      "bytes": 40585,
+      "duration": 2.48,
+      "leadingSilence": 0.01,
+      "trailingSilence": 0.20999999999999996,
+      "speaker": "general",
+      "generatedAt": "2026-11-11T20:58:10.395Z",
+      "draftRevision": 218
+    },
+    "m01-v4-r49-l002": {
+      "file": "recordings/elevenlabs/m01-v4-r49-l002-94db6528bb3c.mp3",
+      "text": "Пока ангары и сортир.",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "origin": "elevenlabs-synthesis",
+      "sha256": "94db6528bb3cf47e3d91b9515b9c9beb4b2e9801013bb8458b1891c749a87785",
+      "bytes": 38077,
+      "duration": 2.32,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.13999999999999968,
+      "speaker": "commander",
+      "generatedAt": "2026-11-11T20:58:10.442Z",
+      "draftRevision": 218
+    },
+    "m01-v4-r49-l003": {
+      "file": "recordings/elevenlabs/m01-v4-r49-l003-4837edb23367.mp3",
+      "text": "Записываем: город.",
+      "voiceId": "rQOBu7YxCDxGiFdTm28w",
+      "voiceName": "Artem Lebedev - Captivating and Engaging",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "origin": "elevenlabs-synthesis",
+      "sha256": "4837edb2336770d2df1f45daf67238a62bcafd8bdea1a4b57beacc7a196cb13b",
+      "bytes": 31807,
+      "duration": 1.92,
+      "leadingSilence": 0.02,
+      "trailingSilence": 0.16999999999999993,
+      "speaker": "general",
+      "generatedAt": "2026-11-11T20:58:11.366Z",
+      "draftRevision": 218
+    },
+    "m01-v4-r49-l004": {
+      "file": "recordings/elevenlabs/m01-v4-r49-l004-2d5218090743.mp3",
+      "text": "Сортир без крыши.",
+      "voiceId": "6A9D8WSMm4rFsg2DWFeE",
+      "voiceName": "Egor Gadzhiyev - Clear and Commanding",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "origin": "elevenlabs-synthesis",
+      "sha256": "2d521809074337ee51cec6bdee011da7aa84a7f83999e27e7ad0b68c2fbbe6e6",
+      "bytes": 26792,
+      "duration": 1.6,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.29000000000000004,
+      "speaker": "warrant",
+      "generatedAt": "2026-11-11T20:58:11.414Z",
+      "draftRevision": 218
+    },
+    "m01-v4-r49-l005": {
+      "file": "recordings/elevenlabs/m01-v4-r49-l005-764fea3460a9.mp3",
+      "text": "Открытое общественное пространство.",
+      "voiceId": "rQOBu7YxCDxGiFdTm28w",
+      "voiceName": "Artem Lebedev - Captivating and Engaging",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "origin": "elevenlabs-synthesis",
+      "sha256": "764fea3460a9939a3ba835304d8b0f26acc4d7b3b24bc4a863947ffd96498576",
+      "bytes": 41838,
+      "duration": 2.56,
+      "leadingSilence": 0.04,
+      "trailingSilence": 0.16999999999999993,
+      "speaker": "general",
+      "generatedAt": "2026-11-11T20:58:12.440Z",
+      "draftRevision": 218
+    },
+    "m01-v4-r50-l001": {
+      "file": "recordings/elevenlabs/m01-v4-r50-l001-54d96c8fb253.mp3",
+      "text": "Альфа, на юге энергетический всплеск. Источник неизвестен.",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "origin": "elevenlabs-synthesis",
+      "sha256": "54d96c8fb25366f627262270cede3fc632acb0eed6499d063d2fef7ff8c62747",
+      "bytes": 75275,
+      "duration": 4.64,
+      "leadingSilence": 0.02,
+      "trailingSilence": 0.1299999999999999,
+      "speaker": "radio",
+      "generatedAt": "2026-11-11T20:58:13.215Z",
+      "draftRevision": 218
+    },
+    "m01-v4-r50-l002": {
+      "file": "recordings/elevenlabs/m01-v4-r50-l002-202d9f6b4794.mp3",
+      "text": "Включите в отчёт. Новая электростанция.",
+      "voiceId": "rQOBu7YxCDxGiFdTm28w",
+      "voiceName": "Artem Lebedev - Captivating and Engaging",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "origin": "elevenlabs-synthesis",
+      "sha256": "202d9f6b4794dcc06cb42f6bcbb313dffc9c488a086db4bdc247262a2000214e",
+      "bytes": 53541,
+      "duration": 3.28,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.19999999999999973,
+      "speaker": "general",
+      "generatedAt": "2026-11-11T20:58:13.751Z",
+      "draftRevision": 218
+    },
+    "m01-v4-r50-l003": {
+      "file": "recordings/elevenlabs/m01-v4-r50-l003-4e15a5d8f981.mp3",
+      "text": "Она не наша.",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "origin": "elevenlabs-synthesis",
+      "sha256": "4e15a5d8f981b7559cc3f211e5331287dbb7cbbff49a0164d1596f166891a011",
+      "bytes": 20105,
+      "duration": 1.2,
+      "leadingSilence": 0.06,
+      "trailingSilence": 0.1299999999999999,
+      "speaker": "commander",
+      "generatedAt": "2026-11-11T20:58:14.040Z",
+      "draftRevision": 218
+    },
+    "m01-v4-r50-l004": {
+      "file": "recordings/elevenlabs/m01-v4-r50-l004-d591724b0266.mp3",
+      "text": "Вот поэтому и выезжайте.",
+      "voiceId": "rQOBu7YxCDxGiFdTm28w",
+      "voiceName": "Artem Lebedev - Captivating and Engaging",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "origin": "elevenlabs-synthesis",
+      "sha256": "d591724b0266b202b54920108a8310a411429f9aaa02a7ea523bc663b39dfcc6",
+      "bytes": 36823,
+      "duration": 2.24,
+      "leadingSilence": 0.03,
+      "trailingSilence": 0.1900000000000004,
+      "speaker": "general",
+      "generatedAt": "2026-11-11T20:58:14.903Z",
+      "draftRevision": 218
+    }
+  },
+  "retiredStoryIds": [
+    "m01-s11-l001",
+    "m01-s11-l002",
+    "m01-s11-l003",
+    "m01-s11-l004",
+    "m01-s11-l005",
+    "m01-s11-l006",
+    "m01-s11-l007",
+    "m01-s11-l008",
+    "m01-s11-l009",
+    "m01-s11-l010",
+    "m01-s13-l001",
+    "m01-s13-l002",
+    "m01-s13-l003",
+    "m01-s14-l001",
+    "m01-s14-l002",
+    "m01-s14-l003",
+    "m01-s14-l004",
+    "m01-s14-l005",
+    "m01-s14-l006",
+    "m01-s14-l007",
+    "m01-s14-l008",
+    "m01-s14-l009",
+    "m01-s14-l010"
+  ],
+  "changes": {
+    "traffic.reverse_complete.single.written-v4.1": {
+      "before": "Всё. Задним отработал.",
+      "after": "Сдал назад. Место есть."
+    },
+    "mission.victory.single.1": {
+      "before": "Задача закрыта.",
+      "after": "Задание выполнили."
+    },
+    "damage.mobility_lost.group.exchange-v1.3": {
+      "before": "Нужен ремонт рулевого.",
+      "after": "Всё, в ремонт."
+    },
+    "command.capture.mass.written-v4.1": {
+      "before": "Контроль у нас.",
+      "after": "Объекты заняли."
+    },
+    "damage.hit.mass.exchange-v2.2": {
+      "before": "Повреждённым нужен выход.",
+      "after": "Дайте повреждённым отойти."
+    },
+    "damage.hit.group.live-intel-v2.1": {
+      "before": "Работают по нам! В контакте: {facts.attackerComposition}.",
+      "after": "По нам работают! {facts.attackerComposition}."
+    },
+    "damage.hit.group.written-v8.2": {
+      "before": "Тяжёлые — первыми в эфир.",
+      "after": "Кого сильно зацепило — докладывайте."
+    },
+    "command.attack.mass.written-v2.2": {
+      "before": "По одному в проход не толпитесь.",
+      "after": "В проходе не толпитесь."
+    },
+    "traffic.network_overload.group.written-v3.1": {
+      "before": "С потерями — первыми.",
+      "after": "Сначала доклад о потерях."
+    },
+    "repair.mobility_restored.mass.written-v2.2": {
+      "before": "При выезде интервал.",
+      "after": "На выезде держите дистанцию."
+    },
+    "command.attack_move.mass.exchange-v1.1": {
+      "before": "Продвигаемся. Контакты отработать.",
+      "after": "Идём вперёд. Огонь по противнику."
+    },
+    "command.auto_retreat.single.written-v2.1": {
+      "before": "Матчасть побита. Отхожу.",
+      "after": "Машину побили. В ремонт."
+    },
+    "damage.mobility_lost.mass.exchange-v2.1": {
+      "before": "Управление в отказе.",
+      "after": "Руль заклинило."
+    },
+    "damage.hit.group.written-v2.2": {
+      "before": "Повреждённым проход.",
+      "after": "Дайте подбитым выйти."
+    },
+    "traffic.jam_resolved.mass.exchange-v2.1": {
+      "before": "Пробку продавили. Едем.",
+      "after": "Дорога свободна. Едем."
+    },
+    "traffic.queue_blocked.mass.exchange-v3.1": {
+      "before": "Колонну заклинило.",
+      "after": "Колонна застряла."
+    },
+    "repair.start_factory.group.exchange-v2.2": {
+      "before": "Рук под инструмент не суй.",
+      "after": "Под руку мастеру не лезь."
+    },
+    "command.auto_retreat.single.crew-exchange-v1.2": {
+      "before": "Повреждённому дорогу.",
+      "after": "Дайте ему выйти."
+    },
+    "idle.crew_history.mass.loss-afterword-v2.1": {
+      "before": "В рапорте строки. А по именам — тяжело.",
+      "after": "Голоса их ещё в ушах."
+    },
+    "idle.group_no_order.group.exchange-v2.3": {
+      "before": "Да я за простой докладываю.",
+      "after": "Я докладываю. Вдруг забыли."
+    },
+    "traffic.jam_resolved.mass.exchange-v1.1": {
+      "before": "Разъезд пошёл.",
+      "after": "Разъехались. Можно ехать."
+    },
+    "damage.hit.group.exchange-v1.2": {
+      "before": "Кто тяжёлый — первым в эфир.",
+      "after": "Кого сильно побило — докладывайте."
+    },
+    "recon.enemy_first_seen.mass.intel-v3.1": {
+      "before": "В контакте: {facts.enemyComposition}.",
+      "after": "Вижу: {facts.enemyComposition}."
+    },
+    "traffic.queue_blocked.mass.written-v5.2": {
+      "before": "Без встречки. Ещё хуже встанем.",
+      "after": "На встречку не лезь. Всех запрём."
+    },
+    "command.stop.group.exchange-v2.3": {
+      "before": "Остановка. Без расшифровки.",
+      "after": "Постой пока. Не до перекура."
+    },
+    "damage.hit.single.crew-exchange-v1.2": {
+      "before": "Тяжёлый — сразу в эфир. Не тяни.",
+      "after": "Сильно зацепило? Не молчи."
+    },
+    "command.rejected.single.written-v5.1": {
+      "before": "Маршрут не проложен.",
+      "after": "Дороги туда нет."
+    },
+    "damage.mobility_lost.group.written-v3.1": {
+      "before": "Управление в отказе!",
+      "after": "Рулевое накрылось!"
+    },
+    "traffic.queue_blocked.mass.exchange-v1.3": {
+      "before": "Вот и держи просвет.",
+      "after": "Вот и не прижимайся."
+    },
+    "damage.mobility_lost.group.written-v2.2": {
+      "before": "Аварийным оставьте место.",
+      "after": "Дайте повреждённым место."
+    },
+    "repair.complete.single.crew-exchange-v1.3": {
+      "before": "Ремонт закончен. Я в деле.",
+      "after": "Да. Можно ехать."
+    },
+    "repair.complete.mass.exchange-v4.1": {
+      "before": "Ремонт закрыт.",
+      "after": "Ремонт закончили."
+    },
+    "damage.hit.mass.critical-intel.2": {
+      "before": "Тяжёлым дорогу!",
+      "after": "Дайте подбитым выйти!"
+    },
+    "factory.modernization_complete.group.exchange-v1.1": {
+      "before": "Матчасть доработали.",
+      "after": "Машины готовы после доработки."
+    },
+    "idle.group_no_order.mass.exchange-v2.3": {
+      "before": "Да я за простой докладываю.",
+      "after": "Я докладываю. Вдруг забыли."
+    },
+    "recon.camp_cleared.single.written-v2.1": {
+      "before": "С лагерем покончено.",
+      "after": "Лагерь взяли."
+    },
+    "factory.modernization_complete.mass.exchange-v1.1": {
+      "before": "Матчасть доработали.",
+      "after": "Машины готовы после доработки."
+    },
+    "construction.refused.group.written-v3.1": {
+      "before": "По стройке отказ.",
+      "after": "Стройку начать не можем."
+    },
+    "command.move.mass.exchange-v2.3": {
+      "before": "Вот и довезём матчасть целой.",
+      "after": "Вот и доедем без потерь."
+    },
+    "repair.complete.group.exchange-v3.2": {
+      "before": "На выезде мастеров не раскатай.",
+      "after": "Давай без повторного заезда."
+    },
+    "combat.base_attack.mass.2": {
+      "before": "Несрочным — молчать.",
+      "after": "Эфир освободить!"
+    },
+    "traffic.panic_escaped.v6.2": {
+      "before": "Предъявлял. Пропустили же.",
+      "after": "А что? Пропустили же."
+    },
+    "command.move.mass.exchange-v3.1": {
+      "before": "Выдвигаемся по вводной.",
+      "after": "Приказ есть. Выдвигаемся."
+    },
+    "factory.vehicle_complete.mass.exchange-v1.1": {
+      "before": "Завод выдал матчасть.",
+      "after": "С завода новые машины."
+    },
+    "repair.start_factory.mass.exchange-v4.1": {
+      "before": "Встали на восстановление.",
+      "after": "Заехали чиниться."
+    },
+    "repair.start_factory.mass.exchange-v1.1": {
+      "before": "Матчасть в ремзоне.",
+      "after": "Машины в ремонте."
+    },
+    "construction.complete.mass.exchange-v1.3": {
+      "before": "Здесь всё. К следующей работе.",
+      "after": "Здесь закончили. Куда дальше?"
+    },
+    "command.attack.single.written-v6.1": {
+      "before": "Приказ на атаку принят.",
+      "after": "Есть. Атакуем."
+    },
+    "command.auto_retreat.group.exchange-v1.2": {
+      "before": "Тебе доехать надо. Газом не лечится.",
+      "after": "Не гони. До ремонта дотяни."
+    },
+    "research.start.mass.written-v2.2": {
+      "before": "О результате — в эфир.",
+      "after": "Закончите — доложите."
+    },
+    "damage.hit.group.exchange-v2.2": {
+      "before": "Повреждённым нужен выход.",
+      "after": "Дайте повреждённым отойти."
+    },
+    "idle.crew_history.mass.veteran-afterword.2": {
+      "before": "С таким опытом людей мало.",
+      "after": "Эх. Не уберегли."
+    },
+    "factory.vehicle_complete.single.dry-v2.2": {
+      "before": "Опять вручную обкатывать.",
+      "after": "Обкатка опять в бою?"
+    },
+    "traffic.jam_resolved.single.written-v3.1": {
+      "before": "Затор прошёл.",
+      "after": "Дорогу освободили."
+    },
+    "idle.crew_history.group.veteran-afterword.2": {
+      "before": "С таким опытом людей мало.",
+      "after": "Эх. Не уберегли."
+    },
+    "traffic.queue_blocked.mass.dry-v1.1": {
+      "before": "Стоим. Организованная задержка.",
+      "after": "Стоим. По плану, наверное."
+    },
+    "construction.complete.mass.exchange-v1.2": {
+      "before": "Матчасть выводите с площадки.",
+      "after": "Уводите машины с площадки."
+    },
+    "damage.mobility_lost.group.exchange-v2.1": {
+      "before": "Управление в отказе.",
+      "after": "Руль заклинило."
+    },
+    "damage.hit.group.critical-v2.1": {
+      "before": "Матчасть на пределе!",
+      "after": "Совсем разбили!"
+    },
+    "traffic.queue_blocked.single.written-v7.1": {
+      "before": "Нам бы дорогу освободить.",
+      "after": "Дорогу освободите."
+    },
+    "idle.group_no_order.mass.exchange-v2.2": {
+      "before": "Успеешь ещё матчасть погонять.",
+      "after": "Ещё накатаешься."
+    },
+    "repair.complete.mass.1": {
+      "before": "Матчасть восстановили.",
+      "after": "Машины починили."
+    },
+    "repair.start_factory.group.exchange-v4.1": {
+      "before": "Встали на восстановление.",
+      "after": "Заехали чиниться."
+    },
+    "command.attack_move.mass.exchange-v2.2": {
+      "before": "По одному не отваливайтесь.",
+      "after": "От группы не отставать."
+    },
+    "command.attack.group.exchange-v5.2": {
+      "before": "Матчасть берегите. Наглость броню не заменяет.",
+      "after": "Без геройства. Броня не спасёт."
+    },
+    "command.auto_retreat.mass.exchange-v1.2": {
+      "before": "Тебе доехать надо. Газом не лечится.",
+      "after": "Не гони. До ремонта дотяни."
+    },
+    "traffic.retreat_contact.v3.1": {
+      "before": "Чёрт, расступитесь! Мне надо выйти!",
+      "after": "Дайте выехать! Меня добивают!"
+    },
+    "movement.route_changed.single.1": {
+      "before": "Срезаю по короткому.",
+      "after": "Нашёл дорогу короче."
+    },
+    "command.auto_retreat.group.written-v2.1": {
+      "before": "Матчасть побита. Выходим.",
+      "after": "Машины побили. Отходим."
+    },
+    "command.capture.group.written-v4.1": {
+      "before": "Контроль у нас.",
+      "after": "Объекты заняли."
+    },
+    "repair.start_factory.mass.exchange-v2.3": {
+      "before": "Я своё уже нарулил.",
+      "after": "Да я лучше посижу."
+    },
+    "command.attack_move.group.exchange-v1.3": {
+      "before": "По живым целям. Обломки оставим.",
+      "after": "По врагу работаем. Лом не трогать."
+    },
+    "combat.target_destroyed.group.exchange-v4.2": {
+      "before": "Стволы с добитых уберите.",
+      "after": "По разбитым не стреляйте."
+    },
+    "research.complete.single.dry-v1.2": {
+      "before": "А слова «на свой страх»?",
+      "after": "Проверяли хоть?"
+    },
+    "command.stop.mass.exchange-v2.3": {
+      "before": "Остановка. Без расшифровки.",
+      "after": "Постой пока. Не до перекура."
+    },
+    "factory.modernization_complete.mass.exchange-v3.1": {
+      "before": "Модернизацию закрыли.",
+      "after": "Доработку закончили."
+    },
+    "traffic.jam_resolved.group.exchange-v1.1": {
+      "before": "Разъезд пошёл.",
+      "after": "Разъехались. Можно ехать."
+    },
+    "repair.complete.group.exchange-v1.1": {
+      "before": "Матчасть восстановили.",
+      "after": "Машины починили."
+    },
+    "command.stop.single.written-v5.1": {
+      "before": "Есть. Стоп машина.",
+      "after": "Есть. Стоим."
+    },
+    "factory.modernization_complete.single.written-v4.1": {
+      "before": "Модернизацию закрыли.",
+      "after": "Доработку закончили."
+    },
+    "traffic.queue_blocked.group.exchange-v2.3": {
+      "before": "Так дай отъехать.",
+      "after": "Тогда дай сдать назад."
+    },
+    "construction.refused.single.written-v4.1": {
+      "before": "Задание не пошло. Проверяйте.",
+      "after": "Построить не можем. Проверьте приказ."
+    },
+    "traffic.queue_blocked.mass.exchange-v3.3": {
+      "before": "Стоим. Ждём проход.",
+      "after": "Стоим. Ждём, пока разъедутся."
+    },
+    "command.attack.group.written-v3.2": {
+      "before": "С потерями — сразу в эфир.",
+      "after": "О потерях докладывать сразу."
+    },
+    "factory.modernization_complete.group.written-v2.1": {
+      "before": "Матчасть обновлена.",
+      "after": "Машины доработаны."
+    },
+    "combat.target_destroyed.mass.exchange-v1.3": {
+      "before": "Огонь с этой снят.",
+      "after": "Всё, по этой не стреляем."
+    },
+    "traffic.deadlock.mass.written-v2.2": {
+      "before": "Сзади отожмитесь, нужен манёвр.",
+      "after": "Сзади, сдайте назад. Дайте разъехаться."
+    },
+    "combat.target_destroyed.mass.written-v7.2": {
+      "before": "Огонь по этим снять.",
+      "after": "Хватит по ним стрелять."
+    },
+    "command.retreat.group.exchange-v2.1": {
+      "before": "Сворачиваемся. Хватит размена.",
+      "after": "Отходим. Хватит подставляться."
+    },
+    "factory.vehicle_complete.single.written-v5.1": {
+      "before": "Новая матчасть в строю.",
+      "after": "Пополнение на колёсах."
+    },
+    "combat.target_destroyed.mass.written-v2.2": {
+      "before": "По добитым не тратьтесь.",
+      "after": "По обломкам не стреляйте."
+    },
+    "idle.crew_history.group.loss-afterword-v2.1": {
+      "before": "В рапорте строки. А по именам — тяжело.",
+      "after": "Голоса их ещё в ушах."
+    },
+    "idle.group_no_order.mass.written-v3.1": {
+      "before": "Простой. Нужна задача.",
+      "after": "Стоим без дела. Куда дальше?"
+    },
+    "damage.hit.single.critical-intel.2": {
+      "before": "Тяжёлым дорогу!",
+      "after": "Дайте подбитым выйти!"
+    },
+    "construction.refused.group.2": {
+      "before": "Нужны другие вводные.",
+      "after": "Уточните, где строить."
+    },
+    "damage.mobility_lost.mass.exchange-v1.1": {
+      "before": "Рулевое выбито. Не рулится!",
+      "after": "Руль выбило!"
+    },
+    "repair.complete.group.dry-v1.2": {
+      "before": "Расходная ведомость не согласна.",
+      "after": "Ремонтник другого мнения."
+    },
+    "command.auto_retreat.mass.dry-v2.1": {
+      "before": "Матчасть просится в отпуск.",
+      "after": "Машина просится на покой."
+    },
+    "command.retreat.mass.exchange-v1.1": {
+      "before": "Контакт рвём. Выходим!",
+      "after": "Выходим из боя!"
+    },
+    "command.attack_move.single.written-v2.1": {
+      "before": "Иду. Контакты отработаю.",
+      "after": "Иду. Встречу врага — открою огонь."
+    },
+    "combat.target_destroyed.group.written-v7.2": {
+      "before": "Огонь по этим снять.",
+      "after": "Хватит по ним стрелять."
+    },
+    "command.retreat.mass.written-v4.2": {
+      "before": "С потерями — коротко в эфир.",
+      "after": "О потерях докладывайте."
+    },
+    "command.stop.group.exchange-v1.1": {
+      "before": "Колонна, отставить движение.",
+      "after": "Колонна, стой!"
+    },
+    "movement.route_changed.single.written-v3.1": {
+      "before": "Обойдём без крюка.",
+      "after": "Здесь ближе. Свернём."
+    },
+    "command.attack.mass.written-v3.2": {
+      "before": "С потерями — первыми в эфир.",
+      "after": "Потери — докладывать сразу."
+    },
+    "damage.hit.single.critical-v2.1": {
+      "before": "Матчасть на пределе!",
+      "after": "Совсем разбили!"
+    },
+    "factory.vehicle_complete.group.exchange-v3.2": {
+      "before": "Обкатка, как обычно, по обстановке.",
+      "after": "Обкатка, как всегда, под огнём?"
+    },
+    "command.build.mass.written-v4.1": {
+      "before": "Работа нам.",
+      "after": "Строители, за дело."
+    },
+    "command.capture.single.written-v2.1": {
+      "before": "Контроль наш.",
+      "after": "Объект заняли."
+    },
+    "repair.complete.mass.dry-v1.2": {
+      "before": "Расходная ведомость не согласна.",
+      "after": "Ремонтник другого мнения."
+    },
+    "traffic.reverse_started.mass.written-v3.2": {
+      "before": "На встречку не выставляйтесь.",
+      "after": "На встречку не вылезайте."
+    },
+    "damage.mobility_lost.group.exchange-v1.1": {
+      "before": "Рулевое выбито. Не рулится!",
+      "after": "Руль выбило!"
+    },
+    "movement.route_changed.group.written-v3.1": {
+      "before": "Срежем по короткому.",
+      "after": "Пойдём короткой дорогой."
+    },
+    "damage.mobility_lost.mass.written-v3.1": {
+      "before": "Управление в отказе!",
+      "after": "Рулевое накрылось!"
+    },
+    "damage.hit.mass.exchange-v1.1": {
+      "before": "Матчасть зацепило!",
+      "after": "Машины зацепило!"
+    },
+    "combat.base_attack.single.written-v6.1": {
+      "before": "По объектам прилетает!",
+      "after": "По базе прилетает!"
+    },
+    "damage.mobility_lost.mass.written-v2.2": {
+      "before": "Аварийным оставьте место.",
+      "after": "Дайте повреждённым место."
+    },
+    "damage.hit.group.critical-intel.2": {
+      "before": "Тяжёлым дорогу!",
+      "after": "Дайте подбитым выйти!"
+    },
+    "damage.hit.group.enemy-fire-v6.2": {
+      "before": "Матчасть не зажимайте. Дайте маневрировать!",
+      "after": "Дайте машинам развернуться!"
+    },
+    "idle.group_no_order.single.written-v3.1": {
+      "before": "Простой. Задачу дайте.",
+      "after": "Стоим без дела. Нужен приказ."
+    },
+    "damage.hit.mass.written-v2.1": {
+      "before": "Технику побило по всей группе.",
+      "after": "Много машин зацепило."
+    },
+    "command.move.mass.written-v5.1": {
+      "before": "Общее выдвижение.",
+      "after": "Все машины, вперёд."
+    },
+    "command.attack.mass.exchange-v1.3": {
+      "before": "По команде отработаем.",
+      "after": "Понял. Выдвигаемся."
+    },
+    "command.attack.group.exchange-v1.3": {
+      "before": "По команде отработаем.",
+      "after": "Понял. Выдвигаемся."
+    },
+    "traffic.queue_blocked.group.exchange-v5.1": {
+      "before": "Разъезд бы оставить.",
+      "after": "Дайте разъехаться."
+    },
+    "command.retreat.group.exchange-v5.2": {
+      "before": "Матчасть выводите. Подвигов не заказывали.",
+      "after": "Машины выводите. Подвигов не надо."
+    },
+    "damage.hit.mass.critical-v2.1": {
+      "before": "Матчасть на пределе!",
+      "after": "Совсем разбили!"
+    },
+    "command.attack.group.exchange-v2.1": {
+      "before": "Группа, на раздачу.",
+      "after": "Группа, атакуем."
+    },
+    "traffic.queue_blocked.mass.exchange-v5.1": {
+      "before": "Разъезд бы оставить.",
+      "after": "Дайте разъехаться."
+    },
+    "damage.hit.group.critical-v1.2": {
+      "before": "Тяжёлым дорогу!",
+      "after": "Дайте подбитым выйти!"
+    },
+    "traffic.jam_resolved.group.exchange-v3.2": {
+      "before": "Теперь без объятий бамперами.",
+      "after": "Теперь без толкотни."
+    },
+    "traffic.network_overload.mass.written-v3.1": {
+      "before": "С потерями — первыми.",
+      "after": "Сначала доклад о потерях."
+    },
+    "traffic.queue_blocked.mass.exchange-v2.3": {
+      "before": "Так дай отъехать.",
+      "after": "Тогда дай сдать назад."
+    },
+    "repair.start_factory.single.crew-exchange-v1.2": {
+      "before": "С дефектами разобрались?",
+      "after": "Сильно досталось?"
+    },
+    "traffic.reverse_started.group.written-v3.2": {
+      "before": "На встречку не выставляйтесь.",
+      "after": "На встречку не вылезайте."
+    },
+    "command.attack.group.exchange-v1.1": {
+      "before": "Цель взяли в работу.",
+      "after": "Берём эту цель."
+    },
+    "research.complete.group.dry-v1.2": {
+      "before": "А слова «на свой страх»?",
+      "after": "Проверяли хоть?"
+    },
+    "command.move.mass.exchange-v2.1": {
+      "before": "Колонна, на колёса.",
+      "after": "Колонна, пошли."
+    },
+    "construction.refused.mass.written-v3.1": {
+      "before": "По стройке отказ.",
+      "after": "Стройку начать не можем."
+    },
+    "traffic.jam_resolved.mass.written-v4.2": {
+      "before": "Интервал. Второй раз не собираемся.",
+      "after": "Дистанцию держите. Хватит пробок."
+    },
+    "construction.complete.group.exchange-v1.3": {
+      "before": "Здесь всё. К следующей работе.",
+      "after": "Здесь закончили. Куда дальше?"
+    },
+    "traffic.deadlock.group.exchange-v2.3": {
+      "before": "Сзади отойдите!",
+      "after": "Сзади, сдайте назад!"
+    },
+    "factory.vehicle_complete.group.exchange-v1.1": {
+      "before": "Завод выдал матчасть.",
+      "after": "С завода новые машины."
+    },
+    "repair.start_factory.mass.exchange-v2.2": {
+      "before": "Рук под инструмент не суй.",
+      "after": "Под руку мастеру не лезь."
+    },
+    "command.auto_retreat.mass.observed-retreat.1": {
+      "before": "Отходим. Противник в контакте.",
+      "after": "Отходим. Противник рядом."
+    },
+    "command.attack_move.mass.exchange-v1.3": {
+      "before": "По живым целям. Обломки оставим.",
+      "after": "По врагу работаем. Лом не трогать."
+    },
+    "command.attack.group.exchange-v2.3": {
+      "before": "Каждый свою линию держит.",
+      "after": "Друг другу не мешать."
+    },
+    "factory.modernization_complete.group.exchange-v2.1": {
+      "before": "Из доработки вышли.",
+      "after": "Доработку закончили. Выезжаем."
+    },
+    "traffic.reverse_started.single.written-v3.1": {
+      "before": "Отхожу задним. Не подпирай.",
+      "after": "Сдаю назад. Дай место."
+    },
+    "traffic.deadlock.group.exchange-v1.3": {
+      "before": "Нам разъезд, не таран нужен.",
+      "after": "Не дави. Дай разъехаться."
+    },
+    "combat.target_destroyed.mass.exchange-v1.2": {
+      "before": "По обломкам бэка не жги.",
+      "after": "Бэка на обломки не трать."
+    },
+    "construction.refused.mass.2": {
+      "before": "Нужны другие вводные.",
+      "after": "Уточните, где строить."
+    },
+    "combat.target_destroyed.mass.exchange-v4.2": {
+      "before": "Стволы с добитых уберите.",
+      "after": "По разбитым не стреляйте."
+    },
+    "command.auto_retreat.mass.exchange-v3.1": {
+      "before": "Железо побито. Увожу.",
+      "after": "Машину побили. Увожу."
+    },
+    "construction.refused.single.written-v3.1": {
+      "before": "Отказ по стройке.",
+      "after": "Здесь построить не можем."
+    },
+    "recon.camp_cleared.single.written-v4.1": {
+      "before": "Лагерь закрыли.",
+      "after": "В лагере всё чисто."
+    },
+    "damage.hit.group.enemy-fire-v4.2": {
+      "before": "Блять, разнеситесь!",
+      "after": "Блять, не кучкуйтесь!"
+    },
+    "command.stop.single.written-v6.1": {
+      "before": "Ход сбрасываю.",
+      "after": "Сбавляю ход."
+    },
+    "factory.vehicle_complete.mass.dry-v2.2": {
+      "before": "Опять вручную обкатывать.",
+      "after": "Обкатка опять в бою?"
+    },
+    "command.retreat.group.observed-retreat.1": {
+      "before": "Отходим. Противник в контакте.",
+      "after": "Отходим. Противник рядом."
+    },
+    "damage.hit.group.written-v6.2": {
+      "before": "Неисправным — дорогу.",
+      "after": "Дайте повреждённым проехать."
+    },
+    "damage.panic_failed.v1.1": {
+      "before": "{facts.casualtyCallSign} не вышел. Машину потеряли.",
+      "after": "Потеряли {facts.casualtyCallSign}."
+    },
+    "command.attack.mass.exchange-v1.1": {
+      "before": "Цель взяли в работу.",
+      "after": "Берём эту цель."
+    },
+    "idle.group_no_order.group.exchange-v2.2": {
+      "before": "Успеешь ещё матчасть погонять.",
+      "after": "Ещё накатаешься."
+    },
+    "combat.base_attack.group.2": {
+      "before": "Несрочным — молчать.",
+      "after": "Эфир освободить!"
+    },
+    "damage.hit.mass.intel-v3.1": {
+      "before": "Нас шили: {facts.attackerComposition}.",
+      "after": "По нам били: {facts.attackerComposition}."
+    },
+    "factory.modernization_complete.group.exchange-v2.2": {
+      "before": "Теперь бы инструкцию к доработке.",
+      "after": "Хоть скажите, что поменяли."
+    },
+    "repair.complete.single.crew-exchange-v1.2": {
+      "before": "Железо исправно?",
+      "after": "Всё починили?"
+    },
+    "command.move.group.exchange-v3.1": {
+      "before": "Выдвигаемся по вводной.",
+      "after": "Приказ есть. Выдвигаемся."
+    },
+    "traffic.deadlock.group.written-v2.2": {
+      "before": "Сзади отожмитесь, нужен манёвр.",
+      "after": "Сзади, сдайте назад. Дайте разъехаться."
+    },
+    "construction.complete.mass.exchange-v2.1": {
+      "before": "Стройку закрыли.",
+      "after": "Стройку закончили."
+    },
+    "command.move.mass.exchange-v5.2": {
+      "before": "Хвостом не виляйте. Сзади тоже техника.",
+      "after": "Без резких поворотов. Сзади свои."
+    },
+    "command.retreat.single.observed-retreat.1": {
+      "before": "Отходим. Противник в контакте.",
+      "after": "Отходим. Противник рядом."
+    },
+    "traffic.reverse_complete.single.1": {
+      "before": "Задний ход закончил.",
+      "after": "Всё, отъехал."
+    },
+    "damage.hit.mass.exchange-v3.1": {
+      "before": "Технику посекло.",
+      "after": "Машинам досталось."
+    },
+    "command.auto_retreat.single.observed-retreat.1": {
+      "before": "Отходим. Противник в контакте.",
+      "after": "Отходим. Противник рядом."
+    },
+    "construction.complete.single.written-v2.1": {
+      "before": "Стройку закрыли.",
+      "after": "Стройку закончили."
+    },
+    "factory.modernization_complete.group.exchange-v3.1": {
+      "before": "Модернизацию закрыли.",
+      "after": "Доработку закончили."
+    },
+    "factory.modernization_complete.mass.written-v2.1": {
+      "before": "Матчасть обновлена.",
+      "after": "Машины доработаны."
+    },
+    "idle.group_no_order.single.exchange-v2.2": {
+      "before": "Успеешь ещё матчасть погонять.",
+      "after": "Ещё накатаешься."
+    },
+    "command.auto_retreat.group.observed-retreat.1": {
+      "before": "Отходим. Противник в контакте.",
+      "after": "Отходим. Противник рядом."
+    },
+    "construction.refused.single.written-v5.1": {
+      "before": "Стройка не запущена.",
+      "after": "Начать стройку не выходит."
+    },
+    "command.stop.mass.exchange-v1.1": {
+      "before": "Колонна, отставить движение.",
+      "after": "Колонна, стой!"
+    },
+    "damage.panic_failed.v5.1": {
+      "before": "Отмучилась… Чёрт. Не успела уйти.",
+      "after": "Не успела уйти… Чёрт."
+    },
+    "command.stop.group.exchange-v1.3": {
+      "before": "В бампер приёмку не устраивать.",
+      "after": "Да вижу. Не кричи."
+    },
+    "command.rejected.group.written-v3.1": {
+      "before": "Маршрут не проложен. Стоим.",
+      "after": "Дальше не проехать. Стоим."
+    },
+    "command.retreat.group.written-v8.2": {
+      "before": "Кто встал — сразу в эфир.",
+      "after": "Кто не на ходу — докладывайте."
+    },
+    "command.auto_retreat.group.dry-v2.1": {
+      "before": "Матчасть просится в отпуск.",
+      "after": "Машина просится на покой."
+    },
+    "command.move.group.exchange-v5.2": {
+      "before": "Хвостом не виляйте. Сзади тоже техника.",
+      "after": "Без резких поворотов. Сзади свои."
+    },
+    "damage.hit.mass.2": {
+      "before": "Кто встал — первыми в эфир.",
+      "after": "Кто встал — докладывайте первым."
+    },
+    "damage.hit.mass.written-v4.2": {
+      "before": "Тяжёлые — первыми. Остальным ждать.",
+      "after": "Сильно побитые, докладывайте. Остальным ждать."
+    },
+    "command.attack.mass.exchange-v1.2": {
+      "before": "Своим стволы не закройте.",
+      "after": "Из-под своих пулемётов уйдите."
+    },
+    "idle.crew_history.group.loss-afterword-v4.2": {
+      "before": "Привыкнуть бы к этому не дай бог.",
+      "after": "К такому не привыкнешь."
+    },
+    "command.attack.group.written-v2.2": {
+      "before": "Без кучи. Разнеситесь.",
+      "after": "Не кучкуйтесь. Дайте друг другу место."
+    },
+    "idle.group_no_order.single.exchange-v2.3": {
+      "before": "Да я за простой докладываю.",
+      "after": "Я докладываю. Вдруг забыли."
+    },
+    "command.move.group.exchange-v4.2": {
+      "before": "Узкие места по одному. Не клиньте колонну.",
+      "after": "Узкий проезд — по одному."
+    },
+    "factory.vehicle_complete.group.dry-v2.2": {
+      "before": "Опять вручную обкатывать.",
+      "after": "Обкатка опять в бою?"
+    },
+    "command.move.mass.dry-v1.2": {
+      "before": "Имущество всё на колёсах.",
+      "after": "Зато вещи паковать не надо."
+    },
+    "repair.complete.group.exchange-v4.1": {
+      "before": "Ремонт закрыт.",
+      "after": "Ремонт закончили."
+    },
+    "traffic.queue_blocked.group.2": {
+      "before": "Заднюю без предупреждения не давай.",
+      "after": "Назад сдаёшь — предупреди."
+    },
+    "command.stop.mass.exchange-v1.3": {
+      "before": "В бампер приёмку не устраивать.",
+      "after": "Да вижу. Не кричи."
+    },
+    "factory.modernization_complete.mass.exchange-v2.1": {
+      "before": "Из доработки вышли.",
+      "after": "Доработку закончили. Выезжаем."
+    },
+    "combat.target_destroyed.group.exchange-v1.3": {
+      "before": "Огонь с этой снят.",
+      "after": "Всё, по этой не стреляем."
+    },
+    "command.attack.mass.exchange-v2.3": {
+      "before": "Каждый свою линию держит.",
+      "after": "Друг другу не мешать."
+    },
+    "damage.hit.group.exchange-v5.2": {
+      "before": "Состояние уточняйте. Без переклички на весь эфир.",
+      "after": "Сильно зацепило — докладывайте. Остальным тихо."
+    },
+    "combat.target_destroyed.group.exchange-v1.2": {
+      "before": "По обломкам бэка не жги.",
+      "after": "Бэка на обломки не трать."
+    },
+    "idle.group_no_order.group.written-v3.1": {
+      "before": "Простой. Нужна задача.",
+      "after": "Стоим без дела. Куда дальше?"
+    },
+    "research.start.group.written-v2.2": {
+      "before": "О результате — в эфир.",
+      "after": "Закончите — доложите."
+    },
+    "combat.target_destroyed.group.written-v2.2": {
+      "before": "По добитым не тратьтесь.",
+      "after": "По обломкам не стреляйте."
+    },
+    "command.attack.mass.exchange-v3.1": {
+      "before": "Есть вводная. Отработать цель.",
+      "after": "Приказ — уничтожить цель."
+    },
+    "research.complete.mass.dry-v1.2": {
+      "before": "А слова «на свой страх»?",
+      "after": "Проверяли хоть?"
+    },
+    "command.build.group.written-v4.1": {
+      "before": "Работа нам.",
+      "after": "Строители, за дело."
+    },
+    "construction.complete.group.exchange-v1.2": {
+      "before": "Матчасть выводите с площадки.",
+      "after": "Уводите машины с площадки."
+    },
+    "command.attack_move.group.exchange-v1.1": {
+      "before": "Продвигаемся. Контакты отработать.",
+      "after": "Идём вперёд. Огонь по противнику."
+    },
+    "idle.group_no_order.single.written-v4.1": {
+      "before": "Распоряжений нет.",
+      "after": "Ждём, куда пошлют."
+    },
+    "damage.hit.mass.critical-v1.2": {
+      "before": "Тяжёлым дорогу!",
+      "after": "Дайте подбитым выйти!"
+    },
+    "recon.enemy_first_seen.single.intel-v3.1": {
+      "before": "В контакте: {facts.enemyComposition}.",
+      "after": "Вижу: {facts.enemyComposition}."
+    },
+    "factory.vehicle_complete.mass.exchange-v3.2": {
+      "before": "Обкатка, как обычно, по обстановке.",
+      "after": "Обкатка, как всегда, под огнём?"
+    },
+    "command.move.mass.exchange-v4.2": {
+      "before": "Узкие места по одному. Не клиньте колонну.",
+      "after": "Узкий проезд — по одному."
+    },
+    "factory.modernization_complete.single.written-v2.1": {
+      "before": "Матчасть обновили.",
+      "after": "Машину доработали."
+    },
+    "command.attack.group.written-v3.1": {
+      "before": "Цель принята. Начинаем.",
+      "after": "Цель поняли. Выдвигаемся."
+    },
+    "traffic.panic_escaped.v4.1": {
+      "before": "Коричневый код отменяется?",
+      "after": "Ну что, штаны целы?"
+    },
+    "damage.panic_failed.v3.1": {
+      "before": "Отмучился… Чёрт. Не успел уйти.",
+      "after": "Не успел уйти… Чёрт."
+    },
+    "traffic.reverse_complete.mass.written-v3.1": {
+      "before": "Задний ход окончен.",
+      "after": "Отъехали. Можно ехать."
+    },
+    "command.attack.group.exchange-v3.1": {
+      "before": "Есть вводная. Отработать цель.",
+      "after": "Приказ — уничтожить цель."
+    },
+    "command.auto_retreat.mass.exchange-v4.1": {
+      "before": "Пора латать матчасть.",
+      "after": "Пора машины латать."
+    },
+    "traffic.queue_blocked.mass.2": {
+      "before": "Заднюю без предупреждения не давай.",
+      "after": "Назад сдаёшь — предупреди."
+    },
+    "damage.hit.mass.exchange-v5.2": {
+      "before": "Состояние уточняйте. Без переклички на весь эфир.",
+      "after": "Сильно зацепило — докладывайте. Остальным тихо."
+    },
+    "repair.start_factory.mass.written-v3.1": {
+      "before": "Матчасть в работе.",
+      "after": "Машину чинят."
+    },
+    "traffic.queue_blocked.group.exchange-v1.3": {
+      "before": "Вот и держи просвет.",
+      "after": "Вот и не прижимайся."
+    },
+    "damage.hit.single.live-intel-v2.1": {
+      "before": "Работают по нам! В контакте: {facts.attackerComposition}.",
+      "after": "По нам работают! {facts.attackerComposition}."
+    },
+    "traffic.panic_blocked.v6.2": {
+      "before": "Слышим тебя. Не дёргайся в стену.",
+      "after": "Спокойно. Попробуй сдать назад."
+    },
+    "command.move.group.exchange-v2.3": {
+      "before": "Вот и довезём матчасть целой.",
+      "after": "Вот и доедем без потерь."
+    },
+    "command.attack_move.mass.written-v2.1": {
+      "before": "Вперёд. Контакты отрабатывать.",
+      "after": "Вперёд. Врага увидите — бейте."
+    },
+    "command.auto_retreat.mass.2": {
+      "before": "Повреждённым проход.",
+      "after": "Дайте подбитым выйти."
+    },
+    "command.retreat.mass.observed-retreat.1": {
+      "before": "Отходим. Противник в контакте.",
+      "after": "Отходим. Противник рядом."
+    },
+    "recon.enemy_first_seen.group.intel-v3.1": {
+      "before": "В контакте: {facts.enemyComposition}.",
+      "after": "Вижу: {facts.enemyComposition}."
+    },
+    "command.attack.group.exchange-v1.2": {
+      "before": "Своим стволы не закройте.",
+      "after": "Из-под своих пулемётов уйдите."
+    },
+    "command.retreat.mass.written-v4.1": {
+      "before": "Массовый отход. Уходим!",
+      "after": "Всем отходить!"
+    },
+    "movement.route_changed.single.written-v4.1": {
+      "before": "Убираю лишний крюк.",
+      "after": "Срежу дорогу."
+    },
+    "command.attack.mass.exchange-v2.1": {
+      "before": "Группа, на раздачу.",
+      "after": "Группа, атакуем."
+    },
+    "traffic.jam_resolved.group.written-v4.2": {
+      "before": "Интервал. Второй раз не собираемся.",
+      "after": "Дистанцию держите. Хватит пробок."
+    },
+    "command.auto_retreat.group.2": {
+      "before": "Повреждённым проход.",
+      "after": "Дайте подбитым выйти."
+    },
+    "construction.complete.group.written-v2.1": {
+      "before": "Стройку закрыли.",
+      "after": "Стройку закончили."
+    },
+    "research.start.group.written-v2.1": {
+      "before": "Разработка в работе.",
+      "after": "НИИ взялся за дело."
+    },
+    "construction.complete.group.exchange-v2.1": {
+      "before": "Стройку закрыли.",
+      "after": "Стройку закончили."
+    },
+    "traffic.jam_resolved.mass.written-v3.1": {
+      "before": "Затор прошли.",
+      "after": "Пробку проехали."
+    },
+    "damage.hit.mass.live-intel-v2.1": {
+      "before": "Работают по нам! В контакте: {facts.attackerComposition}.",
+      "after": "По нам работают! {facts.attackerComposition}."
+    },
+    "movement.arrived.group.written-v3.1": {
+      "before": "На месте. Маршрут закрыт.",
+      "after": "Все на месте. Ждём приказа."
+    },
+    "command.auto_retreat.group.exchange-v1.1": {
+      "before": "Матчасть в ремзону. Снимаюсь.",
+      "after": "Машина побита. Еду чиниться."
+    },
+    "command.retreat.group.exchange-v1.1": {
+      "before": "Контакт рвём. Выходим!",
+      "after": "Выходим из боя!"
+    },
+    "traffic.jam_resolved.group.exchange-v2.1": {
+      "before": "Пробку продавили. Едем.",
+      "after": "Дорога свободна. Едем."
+    },
+    "damage.hit.single.critical-v3.1": {
+      "before": "Машина на грани!",
+      "after": "Машину почти разбили!"
+    },
+    "command.rejected.mass.written-v3.1": {
+      "before": "Маршрут не проложен. Стоим.",
+      "after": "Дальше не проехать. Стоим."
+    },
+    "damage.mobility_lost.single.written-v5.1": {
+      "before": "Рулевое в отказе.",
+      "after": "Руль не работает."
+    },
+    "traffic.queue_blocked.group.exchange-v3.3": {
+      "before": "Стоим. Ждём проход.",
+      "after": "Стоим. Ждём, пока разъедутся."
+    },
+    "command.attack_move.group.exchange-v2.2": {
+      "before": "По одному не отваливайтесь.",
+      "after": "От группы не отставать."
+    },
+    "traffic.queue_blocked.group.written-v5.2": {
+      "before": "Без встречки. Ещё хуже встанем.",
+      "after": "На встречку не лезь. Всех запрём."
+    },
+    "repair.start_factory.single.crew-exchange-v1.1": {
+      "before": "Загнал матчасть в ремзону.",
+      "after": "Машина в боксе."
+    },
+    "traffic.panic_escaped.v4.2": {
+      "before": "Отменяется. И хватит об этом в эфире.",
+      "after": "Отстань. Дай выдохнуть."
+    },
+    "idle.crew_history.single.loss-afterword-v2.1": {
+      "before": "В рапорте строки. А по именам — тяжело.",
+      "after": "Голоса их ещё в ушах."
+    },
+    "command.retreat.mass.exchange-v5.2": {
+      "before": "Матчасть выводите. Подвигов не заказывали.",
+      "after": "Машины выводите. Подвигов не надо."
+    },
+    "command.capture.single.written-v4.1": {
+      "before": "Объект под нами.",
+      "after": "Здесь теперь наши."
+    },
+    "command.auto_retreat.group.exchange-v3.1": {
+      "before": "Железо побито. Увожу.",
+      "after": "Машину побили. Увожу."
+    },
+    "command.attack.group.written-v5.1": {
+      "before": "В атаку. По команде.",
+      "after": "Есть приказ. В атаку."
+    },
+    "repair.complete.mass.exchange-v3.2": {
+      "before": "На выезде мастеров не раскатай.",
+      "after": "Давай без повторного заезда."
+    },
+    "idle.crew_history.mass.loss-afterword-v4.2": {
+      "before": "Привыкнуть бы к этому не дай бог.",
+      "after": "К такому не привыкнешь."
+    },
+    "movement.route_changed.mass.written-v3.1": {
+      "before": "Срежем по короткому.",
+      "after": "Пойдём короткой дорогой."
+    },
+    "command.move.group.dry-v1.2": {
+      "before": "Имущество всё на колёсах.",
+      "after": "Зато вещи паковать не надо."
+    },
+    "command.move.mass.written-v2.1": {
+      "before": "Массовый выход. Интервал!",
+      "after": "Всем трогаться. Дистанцию держать!"
+    },
+    "repair.complete.single.dry-v1.2": {
+      "before": "Расходная ведомость не согласна.",
+      "after": "Ремонтник другого мнения."
+    },
+    "repair.start_factory.group.written-v3.1": {
+      "before": "Матчасть в работе.",
+      "after": "Машину чинят."
+    },
+    "traffic.reverse_complete.group.written-v3.1": {
+      "before": "Задний ход окончен.",
+      "after": "Отъехали. Можно ехать."
+    },
+    "command.attack_move.group.written-v3.2": {
+      "before": "По контакту — коротко в эфир.",
+      "after": "Увидите противника — докладывайте."
+    },
+    "command.auto_retreat.single.written-v5.1": {
+      "before": "Отхожу на восстановление.",
+      "after": "Ухожу к ремонтникам."
+    },
+    "command.auto_retreat.group.exchange-v4.1": {
+      "before": "Пора латать матчасть.",
+      "after": "Пора машины латать."
+    },
+    "traffic.deadlock.mass.exchange-v2.3": {
+      "before": "Сзади отойдите!",
+      "after": "Сзади, сдайте назад!"
+    },
+    "damage.hit.group.written-v3.2": {
+      "before": "Состояние машин — коротко.",
+      "after": "Насколько сильно? Докладывайте."
+    },
+    "command.attack.group.written-v8.2": {
+      "before": "Срочные доклады — первыми.",
+      "after": "Не забивайте эфир."
+    },
+    "damage.hit.mass.enemy-fire-v4.2": {
+      "before": "Блять, разнеситесь!",
+      "after": "Блять, не кучкуйтесь!"
+    },
+    "movement.arrived.single.written-v4.1": {
+      "before": "Доехал. Жду следующую.",
+      "after": "Доехал. Что дальше?"
+    },
+    "command.attack.group.2": {
+      "before": "Своим огонь не перекрывать.",
+      "after": "Под свои стволы не лезть."
+    },
+    "traffic.queue_blocked.group.exchange-v3.1": {
+      "before": "Колонну заклинило.",
+      "after": "Колонна застряла."
+    },
+    "command.attack_move.mass.written-v3.2": {
+      "before": "По контакту — коротко в эфир.",
+      "after": "Увидите противника — докладывайте."
+    },
+    "damage.hit.group.2": {
+      "before": "Кто встал — сразу в эфир.",
+      "after": "Кто не на ходу — докладывайте."
+    },
+    "combat.target_destroyed.group.written-v6.1": {
+      "before": "С целями покончено.",
+      "after": "Эти больше не стреляют."
+    },
+    "research.start.single.written-v4.1": {
+      "before": "Над разработкой работают.",
+      "after": "Учёные разбираются."
+    },
+    "command.build.single.written-v6.1": {
+      "before": "На строительную точку.",
+      "after": "Выезжаю на стройку."
+    },
+    "damage.hit.mass.exchange-v1.2": {
+      "before": "Кто тяжёлый — первым в эфир.",
+      "after": "Кого сильно побило — докладывайте."
+    },
+    "movement.arrived.single.written-v3.1": {
+      "before": "Маршрут пройден.",
+      "after": "До точки добрались."
+    },
+    "repair.mobility_restored.group.written-v2.2": {
+      "before": "При выезде интервал.",
+      "after": "На выезде держите дистанцию."
+    },
+    "command.auto_retreat.mass.written-v2.1": {
+      "before": "Матчасть побита. Выходим.",
+      "after": "Машины побили. Отходим."
+    },
+    "traffic.network_overload.single.written-v3.1": {
+      "before": "С потерями — первыми. Остальным ждать.",
+      "after": "Потери — сразу. Остальным молчать."
+    },
+    "damage.hit.single.crew-exchange-v3.1": {
+      "before": "Матчасть побита.",
+      "after": "Машину побили."
+    },
+    "traffic.jam_resolved.mass.exchange-v3.2": {
+      "before": "Теперь без объятий бамперами.",
+      "after": "Теперь без толкотни."
+    },
+    "repair.start_factory.group.exchange-v2.3": {
+      "before": "Я своё уже нарулил.",
+      "after": "Да я лучше посижу."
+    },
+    "command.attack.mass.exchange-v5.2": {
+      "before": "Матчасть берегите. Наглость броню не заменяет.",
+      "after": "Без геройства. Броня не спасёт."
+    },
+    "traffic.jam_resolved.group.written-v3.1": {
+      "before": "Затор прошли.",
+      "after": "Пробку проехали."
+    },
+    "construction.complete.mass.written-v2.1": {
+      "before": "Стройку закрыли.",
+      "after": "Стройку закончили."
+    },
+    "command.attack_move.group.written-v2.1": {
+      "before": "Вперёд. Контакты отрабатывать.",
+      "after": "Вперёд. Врага увидите — бейте."
+    },
+    "movement.arrived.mass.written-v3.1": {
+      "before": "На месте. Маршрут закрыт.",
+      "after": "Все на месте. Ждём приказа."
+    },
+    "command.stop.mass.written-v2.1": {
+      "before": "Общая остановка.",
+      "after": "Колонна, останавливаемся."
+    },
+    "research.complete.single.written-v5.1": {
+      "before": "НИИ выдал результат.",
+      "after": "У учёных всё готово."
+    },
+    "idle.crew_history.single.loss-afterword-v4.2": {
+      "before": "Привыкнуть бы к этому не дай бог.",
+      "after": "К такому не привыкнешь."
+    },
+    "traffic.panic_escaped.v5.1": {
+      "before": "К своему пацану так не спешат, как ты сейчас!",
+      "after": "На свидание так не рвутся!"
+    },
+    "factory.modernization_complete.mass.exchange-v2.2": {
+      "before": "Теперь бы инструкцию к доработке.",
+      "after": "Хоть скажите, что поменяли."
+    },
+    "damage.hit.group.exchange-v3.1": {
+      "before": "Технику посекло.",
+      "after": "Машинам досталось."
+    },
+    "damage.hit.group.intel-v3.1": {
+      "before": "Нас шили: {facts.attackerComposition}.",
+      "after": "По нам били: {facts.attackerComposition}."
+    },
+    "repair.complete.group.1": {
+      "before": "Матчасть восстановили.",
+      "after": "Машины починили."
+    },
+    "command.move.group.exchange-v2.1": {
+      "before": "Колонна, на колёса.",
+      "after": "Колонна, пошли."
+    },
+    "traffic.queue_blocked.group.dry-v1.1": {
+      "before": "Стоим. Организованная задержка.",
+      "after": "Стоим. По плану, наверное."
+    },
+    "command.auto_retreat.single.crew-exchange-v1.1": {
+      "before": "Увожу матчасть в ремонт.",
+      "after": "Машину надо чинить. Отхожу."
+    },
+    "command.attack.group.written-v8.1": {
+      "before": "Заходим в бой.",
+      "after": "Идём в атаку."
+    },
+    "command.auto_retreat.mass.exchange-v1.1": {
+      "before": "Матчасть в ремзону. Снимаюсь.",
+      "after": "Машина побита. Еду чиниться."
+    },
+    "traffic.deadlock.mass.exchange-v1.3": {
+      "before": "Нам разъезд, не таран нужен.",
+      "after": "Не дави. Дай разъехаться."
+    },
+    "damage.hit.group.exchange-v1.1": {
+      "before": "Матчасть зацепило!",
+      "after": "Машины зацепило!"
+    },
+    "command.attack.mass.2": {
+      "before": "Своим огонь не перекрывать.",
+      "after": "Под свои стволы не лезть."
+    },
+    "repair.complete.single.written-v2.1": {
+      "before": "Матчасть восстановлена.",
+      "after": "Машину починили."
+    },
+    "traffic.queue_blocked.single.dry-v1.1": {
+      "before": "Стоим. Организованная задержка.",
+      "after": "Стоим. По плану, наверное."
+    },
+    "repair.start_factory.group.exchange-v1.1": {
+      "before": "Матчасть в ремзоне.",
+      "after": "Машины в ремонте."
+    },
+    "damage.hit.single.intel-v3.1": {
+      "before": "Нас шили: {facts.attackerComposition}.",
+      "after": "По нам били: {facts.attackerComposition}."
+    },
+    "repair.start_factory.group.exchange-v1.2": {
+      "before": "Долго в ремзоне?",
+      "after": "Надолго встал?"
+    },
+    "command.retreat.mass.exchange-v2.1": {
+      "before": "Сворачиваемся. Хватит размена.",
+      "after": "Отходим. Хватит подставляться."
+    },
+    "traffic.queue_blocked.single.crew-exchange-v1.2": {
+      "before": "В хвост не дави. Разъезд нужен.",
+      "after": "Не подпирай. Дай разъехаться."
+    },
+    "idle.crew_history.single.veteran-afterword.2": {
+      "before": "С таким опытом людей мало.",
+      "after": "Эх. Не уберегли."
+    },
+    "repair.start_factory.group.exchange-v4.2": {
+      "before": "Дефекты перечисляй. По звуку не всё найдут.",
+      "after": "Скажи, что сломалось. Сами не угадают."
+    },
+    "repair.start_factory.single.written-v2.1": {
+      "before": "Матчасть в работе.",
+      "after": "Машину чинят."
+    },
+    "repair.complete.mass.exchange-v1.1": {
+      "before": "Матчасть восстановили.",
+      "after": "Машины починили."
+    },
+    "damage.hit.single.crew-exchange-v4.2": {
+      "before": "По состоянию разберись. В эфире место оставим.",
+      "after": "Сильно досталось? Докладывай."
+    },
+    "damage.hit.mass.enemy-fire-v6.2": {
+      "before": "Матчасть не зажимайте. Дайте маневрировать!",
+      "after": "Дайте машинам развернуться!"
+    },
+    "command.attack_move.single.written-v6.1": {
+      "before": "По маршруту. Встречных отработаем.",
+      "after": "Идём. Противника встретим огнём."
+    },
+    "combat.target_destroyed.mass.written-v6.1": {
+      "before": "С целями покончено.",
+      "after": "Эти больше не стреляют."
+    },
+    "research.start.mass.written-v2.1": {
+      "before": "Разработка в работе.",
+      "after": "НИИ взялся за дело."
+    },
+    "damage.hit.single.written-v7.1": {
+      "before": "Попали. Матчасть побита.",
+      "after": "Зацепило. Машина побита."
+    },
+    "repair.start_factory.mass.exchange-v1.2": {
+      "before": "Долго в ремзоне?",
+      "after": "Надолго встал?"
+    },
+    "traffic.panic_blocked.v5.2": {
+      "before": "Держись. Ищи свободный край.",
+      "after": "Держись. Ищи объезд."
+    },
+    "repair.start_factory.mass.exchange-v4.2": {
+      "before": "Дефекты перечисляй. По звуку не всё найдут.",
+      "after": "Скажи, что сломалось. Сами не угадают."
+    },
+    "damage.mobility_lost.mass.exchange-v1.3": {
+      "before": "Нужен ремонт рулевого.",
+      "after": "Всё, в ремонт."
+    },
+    "command.move.single.bawdy-v1.1": {
+      "before": "Держи дистанцию. Мы ещё не встречаемся.",
+      "after": "К бамперу не липни. Мы ещё не встречаемся."
+    },
+    "command.move.single.bawdy-v1.2": {
+      "before": "А у меня уже резина новая.",
+      "after": "А я уж резину сменил."
+    },
+    "command.move.single.bawdy-v2.1": {
+      "before": "Колонна пошла.",
+      "after": "Трогаемся."
+    },
+    "command.move.single.bawdy-v2.2": {
+      "before": "Сзади без предварительных ласк не подпирать.",
+      "after": "Сзади без спроса не пристраивайся."
+    },
+    "command.move.group.bawdy-v1.1": {
+      "before": "Держи дистанцию. Мы ещё не встречаемся.",
+      "after": "К бамперу не липни. Мы ещё не встречаемся."
+    },
+    "command.move.group.bawdy-v1.2": {
+      "before": "А у меня уже резина новая.",
+      "after": "А я уж резину сменил."
+    },
+    "command.move.group.bawdy-v2.1": {
+      "before": "Колонна пошла.",
+      "after": "Трогаемся."
+    },
+    "command.move.group.bawdy-v2.2": {
+      "before": "Сзади без предварительных ласк не подпирать.",
+      "after": "Сзади без спроса не пристраивайся."
+    },
+    "command.move.mass.bawdy-v1.1": {
+      "before": "Держи дистанцию. Мы ещё не встречаемся.",
+      "after": "К бамперу не липни. Мы ещё не встречаемся."
+    },
+    "command.move.mass.bawdy-v1.2": {
+      "before": "А у меня уже резина новая.",
+      "after": "А я уж резину сменил."
+    },
+    "command.move.mass.bawdy-v2.1": {
+      "before": "Колонна пошла.",
+      "after": "Трогаемся."
+    },
+    "command.move.mass.bawdy-v2.2": {
+      "before": "Сзади без предварительных ласк не подпирать.",
+      "after": "Сзади без спроса не пристраивайся."
+    },
+    "command.attack_move.group.exchange-v3.1": {
+      "before": "По маршруту с огоньком.",
+      "after": "Идём с огоньком."
+    },
+    "command.attack_move.group.exchange-v3.2": {
+      "before": "Пока без огонька. Сначала контакт.",
+      "after": "Ты пока не гори. Ещё пригодишься."
+    },
+    "command.attack_move.mass.exchange-v3.1": {
+      "before": "По маршруту с огоньком.",
+      "after": "Идём с огоньком."
+    },
+    "command.attack_move.mass.exchange-v3.2": {
+      "before": "Пока без огонька. Сначала контакт.",
+      "after": "Ты пока не гори. Ещё пригодишься."
+    },
+    "command.stop.group.exchange-v1.2": {
+      "before": "Сзади, тормози заранее.",
+      "after": "Сзади тормози!"
+    },
+    "command.stop.group.exchange-v2.2": {
+      "before": "Опять перекур?",
+      "after": "Перекур?"
+    },
+    "command.stop.mass.exchange-v1.2": {
+      "before": "Сзади, тормози заранее.",
+      "after": "Сзади тормози!"
+    },
+    "command.stop.mass.exchange-v2.2": {
+      "before": "Опять перекур?",
+      "after": "Перекур?"
+    },
+    "traffic.queue_blocked.group.exchange-v5.2": {
+      "before": "Сзади тоже железо.",
+      "after": "Сзади тоже стоят."
+    },
+    "traffic.queue_blocked.group.exchange-v5.3": {
+      "before": "Поэтому и прошу.",
+      "after": "Пусть чуть отъедут."
+    },
+    "traffic.queue_blocked.mass.exchange-v5.2": {
+      "before": "Сзади тоже железо.",
+      "after": "Сзади тоже стоят."
+    },
+    "traffic.queue_blocked.mass.exchange-v5.3": {
+      "before": "Поэтому и прошу.",
+      "after": "Пусть чуть отъедут."
+    },
+    "combat.target_destroyed.single.pop-v1.1": {
+      "before": "У цели произошёл хлопок.",
+      "after": "Произошёл хлопок."
+    },
+    "combat.target_destroyed.single.pop-v1.2": {
+      "before": "Цель списываем.",
+      "after": "Смотрю, хорошо хлопнуло."
+    },
+    "combat.target_destroyed.single.pop-v2.1": {
+      "before": "Цель обнулили. Хлопком.",
+      "after": "Хлопнуло знатно."
+    },
+    "combat.target_destroyed.single.pop-v2.2": {
+      "before": "Так в сводку и пиши.",
+      "after": "Это у них техника безопасности."
+    },
+    "combat.target_destroyed.single.pop-v3.1": {
+      "before": "Цели больше нет. Нештатный хлопок.",
+      "after": "Цель уничтожена. Небольшой хлопок."
+    },
+    "combat.target_destroyed.single.pop-v3.2": {
+      "before": "Штатный бы она тоже не пережила.",
+      "after": "В отчёте так и оставим."
+    },
+    "combat.target_destroyed.group.pop-v1.1": {
+      "before": "У цели произошёл хлопок.",
+      "after": "Произошёл хлопок."
+    },
+    "combat.target_destroyed.group.pop-v1.2": {
+      "before": "Цель списываем.",
+      "after": "Смотрю, хорошо хлопнуло."
+    },
+    "combat.target_destroyed.group.pop-v2.1": {
+      "before": "Цель обнулили. Хлопком.",
+      "after": "Хлопнуло знатно."
+    },
+    "combat.target_destroyed.group.pop-v2.2": {
+      "before": "Так в сводку и пиши.",
+      "after": "Это у них техника безопасности."
+    },
+    "combat.target_destroyed.group.pop-v3.1": {
+      "before": "Цели больше нет. Нештатный хлопок.",
+      "after": "Цель уничтожена. Небольшой хлопок."
+    },
+    "combat.target_destroyed.group.pop-v3.2": {
+      "before": "Штатный бы она тоже не пережила.",
+      "after": "В отчёте так и оставим."
+    },
+    "combat.target_destroyed.mass.pop-v1.1": {
+      "before": "У цели произошёл хлопок.",
+      "after": "Произошёл хлопок."
+    },
+    "combat.target_destroyed.mass.pop-v1.2": {
+      "before": "Цель списываем.",
+      "after": "Смотрю, хорошо хлопнуло."
+    },
+    "combat.target_destroyed.mass.pop-v2.1": {
+      "before": "Цель обнулили. Хлопком.",
+      "after": "Хлопнуло знатно."
+    },
+    "combat.target_destroyed.mass.pop-v2.2": {
+      "before": "Так в сводку и пиши.",
+      "after": "Это у них техника безопасности."
+    },
+    "combat.target_destroyed.mass.pop-v3.1": {
+      "before": "Цели больше нет. Нештатный хлопок.",
+      "after": "Цель уничтожена. Небольшой хлопок."
+    },
+    "combat.target_destroyed.mass.pop-v3.2": {
+      "before": "Штатный бы она тоже не пережила.",
+      "after": "В отчёте так и оставим."
+    },
+    "repair.start_factory.single.crew-exchange-v1.3": {
+      "before": "Ремонт уже идёт.",
+      "after": "Сейчас разберутся."
+    },
+    "repair.complete.single.crew-exchange-v1.1": {
+      "before": "Из ремзоны вышел.",
+      "after": "Из ремонта вышел."
+    },
+    "repair.complete.group.exchange-v3.1": {
+      "before": "Залатали. Железо в строю.",
+      "after": "Починили. Снова в строю."
+    },
+    "repair.complete.mass.exchange-v3.1": {
+      "before": "Залатали. Железо в строю.",
+      "after": "Починили. Снова в строю."
+    },
+    "construction.complete.single.dry-v2.1": {
+      "before": "Построили. Стоит.",
+      "after": "Построили. Пока стоит."
+    },
+    "construction.complete.single.dry-v2.2": {
+      "before": "Оставим это в отчёте.",
+      "after": "Вот это «пока» мне не нравится."
+    },
+    "construction.complete.group.dry-v2.1": {
+      "before": "Построили. Стоит.",
+      "after": "Построили. Пока стоит."
+    },
+    "construction.complete.group.dry-v2.2": {
+      "before": "Оставим это в отчёте.",
+      "after": "Вот это «пока» мне не нравится."
+    },
+    "construction.complete.mass.dry-v2.1": {
+      "before": "Построили. Стоит.",
+      "after": "Построили. Пока стоит."
+    },
+    "construction.complete.mass.dry-v2.2": {
+      "before": "Оставим это в отчёте.",
+      "after": "Вот это «пока» мне не нравится."
+    },
+    "idle.quiet.single.bawdy-v2.1": {
+      "before": "Устав как презерватив.",
+      "after": "Опять начальство имеет?"
+    },
+    "idle.quiet.single.bawdy-v2.2": {
+      "before": "Если порвался — виноват сам.",
+      "after": "Даже смазку зажало."
+    },
+    "idle.quiet.single.bawdy-v5.1": {
+      "before": "У нас тут всё по любви?",
+      "after": "У нас служба по любви?"
+    },
+    "idle.quiet.single.bawdy-v5.2": {
+      "before": "По приказу. Любовь потом спишут.",
+      "after": "По приказу. Но с выражением."
+    },
+    "idle.quiet.single.bawdy-v10.1": {
+      "before": "Смазка — великое дело.",
+      "after": "Нас опять поимели?"
+    },
+    "idle.quiet.single.bawdy-v10.2": {
+      "before": "Особенно когда приказ сухой.",
+      "after": "Зато без отрыва от службы."
+    },
+    "idle.quiet.group.bawdy-v2.1": {
+      "before": "Устав как презерватив.",
+      "after": "Опять начальство имеет?"
+    },
+    "idle.quiet.group.bawdy-v2.2": {
+      "before": "Если порвался — виноват сам.",
+      "after": "Даже смазку зажало."
+    },
+    "idle.quiet.group.bawdy-v5.1": {
+      "before": "У нас тут всё по любви?",
+      "after": "У нас служба по любви?"
+    },
+    "idle.quiet.group.bawdy-v5.2": {
+      "before": "По приказу. Любовь потом спишут.",
+      "after": "По приказу. Но с выражением."
+    },
+    "idle.quiet.group.bawdy-v10.1": {
+      "before": "Смазка — великое дело.",
+      "after": "Нас опять поимели?"
+    },
+    "idle.quiet.group.bawdy-v10.2": {
+      "before": "Особенно когда приказ сухой.",
+      "after": "Зато без отрыва от службы."
+    },
+    "idle.quiet.mass.bawdy-v2.1": {
+      "before": "Устав как презерватив.",
+      "after": "Опять начальство имеет?"
+    },
+    "idle.quiet.mass.bawdy-v2.2": {
+      "before": "Если порвался — виноват сам.",
+      "after": "Даже смазку зажало."
+    },
+    "idle.quiet.mass.bawdy-v5.1": {
+      "before": "У нас тут всё по любви?",
+      "after": "У нас служба по любви?"
+    },
+    "idle.quiet.mass.bawdy-v5.2": {
+      "before": "По приказу. Любовь потом спишут.",
+      "after": "По приказу. Но с выражением."
+    },
+    "idle.quiet.mass.bawdy-v10.1": {
+      "before": "Смазка — великое дело.",
+      "after": "Нас опять поимели?"
+    },
+    "idle.quiet.mass.bawdy-v10.2": {
+      "before": "Особенно когда приказ сухой.",
+      "after": "Зато без отрыва от службы."
+    },
+    "idle.driver_pair.single.green-v1.1": {
+      "before": "{addresseeName}, до первой звезды все мы зелень.",
+      "after": "{addresseeName}, зелёный ещё. Не лезь вперёд."
+    },
+    "idle.driver_pair.single.green-v1.2": {
+      "before": "У меня имя есть. {speakerName}.",
+      "after": "{speakerName}. Можешь уже запомнить."
+    },
+    "idle.driver_pair.single.green-v1.3": {
+      "before": "Вот и не дай его в рапорт списать.",
+      "after": "Запомнил. Теперь без геройства."
+    },
+    "idle.driver_pair.single.green-v2.1": {
+      "before": "Пока звезду не получишь, имя запоминать рано.",
+      "after": "До первой звезды имя запоминать рано."
+    },
+    "idle.driver_pair.single.green-v2.2": {
+      "before": "{speakerName}. Запомнишь, пока вернусь.",
+      "after": "{speakerName}. До звезды тоже так звать."
+    },
+    "idle.driver_pair.single.green-v3.3": {
+      "before": "Запомнили. Теперь возвращайся с ним.",
+      "after": "Запомнили. Смотри, вернись."
+    },
+    "idle.driver_pair.group.green-v1.1": {
+      "before": "{addresseeName}, до первой звезды все мы зелень.",
+      "after": "{addresseeName}, зелёный ещё. Не лезь вперёд."
+    },
+    "idle.driver_pair.group.green-v1.2": {
+      "before": "У меня имя есть. {speakerName}.",
+      "after": "{speakerName}. Можешь уже запомнить."
+    },
+    "idle.driver_pair.group.green-v1.3": {
+      "before": "Вот и не дай его в рапорт списать.",
+      "after": "Запомнил. Теперь без геройства."
+    },
+    "idle.driver_pair.group.green-v2.1": {
+      "before": "Пока звезду не получишь, имя запоминать рано.",
+      "after": "До первой звезды имя запоминать рано."
+    },
+    "idle.driver_pair.group.green-v2.2": {
+      "before": "{speakerName}. Запомнишь, пока вернусь.",
+      "after": "{speakerName}. До звезды тоже так звать."
+    },
+    "idle.driver_pair.group.green-v3.3": {
+      "before": "Запомнили. Теперь возвращайся с ним.",
+      "after": "Запомнили. Смотри, вернись."
+    },
+    "idle.driver_pair.mass.green-v1.1": {
+      "before": "{addresseeName}, до первой звезды все мы зелень.",
+      "after": "{addresseeName}, зелёный ещё. Не лезь вперёд."
+    },
+    "idle.driver_pair.mass.green-v1.2": {
+      "before": "У меня имя есть. {speakerName}.",
+      "after": "{speakerName}. Можешь уже запомнить."
+    },
+    "idle.driver_pair.mass.green-v1.3": {
+      "before": "Вот и не дай его в рапорт списать.",
+      "after": "Запомнил. Теперь без геройства."
+    },
+    "idle.driver_pair.mass.green-v2.1": {
+      "before": "Пока звезду не получишь, имя запоминать рано.",
+      "after": "До первой звезды имя запоминать рано."
+    },
+    "idle.driver_pair.mass.green-v2.2": {
+      "before": "{speakerName}. Запомнишь, пока вернусь.",
+      "after": "{speakerName}. До звезды тоже так звать."
+    },
+    "idle.driver_pair.mass.green-v3.3": {
+      "before": "Запомнили. Теперь возвращайся с ним.",
+      "after": "Запомнили. Смотри, вернись."
+    }
+  },
+  "exchanges": [
+    {
+      "id": "command.move.single.bawdy-v1",
+      "count": null,
+      "rule": "command.move",
+      "tier": "single",
+      "priority": 10,
+      "humor": true,
+      "remembrance": false,
+      "previous": true,
+      "recordingIds": [
+        "review-98a1625c3bf064fd2636",
+        "review-12ece4d9d9ae44636f5e",
+        "review-c09fd6ffd1aec1c7d3a1",
+        "review-72069a2434d0211f406f",
+        "review-81664c4e52c1353f9ac1",
+        "review-8746ee5cf32980e259c8",
+        "review-f1e0fb7b2f28773ab8bd",
+        "review-77a0ea467580fb6cc860",
+        "review-5d54c11a13b0f2814f04",
+        "review-06c259cac363c8b9f4d6",
+        "review-bac6704116edac1c254f",
+        "review-fde17474c4a90db2425a"
+      ]
+    },
+    {
+      "id": "movement.route_changed.single.written-v3",
+      "count": null,
+      "rule": "movement.route_changed",
+      "tier": "single",
+      "priority": 35,
+      "humor": false,
+      "remembrance": false,
+      "previous": true,
+      "recordingIds": [
+        "review-ff0dd53ee91f9a3f4970",
+        "review-a48962b253fe92abd7b6",
+        "review-f4cd82d035ac8d1086c2",
+        "review-0dbe598eefaf7982fc07",
+        "review-868503cbe02152d23da8",
+        "review-07d419055528fc8c5e49"
+      ]
+    },
+    {
+      "id": "traffic.jam_resolved.single.written-v3",
+      "count": null,
+      "rule": "traffic.jam_resolved",
+      "tier": "single",
+      "priority": 42,
+      "humor": false,
+      "remembrance": false,
+      "previous": true,
+      "recordingIds": [
+        "review-9e9a6b7624b233196293",
+        "review-de739c1c230d7a6edd2a",
+        "review-dcd66ffefdf529ac2cf5",
+        "review-da78065f412b7d80e2f2",
+        "review-947b2c7ab6c3370f1cbc",
+        "review-43ae86d60a13d396cf73"
+      ]
+    },
+    {
+      "id": "combat.base_attack.group",
+      "count": null,
+      "rule": "combat.base_attack",
+      "tier": "group",
+      "priority": 95,
+      "humor": false,
+      "remembrance": false,
+      "previous": true,
+      "recordingIds": [
+        "review-8dbd1c7e3531edf02a5a",
+        "review-a804c38c61d6ed8b4825",
+        "review-def728ada44d6d69376b",
+        "review-69330dc06e9c7cfa1bb6",
+        "review-62551fb9220f6eb17129",
+        "review-d4656ebfc6a2f96dcf0a"
+      ]
+    },
+    {
+      "id": "damage.hit.group.written-v2",
+      "count": null,
+      "rule": "damage.hit",
+      "tier": "group",
+      "priority": 90,
+      "humor": false,
+      "remembrance": false,
+      "previous": true,
+      "recordingIds": [
+        "review-15537f12f7edace171aa",
+        "review-01ce921ecb0785ecbb29",
+        "review-7ec946cb407b56f9df63",
+        "review-280eebd7d83f5f081af1",
+        "review-dc241b803f6ade8ecb1c",
+        "review-2045e1be2e98010e6afe"
+      ]
+    },
+    {
+      "id": "damage.hit.group.written-v8",
+      "count": null,
+      "rule": "damage.hit",
+      "tier": "group",
+      "priority": 90,
+      "humor": false,
+      "remembrance": false,
+      "previous": true,
+      "recordingIds": [
+        "review-6390d9d4bffe11d8d5c5",
+        "review-1430cde0f589acaf6c52",
+        "review-d15e7f07c706468cc849",
+        "review-400899c30b45f710a6a5",
+        "review-4e417bbaf59e99a6dc62",
+        "review-f6f3101efca456def098"
+      ]
+    },
+    {
+      "id": "damage.hit.group.enemy-fire-v4",
+      "count": null,
+      "rule": "damage.hit",
+      "tier": "group",
+      "priority": 90,
+      "humor": false,
+      "remembrance": false,
+      "previous": true,
+      "recordingIds": [
+        "review-33727164ff870178f54a",
+        "review-d1fa9c55a9c9910d375e",
+        "review-e9aa88b407908f462d1d",
+        "review-f7495c4fe2174a5d6323",
+        "review-43feabb6457e3d879ae7",
+        "review-7d1e227b5197fa159a6b"
+      ]
+    },
+    {
+      "id": "damage.mobility_lost.group.written-v3",
+      "count": null,
+      "rule": "damage.mobility_lost",
+      "tier": "group",
+      "priority": 88,
+      "humor": false,
+      "remembrance": false,
+      "previous": true,
+      "recordingIds": [
+        "review-bc47f4c616d042317125",
+        "review-e0ed6b6d4d8fcb4dcf5c",
+        "review-bf2cd1a08abdeb27f7b4",
+        "review-80b36e100db9e8b613db",
+        "review-f790737c9f45c932e80d",
+        "review-bdf1884c1328504c52ac"
+      ]
+    },
+    {
+      "id": "factory.modernization_complete.single.written-v2",
+      "count": null,
+      "rule": "factory.modernization_complete",
+      "tier": "single",
+      "priority": 52,
+      "humor": false,
+      "remembrance": false,
+      "previous": true,
+      "recordingIds": [
+        "review-ab3d3df6a5d843b3b11b",
+        "review-0e633d22360ee22065c2",
+        "review-4b38b2b775f7f0090c86",
+        "review-105ba5169ecc0b3e03b0",
+        "review-e87af8aab48c1abdc9af",
+        "review-e05cf8f67a41eed35a6b"
+      ]
+    },
+    {
+      "id": "idle.group_no_order.single.written-v4",
+      "count": null,
+      "rule": "idle.group_no_order",
+      "tier": "single",
+      "priority": 1,
+      "humor": false,
+      "remembrance": false,
+      "previous": true,
+      "recordingIds": [
+        "review-fb51cfb8d25e11888e58",
+        "review-f841a73e1e3fba937819",
+        "review-e9e21539d116e9323443",
+        "review-47c54039a88a5cead02c",
+        "review-2afaa5f399f402f49a52",
+        "review-27acfc8dd66fac52c7af"
+      ]
+    },
+    {
+      "id": "idle.quiet.single.bawdy-v2",
+      "count": null,
+      "rule": "idle.quiet",
+      "tier": "single",
+      "priority": 5,
+      "humor": true,
+      "remembrance": false,
+      "previous": true,
+      "recordingIds": [
+        "review-e1c30d91ad7b0db652e0",
+        "review-4ab8530aaaceda7290e9",
+        "review-5665391d35d7ebdbf0c0",
+        "review-9dd056478e2742370ab4",
+        "review-cd38ee7f1e5bbd84f0a5",
+        "review-a922e948d7a76c574884",
+        "review-b1e4f52c2adb1c19b01b",
+        "review-a80ffdc543d1606ee336",
+        "review-c40701ff7c17d6a04763",
+        "review-3bfd1b8b8a6a18bb14a7",
+        "review-77ba04ca86166ff9da50",
+        "review-b6acd3f646bb1a09444f"
+      ]
+    },
+    {
+      "id": "idle.quiet.single.bawdy-v5",
+      "count": null,
+      "rule": "idle.quiet",
+      "tier": "single",
+      "priority": 5,
+      "humor": true,
+      "remembrance": false,
+      "previous": true,
+      "recordingIds": [
+        "review-8acfb27ef3c304113954",
+        "review-6b0ce2e2b8d061c0c588",
+        "review-8a954628fa334c084dd5",
+        "review-9c9588a5e1bdb8ad8dda",
+        "review-0fca4f9ce03d180200be",
+        "review-a9e3692728b7a1c14bfd",
+        "review-8b8127d360e606deea92",
+        "review-4045c870ef4e9e4ddfa9",
+        "review-f278fb7841adf787e9dd",
+        "review-a10469d9b5469246af89",
+        "review-8651d4032b7279be83ab",
+        "review-77d207d925d08f9cdae0"
+      ]
+    },
+    {
+      "id": "idle.crew_history.single.loss-afterword-v2",
+      "count": null,
+      "rule": "idle.crew_history",
+      "tier": "single",
+      "priority": 59,
+      "humor": false,
+      "remembrance": true,
+      "previous": true,
+      "recordingIds": [
+        "review-7ffeaa40a7e12587dfe8",
+        "review-3675e19c08fa6a300a86",
+        "review-e86401b9bf6bb0a84fb6",
+        "review-d0a7e8e640fec597ae2b",
+        "review-fa9aa0f9a462249a49d4",
+        "review-9291702271778ab57444"
+      ]
+    },
+    {
+      "id": "idle.crew_history.single.loss-afterword-v4",
+      "count": null,
+      "rule": "idle.crew_history",
+      "tier": "single",
+      "priority": 59,
+      "humor": false,
+      "remembrance": true,
+      "previous": true,
+      "recordingIds": [
+        "review-6f75eda24863a0e4e3ca",
+        "review-43b193a155f0609bb59d",
+        "review-74c5f87af254962d1d55",
+        "review-ec0beece64325aba0e7d",
+        "review-feaa7ed96fc29a8ae6f3",
+        "review-4a8958f4d54f38a16587"
+      ]
+    },
+    {
+      "id": "damage.panic_failed.v3",
+      "count": null,
+      "rule": "damage.panic_failed",
+      "tier": "single",
+      "priority": 90,
+      "humor": false,
+      "remembrance": false,
+      "previous": true,
+      "recordingIds": [
+        "review-7ace07c404c18b618b35",
+        "review-e8169356b462aeef517e",
+        "review-a73b61b71052463b6748",
+        "review-4ffab01f428bfb881505",
+        "review-56fe3849f282e73a28f5",
+        "review-e2b7b62c4c91c793385b"
+      ]
+    },
+    {
+      "id": "traffic.panic_blocked.v2",
+      "count": null,
+      "rule": "traffic.panic_blocked",
+      "tier": "single",
+      "priority": 72,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-88daf4a556a619011c91",
+        "review-06adc377f5bf8d5f61c8",
+        "review-beff3288b07b564d2fff",
+        "review-696e0dbbcb12104c00ed",
+        "review-c63ed90d83337d2d45d1",
+        "review-fe86a30d3741ef782785"
+      ]
+    },
+    {
+      "id": "traffic.retreat_contact.v10",
+      "count": null,
+      "rule": "traffic.retreat_contact",
+      "tier": "single",
+      "priority": 65,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-c081b001c4e3b7149505",
+        "review-3de1292cd4cbfdb0fa63",
+        "review-db7f84cb54b3f043149f",
+        "review-bc158c7a9455a448c8c0",
+        "review-5d8245e13bab8fc7786e",
+        "review-d6c138af51cb4ff6460b"
+      ]
+    },
+    {
+      "id": "traffic.panic_escaped.v3",
+      "count": null,
+      "rule": "traffic.panic_escaped",
+      "tier": "single",
+      "priority": 40,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-dd80ba3ba4e960f5a9fd",
+        "review-c80c8fee5b37fc5a2f78",
+        "review-157492a26077cb61f869",
+        "review-589a661d52f7b0b47468",
+        "review-a736b3cf7096a42273e2",
+        "review-cccb50c66d8ec576d243"
+      ]
+    },
+    {
+      "id": "damage.commander_down.single.written-v2",
+      "count": null,
+      "rule": "damage.commander_down",
+      "tier": "single",
+      "priority": 99,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-8ae60d87b5a36056b230",
+        "review-b34bacc74a248b8ae568",
+        "review-f12fa64346972e0d3954",
+        "review-579de025118299b9d3dc",
+        "review-a91ff6960b99d2435be5",
+        "review-ef5bfc260aea49a6de08"
+      ]
+    },
+    {
+      "id": "damage.vehicle_destroyed.single.dead-v1",
+      "count": 3,
+      "rule": "damage.vehicle_destroyed",
+      "tier": "single",
+      "priority": 98,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-74863b7262033c62404b",
+        "review-ee757696f888825b4abe",
+        "review-2a2693532972078e67b1",
+        "review-9bf1e7539dff4ae43abc",
+        "review-d6b230ed82a330f4c4b6",
+        "review-f83397d0c80fb7523d2d"
+      ]
+    },
+    {
+      "id": "mission.defeat.single.written-v3",
+      "count": null,
+      "rule": "mission.defeat",
+      "tier": "single",
+      "priority": 96,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-52918cea9603f9ba860b",
+        "review-9e7a815d132d46bde1a5",
+        "review-6fdd33148b492db249d3",
+        "review-38e96133bf8a9bf91293",
+        "review-84a2a151d1c15ead4bc6",
+        "review-1b41ee5b4d0121990ba7"
+      ]
+    },
+    {
+      "id": "combat.base_attack.single.written-v2",
+      "count": null,
+      "rule": "combat.base_attack",
+      "tier": "single",
+      "priority": 95,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-ace0fe876862bde4ff5d",
+        "review-d05bb39bb746620d0c06",
+        "review-7d96b6fa425fd5a91c96",
+        "review-4a0514a329f086e3dfb8",
+        "review-f6101864bd731868f9ce",
+        "review-bd939b1e8de680178b9b"
+      ]
+    },
+    {
+      "id": "damage.hit.single.enemy-fire-v2",
+      "count": null,
+      "rule": "damage.hit",
+      "tier": "single",
+      "priority": 90,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-4a213aff4c865d349755",
+        "review-8857e7ea5657a995313e",
+        "review-3f59732f881b96ad346e",
+        "review-43deeb327fb73d25b268",
+        "review-589e5b0a63ceb9b958f5",
+        "review-f350a49026c6549e8c84"
+      ]
+    },
+    {
+      "id": "damage.hit.mass.written-v2",
+      "count": null,
+      "rule": "damage.hit",
+      "tier": "mass",
+      "priority": 90,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-51570227053942088e7f",
+        "review-185fcbbbf958af90c89a",
+        "review-b797aac72d0608989d8f",
+        "review-2a755d35dab77125dae9",
+        "review-35aa917e35d207e8f3bc",
+        "review-72ae1126f449c27e07d9",
+        "review-b69a1b040e0821337bfe",
+        "review-c791294079fc6a3cd9c2",
+        "review-9baeacec22a066e805b6",
+        "review-44ebda2da72511eab025",
+        "review-ae5276d5f12c54eecdf4",
+        "review-89bd8644973b0725fa02"
+      ]
+    },
+    {
+      "id": "damage.mobility_lost.single.written-v5",
+      "count": null,
+      "rule": "damage.mobility_lost",
+      "tier": "single",
+      "priority": 88,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-3fcdb6cdfcca4fa30057",
+        "review-f3efbc080b2c8cfb6b40",
+        "review-8159617184b919b0484f",
+        "review-c9b026e5339cc6375db1",
+        "review-a39e2270af8fef3e89d8",
+        "review-78909c119993ab6e0f39"
+      ]
+    },
+    {
+      "id": "mission.victory.single.written-v2",
+      "count": null,
+      "rule": "mission.victory",
+      "tier": "single",
+      "priority": 85,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-c8b4d4d33935ba4b46f5",
+        "review-7b5692e6fe79a0b7820a",
+        "review-dd893409bc6cc17ebc9f",
+        "review-3ec4d5606bdaa699097a",
+        "review-8b57e608a4716c4027df",
+        "review-0f7cccfff5281e38a89e"
+      ]
+    },
+    {
+      "id": "mission.victory.group.written-v3",
+      "count": null,
+      "rule": "mission.victory",
+      "tier": "group",
+      "priority": 85,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-c79a8ac77e64eb0ca8bc",
+        "review-dbc8ce5b3ab0654cbe24",
+        "review-2c418df58431f6165a28",
+        "review-f5083828663a94ef54ff",
+        "review-d43f1b814d9d9c3dd40f",
+        "review-89375a8c24492adff86f"
+      ]
+    },
+    {
+      "id": "command.retreat.single.written-v4",
+      "count": null,
+      "rule": "command.retreat",
+      "tier": "single",
+      "priority": 80,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-a23879b90d062b268e96",
+        "review-81a906a3aca98040f591",
+        "review-f8cd29b3cf8a43f29c69",
+        "review-7c2c34f788419a9881da",
+        "review-dbc129b860ef88fbe37c",
+        "review-aad9675c90c61434c648"
+      ]
+    },
+    {
+      "id": "command.retreat.group",
+      "count": null,
+      "rule": "command.retreat",
+      "tier": "group",
+      "priority": 80,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-bd4c12fd792f38e8e6d0",
+        "review-48dff6fe2d7ed9bc183f",
+        "review-dd16e27551e8457aa02f",
+        "review-ef42f83568779a9541a8",
+        "review-cbc0ef8b136a341b7f95",
+        "review-6b29a9be4d13737c7444"
+      ]
+    },
+    {
+      "id": "command.retreat.mass",
+      "count": null,
+      "rule": "command.retreat",
+      "tier": "mass",
+      "priority": 80,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-291cad2d827cb720db10",
+        "review-90a3429c4093ced71b43",
+        "review-d4c8439862ca4e6ff13b",
+        "review-0bb669e1b8d9c1c6a2b8",
+        "review-f567a18261388d9b1521",
+        "review-a7c6dd974197c77bd692",
+        "review-11f8f62f246d7592173a",
+        "review-4964bc70d07a6a0a2b6b",
+        "review-07f3837ecfc061c3bf95",
+        "review-fa9c1ae18b2aa9f8117c",
+        "review-acff04204a82b170cc1f",
+        "review-7140514fdbe208fe3119"
+      ]
+    },
+    {
+      "id": "command.auto_retreat.single.written-v3",
+      "count": null,
+      "rule": "command.auto_retreat",
+      "tier": "single",
+      "priority": 78,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-b0470579e8b98259c56b",
+        "review-b8e4c9ae8a71f65fc16c",
+        "review-be4af388373bf8ea0bd3",
+        "review-8507915973b9989c9a03",
+        "review-343e766332430f1716b2",
+        "review-444097cb8bc643adfce2"
+      ]
+    },
+    {
+      "id": "command.auto_retreat.group.written-v4",
+      "count": null,
+      "rule": "command.auto_retreat",
+      "tier": "group",
+      "priority": 78,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-14eed79220ea3485444d",
+        "review-4ad554c949e7f86e8481",
+        "review-14f7a981f18a08141a0b",
+        "review-a9a815db68c247001044",
+        "review-be353c5e34b5ecdd4e8f",
+        "review-0ee2f6590a6b2ef35c79"
+      ]
+    },
+    {
+      "id": "combat.target_destroyed.single.written-v7",
+      "count": null,
+      "rule": "combat.target_destroyed",
+      "tier": "single",
+      "priority": 72,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-5805de2974c28fdb9b6f",
+        "review-7bdd9dba550bfdae86bf",
+        "review-975405b71fbb7c4d5f8c",
+        "review-60137a4bf9b3fd6aa027",
+        "review-40e51f354f616d9f1858",
+        "review-333ebdeda031fc9d6a40"
+      ]
+    },
+    {
+      "id": "combat.target_destroyed.group.written-v3",
+      "count": null,
+      "rule": "combat.target_destroyed",
+      "tier": "group",
+      "priority": 72,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-ebaf55432f2dd0f35d9e",
+        "review-d00efe814d52ed8bb707",
+        "review-66e357b6eccaf3b8f195",
+        "review-a4d9cfa381bf3aae0537",
+        "review-258c3fbee2f4b2dc034d",
+        "review-1ca3b97c745cc9584c94"
+      ]
+    },
+    {
+      "id": "recon.camp_cleared.single.written-v2",
+      "count": null,
+      "rule": "recon.camp_cleared",
+      "tier": "single",
+      "priority": 70,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-7190753a47e94a26dd81",
+        "review-6f3731e298e73efe95e2",
+        "review-2b8e3419710f269fc5bf",
+        "review-2cdbec1bc1a811abbae3",
+        "review-10a05b7037593c563c1d",
+        "review-125bd0b5921466d0dfa3"
+      ]
+    },
+    {
+      "id": "recon.camp_cleared.group.written-v3",
+      "count": null,
+      "rule": "recon.camp_cleared",
+      "tier": "group",
+      "priority": 70,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-f709186400d465b35be7",
+        "review-b536c87e1f00906879f2",
+        "review-aed15cf8e54973e2ec3e",
+        "review-a08d17e7e4e6853daa85",
+        "review-3fc49a4d3bf310f496e5",
+        "review-561f1cba97aea648139a"
+      ]
+    },
+    {
+      "id": "loot.artifact_found.single.written-v4",
+      "count": null,
+      "rule": "loot.artifact_found",
+      "tier": "single",
+      "priority": 68,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-67d9f0d8246024e8fc61",
+        "review-6cda715f7eb96000bc5f",
+        "review-71933807758044070a50",
+        "review-e97d81e26f2914bd937e",
+        "review-9ddd08a90d99598d0922",
+        "review-6f24764a90e796e279fb"
+      ]
+    },
+    {
+      "id": "loot.artifact_found.group.written-v2",
+      "count": null,
+      "rule": "loot.artifact_found",
+      "tier": "group",
+      "priority": 68,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-48a3d74698f801cf7033",
+        "review-138238a3f5ef7318f515",
+        "review-f5e1670ddd96c1e7e8b4",
+        "review-20025e7c797e0822ebae",
+        "review-e7b4ecaf8095dd6679bd",
+        "review-ba655bf514ab01cfcb3a"
+      ]
+    },
+    {
+      "id": "repair.mobility_restored.single.written-v3",
+      "count": null,
+      "rule": "repair.mobility_restored",
+      "tier": "single",
+      "priority": 65,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-3c0b0d852f761f8d8e14",
+        "review-ab95e39501a140f8902d",
+        "review-18dd4e3889532fbf8a3d",
+        "review-daa47bd12202e13c07e3",
+        "review-a06ab796d000c7d538ec",
+        "review-289fba572d67c8a06b59"
+      ]
+    },
+    {
+      "id": "repair.mobility_restored.group.written-v3",
+      "count": null,
+      "rule": "repair.mobility_restored",
+      "tier": "group",
+      "priority": 65,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-104fea8f79cc93ed4ff2",
+        "review-5625b1b09a90ba500bea",
+        "review-01af41c6130cc990d719",
+        "review-c55d3734a563fbb22eb8",
+        "review-350371d11b53574edbb8",
+        "review-a99cc1749bbc58f58dc5"
+      ]
+    },
+    {
+      "id": "research.complete.single",
+      "count": null,
+      "rule": "research.complete",
+      "tier": "single",
+      "priority": 60,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-813b7c37a0badbb19d06",
+        "review-a452f15f31c500344ec9",
+        "review-e3e2b11864b80126d3bc",
+        "review-83db05068ff3f27cc049",
+        "review-59b319e9b9f5b775311a",
+        "review-400eb234ece24b06b67b"
+      ]
+    },
+    {
+      "id": "research.complete.group.written-v3",
+      "count": null,
+      "rule": "research.complete",
+      "tier": "group",
+      "priority": 60,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-66b31ba828311c4ede40",
+        "review-b4f342ee4f5d19db305c",
+        "review-5cbb8329aa0d7e0a8707",
+        "review-123cda75eccaf80c3bce",
+        "review-3827f30b2118c7ce7a8e",
+        "review-d8307ca8c6bef7b4fcc4"
+      ]
+    },
+    {
+      "id": "repair.complete.single.written-v2",
+      "count": null,
+      "rule": "repair.complete",
+      "tier": "single",
+      "priority": 58,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-fdf1adb70227d3d6ef5f",
+        "review-25f0f3446fc3109cce38",
+        "review-a2ee7e98fbd20a084c16",
+        "review-0f29be9bf87793703e77",
+        "review-e4303a2ff043d240d01c",
+        "review-c94b82a3d23a468bb538"
+      ]
+    },
+    {
+      "id": "repair.complete.group.written-v4",
+      "count": null,
+      "rule": "repair.complete",
+      "tier": "group",
+      "priority": 58,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-a7c6370a0c938811e455",
+        "review-607eeb0e8cde19d12415",
+        "review-acfebd087e5b7e7aad95",
+        "review-7d89987e085ce5acc1d6",
+        "review-f5a9cda1551590221018",
+        "review-d92458a4ddbe5c5522be"
+      ]
+    },
+    {
+      "id": "construction.complete.single",
+      "count": null,
+      "rule": "construction.complete",
+      "tier": "single",
+      "priority": 55,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-27f1eeffc62d76423cdf",
+        "review-54afde5616e373f4c149",
+        "review-e7f8f7e27be26137a51d",
+        "review-d2e6fd61318e031a6506",
+        "review-97de8bc01ecb8f7ff740",
+        "review-79ff77bc67ff47d0ed9c"
+      ]
+    },
+    {
+      "id": "construction.complete.group",
+      "count": null,
+      "rule": "construction.complete",
+      "tier": "group",
+      "priority": 55,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-1c05069852408e3a40b9",
+        "review-5f93b4eec62a5f23897f",
+        "review-0deee1abf9bfd2fdb7ee",
+        "review-f5eea562f16458ec268f",
+        "review-610ec35f893b3e30efa5",
+        "review-1c21cf3e687404445750",
+        "review-52c90143af3731d7eead",
+        "review-cf991dba8971dadc225b",
+        "review-319980866e650f6ad269",
+        "review-20d1595d7a2e870f6073",
+        "review-441c90f2ef57f68790d6",
+        "review-a1040460de2b39dfd40a"
+      ]
+    },
+    {
+      "id": "factory.modernization_complete.group.written-v2",
+      "count": null,
+      "rule": "factory.modernization_complete",
+      "tier": "group",
+      "priority": 52,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-55605df331c3540804b8",
+        "review-6e753f26989c512a7f54",
+        "review-676560681ee2cdddea33",
+        "review-aa0fe69434b584228d4c",
+        "review-b6afbf3fb8c123819d0a",
+        "review-a9eac9f9f790e590ffec"
+      ]
+    },
+    {
+      "id": "factory.vehicle_complete.group.written-v2",
+      "count": null,
+      "rule": "factory.vehicle_complete",
+      "tier": "group",
+      "priority": 50,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-f144e221e0562a3006bb",
+        "review-c84193f252d454dc96d7",
+        "review-1c55eaac7ece0df1f47d",
+        "review-b1d62d54e676daf56ad7",
+        "review-49253c464c47527a3234",
+        "review-0370ba31bf3b9e40da39"
+      ]
+    },
+    {
+      "id": "factory.vehicle_complete.single",
+      "count": null,
+      "rule": "factory.vehicle_complete",
+      "tier": "single",
+      "priority": 50,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-3e1305703b6be0422c30",
+        "review-b72310dd3ae375401a39",
+        "review-ece8aa92a732aca54d94",
+        "review-41a33c308960580cc2c6",
+        "review-a2116c393f29969839a2",
+        "review-dc883d9d8c05826c2bb0"
+      ]
+    },
+    {
+      "id": "traffic.network_overload.single.written-v4",
+      "count": null,
+      "rule": "traffic.network_overload",
+      "tier": "single",
+      "priority": 46,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-7211d4338239d4b73495",
+        "review-c12187d2ea676486d622",
+        "review-2a285870c24a1973d20e",
+        "review-39aed872fa87b9e0f4a8",
+        "review-3095ef145623001bee60",
+        "review-819e5f883b96b45d0def"
+      ]
+    },
+    {
+      "id": "traffic.network_overload.group.written-v3",
+      "count": null,
+      "rule": "traffic.network_overload",
+      "tier": "group",
+      "priority": 46,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-d9d54a8bdb086e29ba59",
+        "review-9f0e0b6e5faf3e24c387",
+        "review-76130951b2d65591d348",
+        "review-e23bcbd2c2142bd8ee46",
+        "review-41ad84ffd919fb08511f",
+        "review-4f2f90e1e429ef295253"
+      ]
+    },
+    {
+      "id": "traffic.queue_blocked.single.written-v5",
+      "count": null,
+      "rule": "traffic.queue_blocked",
+      "tier": "single",
+      "priority": 45,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-2adb439d4726ad83d261",
+        "review-bb960f343089423a55ea",
+        "review-74a7a832e9f50ebc0cb5",
+        "review-bc68fc29d08118ccb3ea",
+        "review-22c0e4fefff1ca1dca5e",
+        "review-c20e9f5fb8947422e176"
+      ]
+    },
+    {
+      "id": "traffic.queue_blocked.group.written-v4",
+      "count": null,
+      "rule": "traffic.queue_blocked",
+      "tier": "group",
+      "priority": 45,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-98a5ad16c84f9d06e410",
+        "review-cf1bf65c7f8b8b2f0f86",
+        "review-ec54f7ff538daa506484",
+        "review-2ecaed92a4b123bdcdcf",
+        "review-52c33fe3cce79c9d9874",
+        "review-7f976d49f596df5a7372"
+      ]
+    },
+    {
+      "id": "traffic.jam_resolved.group.written-v3",
+      "count": null,
+      "rule": "traffic.jam_resolved",
+      "tier": "group",
+      "priority": 42,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-26665eabbe68798a0ff5",
+        "review-e89a90824d58dd335363",
+        "review-a765b45174366bccfede",
+        "review-6039eb552d44cf8c5500",
+        "review-7e114ae91057b34e3e33",
+        "review-98f1269956371eabbc3a"
+      ]
+    },
+    {
+      "id": "command.capture.single.written-v2",
+      "count": null,
+      "rule": "command.capture",
+      "tier": "single",
+      "priority": 35,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-db1490f119c4840bc091",
+        "review-d5b8664802518db2ccb7",
+        "review-373863c559d8f725de4b",
+        "review-478ae8cd84cec2725e8e",
+        "review-76400004425948d019ed",
+        "review-6a560693318740538a45"
+      ]
+    },
+    {
+      "id": "command.capture.group.written-v3",
+      "count": null,
+      "rule": "command.capture",
+      "tier": "group",
+      "priority": 35,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-4ef2b84faf011b7eb1d9",
+        "review-66de2a85a6610d61d033",
+        "review-3a8452f7ecf2b26877ad",
+        "review-718d4362812746456e56",
+        "review-157ee4dae0900f27809a",
+        "review-48792f4acc9dce3888d8"
+      ]
+    },
+    {
+      "id": "traffic.reverse_complete.single",
+      "count": null,
+      "rule": "traffic.reverse_complete",
+      "tier": "single",
+      "priority": 35,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-d8a6d357c294a677bc0d",
+        "review-c5076ea7da7caca0c34a",
+        "review-00c86f5fa99eca1361d7",
+        "review-aacb58e32dd6568bea69",
+        "review-ee581973c064acd66010",
+        "review-c1cb16d9361ac0d26410"
+      ]
+    },
+    {
+      "id": "repair.start_factory.single.written-v2",
+      "count": null,
+      "rule": "repair.start_factory",
+      "tier": "single",
+      "priority": 35,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-17ae4b54d6352a40b0aa",
+        "review-ba14654cccbfed80c844",
+        "review-bfa8c4736e7200a328f4",
+        "review-5335a3f6c98050ff5322",
+        "review-c37a1ce665dd8441098a",
+        "review-01a899c379c905c3df14"
+      ]
+    },
+    {
+      "id": "command.rejected.single",
+      "count": null,
+      "rule": "command.rejected",
+      "tier": "single",
+      "priority": 35,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-d05cc40d96b432ac9760",
+        "review-bbed2fd537980f0e1a1b",
+        "review-e4588f64f7895f4c0605",
+        "review-56188ea14e656cb3de4b",
+        "review-2f5f8dc4381678aa9940",
+        "review-041cd8bf1476a0549563"
+      ]
+    },
+    {
+      "id": "construction.start.single",
+      "count": null,
+      "rule": "construction.start",
+      "tier": "single",
+      "priority": 35,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-a20b85f70c6adf709e79",
+        "review-fd37990e3c806244e056",
+        "review-cf22900fa97acf98781d",
+        "review-a32bd48f9e78b85492bb",
+        "review-850cfd3aa9e6d02c0c3d",
+        "review-9b83b0a4eaa34e3b339e"
+      ]
+    },
+    {
+      "id": "construction.cancelled.single.written-v4",
+      "count": null,
+      "rule": "construction.cancelled",
+      "tier": "single",
+      "priority": 35,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-2ca4547305ab2a9a4850",
+        "review-869a34c73988ed2a97fc",
+        "review-1a9c6b7d362f9a919393",
+        "review-f119b330381302c9751c",
+        "review-fe23ee5c56b9a6068910",
+        "review-7a845ec907d00fff5f72"
+      ]
+    },
+    {
+      "id": "traffic.reverse_started.group.written-v2",
+      "count": null,
+      "rule": "traffic.reverse_started",
+      "tier": "group",
+      "priority": 35,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-d63030bac81ed55b1eba",
+        "review-6b0d8e321cdf59513a1d",
+        "review-f24cbbfe416190f597ba",
+        "review-53db7a670d64fb875c53",
+        "review-948382efa60376ccfcc0",
+        "review-a75310d26b1bb0bf6912"
+      ]
+    },
+    {
+      "id": "repair.start_factory.group.written-v4",
+      "count": null,
+      "rule": "repair.start_factory",
+      "tier": "group",
+      "priority": 35,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-78d6f05f01493d3cdd64",
+        "review-2abfae7f601cc02eb233",
+        "review-74ac1faa78dafc31aaae",
+        "review-c8431b350e120b37c6ce",
+        "review-d9105fbd6972c461352c",
+        "review-8c41aad7954dbf89d791"
+      ]
+    },
+    {
+      "id": "construction.cancelled.group.written-v3",
+      "count": null,
+      "rule": "construction.cancelled",
+      "tier": "group",
+      "priority": 35,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-d246db5d28dfbd912902",
+        "review-9173a74df0f139747fb5",
+        "review-69efda29864575da75df",
+        "review-3f424793b8437f4698bf",
+        "review-cb639f9bd569af134f44",
+        "review-8781f77c093b58257ad2"
+      ]
+    },
+    {
+      "id": "construction.refused.group.written-v2",
+      "count": null,
+      "rule": "construction.refused",
+      "tier": "group",
+      "priority": 35,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-4c669eeeee501a4119f7",
+        "review-1a2d1628523b4e5e9af7",
+        "review-914b783d6d906921cd2b",
+        "review-ed5b8fa4820f7b8526c2",
+        "review-a773b204f0f5a8d5daf2",
+        "review-74956175e3a20a9ab0d5"
+      ]
+    },
+    {
+      "id": "traffic.deadlock.single.written-v3",
+      "count": null,
+      "rule": "traffic.deadlock",
+      "tier": "single",
+      "priority": 35,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-61e69028080a364c8c33",
+        "review-00bdec7c99a1fbeb44ae",
+        "review-76dace5623a6f10bbd5f",
+        "review-06616d3b17ec6518a2ac",
+        "review-b6b279b5bfcd188394ea",
+        "review-89aeccd4200e7559158b"
+      ]
+    },
+    {
+      "id": "research.start.single.written-v4",
+      "count": null,
+      "rule": "research.start",
+      "tier": "single",
+      "priority": 35,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-e3229951f28a1bf8931b",
+        "review-3aea45b0e9b709800078",
+        "review-825b9313de3f6bbd1e61",
+        "review-20aa6fedafebc9f2f3c9",
+        "review-8d260865001764587265",
+        "review-59fa549b8cc615dd554a"
+      ]
+    },
+    {
+      "id": "movement.route_changed.group.written-v2",
+      "count": null,
+      "rule": "movement.route_changed",
+      "tier": "group",
+      "priority": 35,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-c6d5ed8ac88a3dfbac1e",
+        "review-acc855a6719da116d9a7",
+        "review-f704a9bb2a0e22b406f5",
+        "review-a5fcbf2cba0f6621d75c",
+        "review-3ae3868ffecb2bfded8b",
+        "review-4ec700cf980980952674"
+      ]
+    },
+    {
+      "id": "traffic.reverse_started.single.written-v3",
+      "count": null,
+      "rule": "traffic.reverse_started",
+      "tier": "single",
+      "priority": 35,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-189ae6e459566ddcd2d4",
+        "review-c47338adb5dbb79bd311",
+        "review-dbf8ac4dc941abd6fc9c",
+        "review-6899dcd79bf06c967759",
+        "review-77c60c0a752076e2d97c",
+        "review-496b97dfcd6d8d6b8685"
+      ]
+    },
+    {
+      "id": "construction.refused.single.written-v2",
+      "count": null,
+      "rule": "construction.refused",
+      "tier": "single",
+      "priority": 35,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-e86677f5eb391d47f7c0",
+        "review-32183d63ff945454b243",
+        "review-31796fc86e407c2e1721",
+        "review-9621e8fc316f528ffcf4",
+        "review-679e45bc27842593a9b8",
+        "review-29984b384156ad73b551"
+      ]
+    },
+    {
+      "id": "research.start.group.written-v3",
+      "count": null,
+      "rule": "research.start",
+      "tier": "group",
+      "priority": 35,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-f130f1cc8cc953361f5d",
+        "review-fe97034c9b3bf596818e",
+        "review-97738bcbf00a533590fd",
+        "review-58f0edd655c08f1b542d",
+        "review-1eb1cf3cc7adefc11a32",
+        "review-1c5a592f7bab24f1a9f0"
+      ]
+    },
+    {
+      "id": "command.rejected.group.written-v3",
+      "count": null,
+      "rule": "command.rejected",
+      "tier": "group",
+      "priority": 35,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-89bbc0caad54827aa30a",
+        "review-5acbb0743b6af0dfd29b",
+        "review-a45f0ac56bfbd2a7bf07",
+        "review-4ce73047995a7ee656c3",
+        "review-30a1801534f05fd82690",
+        "review-881184854018af656834"
+      ]
+    },
+    {
+      "id": "traffic.deadlock.group.written-v3",
+      "count": null,
+      "rule": "traffic.deadlock",
+      "tier": "group",
+      "priority": 35,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-d43d6450a15cc28e31ca",
+        "review-73243452d9ff2eddac77",
+        "review-8e09162008041453f921",
+        "review-09fec7f50920ea8a8d5e",
+        "review-3f407fc6373526709b65",
+        "review-795eab60dc6ac7554521"
+      ]
+    },
+    {
+      "id": "traffic.reverse_complete.group",
+      "count": null,
+      "rule": "traffic.reverse_complete",
+      "tier": "group",
+      "priority": 35,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-8c60b5d246ad7ae3dcbf",
+        "review-b17d66b8ae4dc0a901e1",
+        "review-fd84a74497000c64b57a",
+        "review-23c56f30e9495a0c7280",
+        "review-99a17463299a4fe7682c",
+        "review-21c1aa14c622852d3b80",
+        "review-1aabae0c06e67774c793",
+        "review-caa3e15e9e2a58c0134c",
+        "review-ac6655081ab6f3dc1869",
+        "review-656085a342dcc5529060",
+        "review-2c5e3184bff729fe24c5",
+        "review-084421d62982e5aa1264"
+      ]
+    },
+    {
+      "id": "construction.start.group",
+      "count": null,
+      "rule": "construction.start",
+      "tier": "group",
+      "priority": 35,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-33684bd54aa4cab33450",
+        "review-b866b967f3e2a80311c6",
+        "review-3d27f8c592bb1a9afdce",
+        "review-8fa52a3aace3669f561c",
+        "review-ad0b37b109a2b9c784e5",
+        "review-e2a1e89c2c49f1ec4bc1",
+        "review-5c97c15daa930a1210d3",
+        "review-2ab4338dbde5826f8f6a",
+        "review-7b9227f62e2674fa2d1a",
+        "review-b1cb54d94208c1be5332",
+        "review-eb140f1f87adef134873",
+        "review-d56ba7db1155ac4ffe17"
+      ]
+    },
+    {
+      "id": "command.attack.single.written-v8",
+      "count": null,
+      "rule": "command.attack",
+      "tier": "single",
+      "priority": 28,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-0510b4917a62076d9058",
+        "review-3e9c9c08f0656ebd5412",
+        "review-71b36db798ee0f01adba",
+        "review-10d09b84f00d16eeda63",
+        "review-b0fb5ef3ba215928e9b5",
+        "review-103fe88781fcc7ad2ef6"
+      ]
+    },
+    {
+      "id": "command.attack.group.written-v6",
+      "count": null,
+      "rule": "command.attack",
+      "tier": "group",
+      "priority": 28,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-79d8c8589ea58c94f119",
+        "review-402dbc990553f8f0e48d",
+        "review-58b192f126b0766b00ab",
+        "review-38e37823d8fa72b160d9",
+        "review-da646ea50ccc8a2fa423",
+        "review-b2a3bfaf0d8e7df650e7"
+      ]
+    },
+    {
+      "id": "command.attack.mass.written-v4",
+      "count": null,
+      "rule": "command.attack",
+      "tier": "mass",
+      "priority": 28,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-3562f7a15c305bea8d6b",
+        "review-ffba84ddc3c6b885f69f",
+        "review-d7630bbde03a80f968fa",
+        "review-c48469d004081b224fb6",
+        "review-b24299ae472015ec26e0",
+        "review-53bc0145ddc9007f3753"
+      ]
+    },
+    {
+      "id": "command.attack_move.single.written-v3",
+      "count": null,
+      "rule": "command.attack_move",
+      "tier": "single",
+      "priority": 26,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-eb08f601f73c56551144",
+        "review-42a97028230e4c5f9d41",
+        "review-d3b232dc7839120be929",
+        "review-01354d70868f33688d00",
+        "review-b36cad53d427894b7b28",
+        "review-89da0fde39782f9b6fc2"
+      ]
+    },
+    {
+      "id": "command.attack_move.group.written-v4",
+      "count": null,
+      "rule": "command.attack_move",
+      "tier": "group",
+      "priority": 26,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-fd82d263750d18ccba37",
+        "review-24038795ba0e47aff36b",
+        "review-52a59a482f65124b411d",
+        "review-787d1f0b7c6104b4bf7f",
+        "review-47f481659f5968d41fcc",
+        "review-e40cbc04afd053ff8584"
+      ]
+    },
+    {
+      "id": "command.build.single.written-v2",
+      "count": null,
+      "rule": "command.build",
+      "tier": "single",
+      "priority": 20,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-179eec9a72d9d70a7100",
+        "review-246a19f85a7dbb21134e",
+        "review-abea15f192c2e26143f5",
+        "review-ace38b3bbe7001c37bb3",
+        "review-9eaa765acb2b24fa51a2",
+        "review-260774b9cf05de448256"
+      ]
+    },
+    {
+      "id": "command.build.group.written-v3",
+      "count": null,
+      "rule": "command.build",
+      "tier": "group",
+      "priority": 20,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-52e7f0351390b9d014ec",
+        "review-0bccbeca6934f80db3a8",
+        "review-784164be0e195b6f4ca7",
+        "review-6eff2a34b2bfe3307a2a",
+        "review-4f5302a74d5b76747282",
+        "review-1c80266ef440036a3219"
+      ]
+    },
+    {
+      "id": "command.stop.single",
+      "count": null,
+      "rule": "command.stop",
+      "tier": "single",
+      "priority": 12,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-092e9b2512387e359467",
+        "review-90c22c078f462d643218",
+        "review-f2711af0ae22e8730e00",
+        "review-f70246b3712607417432",
+        "review-bbc4194dad8f91559583",
+        "review-c799900df4c409d6ad96"
+      ]
+    },
+    {
+      "id": "command.stop.group.written-v4",
+      "count": null,
+      "rule": "command.stop",
+      "tier": "group",
+      "priority": 12,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-8bf6e4dd061431197440",
+        "review-427e24f242ef77a0b0ae",
+        "review-6fe204c503adaf184761",
+        "review-4debf34c6cf990516919",
+        "review-b27ed977388369a41f7e",
+        "review-574cdbf0bb2ae1963ac4"
+      ]
+    },
+    {
+      "id": "command.stop.mass.written-v3",
+      "count": null,
+      "rule": "command.stop",
+      "tier": "mass",
+      "priority": 12,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-5bdf46eb6b0cfcd66fd2",
+        "review-ef2983db0b4c5f37e7bb",
+        "review-b635e0063b71320f984d",
+        "review-4d8ff06a8549bbff46ae",
+        "review-180b6b252fe63573d62e",
+        "review-213f9d1ae5e20c9aef76"
+      ]
+    },
+    {
+      "id": "command.move.group.written-v8",
+      "count": null,
+      "rule": "command.move",
+      "tier": "group",
+      "priority": 10,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-4618d38058d6c1434293",
+        "review-f41bd892d77889e9b125",
+        "review-18d03299ea7792c68582",
+        "review-7842f107af31e1f65dc3",
+        "review-98ead17273aead9e118b",
+        "review-7a689019bec51339e641"
+      ]
+    },
+    {
+      "id": "command.move.mass.written-v5",
+      "count": null,
+      "rule": "command.move",
+      "tier": "mass",
+      "priority": 10,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-f4483f3e1c31cca54700",
+        "review-b7d7fca7015aa6973096",
+        "review-44678383238748bbd60b",
+        "review-2dcb7964768cbeef1b08",
+        "review-5660aeb35f2996fa677f",
+        "review-dfc60421215717eb2f36"
+      ]
+    },
+    {
+      "id": "movement.arrived.single.written-v5",
+      "count": null,
+      "rule": "movement.arrived",
+      "tier": "single",
+      "priority": 8,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-158be8d7227cb35b6697",
+        "review-5f8259340168b270a9db",
+        "review-f07c695550f0f40b063c",
+        "review-078ca8c25b79d0d8d2c4",
+        "review-aa36f09711b16e219a38",
+        "review-307233ecfb731cd23987"
+      ]
+    },
+    {
+      "id": "movement.arrived.group.written-v4",
+      "count": null,
+      "rule": "movement.arrived",
+      "tier": "group",
+      "priority": 8,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-00021431091a12fa4dfb",
+        "review-7a6880a0cbe4f0843b09",
+        "review-1a245f6d8af6c61dcee3",
+        "review-8584b005905a0ded60c9",
+        "review-6de70e5dbcbb931e95c0",
+        "review-a2207e13e2f3355abcfd"
+      ]
+    },
+    {
+      "id": "idle.group_no_order.group.written-v4",
+      "count": null,
+      "rule": "idle.group_no_order",
+      "tier": "group",
+      "priority": 1,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-f70181e08902de32b924",
+        "review-12e591a64dcc40dd79cf",
+        "review-af09f796001669247bf1",
+        "review-fb3bcc28991fc38f6202",
+        "review-85bccd1f7e87257876de",
+        "review-a91e308bd10658f42a5e"
+      ]
+    },
+    {
+      "id": "damage.panic_failed.v5",
+      "count": null,
+      "rule": "damage.panic_failed",
+      "tier": "single",
+      "priority": 90,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-20b3d24b283e4bd42daa",
+        "review-9379c2c39a776979f15b",
+        "review-d995ee423d7559299729",
+        "review-2226bf5b5c4ac1de53a7",
+        "review-0db2d377cfdd469513a9",
+        "review-163784e2eadcba8c341d"
+      ]
+    },
+    {
+      "id": "traffic.panic_blocked.v1",
+      "count": null,
+      "rule": "traffic.panic_blocked",
+      "tier": "single",
+      "priority": 72,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-8f1e51cae1631990f996",
+        "review-70878aaaa2631060ca00",
+        "review-6c51c6eb83414825a9e9",
+        "review-1575d01ad091d92c1e15",
+        "review-06c43108018497b7f328",
+        "review-3ad2f2b4ccece705c57a"
+      ]
+    },
+    {
+      "id": "traffic.retreat_contact.v3",
+      "count": null,
+      "rule": "traffic.retreat_contact",
+      "tier": "single",
+      "priority": 65,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-74a029c7490b2ba8d683",
+        "review-489a23044aac20237f88",
+        "review-313b23a9d98017d8497f",
+        "review-c7b3d2586088c87ebd52",
+        "review-20521faf03427349cdb8",
+        "review-5f6e055c6bcdbd1ed493"
+      ]
+    },
+    {
+      "id": "traffic.panic_escaped.v2",
+      "count": null,
+      "rule": "traffic.panic_escaped",
+      "tier": "single",
+      "priority": 40,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-f669d6f3f336f4ec97f0",
+        "review-13b9de5648003f13d9e0",
+        "review-59988b88747b463da9c2",
+        "review-3c3020a37da62edab41c",
+        "review-925b78b4287ae7428623",
+        "review-795f15a84385de0b2f46"
+      ]
+    },
+    {
+      "id": "damage.commander_down.single.written-v3",
+      "count": null,
+      "rule": "damage.commander_down",
+      "tier": "single",
+      "priority": 99,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-e425e66a631f4c972d12",
+        "review-a26b2256082315c4ef65",
+        "review-f79dd143ae9a7cb5d550",
+        "review-48f13ee64b8a960f9d05",
+        "review-f498ec576790444cde70",
+        "review-1794df7c8ff0f9055993"
+      ]
+    },
+    {
+      "id": "damage.vehicle_destroyed.single.dead-v1",
+      "count": 1,
+      "rule": "damage.vehicle_destroyed",
+      "tier": "single",
+      "priority": 98,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-73ecc94aad56ffa38c86",
+        "review-f11cd7eafff9cae274b7",
+        "review-b23a100f9023a10006a9",
+        "review-b0b6e5ce06e59a236a1b",
+        "review-c293552a28fe95e0a41c",
+        "review-64f6f2cc6e410a28b2ec"
+      ]
+    },
+    {
+      "id": "mission.defeat.single.written-v2",
+      "count": null,
+      "rule": "mission.defeat",
+      "tier": "single",
+      "priority": 96,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-7f9b9005dc5a8ceb3699",
+        "review-926ad6d8db705b3767e7",
+        "review-1b0c0c207233d8449cff",
+        "review-ccde01cb12195f6d5080",
+        "review-ff820951e918faa9c138",
+        "review-128c00d589013fcfee48"
+      ]
+    },
+    {
+      "id": "combat.base_attack.single.written-v4",
+      "count": null,
+      "rule": "combat.base_attack",
+      "tier": "single",
+      "priority": 95,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-88623561661f99128356",
+        "review-2b6dedc2e4e1a72e60cd",
+        "review-32ae38109363a3e29930",
+        "review-547e421540483ce41064",
+        "review-ca12133aae5567eb0c33",
+        "review-78a9148f0309fcc2ac52"
+      ]
+    },
+    {
+      "id": "damage.hit.single.written-v6",
+      "count": null,
+      "rule": "damage.hit",
+      "tier": "single",
+      "priority": 90,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-ea8a76e278e25240d12d",
+        "review-e1fa2cd8b7567e98fd56",
+        "review-060a5e863d25aa493ad0",
+        "review-f2e68cfd4c08cecb1519",
+        "review-c10189217b526828599a",
+        "review-b3523648501ea274a06b"
+      ]
+    },
+    {
+      "id": "damage.mobility_lost.single.written-v4",
+      "count": null,
+      "rule": "damage.mobility_lost",
+      "tier": "single",
+      "priority": 88,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-d99e18c095770ae1082f",
+        "review-e373a693a011c19c6296",
+        "review-5b16be65641e1a33ba2c",
+        "review-ed21b4eac7a30e9fb237",
+        "review-d2163fe1d45299ea57fb",
+        "review-21aca90b227aa86b550e"
+      ]
+    },
+    {
+      "id": "mission.victory.single.written-v4",
+      "count": null,
+      "rule": "mission.victory",
+      "tier": "single",
+      "priority": 85,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-483e5b2f7e7ba3fcdd97",
+        "review-2cb23ce31bb2757861b5",
+        "review-e158a2da1c9b42f6f1f5",
+        "review-8eadc3c567ef9f0bd7bf",
+        "review-4036090893083d6f4ce7",
+        "review-23ee41d351f127cb3f3d"
+      ]
+    },
+    {
+      "id": "command.retreat.single.written-v3",
+      "count": null,
+      "rule": "command.retreat",
+      "tier": "single",
+      "priority": 80,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-00d9dad1a91311ba0a55",
+        "review-c0463183bc4bc8562122",
+        "review-d4a3414a669012718c54",
+        "review-694caa292813b2d1286a",
+        "review-07acbcde6b352fc2aded",
+        "review-6cb9af14fa5c5ff9d6d0"
+      ]
+    },
+    {
+      "id": "command.auto_retreat.single.written-v5",
+      "count": null,
+      "rule": "command.auto_retreat",
+      "tier": "single",
+      "priority": 78,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-6d363936b6df7bd8cfd0",
+        "review-d7117047070fa2957616",
+        "review-b9893c7b23a8902c3668",
+        "review-4e45d8277ed35ad51c68",
+        "review-1f394bce4fb98afb94dd",
+        "review-c90c24d53f9bf5945a52"
+      ]
+    },
+    {
+      "id": "combat.target_destroyed.single.written-v3",
+      "count": null,
+      "rule": "combat.target_destroyed",
+      "tier": "single",
+      "priority": 72,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-e712890f00d45d860649",
+        "review-ba7260969a3f29aff50b",
+        "review-70e20250c314e0a32da1",
+        "review-96dc76b5c8c51f4d823e",
+        "review-1ce320bc4c3a85d4c054",
+        "review-59e3bffb571f5f73f508"
+      ]
+    },
+    {
+      "id": "recon.camp_cleared.single",
+      "count": null,
+      "rule": "recon.camp_cleared",
+      "tier": "single",
+      "priority": 70,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-a3da2b026fdda643effa",
+        "review-580fb3bb4c917d097192",
+        "review-e0887735923277dcf43e",
+        "review-fb9eba990aaf289badcb",
+        "review-846f9bac3477deb226ef",
+        "review-dff3ac9f166fa99c6a04"
+      ]
+    },
+    {
+      "id": "loot.artifact_found.single",
+      "count": null,
+      "rule": "loot.artifact_found",
+      "tier": "single",
+      "priority": 68,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-8321f2620e887f127261",
+        "review-b0030bb787a29427e6b7",
+        "review-7e6e2dd1f296d08778a8",
+        "review-675b0193b5001096e118",
+        "review-9b9fa1f69ba43634348a",
+        "review-eb9492c8edfc1c95c013"
+      ]
+    },
+    {
+      "id": "research.complete.single.written-v5",
+      "count": null,
+      "rule": "research.complete",
+      "tier": "single",
+      "priority": 60,
+      "humor": false,
+      "remembrance": false,
+      "previous": false,
+      "recordingIds": [
+        "review-75d6ac4d4e7033d03b73",
+        "review-6a385e10c125e08c03d7",
+        "review-e0a1543c1cab5277bcc8",
+        "review-713f1ecf13fb5dd3aa69",
+        "review-1e3267394309a0c47bd9",
+        "review-639bf4168e938fa1557b"
+      ]
+    }
+  ],
+  "note": "Conservative reservations, not verified account charges. Original files retained. Fixed cast including Russian Odessa voice. Language ru. No runtime API calls."
+}

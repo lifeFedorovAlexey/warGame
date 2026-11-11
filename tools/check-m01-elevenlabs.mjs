@@ -6,23 +6,34 @@ import {applyStoryEdits} from '../campaign/story-edits.js';
 const require=createRequire(import.meta.url);
 const {chromium}=require('C:/Users/Алексей/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
 const base=process.env.WARGAME_URL||'http://127.0.0.1:8767';
-const folder='campaign/previews/elevenlabs-m01';fs.mkdirSync(folder,{recursive:true});
+const folder='campaign/previews/elevenlabs-language-review';fs.mkdirSync(folder,{recursive:true});
 const read=name=>JSON.parse(fs.readFileSync('assets/campaign/alpha/mission01/'+name,'utf8'));
 const completed=JSON.parse(fs.readFileSync('docs/campaign/alpha/voice/elevenlabs-m01-completion.json','utf8'));
+const languagePass=JSON.parse(fs.readFileSync('docs/campaign/radio-language-review.json','utf8'));
 const {story,audio}=applyStoryEdits(read('story-v2.json'),read('audio-v2.json'),read('reviewed-dialogue.json'));
-const report={errors:[],checks:[],generated:Object.keys(completed.clips).length};let browser;
+const report={errors:[],paidRequests:[],checks:[],generated:Object.keys(completed.clips).length,newStoryRecordings:Object.keys(languagePass.storyClips).length};let browser;
 try {
   assert.equal(report.generated,69);assert.deepEqual(completed.remainingTemporaryOrMissing,[]);
   for(const [id,clip] of Object.entries(completed.clips)) {
     const actual=id.startsWith('factory-')?read('factory-service-voice.json').barks.find(line=>line.id===id).clip:audio.clips[id];
-    assert.equal(actual.sha256,clip.sha256,id);
+    if(languagePass.retiredStoryIds.includes(id))assert.equal(actual,undefined,'Retired cue stays outside the active script: '+id);
+    else assert.equal(actual?.sha256,clip.sha256,id);
     assert.equal(createHash('sha256').update(fs.readFileSync('assets/campaign/alpha/mission01/'+clip.file)).digest('hex'),clip.sha256,id);
   }
   assert.equal(audio.clips['m01-s07-l014'].voiceName,'Mishka Yaponcik - Odessa Rogue Charm');
-  report.checks.push('69 generated performances are wired into playable content with matching checksums');
-  browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true,args:['--enable-unsafe-swiftshader','--use-angle=swiftshader']});
+  report.checks.push('69 earlier generated performances remain available with matching checksums');
+  assert.equal(report.newStoryRecordings,15);
+  for(const [id,clip] of Object.entries(languagePass.storyClips)) {
+    assert.deepEqual(audio.clips[id],clip,id);
+    assert.equal(story.dialogue.find(line=>line.id===id)?.text,clip.text,id);
+    assert.equal(createHash('sha256').update(fs.readFileSync('assets/campaign/alpha/mission01/'+clip.file)).digest('hex'),clip.sha256,id);
+  }
+  for(const scene of languagePass.scenes)assert.deepEqual(story.scenes.find(s=>s.id===scene.id).cues,scene.cues);
+  report.checks.push('all 15 new lines match the chosen scenes, texts and immutable recordings');
+  browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true,args:['--use-angle=d3d11']});
   const page=await browser.newPage({viewport:{width:1440,height:900}});
   page.on('pageerror',e=>report.errors.push(e.stack||e.message));
+  page.on('request',r=>{if(r.url().includes('api.elevenlabs.io'))report.paidRequests.push(r.url());});
   await page.addInitScript(()=>{
     for(const key of ['fieldSound','fieldStoryVoice','fieldRadio'])localStorage.setItem('warGame.'+key,'on');
     window.voiceChecks=[];const start=AudioBufferSourceNode.prototype.start;
@@ -43,7 +54,7 @@ try {
       for(const n of buffer.getChannelData(0)){peak=Math.max(peak,Math.abs(n));sum+=n*n;}
       decoded.push({id,duration:buffer.duration,expected:clip.duration,peak,rms:Math.sqrt(sum/buffer.length)});
     }await ctx.close();return decoded;
-  },completed.clips);
+  },{...completed.clips,...languagePass.storyClips});
   assert(report.decoded.every(v=>v.peak>.01&&v.rms>.005&&v.duration>.25&&Math.abs(v.duration-v.expected)<.05));
   report.checks.push('all new files decode in the browser with non-silent audio and correct durations');
   await page.evaluate(()=>{
@@ -55,7 +66,7 @@ try {
   await page.locator('#resume-save').click();await page.waitForFunction(()=>campaign.state.active,null,{timeout:60000});
   if(!await page.evaluate(()=>campaign.state.paused))await page.locator('#pause').click();
   await page.evaluate(()=>{campaign.radio.consume=()=>{};campaign.radio.hide();});
-  for(const [id,scene] of [['m01-s07-l014','r19'],['m01-s11-l001','r42'],['m01-s14-l001','r50']]) {
+  for(const [id,scene] of [['m01-s07-l014','r19'],['m01-v4-r42-l001','r42'],['m01-v4-r49-l001','r49'],['m01-v4-r50-l001','r50']]) {
     await page.evaluate(({id,scene})=>{
       const r=campaign.radio,line=r.director.lines.get(id);
       r.present({...line,story:true,dialogue:true,storyScene:scene,chapter:'story-'+scene,token:'verify-'+id,priority:2,
@@ -82,6 +93,25 @@ try {
     await page.setViewportSize({width,height});await page.screenshot({path:folder+'/editor-'+label+'.png',fullPage:true});
     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
   }
-  report.checks.push('workshop plays the corrected recording; desktop and narrow layouts inspected');
+  report.checks.push('workshop plays the corrected recording; desktop and landscape layouts captured');
+  report.editorScenes=[];
+  await page.setViewportSize({width:1440,height:900});
+  for(const scene of languagePass.scenes){
+    await page.locator('#scenes a[data-scene="'+scene.id+'"]').click();
+    await page.evaluate(()=>{window.editorPlayed=[];});
+    await page.locator('#play-scene').click();
+    await page.waitForFunction(count=>editorPlayed.length===count,scene.cues.length,{timeout:90000});
+    await page.waitForFunction(()=>[...document.querySelectorAll('audio')].every(a=>a.paused||a.ended),null,{timeout:20000});
+    const played=await page.evaluate(()=>editorPlayed);
+    assert.deepEqual(played.map(p=>decodeURI(new URL(p.src).pathname)),scene.cues.map(id=>'/assets/campaign/alpha/mission01/'+languagePass.storyClips[id].file));
+    report.editorScenes.push({scene:scene.id,played});
+    for(const [label,width,height] of [['desktop',1440,900],['landscape',844,390],['small-landscape',667,375]]){
+      await page.setViewportSize({width,height});await page.screenshot({path:folder+'/editor-'+scene.id+'-'+label+'.png',fullPage:true});
+      assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+    }
+    await page.setViewportSize({width:1440,height:900});
+  }
+  report.checks.push('editor plays all three rewritten conversations in full and in order');
+  assert.deepEqual(report.paidRequests,[]);
   assert.deepEqual(report.errors,[]);console.log(JSON.stringify({checks:report.checks,decoded:report.decoded.length,gamePlayed:report.gamePlayed.length,errors:report.errors}));
 } finally {fs.writeFileSync(folder+'/verification.json',JSON.stringify(report,null,2));await browser?.close();}
