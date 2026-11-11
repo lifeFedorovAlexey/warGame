@@ -289,6 +289,10 @@ export class TerrainNavigator{
   if(sharedRoute&&goalAccepted&&!terrainEscape&&!occupancyKey&&maxGoalDistance<=.01){
    const shared=yield* sharedRoute(from,to);if(shared)return shared;
   }
+  if(!direct&&goalAccepted&&!terrainEscape&&!occupancyKey){
+   const candidate=this.routeAdvisor?.candidate(this,from,to);
+   if(candidate)return candidate;
+  }
   const [cx,cy]=this.grid(from.x,from.y),entries=[];
   const entryRadius=terrainEscape?Math.ceil(terrainEscape.radius/this.cell):2;
   for(let dy=-entryRadius;dy<=entryRadius;dy++)for(let dx=-entryRadius;dx<=entryRadius;dx++){

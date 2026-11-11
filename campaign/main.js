@@ -298,6 +298,7 @@ async function start(restore = false) {
   $('welcome').hidden=false;
   mainMenu.loading.begin(ENTRY_STAGES);
   await mainMenu.loading.stage('graphics');
+  await mission.nav.routeAdvisor?.prepareForPlay(mission.nav,mission.config.finalMapBounds);
   await world.prepareRendering?.(mission);
   await mainMenu.loading.stage('entry');
   if(!continuing)mission.state.storyConstruction={enabled:true,unlocked:['generator'],research:false,requiredBunkers:2};
@@ -1101,6 +1102,12 @@ try {
   attackOverlay=createAttackOverlay($('world'),(point,height)=>world.screen(point,height));
   await mainMenu.loading.stage('simulation');
   mission = new Mission(config, world.field);
+  try{
+    const {createRouteAdvisor}=await import('./recast/vendor/route-advisor.js');
+    mission.nav.routeAdvisor=await createRouteAdvisor(new URL('./recast/vendor/mesh-worker.js',import.meta.url));
+  }catch(error){
+    console.warn('Recast navigation is unavailable',error);
+  }
   minimapView=createMinimap($('minimap'),{world,mission,selected,background:miniBackground,notify:toast});
   navigationTelemetry=installNavigationTelemetry(mission,()=>({active,paused,speed,openingPlaying,
    camera:{x:Math.round(world.controls.target.x),y:Math.round(world.controls.target.y),distance:Math.round(world.camera.position.distanceTo(world.controls.target))},
@@ -1235,10 +1242,12 @@ try {
     enteringM02=true;$('result-continue').disabled=true;
     try{
       try{localStorage.setItem(checkpointKey,await mission.saveAsync());}catch{return toast('Не удалось создать контрольное сохранение');}
+      loadingGame=true;
       const result=mission.enterM02();if(!result.ok)return report(result);
+      await mission.nav.routeAdvisor?.prepareForPlay(mission.nav,mission.config.finalMapBounds);
       resultShown=false;resultPrepared=false;resultsView.hide();$('results-open').hidden=true;radio.reset();taskKey='';actionKey='';world.storySignals.show(null);
       await saveGame(false);updateUi();
-    }finally{enteringM02=false;$('result-continue').disabled=false;}
+    }finally{loadingGame=false;last=performance.now();enteringM02=false;$('result-continue').disabled=false;}
   };
   $('result-close').onclick = () => resultsView.hide();
   $('result-menu').onclick = () => {resultsView.hide();$('main-menu-return').click();};
