@@ -11,7 +11,7 @@ export function pickupTarget(mission,point){
     ??candidates.filter(({item,radius})=>distance(item,point)<radius)
       .sort((a,b)=>distance(a.item,point)-distance(b.item,point))[0]??null;
 }
-function canCollect(mission,unit,pickup){
+export function canCollectPickup(mission,unit,pickup){
   return unit.hp>0&&unit.owner==='rai'&&(pickup.kind==='artifact'||!!salvageRecipe(mission,unit,pickup.item));
 }
 function inReach(mission,unit,pickup){
@@ -25,20 +25,21 @@ function* pickupPathSteps(mission,unit,pickup){
     point=>distance(point,pickup.item)<22,{fallback:false,maxGoalDistance:4});
 }
 function stopPickup(mission,unit){
-  mission.stop([unit.id],{expandGroup:false});unit.driveSpeed=0;unit.steering=0;
+  mission.stop([unit.id],{expandGroup:false,preserveQueue:true});unit.driveSpeed=0;unit.steering=0;
   for(const key of ['routeOrder','passage','passingLane','driveWatch','failedArcs','reverseDebt','pickupRetryAt','resumeConstructionId'])delete unit[key];
 }
-export function orderPickup(mission,units,pickup){
+export function orderPickup(...args){let step;const iterator=orderPickupSteps(...args);do{step=iterator.next();}while(!step.done);return step.value;}
+export function* orderPickupSteps(mission,units,pickup){
   const key=keyFor(pickup),id=pickup.item.id;
-  const candidates=units.filter(unit=>canCollect(mission,unit,pickup))
+  const candidates=units.filter(unit=>canCollectPickup(mission,unit,pickup))
     .sort((a,b)=>distance(a,pickup.item)-distance(b,pickup.item)||a.id.localeCompare(b.id));
   if(!candidates.length)return mission.fail(pickup.kind==='salvage'?'Нет машины для этого улучшения':'Не выбрана подходящая техника');
   // Keep a valid owner on repeated clicks: neither reassign nor reset its turn.
   const current=candidates.find(unit=>unit.task?.[key]===id&&(unit.path.length||inReach(mission,unit,pickup)));
   let collector=current,path;
   if(!collector)for(const unit of candidates){
-    const search=pickupPathSteps(mission,unit,pickup);let step;do{step=search.next();}while(!step.done);
-    if(step.value){collector=unit;path=step.value;break;}
+    const found=yield* pickupPathSteps(mission,unit,pickup);
+    if(found){collector=unit;path=found;break;}
   }
   if(!collector)return mission.fail('Нет пути к предмету');
   // Clean duplicate assignments, including a repeated click from a different
@@ -48,6 +49,9 @@ export function orderPickup(mission,units,pickup){
       &&other.routeOrder?.request&&distance(other.routeOrder.request,pickup.item)<3))stopPickup(mission,other);
   if(!current){
     stopPickup(mission,collector);
+    // Queued collection starts inside its own controller. The reset above
+    // may be deferred; it must not erase the newly accepted pickup afterward.
+    if(collector.pendingOrder?.type==='stop')delete collector.pendingOrder;
     const end=path.at(-1)??collector;
     collector.path=path;collector.task={type:'move',x:end.x,y:end.y,[key]:id};
   }
@@ -62,7 +66,7 @@ export function* updatePickupOrder(mission,unit){
   const kind=key==='artifactId'?'artifact':'salvage';
   const item=(kind==='artifact'?mission.state.artifacts:mission.state.salvage?.items??[]).find(item=>item.id===task[key]);
   const pickup={kind,item};
-  if(!item||item.collected||kind==='salvage'&&item.expiresAt<=mission.state.time||!canCollect(mission,unit,pickup)){
+  if(!item||item.collected||kind==='salvage'&&item.expiresAt<=mission.state.time||!canCollectPickup(mission,unit,pickup)){
     stopPickup(mission,unit);return true;
   }
   if(inReach(mission,unit,pickup)){

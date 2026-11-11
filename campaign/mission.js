@@ -50,13 +50,14 @@ import {updateFactoryVisit,insideFactory,factoryProductionPaused,tryEnterFactory
 import {inFactoryInterior,shouldAutoRetreat,canAutoRetreat} from './combat-retreat-state.js';
 import {blockingCombatTarget,interruptedCombatTargets,movementCombatTarget} from './combat-orders.js';
 import {cancelCombatDeployment,updateCombatDeployment,updateCombatParking,combatPositionConditions} from './combat-deployment.js';
-import {pickupTarget,orderPickup,updatePickupOrder} from './pickup-orders.js';
+import {pickupTarget,orderPickupSteps,updatePickupOrder} from './pickup-orders.js';
 import {roadTrafficRank,compareRoadTrafficRanks} from './traffic-priority.js';
 import {roadDrivingLane,deferRoadMerge} from './road-merge.js';
 import {turningHeadway} from './turning-headway.js';
 import {passageWaitClear} from './passage-reservations.js';
 import {beginNavigationStep,navigationDecision,finishNavigationStep,auditNavigationWaits} from './navigation-state.js';
 import {CommandPlanner,commandBoundary,activateCommand} from './command-planner.js';
+import {appendOrder,clearQueuedOrders,orderCandidates,dispatchQueuedTravel,startQueuedWork} from './queued-orders.js';
 import {ArrivalPlanner} from './arrival-planner.js';
 import {followsContinuation,applyRouteContinuations,waitingForContinuation} from './route-continuation.js';
 import {configureCommandGroup,refreshCommandGroups,expandCommandIds,commandGroupFor,formationRequest} from './group-command.js';
@@ -350,7 +351,7 @@ export class Mission{
    const target=resume.targetId?this.entity(resume.targetId):resume;
    const {left,right,bottom,top}=this.siteBounds(building);
    const inside=target&&target.x>left&&target.x<right&&target.y>bottom&&target.y<top;
-   if(target&&!inside&&resume.type!=='clear-site')this.order([unit.id],resume.type,target);
+   if(target&&!inside&&resume.type!=='clear-site')this.order([unit.id],resume.type,target,{preserveQueue:true});
   }
  }
  availableBuilders(building){
@@ -359,13 +360,13 @@ export class Mission{
   return building.builderIds.filter(id=>{
    const unit=this.entity(id);
    if(!unit||earlier.some(b=>b.builderIds.includes(id)))return false;
-   return !unit.task||unit.task.type==='move'||unit.task.type==='clear-site'&&unit.task.targetId===building.id;
+   return !unit.orderQueue?.length&&(!unit.task||unit.task.type==='move'||unit.task.type==='clear-site'&&unit.task.targetId===building.id);
   });
  }
  assignConstruction(building){
   const builders=this.availableBuilders(building);
   if(!builders.length){building.awaitingWorkers=true;return {ok:true,waiting:true};}
-  const result=this.order(builders,'build',building);
+  const result=this.order(builders,'build',building,{preserveQueue:true});
   if(result.ok){
    building.awaitingWorkers=false;
    delete building.builderIds;
@@ -505,20 +506,21 @@ export class Mission{
   return null;
  }
  configureGroup(ids,options){this.finishPendingStep();return configureCommandGroup(this,ids,options);}
- retreat(ids){const result=forceCombatRetreat(this,expandCommandIds(this,ids));if(result.ok)this.trafficCoordinator.intentChanged();return result;}
- submitOrder(ids,action,target){if(action==='retreat')return this.retreat(ids);return (this.commandPlanner??=new CommandPlanner(this)).submit(selectedCommandIds(this,ids,action,target),action,target);}
- order(ids,action,target){ids=selectedCommandIds(this,ids,action,target);this.finishPendingStep();const result=completeSteps(this.orderSteps(ids,action,target));if(result.ok)this.commandPlanner?.cancel(result.assignedIds??ids.filter(id=>!result.unassigned?.includes(id)));return result;}
+ retreat(ids){ids=expandCommandIds(this,ids);const result=forceCombatRetreat(this,ids);if(result.ok){clearQueuedOrders(this,ids);this.trafficCoordinator.intentChanged();}return result;}
+ submitOrder(ids,action,target,{append=false,expandGroup=true,preserveQueue=false}={}){
+  if(action==='retreat')return this.retreat(ids);
+  if(expandGroup)ids=selectedCommandIds(this,ids,action,target);
+  if(append)return appendOrder(this,ids,action,target);
+  const result=(this.commandPlanner??=new CommandPlanner(this)).submit(ids,action,target);
+  if(result.ok&&!preserveQueue)clearQueuedOrders(this,result.assignedIds??[]);
+  return result;
+ }
+ order(ids,action,target,{preserveQueue=false}={}){ids=selectedCommandIds(this,ids,action,target);this.finishPendingStep();const result=completeSteps(this.orderSteps(ids,action,target));if(result.ok){const accepted=result.assignedIds??ids.filter(id=>!result.unassigned?.includes(id));this.commandPlanner?.cancel(accepted);if(!preserveQueue)clearQueuedOrders(this,accepted);}return result;}
  *orderSteps(ids,action,target){
-  if(!['move','attack-move','attack','build','repair','demolish'].includes(action)||!target||!Number.isFinite(target.x)||!Number.isFinite(target.y))return this.fail('Недопустимый приказ');
+  const check=orderCandidates(this,ids,action,target);if(!check.ok)return check;
+  const {units,pickup}=check,assigned=new Set();
   const travel=action==='move'||action==='attack-move',combat=action==='attack'||action==='attack-move';
-  if(action==='attack'&&(target.owner==='rai'||!this.entity(target.id)||!this.visibleAt(target.x,target.y)))return this.fail('Цель не обнаружена');
-  if(action==='build'&&target.clearing)return this.fail('Техника освобождает площадку');
-  if(action==='demolish'&&!canDemolish(this,target))return this.fail('Выберите своё готовое здание');
-  if(action==='repair'&&!repairableBuilding(this,target))return this.fail('Строители ремонтируют только готовые постройки');
-  if(['build','repair','demolish'].includes(action)&&(target.owner!=='rai'||!this.entity(target.id)))return this.fail('Нужна своя техника или постройка');
-  const units=this.state.units.filter(u=>ids.includes(u.id)&&u.owner==='rai'&&u.hp>0&&!inFactoryInterior(u)&&(!['build','repair','demolish'].includes(action)||this.unitSpec(u).role==='builder')&&(!combat||this.unitSpec(u).damage));if(!units.length)return this.fail('Не выбрана подходящая техника');const assigned=new Set();
-  const pickup=action==='move'?pickupTarget(this,target):null;
-  if(pickup)return orderPickup(this,units,pickup);
+  if(pickup)return yield* orderPickupSteps(this,units,pickup);
   const commandGroup=commandGroupFor(this,units),formationMode=commandGroup?.formation??'auto';
   const disengage=action==='attack-move'?(yield* interruptedCombatTargets(this,units)):[];
   const repeat=new Map();
@@ -553,7 +555,7 @@ export class Mission{
   };
   if(repeat.size===units.length){
    for(const unit of units)yield* finishRepeat(this,unit);
-   return {ok:true,assigned:units.length,unassigned:[]};
+   return {ok:true,assigned:units.length,assignedIds:units.map(u=>u.id),unassigned:[]};
   }
   const reserved=[...repeat.values(),...units.filter(u=>this.commandJob?.tailSources&&!repeat.has(u.id)&&u.routeContinuation?.ready)
    .map(u=>u.routeContinuation.destination).filter(Boolean)],changedTraffic=new Set();
@@ -728,7 +730,7 @@ export class Mission{
    if(changedTraffic.size)this.state.parkingGoalReleases=[...new Set([...(this.state.parkingGoalReleases??[]),...changedTraffic])];
   }else yield* this.releaseParkingGoalsSteps(changedTraffic);
   if(action==='build'&&assigned.size){target.awaitingWorkers=false;delete target.builderIds;}
-  return assigned.size?{ok:true,assigned:assigned.size,unassigned:units.filter(unit=>!assigned.has(unit.id)).map(unit=>unit.id)}:
+  return assigned.size?{ok:true,assigned:assigned.size,assignedIds:[...assigned],unassigned:units.filter(unit=>!assigned.has(unit.id)).map(unit=>unit.id)}:
    this.fail('Нет доступного пути или подходящего строителя');
  }
  releaseParkingGoals(changed){return completeSteps(this.releaseParkingGoalsSteps(changed));}
@@ -783,9 +785,10 @@ export class Mission{
  setCombatPolicy(ids,changes){const result=configureCombat(this,ids,changes);if(result.ok)this.trafficCoordinator.intentChanged();return result;}
  setArmyCombatPolicy(changes){const result=configureArmyCombat(this,changes);if(result.ok)this.trafficCoordinator.intentChanged();return result;}
  setBuilderAutoRepair(enabled){return setBuilderAutoRepair(this,enabled);}
- stop(ids,{expandGroup=true}={}){
+ stop(ids,{expandGroup=true,preserveQueue=false}={}){
   if(expandGroup)ids=expandCommandIds(this,ids);
   ids=ids.filter(id=>{const unit=this.entity(id);return !unit||!inFactoryInterior(unit);});
+  if(!preserveQueue)clearQueuedOrders(this,ids);
   this.commandPlanner?.cancel(ids);
   const selected=this.state.units.filter(unit=>ids.includes(unit.id)&&unit.owner==='rai'&&unit.hp>0);
   // Stop is a new intent even for an idle car which never had a revision.
@@ -2129,7 +2132,7 @@ export class Mission{
    if(distance(unit,unit.task)<(unit.routeOrder?2:24)&&borrowedHomeClear(this,unit)){
     unit.task=null;
     const building=unit.resumeConstructionId&&this.entity(unit.resumeConstructionId);
-    if(building&&!building.completed&&!building.clearing&&this.canWorkHere(unit,building))this.order([unit.id],'build',building);
+    if(building&&!building.completed&&!building.clearing&&this.canWorkHere(unit,building))this.order([unit.id],'build',building,{preserveQueue:true});
    }
    else if(this.state.time-(unit.lastRepath??-10)>=.4){unit.path=(yield* this.vehiclePathSteps(unit,unit.task,unit.routeOrder?{fallback:false,maxGoalDistance:.01}:{}))??[];unit.lastRepath=this.state.time;}
   }
@@ -2158,6 +2161,7 @@ export class Mission{
  }
  *executeUnitSteps(unit,dt){
   if(unit.hp<=0)return;unit.previousX=unit.x;unit.previousY=unit.y;unit.previousHeading=unit.heading;unit.previousWheelDistance=unit.wheelDistance??0;unit.previousSteering=unit.steering??0;unit.cooldown=Math.max(0,unit.cooldown-dt);const spec=this.unitSpec(unit);
+  if(unit.orderQueue?.length)yield* startQueuedWork(this,unit);
   updateSteeringDamage(this,unit);
   // Clear the vehicle's own route before normal targeting. Withdrawal also
   // keeps its turret active when traffic or garage handling returns early.
@@ -2405,6 +2409,7 @@ export class Mission{
   finalizeMissionResults(this);
  }
  beginTick(dt,budgeted=false){
+  dispatchQueuedTravel(this);
   this.trafficCoordinator.publishPlanning(this);
   refreshCommandGroups(this);
   auditNavigationWaits(this);
@@ -2481,7 +2486,7 @@ export class Mission{
    }
   }
  }
- freezeWreck(unit){unit.previousX=unit.x;unit.previousY=unit.y;unit.previousHeading=unit.heading;unit.previousWheelDistance=unit.wheelDistance??0;unit.previousSteering=unit.steering??0;unit.driveSpeed=0;unit.path=[];unit.task=null;delete unit.detour;delete unit.traffic;delete unit.trafficHold;}
+ freezeWreck(unit){delete unit.orderQueue;unit.previousX=unit.x;unit.previousY=unit.y;unit.previousHeading=unit.heading;unit.previousWheelDistance=unit.wheelDistance??0;unit.previousSteering=unit.steering??0;unit.driveSpeed=0;unit.path=[];unit.task=null;delete unit.detour;delete unit.traffic;delete unit.trafficHold;}
  walk(unit,dt){
   unit.driveSpeed=0;unit.steering=0;unit.reversing=false;
   const point=unit.path[0];if(!point)return false;
