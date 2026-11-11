@@ -9,9 +9,6 @@ export function createTrafficVisibility(T,camera,field,config,{cache=true}={}){
  const previous=new Float64Array(16).fill(NaN),bodies=new WeakMap();let revision=0;
  const stats={calls:0,frustumBuilds:0,bodyChecks:0,cacheHits:0};
  function update(mission){
-  // m02 has a camera-independent simulation contract. Keep the existing
-  // collision policy fully enabled, including in suspended planning snapshots.
-  if(mission.state.m02){for(const unit of mission.state.units)unit.trafficOnScreen=true;return;}
   stats.calls++;camera.updateMatrixWorld();projection.multiplyMatrices(camera.projectionMatrix,camera.matrixWorldInverse);
   let changed=!cache;
   for(let i=0;i<16;i++)if(previous[i]!==projection.elements[i]){changed=true;previous[i]=projection.elements[i];}

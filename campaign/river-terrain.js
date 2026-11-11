@@ -1,15 +1,13 @@
 import {damLayout} from './dam-layout.js';
+import {createPolylineQuery} from './polyline-query.js';
 // Shared geography for both missions. Grid coordinates are the game's native
 // north-up coordinates; the concept camera never rotates the authored map.
 const controls=[[8.42,59.69],[9.8,62],[14,64],[20.5,64.4],[22.4,68],[24,73],[25.6,79.5],[26.2,82],[29,84.2],[34,84.5],[39,84.5],[44,86],[49,89],[54.5,92]];
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const lineQueries=new WeakMap();
 export function nearestOnLine(points,x,y){
- let best={distance:Infinity};
- for(let i=1;i<points.length;i++){
-  const a=points[i-1],b=points[i],dx=b.x-a.x,dy=b.y-a.y,length=Math.hypot(dx,dy),t=clamp(((x-a.x)*dx+(y-a.y)*dy)/(length*length),0,1),px=a.x+dx*t,py=a.y+dy*t,distance=Math.hypot(x-px,y-py);
-  if(distance<best.distance)best={distance,x:px,y:py,z:a.z+(b.z-a.z)*t,along:a.along+(b.along-a.along)*t,nx:-dy/length,ny:dx/length,index:i,t};
- }
- return best;
+ let query=lineQueries.get(points);if(!query){query=createPolylineQuery(points);lineQueries.set(points,query);}
+ return query.nearest(x,y)??{distance:Infinity};
 }
 export function installRiverTerrain(field,roads){
  if(field.river||field.m02Authoring)return field.river;
@@ -72,7 +70,8 @@ export function installRiverTerrain(field,roads){
  // The cliff rim must not rise back through the engineered outfall apron.
  for(const [id,height] of apron)samples[id]=Math.min(samples[id],height);
  const terrainHeightAt=field.heightAt,terrainGradientAt=field.gradientAt;
- const forbidden=(x,y)=>within(x,y)&&sample(x,y).distance<blockedRadius&&!deckAt(x,y,-1.2);
+ const riverQuery=createPolylineQuery(points);
+ const forbidden=(x,y)=>within(x,y)&&riverQuery.withinDistance(x,y,blockedRadius)&&!deckAt(x,y,-1.2);
  const walls=[],step=8;
  for(let y=Math.floor(bounds[1]/step)*step;y<=bounds[3];y+=step){let begin=null;
   for(let x=Math.floor(bounds[0]/step)*step;x<=bounds[2]+step;x+=step){

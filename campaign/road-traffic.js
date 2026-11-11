@@ -17,6 +17,11 @@ export class RoadTraffic {
     this.buckets = new Map();
     this.routes = new Map();
     this.junctionLinks = new Map();
+    // The road index is immutable until the navigator rebuilds it. Keep exact
+    // queries for persistent waypoints and repeated previews, never rounded
+    // positions: narrow road edges must retain their original classification.
+    this.pointQueries = new WeakMap();
+    this.querySerial = 0;
     this.intersections = (field.roadNetwork?.nodes ?? []).filter(node => node.degree > 2 || node.base);
     for (const [pathIndex,path] of [...(field.roadNetwork?.paths ?? []),...localRoads].entries()) {
       const pathId=path.id??pathIndex,segments=[];
@@ -59,11 +64,22 @@ export class RoadTraffic {
   }
 
   nearest(point, radius = 0) {
+    let cached=this.pointQueries.get(point);
+    if(!cached||cached.x!==point.x||cached.y!==point.y){
+      cached={x:point.x,y:point.y,results:new Map()};this.pointQueries.set(point,cached);
+    }
+    if(cached.results.has(radius)){
+      const result=cached.results.get(radius);return result?{...result}:null;
+    }
     const x0 = Math.floor((point.x - radius) / bucketSize), x1 = Math.floor((point.x + radius) / bucketSize);
     const y0 = Math.floor((point.y - radius) / bucketSize), y1 = Math.floor((point.y + radius) / bucketSize);
     let nearest = null, shortest = Infinity;
+    const serial=++this.querySerial;
     for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
       for (const segment of this.buckets.get(x + ',' + y) ?? []) {
+        // Wide queries visit the same segment in several neighbouring buckets.
+        // First occurrence order is preserved, including equal-distance ties.
+        if(segment.querySerial===serial)continue;segment.querySerial=serial;
         const {a, b, path, ux, uy, length} = segment;
         const along = clamp((point.x - a.x) * ux + (point.y - a.y) * uy, 0, length);
         const px = a.x + ux * along, py = a.y + uy * along;
@@ -79,7 +95,9 @@ export class RoadTraffic {
         nearest = {segment, along, x: px, y: py, distance, width};
       }
     }
-    return nearest;
+    if(cached.results.size>=8)cached.results.clear();
+    cached.results.set(radius,nearest);
+    return nearest?{...nearest}:null;
   }
 
   coverage(x, y) {

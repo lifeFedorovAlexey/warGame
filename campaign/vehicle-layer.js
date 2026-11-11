@@ -14,6 +14,7 @@ import {createVehicleContactShadows} from './vehicle-contact-shadows.js';
 import {createScavUnit,poseScavUnit} from './scav-units.js';
 import {SCAV_PROFILES,isInfantry} from './scav-unit-profiles.js';
 import {contactRockAt} from './vehicle-contact-rock.js';
+import {createVehiclePresentation} from './vehicle-presentation.js';
 import {VEHICLE_PAINTS,vehiclePaint,vehiclePaintTint,isVehiclePaintMaterial,paintVehicleModel} from './vehicle-paint.js';
 
 // One instance stream per GLB primitive. More units do not add draw calls.
@@ -197,8 +198,8 @@ export async function createVehicleLayer(T,scene,field,config,damage,onLoaded=()
  const contactShadows=createVehicleContactShadows(T,scene,field,scale);
  const dummy=new T.Object3D(),color=new T.Color(),scrapColor=new T.Color(),matrix=new T.Matrix4(),contact=new T.Vector3();
  const paintTints=new Map(VEHICLE_PAINTS.map(paint=>[paint.id,vehiclePaintTint(T,paint)]));
- const turnDelta=(a,b)=>Math.atan2(Math.sin(a-b),Math.cos(a-b));
  let activeLod=1;
+ const presentation=createVehiclePresentation();
 
  function update(mission,cameraDistance,shotTimes,now,camera,buildingObjects,workTime=mission.state.time) {
   activeMission=mission;
@@ -213,13 +214,11 @@ export async function createVehicleLayer(T,scene,field,config,damage,onLoaded=()
   muzzles.clear();
   const live=new Set();
   for(const unit of mission.state.units){
-   const phase=unit.hp<=0?1:mission.renderUnitPhase?.(unit,now*1000)??T.MathUtils.clamp(mission.accumulator/config.simulationStep,0,1);
+   const displayed=presentation(mission,unit,now*1000),phase=displayed.phase;
    if(unit.factoryVisit?.phase==='inside'||unit.hp<=0&&!unit.damage?.wreck||unit.owner!=='rai'&&!mission.visibleAt(unit.x,unit.y))continue;
    live.add(unit.id);
-   const moving=unit.hp>0&&Math.hypot(unit.x-unit.previousX,unit.y-unit.previousY)>.008;
-   const blend=moving?phase:1;
-   const x=T.MathUtils.lerp(unit.previousX,unit.x,blend),y=T.MathUtils.lerp(unit.previousY,unit.y,blend);
-   const previous=unit.previousHeading??unit.heading,heading=previous+turnDelta(unit.heading,previous)*(unit.builderWorking?1:phase);
+   const moving=displayed.moving;
+   const {x,y}=displayed,heading=unit.builderWorking?unit.heading:displayed.heading;
    const pose=vehiclePose({kind:unit.kind,x,y,heading},field,scale);
    if(unit.contactRock&&!isInfantry(unit)&&activeLod<2){
     const rock=contactRockAt(unit,time+phase*config.simulationStep);pose.roll+=rock.roll;pose.pitch+=rock.pitch;
@@ -240,8 +239,8 @@ export async function createVehicleLayer(T,scene,field,config,damage,onLoaded=()
    if(!damageInfo.visible)continue;
    contacts.push({kind:unit.kind,x,y,z:dummy.position.z,heading,damage:unit.damage});
    const unitLod=Math.min(2,damageInfo.lod);
-   const steer=unitLod===2?0:T.MathUtils.lerp(unit.previousSteering??unit.steering??0,unit.steering??0,phase);
-   const travel=T.MathUtils.lerp(unit.previousWheelDistance??unit.wheelDistance??0,unit.wheelDistance??0,phase);
+   const steer=unitLod===2?0:displayed.steering;
+   const travel=displayed.travel;
    if(unit.hp>0)visible.push({id:unit.id,kind:unit.kind,owner:unit.owner,x,y,heading,steering:steer,speed:moving?(unit.driveSpeed??0):0,working:unit.builderWorking});
    const spin=unitLod===2?0:-travel/(.435*pose.scale);
    const suspensionDelta=(x,y)=>{
