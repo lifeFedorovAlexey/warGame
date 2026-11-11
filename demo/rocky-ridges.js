@@ -5,7 +5,7 @@ float ridgeCoverage=0.;
 float ridgeMask(vec3 p,vec3 n){
  float slope=length(n.xy)/max(.08,abs(n.z));
  float exposure=tnoise(p.xy/94.+vec2(17.,-9.));
- return smoothstep(.24,.68,slope+(exposure-.5)*.24)*smoothstep(3.,11.,p.z);
+ return smoothstep(.16,.48,slope+(exposure-.5)*.16)*smoothstep(3.,11.,p.z);
 }
 vec3 rockyRidgeSurface(vec3 ground,float viewDistance){
  vec3 p=vTerrainPosition,n=normalize(vTerrainNormal);
@@ -22,11 +22,12 @@ vec3 rockyRidgeSurface(vec3 ground,float viewDistance){
  // Broad warm sandstone masses and irregular bedding survive the overview
  // scale; fine scanned grain recedes without turning into a speckled carpet.
  float broad=tnoise(p.xy/73.);
- float strata=sin(p.z*.35+tnoise(p.xy/55.)*2.);
- float seam=1.-smoothstep(.02,.16+fwidth(strata),abs(strata));
+ float strata=sin(p.z*.55+tnoise(p.xy/95.)*1.3);
+ float seam=1.-smoothstep(.04,.25+fwidth(strata),abs(strata));
+ float fracture=1.-smoothstep(.035,.14,abs(tnoise(p.xy/27.)-.5));
  float detail=1.-smoothstep(600.,1900.,viewDistance);
- vec3 stone=mix(ground*vec3(1.12,1.23,1.36),sandstone*.63,.72);
- stone*= (.92+broad*.16)*(1.-seam*.07*detail);
+ vec3 stone=mix(ground*vec3(.93,.94,.96),sandstone*.59,.80);
+ stone*= (.88+broad*.22)*(1.-seam*.19)*(1.-fracture*.11*detail);
  return mix(ground,stone,ridgeCoverage*.9);
 }
 `;
@@ -36,5 +37,5 @@ export const rockyRidgeNormals=`
 // vehicle contact, foundations and navigation still share exactly one surface.
 vec3 rockFace=normalize(cross(dFdx(vViewPosition),dFdy(vViewPosition)));
 if(dot(rockFace,normal)<0.)rockFace=-rockFace;
-normal=normalize(mix(normal,rockFace,ridgeCoverage*(1.-pavementCoverage)*.20));
+normal=normalize(mix(normal,rockFace,ridgeCoverage*(1.-pavementCoverage)*.58));
 `;

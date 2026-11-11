@@ -25,9 +25,20 @@ export function buildTerrainPassability(field){
  };
  function addWall(axis,at,low,high){
   if(high-low<.001)return;
+  if(field.river?.bridges.some(b=>b.points.some(p=>Math.abs(p[axis]-at)<b.width&&p[axis==='x'?'y':'x']>=low-b.width&&p[axis==='x'?'y':'x']<=high+b.width))){
+   // Only the engineered deck opens pre-existing level edges. The gorge is
+   // blocked below, independently of destructible buildings and decoration.
+   for(let p=low;p<high;p+=8){const end=Math.min(high,p+8),mid=(p+end)/2;
+    if(!field.river.deckAt(axis==='x'?at:mid,axis==='x'?mid:at,-1))addBox(axis==='x'?at:mid,axis==='x'?mid:at,axis==='x'?.01:(end-p)/2,axis==='x'?(end-p)/2:.01);
+   }return;
+  }
   const vertical=axis==='x',wall={id:'level-wall:'+walls.length,
    x:vertical?at:(low+high)/2,y:vertical?(low+high)/2:at,
    halfWidth:vertical?.01:(high-low)/2,halfDepth:vertical?(high-low)/2:.01};
+  register(wall);
+ }
+ function addBox(x,y,halfWidth,halfDepth){register({id:'level-wall:'+walls.length,x,y,halfWidth,halfDepth});}
+ function register(wall){
   walls.push(wall);
   for(let y=Math.floor((wall.y-wall.halfDepth)/64);y<=Math.floor((wall.y+wall.halfDepth)/64);y++)
    for(let x=Math.floor((wall.x-wall.halfWidth)/64);x<=Math.floor((wall.x+wall.halfWidth)/64);x++){
@@ -79,7 +90,8 @@ export function buildTerrainPassability(field){
   }
   return true;
  }
- const allowed=(x,y)=>index(x,y)>=0;
+ for(const wall of field.river?.walls??[])register(wall);
+ const allowed=(x,y)=>index(x,y)>=0&&!field.river?.forbidden(x,y);
  return Object.assign(allowed,{version:layout?.version??'single-level',levelAt:(x,y)=>{const i=index(x,y);return i<0?null:levels[i];},
   clearSegment,nearbyWalls:nearby,walls,transitions:layout?.transitions??[]});
 }

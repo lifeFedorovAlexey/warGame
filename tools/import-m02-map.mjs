@@ -77,6 +77,7 @@ for(const spec of siteRoads){
   const road=f.roadNetwork.paths.find(r=>r.id===id),[l,b,r,t]=replaceAreas[0].rect;
   return {width:road.width,points:road.points.filter(p=>p.x>l-32&&p.x<r+32&&p.y>b-32&&p.y<t+32)};
  });
+ if(spec.endWidth){let distance=0;for(let i=points.length-1;i>=0;i--){if(i<points.length-1)distance+=Math.hypot(points[i].x-points[i+1].x,points[i].y-points[i+1].y);points[i].width=spec.width+(spec.endWidth-spec.width)*Math.max(0,1-distance/40);}}
  roads.paths.push({id:'m02-'+spec.id,site:spec.site,width:spec.width,startCap:'round',endCap:spec.endCap??'butt',cutSourcePaint:true,...(replaceAreas?{replaceAreas}:{}),points});
  for(const [trim,output] of [[spec.sourceEnd,roads.sourceRoadEnds],[spec.sourceStart,roads.sourceRoadStarts]])if(trim){
   const source=f.roadNetwork.paths.find(r=>r.id===trim.id),x=p([trim.gridX,0]).x;

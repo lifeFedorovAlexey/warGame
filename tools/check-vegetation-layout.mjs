@@ -22,7 +22,10 @@ function trees(name){
 }
 const birches=trees('birch_trunks'),pines=trees('pine_trunks'),bins=Array.from({length:8},()=>[0,0,0]);
 for(const p of birches){assert(p.grid[0]>=1&&p.grid[0]<=52&&p.grid[1]>=1&&p.grid[1]<=126);bins[Math.floor(p.grid[1]/(127/8))][Math.floor(p.grid[0]/(53/3))]++;}
-assert(bins.every(row=>row.every(n=>n>=2)),'Each broad map region has a birch grove, including the southern extension');
+const nearWater=p=>f.river.sample(p.x,p.y).distance<300||Math.hypot(p.x-dam.x,p.y-dam.y)<330;
+const allTrees=[...birches,...pines],wetTrees=allTrees.filter(nearWater);
+assert(wetTrees.length>allTrees.length*.65,'Most vegetation follows water; distant plateaus remain wasteland');
+assert(allTrees.some(p=>!nearWater(p)),'A few dry groves remain outside the riparian belt');
 const boxes=[...m.config.camps,...m.config.m01LegacyLayout.camps].map(c=>campBaseLayout({...c,...f.gridToWorld(c.grid)})?.bounds).filter(Boolean);
 for(const site of siteCourts){const a=f.gridToWorld(site.rect.slice(0,2)),b=f.gridToWorld(site.rect.slice(2));boxes.push([a.x,b.y,b.x,a.y]);}
 let minRoadGap=Infinity,maxGrade=0;
@@ -40,6 +43,6 @@ const second=createDesertDressing(T,f,m.config,roads,dam,()=>{});
 for(const name of ['birch_trunks','small_birches','pine_trunks','small_pines'])assert.deepEqual(second.root.getObjectByName(name).instanceMatrix.array,dressing.root.getObjectByName(name).instanceMatrix.array,'Reload is deterministic');
 const p=birches.find(p=>p.grid[1]>90),moved=dressing.setAccessRoads([{width:24,points:[{x:p.x-80,y:p.y},{x:p.x+80,y:p.y}]}]);assert(moved>0);
 for(const [a,b] of [['birch_trunks','small_birches'],['pine_trunks','small_pines']])assert.deepEqual(dressing.root.getObjectByName(a).instanceMatrix.array,dressing.root.getObjectByName(b).instanceMatrix.array,'Road moves keep the crown and trunk paired');
-const report={birches:birches.length,pines:pines.length,southernBirches:birches.filter(p=>p.grid[1]>63).length,southernPines:pines.filter(p=>p.grid[1]>63).length,birchesPerRegion:bins,minRoadGap,maxGrade,movedForRoad:moved,unchangedTerrainAndCollisions:true};
+const report={birches:birches.length,pines:pines.length,nearWater:wetTrees.length,southernBirches:birches.filter(p=>p.grid[1]>63).length,southernPines:pines.filter(p=>p.grid[1]>63).length,birchesPerRegion:bins,minRoadGap,maxGrade,movedForRoad:moved,unchangedTerrainAndCollisions:true};
 fs.mkdirSync('docs/playtest-evidence/birches-map',{recursive:true});fs.writeFileSync('docs/playtest-evidence/birches-map/layout.json',JSON.stringify(report,null,2)+'\n');
 console.log('PASS',JSON.stringify(report));

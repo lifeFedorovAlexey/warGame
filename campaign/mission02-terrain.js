@@ -1,6 +1,7 @@
 import authored from '../assets/campaign/alpha/mission02/roads.js';
 import {applyRoadGrades} from '../demo/road-grading.js';
 import {gradeM02Courts} from './mission02-grading.js';
+import {installRiverTerrain} from './river-terrain.js';
 
 // Prepare the shared terrain mesh once. Roads and level openings are activated
 // separately: the southern bases do not exist during the first mission.
@@ -25,6 +26,7 @@ export function installM02Terrain(field){
   if(start)return {...road,from:undefined,points:[start.point,...road.points.slice(start.afterIndex+1)]};
   return end?{...road,to:undefined,points:[...road.points.slice(0,end.afterIndex+1),end.point]}:road;
  })}:network;
+ installRiverTerrain(field,southernNetwork.paths);
  field.missionTerrain={southern:false,navigation,network,southernNetwork,
   southernNavigation:{...navigation,version:navigation.version+'-m02-v2',transitions:[...navigation.transitions,...authored.transitions]}};
  return authored.paths;

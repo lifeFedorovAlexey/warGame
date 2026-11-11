@@ -4,7 +4,10 @@ export const DAM_ID='western-reservoir';
 export const DAM_WIDTH=84;
 export const DAM_HEIGHT=20;
 export const damBow=x=>-5*(1-(x/(DAM_WIDTH/2))**2);
-export const DAM_OUTLETS=[{x:13,y:-20,z:2},{x:19,y:-20,z:2},{x:25,y:-20,z:2}];
+// The operating outlets sit beside the southern gorge. The central breach
+// gate retains its original location for the story and saved section damage.
+export const DAM_OUTLETS=[{x:-34,y:-20,z:2},{x:-28,y:-20,z:2},{x:-22,y:-20,z:2}];
+export const DAM_DRAINAGE_OUTFALL={x:-44,y:-27,z:.18};
 export function damLayout(field,config){
  const start=field.gridToWorld(config.startGrid),x=start.x-316,y=start.y;
  return {id:DAM_ID,x,y,z:field.heightAt(x+20,y),rotation:Math.PI/2,scale:config.worldScale,

@@ -65,6 +65,7 @@ export function checkBuildingPlacement(mission,kind,x,y,angle=0,{checkMoney=true
  let low=Infinity,high=-Infinity;
  for(const dx of samples)for(const dy of samples){
   const px=x+dx*halfWidth,py=y+dy*halfDepth;
+  if(field.river?.within(px,py)&&field.river.sample(px,py).distance<field.river.outer)return fail('Нельзя строить в ущелье или на мосту');
   if(!mission.inBounds(px,py)||!mission.exploredAt(px,py))return fail('Пятно застройки выходит за разведанный район');
   const slope=field.gradientAt(px,py);
   if(Math.hypot(slope.x,slope.y)>maxGrade)return fail('Слишком крутой склон');

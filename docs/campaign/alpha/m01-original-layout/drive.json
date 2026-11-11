@@ -3,28 +3,28 @@
   "visits": [
     {
       "id": "outpost",
-      "seconds": 45,
-      "distance": 22.57793555669983
+      "seconds": 49,
+      "distance": 13.90844646144407
     },
     {
       "id": "east",
-      "seconds": 43,
-      "distance": 18.159870054137315
+      "seconds": 44,
+      "distance": 18.333840082770823
     },
     {
       "id": "northwest",
       "seconds": 40,
-      "distance": 15.983811279540975
+      "distance": 13.135326897358233
     },
     {
       "id": "hq",
-      "seconds": 26,
-      "distance": 4.327276069869236
+      "seconds": 31,
+      "distance": 10.43919063056304
     },
     {
       "id": "home",
-      "seconds": 106,
-      "distance": 17.593261179518013
+      "seconds": 91,
+      "distance": 3.1361038208084
     }
   ]
 }

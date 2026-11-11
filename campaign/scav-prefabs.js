@@ -1,4 +1,5 @@
 import {mergeGeometries} from '../demo/vendor/utils/BufferGeometryUtils.js';
+import {addRuinedWorkshop} from './ruined-workshop.js';
 
 export function createScavPrefab(T, kind, site) {
   const root = new T.Group();
@@ -354,5 +355,6 @@ export function createScavPrefab(T, kind, site) {
     parent.add(mesh);
     for (const item of geometries) item.dispose();
   }
+  if(kind==='camp-core')addRuinedWorkshop(T,root,site==='nw-east'?{width:5.7,depth:4.2,height:3.05,x:1.3,y:.27,seed:3}:site==='nw-west'?{width:9.9,depth:4.1,height:3.65,y:1.1,seed:2}:site==='nw-pocket'?{width:9.7,depth:4.3,height:3.25,y:.1,seed:1}:{width:10.5,depth:5.4,height:3.75,y:.7,seed:4});
   return root;
 }

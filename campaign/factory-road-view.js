@@ -1,15 +1,19 @@
+import {missionRoads} from './mission02-terrain.js';
+import {sharedRoadSurfaces} from '../demo/shared-road-alignments.js';
 export function createFactoryRoadView(T,scene,field,terrain,baseRoads,addFog,updateJunctions){
- let signature='';
+ let signature='',activeSource,activeSouth,fixed=[],roadRevision=0;
  const paintMaterial=new T.MeshStandardMaterial({color:'#d2cbb5',roughness:1,transparent:true,opacity:.7,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});
  addFog?.(paintMaterial);
  const markings=new T.Mesh(new T.BufferGeometry(),paintMaterial);markings.name='factory_road_markings';markings.receiveShadow=true;scene.add(markings);
  const preview=new T.Mesh(new T.BufferGeometry(),new T.MeshBasicMaterial({color:'#adc67c',transparent:true,opacity:.28,depthWrite:false}));
  preview.name='factory_access_preview';preview.visible=false;preview.frustumCulled=false;scene.add(preview);
  function update(mission){
-  const factories=mission.state.buildings.filter(b=>b.kind==='factory'&&b.hp>0&&b.accessRoads?.length),key=factories.map(f=>f.id+':'+f.x+':'+f.y+':'+f.rotation+':'+JSON.stringify(f.accessRoads)).join('|');
+  const source=field.missionBaseRoads??baseRoads,south=mission.state.m02?.version>=2;
+  if(source!==activeSource||south!==activeSouth){fixed=[...missionRoads(field,south,source),...sharedRoadSurfaces(field)];activeSource=source;activeSouth=south;roadRevision++;}
+  const factories=mission.state.buildings.filter(b=>b.kind==='factory'&&b.hp>0&&b.accessRoads?.length),key=roadRevision+'|'+factories.map(f=>f.id+':'+f.x+':'+f.y+':'+f.rotation+':'+JSON.stringify(f.accessRoads)).join('|');
   if(key===signature)return;signature=key;
   const accessRoads=factories.flatMap(f=>f.accessRoads);
-  terrain.setLocalRoads([...baseRoads,...accessRoads],baseRoads.length);updateJunctions?.(accessRoads);
+  terrain.setLocalRoads([...fixed,...accessRoads],fixed.length);updateJunctions?.(accessRoads);
   const vertices=[];
   const strip=(a,b,offset,width)=>{
    const length=Math.hypot(b.x-a.x,b.y-a.y),nx=-(b.y-a.y)/length,ny=(b.x-a.x)/length;

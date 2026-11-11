@@ -1,10 +1,13 @@
-import {DAM_OUTLETS} from './dam-layout.js';
+import {DAM_OUTLETS,DAM_DRAINAGE_OUTFALL} from './dam-layout.js';
 import {sceneryBuilder} from './environment-geometry.js';
 import {damWaterNormals} from './dam-water.js';
 
-// Shallow stilling troughs feed one covered collector. Decorative only.
+// The stilling troughs feed an open cross-channel and discharge into the river.
 export function createDamDrainage(T,addFog){
  const root=new T.Group();root.name='dam_drainage';root.userData.decorative=true;
+ // The detailed original collector is authored around x=19. Move the entire
+ // assembly with the outlets, keeping its grates, pools and jets aligned.
+ const shift=DAM_OUTLETS[1].x-19;root.position.x=shift;
  const concrete=new T.MeshStandardMaterial({color:'#918b73',roughness:1});
  const damp=new T.MeshStandardMaterial({color:'#515b48',roughness:.78});
  const iron=new T.MeshStandardMaterial({color:'#4e4e3c',metalness:.5,roughness:.86}),dark=new T.MeshStandardMaterial({color:'#1c2722',roughness:1});
@@ -30,7 +33,8 @@ export function createDamDrainage(T,addFog){
   for(const end of [-1,1])for(let i=1;i<p.length-1;i++)for(const q of end<0?[p[0],p[i],p[i+1]]:[p[0],p[i+1],p[i]]){v.push(x+q[0],y+end*length/2,q[1]);uv.push(q[0],q[1]);}
   const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(v,3));g.setAttribute('uv',new T.Float32BufferAttribute(uv,2));g.computeVertexNormals();shape(g,concrete);
  }
- for(const [i,p] of DAM_OUTLETS.entries()){
+ for(const [i,outlet] of DAM_OUTLETS.entries()){
+  const p={...outlet,x:outlet.x-shift};
   box([4.9,7.3,.24],[p.x,-22.65,-.015],concrete);
   box([4.15,7.1,.045],[p.x,-22.7,.122],damp);
   for(const side of [-1,1])curb(p.x+side*2.3,-22.65,7.3);
@@ -52,7 +56,7 @@ export function createDamDrainage(T,addFog){
  surface(10.4,27.6,-27.8,-26.4,.18,water,'dam_collector_water');
  box([17.7,.18,.38],[19,-27.99,.14],concrete);
  for(const [a,b] of [[10.15,10.925],[15.075,16.925],[21.075,22.925],[27.075,27.85]])box([b-a,.18,.38],[(a+b)/2,-26.32,.14],concrete);
- for(const x of [10.16,27.84])box([.22,1.85,.38],[x,-27.15,.14],concrete);
+ box([.22,1.85,.38],[27.84,-27.15,.14],concrete);
  for(let panel=0;panel<6;panel++){
   const x=11.7+panel*2.92;
   for(const y of [-27.82,-26.48])box([2.84,.085,.105],[x,y,.34],iron);
@@ -66,5 +70,11 @@ export function createDamDrainage(T,addFog){
  box([1.85,1.62,.09],[28.9,-27.15,.38],iron);
  for(const y of [-27.7,-26.6])for(const x of [28.2,29.6])box([.11,.11,.04],[x,y,.445],dark);
  for(const x of [28.5,29.3])box([.18,.38,.02],[x,-27.15,.435],dark);
+ // Open southern outlet: the water surface meets the head of the gorge at
+ // exactly the same world height. No buried/disconnected pipe across the road.
+ const out=DAM_DRAINAGE_OUTFALL.x-shift,join=10.45,length=join-out;
+ box([length,3.3,.25],[(out+join)/2,-27,-.05],concrete);
+ for(const y of [-28.65,-25.35])box([length,.28,.65],[(out+join)/2,y,.18],concrete);
+ surface(out,join,-28.5,-25.5,DAM_DRAINAGE_OUTFALL.z,water,'open_river_outfall');
  finish();return {root,update(time){clock.value=time;normals.offset.set(time*.007,-time*.026);}};
 }

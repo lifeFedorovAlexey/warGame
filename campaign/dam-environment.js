@@ -85,7 +85,7 @@ export function createDamEnvironment(T,field,config,addFog,sound,terrain){
    }
   }
   particleGeometry.setDrawRange(0,count);if(count)particles.needsUpdate=true;stats.particles=count;stats.discharging=active;
-  const focus=damWorld(layout,18,-20,2),distance=Math.hypot(camera.position.x-focus.x,camera.position.y-focus.y,camera.position.z-focus.z);
+  const focus=damWorld(layout,DAM_OUTLETS[1].x,-20,2),distance=Math.hypot(camera.position.x-focus.x,camera.position.y-focus.y,camera.position.z-focus.z);
   projected.set(focus.x,focus.y,focus.z).project(camera);
   const visible=mission.visibleAt(focus.x,focus.y),attenuation=Math.max(0,1-distance/1100)**2;
   audio.update(visible?Math.min(1,total)*attenuation:0,projected.x*.8,live);

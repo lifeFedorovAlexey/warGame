@@ -7,7 +7,7 @@ const {createScavBasePrefab}=await import('../campaign/scav-base-prefabs.js');
 const meshes=root=>{const result=[];root.traverse(o=>{if(o.isMesh)result.push(o);});return result;};
 for(const kind of ['scav-barracks','scav-store','scav-fence','scav-gate']){
  const root=createScavBasePrefab(T,kind,'nw-pocket'),parts=meshes(root);
- assert(parts.length<=4,kind+' is batched per material');
+ assert(parts.filter(mesh=>mesh.parent===root.getObjectByName('building_structure')).length<=4,kind+' base geometry is batched per material');
  assert(parts.length>0);assert(root.userData.damageParts[16]?.detachable,kind+' has removable sheets');
  for(const mesh of parts){
   const position=mesh.geometry.attributes.position,damage=mesh.geometry.attributes.damagePart;
@@ -27,4 +27,4 @@ for(let i=0;i<flat.length;i++){
 }
 const boxes=sightVolumes({kind:'scav-fence',fenceSpan:7,fenceProfile:profile},{},4.5);
 assert.equal(Math.min(...boxes.map(b=>b[2])),-1);assert.equal(Math.max(...boxes.map(b=>b[5])),4.5,'Sight blockers follow the raised end of the fence');
-console.log('PASS: four batched scrap models, detachable sheets, slope-conforming geometry and sight volumes');
+console.log('PASS: batched camp models, detachable panels, slope-conforming geometry and sight volumes');

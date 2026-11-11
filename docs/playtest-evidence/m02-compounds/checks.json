@@ -90,7 +90,7 @@
     {
       "site": "east_factory",
       "direction": "out",
-      "seconds": 16
+      "seconds": 19
     },
     {
       "site": "hill_factory",
@@ -115,12 +115,12 @@
     {
       "site": "energy_hub",
       "direction": "in",
-      "seconds": 9
+      "seconds": 10
     },
     {
       "site": "energy_hub",
       "direction": "out",
-      "seconds": 23
+      "seconds": 28
     }
   ]
 }

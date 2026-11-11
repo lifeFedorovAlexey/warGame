@@ -1,7 +1,10 @@
 import {mergeGeometries} from '../demo/vendor/utils/BufferGeometryUtils.js';
+import {addRuinedWorkshop} from './ruined-workshop.js';
+import {createConcreteFence} from './concrete-fence.js';
 
 // Low-poly scrap construction, shared geometry per material and model variant.
 export function createScavBasePrefab(T,kind,site,span=7,variant='0',profile=null){
+ if(kind==='scav-fence'&&variant!=='service-gate')return createConcreteFence(T,site,span,variant,profile);
  const root=new T.Group(),structure=new T.Group();structure.name='building_structure';root.add(structure);
  const materials=[0x6e4531,0x8c8167,0x393b32,0x665744].map(color=>new T.MeshStandardMaterial({color,roughness:.96,metalness:.17}));
  const batches=materials.map(()=>[]),parts={0:{name:'frame',material:'metal'}};let part=0;
@@ -18,23 +21,6 @@ export function createScavBasePrefab(T,kind,site,span=7,variant='0',profile=null
    for(const z of [.45,2.1])box(span/2-.24,.15,.14,side*span/4,-.18,z,2);
    beam([side*.16,-.2,.45],[side*(span/2-.2),-.2,2.1],.12,3);
   });
- }else if(kind==='scav-fence'){
-  const count=Math.ceil(span/1.55),w=span/count,v=Number(variant)||0;
-  if(String(variant).startsWith('reinforced')){
-   box(span,.48,.65,0,.08,.2,1);
-   for(const x of [-span/2,span/2]){box(.4,.65,2.9,x,.16,1.25,2);box(.8,1.1,.35,x,.16,-.05,1);}
-   for(const z of [.75,2.1])box(span,.22,.2,0,.21,z,2);
-  }
-  for(let i=0;i<=count;i++){const x=-span/2+i*w;box(.15,.19,3.1,x,.08,1.12,3,0,(i%2?.025:-.02));}
-  for(const z of [.45,1.65])box(span,.13,.15,0,.1,z,2);
-  for(let i=0;i<count;i++){const x=-span/2+(i+.5)*w,h=1.9+((i+v)%3)*.17;
-   panel(16+i,'scrap_panel_'+i,()=>{
-    box(w-.035,.11,h,x,-.045,h/2+.18,(i+v)%2,0,(i%3-1)*.025,0);
-    for(let k=0;k<5;k++)box(.045,.05,h-.06,x-w/2+(k+.5)*w/5,-.12,h/2+.18,(i+v)%2);
-    if((i+v)%3===0){box(w*.7,.07,.55,x,-.16,1.27,2,0,0,.10);box(.55,.06,.36,x+.13,-.21,.54,1,0,0,-.13);}
-   });
-  }
-  for(let i=0;i<count;i++)beam([-span/2+i*w,.1,2.6],[-span/2+(i+1)*w,.1,2.44],.035,2);
  }else if(kind==='scav-gate'&&variant==='m02-open-leaf'){
   // Same scrap gate, sized to half the actual entrance and held open along
   // the road. Both the hinge post and the leaf belong to the damage system.
@@ -81,5 +67,6 @@ export function createScavBasePrefab(T,kind,site,span=7,variant='0',profile=null
  batches.forEach((items,i)=>{if(!items.length){materials[i].dispose();return;}const geometry=mergeGeometries(items);
   if(profile){const p=geometry.attributes.position;for(let j=0;j<p.count;j++){const t=Math.max(0,Math.min(2,p.getX(j)/span*2+1)),k=Math.min(1,Math.floor(t));p.setZ(j,p.getZ(j)+profile[k]+(profile[k+1]-profile[k])*(t-k));}geometry.computeVertexNormals();}
   const mesh=new T.Mesh(geometry,materials[i]);mesh.castShadow=mesh.receiveShadow=true;mesh.userData.damageParts=parts;structure.add(mesh);items.forEach(g=>g.dispose());});
+ if(kind==='scav-barracks'||kind==='scav-store')addRuinedWorkshop(T,root,{width:kind==='scav-barracks'?9.1:5.5,depth:kind==='scav-barracks'?5:3.4,height:kind==='scav-barracks'?3.3:2.8,seed:kind==='scav-barracks'?2:5});
  root.name='scav_'+kind+'_'+site;return root;
 }

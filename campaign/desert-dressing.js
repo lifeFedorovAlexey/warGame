@@ -57,6 +57,7 @@ export function createDesertDressing(T,field,config,roads,dam,addFog){
  if(openingLamp){const goal={x:openingLamp.x,y:openingLamp.y+2.3*config.worldScale};openingCorridors.push({a:first,b:goal,width:44},{a:goal,b:{x:goal.x,y:start.y+42},width:44});}
  const openingClear=(p,r)=>openingCorridors.every(segment=>roadDistance(p,segment)>=r);
  function reserved(p,r){
+  if(field.river?.within(p.x,p.y,r)&&field.river.sample(p.x,p.y).distance<field.river.outer+r)return true;
   if(field.preparedPads?.some(({rect:[left,bottom,right,top]})=>p.x>left-r&&p.x<right+r&&p.y>bottom-r&&p.y<top+r))return true;
   if(Math.hypot(p.x-sign.x,p.y-sign.y)<30+r)return true;
   if(sites.some(s=>Math.abs(s.x-p.x)<s.size[0]*config.worldScale/2+25+r&&Math.abs(s.y-p.y)<s.size[1]*config.worldScale/2+36+r))return true;
@@ -139,6 +140,29 @@ export function createDesertDressing(T,field,config,roads,dam,addFog){
    if(!treeSite(p,radius)||!treeSpace(p,radius))continue;
    for(const part of set.parts)add(part,p.x,p.y,s,rotation,[1,1,.95+(placed%3)*.04]);
    placed++;
+  }
+ }
+ // Moisture follows the actual river. Keep a few dry groves, then add mixed
+ // birch/pine groups outside the gorge rim, roads and both missions' yards.
+ if(field.river){
+  const river=field.river;
+  for(const set of treeSets){
+   const keep=set.poses.map((p,i)=>river.sample(p.x,p.y).distance<220||Math.hypot(p.x-dam.x,p.y-dam.y)<330||i%5===0);
+   for(const item of set.parts)item.poses=item.poses.filter((p,i)=>keep[i]);
+   set.poses=set.parts[0].poses;
+  }
+  let index=0;
+  for(let i=2;i<river.points.length-2;i+=2){const p=river.points[i],q=river.sample(p.x,p.y);
+   for(const side of [-1,1])for(let j=0;j<3;j++){
+    const d=river.outer+20+j*21+Math.sin(i*2.7+j)*8,tangent=(j-1)*19;
+    const point={x:p.x+q.nx*d*side-q.ny*tangent,y:p.y+q.ny*d*side+q.nx*tangent};
+    const set=treeSets[index++%4===0?0:1],s=2.65+groveRandom()*.9,r=set.radius*s;
+    if(!treeSite(point,r)||!treeSpace(point,r))continue;
+    for(const part of set.parts)add(part,point.x,point.y,s,groveRandom()*6.28);
+    // Trunk/crown must share a rotation as well as a location.
+    set.parts[1].poses.at(-1).rotation=set.parts[0].poses.at(-1).rotation;
+    const bx=point.x+12,by=point.y+6;if(!reserved({x:bx,y:by},4))shrubs(bx,by,2.8,groveRandom()*6.28);
+   }
   }
  }
  const dummy=new T.Object3D(),color=new T.Color();let instances=0,triangles=0;

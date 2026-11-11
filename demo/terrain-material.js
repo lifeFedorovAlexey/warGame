@@ -110,7 +110,7 @@ export async function createTerrainMaterials(T,extent,{lightweightOverview=false
  ground=roadSurface(rockyRidgeSurface(ground,length(vViewPosition)),(texture2D(roadDetail,vMapUv).g-.5)*24.);
  diffuseColor.rgb*=ground*mix(vec3(1.04,1.,.95),vec3(1.),pavementCoverage);
  `;
- function configure(material,key,mode){
+ function configure(material,key,mode,paved=false){
   material.onBeforeCompile=shader=>{
    Object.assign(shader.uniforms,{
     ...localRoads.uniforms,
@@ -124,13 +124,14 @@ export async function createTerrainMaterials(T,extent,{lightweightOverview=false
     .replace('#include <begin_vertex>',`#include <begin_vertex>
      vTerrainPosition=(modelMatrix*vec4(position,1.0)).xyz;
      vTerrainNormal=normalize(mat3(modelMatrix)*normal);`);
-   shader.fragmentShader=(declarations+shader.fragmentShader).replace('#include <map_fragment>',mode==='light'?lightSplat:splat);
+   const surfaceDeclarations=paved?declarations.replace('inward=withLocalRoad(vTerrainPosition.xy,inward);','inward=24.;'):declarations;
+   shader.fragmentShader=(surfaceDeclarations+shader.fragmentShader).replace('#include <map_fragment>',mode==='light'?lightSplat:splat);
    if(mode!=='light')shader.fragmentShader=shader.fragmentShader
     .replace('#include <normal_fragment_maps>',terrainPbrNormals)
     .replace('#include <roughnessmap_fragment>','#include <roughnessmap_fragment>\nroughnessFactor=terrainRoughness;');
    shader.fragmentShader=shader.fragmentShader.replace('#include <normal_fragment_begin>','#include <normal_fragment_begin>\n'+rockyRidgeNormals);
   };
-  material.customProgramCacheKey=()=>key+'_rocky_ridges_v1';
+  material.customProgramCacheKey=()=>key+'_rocky_ridges_v2'+(paved?'_bridge':'');
   return material;
  }
  const markings=new T.MeshLambertMaterial({color:'#d1c8ad',transparent:true,opacity:.38,depthWrite:false,side:T.DoubleSide});markings.onBeforeCompile=shader=>{Object.assign(shader.uniforms,localRoads.uniforms);shader.uniforms.roadMask={value:roadDetail};shader.vertexShader='varying vec3 vMarkWorld;\n'+shader.vertexShader;shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvMarkWorld=(modelMatrix*vec4(position,1.)).xyz;');shader.fragmentShader='varying vec3 vMarkWorld;uniform sampler2D roadMask;\n'+roadEdgeGLSL+localRoadGLSL+shader.fragmentShader;shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
@@ -155,5 +156,7 @@ export async function createTerrainMaterials(T,extent,{lightweightOverview=false
  }
  const overview=configure(new T.MeshLambertMaterial({map:controls[0],vertexColors:true}),lightweightOverview?'mesa_software_v3':'mesa_array_v9',lightweightOverview?'light':'overview');
  const close=configure(new T.MeshStandardMaterial({map:controls[0],roughness:.96,metalness:0,vertexColors:true}),'mesa_array_pbr_v9','close');
- return {setLocalRoads:localRoads.setRoads,roadBlendAt,overview,close,surround,markings,statistics:{style:'ochre desert terrain, layered rock and broken asphalt',albedoTiles:12,tileResolution:resolution,controlMaps:4,maskResolution:1024,blending:'height + smoothed slope + organic deposition + stochastic UVs + scanned PBR surfaces',pbr:pbr.statistics,normalDetail:'scanned OpenGL normal maps; fades from 220m to 800m',roughnessByMaterial:true,distantShaderSamples:2,textureArray:true,sourceSheetAsAlbedo:false,lightweightOverview}};
+ const bridgeOverview=configure(new T.MeshLambertMaterial({map:controls[0]}),'bridge_surface',lightweightOverview?'light':'overview',true);
+ const bridgeClose=configure(new T.MeshStandardMaterial({map:controls[0],roughness:.96,metalness:0}),'bridge_surface_pbr','close',true);
+ return {setLocalRoads:localRoads.setRoads,roadBlendAt,overview,close,bridgeOverview,bridgeClose,surround,markings,statistics:{style:'ochre desert terrain, layered rock and broken asphalt',albedoTiles:12,tileResolution:resolution,controlMaps:4,maskResolution:1024,blending:'height + smoothed slope + organic deposition + stochastic UVs + scanned PBR surfaces',pbr:pbr.statistics,normalDetail:'scanned OpenGL normal maps; fades from 220m to 800m',roughnessByMaterial:true,distantShaderSamples:2,textureArray:true,sourceSheetAsAlbedo:false,lightweightOverview}};
 }

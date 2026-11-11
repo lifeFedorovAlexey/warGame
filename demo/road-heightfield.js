@@ -1,6 +1,6 @@
-// A finer collision grid is needed only for road profiles. Samples away from
-// road grading lie exactly on the original coarse triangles.
-export function refineRoadHeightfield(source){
+import {shapeRockEscarpments} from './rock-escarpments.js';
+// Roads and exposed rock use the same finer mesh for rendering and contact.
+export function refineRoadHeightfield(source,{rockEscarpments=true}={}){
  const renderSize=(source.renderSize-1)*2+1,renderCell=source.renderCell/2,renderSamples=new Float32Array(renderSize*renderSize);
  for(let y=0;y<renderSize;y++)for(let x=0;x<renderSize;x++)renderSamples[y*renderSize+x]=source.heightAt(x*renderCell-source.half,source.half-y*renderCell);
  const field={...source,renderSize,renderCell,renderSamples,coarseSize:source.renderSize,fineMask:new Uint8Array(renderSamples.length)};
@@ -17,5 +17,6 @@ export function refineRoadHeightfield(source){
   }
   return{x:(field.heightAt(x+.1,y)-field.heightAt(x-.1,y))/.2,y:(field.heightAt(x,y+.1)-field.heightAt(x,y-.1))/.2};
  };
+ if(rockEscarpments)shapeRockEscarpments(field);
  return field;
 }

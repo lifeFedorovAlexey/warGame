@@ -88,5 +88,15 @@ export function createDamModel(T,addFog){
   shape(new T.CircleGeometry(.76,16),dark,[p.x,-19.83,2.2],[Math.PI/2,0,0]);
   for(const y of [-14.5,-18])box([2.3,1.2,1.5],[p.x,y,.7],edge);
  });
+ // Short retaining returns meet the rocky shoulders. Keep them attached to
+ // the existing end sections so future breach state also removes their mesh.
+ for(const side of [-1,1])section(side<0?'monolith_00':'monolith_13',()=>{
+  for(let i=0;i<4;i++){
+   const x=side*(42+i*1.3),y=2+i*3.8;
+   box([2.4,4.2,19.7],[x,y,9.85],concrete,[0,0,-side*.31]);
+   box([3.1,4.4,.45],[x,y,20],edge,[0,0,-side*.31]);
+   for(const dy of [-1.7,1.7])rod([x-side*.9,y+dy,20.2],[x-side*.9,y+dy,21.3],.06,steel);
+  }
+ });
  finish();return root;
 }

@@ -17,7 +17,8 @@ function segmentBox(a,b,box,pad){
  return true;
 }
 export function factoryRoadNetwork(mission){
- const local=mission.field.localRoads??baseApproachRoads(mission.field,mission.config);
+ const authored=mission.field.localRoads??[],local=authored.some(r=>r.kind==='street')||!mission.config.baseSites?.length
+  ?authored:[...baseApproachRoads(mission.field,mission.config),...authored];
  const replacement=local.find(r=>r.replaceRect)?.replaceRect,surveyed=[];
  // The terrain mask erases this old alignment. Joining it produced visible stubs.
  for(const road of mission.field.roadNetwork?.paths??[]){

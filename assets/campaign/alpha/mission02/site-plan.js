@@ -5,12 +5,12 @@ export const siteRoads=[
  // Reroute that whole arm south of the yard, retaining the north/south trunk.
  {id:'east-entry',site:'east_factory',width:26,radius:24,startAt:'existing-road',endAt:'existing-road',endCap:'round',
   replaceGrid:[29.05,75.6,39,81],preserveSource:['junction-1--junction-7-2','junction-3--junction-7-8'],
-  sourceStart:{id:'junction-7--west-south-18',gridX:29},grid:[[38.4,80.4],[33,80.4],[30.5,80.4],[29,80.16]]},
- {id:'east-yard',site:'east_factory',width:28,radius:20,endCap:'round',grid:[[33,80.4],[33,77.15]]},
+  sourceStart:{id:'junction-7--west-south-18',gridX:29},grid:[[38.65,80.5],[33,80.5],[30.5,80.5],[29,80.5]]},
+ {id:'east-yard',site:'east_factory',width:28,radius:20,endCap:'round',grid:[[33,80.5],[33,77.15]]},
  {id:'west-bypass',site:'hill_factory',width:24,radius:28,grade:.22,maxCut:12,endCap:'round',replaceGrids:[[6.3,76.05,10.95,81.8],[8.1,66.5,14.7,76.05]],
   sourceSpan:'junction-7--west-south-18',grid:[[10.93628,80.76976],[9.2,81.2],[7.5,80.9],[6.9,79.8],[6.95,78.3],[8.5,76.2],[8.5,70.4],[9.5,67],[14.5,67.5]]},
- {id:'west-entry',site:'hill_factory',width:26,radius:26,endCap:'round',grid:[[8.5,75],[10.5,75],[15,75],[15,72.9]]},
- {id:'west-loading',site:'hill_factory',width:20,radius:20,startAt:'existing-road',endCap:'round',grid:[[14.5,67.5],[17.5,67.5],[17.5,69.45]]},
+ {id:'west-entry',site:'hill_factory',width:26,endWidth:42,radius:26,endCap:'round',grid:[[8.5,75],[10.5,75],[15,75],[15,72.9]]},
+ {id:'west-loading',site:'hill_factory',width:20,endWidth:36,radius:20,startAt:'existing-road',endCap:'round',grid:[[14.5,67.5],[17.5,67.5],[17.5,69.45]]},
  // A direct junction from the eastern trunk passes through both guarded gates
  // and continues to the southern service road; no doubled-back dead-end spur.
  {id:'radar-approach',site:'sensor_outpost',width:26,radius:26,grade:.22,maxCut:12,startAt:'existing-road',grid:[[39.5,90],[26.5,90]]},
@@ -22,6 +22,10 @@ export const siteRoads=[
  {id:'energy-entry',site:'energy_hub',width:32,radius:26,grade:.22,maxCut:12,startAt:'existing-road',
   replaceGrid:[27.75,104.0,35.01,109.15],sourceEnd:{id:'junction-3--south-west-7',gridX:35},
   grid:[[35,104.4],[34.25,106],[33.8,107.5],[31.1,107.5]]},
+ // The eastern gate also leads straight to the next region, across the open
+ // plain, instead of sending outgoing traffic back around the northern fork.
+ {id:'energy-east-exit',site:'energy_hub',width:26,radius:40,grade:.22,maxCut:12,endAt:'existing-road',endCap:'round',
+  grid:[[32.2,107.5],[37.5,107.5],[40,109],[46,109],[52,106.9]]},
 ];
 export const siteCourts=[
  {id:'east_factory',rect:[30.3,73.6,36.85,79.6],terraces:[[30.6,74.2,37,79.3]],tiles:[[31,77.6,36.8,79.3]],stores:[[32.6,74.8],[36.4,76.8]],gate:[33,79.6],axis:'y',

@@ -1,52 +1,53 @@
 {
-  "birches": 93,
-  "pines": 67,
-  "southernBirches": 44,
-  "southernPines": 15,
+  "birches": 84,
+  "pines": 44,
+  "nearWater": 101,
+  "southernBirches": 66,
+  "southernPines": 23,
   "birchesPerRegion": [
     [
-      4,
-      3,
-      4
+      1,
+      0,
+      1
     ],
     [
-      4,
-      6,
-      3
-    ],
-    [
-      7,
-      4,
-      2
+      1,
+      2,
+      0
     ],
     [
       2,
+      0,
+      0
+    ],
+    [
       6,
-      4
+      5,
+      1
     ],
     [
       4,
-      3,
-      4
+      17,
+      1
     ],
     [
-      3,
-      4,
-      3
+      1,
+      13,
+      24
     ],
     [
-      4,
-      4,
-      4
+      1,
+      1,
+      0
     ],
     [
-      3,
-      4,
-      4
+      1,
+      1,
+      1
     ]
   ],
-  "minRoadGap": 40.657468152293106,
-  "maxGrade": 0.4196310052672422,
-  "movedForRoad": 2,
+  "minRoadGap": 12.265033364373505,
+  "maxGrade": 0.41782841401315285,
+  "movedForRoad": 1,
   "unchangedTerrainAndCollisions": true
 }

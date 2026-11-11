@@ -37,6 +37,8 @@ import {createM02Factory} from './mission02-factory.js';
 import {styleM02Workshop} from './mission02-workshop-style.js';
 import {createScavOilPrefab} from './scav-oil-prefab.js';
 import {createDamEnvironment} from './dam-environment.js';
+import {createRiverEnvironment} from './river-environment.js';
+import {concreteFenceVariant} from './concrete-fence.js';
 import {createDesertDressing} from './desert-dressing.js';
 import {createFieldArtifact} from './field-artifacts.js';
 import {combatContact} from './combat-contact.js';
@@ -83,6 +85,7 @@ export async function createCampaignWorld(host,config,sound,loading){
  for(const material of terrain.terrainMaterials) addFog(material);
  const baseYard=createBaseYard(T,field,config,addFog);scene.add(baseYard.root);
  const dam=createDamEnvironment(T,field,config,addFog,sound,terrain);scene.add(dam.root);baseYard.roads.push(dam.road,...scavBaseRoads(field,config));terrain.setLocalRoads(baseYard.roads);
+ const river=createRiverEnvironment(T,field,dam.layout,addFog,terrain);scene.add(river.root);
  field.missionBaseRoads=baseYard.roads;field.localRoads=baseYard.roads;
  const mission02Sites=createMission02Sites(T,field,addFog);scene.add(mission02Sites.root);
  const scavYardSurface=createScavYardSurface(T,field,addFog);scene.add(scavYardSurface.root);
@@ -201,7 +204,7 @@ export async function createCampaignWorld(host,config,sound,loading){
   controls.update();
  }
  const prefabKey=(kind,owner='rai',camp='',variant='',span=7,profile=null)=>owner+':'+kind+':'+camp+':'+variant+':'+span+':'+profile;
- function prefabCamp(entity){return entity.campId??(entity.m02Base?'m02.base.'+entity.m02Base:undefined);}
+ function prefabCamp(entity){const camp=entity.campId??(entity.m02Base?'m02.base.'+entity.m02Base:'');return entity.kind==='scav-fence'&&entity.scavVariant!=='service-gate'?camp+':concrete-'+concreteFenceVariant(entity):camp;}
  function getPrefab(kind,owner='rai',camp='',variant='',span=7,profile=null){
   const key = prefabKey(kind,owner,camp,variant,span,profile);
   if (!prefabs.has(key)) {
@@ -345,6 +348,7 @@ export async function createCampaignWorld(host,config,sound,loading){
   sky.update(camera,false);
   if(baseYard.update(mission,time+(live?mission.accumulator:0)))renderer.shadowMap.needsUpdate=true;
   if(dam.update(mission,camera,time+(live?mission.accumulator:0),live))renderer.shadowMap.needsUpdate=true;
+  river.update(time);
   storySignals.update(mission,camera,now);
   rallyFlags.update(mission,selected,camera);
   const threshold=software?145:800;

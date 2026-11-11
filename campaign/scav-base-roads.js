@@ -65,7 +65,7 @@ function originalCampRoads(field,config){
  const source=field.m01SourceNetworks?.network??field.missionTerrain?.network??field.roadNetwork;
  const junction=grid=>{const target=p(grid),road=source?.paths?.find(r=>r.id==='nw-east--nw-west-13');return road?road.points.reduce((best,q)=>Math.hypot(q.x-target.x,q.y-target.y)<Math.hypot(best.x-target.x,best.y-target.y)?q:best):target;};
  const plans=[
-  ['outpost-approach','nw-pocket',22,[[35.5,42.5],[35.5,41.5],[33.5,40.5],[28.5,40.5],[28.5,39]]],
+  ['outpost-approach','nw-pocket',22,[[41.3,40.8],[37.5,40.8],[33.5,40.5],[28.5,40.5],[28.5,39]]],
   ['outpost-yard','nw-pocket',20,[[28.5,39],[28.5,37],[29.5,37]]],
   ['east-approach','nw-west',24,[[31,21.35],[38,22],[39.5,22],[39.5,20.5]]],
   ['east-yard','nw-west',20,[[39.5,20.5],[40,19.8],[40,17.7]]],
@@ -76,7 +76,15 @@ function originalCampRoads(field,config){
  ];
  return plans.map(([name,campId,width,grid])=>{
   const points=grid.map(p);if(['east-approach','northwest-approach','hq-approach'].includes(name))points[0]=junction(grid[0]);
+  if(name==='outpost-approach'){
+   const trunk=source.paths.find(r=>r.id==='junction-1--junction-6-3'),target=points[0];
+   points[0]=trunk.points.reduce((best,q)=>Math.hypot(q.x-target.x,q.y-target.y)<Math.hypot(best.x-target.x,best.y-target.y)?q:best);
+  }
   const road={id:'m01-original-'+name,campId,m01LayoutVersion:3,width,points:rounded(points,width)};
+  if(name==='outpost-approach'){
+   const a=p([34.5,36]),b=p([42.5,43.4]);road.cutSourcePaint=true;
+   road.replaceAreas=[{rect:[a.x,b.y,b.x,a.y],feather:2,preserveRoads:source.paths.filter(r=>['junction-1--junction-6-3','nw-east--junction-6-12'].includes(r.id))}];
+  }
   if(name==='hq-approach'){
    const sourceRoad=source?.paths?.find(r=>r.id==='nw-east--nw-west-13'),start=points[0];
    const prefix=sourceRoad?{...sourceRoad,points:sourceRoad.points.slice(0,sourceRoad.points.indexOf(start)+1)}:null;
@@ -92,7 +100,7 @@ export function syncScavBaseRoads(field,config){
  const terrain=field.missionTerrain;
  if(terrain){
   field.m01SourceNetworks??={network:terrain.network,southernNetwork:terrain.southernNetwork};
-  const trim=network=>({...network,paths:network.paths.map(road=>{
+  const trim=network=>({...network,paths:network.paths.filter(road=>road.id!=='junction-6--nw-pocket-17').map(road=>{
    if(road.id!=='nw-east--nw-west-13')return road;
    const point=field.gridToWorld([17,24.5]);let end=0;
    for(let i=1;i<road.points.length;i++)if(Math.hypot(road.points[i].x-point.x,road.points[i].y-point.y)<Math.hypot(road.points[end].x-point.x,road.points[end].y-point.y))end=i;
