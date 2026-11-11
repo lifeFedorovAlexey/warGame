@@ -25,7 +25,8 @@ for(const cue of [...source.dialogue,...source.barks]){
 }
 assert.equal(userCount,112);
 for(const id of ['m01-v3-r24-l001','m01-v3-r24-l002','m01-v3-r24-l003'])assert.equal(audio.clips[id].origin,'user-recording',id);
-assert.equal(source.dialogue.find(c=>c.id==='m01-s02-l008').text,'Значит ВОСПОМИНАНИЯ,  Спи дальше.');
+assert.equal(source.dialogue.find(c=>c.id==='m01-s02-l008').text,'Значит, воспоминания. Спи дальше.');
+assert.equal(source.dialogue.find(c=>c.id==='m01-s05-l004').text,'Учёные будут изучать находки. Получат новые чертежи — смогут другую технику собирать.');
 assert.deepEqual(source.scenes.find(s=>s.id==='p04').cues,['m01-s03-l001','m01-v3-builder-crooked-plinth']);
 assert(!source.dialogue.some(c=>c.id==='m01-s03-l003'),'The disabled sign reply must not play');
 for(const sceneId of ['r21','r22','r23','r24','r24a','r25','r26','r27','r29','r30-alt','r31','r32','r33','r35','r36']){
