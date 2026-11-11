@@ -95,10 +95,10 @@
     }
   ],
   "near": {
-    "distance": 64.99999999999999,
+    "distance": 64.99999999999997,
     "min": 65,
     "max": 1600,
-    "clearance": 45.10018565276443,
+    "clearance": 45.10018565276442,
     "target": [
       -1646,
       260,
@@ -107,24 +107,24 @@
     "position": [
       -1633.47217065201,
       214.89981434723558,
-      45.70018567660629
+      45.700185676606274
     ]
   },
   "picked": true,
   "far": {
-    "distance": 1599.9999999999795,
+    "distance": 1599.9999999999804,
     "min": 65,
     "max": 1600,
-    "clearance": 1076.9213985787019,
+    "clearance": 1076.9213985787023,
     "target": [
       -1646,
       260,
       0.6000000238418579
     ],
     "position": [
-      -1337.6226622033216,
-      -850.1584160680338,
-      1110.758416091874
+      -1337.622662203321,
+      -850.1584160680343,
+      1110.7584160918746
     ]
   },
   "pinch": [
@@ -132,7 +132,7 @@
       "distance": 64.99999999999999,
       "min": 65,
       "max": 1600,
-      "clearance": 45.1001856527643,
+      "clearance": 45.100185652764274,
       "target": [
         -1646,
         260,
@@ -140,8 +140,8 @@
       ],
       "position": [
         -1633.4721706520095,
-        214.89981434723558,
-        45.70018567660616
+        214.89981434723555,
+        45.70018567660613
       ]
     },
     {
@@ -207,37 +207,46 @@
       "background": "rgba(0, 0, 0, 0)",
       "shadow": "none",
       "resultHidden": true,
-      "icons": 0,
+      "icons": 3,
       "buttons": [
         {
-          "text": "Продолжить",
+          "text": "",
+          "label": "Продолжить",
+          "title": "Продолжить · Продолжить",
+          "icon": "http://127.0.0.1:8777/assets/ui/controls.svg#play",
           "background": "rgba(0, 0, 0, 0)",
           "border": "0px",
           "shadow": "none",
-          "x": 629.8046875,
-          "y": 372,
-          "width": 180.390625,
-          "height": 44
+          "x": 620,
+          "y": 422,
+          "width": 56,
+          "height": 56
         },
         {
-          "text": "Заново",
+          "text": "",
+          "label": "Заново",
+          "title": "Начать эту операцию заново",
+          "icon": "http://127.0.0.1:8777/assets/ui/controls.svg#restart",
           "background": "rgba(0, 0, 0, 0)",
           "border": "0px",
           "shadow": "none",
-          "x": 661.0703125,
-          "y": 428,
-          "width": 117.84375,
-          "height": 44
+          "x": 692,
+          "y": 422,
+          "width": 56,
+          "height": 56
         },
         {
-          "text": "В меню",
+          "text": "",
+          "label": "В меню",
+          "title": "В меню · Сохранить и выйти в главное меню",
+          "icon": "http://127.0.0.1:8777/assets/ui/controls.svg#menu",
           "background": "rgba(0, 0, 0, 0)",
           "border": "0px",
           "shadow": "none",
-          "x": 658.9921875,
-          "y": 484,
-          "width": 122.015625,
-          "height": 44
+          "x": 764,
+          "y": 422,
+          "width": 56,
+          "height": 56
         }
       ]
     },
@@ -249,37 +258,46 @@
       "background": "rgba(0, 0, 0, 0)",
       "shadow": "none",
       "resultHidden": true,
-      "icons": 0,
+      "icons": 3,
       "buttons": [
         {
-          "text": "Продолжить",
+          "text": "",
+          "label": "Продолжить",
+          "title": "Продолжить · Продолжить",
+          "icon": "http://127.0.0.1:8777/assets/ui/controls.svg#play",
           "background": "rgba(0, 0, 0, 0)",
           "border": "0px",
           "shadow": "none",
-          "x": 337.8203125,
-          "y": 121,
-          "width": 168.359375,
-          "height": 44
+          "x": 338,
+          "y": 171,
+          "width": 48,
+          "height": 48
         },
         {
-          "text": "Заново",
+          "text": "",
+          "label": "Заново",
+          "title": "Начать эту операцию заново",
+          "icon": "http://127.0.0.1:8777/assets/ui/controls.svg#restart",
           "background": "rgba(0, 0, 0, 0)",
           "border": "0px",
           "shadow": "none",
-          "x": 366.4921875,
-          "y": 173,
-          "width": 111.015625,
-          "height": 44
+          "x": 398,
+          "y": 171,
+          "width": 48,
+          "height": 48
         },
         {
-          "text": "В меню",
+          "text": "",
+          "label": "В меню",
+          "title": "В меню · Сохранить и выйти в главное меню",
+          "icon": "http://127.0.0.1:8777/assets/ui/controls.svg#menu",
           "background": "rgba(0, 0, 0, 0)",
           "border": "0px",
           "shadow": "none",
-          "x": 364.5703125,
-          "y": 225,
-          "width": 114.84375,
-          "height": 44
+          "x": 458,
+          "y": 171,
+          "width": 48,
+          "height": 48
         }
       ]
     },
@@ -291,37 +309,46 @@
       "background": "rgba(0, 0, 0, 0)",
       "shadow": "none",
       "resultHidden": true,
-      "icons": 0,
+      "icons": 3,
       "buttons": [
         {
-          "text": "Продолжить",
+          "text": "",
+          "label": "Продолжить",
+          "title": "Продолжить · Продолжить",
+          "icon": "http://127.0.0.1:8777/assets/ui/controls.svg#play",
           "background": "rgba(0, 0, 0, 0)",
           "border": "0px",
           "shadow": "none",
-          "x": 249.3203125,
-          "y": 113.5,
-          "width": 168.359375,
-          "height": 44
+          "x": 249.5,
+          "y": 163.5,
+          "width": 48,
+          "height": 48
         },
         {
-          "text": "Заново",
+          "text": "",
+          "label": "Заново",
+          "title": "Начать эту операцию заново",
+          "icon": "http://127.0.0.1:8777/assets/ui/controls.svg#restart",
           "background": "rgba(0, 0, 0, 0)",
           "border": "0px",
           "shadow": "none",
-          "x": 277.9921875,
-          "y": 165.5,
-          "width": 111.015625,
-          "height": 44
+          "x": 309.5,
+          "y": 163.5,
+          "width": 48,
+          "height": 48
         },
         {
-          "text": "В меню",
+          "text": "",
+          "label": "В меню",
+          "title": "В меню · Сохранить и выйти в главное меню",
+          "icon": "http://127.0.0.1:8777/assets/ui/controls.svg#menu",
           "background": "rgba(0, 0, 0, 0)",
           "border": "0px",
           "shadow": "none",
-          "x": 276.0703125,
-          "y": 217.5,
-          "width": 114.84375,
-          "height": 44
+          "x": 369.5,
+          "y": 163.5,
+          "width": 48,
+          "height": 48
         }
       ]
     }

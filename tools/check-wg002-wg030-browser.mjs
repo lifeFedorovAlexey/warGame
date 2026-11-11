@@ -36,11 +36,12 @@ try{
      const panel=document.querySelector('#mission-ending'),r=panel.getBoundingClientRect(),css=getComputedStyle(panel);
      return {x:r.x+r.width/2,y:r.y+r.height/2,background:css.backgroundColor,shadow:css.boxShadow,
       resultHidden:document.querySelector('#result').hidden,icons:panel.querySelectorAll('svg,img').length,
-      buttons:[...panel.querySelectorAll('button')].filter(b=>!b.hidden).map(b=>{const s=getComputedStyle(b),r=b.getBoundingClientRect();return {text:b.textContent,background:s.backgroundColor,border:s.borderTopWidth,shadow:s.boxShadow,x:r.x,y:r.y,width:r.width,height:r.height};})};
+      buttons:[...panel.querySelectorAll('button')].filter(b=>!b.hidden).map(b=>{const s=getComputedStyle(b),r=b.getBoundingClientRect();return {text:b.textContent,label:b.getAttribute('aria-label'),title:b.title,icon:b.querySelector('use')?.getAttribute('href'),background:s.backgroundColor,border:s.borderTopWidth,shadow:s.boxShadow,x:r.x,y:r.y,width:r.width,height:r.height};})};
     });
-    assert(Math.abs(layout.x-width/2)<1&&Math.abs(layout.y-height/2)<1);assert.equal(layout.background,'rgba(0, 0, 0, 0)');assert.equal(layout.shadow,'none');assert(layout.resultHidden);assert.equal(layout.icons,0);
-    assert.deepEqual(layout.buttons.map(b=>b.text),['Продолжить','Заново','В меню']);
-    for(const b of layout.buttons){assert.equal(b.background,'rgba(0, 0, 0, 0)');assert.equal(b.border,'0px');assert.equal(b.shadow,'none');assert(b.x>=0&&b.y>=0&&b.x+b.width<=width&&b.y+b.height<=height&&b.height>=44);}
+    assert(Math.abs(layout.x-width/2)<1&&Math.abs(layout.y-height/2)<1);assert.equal(layout.background,'rgba(0, 0, 0, 0)');assert.equal(layout.shadow,'none');assert(layout.resultHidden);assert.equal(layout.icons,3);
+    assert.deepEqual(layout.buttons.map(b=>b.label),['Продолжить','Заново','В меню']);
+    assert.deepEqual(layout.buttons.map(b=>b.icon?.split('/').at(-1)),['controls.svg#play','controls.svg#restart','controls.svg#menu']);
+    for(const b of layout.buttons){assert.equal(b.text,'');assert(b.title);assert.equal(b.background,'rgba(0, 0, 0, 0)');assert.equal(b.border,'0px');assert.equal(b.shadow,'none');assert(b.x>=0&&b.y>=0&&b.x+b.width<=width&&b.y+b.height<=height&&b.height>=44);}
     (report.choiceLayouts??=[]).push({width,height,...layout});
    }
    await page.screenshot({path:folder+'/'+name+'-'+width+'.png'});

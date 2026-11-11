@@ -173,17 +173,14 @@ body:has(#designer[open]) #designer { visibility: visible; }
   #designer .garage-config { gap: 6px; }
   #designer .designer-stats { grid-template-columns: repeat(4,minmax(0,1fr)); gap: 8px; }
 }
-/* Paint samples are free colour marks, with a check on the chosen finish. */
-#mission-ending {position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:12px;pointer-events:none;}
+#mission-ending {position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:16px;pointer-events:none;}
 #mission-ending[hidden] {display:none;}
-#mission-ending button {pointer-events:auto;min-height:44px;padding:6px 18px;border:0;border-radius:0;background:none;box-shadow:none;color:#f0e2ba;font:600 24px/1.25 "Segoe UI",sans-serif;white-space:nowrap;text-shadow:0 1px 3px #171511,0 2px 8px #171511;}
-#mission-ending button:hover,#mission-ending button:focus-visible {background:none;color:#f3ae54;outline:0;}
-#mission-ending button:focus-visible {text-decoration:underline;text-underline-offset:6px;}
-#mission-ending button:disabled {opacity:.45;}
+#mission-ending button.icon-button {--button-size:56px;--icon-size:44px;pointer-events:auto;}
 #mission-hud.ending-choices > :not(#mission-ending),#game:has(.ending-choices) > :is(#toast,#personnel-notice) {visibility:hidden;}
 .mission-ended :is(.squad,#commands,#field-tasks,#objective-focus,#pause,#tempo,#home) {display:none!important;}
 #mission-hud.mission-ended > #radio {max-width:min(390px,55vw);}
-@media(max-height:520px){#mission-ending {gap:8px;}#mission-ending button {font-size:22px;}}
+@media(max-height:520px){#mission-ending {gap:12px;}#mission-ending button.icon-button {--button-size:48px;--icon-size:40px;}}
+/* Paint samples are free colour marks, with a check on the chosen finish. */
 #designer .designer-paint-row {display:flex;align-items:center;justify-content:center;gap:8px;min-width:0;}
 #designer .designer-paint-row > span {font-size:11px;color:#b7b9a7;}
 #designer [data-design-paints] {display:flex;align-items:center;gap:2px;}
