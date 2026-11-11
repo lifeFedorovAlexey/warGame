@@ -174,15 +174,16 @@ body:has(#designer[open]) #designer { visibility: visible; }
   #designer .designer-stats { grid-template-columns: repeat(4,minmax(0,1fr)); gap: 8px; }
 }
 /* Paint samples are free colour marks, with a check on the chosen finish. */
-#mission-ending {position:fixed;top:56px;right:16px;max-width:min(280px,40vw);display:flex;flex-direction:column;align-items:flex-end;gap:6px;pointer-events:none;text-align:right;color:#f0e2ba;text-shadow:0 1px 3px #171511,0 2px 8px #171511;}
+#mission-ending {position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:12px;pointer-events:none;}
 #mission-ending[hidden] {display:none;}
-#mission-ending strong {font-size:22px;line-height:1.15;font-weight:650;}
-#mission-ending small {font-size:12px;color:#d6c994;}
-#mission-ending button {pointer-events:auto;}
+#mission-ending button {pointer-events:auto;min-height:44px;padding:6px 18px;border:0;border-radius:0;background:none;box-shadow:none;color:#f0e2ba;font:600 24px/1.25 "Segoe UI",sans-serif;white-space:nowrap;text-shadow:0 1px 3px #171511,0 2px 8px #171511;}
+#mission-ending button:hover,#mission-ending button:focus-visible {background:none;color:#f3ae54;outline:0;}
+#mission-ending button:focus-visible {text-decoration:underline;text-underline-offset:6px;}
+#mission-ending button:disabled {opacity:.45;}
+#mission-hud.ending-choices > :not(#mission-ending),#game:has(.ending-choices) > :is(#toast,#personnel-notice) {visibility:hidden;}
 .mission-ended :is(.squad,#commands,#field-tasks,#objective-focus,#pause,#tempo,#home) {display:none!important;}
 #mission-hud.mission-ended > #radio {max-width:min(390px,55vw);}
-#mission-hud.mission-ended:has(.settings[open]) > #mission-ending {visibility:hidden;}
-@media(max-height:520px){#mission-ending {top:52px;right:12px;gap:4px;}#mission-ending strong {font-size:18px;}}
+@media(max-height:520px){#mission-ending {gap:8px;}#mission-ending button {font-size:22px;}}
 #designer .designer-paint-row {display:flex;align-items:center;justify-content:center;gap:8px;min-width:0;}
 #designer .designer-paint-row > span {font-size:11px;color:#b7b9a7;}
 #designer [data-design-paints] {display:flex;align-items:center;gap:2px;}

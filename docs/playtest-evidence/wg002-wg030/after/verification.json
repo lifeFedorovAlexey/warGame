@@ -76,19 +76,19 @@
       "scroll": 667
     },
     {
-      "name": "results",
+      "name": "choices",
       "width": 1440,
       "height": 900,
       "scroll": 1440
     },
     {
-      "name": "results",
+      "name": "choices",
       "width": 844,
       "height": 390,
       "scroll": 844
     },
     {
-      "name": "results",
+      "name": "choices",
       "width": 667,
       "height": 375,
       "scroll": 667
@@ -112,10 +112,10 @@
   },
   "picked": true,
   "far": {
-    "distance": 1599.9999999999789,
+    "distance": 1599.9999999999795,
     "min": 65,
     "max": 1600,
-    "clearance": 1076.9213985787012,
+    "clearance": 1076.9213985787019,
     "target": [
       -1646,
       260,
@@ -123,8 +123,8 @@
     ],
     "position": [
       -1337.6226622033216,
-      -850.1584160680336,
-      1110.7584160918734
+      -850.1584160680338,
+      1110.758416091874
     ]
   },
   "pinch": [
@@ -145,19 +145,19 @@
       ]
     },
     {
-      "distance": 1599.9999999999839,
+      "distance": 1599.9999999999825,
       "min": 65,
       "max": 1600,
-      "clearance": 1076.9213985787005,
+      "clearance": 1076.9213985786996,
       "target": [
         -1646,
         260,
         0.6000000238418579
       ],
       "position": [
-        -1337.6226622033091,
-        -850.1584160680363,
-        1110.7584160918743
+        -1337.6226622033096,
+        -850.1584160680354,
+        1110.7584160918734
       ]
     }
   ],
@@ -179,7 +179,8 @@
   },
   "presentation": {
     "controls": false,
-    "status": "Задание выполнено",
+    "choicesHidden": true,
+    "cornerHeading": false,
     "commands": "none",
     "target": [
       -1424,
@@ -196,12 +197,141 @@
     "r50",
     "r54"
   ],
-  "autoResults": true,
+  "autoChoices": true,
+  "choiceLayouts": [
+    {
+      "width": 1440,
+      "height": 900,
+      "x": 720,
+      "y": 450,
+      "background": "rgba(0, 0, 0, 0)",
+      "shadow": "none",
+      "resultHidden": true,
+      "icons": 0,
+      "buttons": [
+        {
+          "text": "Продолжить",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "0px",
+          "shadow": "none",
+          "x": 629.8046875,
+          "y": 372,
+          "width": 180.390625,
+          "height": 44
+        },
+        {
+          "text": "Заново",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "0px",
+          "shadow": "none",
+          "x": 661.0703125,
+          "y": 428,
+          "width": 117.84375,
+          "height": 44
+        },
+        {
+          "text": "В меню",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "0px",
+          "shadow": "none",
+          "x": 658.9921875,
+          "y": 484,
+          "width": 122.015625,
+          "height": 44
+        }
+      ]
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "x": 422,
+      "y": 195,
+      "background": "rgba(0, 0, 0, 0)",
+      "shadow": "none",
+      "resultHidden": true,
+      "icons": 0,
+      "buttons": [
+        {
+          "text": "Продолжить",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "0px",
+          "shadow": "none",
+          "x": 337.8203125,
+          "y": 121,
+          "width": 168.359375,
+          "height": 44
+        },
+        {
+          "text": "Заново",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "0px",
+          "shadow": "none",
+          "x": 366.4921875,
+          "y": 173,
+          "width": 111.015625,
+          "height": 44
+        },
+        {
+          "text": "В меню",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "0px",
+          "shadow": "none",
+          "x": 364.5703125,
+          "y": 225,
+          "width": 114.84375,
+          "height": 44
+        }
+      ]
+    },
+    {
+      "width": 667,
+      "height": 375,
+      "x": 333.5,
+      "y": 187.5,
+      "background": "rgba(0, 0, 0, 0)",
+      "shadow": "none",
+      "resultHidden": true,
+      "icons": 0,
+      "buttons": [
+        {
+          "text": "Продолжить",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "0px",
+          "shadow": "none",
+          "x": 249.3203125,
+          "y": 113.5,
+          "width": 168.359375,
+          "height": 44
+        },
+        {
+          "text": "Заново",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "0px",
+          "shadow": "none",
+          "x": 277.9921875,
+          "y": 165.5,
+          "width": 111.015625,
+          "height": 44
+        },
+        {
+          "text": "В меню",
+          "background": "rgba(0, 0, 0, 0)",
+          "border": "0px",
+          "shadow": "none",
+          "x": 276.0703125,
+          "y": 217.5,
+          "width": 114.84375,
+          "height": 44
+        }
+      ]
+    }
+  ],
   "review": {
     "controls": true,
     "commands": "none",
-    "ending": true
+    "ending": false
   },
+  "manualReport": true,
   "nextMission": {
     "controls": true,
     "ending": true,
@@ -213,11 +343,33 @@
   },
   "defeat": {
     "status": "defeat",
-    "title": "Операция прервана"
+    "continueHidden": true,
+    "restartEnabled": true,
+    "resultHidden": true
+  },
+  "restartM02": {
+    "backup": "defeat",
+    "builders": 2,
+    "controls": true
   },
   "radioOff": {
     "status": "victory",
     "radio": false,
-    "title": "Миссия завершена"
+    "continueHidden": true,
+    "resultHidden": true
+  },
+  "menu": {
+    "welcome": true,
+    "savedStatus": "victory"
+  },
+  "restartM01": {
+    "backup": "victory",
+    "opening": true,
+    "buildings": [
+      {
+        "kind": "base-sign",
+        "completed": false
+      }
+    ]
   }
 }
