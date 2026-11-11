@@ -2,8 +2,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {createSpeechClient} from './elevenlabs-speech.mjs';
-const folder=path.resolve('tools/.runtime-media/elevenlabs-radio-10k');
-const plan=JSON.parse(fs.readFileSync(path.join(folder,'plan.json'),'utf8'));
+// An explicit plan also supports bounded story batches using the same paid-request ledger.
+const planFile=path.resolve(process.argv[2]||'tools/.runtime-media/elevenlabs-radio-10k/plan.json');
+const folder=path.dirname(planFile),plan=JSON.parse(fs.readFileSync(planFile,'utf8'));
 const ledgerFile=path.join(folder,'ledger.json'),renders=path.join(folder,'renders');
 fs.mkdirSync(renders,{recursive:true});
 const ledger=fs.existsSync(ledgerFile)?JSON.parse(fs.readFileSync(ledgerFile,'utf8')):{budgetCredits:plan.budgetCredits,requests:{}};
