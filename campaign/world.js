@@ -14,6 +14,7 @@ import {createScavPrefab} from './scav-prefabs.js';
 import {createScavBasePrefab} from './scav-base-prefabs.js';
 import {aimTowerWeapon,towerDamagePose} from './tower-weapon.js';
 import {mgRecoil} from './mg-burst.js';
+import {radarAngle} from './radar-animation.js';
 import {createShadowCasters} from './shadow-casters.js';
 import {createGroundEffects} from './ground-effects.js';
 import {updateOilPump} from './oil-pump.js';
@@ -348,12 +349,19 @@ export async function createCampaignWorld(host,config,sound,loading){
    if(!visibleIds.has(unit.id)&&!unit.damage?.wreck)continue;
    const transform=vehicles.transforms.get(unit.id);
    if(!transform)continue;
-   const {position,heading}=transform,aim=unit.aimTarget;
+   const representation=damage.records.get(unit.id);
+   if(representation&&!representation.visible)continue;
+   const {position,heading,matrix}=transform,aim=unit.aimTarget;
+   // Fading wrecks and moving attachments change the shadow silhouette even
+   // when their navigation position is fixed.
+   const fade=unit.damage?.wreck&&unit.removeAt>0?T.MathUtils.clamp(time-unit.removeAt+2,0,2):0;
+   const scan=unit.kind==='sensor'?radarAngle(unit,time+(live?mission.accumulator:0)):0;
    const shotAge=now-(shotTimes.get(unit.id)??-Infinity);
    const recoil=unit.kind==='bukhanka'||unit.kind==='raider'?mgRecoil(shotAge):shotAge<.065?now:0;
    shadowCasters.watch(unit.id,unit.kind,unit.damage?.wreck,position.x,position.y,position.z,heading,
     blend(unit.previousSteering,unit.steering),blend(unit.previousWheelDistance,unit.wheelDistance),
-    unit.projector?.yaw,unit.projector?.pitch,aim?.x,aim?.y,aim?.z,recoil);
+    unit.projector?.yaw,unit.projector?.pitch,aim?.x,aim?.y,aim?.z,recoil,
+    representation?.lod,fade,scan,matrix.elements[2],matrix.elements[6],matrix.elements[10]);
   }
   groundEffects.update(dt,vehicles.visible,distance);
   const near=distance<680?vehicles.visible.filter(unit=>unit.owner==='rai'&&unit.kind!=='command').sort((a,b)=>{
@@ -475,7 +483,9 @@ export async function createCampaignWorld(host,config,sound,loading){
   const {textureRows}=damage.statistics;
   if(textureRows!==lastDamageRows){lastDamageRows=textureRows;renderer.shadowMap.needsUpdate=true;}
   shadowDirty=shadowCasters.end()||renderer.shadowMap.needsUpdate||time<lastWorldTime||shadowDirty;
-  renderer.shadowMap.needsUpdate=shadowDirty&&(now-lastShadowAt>=1/shadowHz||time<lastWorldTime);
+  // A hidden/removed caster must not leave a detached shadow until the next
+  // throttled refresh. Keep the rate limit for motion within the same set.
+  renderer.shadowMap.needsUpdate=shadowDirty&&(shadowCasters.membershipChanged||now-lastShadowAt>=1/shadowHz||time<lastWorldTime);
   if(renderer.shadowMap.needsUpdate){
    shadowCentre.copy(stableTarget);sun.position.copy(stableTarget).add(lightOffset);sun.target.position.copy(stableTarget);
    shadowUpdates++;shadowDirty=false;lastShadowAt=now;
