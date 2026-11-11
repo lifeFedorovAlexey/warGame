@@ -205,8 +205,9 @@ export class Mission{
   const terrainChanged=selectMissionTerrain(this.field,southern);
   if(changed)this.field.localRoads=missionRoads(this.field,southern);
   if(changed||terrainChanged){
-   const revision=this.nav.topologyRevision;
+   const {topologyRevision:revision,routeAdvisor}=this.nav;
    this.nav=new TerrainNavigator(this.field,{bounds:this.state.bounds.slice(),vehicleScale:this.config.worldScale});
+   this.nav.routeAdvisor=routeAdvisor;
    this.nav.topologyRevision=revision+1;this.nav.beforeSynchronousSearch=()=>this.finishPendingStep();
    // Saved command intents are resumed with the new terrain, not discarded.
    this.commandPlanner=null;this.scavJob=null;
@@ -2228,7 +2229,7 @@ export class Mission{
   }
   // A checked shutter approach can finish from the live pose while a generic
   // local turn is queued. Entering invalidates that search's route intent.
-  if(unit.factoryVisit?.phase==='approach'&&this.trafficCoordinator.routes?.get(unit.id)?.kind==='maneuver'){
+  if(unit.factoryVisit?.phase==='gate'&&this.trafficCoordinator.routes?.get(unit.id)?.kind==='maneuver'){
    const factory=this.entity(unit.factoryVisit.factoryId);
    if(tryEnterFactory(this,unit,factory)){yield* updateFactoryVisit(this,unit,factory,dt);return;}
   }

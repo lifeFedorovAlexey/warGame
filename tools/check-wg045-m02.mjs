@@ -26,21 +26,27 @@ assert.equal(units.length,20);
 assert(m.setCombatPolicy(units.map(u=>u.id),{retreat:'light',response:'ignore'}).ok);
 assert(m.submitOrder(units.map(u=>u.id),'attack-move',at(745)).ok);
 fs.writeFileSync('campaign/previews/playtest-WG-045/m02-split-start.json',m.save());
-let hit=false,last=-10,frames=0,maxShoulder=0,maxRetreat=0;const wall=performance.now(),arrived=new Set();
+const checkRepair=process.argv.includes('--repair'),repairLimit=checkRepair?320:140;
+let hit=false,last=-10,frames=0,maxShoulder=0,maxRetreat=0;
+const wall=performance.now(),arrived=new Set(),released=new Set(),moved=new Set();
 let damaged=[],start=[];
 const enemy=m.state.buildings.find(b=>b.owner==='scavs'&&b.hp>0);
 assert(enemy);
-while(m.state.time<140&&performance.now()-wall<90000){
+while(m.state.time<repairLimit&&performance.now()-wall<90000){
  m.advance(1/30,{budgetMs:6});frames++;
+ for(const e of m.drainEvents())if(e.type==='factory-released')released.add(e.unit);
+ m.drainEffects();
  for(const u of units.slice(10))if(u.navigation?.state==='ARRIVED'&&u.navigation.reason==='destination-reached')arrived.add(u.id);
  if(!hit&&m.state.time>=5){hit=true;damaged=units.slice(0,10);start=units.map(u=>({x:u.x,y:u.y}));
   for(const u of damaged)m.damage(u,70,enemy);fs.writeFileSync('campaign/previews/playtest-WG-045/m02-split-hit.json',m.save());console.log('damage applied',damaged.map(u=>u.id).join(','));}
+ if(hit)for(const [i,u] of units.entries())if(Math.hypot(u.x-start[i].x,u.y-start[i].y)>25)moved.add(u.id);
+ if(checkRepair&&arrived.size===10&&damaged.length===10&&damaged.every(u=>released.has(u.id)))break;
  if(m.state.time>=last+10){last=Math.floor(m.state.time/10)*10;
   const shoulder=units.filter(u=>u.combatRetreat&&u.path?.length&&roadDrivingLane(m,u,u.path[0],m.config.worldScale)?.retreatShoulder).length;
   maxShoulder=Math.max(maxShoulder,shoulder);maxRetreat=Math.max(maxRetreat,units.filter(u=>u.combatRetreat).length);
   const stalled=units.filter(u=>u.navigation?.waitSeconds>5).map(u=>u.id);
   console.log(JSON.stringify({time:+m.state.time.toFixed(1),wall:+((performance.now()-wall)/1000).toFixed(1),
-   moved:hit?units.filter((u,i)=>Math.hypot(u.x-start[i].x,u.y-start[i].y)>25).length:0,
+   moved:moved.size,repaired:damaged.filter(u=>released.has(u.id)).length,
    retreat:units.filter(u=>u.combatRetreat).length,shoulder,stalled}));
  }
 }
@@ -48,6 +54,7 @@ const result={time:m.state.time,wall:(performance.now()-wall)/1000,maxShoulder,m
 fs.writeFileSync(process.argv.includes('--baseline')?'campaign/previews/playtest-WG-045/m02-combat-split-baseline.json':'campaign/previews/playtest-WG-045/m02-combat-split-result.json',JSON.stringify(result,null,2));
 assert(maxRetreat===10,'The ten lightly damaged vehicles must actually retreat');
 if(!process.argv.includes('--baseline'))assert(maxShoulder>0,'Retreaters must choose the shoulder when facing attackers');
-assert(result.units.every(u=>u.moved>25),'Every vehicle must make real progress');
+assert.equal(moved.size,units.length,'Every vehicle must make real progress');
 assert.equal(arrived.size,10,'The ten attackers must each reach their assigned destination');
+if(checkRepair)assert(damaged.every(u=>released.has(u.id)),`Not all damaged vehicles were released: ${damaged.filter(u=>!released.has(u.id)).map(u=>u.id).join(', ')}`);
 console.log('PASS: 20 vehicles move; ten lightly damaged retreat and the ten attackers arrive');

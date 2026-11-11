@@ -43,7 +43,7 @@ export const vehicleObstacle = unit => unit.hp > 0&&unit.factoryVisit?.phase!=='
 const alliedVehicles=(a,b)=>a?.owner==='rai'&&b?.owner==='rai'&&!SCAV_PROFILES[a.kind]?.infantry&&!SCAV_PROFILES[b.kind]?.infantry;
 const factoryTransfer=u=>{
  const phase=u.factoryVisit?.phase;
- return phase==='entering'||phase==='inside'||phase==='leaving'||phase==='departure';
+ return phase==='approach'||phase==='waiting'||phase==='gate'||phase==='entering'||phase==='inside'||phase==='leaving'||phase==='departure';
 };
 export const jamPassThroughAllowed=(a,b)=>alliedVehicles(a,b)&&!factoryTransfer(a)&&!factoryTransfer(b);
 const hasPassage=(a,b)=>a.trafficPassThrough?.revision===a.commandRevision
