@@ -1,0 +1,975 @@
+{
+  "build": "7251fad",
+  "scenario": "M02: 20 attack-move vehicles, first 10 take 70 enemy damage at 5 seconds; light-damage retreat enabled; enemy structure damage disabled for isolated traffic check",
+  "seconds": 140.09999999999633,
+  "wallSeconds": 34.3257932,
+  "attackersArrived": 10,
+  "maxRetreaters": 10,
+  "maxShoulderUsers": 10,
+  "allMovedMoreThan25": true,
+  "units": [
+    {
+      "id": "u432",
+      "damaged": true,
+      "hp": 320,
+      "x": -1600,
+      "y": 394.5,
+      "moved": 1013.9156004825746,
+      "task": null,
+      "nav": {
+        "state": "IDLE",
+        "reason": "inside-factory",
+        "since": 112.79999999999787,
+        "stoppedSince": null,
+        "control": "IDLE",
+        "controlReason": "inside-factory",
+        "blockerId": null,
+        "blockerIds": [],
+        "nextAction": "leave-factory",
+        "desiredSpeed": null,
+        "speed": 0,
+        "progressAnchor": {
+          "x": -1600,
+          "y": 394.5
+        },
+        "lastProgressAt": 112.59999999999788,
+        "waitSeconds": 0,
+        "attempt": 0,
+        "waitCycle": false,
+        "potentialDefect": false,
+        "reported": false
+      },
+      "retreat": {
+        "status": "servicing",
+        "resume": {
+          "action": "attack-move",
+          "target": {
+            "x": -771.2247040847228,
+            "y": -416.99793329932527
+          },
+          "origin": {
+            "x": -797.7403721662143,
+            "y": -226.84269807970696
+          }
+        },
+        "threat": {
+          "id": "m02.original.42",
+          "x": -896,
+          "y": -400,
+          "time": 5.099999999999998,
+          "range": 0
+        },
+        "started": 5.1999999999999975,
+        "home": {
+          "id": "b180",
+          "x": -1600,
+          "y": 408,
+          "radius": 123.47590011563598
+        },
+        "phase": "home",
+        "destination": {
+          "x": -1600,
+          "y": 327
+        },
+        "shoulderSide": -1,
+        "shoulderPath": "player--junction-1-1",
+        "shoulderDirection": -1,
+        "factoryChoiceAt": 109.29999999999818,
+        "nextCoverSearchAt": 107.49999999999825,
+        "service": "repairing"
+      }
+    },
+    {
+      "id": "u433",
+      "damaged": true,
+      "hp": 320,
+      "x": -1600,
+      "y": 394.5,
+      "moved": 1034.0151417397524,
+      "task": null,
+      "nav": {
+        "state": "IDLE",
+        "reason": "inside-factory",
+        "since": 135.1999999999966,
+        "stoppedSince": null,
+        "control": "IDLE",
+        "controlReason": "inside-factory",
+        "blockerId": null,
+        "blockerIds": [],
+        "nextAction": "leave-factory",
+        "desiredSpeed": null,
+        "speed": 0,
+        "progressAnchor": {
+          "x": -1600,
+          "y": 394.5
+        },
+        "lastProgressAt": 134.99999999999662,
+        "waitSeconds": 0,
+        "attempt": 0,
+        "waitCycle": false,
+        "potentialDefect": false,
+        "reported": false
+      },
+      "retreat": {
+        "status": "servicing",
+        "resume": {
+          "action": "attack-move",
+          "target": {
+            "x": -819.1752959152773,
+            "y": -414.82060854184056
+          },
+          "origin": {
+            "x": -801.6640716885046,
+            "y": -266.0104946273056
+          }
+        },
+        "threat": {
+          "id": "m02.original.42",
+          "x": -896,
+          "y": -400,
+          "time": 5.099999999999998,
+          "range": 0
+        },
+        "started": 5.1999999999999975,
+        "home": {
+          "id": "b180",
+          "x": -1600,
+          "y": 408,
+          "radius": 123.47590011563598
+        },
+        "phase": "home",
+        "destination": {
+          "x": -1600,
+          "y": 327
+        },
+        "shoulderSide": -1,
+        "shoulderPath": "player--junction-1-1",
+        "shoulderDirection": -1,
+        "factoryChoiceAt": 131.49999999999693,
+        "nextCoverSearchAt": 131.09999999999692,
+        "service": "repairing"
+      }
+    },
+    {
+      "id": "u434",
+      "damaged": true,
+      "hp": 249.88140445611467,
+      "x": -1601.8533932254988,
+      "y": 384.30434523376965,
+      "moved": 1014.3351054080144,
+      "task": null,
+      "nav": {
+        "state": "MOVING",
+        "reason": "following-route",
+        "since": 135.59999999999658,
+        "stoppedSince": null,
+        "control": null,
+        "controlReason": null,
+        "blockerId": null,
+        "blockerIds": [],
+        "nextAction": null,
+        "desiredSpeed": null,
+        "speed": 13.500000000000414,
+        "progressAnchor": {
+          "x": -1601.8533932254988,
+          "y": 384.30434523376965
+        },
+        "lastProgressAt": 140.09999999999633,
+        "waitSeconds": 0,
+        "attempt": 0,
+        "waitCycle": false,
+        "potentialDefect": false,
+        "reported": false
+      },
+      "retreat": {
+        "status": "servicing",
+        "resume": {
+          "action": "attack-move",
+          "target": {
+            "x": -795.2,
+            "y": -415.9092709205829
+          },
+          "origin": {
+            "x": -782.3206274704032,
+            "y": -215.30590691467498
+          }
+        },
+        "threat": {
+          "id": "m02.original.42",
+          "x": -896,
+          "y": -400,
+          "time": 5.099999999999998,
+          "range": 0
+        },
+        "started": 5.1999999999999975,
+        "home": {
+          "id": "b180",
+          "x": -1600,
+          "y": 408,
+          "radius": 123.47590011563598
+        },
+        "phase": "home",
+        "destination": {
+          "x": -1600,
+          "y": 327
+        },
+        "shoulderSide": -1,
+        "shoulderPath": "player--junction-1-1",
+        "shoulderDirection": -1,
+        "factoryChoiceAt": 132.29999999999688,
+        "nextCoverSearchAt": 133.3999999999968,
+        "service": "entering"
+      }
+    },
+    {
+      "id": "u435",
+      "damaged": true,
+      "hp": 320,
+      "x": -1600,
+      "y": 394.5,
+      "moved": 981.3478574867438,
+      "task": null,
+      "nav": {
+        "state": "IDLE",
+        "reason": "inside-factory",
+        "since": 128.59999999999698,
+        "stoppedSince": null,
+        "control": "IDLE",
+        "controlReason": "inside-factory",
+        "blockerId": null,
+        "blockerIds": [],
+        "nextAction": "leave-factory",
+        "desiredSpeed": null,
+        "speed": 0,
+        "progressAnchor": {
+          "x": -1600,
+          "y": 394.5
+        },
+        "lastProgressAt": 128.499999999997,
+        "waitSeconds": 0,
+        "attempt": 0,
+        "waitCycle": false,
+        "potentialDefect": false,
+        "reported": false
+      },
+      "retreat": {
+        "status": "servicing",
+        "resume": {
+          "action": "attack-move",
+          "target": {
+            "x": -820.2639582940196,
+            "y": -438.79590445711784
+          },
+          "origin": {
+            "x": -808.2248722857561,
+            "y": -189.5160000986418
+          }
+        },
+        "threat": {
+          "id": "m02.original.42",
+          "x": -896,
+          "y": -400,
+          "time": 5.099999999999998,
+          "range": 0
+        },
+        "started": 5.1999999999999975,
+        "home": {
+          "id": "b180",
+          "x": -1600,
+          "y": 408,
+          "radius": 123.47590011563598
+        },
+        "phase": "home",
+        "destination": {
+          "x": -1600,
+          "y": 327
+        },
+        "shoulderSide": -1,
+        "shoulderPath": "player--junction-1-1",
+        "shoulderDirection": -1,
+        "factoryChoiceAt": 120.59999999999754,
+        "nextCoverSearchAt": 120.09999999999754,
+        "service": "repairing"
+      }
+    },
+    {
+      "id": "u436",
+      "damaged": true,
+      "hp": 320,
+      "x": -1478.1613973021583,
+      "y": 484.86318001221406,
+      "moved": 946.9123133793156,
+      "task": {
+        "type": "attack-move",
+        "targetId": null,
+        "x": -747.2494081694455,
+        "y": -418.0865956780676,
+        "workOffset": 0
+      },
+      "nav": {
+        "state": "MOVING",
+        "reason": "following-route",
+        "since": 130.99999999999685,
+        "stoppedSince": null,
+        "control": "MOVING",
+        "controlReason": "following-clear-route",
+        "blockerId": null,
+        "blockerIds": [],
+        "nextAction": "follow-route",
+        "desiredSpeed": 30,
+        "speed": 29.99999999999892,
+        "progressAnchor": {
+          "x": -1478.1613973021583,
+          "y": 484.86318001221406
+        },
+        "lastProgressAt": 140.09999999999633,
+        "waitSeconds": 0,
+        "commandRevision": 5,
+        "attempt": 0,
+        "waitCycle": false,
+        "potentialDefect": false,
+        "reported": false
+      },
+      "goal": {
+        "x": -747.2494081694455,
+        "y": -418.0865956780676
+      }
+    },
+    {
+      "id": "u437",
+      "damaged": true,
+      "hp": 320,
+      "x": -811.1248682973808,
+      "y": 272.46989838952373,
+      "moved": 418.87199242815166,
+      "task": {
+        "type": "attack-move",
+        "targetId": null,
+        "x": -816.9979711577926,
+        "y": -366.870016711286,
+        "workOffset": 0
+      },
+      "nav": {
+        "state": "MOVING",
+        "reason": "following-route",
+        "since": 116.49999999999766,
+        "stoppedSince": null,
+        "control": "MOVING",
+        "controlReason": "following-clear-route",
+        "blockerId": null,
+        "blockerIds": [],
+        "nextAction": "follow-route",
+        "desiredSpeed": 40.2,
+        "speed": 40.199992741946296,
+        "progressAnchor": {
+          "x": -811.1248682973808,
+          "y": 272.46989838952373
+        },
+        "lastProgressAt": 140.09999999999633,
+        "waitSeconds": 0,
+        "commandRevision": 4,
+        "attempt": 0,
+        "waitCycle": false,
+        "potentialDefect": false,
+        "reported": false
+      },
+      "goal": {
+        "x": -816.9979711577926,
+        "y": -366.870016711286
+      }
+    },
+    {
+      "id": "u438",
+      "damaged": true,
+      "hp": 320,
+      "x": -1600,
+      "y": 394.5,
+      "moved": 994.6661376217133,
+      "task": null,
+      "nav": {
+        "state": "IDLE",
+        "reason": "inside-factory",
+        "since": 119.09999999999751,
+        "stoppedSince": null,
+        "control": "IDLE",
+        "controlReason": "inside-factory",
+        "blockerId": null,
+        "blockerIds": [],
+        "nextAction": "leave-factory",
+        "desiredSpeed": null,
+        "speed": 0,
+        "progressAnchor": {
+          "x": -1600,
+          "y": 394.5
+        },
+        "lastProgressAt": 118.89999999999752,
+        "waitSeconds": 0,
+        "attempt": 0,
+        "waitCycle": false,
+        "potentialDefect": false,
+        "reported": false
+      },
+      "retreat": {
+        "status": "servicing",
+        "resume": {
+          "action": "attack-move",
+          "target": {
+            "x": -770.1360417059805,
+            "y": -393.022637384048
+          },
+          "origin": {
+            "x": -777.1663932944831,
+            "y": -166.60111199042635
+          }
+        },
+        "threat": {
+          "id": "m02.original.42",
+          "x": -896,
+          "y": -400,
+          "time": 5.099999999999998,
+          "range": 0
+        },
+        "started": 5.1999999999999975,
+        "home": {
+          "id": "b180",
+          "x": -1600,
+          "y": 408,
+          "radius": 123.47590011563598
+        },
+        "phase": "home",
+        "destination": {
+          "x": -1600,
+          "y": 327
+        },
+        "shoulderSide": -1,
+        "shoulderPath": "player--junction-1-1",
+        "shoulderDirection": -1,
+        "factoryChoiceAt": 110.49999999999811,
+        "nextCoverSearchAt": 109.99999999999811,
+        "service": "repairing"
+      }
+    },
+    {
+      "id": "u439",
+      "damaged": true,
+      "hp": 320,
+      "x": -818.2874705449549,
+      "y": -390.449889423442,
+      "moved": 256.8334382625543,
+      "task": null,
+      "nav": {
+        "state": "ARRIVED",
+        "reason": "destination-reached",
+        "since": 138.29999999999643,
+        "stoppedSince": null,
+        "control": null,
+        "controlReason": null,
+        "blockerId": null,
+        "blockerIds": [],
+        "nextAction": null,
+        "desiredSpeed": null,
+        "speed": 0,
+        "progressAnchor": {
+          "x": -818.2874705449549,
+          "y": -390.449889423442
+        },
+        "lastProgressAt": 138.09999999999644,
+        "waitSeconds": 0,
+        "commandRevision": 2,
+        "attempt": 0,
+        "waitCycle": false,
+        "potentialDefect": false,
+        "reported": false
+      },
+      "goal": {
+        "x": -818.0866335365349,
+        "y": -390.84531262656327
+      }
+    },
+    {
+      "id": "u440",
+      "damaged": true,
+      "hp": 320,
+      "x": -1600,
+      "y": 394.5,
+      "moved": 960.6469291768576,
+      "task": null,
+      "nav": {
+        "state": "IDLE",
+        "reason": "inside-factory",
+        "since": 101.19999999999852,
+        "stoppedSince": null,
+        "control": "IDLE",
+        "controlReason": "inside-factory",
+        "blockerId": null,
+        "blockerIds": [],
+        "nextAction": "leave-factory",
+        "desiredSpeed": null,
+        "speed": 0,
+        "progressAnchor": {
+          "x": -1600,
+          "y": 394.5
+        },
+        "lastProgressAt": 101.09999999999853,
+        "waitSeconds": 0,
+        "attempt": 0,
+        "waitCycle": false,
+        "potentialDefect": false,
+        "reported": false
+      },
+      "retreat": {
+        "status": "servicing",
+        "resume": {
+          "action": "attack-move",
+          "target": {
+            "x": -746.1607457907031,
+            "y": -394.11129976279034
+          },
+          "origin": {
+            "x": -765.5018559810521,
+            "y": -84.5087585610517
+          }
+        },
+        "threat": {
+          "id": "m02.original.42",
+          "x": -896,
+          "y": -400,
+          "time": 5.099999999999998,
+          "range": 0
+        },
+        "started": 5.1999999999999975,
+        "home": {
+          "id": "b180",
+          "x": -1600,
+          "y": 408,
+          "radius": 123.47590011563598
+        },
+        "phase": "home",
+        "destination": {
+          "x": -1600,
+          "y": 327
+        },
+        "shoulderSide": -1,
+        "shoulderPath": "player--junction-1-1",
+        "shoulderDirection": -1,
+        "factoryChoiceAt": 94.69999999999901,
+        "nextCoverSearchAt": 94.19999999999901,
+        "service": "repairing"
+      }
+    },
+    {
+      "id": "u441",
+      "damaged": true,
+      "hp": 320,
+      "x": -787.7491685319139,
+      "y": -145.99213732128015,
+      "moved": 38.31061747684679,
+      "task": {
+        "type": "attack-move",
+        "targetId": null,
+        "x": -794.1113376212577,
+        "y": -391.9339750053056,
+        "workOffset": 0
+      },
+      "nav": {
+        "state": "MOVING",
+        "reason": "following-route",
+        "since": 104.49999999999834,
+        "stoppedSince": null,
+        "control": "MOVING",
+        "controlReason": "following-clear-route",
+        "blockerId": null,
+        "blockerIds": [],
+        "nextAction": "follow-route",
+        "desiredSpeed": 40.2,
+        "speed": 40.199992720532386,
+        "progressAnchor": {
+          "x": -787.7491685319139,
+          "y": -145.99213732128015
+        },
+        "lastProgressAt": 140.09999999999633,
+        "waitSeconds": 0,
+        "commandRevision": 3,
+        "attempt": 0,
+        "waitCycle": false,
+        "potentialDefect": false,
+        "reported": false
+      },
+      "goal": {
+        "x": -794.1113376212577,
+        "y": -391.9339750053056
+      }
+    },
+    {
+      "id": "u442",
+      "damaged": false,
+      "hp": 320,
+      "x": -792.9366064795856,
+      "y": -367.58681866652705,
+      "moved": 322.6078032790428,
+      "task": null,
+      "nav": {
+        "state": "ARRIVED",
+        "reason": "destination-reached",
+        "since": 33.0000000000002,
+        "stoppedSince": null,
+        "control": null,
+        "controlReason": null,
+        "blockerId": null,
+        "blockerIds": [],
+        "nextAction": null,
+        "desiredSpeed": null,
+        "speed": 0,
+        "progressAnchor": {
+          "x": -792.9366064795856,
+          "y": -367.58681866652705
+        },
+        "lastProgressAt": 32.800000000000196,
+        "waitSeconds": 0,
+        "commandRevision": 1,
+        "attempt": 0,
+        "waitCycle": false,
+        "potentialDefect": false,
+        "reported": false
+      },
+      "goal": {
+        "x": -793.0226752425153,
+        "y": -367.95867909002834
+      }
+    },
+    {
+      "id": "u443",
+      "damaged": false,
+      "hp": 320,
+      "x": -814.4644085097362,
+      "y": -318.8996374969663,
+      "moved": 268.027136269407,
+      "task": null,
+      "nav": {
+        "state": "ARRIVED",
+        "reason": "destination-reached",
+        "since": 18.699999999999996,
+        "stoppedSince": null,
+        "control": null,
+        "controlReason": null,
+        "blockerId": null,
+        "blockerIds": [],
+        "nextAction": null,
+        "desiredSpeed": null,
+        "speed": 0,
+        "progressAnchor": {
+          "x": -814.4644085097362,
+          "y": -318.8996374969663
+        },
+        "lastProgressAt": 18.499999999999993,
+        "waitSeconds": 0,
+        "commandRevision": 1,
+        "attempt": 0,
+        "waitCycle": false,
+        "potentialDefect": false,
+        "reported": false
+      },
+      "goal": {
+        "x": -814.820646400308,
+        "y": -318.91942488073147
+      }
+    },
+    {
+      "id": "u444",
+      "damaged": false,
+      "hp": 320,
+      "x": -769.3831248807364,
+      "y": -368.97977352549896,
+      "moved": 344.58282062552115,
+      "task": null,
+      "nav": {
+        "state": "ARRIVED",
+        "reason": "destination-reached",
+        "since": 32.000000000000185,
+        "stoppedSince": null,
+        "control": null,
+        "controlReason": null,
+        "blockerId": null,
+        "blockerIds": [],
+        "nextAction": null,
+        "desiredSpeed": null,
+        "speed": 0,
+        "progressAnchor": {
+          "x": -769.3831248807364,
+          "y": -368.97977352549896
+        },
+        "lastProgressAt": 31.800000000000182,
+        "waitSeconds": 0,
+        "commandRevision": 1,
+        "attempt": 0,
+        "waitCycle": false,
+        "potentialDefect": false,
+        "reported": false
+      },
+      "goal": {
+        "x": -769.0473793272381,
+        "y": -369.0473414687707
+      }
+    },
+    {
+      "id": "u445",
+      "damaged": false,
+      "hp": 320,
+      "x": -815.4998580042778,
+      "y": -342.95035974101546,
+      "moved": 296.3765344118919,
+      "task": null,
+      "nav": {
+        "state": "ARRIVED",
+        "reason": "destination-reached",
+        "since": 24.900000000000084,
+        "stoppedSince": null,
+        "control": null,
+        "controlReason": null,
+        "blockerId": null,
+        "blockerIds": [],
+        "nextAction": null,
+        "desiredSpeed": null,
+        "speed": 0,
+        "progressAnchor": {
+          "x": -815.4998580042778,
+          "y": -342.95035974101546
+        },
+        "lastProgressAt": 24.70000000000008,
+        "waitSeconds": 0,
+        "commandRevision": 1,
+        "attempt": 0,
+        "waitCycle": false,
+        "potentialDefect": false,
+        "reported": false
+      },
+      "goal": {
+        "x": -815.9093087790502,
+        "y": -342.89472079600876
+      }
+    },
+    {
+      "id": "u446",
+      "damaged": false,
+      "hp": 320,
+      "x": -745.188407539249,
+      "y": -369.78013226378135,
+      "moved": 377.64598245600763,
+      "task": null,
+      "nav": {
+        "state": "ARRIVED",
+        "reason": "destination-reached",
+        "since": 42.90000000000034,
+        "stoppedSince": null,
+        "control": null,
+        "controlReason": null,
+        "blockerId": null,
+        "blockerIds": [],
+        "nextAction": null,
+        "desiredSpeed": null,
+        "speed": 0,
+        "progressAnchor": {
+          "x": -745.188407539249,
+          "y": -369.78013226378135
+        },
+        "lastProgressAt": 42.70000000000034,
+        "waitSeconds": 0,
+        "commandRevision": 1,
+        "attempt": 0,
+        "waitCycle": false,
+        "potentialDefect": false,
+        "reported": false
+      },
+      "goal": {
+        "x": -745.0720834119608,
+        "y": -370.13600384751305
+      }
+    },
+    {
+      "id": "u447",
+      "damaged": false,
+      "hp": 320,
+      "x": -837.4449453861912,
+      "y": -293.5359560235127,
+      "moved": 283.90479777094896,
+      "task": null,
+      "nav": {
+        "state": "ARRIVED",
+        "reason": "destination-reached",
+        "since": 25.000000000000085,
+        "stoppedSince": null,
+        "control": null,
+        "controlReason": null,
+        "blockerId": null,
+        "blockerIds": [],
+        "nextAction": null,
+        "desiredSpeed": null,
+        "speed": 0,
+        "progressAnchor": {
+          "x": -837.4449453861912,
+          "y": -293.5359560235127
+        },
+        "lastProgressAt": 24.800000000000082,
+        "waitSeconds": 0,
+        "commandRevision": 1,
+        "attempt": 0,
+        "waitCycle": false,
+        "potentialDefect": false,
+        "reported": false
+      },
+      "goal": {
+        "x": -837.7072799368428,
+        "y": -293.8554665867118
+      }
+    },
+    {
+      "id": "u448",
+      "damaged": false,
+      "hp": 320,
+      "x": -768.134423243494,
+      "y": -345.27116555432775,
+      "moved": 397.4852078715374,
+      "task": null,
+      "nav": {
+        "state": "ARRIVED",
+        "reason": "destination-reached",
+        "since": 37.000000000000256,
+        "stoppedSince": null,
+        "control": null,
+        "controlReason": null,
+        "blockerId": null,
+        "blockerIds": [],
+        "nextAction": null,
+        "desiredSpeed": null,
+        "speed": 0,
+        "progressAnchor": {
+          "x": -768.134423243494,
+          "y": -345.27116555432775
+        },
+        "lastProgressAt": 36.900000000000254,
+        "waitSeconds": 0,
+        "commandRevision": 1,
+        "attempt": 0,
+        "waitCycle": false,
+        "potentialDefect": false,
+        "reported": false
+      },
+      "goal": {
+        "x": -767.9587169484957,
+        "y": -345.07204555349347
+      }
+    },
+    {
+      "id": "u449",
+      "damaged": false,
+      "hp": 320,
+      "x": -790.9925233337814,
+      "y": -319.6694817891546,
+      "moved": 354.0123072683802,
+      "task": null,
+      "nav": {
+        "state": "ARRIVED",
+        "reason": "destination-reached",
+        "since": 24.800000000000082,
+        "stoppedSince": null,
+        "control": null,
+        "controlReason": null,
+        "blockerId": null,
+        "blockerIds": [],
+        "nextAction": null,
+        "desiredSpeed": null,
+        "speed": 0,
+        "progressAnchor": {
+          "x": -790.9925233337814,
+          "y": -319.6694817891546
+        },
+        "lastProgressAt": 24.60000000000008,
+        "waitSeconds": 0,
+        "commandRevision": 1,
+        "attempt": 0,
+        "waitCycle": false,
+        "potentialDefect": false,
+        "reported": false
+      },
+      "goal": {
+        "x": -790.8453504850306,
+        "y": -320.0080872594738
+      }
+    },
+    {
+      "id": "u450",
+      "damaged": false,
+      "hp": 320,
+      "x": -744.2802346567602,
+      "y": -346.0574871881327,
+      "moved": 423.0094958754333,
+      "task": null,
+      "nav": {
+        "state": "ARRIVED",
+        "reason": "destination-reached",
+        "since": 38.70000000000028,
+        "stoppedSince": null,
+        "control": null,
+        "controlReason": null,
+        "blockerId": null,
+        "blockerIds": [],
+        "nextAction": null,
+        "desiredSpeed": null,
+        "speed": 0,
+        "progressAnchor": {
+          "x": -744.2802346567602,
+          "y": -346.0574871881327
+        },
+        "lastProgressAt": 38.50000000000028,
+        "waitSeconds": 0,
+        "commandRevision": 1,
+        "attempt": 0,
+        "waitCycle": false,
+        "potentialDefect": false,
+        "reported": false
+      },
+      "goal": {
+        "x": -743.9834210332184,
+        "y": -346.1607079322358
+      }
+    },
+    {
+      "id": "u451",
+      "damaged": false,
+      "hp": 319.88922728698464,
+      "x": -792.3465555639307,
+      "y": -343.90101813855534,
+      "moved": 421.6451900232623,
+      "task": null,
+      "nav": {
+        "state": "ARRIVED",
+        "reason": "destination-reached",
+        "since": 46.40000000000039,
+        "stoppedSince": null,
+        "control": null,
+        "controlReason": null,
+        "blockerId": null,
+        "blockerIds": [],
+        "nextAction": null,
+        "desiredSpeed": null,
+        "speed": 0,
+        "progressAnchor": {
+          "x": -792.3465555639307,
+          "y": -343.90101813855534
+        },
+        "lastProgressAt": 46.20000000000039,
+        "waitSeconds": 0,
+        "commandRevision": 1,
+        "attempt": 0,
+        "waitCycle": false,
+        "potentialDefect": false,
+        "reported": false
+      },
+      "goal": {
+        "x": -791.934012863773,
+        "y": -343.9833831747511
+      }
+    }
+  ],
+  "limitation": "Owner save from the original traffic freeze is unavailable; this is a reproducible representative scenario."
+}
