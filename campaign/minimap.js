@@ -43,6 +43,7 @@ export function installMinimapInput(canvas,{mission,enabled,mode,building,order,
 
 export function createMinimap(canvas,{world,mission,selected,background,notify}){
  const base=document.createElement('canvas'),ctx=canvas.getContext('2d'),cached=base.getContext('2d'),alerts=new MinimapAlerts(notify);
+ const surface=document.createElement('canvas'),surfaceContext=surface.getContext('2d');
  let refreshed=-Infinity,boundsKey='',cachedCssSize=canvas.clientWidth||132;
  new ResizeObserver(entries=>{cachedCssSize=entries[0].contentRect.width||132;refreshed=-Infinity;}).observe(canvas);
  const position=p=>minimapPosition(world.field,p,canvas.width,canvas.height,mission.state.bounds);
@@ -51,9 +52,14 @@ export function createMinimap(canvas,{world,mission,selected,background,notify})
   // of exposing a green rectangle that looks like a straight water boundary.
   const size=canvas.width;cached.clearRect(0,0,size,size);cached.fillStyle='#0b0e0f';cached.fillRect(0,0,size,size);
   const view=minimapViewport(mission.state.bounds),fullSize=size*127/view.span;
-  cached.save();cached.translate(-view.left/view.span*size,-view.top/view.span*size);
-  if(background.complete&&background.naturalWidth)cached.drawImage(background,0,0,fullSize,fullSize);
-  world.drawMinimapFog(cached,fullSize);cached.restore();
+  // Composite at integer edges first. Drawing the map and fog separately at
+  // a fractional offset blends their edges twice and leaks a bright seam.
+  const surfaceSize=Math.ceil(fullSize);
+  if(surface.width!==surfaceSize||surface.height!==surfaceSize)surface.width=surface.height=surfaceSize;
+  surfaceContext.clearRect(0,0,surfaceSize,surfaceSize);
+  if(background.complete&&background.naturalWidth)surfaceContext.drawImage(background,0,0,surfaceSize,surfaceSize);
+  world.drawMinimapFog(surfaceContext,surfaceSize);
+  cached.drawImage(surface,-view.left/view.span*size,-view.top/view.span*size,fullSize,fullSize);
   for(const grid of mission.config.oilFields){const p=world.field.gridToWorld(grid);if(!mission.exploredAt(p.x,p.y))continue;const [x,y]=position(p);cached.fillStyle='#d5b869';cached.fillRect(x-scale,y-scale,2*scale,2*scale);}
   // Structures are drawn first; units remain visible over them.
   for(const [group,isBuilding] of [[mission.state.buildings,true],[mission.state.units,false]])for(const e of group){
