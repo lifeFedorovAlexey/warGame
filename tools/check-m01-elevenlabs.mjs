@@ -16,7 +16,7 @@ try {
   assert.equal(report.generated,69);assert.deepEqual(completed.remainingTemporaryOrMissing,[]);
   for(const [id,clip] of Object.entries(completed.clips)) {
     const actual=id.startsWith('factory-')?read('factory-service-voice.json').barks.find(line=>line.id===id).clip:audio.clips[id];
-    if(languagePass.retiredStoryIds.includes(id))assert.equal(actual,undefined,'Retired cue stays outside the active script: '+id);
+    if([...languagePass.retiredStoryIds,'m01-s14-l015','m01-s14-l016','m01-s14-l017'].includes(id))assert.equal(actual,undefined,'Retired cue stays outside the active script: '+id);
     else assert.equal(actual?.sha256,clip.sha256,id);
     assert.equal(createHash('sha256').update(fs.readFileSync('assets/campaign/alpha/mission01/'+clip.file)).digest('hex'),clip.sha256,id);
   }

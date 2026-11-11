@@ -12,10 +12,12 @@ export function resultsPresentationReady(mission,radio){
  if(mission.state.status==='running')return false;
  if(mission.state.status==='victory'&&hasPendingCampDemolition(mission))return false;
  if(mission.state.status==='defeat'||!radio?.enabled||!radio.director)return true;
- const id=mission.state.m03?'m03-s11':mission.state.m02?'m02-radio-victory':'r54',director=radio.director;
+ const director=radio.director;
+ const finalScenes=mission.state.m03?['m03-s11']:mission.state.m02?['m02-radio-victory']:['r54','r50','r49','r48'];
+ const id=finalScenes.find(key=>{const scene=director.scenes.get(key);return scene?.enabled!==false&&scene?.cues.length;});
  // The final exchange keeps its portraits, captions and full recordings on
  // the map. End-of-operation choices wait for the exchange to finish.
- return !director.scenes.has(id)||director.finished(id);
+ return !id||director.finished(id);
 }
 export class MissionResultsView{
  constructor(root,{onVisibility=()=>{}}={}){
@@ -56,7 +58,7 @@ export class MissionResultsView{
   this.canvas.setAttribute('aria-label',`Холм памяти. Погибших: ${data.memorial.length}. Стрелки влево и вправо — выбрать бойца, Home и End — первый и последний.`);
   this.inspect(-1);this.root.hidden=false;this.scene.setData(data.memorial);this.onVisibility(true);this.scene.start();
   this.fitRanks();
-  $('result-continue').hidden?$('result-close').focus():$('result-continue').focus();return true;
+  $('result-close').focus();return true;
  }
  honours(node,soldiers){
   const list=node.querySelector('div');list.replaceChildren();

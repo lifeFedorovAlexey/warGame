@@ -10,7 +10,6 @@ const profiles=[
  ['voice-2','m','6YjFofyVXU1ASguf2hTJ','Maxim - Conversational & Natural'],
  ['voice-3','f','GN4wbsbejSnGSa1AzjH5','Ekaterina - Soft, Silky and Tender'],
  ['voice-4','m','txnCCHHGKmYIwrn7HfHQ','Alexandr Vlasov - Vibrant and Energetic'],
- ['voice-5','f','EXAVITQu4vr4xnSDxMaL','Sarah - Mature, Reassuring, Confident'],
  ['voice-6','m','RLRdvNFwJJct2XZOgfzy','Mishka Yaponcik - Odessa Rogue Charm'],
 ].map(([profile,gender,voiceId,voiceName])=>({profile,gender,voiceId,voiceName}));
 const hash=x=>createHash('sha256').update(x).digest('hex');

@@ -3,7 +3,7 @@ import {stableHash} from './conditions.js';
 import {TacticalIntel} from './tactical-intel.js';
 import {CrewStories} from './crew-stories.js';
 import {CrewBanter,banterCrew} from './crew-banter.js';
-import {loadRecordedSpeech} from './audio.js';
+import {loadRecordedSpeech,activeRadioVoice} from './audio.js';
 import {RetreatIncidents,mergeRetreatLibrary} from './retreat-incidents.js';
 
 export const ENGINE_EVENTS={
@@ -248,8 +248,8 @@ export class MissionRadio{
    const role=unit.kind==='command'?'commander':m.unitSpec(unit).role==='builder'?'builder':'driver';
    const gender=soldier.gender??'m';
    const prior=this.crews.get(soldier.id);
-   const profiles=this.library.characters.filter(c=>c.enabled&&(c.gender??'m')===gender&&(gender==='f'||c.role===role));
-   const voice=this.library.characters.find(c=>c.enabled&&c.voiceId===prior?.voiceId&&(c.gender??'m')===gender)??profiles[stableHash(soldier.id)%Math.max(1,profiles.length)];
+   const profiles=this.library.characters.filter(c=>c.enabled&&activeRadioVoice(c.voiceId)===c.voiceId&&(c.gender??'m')===gender&&(gender==='f'||c.role===role));
+   const voice=this.library.characters.find(c=>c.enabled&&c.voiceId===activeRadioVoice(prior?.voiceId)&&(c.gender??'m')===gender)??profiles[stableHash(soldier.id)%Math.max(1,profiles.length)];
    this.crews.set(soldier.id,{crewId:soldier.id,unitId:id,callSignId:soldier.callsign,name:soldier.name,role,voiceId:voice?.voiceId??null,
     portraitId:voice?.portrait??null,persona:voice?.name??role,alive:true,combatReady:true,group:unit.commandGroupId??null,rank:soldier.rank,
     radioChannel:'rai',lastSpoken:prior?.lastSpoken??null,memories:[...this.memories.values()].filter(v=>v.crewIds.includes(soldier.id)).map(v=>v.id).slice(-16)});

@@ -28,7 +28,7 @@ for(const cue of [...source.dialogue,...source.barks]){
  assert(clip.duration>0);
  if(cue.speaker!=='past')assert(portraits.characters[cue.speaker],cue.speaker);
 }
-assert.equal(userCount,109);assert.equal(elevenlabsCount,60);
+assert.equal(userCount,107);assert.equal(elevenlabsCount,59);
 assert.equal(audio.clips['m01-s07-l014'].voiceName,'Mishka Yaponcik - Odessa Rogue Charm');
 assert.equal(hash(fs.readFileSync(base+'recordings/reviewed/m01-s07-l014-4e14be06b9b1.mp3')),'4e14be06b9b1155f9d172d2ad351ef622770b629d1241313303b233a4ca38308');
 for(const id of ['m01-v3-r24-l001','m01-v3-r24-l002','m01-v3-r24-l003'])assert.equal(audio.clips[id].origin,'user-recording',id);
@@ -278,7 +278,8 @@ for(const enabled of [false,true]){
 {
  const f=fixture();f.finish();f.mission.state.status='victory';assert.equal(f.tick().storyScene,'r48');f.finish();
  assert.equal(f.tick(6).storyScene,'r49');f.finish();assert.equal(f.tick(6).storyScene,'r50');f.finish();
- assert.equal(f.tick(16).storyScene,'r54');f.finish();assert.equal(f.tick(90),null);
+ assert.equal(f.tick(16),null);assert.equal(f.tick(90),null);
+ assert.equal(source.scenes.find(s=>s.id==='r54').enabled,false);
  assert(!f.director.data.scenes.u01);assert(!f.director.data.scenes.u02);assert(!f.director.data.scenes.u04);
 }
 {

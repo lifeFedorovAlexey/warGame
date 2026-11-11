@@ -14,7 +14,7 @@ assert.equal(personnelRanks.filter(r=>r.service==='army').length,20);assert.equa
 assert.equal((rankInsignia('captain').match(/polygon/g)??[]).length,4);assert.equal((rankInsignia('colonel').match(/polygon/g)??[]).length,3);
 for(const r of personnelRanks.filter(r=>r.order<6))assert(!rankInsignia(r.id).includes('polygon'),'Enlisted insignia have no officer stars');
 const poses=new Set();for(let i=0;i<2000;i++){const p=gravePosition(i);const key=p.x+':'+p.y;assert(!poses.has(key));poses.add(key);}
-const radio={enabled:true,director:{scenes:new Map([['r54',{}],['m02-radio-victory',{}]]),finished:()=>false}};
+const radio={enabled:true,director:{scenes:new Map([['r54',{enabled:false,cues:[]}],['r50',{cues:['last']}],['m02-radio-victory',{cues:['last']}]]),finished:()=>false}};
 assert(!resultsPresentationReady({state:{status:'victory'}},radio));assert(!resultsPresentationReady({state:{status:'victory',m02:{}}},radio));
 assert(resultsPresentationReady({state:{status:'defeat'}},radio));assert(resultsPresentationReady({state:{status:'victory'}},{...radio,enabled:false}));radio.director.finished=()=>true;assert(resultsPresentationReady({state:{status:'victory'}},radio));
 console.log('PASS unique names, deterministic restore, unique callsigns over 3 vocabulary cycles, 39 ranks, 2000 stable grave positions');

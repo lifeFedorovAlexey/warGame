@@ -14,7 +14,7 @@ const report=[];
 for(const name of ['m01','m02']){
  const m=name==='m02'?prepareM02Diagnostic(makeMission()):makeMission();
  const director=new StoryDirector(story),data=director.bind(m);
- const final=name==='m01'?['r48','r49','r50','r54']:['m02-radio-victory'];
+ const final=name==='m01'?['r48','r49','r50']:['m02-radio-victory'];
  for(const scene of story.scenes)if(!final.includes(scene.id))data.scenes[scene.id]={status:'done',cursor:scene.cues.length,endedAt:-30000};
  m.state.storyConstruction={enabled:false};
  m.state.status='victory';m.state.projectiles=[{id:'shell-in-flight-when-last-target-died'}];

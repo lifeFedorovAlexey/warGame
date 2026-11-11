@@ -39,7 +39,7 @@ try{
  // Exercise the current main finale: M02 must expose the next operation,
  // and its checkpoint must stay distinct from the earlier M01 checkpoint.
  await page.evaluate(data=>{delete data.state.m03;data.state.status='victory';campaign.mission.load(data);},structuredClone(base));
- await page.locator('#ending-continue').click({timeout:15000});
+ await page.locator('#result-continue').click({timeout:15000});
  await page.waitForFunction(()=>campaign.mission.state.m03?.phase==='preparation'&&document.querySelector('#result').hidden&&!document.querySelector('#ending-continue').disabled&&document.querySelector('#mission-ending').hidden);
  const restart=await page.evaluate(()=>JSON.parse(localStorage.getItem('warGame.alpha.mission-start.m03.v1')));
  assert.equal(restart.state.m03.phase,'preparation');assert.equal(restart.state.m03.location,'home');

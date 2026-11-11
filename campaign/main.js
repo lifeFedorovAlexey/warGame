@@ -1108,7 +1108,7 @@ function frame(now) {
       $('results-open').hidden=false;
       if(ending.ready&&resultsPresentationReady(mission,radio)){
         ending.prepareChoices();
-        if(ending.ready){resultShown=true;ending.showChoices(mission,!!missionRestartPlan(mission,localStorage));saveGame(false);}
+        if(ending.ready){ending.finish();ending.closeChoices();resultShown=resultsView.show(mission);if(resultShown)saveGame(false);}
       }
     }
   }
@@ -1277,7 +1277,7 @@ try {
   }});
   $('results-open').onclick=()=>{ending.finish();ending.closeChoices();resultShown=true;resultsView.show(mission);};
   const continueMission=async()=>{
-    if(enteringM02||restartingMission||mission.state.m03||mission.state.status!=='victory')return;
+    if(enteringM02||restartingMission||$('result').hidden||mission.state.m03||mission.state.status!=='victory')return;
     enteringM02=true;$('result-continue').disabled=$('ending-continue').disabled=true;
     try{
       try{localStorage.setItem(mission.state.m02?'warGame.alpha.before-m03.v1':checkpointKey,await mission.saveAsync());}catch{return toast('Не удалось создать контрольное сохранение');}
@@ -1289,7 +1289,8 @@ try {
       await saveGame(false);updateUi();
     }finally{loadingGame=false;last=performance.now();enteringM02=false;$('result-continue').disabled=$('ending-continue').disabled=false;}
   };
-  $('result-continue').onclick=$('ending-continue').onclick=continueMission;
+  $('result-continue').onclick=continueMission;
+  $('ending-continue').onclick=()=>{ending.closeChoices();resultsView.show(mission);};
   $('ending-restart').onclick=async()=>{
     if(loadingGame||enteringM02||restartingMission)return;
     const plan=missionRestartPlan(mission,localStorage);if(!plan)return;

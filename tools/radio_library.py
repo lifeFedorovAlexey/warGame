@@ -77,6 +77,10 @@ def load(published=False):
     seed = read(SEED)
     additions = {'traffic.retreat_contact','traffic.panic_blocked','traffic.panic_escaped','damage.panic_failed'}
     document = result['document']
+    # The owner removed Sarah; older published/editor snapshots must not restore her.
+    document['characters'] = [c for c in document['characters'] if c['voiceId'] != 'voice-5']
+    for phrase in document['phrases'].values():
+        if phrase.get('voiceId') == 'voice-5': phrase['voiceId'] = 'voice-3'
     existing = {r['id'] for r in document['rules']}
     for rule in seed['rules']:
         if rule['id'] not in additions or rule['id'] in existing: continue

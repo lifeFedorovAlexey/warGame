@@ -1,0 +1,36 @@
+{
+  "errors": [],
+  "paidRequests": [],
+  "replacement": {
+    "voiceId": "GN4wbsbejSnGSa1AzjH5",
+    "file": "assets/radio/recordings/elevenlabs-10k/voice-3-07599182d4623e1c.mp3"
+  },
+  "oldSaveVoice": "voice-3",
+  "played": [
+    {
+      "id": "m01-v4-r50-l004",
+      "resultVisible": false
+    }
+  ],
+  "viewports": [
+    [
+      1440,
+      900
+    ],
+    [
+      844,
+      390
+    ],
+    [
+      667,
+      375
+    ]
+  ],
+  "explicitContinue": true,
+  "retiredRecordings": 189,
+  "activeRecordedVoices": 5,
+  "activeRecordings": 941,
+  "removedScene": "r54",
+  "legacyDraftAndPublicationMigration": true,
+  "newPaidGenerations": 0
+}

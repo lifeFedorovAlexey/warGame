@@ -12,7 +12,7 @@ assert.equal(bank.batches.length,2);
 for(const batch of bank.batches){assert(batch.reservedCredits<=batch.budgetCredits&&batch.budgetCredits<=10000);assert.equal(batch.radioCredits+batch.storyCredits,batch.reservedCredits);}
 assert.equal(bank.reservedCredits,bank.batches.reduce((n,b)=>n+b.reservedCredits,0));
 assert.equal(report.reservedCredits,9900);assert(report.reservedCredits<=report.budgetCredits);
-assert.equal(bank.profiles.length,6);assert.equal(bank.profiles.filter(p=>p.gender==='f').length,2);
+assert.equal(bank.profiles.length,5);assert.equal(bank.profiles.filter(p=>p.gender==='f').length,1);
 let count=0;
 for(const [voice,clips] of Object.entries(bank.clips))for(const [text,clip] of Object.entries(clips)){
  count++;assert.equal(clip.voice,voice);assert.equal(clip.text,text);assert.equal(clip.origin,'elevenlabs-synthesis');
@@ -23,7 +23,7 @@ for(const [voice,clips] of Object.entries(bank.clips))for(const [text,clip] of O
  const owned={source:'recording',text,audio:{file:'owner.mp3',text}};
  assert.equal(radioClip(owned,text,library.settings,voice).file,'owner.mp3');
 }
-assert.equal(count,1130);assert.equal(count,report.activeRadioRecordings);assert.equal(count,bank.recordings);
+assert.equal(count,941);assert.equal(count+bank.retiredProfiles.reduce((n,p)=>n+p.recordings,0),report.activeRadioRecordings);assert.equal(count,bank.recordings);
 const text='Помолчать бы сейчас.',files=new Set();
 for(const p of bank.profiles){
  const clip=recordedRadioClip(p.profile,text);assert(clip);files.add(clip.file);
@@ -31,7 +31,10 @@ for(const p of bank.profiles){
  const rendered=renderRadioLine({text,source:'tts'}, {}, library.dictionaries,speaker,null,{opening:true});
  assert.equal(rendered.text,text);assert.equal(rendered.callSign,'Кедр');assert.equal(rendered.speakerName,'Алексей');
 }
-assert.equal(files.size,6,'Same line retains six different stable crew voices');
+assert.equal(files.size,5,'Same line retains five different active crew voices');
+assert.equal(recordedRadioClip('voice-5','Технику побило.').voiceId,recordedRadioClip('voice-3','Технику побило.').voiceId);
+assert(!bank.profiles.some(p=>p.voiceId==='EXAVITQu4vr4xnSDxMaL'));
+assert(!bank.clips['voice-5']);
 const changed=radioClip({source:'tts',text},text+' Ещё одна фраза.',library.settings,'voice-1');
 assert.equal(changed.origin,'temporary-synthesis');
 const absentCount='Потеряли девяносто девять машин.';

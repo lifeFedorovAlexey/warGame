@@ -74198,16 +74198,6 @@
       "gender": "m"
     },
     {
-      "id": "voice-5",
-      "name": "Женский · спокойный",
-      "role": "driver",
-      "voiceId": "voice-5",
-      "portrait": null,
-      "channel": "rai",
-      "enabled": true,
-      "gender": "f"
-    },
-    {
       "id": "voice-6",
       "name": "Радист",
       "role": "radio",

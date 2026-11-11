@@ -12,7 +12,7 @@ try{
   for(const key of ['fieldSound','fieldStoryVoice','fieldRadio'])localStorage.setItem('warGame.'+key,'on');
   window.voiceChecks=[];window.editorPlayed=[];const start=AudioBufferSourceNode.prototype.start;
   AudioBufferSourceNode.prototype.start=function(){const entry=window.campaign?.radio?.entry;
-   if(entry?.dynamic&&this.buffer&&Math.abs(this.buffer.duration-entry.clip?.duration)<.05){let peak=0;for(const n of this.buffer.getChannelData(0))peak=Math.max(peak,Math.abs(n));voiceChecks.push({id:entry.id,text:entry.text,voice:entry.clip.voice,voiceName:entry.clip.voiceName,origin:entry.clip.origin,duration:this.buffer.duration,peak,context:this.context.state});}
+   if(entry?.dynamic&&this.buffer&&Math.abs(this.buffer.duration-entry.clip?.duration)<.05){let peak=0;for(const n of this.buffer.getChannelData(0))peak=Math.max(peak,Math.abs(n));voiceChecks.push({id:entry.id,crewId:entry.crewId,text:entry.text,voice:entry.clip.voice,voiceName:entry.clip.voiceName,origin:entry.clip.origin,duration:this.buffer.duration,peak,context:this.context.state});}
    return start.apply(this,arguments);};
   const play=HTMLMediaElement.prototype.play;
   HTMLMediaElement.prototype.play=function(){this.addEventListener('playing',()=>editorPlayed.push({src:this.currentSrc,duration:this.duration}),{once:true});return play.apply(this,arguments);};
@@ -26,8 +26,8 @@ try{
    rows.push({voice,file:clip.file,duration:buffer.duration,expected:clip.duration,peak});
   }await ctx.close();return rows;
  });
- assert.equal(report.decoded.length,1130);assert(report.decoded.every(r=>r.peak>.01&&Math.abs(r.duration-r.expected)<.05));
- report.checks.push('all 1130 files decode in browser; all six profiles have audible recordings');
+ assert.equal(report.decoded.length,941);assert(report.decoded.every(r=>r.peak>.01&&Math.abs(r.duration-r.expected)<.05));
+ report.checks.push('all 941 files decode in browser; all five profiles have audible recordings');
  await page.locator('[data-radio-rule="idle.quiet"]').click();await page.getByLabel('Масштаб',{exact:true}).selectOption('single');
  await page.getByLabel('Вариант разговора',{exact:true}).selectOption('0');
  assert.equal(await page.getByText('Готовая озвучка',{exact:true}).count(),2);
@@ -51,7 +51,8 @@ try{
  });
  await page.waitForFunction(()=>voiceChecks.length>=2,null,{timeout:30000});report.game=await page.evaluate(()=>voiceChecks);
  assert(report.game.every(v=>v.origin==='elevenlabs-synthesis'&&v.peak>.01&&v.context==='running'));
- assert(new Set(report.game.map(v=>v.voice)).size>=2,'Eligible conversation partners use distinct stable crew voices');
+ assert(new Set(report.game.map(v=>v.crewId)).size>=2,'A complete exchange uses different actual crew members');
+ assert(report.game.every(v=>v.voiceName!=='Sarah - Mature, Reassuring, Confident'));
  for(const [label,width,height] of [['desktop',1440,1000],['landscape',844,390],['small-landscape',667,375],['narrow',390,844]]){
   await page.setViewportSize({width,height});await page.screenshot({path:folder+'/game-'+label+'.png'});assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
  }

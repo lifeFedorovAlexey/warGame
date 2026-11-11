@@ -208,6 +208,7 @@ def build():
   'acknowledgements':['Принято.','Подтверждаю.'],'morphology':{'machine':['машина','машины','машин'],'person':['человек','человека','человек']}}}
  enrich(rules,phrases,library['dictionaries'],library['settings'])
  for voice in library['characters']:voice['gender']='f' if voice['voiceId'] in ('voice-3','voice-5') else 'm'
+ library['characters']=[c for c in library['characters'] if c['voiceId']!='voice-5']
  return library
 
 if __name__=='__main__':

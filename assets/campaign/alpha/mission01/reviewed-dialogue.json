@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "draftRevision": 219,
+  "draftRevision": 220,
   "draftSha256": "1c5043ff3241222489be8ed397529c87ee35b77771d3939975d6458ba5943d11",
   "throughScene": "r36",
-  "appliedAt": "2026-11-11T21:01:51.026436+00:00",
+  "appliedAt": "2026-11-11T22:00:11.180169+00:00",
   "scenes": [
     {
       "id": "p01",
@@ -651,6 +651,12 @@
       ],
       "notes": "",
       "enabled": true
+    },
+    {
+      "id": "r54",
+      "cues": [],
+      "enabled": false,
+      "notes": "Послесловие «А если работает?» удалено владельцем. Финал заканчивается сценой r50."
     }
   ],
   "dialogue": [
