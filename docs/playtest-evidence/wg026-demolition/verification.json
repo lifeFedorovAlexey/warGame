@@ -1,0 +1,36 @@
+{
+  "results": [
+    {
+      "base": "east_factory",
+      "segments": 31,
+      "lastBuilding": "scav-barracks",
+      "load": true,
+      "guardsPreserved": 3
+    },
+    {
+      "base": "hill_factory",
+      "segments": 44,
+      "lastBuilding": "scav-barracks",
+      "load": true,
+      "guardsPreserved": 4
+    },
+    {
+      "base": "sensor_outpost",
+      "segments": 24,
+      "lastBuilding": "scav-store",
+      "load": true,
+      "guardsPreserved": 2
+    },
+    {
+      "base": "energy_hub",
+      "segments": 62,
+      "lastBuilding": "scav-store",
+      "load": true,
+      "guardsPreserved": 5
+    }
+  ],
+  "totalSegments": 161,
+  "resourceCapturePreserved": true,
+  "victoryFinishesChain": true,
+  "noRepeatedBlasts": true
+}

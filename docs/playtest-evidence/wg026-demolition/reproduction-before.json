@@ -1,0 +1,29 @@
+{
+  "source": "First invocation of reproduce-wg026.mjs on cd96c07, before the fix",
+  "bases": [
+    {
+      "base": "east_factory",
+      "remainingBuildings": 0,
+      "standingWalls": 31,
+      "wallExplosions": 0
+    },
+    {
+      "base": "hill_factory",
+      "remainingBuildings": 0,
+      "standingWalls": 44,
+      "wallExplosions": 0
+    },
+    {
+      "base": "sensor_outpost",
+      "remainingBuildings": 0,
+      "standingWalls": 24,
+      "wallExplosions": 0
+    },
+    {
+      "base": "energy_hub",
+      "remainingBuildings": 0,
+      "standingWalls": 62,
+      "wallExplosions": 0
+    }
+  ]
+}
