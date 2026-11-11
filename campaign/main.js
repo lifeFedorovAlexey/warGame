@@ -323,7 +323,7 @@ async function start(restore = false) {
   } catch(error) {mainMenu.error('Ошибка подготовки игры. '+error.message);}
   finally {loadingGame=false;last=performance.now();}
 }
-function ordersAt(point, target, mode) {
+function ordersAt(point, target, mode, append=false) {
   const chosen = selection();
   const factory = chosen.length === 1 && chosen[0]?.owner === 'rai' && chosen[0]?.kind === 'factory' && chosen[0]?.completed ? chosen[0] : null;
   if (factory && point && !mode) {
@@ -354,8 +354,9 @@ function ordersAt(point, target, mode) {
     const pickup=pickupTarget(mission,destination);
     if(pickup){destination=pickup.item;action='move';}
   }
-  const result = mission.submitOrder([...selected], action, destination);
+  const result = mission.submitOrder([...selected], action, destination, {append});
   if (!report(result)) return;
+  if(result.queued)toast('Приказ добавлен в очередь');
   lastCommandRevision=result.revision??null;lastCommandFeedback='';
   const combatOrder=action==='attack'||action==='attack-move';
   world.commandMarker(destination,combatOrder);
@@ -509,7 +510,7 @@ function installInput() {
       lastSelectionClick=null;
       event.preventDefault();
       if (buildKind) return cancelMode();
-      ordersAt(world.ground(event.clientX, event.clientY), hitEntity(event.clientX, event.clientY), orderMode);
+      ordersAt(world.ground(event.clientX, event.clientY), hitEntity(event.clientX, event.clientY), orderMode, event.shiftKey);
     }
     if (event.button === 0) {
       if(['attack','demolish'].includes(orderMode)){event.preventDefault();cancelMapGesture();lastSelectionClick=null;cancelMode();return;}
@@ -566,7 +567,7 @@ function installInput() {
     }
     const selecting=Math.hypot(x - origin.x, y - origin.y)>6;
     if(['attack','demolish'].includes(orderMode))return cancelMode();
-    if(orderMode)return ordersAt(world.ground(x,y),hitEntity(x,y),orderMode);
+    if(orderMode)return ordersAt(world.ground(x,y),hitEntity(x,y),orderMode,event.shiftKey);
     if (selecting) {
       const ids = vehicles().filter(unit => {
         const p = world.screen(unit);
@@ -619,7 +620,7 @@ function installInput() {
         toast(labels[index]);
         const members=result.members.map(id=>mission.entity(id)),request=members[0]?.routeOrder;
         if(request&&members.every(u=>u.routeOrder?.request.x===request.request.x&&u.routeOrder?.request.y===request.request.y&&u.task?.type===(request.type??'move')))
-          mission.submitOrder(result.members,request.type??'move',request.request);
+          mission.submitOrder(result.members,request.type??'move',request.request,{preserveQueue:true});
       }
       return;
     }

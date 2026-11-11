@@ -17,7 +17,7 @@ export function setBuilderAutoRepair(mission,enabled){
 
 const stopped=unit=>!unit.path.length&&!unit.pendingOrder&&!unit.detour&&!unit.combatRetreat&&!unit.factoryVisit;
 export function* assignAutomaticRepair(mission,unit){
- if(!mission.state.builderAutoRepair||unit.owner!=='rai'||unit.task||!stopped(unit)||unit.yieldReturn)return;
+ if(!mission.state.builderAutoRepair||unit.owner!=='rai'||unit.task||unit.orderQueue?.length||!stopped(unit)||unit.yieldReturn)return;
  if(mission.state.time<(unit.autoRepairCheckAt??0))return;
  unit.autoRepairCheckAt=mission.state.time+.4;
  const range=mission.unitSpec(unit).vision,claimed=new Set(mission.state.units

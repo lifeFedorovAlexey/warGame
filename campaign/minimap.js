@@ -24,7 +24,7 @@ export function minimapTarget(mission,rect,x,y){
 export function installMinimapInput(canvas,{mission,enabled,mode,building,order,centre,cancel}){
  let dragging=null;
  const at=e=>minimapPoint(mission.field,canvas.getBoundingClientRect(),e.clientX,e.clientY,mission.state.bounds);
- canvas.title='ЛКМ — камера · ПКМ — приказ · с «Атакой» — атака';
+ canvas.title='ЛКМ — камера · ПКМ — приказ · Shift+ПКМ — в очередь · с «Атакой» — атака';
  canvas.setAttribute('aria-label','Миникарта. ЛКМ — камера, ПКМ — приказ выбранной группе. В режиме атаки — атаковать.');
  canvas.addEventListener('contextmenu',e=>e.preventDefault());
  canvas.addEventListener('pointerdown',e=>{
@@ -32,7 +32,7 @@ export function installMinimapInput(canvas,{mission,enabled,mode,building,order,
   e.preventDefault();e.stopPropagation();
   if(e.button===2||mode()==='attack'||mode()==='move'){
    if(building()){cancel();return;}
-   order(at(e),minimapTarget(mission,canvas.getBoundingClientRect(),e.clientX,e.clientY),mode());return;
+   order(at(e),minimapTarget(mission,canvas.getBoundingClientRect(),e.clientX,e.clientY),mode(),e.shiftKey);return;
   }
   dragging=e.pointerId;canvas.setPointerCapture(e.pointerId);centre(at(e));
  });

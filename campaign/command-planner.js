@@ -101,7 +101,7 @@ export class CommandPlanner{
   if(previous&&!(action==='attack-move'&&units.some(movementEngaged))&&units.every(u=>u.commandRevision===previous.revision||ownsPending(u,previous.revision))
    &&(['queued','planning'].includes(previous.status)&&units.some(u=>ownsPending(u,previous.revision)||ownsContinuation(u,previous.revision))
     ||previous.status==='complete'&&previous.signature===this.signature(previous))){
-   this.stats.reused++;return {ok:true,assigned:units.length,pending:units.filter(u=>ownsPending(u,previous.revision)).length,revision:previous.revision,reused:true};
+   this.stats.reused++;return {ok:true,assigned:units.length,assignedIds:units.map(u=>u.id),pending:units.filter(u=>ownsPending(u,previous.revision)).length,revision:previous.revision,reused:true};
   }
   const stopped=new Set(units.filter(unit=>unit.pendingOrder?.type==='stop').map(unit=>unit.id));
   const preserveAccepted=unit=>!stopped.has(unit.id)&&!!(unit.path?.length||unit.task||unit.detour||unit.yieldReturn||unit.jointTraffic);
@@ -131,7 +131,7 @@ export class CommandPlanner{
    // continues live; no saved pose or stale motion snapshot is restored later.
    if(preserve)unit.proposedOrder=pending;else unit.pendingOrder=pending;
   }
-  return {ok:true,assigned:units.length,pending:units.length,revision};
+  return {ok:true,assigned:units.length,assignedIds:units.map(u=>u.id),pending:units.length,revision};
  }
  start(record){
   const m=this.mission;this.nav.refreshContext();
