@@ -65,5 +65,8 @@
   "devDependencies": {
     "gltf-validator": "^2.0.0-dev.3.10"
   },
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "@elevenlabs/elevenlabs-js": "^2.77.0"
+  }
 }

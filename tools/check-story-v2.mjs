@@ -15,16 +15,22 @@ const hash=data=>createHash('sha256').update(data).digest('hex');
 assert.equal(source.revision,5);assert.equal(source.scenes.length,55);
 assert.equal(hash(fs.readFileSync(source.source.path)),source.source.sha256);
 const original=read('audio.json'),portraits=read('portraits/manifest.json');
-let userCount=0;
+const finalRecording=clip=>['user-recording','elevenlabs-synthesis'].includes(clip?.origin);
+let userCount=0,elevenlabsCount=0;
 for(const cue of [...source.dialogue,...source.barks]){
  const clip=audio.clips[cue.id];assert(clip,cue.id);assert.equal(clip.speaker,cue.speaker);
  if(clip.origin==='user-recording')userCount++;
- if(cue.recordingStatus==='Т')assert.equal(clip.origin,'user-recording',cue.id);
+ if(clip.origin==='elevenlabs-synthesis'){
+  elevenlabsCount++;assert(clip.voiceId&&clip.voiceName,cue.id);assert.equal(clip.modelId,'eleven_v4',cue.id);
+ }
+ if(cue.recordingStatus==='Т')assert(finalRecording(clip),cue.id);
  if(!process.argv.includes('--logic-only'))assert.equal(hash(fs.readFileSync(base+clip.file)),clip.sha256,clip.file);
  assert(clip.duration>0);
  if(cue.speaker!=='past')assert(portraits.characters[cue.speaker],cue.speaker);
 }
-assert.equal(userCount,112);
+assert.equal(userCount,111);assert.equal(elevenlabsCount,66);
+assert.equal(audio.clips['m01-s07-l014'].voiceName,'Mishka Yaponcik - Odessa Rogue Charm');
+assert.equal(hash(fs.readFileSync(base+'recordings/reviewed/m01-s07-l014-4e14be06b9b1.mp3')),'4e14be06b9b1155f9d172d2ad351ef622770b629d1241313303b233a4ca38308');
 for(const id of ['m01-v3-r24-l001','m01-v3-r24-l002','m01-v3-r24-l003'])assert.equal(audio.clips[id].origin,'user-recording',id);
 assert.equal(source.dialogue.find(c=>c.id==='m01-s02-l008').text,'Значит, воспоминания. Спи дальше.');
 assert.equal(source.dialogue.find(c=>c.id==='m01-s05-l004').text,'Учёные будут изучать находки. Получат новые чертежи — смогут другую технику собирать.');
@@ -57,7 +63,7 @@ for(const scene of originalStory.scenes.filter(s=>!applied.scenes.some(a=>a.id==
 for(const id of ['m01-s01-l003','m01-s01-l004','m01-s05-l014','m01-s05-l015','m01-s05-l016']){
  assert(!source.dialogue.some(line=>line.id===id));assert(!audio.clips[id]);
 }
-for(const line of applied.dialogue)assert.equal(audio.clips[line.id].origin,'user-recording',line.id);
+for(const line of applied.dialogue)assert(finalRecording(audio.clips[line.id]),line.id);
 
 function fixture(startImmediately=true){
  const camps=['flamethrower','mg-ammo-1','mg-tower',null].map((artifact,i)=>({id:'camp'+i,artifact,cleared:false}));

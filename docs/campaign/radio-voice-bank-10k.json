@@ -1,0 +1,1456 @@
+{
+  "budgetCredits": 10000,
+  "reservedCredits": 9500,
+  "recordings": 548,
+  "texts": 96,
+  "seconds": 923.00425,
+  "profiles": [
+    {
+      "profile": "voice-1",
+      "gender": "m",
+      "voiceId": "JKtNvDNrWu33P1xzttP2",
+      "voiceName": "Ivan - Energetic and Sassy"
+    },
+    {
+      "profile": "voice-2",
+      "gender": "m",
+      "voiceId": "6YjFofyVXU1ASguf2hTJ",
+      "voiceName": "Maxim - Conversational & Natural"
+    },
+    {
+      "profile": "voice-3",
+      "gender": "f",
+      "voiceId": "GN4wbsbejSnGSa1AzjH5",
+      "voiceName": "Ekaterina - Soft, Silky and Tender"
+    },
+    {
+      "profile": "voice-4",
+      "gender": "m",
+      "voiceId": "txnCCHHGKmYIwrn7HfHQ",
+      "voiceName": "Alexandr Vlasov - Vibrant and Energetic"
+    },
+    {
+      "profile": "voice-5",
+      "gender": "f",
+      "voiceId": "EXAVITQu4vr4xnSDxMaL",
+      "voiceName": "Sarah - Mature, Reassuring, Confident"
+    },
+    {
+      "profile": "voice-6",
+      "gender": "m",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm"
+    }
+  ],
+  "exchanges": [
+    {
+      "id": "idle.crew_history.single.loss-afterword-v1",
+      "count": null,
+      "rule": "idle.crew_history",
+      "tier": "single",
+      "priority": 59,
+      "bawdy": false,
+      "remembrance": true,
+      "recordingIds": [
+        "radio-2619d86d4289112042d1",
+        "radio-8ded8da9ee49f08bea7e",
+        "radio-264a2f756d6f816db796",
+        "radio-6de323afcc0701c185d2",
+        "radio-2b4eb21506bf8eddcdfe",
+        "radio-7fc98505b19f9864203e",
+        "radio-3e817638c12e40b01d3c",
+        "radio-cb057c25fe09a8a0512e",
+        "radio-a745ac55006b3a8fb2e8",
+        "radio-77146f61ce4206bd01ce",
+        "radio-3741d3792ad9660fc983",
+        "radio-2317273fb51c3bfb8eee"
+      ]
+    },
+    {
+      "id": "idle.crew_history.single.loss-afterword-v2",
+      "count": null,
+      "rule": "idle.crew_history",
+      "tier": "single",
+      "priority": 59,
+      "bawdy": false,
+      "remembrance": true,
+      "recordingIds": [
+        "radio-af20aeb34e77245e9ada",
+        "radio-245b8f3a11a309c6e12e",
+        "radio-12837c0d0bc26201d300",
+        "radio-14d7269afcc39959b20b",
+        "radio-f16f59babf3af869c50b",
+        "radio-75d82360a3ddb8ef6b78"
+      ]
+    },
+    {
+      "id": "idle.crew_history.single.loss-afterword-v3",
+      "count": null,
+      "rule": "idle.crew_history",
+      "tier": "single",
+      "priority": 59,
+      "bawdy": false,
+      "remembrance": true,
+      "recordingIds": [
+        "radio-0e0f6a0ec6f87ed48248",
+        "radio-9c78f03856b3a9575c55",
+        "radio-9594669288222ac48091",
+        "radio-6b54a04ab56806dd46a6",
+        "radio-ed58aa637f4ea13e5c33",
+        "radio-0c2644bbd9336c0df30e",
+        "radio-f86f345517e1432a03e1",
+        "radio-5dde293c8ad7c9233eab",
+        "radio-8528580714fdf59a8808",
+        "radio-2b67fd40b2f648978159",
+        "radio-0f1b9a119c8569c6f39c",
+        "radio-a9c7a691589010083b46"
+      ]
+    },
+    {
+      "id": "idle.crew_history.single.loss-afterword-v4",
+      "count": null,
+      "rule": "idle.crew_history",
+      "tier": "single",
+      "priority": 59,
+      "bawdy": false,
+      "remembrance": true,
+      "recordingIds": [
+        "radio-bd7f9bcd58005f52b6ab",
+        "radio-dff49bf2771d2b7e344e",
+        "radio-ab52177d7b76d5d752a9",
+        "radio-edd09c5592bdfd36c11d",
+        "radio-2ee934049441ece29cd6",
+        "radio-b6549c330a86da2f2a1d",
+        "radio-e55c0a567ed4a8bf96cc",
+        "radio-689ef8dcd551e7b1a809",
+        "radio-34078b5ac63d6903fb70",
+        "radio-a045700f472783ea77d3",
+        "radio-9cff1360d6ad45b1a9e8",
+        "radio-4c8b9d4bdb81c80a29e1"
+      ]
+    },
+    {
+      "id": "idle.quiet.single.bawdy-v1",
+      "count": null,
+      "rule": "idle.quiet",
+      "tier": "single",
+      "priority": 5,
+      "bawdy": true,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-00adaa2e6a58c7fc879f",
+        "radio-0c82444dff1412014394",
+        "radio-c11c0f90d6f848b2b383",
+        "radio-ad8db095d9615d86c5f9",
+        "radio-8510bbdc0dc9067f7fdd",
+        "radio-cf71dd9b8a5d415d84ad",
+        "radio-24f3e31182964956da87",
+        "radio-05f0b90f0aa9f4ac6085",
+        "radio-833b3a3ca60ef52283bd",
+        "radio-b35e6705541d939c488e",
+        "radio-d9737f64fdfdc11773ec",
+        "radio-c44ee3c0f3529b1fa710"
+      ]
+    },
+    {
+      "id": "idle.quiet.single.bawdy-v2",
+      "count": null,
+      "rule": "idle.quiet",
+      "tier": "single",
+      "priority": 5,
+      "bawdy": true,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-8b5116fb6c3180f8f687",
+        "radio-9fe8a5b299bba08cca3b",
+        "radio-326d97643543eed9358e",
+        "radio-6ec9b96f7592a8c5e77f",
+        "radio-04a304781d59a31890f9",
+        "radio-9a9fe24919249bfae4ab",
+        "radio-b6dca3228caac363f8d6",
+        "radio-8c158b15d23f70d084fb",
+        "radio-2333cab9f2584a5451bc",
+        "radio-1638247458dfa6439e88",
+        "radio-705dcf23f6fa28ab699a",
+        "radio-c7e04ac5be33c732c369"
+      ]
+    },
+    {
+      "id": "idle.quiet.single.bawdy-v5",
+      "count": null,
+      "rule": "idle.quiet",
+      "tier": "single",
+      "priority": 5,
+      "bawdy": true,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-de441fe45e79d2a254de",
+        "radio-bcb73d474a5add8b1a8f",
+        "radio-6b0126173327579e7fa2",
+        "radio-78eeb48f040624e804c7",
+        "radio-5e115d317dfbdc3d3bdc",
+        "radio-bcb7d8b17905f3392636",
+        "radio-d86d6d9f5b46efa3b35d",
+        "radio-3372cc4b829e56728ca7",
+        "radio-129121934831cba79835",
+        "radio-ba22bf8e084a3f913499",
+        "radio-fee5b77fe281a0d4a24e",
+        "radio-59e4547ce9f912aebdc4"
+      ]
+    },
+    {
+      "id": "idle.quiet.single.bawdy-v6",
+      "count": null,
+      "rule": "idle.quiet",
+      "tier": "single",
+      "priority": 5,
+      "bawdy": true,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-c46e6b9eea8845db654a",
+        "radio-f90bed04c33a1a9f91ff",
+        "radio-1d58e0650102961f1233",
+        "radio-5ae442aa8327bcb34ef8",
+        "radio-ac589f15c7db5fed1ecb",
+        "radio-8e27e817fd31b34b9582",
+        "radio-2db33bb39d95cfd668ea",
+        "radio-38d0f24a21bfd3f687d3",
+        "radio-46ccd2a0cb303d7f28d6",
+        "radio-1fb085b241b23dfc7b85",
+        "radio-7a08deba4da4f29c0e21",
+        "radio-c2720eabf75bf466097b"
+      ]
+    },
+    {
+      "id": "idle.quiet.single.bawdy-v9",
+      "count": null,
+      "rule": "idle.quiet",
+      "tier": "single",
+      "priority": 5,
+      "bawdy": true,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-4782986ce6eea7b6e2cd",
+        "radio-689dc36788316cce2c17",
+        "radio-1aee09263c615412dc5c",
+        "radio-ad399e5c6a620b549fb6",
+        "radio-d7ff3c0c459205b1b3b8",
+        "radio-596e893413bff23079eb",
+        "radio-98897c4b0e53e23411f6",
+        "radio-9031f705a0135f742bfc",
+        "radio-e0c79d7542bdcfab2dd1",
+        "radio-0a834deac06f896acfc0",
+        "radio-c6d8df76f3f29c313fa6",
+        "radio-150076024c5635a6bca2"
+      ]
+    },
+    {
+      "id": "idle.quiet.single.bawdy-v13",
+      "count": null,
+      "rule": "idle.quiet",
+      "tier": "single",
+      "priority": 5,
+      "bawdy": true,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-bf467927b56765889e52",
+        "radio-a0754b6941e93f933da6",
+        "radio-bb6c4f1fb235ca032dc6",
+        "radio-b86a7b2d1e963a8371f8",
+        "radio-d1a4d551bdb5ffa99440",
+        "radio-7e049b5b3d4ca89e5a9d",
+        "radio-4a272b8d6cf474f1fc1a",
+        "radio-ec63708a4fc4d8794cb1",
+        "radio-6c97e39e56b78134507a",
+        "radio-08203d4945ee35ffd49b",
+        "radio-4773602c2d6c5538681b",
+        "radio-ecdecb700a29632df218"
+      ]
+    },
+    {
+      "id": "repair.start_factory.single.female-repair-v1",
+      "count": null,
+      "rule": "repair.start_factory",
+      "tier": "single",
+      "priority": 35,
+      "bawdy": true,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-b9ebfaa6e41aa9a87d41",
+        "radio-a6bffdd2f7a038b7b928",
+        "radio-0158a81c8e68071a1980",
+        "radio-1dec5aa5b98fa03fb2f2",
+        "radio-8169fbdec0a41e94af59",
+        "radio-ea783bd7e403d502bd41",
+        "radio-9d8f0a722359854ca9db",
+        "radio-565973ecae11261065b8"
+      ]
+    },
+    {
+      "id": "command.move.single.bawdy-v1",
+      "count": null,
+      "rule": "command.move",
+      "tier": "single",
+      "priority": 10,
+      "bawdy": true,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-6d0af8c7d93394b13890",
+        "radio-db42ba7f62fdc21d4d52",
+        "radio-5a434a8e65e22ec2fe20",
+        "radio-60b9872c4dc63e7e1f98",
+        "radio-c17b1bf18ad7ce57ae11",
+        "radio-0ac4d4a662d0ce88779d",
+        "radio-e73c7d812c58107e5191",
+        "radio-63522f6fd5298784ff6f",
+        "radio-f836d1eca57bb2e1e74f",
+        "radio-fffc68293957545de12c",
+        "radio-c52000ac45a1d9d0d718",
+        "radio-1aa33176ea008b6b490d"
+      ]
+    },
+    {
+      "id": "damage.commander_down.single",
+      "count": null,
+      "rule": "damage.commander_down",
+      "tier": "single",
+      "priority": 99,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-31dd7681f4638675604c",
+        "radio-a2f2095f0a34b2c74931",
+        "radio-0cec1433baf46232c866",
+        "radio-b2f80e7df81642d33554",
+        "radio-3a353ead465fb7adc235",
+        "radio-c6b820e00f79cfe4b5ad"
+      ]
+    },
+    {
+      "id": "damage.vehicle_destroyed.single.dead-v1",
+      "count": 2,
+      "rule": "damage.vehicle_destroyed",
+      "tier": "single",
+      "priority": 98,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-f2239f5278d3778364e5",
+        "radio-51004b917af5cb2ee985",
+        "radio-008a494367f28f82497f",
+        "radio-51d54f5acd50075bcb82",
+        "radio-a6edfd65c37b909abde3",
+        "radio-2a6bc2f05cc6f232f65d"
+      ]
+    },
+    {
+      "id": "mission.defeat.single",
+      "count": null,
+      "rule": "mission.defeat",
+      "tier": "single",
+      "priority": 96,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-ca137d1f870b17239bb9",
+        "radio-d88f00f4f2c10c06435d",
+        "radio-f0fa59d070d0d0f3e7a8",
+        "radio-1de7c8da70ac8d251530",
+        "radio-a1718a9bd01541caa48c",
+        "radio-7ca6920f94c00b35cdfc"
+      ]
+    },
+    {
+      "id": "combat.base_attack.single.written-v5",
+      "count": null,
+      "rule": "combat.base_attack",
+      "tier": "single",
+      "priority": 95,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-069b2aff7e130daf365f",
+        "radio-210f24a774a868e0f714",
+        "radio-251fdc8cda7a38417bf5",
+        "radio-ff6207ba2bb776fe9d14",
+        "radio-bb7e12835ca298c766c1",
+        "radio-88ef7f8807af2bd1060c"
+      ]
+    },
+    {
+      "id": "damage.hit.single",
+      "count": null,
+      "rule": "damage.hit",
+      "tier": "single",
+      "priority": 90,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-3d0f113a247a3c1d5a87",
+        "radio-f073647cb159971c5976",
+        "radio-6ecbcb033419df85b1f8",
+        "radio-6851f9da3c3ae4d67e77",
+        "radio-121987eba73fc1b1ee89",
+        "radio-cd99a23369de5851c2cd"
+      ]
+    },
+    {
+      "id": "damage.panic_failed.v3",
+      "count": null,
+      "rule": "damage.panic_failed",
+      "tier": "single",
+      "priority": 90,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-4087ad77f7694e08c80f",
+        "radio-f8898b06139abf042391",
+        "radio-280bb6840a52f3316c02",
+        "radio-16dfb0575df1ae2f69bd",
+        "radio-690674678f97ee4139eb",
+        "radio-ba01d0e73710114d4145"
+      ]
+    },
+    {
+      "id": "damage.mobility_lost.single",
+      "count": null,
+      "rule": "damage.mobility_lost",
+      "tier": "single",
+      "priority": 88,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-eee83023893f0f1a4e86",
+        "radio-f1f34475b092a7ca7327",
+        "radio-799e56b975349d550db4",
+        "radio-d61899e20cc2a9277398",
+        "radio-421de81f74cf54370a6d",
+        "radio-d2720ab16a35ce44ffd6"
+      ]
+    },
+    {
+      "id": "mission.victory.single.written-v3",
+      "count": null,
+      "rule": "mission.victory",
+      "tier": "single",
+      "priority": 85,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-828143d51006679e4e9d",
+        "radio-951df78c08e35c988339",
+        "radio-4211213578d78d2c9eab",
+        "radio-0ca3b95d7b890bd98386",
+        "radio-0e656d977e435f1af420",
+        "radio-e7e28104d8d831be8040"
+      ]
+    },
+    {
+      "id": "command.retreat.single",
+      "count": null,
+      "rule": "command.retreat",
+      "tier": "single",
+      "priority": 80,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-b0e12d854a44c62359c1",
+        "radio-9f49a1ab74e7897985ad",
+        "radio-8f0518454db72a9b4f90",
+        "radio-cc38b927fc101d162261",
+        "radio-753950a5fb12373489c9",
+        "radio-fe481c4e7a51aa6d4236"
+      ]
+    },
+    {
+      "id": "command.auto_retreat.single",
+      "count": null,
+      "rule": "command.auto_retreat",
+      "tier": "single",
+      "priority": 78,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-26059caa07a4fd8b4ef7",
+        "radio-b45bcf7ef5bcfc6451d0",
+        "radio-e95b0eeb6757b3f0f179",
+        "radio-4b7262aceb6d3c1e215e",
+        "radio-0c16210ba00c7f8d121f",
+        "radio-cdb6831b0d8d16aa2a1e"
+      ]
+    },
+    {
+      "id": "combat.target_destroyed.single.written-v6",
+      "count": null,
+      "rule": "combat.target_destroyed",
+      "tier": "single",
+      "priority": 72,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-52e1bddfc4717784da36",
+        "radio-0c3a0383ea1229cc7e7f",
+        "radio-1a010e6aedbc2dde4e41",
+        "radio-631111b77f81422640ff",
+        "radio-5b03fec2522d3d0759aa",
+        "radio-d8a56b0070a2d25ce997"
+      ]
+    },
+    {
+      "id": "traffic.panic_blocked.v4",
+      "count": null,
+      "rule": "traffic.panic_blocked",
+      "tier": "single",
+      "priority": 72,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-e345ab2cc46ea36c0cb0",
+        "radio-9516cd515319fad98ef9",
+        "radio-5378ff0bb616347f9c78",
+        "radio-c41c28d6d4e3635bbe92",
+        "radio-7fbb63141b5222f6739d",
+        "radio-6a3dc8b6d7e30655b07e"
+      ]
+    },
+    {
+      "id": "recon.camp_cleared.single.written-v3",
+      "count": null,
+      "rule": "recon.camp_cleared",
+      "tier": "single",
+      "priority": 70,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-1c5579af29e8a30bc31a",
+        "radio-463c1142abe828c4ee22",
+        "radio-eed7871c954a0dbefd45",
+        "radio-f8fec778c83b9090e675",
+        "radio-31575533c72a7213af6e",
+        "radio-ec667bec7bcab573fa4c"
+      ]
+    },
+    {
+      "id": "loot.artifact_found.single.written-v2",
+      "count": null,
+      "rule": "loot.artifact_found",
+      "tier": "single",
+      "priority": 68,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-52633ce2fa27e490b43f",
+        "radio-3fd2468eec1d06457417",
+        "radio-9f96f194084b0ea19f14",
+        "radio-1568c17d26da3cfb043c",
+        "radio-0b57ab80da89f8cfea13",
+        "radio-6941f533267e564c5482"
+      ]
+    },
+    {
+      "id": "repair.mobility_restored.single.written-v2",
+      "count": null,
+      "rule": "repair.mobility_restored",
+      "tier": "single",
+      "priority": 65,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-62b4f58208cb2cd279ec",
+        "radio-20f22d0617e0071ac606",
+        "radio-be363a36e4b69a8583d6",
+        "radio-349ffb653ffe6acf1c0e",
+        "radio-d1bbba96fad7c524390a",
+        "radio-45b6633dc190d1e33fa3"
+      ]
+    },
+    {
+      "id": "traffic.retreat_contact.v9",
+      "count": null,
+      "rule": "traffic.retreat_contact",
+      "tier": "single",
+      "priority": 65,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-76d720e861464ff7ffeb",
+        "radio-f257bb43ee4b5f46b783",
+        "radio-6fb15c7f163fea1f7fab",
+        "radio-3587e20e8efdd7828d85",
+        "radio-eaceef5a641ad7162932",
+        "radio-b792ef3aec32c4a0b269"
+      ]
+    },
+    {
+      "id": "research.complete.single.written-v2",
+      "count": null,
+      "rule": "research.complete",
+      "tier": "single",
+      "priority": 60,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-9b69ef15f8a0bd82cda7",
+        "radio-639adb9badaa2c1741f1",
+        "radio-666de4af64457324dcca",
+        "radio-fc18097bdaec2614ff2e",
+        "radio-43226a21a6089340386f",
+        "radio-84999285cc4d3bd43060"
+      ]
+    },
+    {
+      "id": "repair.complete.single.written-v4",
+      "count": null,
+      "rule": "repair.complete",
+      "tier": "single",
+      "priority": 58,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-8585c0909d9673eb2754",
+        "radio-93f3cb4b4aa32e6435f4",
+        "radio-96fb28be0fb1089e1912",
+        "radio-3d11b4cfad4226de33b2",
+        "radio-617c7eba65711ce4957f",
+        "radio-bba7814f201660a4f9a1"
+      ]
+    },
+    {
+      "id": "construction.complete.single.written-v4",
+      "count": null,
+      "rule": "construction.complete",
+      "tier": "single",
+      "priority": 55,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-5c22c6eaa7b22b75c802",
+        "radio-51985c6712b5cf56a0db",
+        "radio-96772c27bb2e2597cc64",
+        "radio-b210dc035fae03b2597c",
+        "radio-f4f8bb0fca421f82e56f",
+        "radio-7b69a7d4c7915aad7090"
+      ]
+    },
+    {
+      "id": "factory.modernization_complete.single.written-v2",
+      "count": null,
+      "rule": "factory.modernization_complete",
+      "tier": "single",
+      "priority": 52,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-736a60b87b570a98ecfb",
+        "radio-cfbed4c6e15f8bb7f55c",
+        "radio-3fe5ab1b9fe9456fe812",
+        "radio-60f4c270a30b013918d6",
+        "radio-0914b8412d8dfd965b0a",
+        "radio-3e4c13b8418c2123725a"
+      ]
+    },
+    {
+      "id": "factory.vehicle_complete.single.written-v4",
+      "count": null,
+      "rule": "factory.vehicle_complete",
+      "tier": "single",
+      "priority": 50,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-43c4edcd28654301341c",
+        "radio-057e8f76ebe2c7cf1c4e",
+        "radio-4c8a42ed515a53096976",
+        "radio-a68738ce8446c9704baa",
+        "radio-d9e27ca9670cdf5f6f48",
+        "radio-28a46f31da29d3c765ce"
+      ]
+    },
+    {
+      "id": "traffic.network_overload.single.written-v2",
+      "count": null,
+      "rule": "traffic.network_overload",
+      "tier": "single",
+      "priority": 46,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-40522317db340d1ac686",
+        "radio-945bb6476b71d0aad8a1",
+        "radio-e861749f8a5c52986618",
+        "radio-f828cab4446042635d6d",
+        "radio-4155d8198634556e0f8b",
+        "radio-978e857e00e252176e9e"
+      ]
+    },
+    {
+      "id": "traffic.queue_blocked.single.written-v3",
+      "count": null,
+      "rule": "traffic.queue_blocked",
+      "tier": "single",
+      "priority": 45,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-425bc35a9bd16ec30715",
+        "radio-e04b4c43ea9617bc8653",
+        "radio-8156f9d74a1a809b0f02",
+        "radio-3eaa33b6b66f8fd0a51f",
+        "radio-a36d58ae49b37096698a",
+        "radio-963d9fd4e8b869ae31dd"
+      ]
+    },
+    {
+      "id": "traffic.jam_resolved.single.written-v3",
+      "count": null,
+      "rule": "traffic.jam_resolved",
+      "tier": "single",
+      "priority": 42,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-d96287ef51c897ba3175",
+        "radio-dd471738d4375b923606",
+        "radio-75a586aa6bcfd7503b47",
+        "radio-de1b8dc1cbb0f63b1034",
+        "radio-f0d9c547a0d00ecf7e12",
+        "radio-d23103dd1c5317ed9a10"
+      ]
+    },
+    {
+      "id": "traffic.panic_escaped.v1",
+      "count": null,
+      "rule": "traffic.panic_escaped",
+      "tier": "single",
+      "priority": 40,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-0c2236c8d13252e3cac0",
+        "radio-f71a4c4862c74a2cc9b8",
+        "radio-b660649130ca47a3f80c",
+        "radio-ed0374b9b7f4b4eeb8d8",
+        "radio-cebdfb43bd03699a3a8c",
+        "radio-3e26de359f71be43f212"
+      ]
+    },
+    {
+      "id": "command.capture.single",
+      "count": null,
+      "rule": "command.capture",
+      "tier": "single",
+      "priority": 35,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-d1d3daa9aac9d0e9c9eb",
+        "radio-41eb9c17c23748d40f10",
+        "radio-cacd309952ea0ca0a3e3",
+        "radio-3080a8643e663fbdc6cc",
+        "radio-7f9a3cfd9840eb567608",
+        "radio-d5cb7b9d4fea535b7479"
+      ]
+    },
+    {
+      "id": "command.rejected.single.written-v2",
+      "count": null,
+      "rule": "command.rejected",
+      "tier": "single",
+      "priority": 35,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-7fef09ac8a6f1243205f",
+        "radio-c2059a008b79c54d74c6",
+        "radio-ec3ae712b2b9b805386b",
+        "radio-ea17fdfb8c0069088208",
+        "radio-d3c7b4f095422a373ef2",
+        "radio-c27ca4d33aedf0567e81"
+      ]
+    },
+    {
+      "id": "movement.route_changed.single.written-v3",
+      "count": null,
+      "rule": "movement.route_changed",
+      "tier": "single",
+      "priority": 35,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-14c0818805a9e41bbfd2",
+        "radio-e4a41fd676e449335cd7",
+        "radio-0d757e3777c4424f4e4d",
+        "radio-fde3f26f505e3b762930",
+        "radio-0eee7448dc817cc623a2",
+        "radio-47f768aa0ad997ba9d8b"
+      ]
+    },
+    {
+      "id": "traffic.deadlock.single",
+      "count": null,
+      "rule": "traffic.deadlock",
+      "tier": "single",
+      "priority": 35,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-acd0858d31622852c782",
+        "radio-b98afc8834cde3d640d9",
+        "radio-0d1b16483b758f6d978d",
+        "radio-36859b28e18992469b8b",
+        "radio-71d2434620485b107029",
+        "radio-aa8cf895415ffd135f20"
+      ]
+    },
+    {
+      "id": "traffic.reverse_started.single.written-v2",
+      "count": null,
+      "rule": "traffic.reverse_started",
+      "tier": "single",
+      "priority": 35,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-9e66871ec1cc0033bd25",
+        "radio-1b45c904aac74675ea5a",
+        "radio-d039d5225d6813ccc979",
+        "radio-26a7b2aded6f3e9ee8cd",
+        "radio-1aebb4b7b2614305df52",
+        "radio-43491052ae565d9c8793"
+      ]
+    },
+    {
+      "id": "traffic.reverse_complete.single.written-v3",
+      "count": null,
+      "rule": "traffic.reverse_complete",
+      "tier": "single",
+      "priority": 35,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-1f9888654a155838d7fa",
+        "radio-c9dc46849142115017a4",
+        "radio-70dd2beb90428a4bb424",
+        "radio-982015100d89601756c3",
+        "radio-f85414a69b93d72123fe",
+        "radio-80f715eab95c0df26a49"
+      ]
+    },
+    {
+      "id": "repair.start_factory.single.written-v5",
+      "count": null,
+      "rule": "repair.start_factory",
+      "tier": "single",
+      "priority": 35,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-1cb24319f04c512e73b5",
+        "radio-7677db75fa8cf0412ffd",
+        "radio-983177be851592f3bcb6",
+        "radio-22a9928d99c9c9f1ee70",
+        "radio-1df1432e46802e3b4ee2",
+        "radio-841020fa4daf95227942"
+      ]
+    },
+    {
+      "id": "construction.start.single.written-v3",
+      "count": null,
+      "rule": "construction.start",
+      "tier": "single",
+      "priority": 35,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-eb3a9cd691e533f865f1",
+        "radio-b754a2879c6b896fa0f6",
+        "radio-c06b5ff3c7bf313540f4",
+        "radio-f81872ccbd4a05a106ad",
+        "radio-db1203f362519b1e0eae",
+        "radio-f16a72821c697fbf7aba"
+      ]
+    },
+    {
+      "id": "construction.cancelled.single.written-v2",
+      "count": null,
+      "rule": "construction.cancelled",
+      "tier": "single",
+      "priority": 35,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-1914aa3aed262fd9d733",
+        "radio-6af29b85319dfc161ccc",
+        "radio-94f4eb68dc6437c6275a",
+        "radio-194bc9d07803e8539a0d",
+        "radio-773589f1ccc545516adb",
+        "radio-80ba2657985d2477b186"
+      ]
+    },
+    {
+      "id": "construction.refused.single",
+      "count": null,
+      "rule": "construction.refused",
+      "tier": "single",
+      "priority": 35,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-13f99bc033847b037bae",
+        "radio-3b0f484ab75f1253f7ba",
+        "radio-b35c0e4a8619be5b91e9",
+        "radio-b30597f5d879a69d7885",
+        "radio-6dcbfb22e2ba8282e935",
+        "radio-d0f582c351e61ef4a731"
+      ]
+    },
+    {
+      "id": "research.start.single",
+      "count": null,
+      "rule": "research.start",
+      "tier": "single",
+      "priority": 35,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-8e3fdd26d24ce84d285b",
+        "radio-338365f86339b7d80e0b",
+        "radio-897b5ff82f46eea52ef8",
+        "radio-b4a1bf27b394b777ef06",
+        "radio-76cc052ba5aaf2ecaac0",
+        "radio-d1d7d516e95f9a7f7b92"
+      ]
+    },
+    {
+      "id": "command.attack.single.written-v2",
+      "count": null,
+      "rule": "command.attack",
+      "tier": "single",
+      "priority": 28,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-d63e2c0746dea901ccd6",
+        "radio-a06ca32eb944035de7da",
+        "radio-f6bd0a2e85ca719ab9cc",
+        "radio-b890b457763a32976075",
+        "radio-91309f5e94d07687ed33",
+        "radio-5d583671487f9af73263"
+      ]
+    },
+    {
+      "id": "command.attack_move.single",
+      "count": null,
+      "rule": "command.attack_move",
+      "tier": "single",
+      "priority": 26,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-5841ea709f95e13e6b3e",
+        "radio-6faaf895ce1de4512e8d",
+        "radio-78a3592f6b9f9f5e0ade",
+        "radio-1da84b046efd98ee52ab",
+        "radio-8dd276e1b681a2b78d35",
+        "radio-edbcb4add8900754b6be"
+      ]
+    },
+    {
+      "id": "command.build.single.written-v4",
+      "count": null,
+      "rule": "command.build",
+      "tier": "single",
+      "priority": 20,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-11ee86c101af4807be53",
+        "radio-8c3291968fdcd2b36605",
+        "radio-23ca0558b39f29c625d5",
+        "radio-76444a5d62ccfb223d09",
+        "radio-157894ee665e4a9d112b",
+        "radio-22975b921f6f39680b9c"
+      ]
+    },
+    {
+      "id": "command.stop.single.written-v4",
+      "count": null,
+      "rule": "command.stop",
+      "tier": "single",
+      "priority": 12,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-f78f9b18ab195590e465",
+        "radio-68ff463497f5a93630ba",
+        "radio-785a8f19486f370a5195",
+        "radio-fab286b2522b014f1eef",
+        "radio-53e7e4dc8e2416f3c1c2",
+        "radio-cb5618ec6cd1eb52c0a0"
+      ]
+    },
+    {
+      "id": "command.move.single",
+      "count": null,
+      "rule": "command.move",
+      "tier": "single",
+      "priority": 10,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-8962a8624799af6d25e4",
+        "radio-27bee92fc288096a0814",
+        "radio-75b8962d7fbbe5e14e89",
+        "radio-433c158ecea2b3cd6e71",
+        "radio-61004ed01cecd7e43047",
+        "radio-d6f44c1d627a66d8de47"
+      ]
+    },
+    {
+      "id": "movement.arrived.single",
+      "count": null,
+      "rule": "movement.arrived",
+      "tier": "single",
+      "priority": 8,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-35b70a3f158337a7bef5",
+        "radio-044f591f8f6aa462664f",
+        "radio-d0acbeab5ae18d4ff73f",
+        "radio-19fb448ca230ec1257b5",
+        "radio-90a1e7ac0610ecd08c25",
+        "radio-167536a80ef659ce3f0a"
+      ]
+    },
+    {
+      "id": "idle.group_no_order.single.written-v4",
+      "count": null,
+      "rule": "idle.group_no_order",
+      "tier": "single",
+      "priority": 1,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-0f7e4eb55f6f38d31e50",
+        "radio-7d86d040ca228f889341",
+        "radio-1775542447c256869c4e",
+        "radio-e6cea61e762a3b4d6c2a",
+        "radio-a282d9e16d48ad01fde9",
+        "radio-0e4958dab241b477825e"
+      ]
+    },
+    {
+      "id": "mission.defeat.group.written-v2",
+      "count": null,
+      "rule": "mission.defeat",
+      "tier": "group",
+      "priority": 96,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-e93a808dc3fa76584cba",
+        "radio-602e95cf94e04c48c42b",
+        "radio-e87159cb57bc694b88f0",
+        "radio-3de9407f43de1ca19a17",
+        "radio-a314fc4ff1f1f9c52f0e",
+        "radio-6c285a4db529a4be5abf",
+        "radio-b2ddca89d960daf2c818",
+        "radio-be09e02c0e4de5da233c",
+        "radio-5a9057f837abdeb0a2f9",
+        "radio-74902c51c87f1de53e86",
+        "radio-1826848bd6b0567f3a92",
+        "radio-5f3d4c0ef0222e033d51"
+      ]
+    },
+    {
+      "id": "combat.base_attack.group.written-v3",
+      "count": null,
+      "rule": "combat.base_attack",
+      "tier": "group",
+      "priority": 95,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-a87a824c16a4aa4198c0",
+        "radio-b6a828b86fea3af743a6",
+        "radio-f238eb0ff1e2e6e8c476",
+        "radio-100ceb54750d87db8a34",
+        "radio-38a71f2a4252fd6f003d",
+        "radio-92926149c1ead5bf62ba"
+      ]
+    },
+    {
+      "id": "combat.base_attack.group.written-v4",
+      "count": null,
+      "rule": "combat.base_attack",
+      "tier": "group",
+      "priority": 95,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-608eb568230ca72718b3",
+        "radio-22c1df2079d8337931cc",
+        "radio-7b531d686ff3fd5f853d",
+        "radio-000f07e22508e95d5ef3",
+        "radio-0c17fb4e8f41bb805536",
+        "radio-10b559e74c7a32c0c501"
+      ]
+    },
+    {
+      "id": "combat.base_attack.group",
+      "count": null,
+      "rule": "combat.base_attack",
+      "tier": "group",
+      "priority": 95,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-198456d6879ae85be955",
+        "radio-62176a1c1873a113bb2e",
+        "radio-5f00f4f261750955c038",
+        "radio-a35721a98c0d9668015d",
+        "radio-b4514c0e3ee7041e9037",
+        "radio-108b7687b64cc49a310f",
+        "radio-cebae678a18e6dfd4349",
+        "radio-9ef33adf288c2f9a1b67",
+        "radio-1b80d55938d57d48604d",
+        "radio-ed8c100135060922e575",
+        "radio-db5208cb4cdce9dbfde4",
+        "radio-7c39fe4781f93cc11d11"
+      ]
+    },
+    {
+      "id": "combat.base_attack.group.written-v2",
+      "count": null,
+      "rule": "combat.base_attack",
+      "tier": "group",
+      "priority": 95,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-ab41791748999e99f182",
+        "radio-6051aa883297f56fef2f",
+        "radio-37bac7e4bb1645cdccc3",
+        "radio-b05c6f89e6912fecf4b7",
+        "radio-47fdca7b294f7c05bc2b",
+        "radio-8d92da862c6198754ed6",
+        "radio-3980610cb20b5ae027cf",
+        "radio-8fc8aec810b169e1e63f",
+        "radio-04b1ef4e47846a399246",
+        "radio-60f9f38f22d96ef3c91e",
+        "radio-f1be66fdfdcab62583ed",
+        "radio-c89cd2c5249b6c8841ef"
+      ]
+    },
+    {
+      "id": "damage.hit.group.written-v5",
+      "count": null,
+      "rule": "damage.hit",
+      "tier": "group",
+      "priority": 90,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-e7134c419be537bbabe5",
+        "radio-2609f64c067be0e8c1c0",
+        "radio-94df4b7206760df0aac0",
+        "radio-58f8626f2f6fdad399d4",
+        "radio-28778847410eca8cf75b",
+        "radio-36d670bd36aac311cc19"
+      ]
+    },
+    {
+      "id": "damage.hit.group.written-v7",
+      "count": null,
+      "rule": "damage.hit",
+      "tier": "group",
+      "priority": 90,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-8751134104c5d5f23560",
+        "radio-813b28cdd26c9423945a",
+        "radio-62ee77a4d869f3db8f0a",
+        "radio-52039d2eac91b729f878",
+        "radio-cf03d05eabb94502d374",
+        "radio-1b52777a6127bb124cdb"
+      ]
+    },
+    {
+      "id": "damage.hit.mass.written-v3",
+      "count": null,
+      "rule": "damage.hit",
+      "tier": "mass",
+      "priority": 90,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-0cc2d86c72d08c15fc06",
+        "radio-de0b674523dcd3d7dcae",
+        "radio-1e47cc3a7c7e307e0900",
+        "radio-b6a05e8b3e7ae52a1f2c",
+        "radio-492b066a6f248c9d0c3a",
+        "radio-c5b30ae091741881e9d5"
+      ]
+    },
+    {
+      "id": "damage.hit.group.enemy-fire-v3",
+      "count": null,
+      "rule": "damage.hit",
+      "tier": "group",
+      "priority": 90,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-5ae411e15f80229401d9",
+        "radio-4b79dc31116ff2bc59f9",
+        "radio-83c5320533896a094919",
+        "radio-543303a64cdadf23e198",
+        "radio-3ee8a8e297589fedb5cf",
+        "radio-6d114bf426eb3728b843",
+        "radio-726337b283cf1b94e50b",
+        "radio-39dfdc54c7925ff57685",
+        "radio-fc355d33560999e1d0f7",
+        "radio-c2b92f5306d6b28e79e7",
+        "radio-6ea69b475cd698354b25",
+        "radio-743a0077338ced50cc30"
+      ]
+    },
+    {
+      "id": "damage.hit.group.written-v8",
+      "count": null,
+      "rule": "damage.hit",
+      "tier": "group",
+      "priority": 90,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-ee6dc025778aabd4039e",
+        "radio-6607a4923b463cccc32d",
+        "radio-a8426679ac3cbfa61cb9",
+        "radio-4a77296260d419690c0a",
+        "radio-f8040cd1ccbd4b3cf075",
+        "radio-70520807b4179ffe99e8",
+        "radio-f2e9dfa29b0215ec58c3",
+        "radio-ac19ae7cbdde7ea4dc71",
+        "radio-2de1b29f7712cfe9c103",
+        "radio-443ecedc6df26259a02b",
+        "radio-8d0486404bc4d6c83b45",
+        "radio-fcb3f3831f8d21e54c76"
+      ]
+    },
+    {
+      "id": "damage.hit.group.enemy-fire-v4",
+      "count": null,
+      "rule": "damage.hit",
+      "tier": "group",
+      "priority": 90,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-4fbbb57f6572d3a85bdc",
+        "radio-8e3f7bb3fe55ddc10c83",
+        "radio-d953a484e6e9312d9448",
+        "radio-b172607f5986bc120229",
+        "radio-01da5cc947b29dbadfe9",
+        "radio-7369fe833b20f8890e35",
+        "radio-6c1dbe3aeac407474094",
+        "radio-5ad774a0618fc540b7dc",
+        "radio-ef6786428770853f9a85",
+        "radio-df4fef8ac48e14491f29",
+        "radio-fe8607d41beaf99bca00",
+        "radio-566eecb2f77574bd254e"
+      ]
+    },
+    {
+      "id": "damage.hit.group.written-v2",
+      "count": null,
+      "rule": "damage.hit",
+      "tier": "group",
+      "priority": 90,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-a54e2671a42fab961855",
+        "radio-fe3d17dc3e1127b60339",
+        "radio-ea4b91be82d2f3a00e01",
+        "radio-11cafcf38410fd95b3c1",
+        "radio-6dc2af89d27724932a0f",
+        "radio-e25c491aa46d8eae439c",
+        "radio-14266760ee838a187699",
+        "radio-41b3b2c52bea9de09dcb",
+        "radio-c4fa9df38739f816478a",
+        "radio-a6cc3668a755d7a27455",
+        "radio-9895b24b449f8e52c1a3",
+        "radio-8c19da3998bff7525b28"
+      ]
+    },
+    {
+      "id": "damage.hit.group.written-v4",
+      "count": null,
+      "rule": "damage.hit",
+      "tier": "group",
+      "priority": 90,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-7ba7fac2941985692f4f",
+        "radio-d1c8056cd3de8d567039",
+        "radio-c3b643ec78d454046c66",
+        "radio-2d20fa3b3d1cc177ccc7",
+        "radio-cec8184f9c330b8ef2f7",
+        "radio-da064d6a3cf3b1ba4297",
+        "radio-ce2ac78b42a405b478bf",
+        "radio-a41028dad995f9b8ba27",
+        "radio-2230df5d2b8c94a1469d",
+        "radio-948534cdaad91f2c4260",
+        "radio-884046a12e47151eb01e",
+        "radio-a43b34b95adb274b5a04"
+      ]
+    },
+    {
+      "id": "damage.hit.group.enemy-fire-v1",
+      "count": null,
+      "rule": "damage.hit",
+      "tier": "group",
+      "priority": 90,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-4a69532c315760e70d5b",
+        "radio-bb448899cbe0492e93f1",
+        "radio-4707208380ea6f1bd9fd",
+        "radio-b812fb6406a3bda384a8",
+        "radio-bf9792463d4439bb8869",
+        "radio-491aeb04a831d14be815",
+        "radio-0406bd90422ebeab5fe5",
+        "radio-6c67208fbb0ed63237fa",
+        "radio-6ad2c37df041d0e0b778",
+        "radio-71a20da33b7216dc1679",
+        "radio-f08d360f0a86fb885baa",
+        "radio-a40eeb11e8d47e375e0e"
+      ]
+    },
+    {
+      "id": "damage.mobility_lost.group.written-v3",
+      "count": null,
+      "rule": "damage.mobility_lost",
+      "tier": "group",
+      "priority": 88,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-37eb87dee443fcd7cd45",
+        "radio-f564c6583b6f8cb1d5e8",
+        "radio-163e7ee58705a754615e",
+        "radio-10763c29944fda87bb13",
+        "radio-aa839932605766e0b145",
+        "radio-15ddfd2cad7242795137"
+      ]
+    },
+    {
+      "id": "combat.target_destroyed.group.written-v8",
+      "count": null,
+      "rule": "combat.target_destroyed",
+      "tier": "group",
+      "priority": 72,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-2e39ae1a6e4cfe6ca156",
+        "radio-ff3ad50d961159869d32",
+        "radio-b4183bd8ff3c99789b7d",
+        "radio-a4731029e435cd7e2870",
+        "radio-180b4d317975b8cb5b6c",
+        "radio-59dd31b61c8b589446fa"
+      ]
+    },
+    {
+      "id": "traffic.reverse_complete.group.written-v2",
+      "count": null,
+      "rule": "traffic.reverse_complete",
+      "tier": "group",
+      "priority": 35,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-b40a9c42833616a66595",
+        "radio-ec140dd40de25a8329e7",
+        "radio-f2fe7461c059a0b97374",
+        "radio-b394e4a394538fd3971f",
+        "radio-b6f9644706862fbb6cde",
+        "radio-fb6fe1e74c276baf4042"
+      ]
+    },
+    {
+      "id": "combat.base_attack.single",
+      "count": null,
+      "rule": "combat.base_attack",
+      "tier": "single",
+      "priority": 95,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-198456d6879ae85be955",
+        "radio-62176a1c1873a113bb2e",
+        "radio-5f00f4f261750955c038",
+        "radio-a35721a98c0d9668015d",
+        "radio-b4514c0e3ee7041e9037",
+        "radio-108b7687b64cc49a310f"
+      ]
+    },
+    {
+      "id": "damage.hit.single.enemy-fire-v1",
+      "count": null,
+      "rule": "damage.hit",
+      "tier": "single",
+      "priority": 90,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-4a69532c315760e70d5b",
+        "radio-bb448899cbe0492e93f1",
+        "radio-4707208380ea6f1bd9fd",
+        "radio-b812fb6406a3bda384a8",
+        "radio-bf9792463d4439bb8869",
+        "radio-491aeb04a831d14be815"
+      ]
+    },
+    {
+      "id": "damage.hit.single.enemy-fire-v3",
+      "count": null,
+      "rule": "damage.hit",
+      "tier": "single",
+      "priority": 90,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-5ae411e15f80229401d9",
+        "radio-4b79dc31116ff2bc59f9",
+        "radio-83c5320533896a094919",
+        "radio-543303a64cdadf23e198",
+        "radio-3ee8a8e297589fedb5cf",
+        "radio-6d114bf426eb3728b843"
+      ]
+    },
+    {
+      "id": "damage.hit.single.enemy-fire-v4",
+      "count": null,
+      "rule": "damage.hit",
+      "tier": "single",
+      "priority": 90,
+      "bawdy": false,
+      "remembrance": false,
+      "recordingIds": [
+        "radio-4fbbb57f6572d3a85bdc",
+        "radio-8e3f7bb3fe55ddc10c83",
+        "radio-d953a484e6e9312d9448",
+        "radio-b172607f5986bc120229",
+        "radio-01da5cc947b29dbadfe9",
+        "radio-7369fe833b20f8890e35"
+      ]
+    }
+  ],
+  "note": "Offline assets. Figures are conservative reserved credits; account balance permission is unavailable. No game-time API charges."
+}

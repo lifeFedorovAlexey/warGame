@@ -1,4 +1,5 @@
 import {realize,stableHash} from './conditions.js';
+import {recordedRadioClip} from './audio.js';
 
 export const speechKey=text=>String(text??'').toLocaleLowerCase('ru').replaceAll('ё','е').replace(/[^\p{L}\p{N}@]+/gu,' ').trim();
 
@@ -11,7 +12,8 @@ export function renderRadioLine(phrase,context,dictionaries,speaker,addressee,{o
  // Identity changes must not disguise the same sentence as a new variant.
  const neutral=phrase.text.replace(/\{(?:speaker|addressee)(?:CallSign|Name)\}/g,'@person');
  const repeatText=realize(neutral,context,dictionaries);if(!repeatText)return null;
- const recorded=phrase.source==='recording'&&phrase.audio&&(phrase.audio.text===body||!phrase.audio.text&&body===phrase.text);
+ const recorded=phrase.source==='recording'&&phrase.audio&&(phrase.audio.text===body||!phrase.audio.text&&body===phrase.text)||
+  phrase.source!=='text'&&recordedRadioClip(speaker.voiceId,body);
  let text=body;
  if(opening&&!recorded&&speaker.callSign&&!/\{speaker(?:CallSign|Name)\}/.test(phrase.text)&&phrase.identify!==false){
   const patterns=dictionaries.radioOpenings??['{speakerCallSign}, на связи. {body}'];
