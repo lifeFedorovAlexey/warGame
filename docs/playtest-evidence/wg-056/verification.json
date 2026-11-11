@@ -1,0 +1,234 @@
+{
+  "issue": "WG-056",
+  "status": "На проверке владельца",
+  "change": "Owner correction: all vehicle collision ovals reduced 10% in width and length (scale 0.90); shared oval and passing logic retained.",
+  "sizesAndClosePass": {
+    "reports": [
+      {
+        "kind": "bukhanka",
+        "widthBefore": 2.0899798398000002,
+        "widthAfter": 1.8809818558200004,
+        "lengthBefore": 4.323989152800001,
+        "lengthAfter": 3.8915902375200013,
+        "infantry": false
+      },
+      {
+        "kind": "builder",
+        "widthBefore": 2.0899798398000002,
+        "widthAfter": 1.8809818558200004,
+        "lengthBefore": 4.323989152800001,
+        "lengthAfter": 3.8915902375200013,
+        "infantry": false
+      },
+      {
+        "kind": "command",
+        "widthBefore": 1.88,
+        "widthAfter": 1.692,
+        "lengthBefore": 4.364500046,
+        "lengthAfter": 3.9280500414000006,
+        "infantry": false
+      },
+      {
+        "kind": "flamer",
+        "widthBefore": 2.0899798398000002,
+        "widthAfter": 1.8809818558200004,
+        "lengthBefore": 4.323989152800001,
+        "lengthAfter": 3.8915902375200013,
+        "infantry": false
+      },
+      {
+        "kind": "raider",
+        "widthBefore": 1.88,
+        "widthAfter": 1.692,
+        "lengthBefore": 4.203999997,
+        "lengthAfter": 3.7835999973000005,
+        "infantry": false
+      },
+      {
+        "kind": "scav-zaporozhets",
+        "widthBefore": 1.73,
+        "widthAfter": 1.557,
+        "lengthBefore": 3.870000015,
+        "lengthAfter": 3.4830000135,
+        "infantry": false
+      },
+      {
+        "kind": "scav-firetruck",
+        "widthBefore": 2.700000048,
+        "widthAfter": 2.4300000432,
+        "lengthBefore": 7.414999962,
+        "lengthAfter": 6.6734999658,
+        "infantry": false
+      },
+      {
+        "kind": "scav-bus",
+        "widthBefore": 2.75,
+        "widthAfter": 2.475,
+        "lengthBefore": 7.535000086,
+        "lengthAfter": 6.7815000774000005,
+        "infantry": false
+      },
+      {
+        "kind": "scav-rifleman",
+        "widthBefore": 0.64,
+        "widthAfter": 0.64,
+        "lengthBefore": 0.52,
+        "lengthAfter": 0.52,
+        "infantry": true
+      },
+      {
+        "kind": "scav-grenadier",
+        "widthBefore": 0.68,
+        "widthAfter": 0.68,
+        "lengthBefore": 0.58,
+        "lengthAfter": 0.58,
+        "infantry": true
+      }
+    ],
+    "scenes": [
+      {
+        "mode": "one",
+        "spacing": 8.864418351190002,
+        "finish": 5.4999999999999964,
+        "overlapCorrections": 0,
+        "units": [
+          {
+            "id": "u180",
+            "x": 0,
+            "y": 74.68130600243686,
+            "hp": 320
+          },
+          {
+            "id": "u181",
+            "x": -8.864418351190002,
+            "y": 0,
+            "hp": 320
+          },
+          {
+            "id": "u182",
+            "x": 8.864418351190002,
+            "y": 0,
+            "hp": 320
+          }
+        ]
+      },
+      {
+        "mode": "three",
+        "spacing": 8.864418351190002,
+        "finish": 10.09999999999998,
+        "overlapCorrections": 0,
+        "units": [
+          {
+            "id": "u180",
+            "x": -0.3385773190271695,
+            "y": 119.82761316569619,
+            "hp": 320
+          },
+          {
+            "id": "u181",
+            "x": -8.710330259762419,
+            "y": 74.55911557628772,
+            "hp": 320
+          },
+          {
+            "id": "u182",
+            "x": 8.732233622437995,
+            "y": 74.63512750380013,
+            "hp": 320
+          }
+        ]
+      },
+      {
+        "mode": "stop",
+        "spacing": 8.864418351190002,
+        "finish": 2.600000000000001,
+        "overlapCorrections": 0,
+        "units": [
+          {
+            "id": "u180",
+            "x": -18.50309880133837,
+            "y": -9.956679644918871,
+            "hp": 320
+          },
+          {
+            "id": "u181",
+            "x": -8.864418351190002,
+            "y": 0,
+            "hp": 320
+          },
+          {
+            "id": "u182",
+            "x": 8.864418351190002,
+            "y": 0,
+            "hp": 320
+          }
+        ]
+      },
+      {
+        "mode": "load",
+        "spacing": 8.864418351190002,
+        "finish": 7.499999999999989,
+        "overlapCorrections": 0,
+        "units": [
+          {
+            "id": "u180",
+            "x": -0.2083477663349195,
+            "y": 74.71670896709963,
+            "hp": 320
+          },
+          {
+            "id": "u181",
+            "x": -8.864418351190002,
+            "y": 0,
+            "hp": 320
+          },
+          {
+            "id": "u182",
+            "x": 8.864418351190002,
+            "y": 0,
+            "hp": 320
+          }
+        ]
+      }
+    ]
+  },
+  "browser": [
+    {
+      "name": "m01",
+      "scene": "close-exit",
+      "stats": [
+        {
+          "id": "u182",
+          "done": true,
+          "error": 0.3186939975630594,
+          "hp": 320,
+          "reason": "destination-reached"
+        }
+      ],
+      "drift": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "elapsed": 8.099999999999977,
+      "errors": []
+    }
+  ],
+  "screens": [
+    [
+      1440,
+      900
+    ],
+    [
+      844,
+      390
+    ],
+    [
+      667,
+      375
+    ]
+  ],
+  "previous15PercentResults": "verification-15.json",
+  "scope": "Only targeted size/close-pass checks and one native M01 scene repeated, per owner request."
+}

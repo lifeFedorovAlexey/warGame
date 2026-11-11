@@ -92,6 +92,7 @@ export function rememberHostileHit(mission, unit, source) {
 }
 export function cancelCombatRetreat(unit, suppress=true) {
   delete unit.combatRetreat;
+  delete unit.retreatPush;
   if(!inFactoryInterior(unit))delete unit.factoryVisit;
   unit.retreatSuppressed=suppress;
 }
@@ -128,6 +129,7 @@ function retreatThreat(mission, unit, spec) {
 }
 function clearMotion(unit) {
   unit.path=[];unit.task=null;
+  delete unit.retreatPush;
   delete unit.combatDeployment;delete unit.combatGroup;delete unit.combatResume;delete unit.combatParking;
   for(const key of ['detour','traffic','trafficHold','passage','passingLane','driveWatch','routeOrder','routeContinuation','failedArcs','reverseDebt','yieldReturn','pendingOrder','commandRevision','resumeConstructionId','combatDisengage'])delete unit[key];
 }

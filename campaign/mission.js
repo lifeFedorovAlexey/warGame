@@ -36,6 +36,7 @@ import {UnitSpatialIndex} from './unit-spatial-index.js';
 import {vehicleContact,impactPower,fallbackVehicleImpact,resolveVehicleOverlapsSteps} from './vehicle-impact.js';
 import {kickContactRock} from './vehicle-contact-rock.js';
 import {PredictiveTraffic} from './predictive-traffic.js';
+import {retreatSpeed,applyRetreatContact} from './retreat-contact.js';
 import {departureSlotOrder,recordYieldStep,borrowedHomeClear,checkedPassageBackoff,checkedYieldPassage} from './traffic-start.js';
 import {checkedRouteShortcut,checkedProgressTurn,checkedDetourAlternative,checkedRouteRejoin,checkedGoalArrival,recoveryConditions,unchangedRecoveryFailure,rememberRecoveryFailure} from './traffic-shortcut.js';
 import {maneuverAdmissionBlocker} from './maneuver-admission.js';
@@ -1272,6 +1273,9 @@ export class Mission{
    const dx=obstacle.x-shape.x,dy=obstacle.y-shape.y;
    const otherLane=lane?roadDrivingLane(this,other,point,scale):null;
    if(otherLane&&lane.path===otherLane.path&&lane.direction===otherLane.direction){
+    const separate=!!lane.retreatShoulder!==!!otherLane.retreatShoulder||lane.retreatShoulder&&lane.retreatSide!==otherLane.retreatSide;
+    const across=Math.abs(dx*course.y-dy*course.x);
+    if(separate&&across>width+footprintSupport(obstacle,course.y,-course.x)+scale*.15)continue;
     const along=otherLane.progress-lane.progress;
     if(Math.abs(along)>scale*8)continue;
     let merge=unit.mergeTraffic?.[other.id];
@@ -1790,7 +1794,7 @@ export class Mission{
   const checkingTurn=cruising&&!aligned;
   let trafficLimit=curving?coordinatorLimit:cruising&&aligned?this.trafficSpeed(unit,motionCourse,roadLane,scale,stoppedObstacles)
    :checkingTurn?Math.min(coordinatorLimit,this.trafficSpeed(unit,forward,null,scale,stoppedObstacles)):coordinatorLimit;
-  const speed=this.unitSpec(unit).speed*this.nav.roads.factor(unit.x,unit.y)*damageMobility(unit.damage);
+  const speed=retreatSpeed(unit,this.unitSpec(unit).speed*this.nav.roads.factor(unit.x,unit.y)*damageMobility(unit.damage));
   if(unit.navigation)unit.navigation.desiredSpeed=speed;
   const reverseLimit=unit.task?.type==='clear-site'?scale*4:precise?scale*1.5:0;
   const reverseApproach=remaining<reverseLimit
@@ -2514,6 +2518,9 @@ export class Mission{
    const v=other.hp>0?(other.driveSpeed??0)*(other.reversing?-1:1):0,n=contact.normal;
    const closing=((vx+Math.sin(other.heading)*v)*n[0]+(vy-Math.cos(other.heading)*v)*n[1])/scale,power=impactPower(closing);
    if(closing<=.18)continue;
+   if((unit.combatRetreat||other.combatRetreat)&&!isInfantry(unit)&&!isInfantry(other)){
+    applyRetreatContact(this,unit,other,closing,contact);continue;
+   }
    const key=[unit.id,other.id].sort().join('|'),rock=this.state.time-(rockPairs.get(key)??-Infinity)>=.35,
     damage=power>=1&&this.state.time-(pairs.get(key)??-Infinity)>=.6;
    if(!rock&&!damage)continue;

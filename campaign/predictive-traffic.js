@@ -17,6 +17,7 @@ import {maneuverAdmissionBlocker} from './maneuver-admission.js';
 import {isInfantry} from './scav-unit-profiles.js';
 import {TrafficPlanner} from './traffic-planner.js';
 import {roadDrivingLane} from './road-merge.js';
+import {stepRetreatContact,retreatSpeed,holdRetreatYield} from './retreat-contact.js';
 
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 const wrap=x=>Math.atan2(Math.sin(x),Math.cos(x));
@@ -48,13 +49,18 @@ export function approachCost(pose,goal,radius){
 }
 function approachingControl(pose,control,goal,dt,braking,final){
  const reaction=braking*dt;
- const cap=Math.sqrt(2*braking*Math.max(0,distance(pose,goal)-(final?.65:0))+reaction*reaction)-reaction;
+ const cap=Math.sqrt(2*braking*Math.max(0,distance(pose,goal)-(final?.2:0))+reaction*reaction)-reaction;
  return {...control,speed:Math.sign(control.speed)*Math.min(Math.abs(control.speed),cap)};
 }
 
 function routeSteering(pose,goal,scale,speed){
  const dynamics=vehicleDynamics(pose),look=Math.max(scale*3,Math.min(distance(pose,goal),Math.max(Math.abs(speed),pose.driveSpeed??0)));
- return clamp(Math.atan(2*dynamics.wheelbase*scale*Math.sin(angle(pose,goal))/look),-dynamics.steeringLimit,dynamics.steeringLimit);
+ const turn=angle(pose,goal);
+ // Pure pursuit assumes a target ahead. Behind the car sin(turn) tends
+ // back to zero, so a U-turn was predicted as nearly straight driving.
+ // Turn toward the rear target until it enters the forward semicircle.
+ if(Math.abs(turn)>Math.PI/2)return Math.sign(turn)*dynamics.steeringLimit;
+ return clamp(Math.atan(2*dynamics.wheelbase*scale*Math.sin(turn)/look),-dynamics.steeringLimit,dynamics.steeringLimit);
 }
 
 // Integrate the same bicycle dimensions, steering, acceleration and braking
@@ -215,8 +221,10 @@ export class PredictiveTraffic extends TrafficCoordinator{
       &&Math.abs(angle(pose,waypoint))<.65;
     };
     const options={scale,attempts:expanded?2:0,maximumLegs,tolerance:final?.5:2,allowed,accept};
-    const legs=(yield* facade.planManeuverSteps(source,goal,{...options,reverseBudget:0}))
-     ??(yield* facade.planManeuverSteps(source,goal,{...options,reverseBudget:scale*(expanded?6:3)}));
+    const legs=final
+     ?yield* facade.planManeuverSteps(source,goal,{...options,reverseBudget:scale*6})
+     :(yield* facade.planManeuverSteps(source,goal,{...options,reverseBudget:0}))
+      ??(yield* facade.planManeuverSteps(source,goal,{...options,reverseBudget:scale*(expanded?6:3)}));
     if(!legs)return null;
     const end=yield* checkManeuverSteps(source,legs,scale,allowed,()=>facade.nav.workDeadline);
     return end&&{legs,reached:distance(end,goal)<(final?.65:2)&&(!final||borrowedHomeClear(facade,unit,end))};
@@ -375,6 +383,9 @@ export class PredictiveTraffic extends TrafficCoordinator{
   return false;
  }
  *prepareUnitSteps(mission,unit,spec,dt){
+  if(holdRetreatYield(mission,unit))return true;
+  if(unit.retreatPushedAt===mission.state.time){unit.driveSpeed=0;return true;}
+  if(stepRetreatContact(mission,unit,dt,integrateControl))return true;
   if(this.holdRecoveryMotion(mission,unit))return true;
   if(unit.detour?.recoveryTurn&&this.stepStuckTurn(mission,unit,dt))return true;
   if(!unit.pendingOrder&&(unit.detour||unit.jointTraffic||unit.traffic)&&!steeringManeuverReady(unit,dt)){
@@ -505,10 +516,20 @@ export class PredictiveTraffic extends TrafficCoordinator{
   if(unit.yieldReturn&&!returning||unit.jointTraffic||unit.detour
     ||unit.traffic||unit.trafficHold||unit.passage||unit.routeContinuation
     ||!['move','attack-move','attack','combat-position','scav-search','scav-return'].includes(unit.task?.type))return yield* super.prepareMovementSteps(mission,unit,dt);
-  while(unit.path.length&&distance(unit,unit.path[0])<(unit.path.length>1?4:1)
+  while(unit.path.length&&distance(unit,unit.path[0])<(unit.path.length>1?4:.5)
    &&(unit.path.length>1||borrowedHomeClear(mission,unit)))unit.path.shift();
   if(!unit.path.length){unit.driveSpeed=0;this.controls.delete(unit.id);return false;}
   this.trimClearedDetour(mission,unit);
+  // A nearby lateral slot lies inside the car's minimum turning circle.
+  // Prove its short parking manoeuvre before the greedy rollout alternates
+  // gears or drives a complete loop. Use the existing sliced search queue.
+  if(unit.path.length===1&&(unit.driveSpeed??0)<.01){
+   const goal=unit.path[0],dynamics=vehicleDynamics(unit),radius=dynamics.wheelbase*mission.config.worldScale/Math.tan(dynamics.steeringLimit);
+   if(distance(unit,goal)<2*radius*Math.abs(Math.sin(angle(unit,goal)))){
+    this.requestManeuver(mission,unit);
+    if(this.holdRecoveryMotion(mission,unit))return false;
+   }
+  }
   // Follow the next visible section instead of turning back to touch a grid
   // corner just passed by the car. The final accepted destination is retained.
   const lookahead=mission.config.worldScale*4;
@@ -567,12 +588,13 @@ export class PredictiveTraffic extends TrafficCoordinator{
   const account=()=>{const elapsed=performance.now()-sliceAt;cpuMs+=elapsed;
    this.stats.maxControlSliceMs=Math.max(this.stats.maxControlSliceMs??0,elapsed);};
   const finish=()=>{account();this.stats.maxDecisionMs=Math.max(this.stats.maxDecisionMs,cpuMs);};
-  const remaining=distance(unit,goal),maxSpeed=mission.unitSpec(unit).speed*mission.nav.roads.factor(unit.x,unit.y)*damageMobility(unit.damage);
+  const remaining=distance(unit,goal),maxSpeed=retreatSpeed(unit,mission.unitSpec(unit).speed*mission.nav.roads.factor(unit.x,unit.y)*damageMobility(unit.damage));
   const topology=mission.nav.topologyRevision;
   const regionSolids=mission.nav.nearbySolids(unit,Math.max(maxSpeed,unit.driveSpeed??0)*horizon+vehicleRadiusBound(unit.kind,scale)+scale*5);
-  const targetSpeed=passingLane?maxSpeed:Math.min(maxSpeed,Math.sqrt(2*dynamics.braking*Math.max(0,remaining-(final?.7:0))));
+  const targetSpeed=passingLane?maxSpeed:Math.min(maxSpeed,Math.sqrt(2*dynamics.braking*Math.max(0,remaining-(final?.2:0))));
   const turn=angle(unit,goal),preferred=routeSteering(unit,goal,scale,targetSpeed);
-  const previous=this.controls.get(unit.id),steerings=[preferred,0,-dynamics.steeringLimit,dynamics.steeringLimit,
+  const reversePreferred=-routeSteering({...unit,heading:wrap(unit.heading+Math.PI)},goal,scale,dynamics.maneuverReverse);
+  const previous=this.controls.get(unit.id),steerings=[preferred,reversePreferred,0,-dynamics.steeringLimit,dynamics.steeringLimit,
    -dynamics.steeringLimit/2,dynamics.steeringLimit/2,previous?.steering??0];
   const intervals=[dt,...Array(9).fill(Math.max(0,horizon-dt)/9)];
   const radius=dynamics.wheelbase*scale/Math.tan(dynamics.steeringLimit);
@@ -582,18 +604,26 @@ export class PredictiveTraffic extends TrafficCoordinator{
   const passingProgress=pose=>passingLane?(pose.x-origin.x)*passingLane.ux+(pose.y-origin.y)*passingLane.uy:0;
   // Field passing has the same moving lookahead as a road lane. Treating
   // its short lateral target as a parking spot made both cars crawl.
-  const preview=pose=>roadLane?roadDrivingLane(mission,{...unit,...pose},unit.path[0],scale)??goal
+  const lanePose=(car,pose,lane)=>({...car,...pose,navigation:{waitSeconds:0},
+   ...(lane.retreatShoulder?{combatRetreat:{...car.combatRetreat,shoulderSide:lane.retreatSide,shoulderPath:lane.path,shoulderDirection:lane.direction}}:{})});
+  const preview=pose=>roadLane?roadDrivingLane(mission,lanePose(unit,pose,roadLane),unit.path[0],scale)??goal
    :passingLane?{x:goal.x+passingLane.ux*passingProgress(pose),y:goal.y+passingLane.uy*passingProgress(pose)}:goal;
   const motionCost=pose=>{
+   // Parking specifies a position, not a final heading. An already reached
+   // slot must not be scored as another full turn to face its centre.
+   if(final&&distance(pose,goal)<.5)return 0;
    if(passingLane)return approachCost(pose,preview(pose),radius)-passingProgress(pose);
    if(!roadLane)return approachCost(pose,goal,radius);
-   const at=mission.nav.roads.nearest(pose),target=preview(pose);
+   const at=mission.nav.roads.nearest(pose,roadLane.retreatShoulder?scale*8:0),target=preview(pose);
    const progress=at?.segment.pathId===roadLane.path
     ?(at.segment.progress+at.along)*roadLane.direction-roadLane.progress:0;
    return approachCost(pose,target,radius)-progress;
   };
   const initialCost=motionCost(unit);
-  const backingArrival=final&&remaining<radius*2&&Math.abs(turn)>Math.PI/2;
+  // Keep evaluating the same reverse approach while braking or backing.
+  // Crossing a bearing threshold must not turn yesterday's useful reverse
+  // arc into a forward-facing cost and force another gear change.
+  const backingArrival=final&&remaining<radius*3&&(Math.abs(turn)>Math.PI/3||unit.reversing||previous?.speed<0);
   const nearby=mission.nearbyUnits(unit,100).filter(other=>other!==unit&&other.hp>0);
   const visible=unit.trafficOnScreen,neighbours=[];
   const bodies=nearby.map(other=>{
@@ -605,8 +635,9 @@ export class PredictiveTraffic extends TrafficCoordinator{
    &&unit.heading===origin.heading&&this.routeIntent(unit)===intent&&unit.trafficOnScreen===visible
    &&bodies.every(([body,wasVisible,collides])=>body.trafficOnScreen===wasVisible&&trafficCollisionRequired(unit,body)===collides);
   const forecasts=neighbours.map(other=>{
+   const lane=this.intents.get(other.id)?.roadLane;
    const key=[other.x,other.y,other.heading,other.kind,other.driveSpeed,other.reversing,other.steering,
-    other.steeringRequested,other.steeringFault?.episodes,mission.state.time,dt,scale];
+    other.steeringRequested,other.steeringFault?.episodes,mission.state.time,dt,scale,lane?.path,lane?.direction,lane?.retreatSide,other.path?.[0]];
    const cached=this.forecasts.get(other);
    if(cached&&key.every((value,i)=>value===cached.key[i])){
     this.stats.forecastCacheHits=(this.stats.forecastCacheHits??0)+1;return cached.value;
@@ -616,7 +647,13 @@ export class PredictiveTraffic extends TrafficCoordinator{
    else{
     let pose=other,time=mission.state.time;shapes=[];
     const control={speed:other.driveSpeed*(other.reversing?-1:1),steering:other.steeringRequested??other.steering??0,fault:other.steeringFault};
-    for(const step of intervals){pose=integrateControl(pose,{...control,time},step,scale);shapes.push(vehicleEnvelope(pose,scale,mission.field));time+=step;}
+    const followsLane=lane&&other.path?.length&&!other.reversing&&!other.detour&&!other.jointTraffic
+     &&-Math.sin(other.heading)*lane.ux+Math.cos(other.heading)*lane.uy>.75;
+    for(const step of intervals){
+     const target=followsLane?roadDrivingLane(mission,lanePose(other,pose,lane),other.path[0],scale):null;
+     const steering=target?routeSteering(pose,target,scale,control.speed):control.steering;
+     pose=integrateControl(pose,{...control,steering,time},step,scale);shapes.push(vehicleEnvelope(pose,scale,mission.field));time+=step;
+    }
    }
    const value={other,shapes};this.forecasts.set(other,{key,value});return value;
   });
@@ -629,7 +666,7 @@ export class PredictiveTraffic extends TrafficCoordinator{
   // Reverse candidates still pass the same live swept-body/reservation check
   // and every forecast sample; they cannot move through a following vehicle.
   const speedPasses=[[forwardSpeed,forwardSpeed*.5,forwardSpeed*.25],
-   [0,-Math.min(8,targetSpeed),-Math.min(4,targetSpeed)]];
+   [0,-Math.min(dynamics.maneuverReverse,targetSpeed),-Math.min(dynamics.maneuverReverse*.5,targetSpeed)]];
   for(let pass=0;pass<speedPasses.length;pass++){
    // Keep a productive forward arc. Reverse is an escape when no forward
    // sample makes progress, not a competing preference on every frame.
@@ -646,7 +683,8 @@ export class PredictiveTraffic extends TrafficCoordinator{
      // A new command or changed visibility discards the unexecuted candidates.
      if(!current()){this.stats.controlDiscards=(this.stats.controlDiscards??0)+1;finish();return false;}
     }
-    const step=intervals[i],target=preview(pose),feedback=steering===preferred&&speed>=0?routeSteering(pose,target,scale,speed):steering;
+    const step=intervals[i],target=preview(pose),feedback=steering===preferred&&speed>=0?routeSteering(pose,target,scale,speed)
+     :steering===reversePreferred&&speed<0?-routeSteering({...pose,heading:wrap(pose.heading+Math.PI)},target,scale,speed):steering;
     const next=integrateControl(pose,{...(passingLane?control:approachingControl(pose,control,target,step,dynamics.braking,final)),steering:feedback,time,fault:unit.steeringFault},step,scale);
     time+=step;this.stats.projections++;
     if(i===0){first=next;if(!mission.vehicleMotionClear(unit,unit,first,.52,rejected)){valid=false;break;}}

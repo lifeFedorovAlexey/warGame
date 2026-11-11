@@ -1,0 +1,14 @@
+{
+  "date": "2026-11-11",
+  "base": "e001b63",
+  "collisionScale": 0.9,
+  "passed": [
+    "check-wg056-collision-size",
+    "check-wg057-lanes",
+    "check-wg055-retreat-contact",
+    "check-wg055-retreat-mission",
+    "check-wg051-maneuvers: reverse-offset, turn-around, side-close, group-reverse"
+  ],
+  "browser": "Owner-reviewed screenshots were taken in shared workspace; no new visual changes made during integration.",
+  "radio": "Dynamic radio is unmerged work from another chat. Mechanical fixes integrated; radio extension retained as docs/playtest-patches/wg055-radio.patch, WG-055 remains open."
+}

@@ -1,0 +1,1821 @@
+--- /dev/null
++++ b/campaign/radio/retreat-incidents.js
+@@ -0,0 +1,69 @@
++export const RETREAT_RULES=['traffic.retreat_contact','traffic.panic_blocked','traffic.panic_escaped','damage.panic_failed'];
++export function mergeRetreatLibrary(library,seed){
++ const existing=new Set(library.rules.map(r=>r.id));
++ for(const rule of seed.rules.filter(r=>RETREAT_RULES.includes(r.id)&&!existing.has(r.id))){
++  library.rules.push(structuredClone(rule));
++  for(const tier of rule.tiers)for(const graph of tier.graphs)for(const node of graph.nodes)library.phrases[node.phraseId]??=structuredClone(seed.phrases[node.phraseId]);
++ }
++ return library;
++}
++const crew=(m,id)=>{
++ const p=m.state.campaign?.personnel;
++ return p?.crews[id]?.memberIds.map(id=>p.soldiers[id]).find(s=>s&&!s.death);
++};
++export class RetreatIncidents{
++ constructor(saved={}){this.records=new Map(saved.records??[]);this.serial=saved.serial??0;}
++ begin(m,u){
++  let r=this.records.get(u.id);
++  if(!r){r={id:'panic-'+u.id+'-'+(++this.serial),started:m.state.time,revision:u.commandRevision,contacts:[],blocked:false};this.records.set(u.id,r);}
++  while(this.records.size>128)this.records.delete(this.records.keys().next().value);return r;
++ }
++ participants(m,u,r){
++  const driver=crew(m,u.id),candidates=m.nearbyUnits(u,300).filter(v=>v!==u&&v.owner==='rai'&&v.hp>0&&crew(m,v.id));
++  const witness=candidates.find(v=>r.contacts.includes(v.id))??candidates.sort((a,b)=>a.id.localeCompare(b.id))[0];
++  return {driver,witness,witnessCrew:witness&&crew(m,witness.id)};
++ }
++ contact(m,event,emit){
++  const a=m.entity(event.unit),b=m.entity(event.target);if(!a||!b)return;
++  const u=a.combatRetreat?a:b.combatRetreat?b:null;if(!u||u.owner!=='rai')return;
++  const other=u===a?b:a,r=this.begin(m,u);r.contacts=[...new Set([...r.contacts,other.id])].slice(-8);
++  const driver=crew(m,u.id),bumped=other.owner==='rai'&&crew(m,other.id);
++  if(!driver)return;
++  emit('traffic.retreat_contact',{incidentId:r.id+':contact',actorIds:[u.id],affectedIds:[u.id,...(bumped?[other.id]:[])],targetIds:[other.id],
++   facts:{panickedId:driver.id,bumpedId:bumped?.id,urgency:1-u.hp/u.maxHp,closingSpeed:event.closingSpeed,retreating:true},flags:{confirmed:true}});
++ }
++ observe(m,u,emit){
++  let r=this.records.get(u.id);
++  if(u.hp<=0)return;
++  if(!u.combatRetreat&&!u.factoryVisit){if(r)this.records.delete(u.id);return;}
++  if(!r&&u.hp/u.maxHp<=.35&&u.combatRetreat&&u.combatRetreat.status!=='arrived'&&u.path?.length&&u.factoryVisit?.phase!=='inside')r=this.begin(m,u);
++  if(!r)return;
++  if(r.revision!==u.commandRevision){this.records.delete(u.id);return;}
++  const {driver,witness,witnessCrew}=this.participants(m,u,r);
++  if(!driver)return;
++  if(u.factoryVisit?.phase==='inside'||u.combatRetreat?.status==='arrived'){
++   this.records.delete(u.id);
++   emit('traffic.panic_escaped',{incidentId:r.id,actorIds:[u.id],affectedIds:[u.id,...(witness?[witness.id]:[])],
++    facts:{panickedId:driver.id,witnessId:witnessCrew?.id,escaped:true,wasBlocked:r.blocked,hadContact:r.contacts.length>0},flags:{confirmed:true}});
++  }else if(!r.blocked&&(u.navigation?.waitSeconds??0)>=3&&m.state.time-r.started>=3){
++   r.blocked=true;
++   emit('traffic.panic_blocked',{incidentId:r.id,actorIds:[u.id],affectedIds:[u.id,...(witness?[witness.id]:[])],
++    facts:{panickedId:driver.id,witnessId:witnessCrew?.id,alive:true,blocked:true},flags:{confirmed:true}});
++  }
++ }
++ destroyed(m,u,killedIds,emit){
++  if(!u)return false;
++  // An explicit cancellation is not a failed retreat. Conversely, a fatal
++  // hit can land between committing Retreat and the first controller sample.
++  if(!u.combatRetreat&&!u.factoryVisit){this.records.delete(u.id);return false;}
++  const r=this.records.get(u.id)??(u.combatRetreat&&u.combatRetreat.status!=='arrived'&&u.factoryVisit?.phase!=='inside'?this.begin(m,u):null);
++  if(!r)return false;this.records.delete(u.id);
++  const {witness,witnessCrew}=this.participants(m,u,r);if(!witness)return false;
++  const p=m.state.campaign?.personnel,dead=killedIds.map(id=>p?.soldiers[id]).find(s=>s?.death);
++  emit('damage.panic_failed',{incidentId:r.id,actorIds:[witness.id],affectedIds:[witness.id],targetIds:[u.id],
++   facts:{witnessId:witnessCrew.id,destroyedIds:[u.id],killedIds,crewKnown:!!p?.crews[u.id],confirmedDeath:!!dead,casualtyGender:dead?.gender??'m',
++    casualtyCallSign:dead?.callsign??p?.crews[u.id]?.designation??u.id},flags:{confirmed:true,urgent:true,hasCombat:true}});
++  return true;
++ }
++ save(){return {records:[...this.records],serial:this.serial};}
++}
+--- a/campaign/radio/adapter.js
++++ b/campaign/radio/adapter.js
+@@ -3,6 +3,7 @@
+ import {TacticalIntel} from './tactical-intel.js';
+ import {CrewStories} from './crew-stories.js';
+ import {CrewBanter,banterCrew} from './crew-banter.js';
++import {RetreatIncidents,mergeRetreatLibrary} from './retreat-incidents.js';
+ 
+ export const ENGINE_EVENTS={
+  'factory-repair-start':'repair.start_factory','factory-repair-complete':'repair.complete',
+@@ -86,6 +87,7 @@
+   this.retreatOrders=new Map(saved?.retreatOrders??[]);
+   this.intel=new TacticalIntel(saved?.intel);this.crewStories=new CrewStories(saved?.crewStories);
+   this.banter=new CrewBanter(saved?.banter);
++  this.retreatIncidents=new RetreatIncidents(saved?.retreatIncidents);
+   this.eventWindows=new Map(saved?.eventWindows??[]);
+   this.unitIds=new Set(m.state.units.filter(u=>u.owner==='rai').map(u=>u.id));
+   if(this.warmingUp)this.clearStartupQueue();
+@@ -137,6 +139,7 @@
+  });}
+  note(event){if(this.library.settings.enabled===false)return;return this.safe(()=>{
+   const m=this.mission,type=ENGINE_EVENTS[event.type];
++  if(event.type==='retreat-contact'){this.retreatIncidents.contact(m,event,(type,data)=>this.event(type,data));return;}
+   if(event.type==='under-attack'){
+    this.engine.state.lastCombat=this.time;
+    if(event.building)this.event('combat.base_attack',{rootCauseId:event.id,incidentId:this.windowScope('combat.base_attack'),
+@@ -145,10 +148,11 @@
+   if(event.type==='vehicle-steering-damage-roll'&&!event.failed)return;
+   if(event.type==='unit-produced')this.unitIds.add(event.unit);
+   if(event.type==='destroyed'){
+-   const unit=m.entity(event.target);if(event.owner!=='rai'||!m.config.units[event.kind])return;
++   const unit=m.state.units.find(u=>u.id===event.target);if(event.owner!=='rai'||!m.config.units[event.kind])return;
+    const crew=m.state.campaign?.personnel?.crews[event.target],soldiers=m.state.campaign?.personnel?.soldiers??{};
+    const killedIds=(crew?.memberIds??[]).filter(id=>!!soldiers[id]?.death);
+    this.crewStories.lost(m,killedIds);
++   if(this.retreatIncidents.destroyed(m,unit,killedIds,(type,data)=>this.event(type,data)))return;
+    const lossType=event.kind==='command'?'damage.commander_down':'damage.vehicle_destroyed';
+    this.event(lossType,{
+     incidentId:this.windowScope(lossType),affectedIds:[event.target],targetIds:[event.target],
+@@ -178,6 +182,7 @@
+   if(unit.owner!=='rai')return;
+   if(unit.hp<=0){this.unitIds.delete(unit.id);this.assignments.delete(unit.id);this.previous.delete(unit.id);return;}
+   this.unitIds.add(unit.id);
++  this.retreatIncidents.observe(this.mission,unit,(type,data)=>this.event(type,data));
+   const retreat=this.retreatOrders.get(unit.id);
+   if(retreat&&!retreat.reported&&unit.combatRetreat?.status==='moving'){
+    retreat.reported=true;this.event(retreat.forced?'command.retreat':'command.auto_retreat',{
+@@ -265,15 +270,20 @@
+    const unit=m.entity(id);return unit?.hp>0&&context.orderIds.includes(this.assignments.get(id)?.orderId);
+   });
+   if(context.primaryEventType==='traffic.queue_blocked')relevant=context.incidentIds.some(id=>this.traffic.incidents.get(id)?.status==='open');
++  if(['traffic.retreat_contact','traffic.panic_blocked','traffic.panic_escaped'].includes(context.primaryEventType)){
++   const unit=m.entity(context.actorIds[0]);relevant=unit?.hp>0;
++   if(context.primaryEventType==='traffic.panic_blocked')relevant=relevant&&!!unit.combatRetreat&&(unit.navigation?.waitSeconds??0)>=1;
++   if(context.primaryEventType==='traffic.retreat_contact')relevant=relevant&&!!unit.combatRetreat&&unit.combatRetreat.status!=='arrived'&&unit.factoryVisit?.phase!=='inside';
++  }
+   return {speakers,relevant,combat:this.time-(this.engine.state.lastCombat??-100)<8};
+  }
+  next(options){this.bind();if(this.warmingUp){this.clearStartupQueue();return null;}const line=this.engine.next(this.time,options);if(line&&this.crews.has(line.crewId))this.crews.get(line.crewId).lastSpoken=this.time;return line;}
+- save(){this.bind();this.mission.state.dynamicRadio={version:1,engine:this.engine.save(),traffic:this.traffic.save(),previous:[...this.previous],orders:[...this.orders],assignments:[...this.assignments],retreatOrders:[...this.retreatOrders],eventWindows:[...this.eventWindows],crews:[...this.crews],memories:[...this.memories],intel:this.intel.save(),crewStories:this.crewStories.save(),banter:this.banter.save()};}
++ save(){this.bind();this.mission.state.dynamicRadio={version:1,engine:this.engine.save(),traffic:this.traffic.save(),previous:[...this.previous],orders:[...this.orders],assignments:[...this.assignments],retreatOrders:[...this.retreatOrders],eventWindows:[...this.eventWindows],crews:[...this.crews],memories:[...this.memories],intel:this.intel.save(),crewStories:this.crewStories.save(),banter:this.banter.save(),retreatIncidents:this.retreatIncidents.save()};}
+ }
+ 
+ export async function loadRadioLibrary(){
+  const response=await fetch('/api/radio/published').catch(()=>null);
+- if(response?.ok)return (await response.json()).document;
+  const seed=await fetch(new URL('../../assets/radio/situations_catalog.json',import.meta.url));
+- if(!seed.ok)throw Error('Библиотека радио недоступна');return seed.json();
++ if(!seed.ok){if(response?.ok)return (await response.json()).document;throw Error('Библиотека радио недоступна');}
++ const defaults=await seed.json();return response?.ok?mergeRetreatLibrary((await response.json()).document,defaults):defaults;
+ }
+--- a/campaign/radio/conditions.js
++++ b/campaign/radio/conditions.js
+@@ -88,7 +88,7 @@
+     for(const node of graph.nodes){
+      if(node.speakerSlot!=null&&(!Number.isInteger(node.speakerSlot)||node.speakerSlot<0||node.speakerSlot>5))throw Error('Неверный участник разговора');
+      if(node.affectedSpeaker!=null&&typeof node.affectedSpeaker!=='boolean')throw Error('Неверная привязка участника к событию');
+-     if(node.speakerFact!=null&&!['newcomerId','mentorId'].includes(node.speakerFact))throw Error('Неизвестная роль участника личной истории');
++     if(node.speakerFact!=null&&!['newcomerId','mentorId','panickedId','bumpedId','witnessId'].includes(node.speakerFact))throw Error('Неизвестная роль участника личной истории');
+      const phrase=library.phrases[node.phraseId];if(!phrase||phrase.archived)throw Error('Неизвестная/архивная реплика '+node.phraseId);
+      if(phrase.kind==='question'){if(!phrase.fact)throw Error('Вопросу нужен тип факта');question=phrase.fact;}
+      else if(question){if(phrase.kind!=='answer'||phrase.fact!==question)throw Error('Ответ не соответствует вопросу');question=null;}
+--- a/campaign/radio/engine.js
++++ b/campaign/radio/engine.js
+@@ -211,7 +211,7 @@
+     if(lines.length===0&&addressee&&replySlot!=null&&replySlot!==node.speakerSlot&&/\{addressee(?:CallSign|Name)\}/.test(p.text))slots.set(replySlot,addressee.crewId);
+     const rendered=renderRadioLine(p,context,this.library.dictionaries,speaker,addressee,{opening:lines.length===0,seed:graph.id});
+     if(!rendered){valid=false;break;}
+-    lines.push({...p,...rendered,speakerSlot:node.speakerSlot,speaker:speaker.speaker??speaker.role,speakerRole:speaker.role,station:speaker.callSign,crewId:speaker.crewId,unitId:speaker.unitId,
++    lines.push({...p,...rendered,speakerSlot:node.speakerSlot,speakerFact:node.speakerFact,speaker:speaker.speaker??speaker.role,speakerRole:speaker.role,station:speaker.callSign,crewId:speaker.crewId,unitId:speaker.unitId,
+      portrait:p.portrait??speaker.portrait,clip:radioClip(p,rendered.text,this.settings,speaker.voiceId,speaker.role)});prior=speaker;
+    }
+    if(valid&&!this.repeatBlocked(lines,context,now))
+@@ -277,7 +277,7 @@
+   if(!live){
+    // A reply addressed to a particular operator cannot silently switch to a
+    // replacement operator midway through an authored conversation.
+-   if(line.speakerSlot!=null&&(q.cursor>0||q.personal||q.bawdy)){this.active=null;this.reject('conversation-participant-unavailable');return null;}
++   if(line.speakerFact||line.speakerSlot!=null&&(q.cursor>0||q.personal||q.bawdy)){this.active=null;this.reject('conversation-participant-unavailable');return null;}
+    const order=this.speakerOrder(q.context);
+    live=snapshot.speakers?.filter(s=>s.alive&&s.radioChannel==='rai'&&s.role===(line.speakerRole??line.role)&&(!line.voiceId||line.voiceId===s.voiceId)).sort((a,b)=>order(a,b,q.cursor===0))[0];
+    if(live)Object.assign(line,{crewId:live.crewId,unitId:live.unitId,station:live.callSign,speaker:live.speaker??live.role,portrait:live.portrait});
+--- a/campaign/radio/simulator.js
++++ b/campaign/radio/simulator.js
+@@ -15,7 +15,9 @@
+  const enrich=c=>{c.knownEnemyCount=enemies.length;c.knownAttackerCount=enemies.length;c.towerSourceCount=enemies.filter(e=>e.kind==='mg-tower').length;c.machinegunSourceCount=enemies.filter(e=>e.weapon==='mg').length;c.flamethrowerSourceCount=enemies.filter(e=>e.weapon==='flame').length;
+   const text=composition(enemies),report=text?text[0].toLocaleUpperCase('ru')+text.slice(1):'';
+   Object.assign(c.facts,{enemyComposition:text,enemyReport:report,attackerComposition:text,attackerReport:report,fireCurrent:enemies.length>0,enemyHasFlamer:enemies.some(e=>e.weapon==='flame'),observedEnemies:enemies,observedAttackers:enemies,
+-   personalLossCount:losses,lostCallSign:'Грач',lostName:'Иван',lostVeteran,lostNewcomerRemembered,mentorId:speakers[0].crewId,newcomerId:speakers[1].crewId});return c;};
++   personalLossCount:losses,lostCallSign:'Грач',lostName:'Иван',lostVeteran,lostNewcomerRemembered,mentorId:speakers[0].crewId,newcomerId:speakers[1].crewId,
++   panickedId:speakers[0].crewId,bumpedId:speakers[1].crewId,witnessId:speakers[1].crewId,urgency:.9,escaped:type==='traffic.panic_escaped',hadContact:true,
++   confirmedDeath:crewKnown&&killed>0,casualtyCallSign:'Грач',casualtyGender:'m'});return c;};
+  const engine=new RadioEngine(library,{missionId:seed,snapshot:c=>{enrich(c);return {speakers};},legacy:()=>legacy});
+  const contexts=[],raw=Math.max(orders,type==='damage.hit'?hits:1);
+  for(let i=0;i<raw;i++)engine.event({id:'fixture-'+i,tickId:Math.round(simTime*10),simTime,type,orderId:type.startsWith('command.')?'order-'+(i%orders):undefined,
+--- a/assets/radio/situations_catalog.json
++++ b/assets/radio/situations_catalog.json
+@@ -34760,6 +34760,915 @@
+           ]
+         }
+       ]
++    },
++    {
++      "id": "traffic.retreat_contact",
++      "eventType": "traffic.retreat_contact",
++      "title": "Толчок при отходе",
++      "category": "traffic",
++      "support": "wired",
++      "source": "retreat-contact / RetreatIncidents",
++      "reason": "",
++      "enabled": true,
++      "countMetric": "affectedUnitCount",
++      "windowSimSeconds": 0.4,
++      "scope": "incident",
++      "priority": 65,
++      "cooldown": 18,
++      "expiresAfter": 12,
++      "legacyOverride": false,
++      "interruptible": true,
++      "preconditions": {
++        "all": []
++      },
++      "roles": [
++        "driver",
++        "builder",
++        "commander",
++        "radio"
++      ],
++      "tiers": [
++        {
++          "id": "single",
++          "min": 1,
++          "graphs": [
++            {
++              "id": "traffic.retreat_contact.v1",
++              "weight": 1,
++              "nodes": [
++                {
++                  "phraseId": "traffic.retreat_contact.v1.1",
++                  "speakerFact": "panickedId",
++                  "speakerSlot": 0,
++                  "differentSpeaker": false,
++                  "affectedSpeaker": true
++                }
++              ],
++              "requires": {
++                "all": [
++                  {
++                    "field": "facts.urgency",
++                    "op": "gte",
++                    "value": 0.65
++                  }
++                ]
++              }
++            },
++            {
++              "id": "traffic.retreat_contact.v2",
++              "weight": 1,
++              "nodes": [
++                {
++                  "phraseId": "traffic.retreat_contact.v2.1",
++                  "speakerFact": "panickedId",
++                  "speakerSlot": 0,
++                  "differentSpeaker": false,
++                  "affectedSpeaker": true
++                }
++              ],
++              "requires": {
++                "all": [
++                  {
++                    "field": "facts.urgency",
++                    "op": "gte",
++                    "value": 0.65
++                  }
++                ]
++              }
++            },
++            {
++              "id": "traffic.retreat_contact.v3",
++              "weight": 1,
++              "nodes": [
++                {
++                  "phraseId": "traffic.retreat_contact.v3.1",
++                  "speakerFact": "panickedId",
++                  "speakerSlot": 0,
++                  "differentSpeaker": false,
++                  "affectedSpeaker": true
++                }
++              ],
++              "requires": {
++                "all": [
++                  {
++                    "field": "facts.urgency",
++                    "op": "gte",
++                    "value": 0.65
++                  }
++                ]
++              }
++            },
++            {
++              "id": "traffic.retreat_contact.v4",
++              "weight": 1,
++              "nodes": [
++                {
++                  "phraseId": "traffic.retreat_contact.v4.1",
++                  "speakerFact": "panickedId",
++                  "speakerSlot": 0,
++                  "differentSpeaker": false,
++                  "affectedSpeaker": true
++                },
++                {
++                  "phraseId": "traffic.retreat_contact.v4.2",
++                  "speakerFact": "bumpedId",
++                  "speakerSlot": 1,
++                  "differentSpeaker": true,
++                  "affectedSpeaker": true
++                }
++              ],
++              "requires": {
++                "all": [
++                  {
++                    "field": "facts.bumpedId",
++                    "op": "known",
++                    "value": true
++                  }
++                ]
++              }
++            },
++            {
++              "id": "traffic.retreat_contact.v5",
++              "weight": 1,
++              "nodes": [
++                {
++                  "phraseId": "traffic.retreat_contact.v5.1",
++                  "speakerFact": "panickedId",
++                  "speakerSlot": 0,
++                  "differentSpeaker": false,
++                  "affectedSpeaker": true
++                },
++                {
++                  "phraseId": "traffic.retreat_contact.v5.2",
++                  "speakerFact": "bumpedId",
++                  "speakerSlot": 1,
++                  "differentSpeaker": true,
++                  "affectedSpeaker": true
++                }
++              ],
++              "requires": {
++                "all": [
++                  {
++                    "field": "facts.bumpedId",
++                    "op": "known",
++                    "value": true
++                  }
++                ]
++              }
++            },
++            {
++              "id": "traffic.retreat_contact.v6",
++              "weight": 1,
++              "nodes": [
++                {
++                  "phraseId": "traffic.retreat_contact.v6.1",
++                  "speakerFact": "panickedId",
++                  "speakerSlot": 0,
++                  "differentSpeaker": false,
++                  "affectedSpeaker": true
++                },
++                {
++                  "phraseId": "traffic.retreat_contact.v6.2",
++                  "speakerFact": "bumpedId",
++                  "speakerSlot": 1,
++                  "differentSpeaker": true,
++                  "affectedSpeaker": true
++                }
++              ],
++              "requires": {
++                "all": [
++                  {
++                    "field": "facts.bumpedId",
++                    "op": "known",
++                    "value": true
++                  }
++                ]
++              }
++            },
++            {
++              "id": "traffic.retreat_contact.v7",
++              "weight": 1,
++              "nodes": [
++                {
++                  "phraseId": "traffic.retreat_contact.v7.1",
++                  "speakerFact": "bumpedId",
++                  "speakerSlot": 0,
++                  "differentSpeaker": false,
++                  "affectedSpeaker": true
++                },
++                {
++                  "phraseId": "traffic.retreat_contact.v7.2",
++                  "speakerFact": "panickedId",
++                  "speakerSlot": 1,
++                  "differentSpeaker": true,
++                  "affectedSpeaker": true
++                }
++              ],
++              "requires": {
++                "all": [
++                  {
++                    "field": "facts.bumpedId",
++                    "op": "known",
++                    "value": true
++                  }
++                ]
++              }
++            },
++            {
++              "id": "traffic.retreat_contact.v8",
++              "weight": 1,
++              "nodes": [
++                {
++                  "phraseId": "traffic.retreat_contact.v8.1",
++                  "speakerFact": "bumpedId",
++                  "speakerSlot": 0,
++                  "differentSpeaker": false,
++                  "affectedSpeaker": true
++                },
++                {
++                  "phraseId": "traffic.retreat_contact.v8.2",
++                  "speakerFact": "panickedId",
++                  "speakerSlot": 1,
++                  "differentSpeaker": true,
++                  "affectedSpeaker": true
++                }
++              ],
++              "requires": {
++                "all": [
++                  {
++                    "field": "facts.bumpedId",
++                    "op": "known",
++                    "value": true
++                  }
++                ]
++              }
++            },
++            {
++              "id": "traffic.retreat_contact.v9",
++              "weight": 1,
++              "nodes": [
++                {
++                  "phraseId": "traffic.retreat_contact.v9.1",
++                  "speakerFact": "panickedId",
++                  "speakerSlot": 0,
++                  "differentSpeaker": false,
++                  "affectedSpeaker": true
++                }
++              ]
++            },
++            {
++              "id": "traffic.retreat_contact.v10",
++              "weight": 1,
++              "nodes": [
++                {
++                  "phraseId": "traffic.retreat_contact.v10.1",
++                  "speakerFact": "panickedId",
++                  "speakerSlot": 0,
++                  "differentSpeaker": false,
++                  "affectedSpeaker": true
++                }
++              ]
++            }
++          ]
++        }
++      ]
++    },
++    {
++      "id": "traffic.panic_blocked",
++      "eventType": "traffic.panic_blocked",
++      "title": "Паника: отход перекрыт",
++      "category": "traffic",
++      "support": "wired",
++      "source": "retreat-contact / RetreatIncidents",
++      "reason": "",
++      "enabled": true,
++      "countMetric": "affectedUnitCount",
++      "windowSimSeconds": 0.2,
++      "scope": "incident",
++      "priority": 72,
++      "cooldown": 18,
++      "expiresAfter": 12,
++      "legacyOverride": false,
++      "interruptible": true,
++      "preconditions": {
++        "all": []
++      },
++      "roles": [
++        "driver",
++        "builder",
++        "commander",
++        "radio"
++      ],
++      "tiers": [
++        {
++          "id": "single",
++          "min": 1,
++          "graphs": [
++            {
++              "id": "traffic.panic_blocked.v1",
++              "weight": 1,
++              "nodes": [
++                {
++                  "phraseId": "traffic.panic_blocked.v1.1",
++                  "speakerFact": "panickedId",
++                  "speakerSlot": 0,
++                  "differentSpeaker": false,
++                  "affectedSpeaker": true
++                }
++              ]
++            },
++            {
++              "id": "traffic.panic_blocked.v2",
++              "weight": 1,
++              "nodes": [
++                {
++                  "phraseId": "traffic.panic_blocked.v2.1",
++                  "speakerFact": "panickedId",
++                  "speakerSlot": 0,
++                  "differentSpeaker": false,
++                  "affectedSpeaker": true
++                }
++              ]
++            },
++            {
++              "id": "traffic.panic_blocked.v3",
++              "weight": 1,
++              "nodes": [
++                {
++                  "phraseId": "traffic.panic_blocked.v3.1",
++                  "speakerFact": "panickedId",
++                  "speakerSlot": 0,
++                  "differentSpeaker": false,
++                  "affectedSpeaker": true
++                }
++              ]
++            },
++            {
++              "id": "traffic.panic_blocked.v4",
++              "weight": 1,
++              "nodes": [
++                {
++                  "phraseId": "traffic.panic_blocked.v4.1",
++                  "speakerFact": "panickedId",
++                  "speakerSlot": 0,
++                  "differentSpeaker": false,
++                  "affectedSpeaker": true
++                }
++              ]
++            },
++            {
++              "id": "traffic.panic_blocked.v5",
++              "weight": 1,
++              "nodes": [
++                {
++                  "phraseId": "traffic.panic_blocked.v5.1",
++                  "speakerFact": "panickedId",
++                  "speakerSlot": 0,
++                  "differentSpeaker": false,
++                  "affectedSpeaker": true
++                },
++                {
++                  "phraseId": "traffic.panic_blocked.v5.2",
++                  "speakerFact": "witnessId",
++                  "speakerSlot": 1,
++                  "differentSpeaker": true,
++                  "affectedSpeaker": true
++                }
++              ],
++              "requires": {
++                "all": [
++                  {
++                    "field": "facts.witnessId",
++                    "op": "known",
++                    "value": true
++                  }
++                ]
++              }
++            },
++            {
++              "id": "traffic.panic_blocked.v6",
++              "weight": 1,
++              "nodes": [
++                {
++                  "phraseId": "traffic.panic_blocked.v6.1",
++                  "speakerFact": "panickedId",
++                  "speakerSlot": 0,
++                  "differentSpeaker": false,
++                  "affectedSpeaker": true
++                },
++                {
++                  "phraseId": "traffic.panic_blocked.v6.2",
++                  "speakerFact": "witnessId",
++                  "speakerSlot": 1,
++                  "differentSpeaker": true,
++                  "affectedSpeaker": true
++                }
++              ],
++              "requires": {
++                "all": [
++                  {
++                    "field": "facts.witnessId",
++                    "op": "known",
++                    "value": true
++                  }
++                ]
++              }
++            }
++          ]
++        }
++      ]
++    },
++    {
++      "id": "traffic.panic_escaped",
++      "eventType": "traffic.panic_escaped",
++      "title": "Отход завершён: облегчение, подкол или возмущение",
++      "category": "traffic",
++      "support": "wired",
++      "source": "retreat-contact / RetreatIncidents",
++      "reason": "",
++      "enabled": true,
++      "countMetric": "affectedUnitCount",
++      "windowSimSeconds": 1,
++      "scope": "incident",
++      "priority": 40,
++      "cooldown": 18,
++      "expiresAfter": 12,
++      "legacyOverride": false,
++      "interruptible": true,
++      "preconditions": {
++        "all": []
++      },
++      "roles": [
++        "driver",
++        "builder",
++        "commander",
++        "radio"
++      ],
++      "tiers": [
++        {
++          "id": "single",
++          "min": 1,
++          "graphs": [
++            {
++              "id": "traffic.panic_escaped.v1",
++              "weight": 1,
++              "nodes": [
++                {
++                  "phraseId": "traffic.panic_escaped.v1.1",
++                  "speakerFact": "panickedId",
++                  "speakerSlot": 0,
++                  "differentSpeaker": false,
++                  "affectedSpeaker": true
++                }
++              ],
++              "requires": {
++                "all": [
++                  {
++                    "field": "facts.escaped",
++                    "op": "eq",
++                    "value": true
++                  }
++                ]
++              }
++            },
++            {
++              "id": "traffic.panic_escaped.v2",
++              "weight": 1,
++              "nodes": [
++                {
++                  "phraseId": "traffic.panic_escaped.v2.1",
++                  "speakerFact": "panickedId",
++                  "speakerSlot": 0,
++                  "differentSpeaker": false,
++                  "affectedSpeaker": true
++                }
++              ],
++              "requires": {
++                "all": [
++                  {
++                    "field": "facts.escaped",
++                    "op": "eq",
++                    "value": true
++                  }
++                ]
++              }
++            },
++            {
++              "id": "traffic.panic_escaped.v3",
++              "weight": 1,
++              "nodes": [
++                {
++                  "phraseId": "traffic.panic_escaped.v3.1",
++                  "speakerFact": "panickedId",
++                  "speakerSlot": 0,
++                  "differentSpeaker": false,
++                  "affectedSpeaker": true
++                }
++              ],
++              "requires": {
++                "all": [
++                  {
++                    "field": "facts.escaped",
++                    "op": "eq",
++                    "value": true
++                  }
++                ]
++              }
++            },
++            {
++              "id": "traffic.panic_escaped.v4",
++              "weight": 1,
++              "nodes": [
++                {
++                  "phraseId": "traffic.panic_escaped.v4.1",
++                  "speakerFact": "witnessId",
++                  "speakerSlot": 0,
++                  "differentSpeaker": false,
++                  "affectedSpeaker": true
++                },
++                {
++                  "phraseId": "traffic.panic_escaped.v4.2",
++                  "speakerFact": "panickedId",
++                  "speakerSlot": 1,
++                  "differentSpeaker": true,
++                  "affectedSpeaker": true
++                }
++              ],
++              "requires": {
++                "all": [
++                  {
++                    "field": "facts.escaped",
++                    "op": "eq",
++                    "value": true
++                  },
++                  {
++                    "field": "facts.witnessId",
++                    "op": "known",
++                    "value": true
++                  }
++                ]
++              },
++              "humor": true
++            },
++            {
++              "id": "traffic.panic_escaped.v5",
++              "weight": 1,
++              "nodes": [
++                {
++                  "phraseId": "traffic.panic_escaped.v5.1",
++                  "speakerFact": "witnessId",
++                  "speakerSlot": 0,
++                  "differentSpeaker": false,
++                  "affectedSpeaker": true
++                },
++                {
++                  "phraseId": "traffic.panic_escaped.v5.2",
++                  "speakerFact": "panickedId",
++                  "speakerSlot": 1,
++                  "differentSpeaker": true,
++                  "affectedSpeaker": true
++                }
++              ],
++              "requires": {
++                "all": [
++                  {
++                    "field": "facts.escaped",
++                    "op": "eq",
++                    "value": true
++                  },
++                  {
++                    "field": "facts.witnessId",
++                    "op": "known",
++                    "value": true
++                  }
++                ]
++              },
++              "humor": true
++            },
++            {
++              "id": "traffic.panic_escaped.v6",
++              "weight": 1,
++              "nodes": [
++                {
++                  "phraseId": "traffic.panic_escaped.v6.1",
++                  "speakerFact": "witnessId",
++                  "speakerSlot": 0,
++                  "differentSpeaker": false,
++                  "affectedSpeaker": true
++                },
++                {
++                  "phraseId": "traffic.panic_escaped.v6.2",
++                  "speakerFact": "panickedId",
++                  "speakerSlot": 1,
++                  "differentSpeaker": true,
++                  "affectedSpeaker": true
++                }
++              ],
++              "requires": {
++                "all": [
++                  {
++                    "field": "facts.escaped",
++                    "op": "eq",
++                    "value": true
++                  },
++                  {
++                    "field": "facts.witnessId",
++                    "op": "known",
++                    "value": true
++                  },
++                  {
++                    "field": "facts.hadContact",
++                    "op": "eq",
++                    "value": true
++                  }
++                ]
++              },
++              "humor": true
++            },
++            {
++              "id": "traffic.panic_escaped.v7",
++              "weight": 1,
++              "nodes": [
++                {
++                  "phraseId": "traffic.panic_escaped.v7.1",
++                  "speakerFact": "witnessId",
++                  "speakerSlot": 0,
++                  "differentSpeaker": false,
++                  "affectedSpeaker": true
++                },
++                {
++                  "phraseId": "traffic.panic_escaped.v7.2",
++                  "speakerFact": "panickedId",
++                  "speakerSlot": 1,
++                  "differentSpeaker": true,
++                  "affectedSpeaker": true
++                }
++              ],
++              "requires": {
++                "all": [
++                  {
++                    "field": "facts.escaped",
++                    "op": "eq",
++                    "value": true
++                  },
++                  {
++                    "field": "facts.witnessId",
++                    "op": "known",
++                    "value": true
++                  },
++                  {
++                    "field": "facts.hadContact",
++                    "op": "eq",
++                    "value": true
++                  }
++                ]
++              }
++            },
++            {
++              "id": "traffic.panic_escaped.v8",
++              "weight": 1,
++              "nodes": [
++                {
++                  "phraseId": "traffic.panic_escaped.v8.1",
++                  "speakerFact": "witnessId",
++                  "speakerSlot": 0,
++                  "differentSpeaker": false,
++                  "affectedSpeaker": true
++                },
++                {
++                  "phraseId": "traffic.panic_escaped.v8.2",
++                  "speakerFact": "panickedId",
++                  "speakerSlot": 1,
++                  "differentSpeaker": true,
++                  "affectedSpeaker": true
++                }
++              ],
++              "requires": {
++                "all": [
++                  {
++                    "field": "facts.escaped",
++                    "op": "eq",
++                    "value": true
++                  },
++                  {
++                    "field": "facts.witnessId",
++                    "op": "known",
++                    "value": true
++                  },
++                  {
++                    "field": "facts.hadContact",
++                    "op": "eq",
++                    "value": true
++                  }
++                ]
++              }
++            },
++            {
++              "id": "traffic.panic_escaped.v9",
++              "weight": 1,
++              "nodes": [
++                {
++                  "phraseId": "traffic.panic_escaped.v9.1",
++                  "speakerFact": "witnessId",
++                  "speakerSlot": 0,
++                  "differentSpeaker": false,
++                  "affectedSpeaker": true
++                },
++                {
++                  "phraseId": "traffic.panic_escaped.v9.2",
++                  "speakerFact": "panickedId",
++                  "speakerSlot": 1,
++                  "differentSpeaker": true,
++                  "affectedSpeaker": true
++                }
++              ],
++              "requires": {
++                "all": [
++                  {
++                    "field": "facts.escaped",
++                    "op": "eq",
++                    "value": true
++                  },
++                  {
++                    "field": "facts.witnessId",
++                    "op": "known",
++                    "value": true
++                  }
++                ]
++              }
++            }
++          ]
++        }
++      ]
++    },
++    {
++      "id": "damage.panic_failed",
++      "eventType": "damage.panic_failed",
++      "title": "Не удалось отойти: подтверждённая потеря",
++      "category": "damage",
++      "support": "wired",
++      "source": "retreat-contact / RetreatIncidents",
++      "reason": "",
++      "enabled": true,
++      "countMetric": "affectedUnitCount",
++      "windowSimSeconds": 0.2,
++      "scope": "incident",
++      "priority": 90,
++      "cooldown": 18,
++      "expiresAfter": 12,
++      "legacyOverride": false,
++      "interruptible": false,
++      "preconditions": {
++        "all": []
++      },
++      "roles": [
++        "driver",
++        "builder",
++        "commander",
++        "radio"
++      ],
++      "tiers": [
++        {
++          "id": "single",
++          "min": 1,
++          "graphs": [
++            {
++              "id": "damage.panic_failed.v1",
++              "weight": 1,
++              "nodes": [
++                {
++                  "phraseId": "damage.panic_failed.v1.1",
++                  "speakerFact": "witnessId",
++                  "speakerSlot": 0,
++                  "differentSpeaker": false,
++                  "affectedSpeaker": true
++                }
++              ]
++            },
++            {
++              "id": "damage.panic_failed.v2",
++              "weight": 1,
++              "nodes": [
++                {
++                  "phraseId": "damage.panic_failed.v2.1",
++                  "speakerFact": "witnessId",
++                  "speakerSlot": 0,
++                  "differentSpeaker": false,
++                  "affectedSpeaker": true
++                }
++              ]
++            },
++            {
++              "id": "damage.panic_failed.v3",
++              "weight": 1,
++              "nodes": [
++                {
++                  "phraseId": "damage.panic_failed.v3.1",
++                  "speakerFact": "witnessId",
++                  "speakerSlot": 0,
++                  "differentSpeaker": false,
++                  "affectedSpeaker": true
++                }
++              ],
++              "requires": {
++                "all": [
++                  {
++                    "field": "facts.confirmedDeath",
++                    "op": "eq",
++                    "value": true
++                  },
++                  {
++                    "field": "facts.casualtyGender",
++                    "op": "eq",
++                    "value": "m"
++                  }
++                ]
++              }
++            },
++            {
++              "id": "damage.panic_failed.v4",
++              "weight": 1,
++              "nodes": [
++                {
++                  "phraseId": "damage.panic_failed.v4.1",
++                  "speakerFact": "witnessId",
++                  "speakerSlot": 0,
++                  "differentSpeaker": false,
++                  "affectedSpeaker": true
++                }
++              ],
++              "requires": {
++                "all": [
++                  {
++                    "field": "facts.confirmedDeath",
++                    "op": "eq",
++                    "value": true
++                  },
++                  {
++                    "field": "facts.casualtyGender",
++                    "op": "eq",
++                    "value": "m"
++                  }
++                ]
++              }
++            },
++            {
++              "id": "damage.panic_failed.v5",
++              "weight": 1,
++              "nodes": [
++                {
++                  "phraseId": "damage.panic_failed.v5.1",
++                  "speakerFact": "witnessId",
++                  "speakerSlot": 0,
++                  "differentSpeaker": false,
++                  "affectedSpeaker": true
++                }
++              ],
++              "requires": {
++                "all": [
++                  {
++                    "field": "facts.confirmedDeath",
++                    "op": "eq",
++                    "value": true
++                  },
++                  {
++                    "field": "facts.casualtyGender",
++                    "op": "eq",
++                    "value": "f"
++                  }
++                ]
++              }
++            },
++            {
++              "id": "damage.panic_failed.v6",
++              "weight": 1,
++              "nodes": [
++                {
++                  "phraseId": "damage.panic_failed.v6.1",
++                  "speakerFact": "witnessId",
++                  "speakerSlot": 0,
++                  "differentSpeaker": false,
++                  "affectedSpeaker": true
++                }
++              ],
++              "requires": {
++                "all": [
++                  {
++                    "field": "facts.confirmedDeath",
++                    "op": "eq",
++                    "value": true
++                  },
++                  {
++                    "field": "facts.casualtyGender",
++                    "op": "eq",
++                    "value": "f"
++                  }
++                ]
++              }
++            }
++          ]
++        }
++      ]
+     }
+   ],
+   "phrases": {
+@@ -72659,6 +73568,592 @@
+       "pauseAfter": 0.18,
+       "archived": false,
+       "emotion": "dry"
++    },
++    "traffic.retreat_contact.v1.1": {
++      "id": "traffic.retreat_contact.v1.1",
++      "text": "Дайте проехать, меня сейчас добьют!",
++      "role": "driver",
++      "kind": "report",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "urgent"
++    },
++    "traffic.retreat_contact.v2.1": {
++      "id": "traffic.retreat_contact.v2.1",
++      "text": "С дороги! У меня машина еле живая!",
++      "role": "driver",
++      "kind": "report",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "urgent"
++    },
++    "traffic.retreat_contact.v3.1": {
++      "id": "traffic.retreat_contact.v3.1",
++      "text": "Чёрт, расступитесь! Мне надо выйти!",
++      "role": "driver",
++      "kind": "report",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "urgent"
++    },
++    "traffic.retreat_contact.v4.1": {
++      "id": "traffic.retreat_contact.v4.1",
++      "text": "Подвинься, я отхожу!",
++      "role": "driver",
++      "kind": "report",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "urgent"
++    },
++    "traffic.retreat_contact.v4.2": {
++      "id": "traffic.retreat_contact.v4.2",
++      "text": "Ты куда бампером?! Вижу я, вижу!",
++      "role": "driver",
++      "kind": "ack",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "dry"
++    },
++    "traffic.retreat_contact.v5.1": {
++      "id": "traffic.retreat_contact.v5.1",
++      "text": "Не стой поперёк, дай уйти!",
++      "role": "driver",
++      "kind": "report",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "urgent"
++    },
++    "traffic.retreat_contact.v5.2": {
++      "id": "traffic.retreat_contact.v5.2",
++      "text": "Да еду я! Борт-то зачем мять?",
++      "role": "driver",
++      "kind": "ack",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "dry"
++    },
++    "traffic.retreat_contact.v6.1": {
++      "id": "traffic.retreat_contact.v6.1",
++      "text": "С дороги, мне совсем хреново!",
++      "role": "driver",
++      "kind": "report",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "urgent"
++    },
++    "traffic.retreat_contact.v6.2": {
++      "id": "traffic.retreat_contact.v6.2",
++      "text": "Твою ж... Осторожнее, мы свои!",
++      "role": "driver",
++      "kind": "ack",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "dry"
++    },
++    "traffic.retreat_contact.v7.1": {
++      "id": "traffic.retreat_contact.v7.1",
++      "text": "Ты чего толкаешься?!",
++      "role": "driver",
++      "kind": "report",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "dry"
++    },
++    "traffic.retreat_contact.v7.2": {
++      "id": "traffic.retreat_contact.v7.2",
++      "text": "Отхожу! Разберёмся потом!",
++      "role": "driver",
++      "kind": "ack",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "urgent"
++    },
++    "traffic.retreat_contact.v8.1": {
++      "id": "traffic.retreat_contact.v8.1",
++      "text": "Эй, кузов мне не ломай!",
++      "role": "driver",
++      "kind": "report",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "dry"
++    },
++    "traffic.retreat_contact.v8.2": {
++      "id": "traffic.retreat_contact.v8.2",
++      "text": "Сейчас уйду, потом поругаемся!",
++      "role": "driver",
++      "kind": "ack",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "urgent"
++    },
++    "traffic.retreat_contact.v9.1": {
++      "id": "traffic.retreat_contact.v9.1",
++      "text": "Проезд освободи, отхожу!",
++      "role": "driver",
++      "kind": "report",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "urgent"
++    },
++    "traffic.retreat_contact.v10.1": {
++      "id": "traffic.retreat_contact.v10.1",
++      "text": "Подвинься! Мне к своим надо!",
++      "role": "driver",
++      "kind": "report",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "urgent"
++    },
++    "traffic.panic_blocked.v1.1": {
++      "id": "traffic.panic_blocked.v1.1",
++      "text": "Не могу выйти! Проезд закрыт, помогите!",
++      "role": "driver",
++      "kind": "report",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "urgent"
++    },
++    "traffic.panic_blocked.v2.1": {
++      "id": "traffic.panic_blocked.v2.1",
++      "text": "Зажали! Я здесь долго не протяну!",
++      "role": "driver",
++      "kind": "report",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "urgent"
++    },
++    "traffic.panic_blocked.v3.1": {
++      "id": "traffic.panic_blocked.v3.1",
++      "text": "Да пустите уже, чёрт! Мне уходить надо!",
++      "role": "driver",
++      "kind": "report",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "urgent"
++    },
++    "traffic.panic_blocked.v4.1": {
++      "id": "traffic.panic_blocked.v4.1",
++      "text": "Стою! Никуда не пролезаю!",
++      "role": "driver",
++      "kind": "report",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "urgent"
++    },
++    "traffic.panic_blocked.v5.1": {
++      "id": "traffic.panic_blocked.v5.1",
++      "text": "Не выпускают! Что мне делать?!",
++      "role": "driver",
++      "kind": "report",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "urgent"
++    },
++    "traffic.panic_blocked.v5.2": {
++      "id": "traffic.panic_blocked.v5.2",
++      "text": "Держись. Ищи свободный край.",
++      "role": "driver",
++      "kind": "ack",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "dry"
++    },
++    "traffic.panic_blocked.v6.1": {
++      "id": "traffic.panic_blocked.v6.1",
++      "text": "Я тут застряну насовсем!",
++      "role": "driver",
++      "kind": "report",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "urgent"
++    },
++    "traffic.panic_blocked.v6.2": {
++      "id": "traffic.panic_blocked.v6.2",
++      "text": "Слышим тебя. Не дёргайся в стену.",
++      "role": "driver",
++      "kind": "ack",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "dry"
++    },
++    "traffic.panic_escaped.v1.1": {
++      "id": "traffic.panic_escaped.v1.1",
++      "text": "Ушёл. Живой. Дайте отдышаться.",
++      "role": "driver",
++      "kind": "report",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "relieved",
++      "femaleText": "Ушла. Живая. Дайте отдышаться.",
++      "femaleTextBase": "Ушёл. Живой. Дайте отдышаться."
++    },
++    "traffic.panic_escaped.v2.1": {
++      "id": "traffic.panic_escaped.v2.1",
++      "text": "До своих добрался. Чуть не остался там.",
++      "role": "driver",
++      "kind": "report",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "relieved",
++      "femaleText": "До своих добралась. Чуть не осталась там.",
++      "femaleTextBase": "До своих добрался. Чуть не остался там."
++    },
++    "traffic.panic_escaped.v3.1": {
++      "id": "traffic.panic_escaped.v3.1",
++      "text": "Вышел. Теперь бы машину собрать обратно.",
++      "role": "driver",
++      "kind": "report",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "relieved",
++      "femaleText": "Вышла. Теперь бы машину собрать обратно.",
++      "femaleTextBase": "Вышел. Теперь бы машину собрать обратно."
++    },
++    "traffic.panic_escaped.v4.1": {
++      "id": "traffic.panic_escaped.v4.1",
++      "text": "Коричневый код отменяется?",
++      "role": "driver",
++      "kind": "dry_joke",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "dry"
++    },
++    "traffic.panic_escaped.v4.2": {
++      "id": "traffic.panic_escaped.v4.2",
++      "text": "Отменяется. И хватит об этом в эфире.",
++      "role": "driver",
++      "kind": "ack",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "relieved"
++    },
++    "traffic.panic_escaped.v5.1": {
++      "id": "traffic.panic_escaped.v5.1",
++      "text": "К своему пацану так не спешат, как ты сейчас!",
++      "role": "driver",
++      "kind": "dry_joke",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "dry"
++    },
++    "traffic.panic_escaped.v5.2": {
++      "id": "traffic.panic_escaped.v5.2",
++      "text": "К ремонту я спешил. Шутник нашёлся.",
++      "role": "driver",
++      "kind": "ack",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "relieved",
++      "femaleText": "К ремонту я спешила. Шутник нашёлся.",
++      "femaleTextBase": "К ремонту я спешил. Шутник нашёлся."
++    },
++    "traffic.panic_escaped.v6.1": {
++      "id": "traffic.panic_escaped.v6.1",
++      "text": "Бампер вместо пропуска?",
++      "role": "driver",
++      "kind": "dry_joke",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "dry"
++    },
++    "traffic.panic_escaped.v6.2": {
++      "id": "traffic.panic_escaped.v6.2",
++      "text": "Предъявлял. Пропустили же.",
++      "role": "driver",
++      "kind": "ack",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "relieved",
++      "femaleText": "Предъявляла. Пропустили же.",
++      "femaleTextBase": "Предъявлял. Пропустили же."
++    },
++    "traffic.panic_escaped.v7.1": {
++      "id": "traffic.panic_escaped.v7.1",
++      "text": "В следующий раз голосом проси, а не бампером!",
++      "role": "driver",
++      "kind": "report",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "dry"
++    },
++    "traffic.panic_escaped.v7.2": {
++      "id": "traffic.panic_escaped.v7.2",
++      "text": "Прости. Там уже не до вежливости было.",
++      "role": "driver",
++      "kind": "ack",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "relieved"
++    },
++    "traffic.panic_escaped.v8.1": {
++      "id": "traffic.panic_escaped.v8.1",
++      "text": "Борт теперь мятый. С тебя ремонт!",
++      "role": "driver",
++      "kind": "report",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "dry"
++    },
++    "traffic.panic_escaped.v8.2": {
++      "id": "traffic.panic_escaped.v8.2",
++      "text": "Записал. Спасибо за проезд.",
++      "role": "driver",
++      "kind": "ack",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "relieved",
++      "femaleText": "Записала. Спасибо за проезд.",
++      "femaleTextBase": "Записал. Спасибо за проезд."
++    },
++    "traffic.panic_escaped.v9.1": {
++      "id": "traffic.panic_escaped.v9.1",
++      "text": "Ну что, отпустило?",
++      "role": "driver",
++      "kind": "report",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "dry"
++    },
++    "traffic.panic_escaped.v9.2": {
++      "id": "traffic.panic_escaped.v9.2",
++      "text": "Выдохнул. Руки всё ещё трясутся.",
++      "role": "driver",
++      "kind": "ack",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "relieved",
++      "femaleText": "Выдохнула. Руки всё ещё трясутся.",
++      "femaleTextBase": "Выдохнул. Руки всё ещё трясутся."
++    },
++    "damage.panic_failed.v1.1": {
++      "id": "damage.panic_failed.v1.1",
++      "text": "{facts.casualtyCallSign} не вышел. Машину потеряли.",
++      "role": "driver",
++      "kind": "report",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "somber"
++    },
++    "damage.panic_failed.v2.1": {
++      "id": "damage.panic_failed.v2.1",
++      "text": "Не удалось отойти. Минус машина.",
++      "role": "driver",
++      "kind": "report",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "somber"
++    },
++    "damage.panic_failed.v3.1": {
++      "id": "damage.panic_failed.v3.1",
++      "text": "Отмучился… Чёрт. Не успел уйти.",
++      "role": "driver",
++      "kind": "report",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "somber"
++    },
++    "damage.panic_failed.v4.1": {
++      "id": "damage.panic_failed.v4.1",
++      "text": "Жалко пацана. Пытался вырваться до последнего.",
++      "role": "driver",
++      "kind": "report",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "somber"
++    },
++    "damage.panic_failed.v5.1": {
++      "id": "damage.panic_failed.v5.1",
++      "text": "Отмучилась… Чёрт. Не успела уйти.",
++      "role": "driver",
++      "kind": "report",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "somber"
++    },
++    "damage.panic_failed.v6.1": {
++      "id": "damage.panic_failed.v6.1",
++      "text": "Жалко девчонку. Пыталась вырваться до последнего.",
++      "role": "driver",
++      "kind": "report",
++      "source": "tts",
++      "audio": null,
++      "portrait": null,
++      "voiceId": null,
++      "pauseAfter": 0.2,
++      "archived": false,
++      "emotion": "somber"
+     }
+   },
+   "characters": [
+--- a/tools/radio_library.py
++++ b/tools/radio_library.py
+@@ -71,7 +71,22 @@
+ 
+ def load(published=False):
+     path = STORE/('published.json' if published else 'draft.json')
+-    return read(path) if path.exists() else {'revision':0,'savedAt':None,'document':read(SEED)}
++    result = read(path) if path.exists() else {'revision':0,'savedAt':None,'document':read(SEED)}
++    # New game sources become editable in older drafts without replacing the
++    # owner's existing wording, recordings, disabled rules or publication file.
++    seed = read(SEED)
++    additions = {'traffic.retreat_contact','traffic.panic_blocked','traffic.panic_escaped','damage.panic_failed'}
++    document = result['document']
++    existing = {r['id'] for r in document['rules']}
++    for rule in seed['rules']:
++        if rule['id'] not in additions or rule['id'] in existing: continue
++        document['rules'].append(rule)
++        for tier in rule['tiers']:
++            for graph in tier['graphs']:
++                for node in graph['nodes']:
++                    phrase = node['phraseId']
++                    document['phrases'].setdefault(phrase, seed['phrases'][phrase])
++    return result
+ 
+ def validate(document):
+     if not isinstance(document,dict): raise ValueError('Нужен JSON библиотеки')
+--- /dev/null
++++ b/tools/check-wg055-panic-radio.mjs
+@@ -0,0 +1,94 @@
++import fs from 'node:fs';
++import assert from 'node:assert/strict';
++import {progressMission} from './check-navigation-public-progress.mjs';
++import {MissionRadio} from '../campaign/radio/adapter.js';
++import {mergeRetreatLibrary,RETREAT_RULES} from '../campaign/radio/retreat-incidents.js';
++import {validateLibrary} from '../campaign/radio/conditions.js';
++import {simulateRadio} from '../campaign/radio/simulator.js';
++const library=JSON.parse(fs.readFileSync('assets/radio/situations_catalog.json','utf8')),results=[];
++const make=()=>{
++ const m=progressMission();m.state.time=30;
++ const a=m.addUnit('bukhanka','rai',{x:0,y:0}),b=m.addUnit('bukhanka','rai',{x:25,y:0});a.hp=40;a.combatRetreat={status:'moving'};a.path=[{x:0,y:150}];a.commandRevision=1;
++ const l=structuredClone(library);for(const r of l.rules)if(!RETREAT_RULES.includes(r.id))r.enabled=false;
++ const radio=m.radioObserver=new MissionRadio(m,l);radio.unit(a);return {m,a,b,radio};
++};
++const pending=(r,type)=>[...r.engine.pending.values()].filter(b=>b.type===type);
++const say=(m,r)=>{m.state.time+=2;r.tick();const lines=[];for(let i=0;i<5;i++){const line=r.next();if(line){lines.push(line);r.engine.completeLine();}m.state.time+=3;}return lines;};
++{
++ const {m,a,b,radio}=make();radio.note({id:'hit',type:'retreat-contact',unit:a.id,target:b.id,closingSpeed:7});
++ const bucket=pending(radio,'traffic.retreat_contact')[0];assert(bucket);assert.equal(bucket.facts.panickedId,m.state.campaign.personnel.crews[a.id].memberIds[0]);
++ const lines=say(m,radio);assert(lines.length);assert(lines.every(l=>[a.id,b.id].includes(l.unitId)));
++ results.push({case:'real contact binds actual participants',lines:lines.map(l=>({unit:l.unitId,text:l.text}))});
++}
++{
++ const {m,a,radio}=make();m.state.time+=4;a.navigation={waitSeconds:4};radio.unit(a);
++ assert.equal(pending(radio,'traffic.panic_blocked').length,1);radio.unit(a);assert.equal(pending(radio,'traffic.panic_blocked')[0].rawEventCount,1);
++ const lines=say(m,radio);assert(lines.length);assert(!lines.some(l=>/отмуч|погиб|жалко пацана|потеряли/i.test(l.text)));
++ results.push({case:'blocked living driver asks for help, never reported dead',lines:lines.map(l=>l.text)});
++}
++{
++ const {m,a,b,radio}=make();radio.note({id:'hit',type:'retreat-contact',unit:a.id,target:b.id,closingSpeed:5});radio.save();
++ const restored=m.radioObserver=new MissionRadio(m,structuredClone(radio.library));assert(restored.retreatIncidents.records.has(a.id));
++ restored.engine.pending.clear();restored.engine.state.queue=[];a.factoryVisit={phase:'inside'};restored.unit(a);
++ const bucket=pending(restored,'traffic.panic_escaped')[0];assert(bucket);assert(bucket.facts.escaped);assert(bucket.facts.hadContact);
++ restored.unit(a);assert.equal(bucket.rawEventCount,1,'Safe arrival is reported only once');
++ const lines=say(m,restored);assert(lines.length);results.push({case:'successful escape and save/load retain one incident',lines:lines.map(l=>l.text)});
++}
++{
++ const {m,a,radio}=make();delete a.combatRetreat;a.path=[];radio.unit(a);assert(!radio.retreatIncidents.records.has(a.id));assert.equal(pending(radio,'traffic.panic_escaped').length,0);
++ results.push({case:'cancelled retreat is neither escape nor death'});
++}
++{
++ const {m,a,radio}=make();m.damage(a,10000);assert.equal(a.hp,0);
++ const bucket=pending(radio,'damage.panic_failed')[0];assert(bucket?.facts.confirmedDeath);assert(bucket.facts.killedIds.length>0);assert.equal(pending(radio,'damage.vehicle_destroyed').length,0);
++ const lines=say(m,radio);assert(lines.length);assert(lines.every(l=>l.unitId!==a.id));results.push({case:'confirmed death voiced by a living witness',lines:lines.map(l=>l.text)});
++}
++{
++ const {m,a,b,radio}=make();radio.note({id:'hit',type:'retreat-contact',unit:a.id,target:b.id,closingSpeed:7});m.state.time+=2;radio.tick();assert(radio.engine.state.queue.length);
++ a.hp=0;assert.equal(radio.next(),null,'A different driver cannot inherit the frightened speaker line');
++ results.push({case:'pending fear line expires when its driver dies'});
++}
++for(const kind of ['traffic.panic_escaped','damage.panic_failed']){
++ const variants=library.rules.find(r=>r.id===kind).tiers[0].graphs;
++ for(const graph of variants){
++  const l=structuredClone(library),r=l.rules.find(r=>r.id===kind);r.tiers[0].graphs=[structuredClone(graph)];
++  for(const killed of kind==='damage.panic_failed'?[0,1]:[0]){
++   const result=simulateRadio(l,{type:kind,count:2,killed,losses:kind==='damage.panic_failed'?1:0,seed:graph.id});
++   const deathVariant=graph.requires?.all.some(x=>x.field==='facts.confirmedDeath');
++   if(deathVariant&&!killed)assert.equal(result.lines.length,0);
++   else if(!graph.requires?.all.some(x=>x.field==='facts.casualtyGender'&&x.value==='f'))assert(result.lines.length,graph.id);
++  }
++ }
++ results.push({case:kind+' every applicable authored graph publishes; death-only wording rejects unconfirmed losses'});
++}
++for(const gender of ['m','f']){
++ const {m,a,radio}=make(),personnel=m.state.campaign.personnel;
++ for(const id of personnel.crews[a.id].memberIds)personnel.soldiers[id].gender=gender;
++ const rule=radio.library.rules.find(r=>r.id==='damage.panic_failed');
++ for(const tier of rule.tiers)tier.graphs=tier.graphs.filter(g=>g.requires?.all.some(c=>c.field==='facts.casualtyGender'&&c.value===gender));
++ m.damage(a,10000);const lines=say(m,radio);assert(lines.length);assert(lines.every(l=>l.unitId!==a.id));
++ if(gender==='f')assert(lines.some(l=>/девчонку|Отмучилась/.test(l.text)));
++ else assert(lines.some(l=>/пацана|Отмучился/.test(l.text)));
++ results.push({case:'actual confirmed '+gender+' casualty gets matching witness wording',lines:lines.map(l=>l.text)});
++}
++{
++ const {m,a,radio}=make();radio.retreatIncidents.records.clear();m.damage(a,10000);
++ assert(pending(radio,'damage.panic_failed')[0]?.facts.confirmedDeath,'Death between retreat commit and first sample is still observed');
++ const cancelled=make();cancelled.m.stop([cancelled.a.id]);cancelled.m.damage(cancelled.a,10000);
++ assert.equal(pending(cancelled.radio,'damage.panic_failed').length,0,'Cancelled retreat cannot create a stale panic death');
++ results.push({case:'immediate fatal hit is observed; cancelled retreat uses ordinary loss reporting'});
++}
++{
++ const {m,a,b,radio}=make(),rule=radio.library.rules.find(r=>r.id==='traffic.retreat_contact');
++ for(const tier of rule.tiers)tier.graphs=tier.graphs.filter(g=>g.id==='traffic.retreat_contact.v4');
++ radio.note({id:'anger',type:'retreat-contact',unit:a.id,target:b.id,closingSpeed:7});const lines=say(m,radio);
++ assert.equal(lines.length,2);assert.equal(lines[0].unitId,a.id);assert.equal(lines[1].unitId,b.id);assert(/Ты куда бампером/.test(lines[1].text));
++ results.push({case:'indignation is voiced by the bumped driver, panic by the retreating driver',lines:lines.map(l=>({unit:l.unitId,text:l.text}))});
++}
++{
++ const old=structuredClone(library);old.rules=old.rules.filter(r=>!RETREAT_RULES.includes(r.id));for(const id of Object.keys(old.phrases))if(RETREAT_RULES.some(r=>id.startsWith(r+'.')))delete old.phrases[id];
++ old.settings.enabled=false;const existing=JSON.stringify(old.rules);mergeRetreatLibrary(old,library);validateLibrary(old);assert.equal(old.settings.enabled,false);assert.equal(JSON.stringify(old.rules.filter(r=>!RETREAT_RULES.includes(r.id))),existing);
++ const rule=old.rules.find(r=>r.id===RETREAT_RULES[0]);rule.enabled=false;mergeRetreatLibrary(old,library);assert.equal(rule.enabled,false);assert.equal(old.rules.length,library.rules.length);
++ results.push({case:'older published libraries receive new sources without replacing owner edits or disabled rules'});
++}
++fs.writeFileSync('campaign/previews/playtest-WG-055/panic-radio-checks.json',JSON.stringify(results,null,2));console.log(JSON.stringify(results,null,2));

@@ -1,11 +1,12 @@
-import {vehicleEnvelope,trafficCollisionRequired} from './vehicle-collision.js';
+import {vehicleEnvelope,trafficCollisionRequired,footprintContact} from './vehicle-collision.js';
 import {isInfantry} from './scav-unit-profiles.js';
 import {navigationDecision} from './navigation-state.js';
 
-// Traffic can use an oval, but its inscribed corners do not contain a van's
-// actual body. Recover existing visible interpenetration using the full body.
-export const bodyEnvelope=(unit,scale,field)=>({...vehicleEnvelope(unit,scale,field),ellipse:false});
+// Use the same owner-requested smaller oval as route admission. A larger
+// rectangle here would stop/push cars after their clear route was admitted.
+export const bodyEnvelope=vehicleEnvelope;
 export function bodyContact(a,b){
+ if(a.ellipse||b.ellipse)return footprintContact(a,b);
  const dx=b.x-a.x,dy=b.y-a.y;let best={gap:-Infinity,nx:1,ny:0};
  const radius=(p,x,y)=>p.width*Math.abs(p.c*x+p.s*y)+p.depth*Math.abs(p.c*y-p.s*x);
  for(const [x,y] of [[a.c,a.s],[-a.s,a.c],[b.c,b.s],[-b.s,b.c]]){
@@ -20,7 +21,7 @@ const bodyCollisionRequired=(a,b)=>!inDoor(a)&&!inDoor(b)&&trafficCollisionRequi
 // Solve only existing penetration. Corrections are bounded physical translation
 // over this simulation step, retaining terrain and static corridor boundaries.
 export function* resolveVehicleOverlapsSteps(mission,dt,onMoved=()=>{}){
- const scale=mission.config.worldScale,maximum=scale*1.2*dt,skin=scale*.3;
+ const scale=mission.config.worldScale,maximum=scale*1.2*dt,skin=scale*.055;
  if(!(maximum>0))return;
  const stats=mission.overlapStatistics??={steps:0,moved:0,blocked:0,maxSliceMs:0,maxCorrection:0};
  let sliceAt=performance.now();
