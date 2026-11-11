@@ -1,3 +1,4 @@
+import {transportReservation,transportSite} from './transport-site.js';
 import {planFactoryAccess,roadIntersectsSite} from './factory-access.js';
 const quarter=Math.PI/2,epsilon=1e-6;
 export const buildingGridStep=config=>Math.max(.1,config.buildingGridMetres??8);
@@ -60,6 +61,7 @@ export function checkBuildingPlacement(mission,kind,x,y,angle=0,{checkMoney=true
  if(spec.requires&&!mission.state.research[spec.requires])return fail('Требуется исследование: '+config.research[spec.requires].name);
  if(checkMoney&&!mission.canSpend(spec.cost))return fail('Недостаточно нефти');
  if(!mission.inBounds(x,y)||!mission.exploredAt(x,y))return fail('Район ещё не разведан');
+ if(transportReservation(field,config,site))return fail('Посадочная площадка МУ-26 — строительство запрещено');
  const maxGrade=spec.maxBuildingGrade??config.maxBuildingGrade;
  const samples=kind==='factory'?[-1,-.5,0,.5,1]:[-1,0,1];
  let low=Infinity,high=-Infinity;
@@ -82,6 +84,9 @@ export function checkBuildingPlacement(mission,kind,x,y,angle=0,{checkMoney=true
  }
  if(structures.some(b=>rectanglesOverlap(site,b)))return fail('Пересечение с постройкой');
  const exit=buildingExit(site,spec,config.worldScale);
+ if(exit&&transportReservation(field,config,exit))return fail('Выезд завода перекрывает посадочную площадку МУ-26');
+ const entryReserve=spec.entryAnchor&&buildingExit(site,{exitAnchor:spec.entryAnchor},config.worldScale);
+ if(entryReserve&&transportReservation(field,config,entryReserve))return fail('Въезд завода перекрывает посадочную площадку МУ-26');
  for(const b of structures){
   if(b.hp>0&&(b.accessRoads??[]).some(road=>roadIntersectsSite(road,site)))return fail('Нельзя перекрывать подъездную дорогу завода');
   const otherExit=b.hp>0&&buildingExit(b,mission.buildingSpec(b),config.worldScale);
@@ -108,6 +113,8 @@ export function checkBuildingPlacement(mission,kind,x,y,angle=0,{checkMoney=true
  if(kind==='factory'){
   const access=planFactoryAccess(mission,site);site.accessRoads=access.roads;
   if(!access.ok)return fail(access.reason);
+  const pad=transportSite(field,config);
+  if(access.roads.some(road=>roadIntersectsSite(road,pad)))return fail('Подъездная дорога перекрывает посадочную площадку МУ-26');
   // A deeper footing can support the hall on a cross slope. Both thresholds
   // still need to be close to the ground across the full driveway width.
   const maxGateRelief=(spec.maxGateReliefMetres??Infinity)*config.worldScale;

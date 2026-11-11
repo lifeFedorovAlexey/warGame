@@ -1,0 +1,303 @@
+{
+  "version": 1,
+  "clips": {
+    "m03-s01-1": {
+      "file": "audio-temp/m03-s01-1-cda36404c8a3.ogg",
+      "text": "Альфа, разведка обнаружила довоенный объект за пределами нашего сектора. Есть основания полагать, что там сохранилось вооружение",
+      "speaker": "general",
+      "duration": 7.357291666666667,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "sha256": "cda36404c8a3478e68f1472675a800e194b1022b266dcfbd06e2009cd61e4e01"
+    },
+    "m03-s01-2": {
+      "file": "audio-temp/m03-s01-2-17a71ad850a3.ogg",
+      "text": "Наземным маршрутом?",
+      "speaker": "commander",
+      "duration": 1.5282916666666666,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "sha256": "17a71ad850a3a8f80d8cb14b378b4f940b5723e61594c0053bea94f13b51cf68"
+    },
+    "m03-s01-3": {
+      "file": "audio-temp/m03-s01-3-a20e949c7c6f.ogg",
+      "text": "Отрицательно. Для вас подготовлен транспорт. Задача — забрать технологию и вернуться",
+      "speaker": "general",
+      "duration": 5.1786666666666665,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "sha256": "a20e949c7c6f37580775d8e1b605492bc6df4613daae59b0dcbfafcb37255e54"
+    },
+    "m03-s02-1": {
+      "file": "audio-temp/m03-s02-1-c691e52b09b8.ogg",
+      "text": "Это и есть наш транспорт?",
+      "speaker": "commander",
+      "duration": 1.794875,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "sha256": "c691e52b09b8c9474d43356b732873478d1c8c17dbb9355b0bbabad8de3a4857"
+    },
+    "m03-s02-2": {
+      "file": "audio-temp/m03-s02-2-5e9617932949.ogg",
+      "text": "Ми-26. Модификация “Коровник”. Два винта, большая грузовая и аппетит соответствующий",
+      "speaker": "warrant",
+      "duration": 6.111458333333333,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "sha256": "5e9617932949c1a08883e1299a8cd3a4ae250c1b451bbe280b82b89ab4eb51a9"
+    },
+    "m03-s02-3": {
+      "file": "audio-temp/m03-s02-3-12ad3aad39dd.ogg",
+      "text": "Главное, чтоб обратно прилетел",
+      "speaker": "commander",
+      "duration": 2.154625,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "sha256": "12ad3aad39dd57949ac040e49c698acb1d9511a8a051340556e4af72eebcc226"
+    },
+    "m03-s02-4": {
+      "file": "audio-temp/m03-s02-4-21783c577206.ogg",
+      "text": "Туда-то мы его точно заправили",
+      "speaker": "warrant",
+      "duration": 2.098,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "sha256": "21783c5772063b17b70e43c2b01c0cba57f2ae191d5924afc56edc979d6ea46d"
+    },
+    "m03-s03-1": {
+      "file": "audio-temp/m03-s03-1-034cc7a65fd9.ogg",
+      "text": "Коровник, приготовиться к приёму техники",
+      "speaker": "radio",
+      "duration": 2.3030833333333334,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "sha256": "034cc7a65fd9cfcaff1ed0a39e6220801c08abace3ed02d713a8ff211a6ae9dd"
+    },
+    "m03-s03-2": {
+      "file": "audio-temp/m03-s03-2-58cae0b94081.ogg",
+      "text": "Принял. Рампа открыта. Только без гонок",
+      "speaker": "pilot",
+      "duration": 3.47525,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "sha256": "58cae0b94081754ede1e90105ae77d5bc3bfcac422b4bd0e5e39b86b9ead5d33"
+    },
+    "m03-s04-1": {
+      "file": "audio-temp/m03-s04-1-ee23e86c4611.ogg",
+      "text": "Груз закреплён. Машины на борту. К вылету готов",
+      "speaker": "pilot",
+      "duration": 4.067125,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "sha256": "ee23e86c4611c70c6484b90c1d933b6c890e8ce90bf3fd66d1ce0af53c48e592"
+    },
+    "m03-s04-2": {
+      "file": "audio-temp/m03-s04-2-f2feef34a182.ogg",
+      "text": "Начинайте",
+      "speaker": "commander",
+      "duration": 0.970875,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "sha256": "f2feef34a182dbedd5d227544cd59be174a2e4904226d666ce64098d1d951029"
+    },
+    "m03-s05-1": {
+      "file": "audio-temp/m03-s05-1-d685c2e6e31b.ogg",
+      "text": "Альфа, точка высадки. Рампа пошла",
+      "speaker": "pilot",
+      "duration": 3.157,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "sha256": "d685c2e6e31b6cefe0af3c92bcc6e2919714c96f3da4bf228dca75d8a338478b"
+    },
+    "m03-s05-2": {
+      "file": "audio-temp/m03-s05-2-be08761a8195.ogg",
+      "text": "Дорога рядом. Следы свежие. Похоже, район не пустой",
+      "speaker": "scout",
+      "duration": 3.903583333333333,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "sha256": "be08761a8195ca1752d10693e49a0388c6ac60665f945c8a7f3afa12f3b8accc"
+    },
+    "m03-s05-3": {
+      "file": "audio-temp/m03-s05-3-0355af8a9a4a.ogg",
+      "text": "Осмотреться. Вперёд без лишнего шума",
+      "speaker": "commander",
+      "duration": 3.0880833333333335,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "sha256": "0355af8a9a4adf0dee1a5e341e6e7b3905106c86dc1d081713be2bb0f5030169"
+    },
+    "m03-s06-1": {
+      "file": "audio-temp/m03-s06-1-75b625585784.ogg",
+      "text": "Впереди патруль. Несколько машин, идут по дороге",
+      "speaker": "scout",
+      "duration": 3.0175833333333335,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "sha256": "75b6255857847560751884f79ec006b7eda020980ff641f1148fe59f9ba18ef0"
+    },
+    "m03-s06-2": {
+      "file": "audio-temp/m03-s06-2-c84b07797a9c.ogg",
+      "text": "Обойти можем?",
+      "speaker": "commander",
+      "duration": 1.3772916666666666,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "sha256": "c84b07797a9cb65c96dda72010c98810599f3f0a253d995e39733ac7a47b3bd2"
+    },
+    "m03-s06-3": {
+      "file": "audio-temp/m03-s06-3-94103205d10e.ogg",
+      "text": "Есть грунтовка. Только она уходит за высоту",
+      "speaker": "scout",
+      "duration": 3.110708333333333,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "sha256": "94103205d10e7df1dc08354b58beb8815f2ad3b80942835a4aeb11647e3c4e52"
+    },
+    "m03-s07-1": {
+      "file": "audio-temp/m03-s07-1-24b81f4fad8e.ogg",
+      "text": "Нашли объект. Старый склад, у ворот огнемётная башня",
+      "speaker": "scout",
+      "duration": 3.4126666666666665,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "sha256": "24b81f4fad8e9a3d3241e912b4be34662f94a7c884b441be60f86ef6c8cb2a5e"
+    },
+    "m03-s07-2": {
+      "file": "audio-temp/m03-s07-2-f74e662f9489.ogg",
+      "text": "Серьёзно встречают. Значит, есть что охранять",
+      "speaker": "commander",
+      "duration": 3.4356666666666666,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "sha256": "f74e662f94893d03e89dee2f64ee9887b20d591c465aedc1d30c67214328a5ac"
+    },
+    "m03-s08-1": {
+      "file": "audio-temp/m03-s08-1-a3ba2f30b5b1.ogg",
+      "text": "Командир, здесь оружейный модуль. Пулемёт тяжёлый, довоенный. Документы уцелели",
+      "speaker": "scout",
+      "duration": 4.995041666666666,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "sha256": "a3ba2f30b5b14853f012ecca5e30b286345d2c9ba5116ad401d2b008213cf5d5"
+    },
+    "m03-s08-2": {
+      "file": "audio-temp/m03-s08-2-3d624e6802cb.ogg",
+      "text": "Отлично. Забираем и домой",
+      "speaker": "commander",
+      "duration": 2.5539583333333336,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "sha256": "3d624e6802cbd91cbf6e59bea079a342c4fe9461dfd71edf97972cee81aacc53"
+    },
+    "m03-s09-1": {
+      "file": "audio-temp/m03-s09-1-36c0236a84fd.ogg",
+      "text": "Тут ещё одна странность. Часть оборудования снята недавно. Причём аккуратно",
+      "speaker": "scout",
+      "duration": 4.832708333333334,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "sha256": "36c0236a84fd2b71d98ee083ce42f265d3c8e83100a5616f1335c0af95ad062e"
+    },
+    "m03-s09-2": {
+      "file": "audio-temp/m03-s09-2-60be20fbe42f.ogg",
+      "text": "Отметь на карте. Вернёмся к этому позже",
+      "speaker": "commander",
+      "duration": 3.2157916666666666,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "sha256": "60be20fbe42fab34682a48586498c845780b8696a6ab487a252b51e04369808f"
+    },
+    "m03-s10-1": {
+      "file": "audio-temp/m03-s10-1-68b5e33d797b.ogg",
+      "text": "Коровник, Альфа на точке. Готовы к эвакуации",
+      "speaker": "commander",
+      "duration": 3.9353333333333333,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "sha256": "68b5e33d797b42200fa90585dc516735ac93e367cfb16595d6e580d276659087"
+    },
+    "m03-s10-2": {
+      "file": "audio-temp/m03-s10-2-52e68afb4c67.ogg",
+      "text": "Вас понял. Захожу",
+      "speaker": "pilot",
+      "duration": 1.926625,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "sha256": "52e68afb4c679330f5a49fa9628d0c92929e9a81864cd2f609c6139e95e3f09b"
+    },
+    "m03-s11-1": {
+      "file": "audio-temp/m03-s11-1-0ac552b8aef2.ogg",
+      "text": "Альфа вернулась. Транспорт на площадке",
+      "speaker": "radio",
+      "duration": 2.539833333333333,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "sha256": "0ac552b8aef21e2903cea1d69cdb88695df66e8c7edc199a818ba3cab62cc36a"
+    },
+    "m03-s11-2": {
+      "file": "audio-temp/m03-s11-2-13e760d3f80f.ogg",
+      "text": "Находку в НИИ. Технику осмотреть, экипажам отдых",
+      "speaker": "commander",
+      "duration": 3.8420833333333335,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "sha256": "13e760d3f80f50182a30b8352a95d520c619aa4c8ca38f717e9c3fe00edb8933"
+    },
+    "m03-s12-1": {
+      "file": "audio-temp/m03-s12-1-1f7068ebe965.ogg",
+      "text": "Тяжёлый пулемёт восстановили по документации. Теперь можем производить свой",
+      "speaker": "scientist",
+      "duration": 4.327166666666667,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "sha256": "1f7068ebe9652a9b0ecd36bdab34e0339b1bcbd9fb1a6f2259118ad66d3985c8"
+    },
+    "m03-s12-2": {
+      "file": "audio-temp/m03-s12-2-d0207a6d7acc.ogg",
+      "text": "Ну наконец-то. Хоть что-то новое без изоленты",
+      "speaker": "commander",
+      "duration": 3.5410833333333334,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "sha256": "d0207a6d7acc4abe698742db66ead154f337d1234efe9e27780f92cb90debc76"
+    },
+    "m03-five-minutes-1": {
+      "file": "audio-temp/m03-five-minutes-1-4106dd3febcf.ogg",
+      "text": "Альфа, до конца операции пять минут. Рассчитывайте время на погрузку.",
+      "speaker": "pilot",
+      "duration": 4.9214166666666666,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "sha256": "4106dd3febcf40c517f06ecacb30e48a29fa1a18dbc14f8ea304c598fd4595cb"
+    },
+    "m03-one-minute-1": {
+      "file": "audio-temp/m03-one-minute-1-0d9a41ec122f.ogg",
+      "text": "Альфа, осталась минута. Срочно на эвакуацию.",
+      "speaker": "pilot",
+      "duration": 3.4469166666666666,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "sha256": "0d9a41ec122fa280b9060e72f405cb5f30470a174342a913c7f07155b9de434d"
+    },
+    "m03-s07-clear-1": {
+      "file": "audio-temp/m03-s07-clear-1-896759206bd5.ogg",
+      "text": "Довоенный склад перед нами. Подступы свободны. Проверяем документацию.",
+      "speaker": "scout",
+      "duration": 4.728291666666666,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "sha256": "896759206bd5eb7efe7fff03070ae2f1a70c2e9cf31dffe2e02ad098e550de15"
+    },
+    "m03-s12-losses-1": {
+      "file": "audio-temp/m03-s12-losses-1-b4f46373de3b.ogg",
+      "text": "Тяжёлый пулемёт восстановили по документации. Теперь можем производить свой.",
+      "speaker": "scientist",
+      "duration": 4.397375,
+      "origin": "temporary-synthesis",
+      "generator": "local Piper + FFmpeg",
+      "sha256": "b4f46373de3b181eae6a7b8d48279ff924c4a95c4d96ee85358a2d55dd5c9251"
+    }
+  },
+  "status": "temporary-synthesis"
+}

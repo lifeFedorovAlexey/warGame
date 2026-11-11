@@ -34,6 +34,7 @@ function relevant(entry, mission, now) {
 }
 
 export function missionSignal(chapter, mission) {
+  if(mission.state.m03)return null;
   if(mission.state.m02)return ['m02-radio-start','m02-radio-power-recovered'].includes(chapter)?m02Signal(mission):null;
   const {config, field, state} = mission;
   const mark = (point, label, kind, distance) => point && {x:point.x,y:point.y,label,kind,distance};

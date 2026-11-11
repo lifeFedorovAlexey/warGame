@@ -4,6 +4,7 @@ import {updateStoryConstruction,migrateStoryOpening} from './story-construction.
 import {openingConstructionReady} from './opening-construction.js';
 import {applyStoryEdits} from './story-edits.js';
 import {appendM02Story,m02RadioRules} from './mission02-radio.js';
+import {m03RadioRules} from './mission03-radio.js';
 
 const terminal = status => ['done','skipped','cancelled'].includes(status);
 const sceneSignal = {r01:'intro',r14:'first-contact',r18:'raid-won',r36:'camp3-sighted',r41:'last-camp',r50:'outro'};
@@ -55,8 +56,8 @@ export class StoryDirector {
     if(event.type==='generator-breakdown')f.generatorBroken=true;
     if(event.type==='unit-damaged'&&mission.entity(event.target)?.campId===mission.state.camps[3]?.id)f.chiefAssault=true;
   }
-  facts(mission) {return mission.state.m02?{battle:this.data.clock-this.data.lastCombat<3000,quiet:this.data.clock-this.data.lastCombat,victory:mission.state.status==='victory'}:storyFacts(mission,this.data);}
-  rules(f) {return this.mission.state.m02?m02RadioRules(this):storyRules(this,f);}
+  facts(mission) {return mission.state.m02||mission.state.m03?{battle:this.data.clock-this.data.lastCombat<3000,quiet:this.data.clock-this.data.lastCombat,victory:mission.state.status==='victory'}:storyFacts(mission,this.data);}
+  rules(f) {return this.mission.state.m03?m03RadioRules(this):this.mission.state.m02?m02RadioRules(this):storyRules(this,f);}
   suspend() {
     if(this.data?.active)parkRadioStory(this.data);
   }
@@ -86,8 +87,8 @@ export class StoryDirector {
       const rule=rules[d.active];
       // A started exchange finishes naturally. Attacks use the existing minimap
       // alert; neither combat nor an urgent report rewinds or replaces speech.
-      if(!rule||mission.state.m02&&!rule.valid)this.end('cancelled');
-      else if(mission.state.m02&&rule.priority>0&&f.battle){this.record(d.active).cursor=0;this.suspend();}
+      if(!rule||(mission.state.m02||mission.state.m03)&&!rule.valid)this.end('cancelled');
+      else if((mission.state.m02||mission.state.m03)&&rule.priority>0&&f.battle){this.record(d.active).cursor=0;this.suspend();}
     }
     const eligible=[];
     for(const [id,rule] of Object.entries(rules)){
@@ -99,7 +100,7 @@ export class StoryDirector {
       }
       if(!rule.trigger||d.clock-d.lastEnd<sceneGapMs||rule.priority>0&&f.battle||rule.priority>=2&&(f.quiet<8000||d.clock-d.lastEnd<rule.gap*1000))continue;
       if(rule.priority===3&&d.clock-(d.facts.lastChatterAt??-Infinity)<45000)continue;
-      if(f.victory&&!finalScene(id)&&!milestoneScenes.has(id)&&!id.startsWith('m02-'))continue;
+      if(f.victory&&!finalScene(id)&&!milestoneScenes.has(id)&&!/^m0[23]-/.test(id))continue;
       eligible.push({id,...rule});
     }
     // Start the final contact on the march: acknowledge the third cleared camp,
@@ -140,5 +141,10 @@ export async function loadMissionStory() {
   const [m02Script,m02Audio,m02Edits]=await Promise.all(['story.json','audio.json','reviewed-dialogue.json'].map(m02Load));
   const m02=applyStoryEdits(m02Script,m02Audio,m02Edits);
   m02.story.dialogue=m02.story.dialogue.map(line=>({...line,clip:m02.audio.clips[line.id]?.file?{...m02.audio.clips[line.id],base:m02Base.href}:null}));
-  return appendM02Story({...story,dialogue:story.dialogue.map(line=>({...line,clip:audio.clips[line.id]})),barks:[...story.barks.map(line=>({...line,clip:audio.clips[line.id]})),...service.barks]},m02.story);
+  const m03Base=new URL('../assets/campaign/alpha/mission03/',import.meta.url);
+  const [m03Script,m03Audio,m03Edits]=await Promise.all(['story.json','audio.json','reviewed-dialogue.json'].map(async file=>{const r=await fetch(new URL(file,m03Base));if(!r.ok)throw new Error('m03 '+file+': '+r.status);return r.json();}));
+  const m03=applyStoryEdits(m03Script,m03Audio,m03Edits);
+  m03.story.dialogue=m03.story.dialogue.map(line=>({...line,clip:m03.audio.clips[line.id]?.file?{...m03.audio.clips[line.id],base:m03Base.href}:null}));
+  const merged=appendM02Story(appendM02Story({...story,dialogue:story.dialogue.map(line=>({...line,clip:audio.clips[line.id]})),barks:[...story.barks.map(line=>({...line,clip:audio.clips[line.id]})),...service.barks]},m02.story),m03.story);
+  merged.speakers={...story.speakers,...m03.story.speakers};return merged;
 }

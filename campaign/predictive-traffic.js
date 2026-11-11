@@ -373,10 +373,12 @@ export class PredictiveTraffic extends TrafficCoordinator{
    navigationDecision(unit,'MANEUVERING','overlap-separation',null,'resolve-overlap');return true;
   }
   const job=this.routes.get(unit.id);
-  // While queued, ordinary checked driving can still use an opening that
-  // appears. A changed pose invalidates the queued search before it starts.
-  // Once the search has started, retain its anchor through publication.
-  if(job?.kind==='maneuver'&&(job.iterator||job.finished)&&this.validRoute(mission,job)){
+  // Cars waiting behind another search can still use a traffic opening.
+  // The next search must claim its pose before this tick drives the owner:
+  // otherwise small reversing corrections cancel it before every first slice.
+  // Keep that anchor until publication; later queued cars remain free to move.
+  const nextManeuver=!this.maneuverJob&&[...this.routes.values()].find(item=>item.kind==='maneuver'&&!item.finished);
+  if(job?.kind==='maneuver'&&(job.iterator||job.finished||job===nextManeuver)&&this.validRoute(mission,job)){
    unit.driveSpeed=0;this.controls.delete(unit.id);
    navigationDecision(unit,'LOCAL_REPLAN',job.finished?'local-turn-publication':'local-turn-search',
     mission.navigationDiagnostics?.dependencies?.get(unit.id)??[],job.finished?'apply-checked-turn':'continue-local-search');return true;

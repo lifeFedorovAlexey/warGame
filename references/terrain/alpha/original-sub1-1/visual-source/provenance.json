@@ -1,0 +1,427 @@
+[
+  {
+    "file": "tile-00.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-00.png",
+    "sha256": "0ba03feb96e106ae835486189740aa3030a9ef6a6ebbb86d4d35854d80c25613"
+  },
+  {
+    "file": "tile-01.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-01.png",
+    "sha256": "bcba2b9bd70f7e40323b9ae7ba2480b7fb11c9115dbc4b602c8fa1a222e97539"
+  },
+  {
+    "file": "tile-02.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-02.png",
+    "sha256": "194e1ac91a3f0c78477c74a89e15a6821fa3403c040711cef14b2bcfc03ce690"
+  },
+  {
+    "file": "tile-03.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-03.png",
+    "sha256": "bfb2cda6281a9523de4564fb1ab0a1d0c2e4b3ce66c99e6bd49a3687f63a9bff"
+  },
+  {
+    "file": "tile-04.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-04.png",
+    "sha256": "aac2f4dcb033616d826f1463ccbe13bf83b0b02dc2360a50d4f22ddd1ec8457c"
+  },
+  {
+    "file": "tile-05.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-05.png",
+    "sha256": "1d3b5db1b33d88cf0134e014e6ad35555c78848382d5f458c5e19fdc821f47b4"
+  },
+  {
+    "file": "tile-06.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-06.png",
+    "sha256": "5c30f2a19c0cc36697f1c7cfa98fc9c0179718bbfff086c792e9e66aee050f94"
+  },
+  {
+    "file": "tile-07.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-07.png",
+    "sha256": "8a6ff19cf4f6c4455a83b8588ca1a3d3ca01dd93ddd2a38d1951e6702e6b6708"
+  },
+  {
+    "file": "tile-08.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-08.png",
+    "sha256": "127ce63d43fc343440ee36bbc911f9bb31afc92b30096c943022f84e57e2b7e6"
+  },
+  {
+    "file": "tile-09.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-09.png",
+    "sha256": "6a90b4bf77f76b4485121d3cd30e9b6e0d9901543dd29a9ae3ebda5628190e27"
+  },
+  {
+    "file": "tile-10.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-10.png",
+    "sha256": "9d44a7b0d38b4c5ba0869389906b57c9762641fe1a0ae13c923f27a9d187a209"
+  },
+  {
+    "file": "tile-11.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-11.png",
+    "sha256": "f25dc03394965d271db68ecac2fe9b4bfd0d975e2f63afbaf472405f7eae80af"
+  },
+  {
+    "file": "tile-12.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-12.png",
+    "sha256": "52593d4695e4e713ef2a5a9a36a59fbc44fc44cdffa62a5077ec001a2f5f24b1"
+  },
+  {
+    "file": "tile-13.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-13.png",
+    "sha256": "5d9dcd0aefb6aa2d45d8d45cf4aa39e74e640e9aead0abacd23f5a0ddac8df7e"
+  },
+  {
+    "file": "tile-14.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-14.png",
+    "sha256": "8696352d718134084045395f029be28034cc4bcd44b5a847f474e74922af61fb"
+  },
+  {
+    "file": "tile-15.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-15.png",
+    "sha256": "73f9f7b76f2815c05b822f12ca41ddd379eb5b48649982800b1e4f1409fd409a"
+  },
+  {
+    "file": "tile-16.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-16.png",
+    "sha256": "5a13d631c509533433efd2000cc5e38d53815eb1fefe2f545617ba5034d772c7"
+  },
+  {
+    "file": "tile-17.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-17.png",
+    "sha256": "56163aa35cff5cfe2705a210c5f3e1e9e51a8e1dd1961a689b5f6f68065f8f13"
+  },
+  {
+    "file": "tile-18.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-18.png",
+    "sha256": "688b39b6b482b33bd1f4da490f74596693c95460fca14c92f54b6f81314fd008"
+  },
+  {
+    "file": "tile-19.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-19.png",
+    "sha256": "6122e9b6f22a27ac70a5d9f72b427163ee0ed28248e3e967bc1ad105d73f22d0"
+  },
+  {
+    "file": "tile-20.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-20.png",
+    "sha256": "8427a96574715164e057def87083fbff17a0620e75cffbbddde5b0f65cb7cb1c"
+  },
+  {
+    "file": "tile-21.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-21.png",
+    "sha256": "9da9afcd4085eb3de45a56e8dde2819e7764b0ccfe5c1481f11b1126d039e5fd"
+  },
+  {
+    "file": "tile-22.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-22.png",
+    "sha256": "5065e19911ffcf379fb20382be39be8a683e2f96d2c23838fb683902f1221f11"
+  },
+  {
+    "file": "tile-23.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-23.png",
+    "sha256": "21ed98b9c1681d2385f7d81ce3a855426f28d22f704b5b0c7f87804f29c0383f"
+  },
+  {
+    "file": "tile-24.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-24.png",
+    "sha256": "c2d6506ae4df513769fc8c2d75f1f9d00ff2266547f98a9f5f18214e9564f6cf"
+  },
+  {
+    "file": "tile-25.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-25.png",
+    "sha256": "6a92ead1e174b9ba6a49172c8ba3f95b6eac7078cdcafbb1ab115f1b4b8ebbff"
+  },
+  {
+    "file": "tile-26.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-26.png",
+    "sha256": "1850ae93e70f71410e5f2140128d28b11580766fa31a805e7cfc52741ef3c816"
+  },
+  {
+    "file": "tile-27.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-27.png",
+    "sha256": "78c4b38c28013de8bbe4fe2085341acbd15a021e1959ad719df89597c6d078b9"
+  },
+  {
+    "file": "tile-28.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-28.png",
+    "sha256": "c93dadbdbd6f8acfb6c035a96de6cbc9a1d1cf25eaf1c3f0ef26c678b00f64c0"
+  },
+  {
+    "file": "tile-29.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-29.png",
+    "sha256": "756a296e001e24de34d52f9206184b5e953640eec28b8d998a4d8b840863c9ab"
+  },
+  {
+    "file": "tile-30.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-30.png",
+    "sha256": "0579edf9665ca6aa4402c35f09793f0c8999dd7e0edce850c648dbe962b69307"
+  },
+  {
+    "file": "tile-31.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-31.png",
+    "sha256": "b537a9f9dff5adc3725d2947e1674e8684a259c28b966baa15388435de43a2bd"
+  },
+  {
+    "file": "tile-32.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-32.png",
+    "sha256": "c254352f03ff62b94ac2236547d8bb8693d510192566f57d907258b65ee08c6d"
+  },
+  {
+    "file": "tile-33.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-33.png",
+    "sha256": "67c3b0ca1d70e16b45d958dd0db47c0913c8212ecb653fd1f936c536499bf5d0"
+  },
+  {
+    "file": "tile-34.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-34.png",
+    "sha256": "707be3332d6db3bf2ac144ba11cc01f5807ea9bdb01fd46a4456c00692fbc954"
+  },
+  {
+    "file": "tile-35.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-35.png",
+    "sha256": "a7ef36648ca5ca38ed5af076b823fa9a8f43de7d64f9903aa35b13c9531a646c"
+  },
+  {
+    "file": "tile-36.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-36.png",
+    "sha256": "929ba19285c5473edf337f034fa2f5f069e0cf6c305017c0b589e594bff12edc"
+  },
+  {
+    "file": "tile-37.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-37.png",
+    "sha256": "68fffa8d23b2b5472035c8d202d9c55d69c7c6a17ca3ee1a403b84fc7c7e6920"
+  },
+  {
+    "file": "tile-38.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-38.png",
+    "sha256": "e30bb6b3194f001d020e9f1f2a515d0d21bb824f126b13b8f991315e452a06d6"
+  },
+  {
+    "file": "tile-39.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-39.png",
+    "sha256": "ced481ec85b3daef0100ac5d256f1522a02233e0374c8c31167ffcb99b4dfbcc"
+  },
+  {
+    "file": "tile-40.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-40.png",
+    "sha256": "e2f30895f72ef8117e725da1d955707cc2942aedb579deefce64d26897be89cb"
+  },
+  {
+    "file": "tile-41.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-41.png",
+    "sha256": "00260f644b1cb7bb750d3457c1e45bde2f0e55e9d9f2c5603506678927c1c06c"
+  },
+  {
+    "file": "tile-42.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-42.png",
+    "sha256": "48f3433b14a53d04cf4af7983626c989dae2a9e9fbf1e1e6c680f22fcd77f32c"
+  },
+  {
+    "file": "tile-43.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-43.png",
+    "sha256": "07eaaac46d23ce4421625ada6dd839e2864d9f1a443511571cc975431f00a9c2"
+  },
+  {
+    "file": "tile-44.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-44.png",
+    "sha256": "8498b28244931aa3aa5147d5fc3450e7524da9a7d820c445c242bbccc01f8e57"
+  },
+  {
+    "file": "tile-45.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-45.png",
+    "sha256": "cb336215e8497359a04f4fd8b37ed3fa2aa9958bfbcd59e7e7911d96846a121d"
+  },
+  {
+    "file": "tile-46.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-46.png",
+    "sha256": "d0d2e7e499f95a1a09f21cf81485ac47c6deccf0f1a58fb84f3b28d87295ff0c"
+  },
+  {
+    "file": "tile-47.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-47.png",
+    "sha256": "7c2829434e4a8cbcb092c8bbd22456bc6d0a182320aec0489469045d66a5a64c"
+  },
+  {
+    "file": "tile-48.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-48.png",
+    "sha256": "04c0c587af64e3f2600ecb014d09da0f6adb55b7227519b0420fc031f6256a0d"
+  },
+  {
+    "file": "tile-49.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-49.png",
+    "sha256": "5b2360158f5ca318c09f84d1f033d4dba57e295d2664ff7fd50fe18f32f382c6"
+  },
+  {
+    "file": "tile-50.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-50.png",
+    "sha256": "e20103b41e00a3eceb8a78162e3ec6a68e0f41bc03a4f3b8a502be4c97d93b91"
+  },
+  {
+    "file": "tile-51.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-51.png",
+    "sha256": "3530dbbd1cc92e058ec562fc0c7cf65f5a7182cfc283c490bfdee9892d35ba63"
+  },
+  {
+    "file": "tile-52.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-52.png",
+    "sha256": "d817782f60fba10e196d56d3925094d4f89ca5ed2c08d3f3c0bf57e088b2dac1"
+  },
+  {
+    "file": "tile-53.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-53.png",
+    "sha256": "3d43480a7d9ae4ae325ed9ec7d92b697128875e2b14af0384218fd6d73ca9402"
+  },
+  {
+    "file": "tile-54.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-54.png",
+    "sha256": "a29729e8ffd47d834956654bce957c529264743a2bd6a561db6014705ca8288c"
+  },
+  {
+    "file": "tile-55.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-55.png",
+    "sha256": "ea20aee64ec81a34ef2ee73a90beba827772f04b0af70c7d6ad2eaa1de45412a"
+  },
+  {
+    "file": "tile-56.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-56.png",
+    "sha256": "06fae2f1d8e87d2240b14456d14bb6b854fd6675882a613779ff28c273f1978b"
+  },
+  {
+    "file": "tile-57.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-57.png",
+    "sha256": "235545e79620416e697e508bf709c129e57f48c6a24d6257f61f2be960f42188"
+  },
+  {
+    "file": "tile-58.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-58.png",
+    "sha256": "fb852e1c7e7438d5d7e61e8873c8ff745391cd29a92dc7f219ed49bbfadd3ed7"
+  },
+  {
+    "file": "tile-59.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-59.png",
+    "sha256": "147749912eee2a305b2ed33892c305b4249510796b174ad54cf7c44ca87f91ba"
+  },
+  {
+    "file": "tile-60.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-60.png",
+    "sha256": "7fb2086103308f8d84ce241609d165ad8521877c0cde6e261e0e501c8bcb8961"
+  },
+  {
+    "file": "tile-61.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-61.png",
+    "sha256": "d457be9dc56191581e1a4c802fa3329e13ac2d61690b1e0bf477d0a13a7a3cac"
+  },
+  {
+    "file": "tile-62.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-62.png",
+    "sha256": "7d50af6b3358e39c4213083e315dd9089a76df12e280187839a40c2600cd383b"
+  },
+  {
+    "file": "tile-63.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-63.png",
+    "sha256": "292b41dc91b9acf2cc9533b53f64316f01a6fe0cd754143de4e7fddeb720ca28"
+  },
+  {
+    "file": "tile-64.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-64.png",
+    "sha256": "12a2fb7162cd37cf54302278c4269c381eeb9086e6fe7f5ddb34d5f932a62bcd"
+  },
+  {
+    "file": "tile-65.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-65.png",
+    "sha256": "1d68eee95d57d2976d62c82dae4801c1276fc4eb2a5394fa10a15998ef7e9c57"
+  },
+  {
+    "file": "tile-66.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-66.png",
+    "sha256": "40aca3a2b1b197e4a3cdf127671c945d577e90921b5657947c68f7cbe8db7907"
+  },
+  {
+    "file": "tile-67.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-67.png",
+    "sha256": "57b376a05ac427fd066c9b25544703260a848723d773b288f260cb27cf29bb81"
+  },
+  {
+    "file": "tile-68.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-68.png",
+    "sha256": "69bef35ec137b912a50339d08104b38d360d75b34a2d5c2413eef3e7cbdf35e7"
+  },
+  {
+    "file": "tile-69.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-69.png",
+    "sha256": "a980c93d841396fbfbdc13957910c24466ab80343a438af3eab92e06a4f200f2"
+  },
+  {
+    "file": "tile-70.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-70.png",
+    "sha256": "ee961b0e9091c0596fcc032ca4a818484b7d6892ba003fb3f1e9b63a26aa9318"
+  },
+  {
+    "file": "tile-71.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-71.png",
+    "sha256": "8293b39c11544c08a9bcc4f14e367eb46deb73629a9c3620dd3203afd752d7be"
+  },
+  {
+    "file": "tile-72.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-72.png",
+    "sha256": "f390a830aee2aad06243a1a5b93275e5d2b88a3b57385f401709b5b63be116d2"
+  },
+  {
+    "file": "tile-73.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-73.png",
+    "sha256": "478839d930167218db9df79a506e5970e980bf73ba553dac021ec6b01ef869b5"
+  },
+  {
+    "file": "tile-74.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-74.png",
+    "sha256": "1a5bb5f0188e3c4f37898ac9084bbfbca559309ccc5e431309c17c5f14b46c6d"
+  },
+  {
+    "file": "tile-75.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-75.png",
+    "sha256": "d16c548c8f34864b6b55e60113e649c52ac1ba3589453755d9753d4709b08343"
+  },
+  {
+    "file": "tile-76.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-76.png",
+    "sha256": "a09ba539ac5d0490ab23c047866fe3c8bd50431a18f3ca564fbdc393b18ab8c5"
+  },
+  {
+    "file": "tile-77.png",
+    "url": "https://raw.githubusercontent.com/Warzone2100/data-terrain-classic/d26c3d0e0242721e24fe34fea2e61880c5805684/texpages/tertilesc1hw-128/tile-77.png",
+    "sha256": "0c9353d41114fe04367c321a29d957e2c693a6aa73e8227b171caab295d79e83"
+  },
+  {
+    "file": "arizonaground.txt",
+    "url": "https://raw.githubusercontent.com/Warzone2100/warzone2100/253e370c2af78228a822df6afa82b6261dc94656/data/base/tileset/arizonaground.txt",
+    "sha256": "3dbc255a8fbf84dddcf405b0a775f1ab2b371394520f512cd5cc1012e905c268"
+  },
+  {
+    "file": "arizonadecals.txt",
+    "url": "https://raw.githubusercontent.com/Warzone2100/warzone2100/253e370c2af78228a822df6afa82b6261dc94656/data/base/tileset/arizonadecals.txt",
+    "sha256": "1f694be5a893e274e9cb5ce1e15c271c2e87d7f870a9346742259d3422a05aa8"
+  },
+  {
+    "file": "map.h",
+    "url": "https://raw.githubusercontent.com/Warzone2100/warzone2100/253e370c2af78228a822df6afa82b6261dc94656/lib/wzmaplib/include/wzmaplib/map.h",
+    "sha256": "97e75dd7e19261e9c197f1aff12d346af5ecfae12cbe61051ccb54525d08671b"
+  },
+  {
+    "file": "map_types.h",
+    "url": "https://raw.githubusercontent.com/Warzone2100/warzone2100/253e370c2af78228a822df6afa82b6261dc94656/lib/wzmaplib/include/wzmaplib/map_types.h",
+    "sha256": "1f2d0441fa9e1c7fb7b3026db0cc22e63b2e23371b620c349f719bfda21e30e0"
+  },
+  {
+    "file": "terrain_type.h",
+    "url": "https://raw.githubusercontent.com/Warzone2100/warzone2100/253e370c2af78228a822df6afa82b6261dc94656/lib/wzmaplib/include/wzmaplib/terrain_type.h",
+    "sha256": "2608ef96ef6ece62814c58740f375980f46a7389547158ed96fa00fec7d7ee14"
+  },
+  {
+    "file": "terrain.cpp",
+    "url": "https://raw.githubusercontent.com/Warzone2100/warzone2100/253e370c2af78228a822df6afa82b6261dc94656/src/terrain.cpp",
+    "sha256": "992f4adffdaee19715d865103216cbb30dc4c3b1c7df1d1f84a8b032d733e1f3"
+  },
+  {
+    "file": "terrain_surface.cpp",
+    "url": "https://raw.githubusercontent.com/Warzone2100/warzone2100/253e370c2af78228a822df6afa82b6261dc94656/src/terrain_surface.cpp",
+    "sha256": "474659db577cab098a335a309feae06e4c2443bddd395d342e76624593a32d79"
+  }
+]

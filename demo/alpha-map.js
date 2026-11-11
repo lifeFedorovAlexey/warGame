@@ -1,3 +1,4 @@
+import {prepareTransportSite} from '../campaign/transport-site.js';
 import {createHeightfield,createMapRoute} from './map-route.js';
 import {createTerrainMaterials} from './terrain-material.js';
 import {applyRoadGrades} from './road-grading.js';
@@ -16,6 +17,7 @@ export async function createAlphaMap(T,{lightweightOverview=false}={}){
  ]);
  const baseField=createHeightfield(heightData),mesaShaping=shapeMesaRims(baseField),field=refineRoadHeightfield(baseField),grading=applyRoadGrades(field,roads),route=createMapRoute(field,routeData),root=new T.Group();root.name='Alpha_4064m_heightfield';
  installM02Terrain(field);
+ prepareTransportSite(field);
  const materials=await createTerrainMaterials(T,field.extent,{lightweightOverview});
  field.roadBlendAt=materials.roadBlendAt;
  const meshSize=field.renderSize,terrainMesh=createTerrainGeometry(T,field,materials.overview),meshes=terrainMesh.meshes;for(const mesh of meshes)root.add(mesh);

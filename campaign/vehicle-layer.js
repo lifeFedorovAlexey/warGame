@@ -134,6 +134,11 @@ export async function createVehicleLayer(T,scene,field,config,damage,onLoaded=()
  const secondBarrel=twinKord.recoil.clone(true);secondBarrel.position.x=.23;twinKord.pitch.add(secondBarrel);twinKord.recoil.position.x=-.23;
  batchRigidMeshes(T,twin);
  const twinBatch=new PoseBatch(T,root,twin,capacity,damage,'weapon').motion([twinKord.yaw,twinKord.pitch,twinKord.recoil,secondBarrel]);
+ const heavy=new T.Group();heavy.name='mission_heavy_machinegun';heavy.position.copy(gun.position);
+ const heavyKord=buildKord(T,heavy,palette,kit);heavyKord.recoil.scale.set(1.3,1.55,1.2);
+ kit.box(heavyKord.yaw,[1.2,.14,.65],[0,.18,.45],palette.dark);
+ kit.box(heavyKord.yaw,[.42,.55,.5],[-.66,-.05,.3],palette.olive);
+ batchRigidMeshes(T,heavy);const heavyBatch=new PoseBatch(T,root,heavy,capacity,damage,'weapon').motion([heavyKord.yaw,heavyKord.pitch,heavyKord.recoil]);
  const sensor=createSensorModule(T,kit,palette);sensor.position.copy(gun.position);batchRigidMeshes(T,sensor);
  const sensorBatch=new PoseBatch(T,root,sensor,capacity,damage,'equipment');
  const sensorYaw=sensor.getObjectByName('camera_yaw');
@@ -177,16 +182,17 @@ export async function createVehicleLayer(T,scene,field,config,damage,onLoaded=()
    if(kind==='flamer'){flameYaw.rotation.z=yaw(flame.position.x,flame.position.y);flamePitch.rotation.x=pitch(flame.position.x,flame.position.y,flame.position.z+.422,-.22,.56);}
    if(kind==='raider')raiderYaw.rotation.z=yaw(0,-1.19);
    if(custom?.scav)poseScavUnit(custom,unit,{aim,travel:unit.wheelDistance??0,steer,scale,moving:unit.hp>0&&(unit.driveSpeed??0)>.1,suspension:suspensionDelta});
-   const prototypes=custom?[custom.root]:[...lods[0].map(e=>e.batch.prototype),kind==='bukhanka'?gun:kind==='builder'?builder.root:kind==='sensor'?sensor:flame];
+   if(kind==='heavy-machinegun'){heavyKord.yaw.rotation.z=yaw(0,-.65);heavyKord.pitch.rotation.x=pitch(0,-.65,3.28,-.32,.48);}
+   const prototypes=custom?[custom.root]:[...lods[0].map(e=>e.batch.prototype),kind==='heavy-machinegun'?heavy:kind==='bukhanka'?gun:kind==='builder'?builder.root:kind==='sensor'?sensor:flame];
    for(const prototype of prototypes){prototype.updateMatrixWorld(true);prototype.userData.damagePoseRevision=(prototype.userData.damagePoseRevision??0)+1;}
    for(const binding of animated)matrices.get(binding).multiplyMatrices(binding.node.matrixWorld,inverses.get(binding));
    return matrices;
   };
  }
- for(const [kind,batch] of [['bukhanka',gunBatch],['builder',builderBatch],['flamer',flameBatch],['twin-machinegun',twinBatch],['sensor',sensorBatch]]){const bindings=[...modularBindings,...batch.parts.map(p=>p.binding)];damage.registerVehicle(kind,bindings,damagePose(bindings,kind));}
+ for(const [kind,batch] of [['bukhanka',gunBatch],['builder',builderBatch],['flamer',flameBatch],['twin-machinegun',twinBatch],['sensor',sensorBatch],['heavy-machinegun',heavyBatch]]){const bindings=[...modularBindings,...batch.parts.map(p=>p.binding)];damage.registerVehicle(kind,bindings,damagePose(bindings,kind));}
  for(const [kind,batch] of [['command',commandBatch],['raider',raiderBatch]]){const bindings=batch.parts.map(p=>p.binding);damage.registerVehicle(kind,bindings,damagePose(bindings,kind));}
  for(const [kind,batch] of scavBatches){const bindings=batch.parts.map(p=>p.binding);damage.registerVehicle(kind,bindings,damagePose(bindings,kind),isInfantry(kind)?{parts:infantryParts}:{});}
- const extras=[builderBatch,gunBatch,flameBatch,twinBatch,sensorBatch,commandBatch,raiderBatch,...scavBatches.values(),...modBatches.map(m=>m.batch)];
+ const extras=[builderBatch,gunBatch,flameBatch,twinBatch,heavyBatch,sensorBatch,commandBatch,raiderBatch,...scavBatches.values(),...modBatches.map(m=>m.batch)];
  const transforms=new Map(),muzzles=new Map(),visible=[],workBeams=[],contacts=[];
  const contactShadows=createVehicleContactShadows(T,scene,field,scale);
  const dummy=new T.Object3D(),color=new T.Color(),scrapColor=new T.Color(),matrix=new T.Matrix4(),contact=new T.Vector3();
@@ -275,6 +281,9 @@ export async function createVehicleLayer(T,scene,field,config,damage,onLoaded=()
    }else if(unit.kind==='sensor'){
     sensorYaw.rotation.z=radarAngle(unit,workTime);
     sensorBatch.add(matrix,color,{},damageInfo,[sensorYaw.rotation.z]);
+   }else if(unit.kind==='heavy-machinegun'){
+    heavyKord.yaw.rotation.z=yawTo(0,-.65);heavyKord.pitch.rotation.x=pitchTo(0,-.65,3.28,-.32,.48);heavyKord.recoil.position.y=recoil*1.4;
+    heavyBatch.add(matrix,color,{},damageInfo);muzzles.set(unit.id,new T.Vector3().setFromMatrixPosition(heavyKord.muzzle.matrixWorld).applyMatrix4(matrix));
    }else if(unit.kind==='twin-machinegun'){
     twinKord.yaw.rotation.z=yawTo(0,-.65);twinKord.pitch.rotation.x=pitchTo(0,-.65,3.28,-.32,.48);twinKord.recoil.position.y=secondBarrel.position.y=recoil;
     twinBatch.add(matrix,color,{},damageInfo);muzzles.set(unit.id,new T.Vector3().setFromMatrixPosition(twinKord.muzzle.matrixWorld).applyMatrix4(matrix));
@@ -304,7 +313,7 @@ export async function createVehicleLayer(T,scene,field,config,damage,onLoaded=()
  function makeDesignModel(components,paint){
   const [chassisId,bodyId,upperId]=components;
   if(chassisId!=='C01'||bodyId!=='B01')return null;
-  const source={U01:gun,U02:twin,U21:sensor,U25:builder.root,'mission-flamer':flame}[upperId];
+  const source={U01:gun,U02:twin,'mission-heavy-mg':heavy,U21:sensor,U25:builder.root,'mission-flamer':flame}[upperId];
   if(!source)return null;
   const assembled=new T.Group(),chassis=lods[0][0].batch.prototype.clone(true),body=lods[0][1].batch.prototype.clone(true),upper=source.clone(true);
   for(const node of [chassis,body,upper])node.traverse(part=>{
@@ -316,7 +325,14 @@ export async function createVehicleLayer(T,scene,field,config,damage,onLoaded=()
   const recoil=upper.getObjectByName('recoil_1');if(recoil)recoil.position.y=0;
   assembled.name='project_'+components.join('_');
   assembled.add(chassis,body,upper);
-  const dispose=paintVehicleModel(assembled,vehiclePaint({components,paint}));
+  // World fog/damage hooks are attached to shared materials. A standalone
+  // preview (or cargo clone) needs its own unmodified material instances.
+  const previewMaterials=new Map();assembled.traverse(node=>{
+   if(!node.isMesh||isVehiclePaintMaterial(node.material))return;
+   const source=node.material;if(!previewMaterials.has(source))previewMaterials.set(source,source.clone());node.material=previewMaterials.get(source);
+  });
+  const disposePaint=paintVehicleModel(assembled,vehiclePaint({components,paint}));
+  const dispose=()=>{disposePaint();for(const material of previewMaterials.values())material.dispose();};
   return {root:assembled,chassis,body,upper,dispose};
  }
  function preloadMaterials(parent){
@@ -327,7 +343,13 @@ export async function createVehicleLayer(T,scene,field,config,damage,onLoaded=()
    }
   }
  }
- return {root,update,transforms,muzzles,visible,workBeams,makeDesignModel,preloadMaterials,get lod(){return activeLod;},get drawCalls(){
+ function makeCargoModel(unit){
+  if(unit.kind!=='command')return makeDesignModel(unit.components??config.units[unit.kind]?.components,unit.paint);
+  const model=command.root.clone(true),materials=new Set();
+  model.traverse(node=>{node.matrixAutoUpdate=true;if(node.isMesh){node.material=node.material.clone();materials.add(node.material);node.castShadow=node.receiveShadow=true;}});
+  return {root:model,dispose(){materials.forEach(m=>m.dispose());}};
+ }
+ return {root,update,transforms,muzzles,visible,workBeams,makeDesignModel,makeCargoModel,preloadMaterials,get lod(){return activeLod;},get drawCalls(){
   return [...lods.flatMap(entries=>entries.map(entry=>entry.batch)),...extras].reduce((sum,b)=>sum+(b.index?b.parts.length:0),0);
  }};
 }

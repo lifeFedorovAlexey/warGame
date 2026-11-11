@@ -12,7 +12,7 @@ export function resultsPresentationReady(mission,radio){
  if(mission.state.status==='running')return false;
  if(mission.state.status==='victory'&&hasPendingCampDemolition(mission))return false;
  if(mission.state.status==='defeat'||!radio?.enabled||!radio.director)return true;
- const id=mission.state.m02?'m02-radio-victory':'r54',director=radio.director;
+ const id=mission.state.m03?'m03-s11':mission.state.m02?'m02-radio-victory':'r54',director=radio.director;
  // The final exchange keeps its portraits, captions and full recordings on
  // the map. The memorial opens after it ends; the menu can open it sooner.
  return !director.scenes.has(id)||director.finished(id);
@@ -36,8 +36,10 @@ export class MissionResultsView{
   const $=id=>this.root.querySelector('#'+id),victory=data.outcome==='victory';
   $('result-title').textContent=victory?'Миссия завершена':'Операция прервана';
   $('result-message').textContent=missionName(data.missionId);
-  $('result-continue').hidden=!victory||data.missionId!=='m01'||typeof mission.enterM02!=='function';
-  $('result-campaign-end').hidden=!victory||data.missionId!=='m02';
+  $('result-continue').hidden=!victory||!['m01','m02'].includes(data.missionId);
+  $('result-continue').title=data.missionId==='m02'?'Миссия 03 — Первый вылет':'Продолжить кампанию';
+  $('result-continue').setAttribute('aria-label',$('result-continue').title);
+  $('result-campaign-end').hidden=!victory||data.missionId!=='m03';
   $('result-history-note').hidden=data.historyComplete&&data.campaignHistoryComplete;
   $('result-history-note').textContent='Старое сохранение: потери и личный счёт учтены с момента обновления игры.';
   const stat=(id,value)=>$(id).textContent=String(value);
