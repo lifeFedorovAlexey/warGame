@@ -161,6 +161,9 @@ export function createScavPrefab(T, kind, site) {
     beam([0,-.14,0],[0,-barrelLength,0],.095,mats.dark);
     damagePart=0;
     activeBatches = batches;
+    // The armed tower remains functional while it has HP. Its authored pieces
+    // can be damaged, but the structure breaks apart only on destruction.
+    for(const part of Object.values(damageParts))if(part.detachable)part.detachOnWreck=true;
   } else if (site === 'nw-pocket') {
     shed(-2.6,.40,4.2,4.3,2.65,mats.rust);
     box([1.47,1.26,.09],[-3.32,-.81,2.90],mats.tin,[.23,0,0]);

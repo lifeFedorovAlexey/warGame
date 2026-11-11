@@ -1,7 +1,7 @@
 import {vehiclePose} from './builder-kinematics.js';
 import {combatContact} from './combat-contact.js';
 import {buildLayerHeight} from './builder-optics.js';
-import {CAGE_COUNT,MAX_MARKS,MAX_PARTS,VEHICLE_PARTS,damageLOD,applyStructuralImpact} from './damage-state.js';
+import {CAGE_COUNT,MAX_MARKS,MAX_PARTS,VEHICLE_PARTS,damageLOD,applyStructuralImpact,restoreDeferredParts} from './damage-state.js';
 import {ATLAS_WIDTH,PART_OFFSET,MARK_OFFSET,META_OFFSET,attachDamageShader} from './damage-shader.js';
 import {prepareDamageGeometry,createDamageCollider,collectDamageRegions} from './damage-geometry.js';
 import {createDamageDebris} from './damage-debris.js';
@@ -129,6 +129,10 @@ export function createDamageSystem(T,scene,field,config){
   }
   function bindMission(m){
     mission=m;m.resolveDamageContact=resolveContact;
+    m.restoreLiveTowerParts=(entity,template=getTemplate(entity))=>{
+      if(!template||!entity.damage||entity.hp<=0)return [];
+      return restoreDeferredParts(entity.damage,template.parts);
+    };
     m.resolveVehicleImpact=(entity,point,into)=>trace(entity,point.map((v,k)=>v-into[k]*3*config.worldScale),into);
     m.damagePartWorldPosition=(entity,id)=>{
       const region=getTemplate(entity)?.regions.find(r=>r.id===id);if(!region)return null;
