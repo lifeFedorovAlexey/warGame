@@ -29,8 +29,8 @@
   "buildingGridMetres": 8,
   "maxBuildingGrade": 0.12,
   "builderRangeMetres": 16,
-  "oilFields": [[10.5, 52], [18.5, 56.5], [30.125, 41.5625], [36.85, 21.9625], [13.25, 73.9375]],
-  "oilFieldRelocations": [{"from": [16.5, 56.5], "to": [18.5, 56.5]}, {"from": [30, 42], "to": [30.125, 41.5625]}, {"from": [38, 30], "to": [36.85, 21.9625]}, {"from": [24.5, 71.5], "to": [13.25, 73.9375]}],
+  "oilFields": [[10.5, 52], [18.5, 55.75], [30.125, 41.5625], [36.85, 21.9625], [13.25, 73.9375]],
+  "oilFieldRelocations": [{"from": [16.5, 56.5], "to": [18.5, 55.75]}, {"from": [18.5, 56.5], "to": [18.5, 55.75]}, {"from": [30, 42], "to": [30.125, 41.5625]}, {"from": [38, 30], "to": [36.85, 21.9625]}, {"from": [24.5, 71.5], "to": [13.25, 73.9375]}],
   "campOilFields": {"nw-pocket": 2, "nw-east": 3, "west-south": 4},
   "camps": [
     {"id": "nw-pocket", "name": "Первый лагерь", "grid": [32, 42.5], "gateGrid": [35.5, 42.5], "artifact": "flamethrower", "chapter": "first-artifact", "units": 3, "strength": 1.12, "extraGuards": ["scav-rifleman", "raider"], "wave": {"seconds": 65, "units": ["scav-zaporozhets", "scav-rifleman"]}},

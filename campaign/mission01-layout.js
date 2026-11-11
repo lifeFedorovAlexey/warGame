@@ -33,9 +33,10 @@ export function selectM01Layout(config,original){
  config.camps=config.camps.map((camp,i)=>({...camp,...camps[i],layoutVersion:3}));
  config.initialMapBounds=[0,0,53,63];config.finalMapBounds=[0,0,53,63];
  // Keep the established player economy. Enemy oil points follow original cam1a.
- config.oilFields=[...config.oilFields.slice(0,2),[31.5,35.5],[37.5,16.5]];
+ const playerOil=config.oilFields.slice(0,2);
+ config.oilFields=[...playerOil,[31.5,35.5],[37.5,16.5]];
  config.campOilFields={'nw-pocket':2,'nw-west':3};
- config.oilFieldRelocations=config.oilFieldRelocations.filter(r=>r.to[0]===18.5&&r.to[1]===56.5);
+ config.oilFieldRelocations=config.oilFieldRelocations.filter(r=>playerOil.some(([x,y])=>r.to[0]===x&&r.to[1]===y));
 }
 export function restoreM01Layout(mission){
  selectM01Layout(mission.config,mission.state.m01LayoutVersion===3);
