@@ -359,7 +359,6 @@ function ordersAt(point, target, mode, append=false) {
   if(result.queued)toast('Приказ добавлен в очередь');
   lastCommandRevision=result.revision??null;lastCommandFeedback='';
   const combatOrder=action==='attack'||action==='attack-move';
-  world.commandMarker(destination,combatOrder);
   const eligible = (combatOrder?commandSelection():chosen).filter(entity => liveMobile(entity) && (!combatOrder || config.units[entity.kind].damage) && (!['build', 'repair', 'demolish'].includes(action) || entity.kind === 'builder'));
   blockedOrders=new Set(result.unassigned);
   blockedUntil=performance.now()+7500;
