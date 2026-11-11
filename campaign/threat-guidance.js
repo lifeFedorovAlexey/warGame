@@ -36,13 +36,18 @@ export function warehouseAdvanceHint(mission) {
 export function southernApproachSignal(mission) {
   const {state,config,field}=mission;
   if(!state.flags.lastRevealed||state.camps[3]?.cleared)return null;
-  const {approachGrid,approachRoad}=config.camps[3]??{};
+  const {approachGrid,approachRoad}=state.camps[3]??{};
   if(!approachGrid)return null;
   const rally=field.gridToWorld(approachGrid);
   const known=point=>mission.inBounds(point.x,point.y)&&mission.exploredAt(point.x,point.y);
   if(known(rally))return {...rally,kind:'intel',label:'К точке сбора',distance:440};
 
-  const paths=field.roadNetwork?.paths??[];
+  const paths=[...(field.roadNetwork?.paths??[]),...(field.localRoads??[])];
+  if(state.m01LayoutVersion===3){
+    const roads=['nw-east--nw-west-13','m01-original-hq-approach'].map(id=>paths.find(p=>p.id===id)).filter(Boolean);
+    const knownPoint=roads.flatMap(r=>r.points).reverse().find(known);
+    return knownPoint?{...knownPoint,kind:'recon',label:'К штабу Петровича',distance:590}:null;
+  }
   for(let i=(approachRoad?.length??0)-1;i>0;i--){
     const from=approachRoad[i-1],to=approachRoad[i];
     const path=paths.find(road=>road.from===from&&road.to===to||road.from===to&&road.to===from);

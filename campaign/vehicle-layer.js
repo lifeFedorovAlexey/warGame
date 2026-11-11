@@ -1,13 +1,15 @@
-import {safeSalvageColor} from './salvage-paint.js';
 import {GLTFLoader} from '../demo/vendor/loaders/GLTFLoader.js';
 import {createConstructionProjector} from './construction-projector.js';
 import {createConstructionScanner} from './construction-scanner.js';
 import {vehiclePose,worldToVehicle} from './builder-kinematics.js';
 import {buildKord} from '../demo/kord.js';
+import {createSensorModule} from './mission02-models.js';
+import {radarAngle} from './radar-animation.js';
 import {mgRecoil} from './mg-burst.js';
 import {vehicleKit,batchRigidMeshes,createFieldVehicle} from './field-vehicles.js';
 import {createFieldModification} from './field-modification-models.js';
 import {FIELD_RECIPES,modificationInstalled} from './vehicle-salvage.js';
+import {safeSalvageColor} from './salvage-paint.js';
 import {createVehicleContactShadows} from './vehicle-contact-shadows.js';
 import {createScavUnit,poseScavUnit} from './scav-units.js';
 import {SCAV_PROFILES,isInfantry} from './scav-unit-profiles.js';
@@ -44,7 +46,7 @@ export class PoseBatch{
   if(painted)this.paintAttribute??=new T.InstancedBufferAttribute(new Float32Array(capacity*3),3).setUsage(T.DynamicDrawUsage);
   mesh.instanceColor=painted?this.paintAttribute:this.colorAttribute;
   if(baked)mesh.instanceMatrix=this.rigidMatrix??=new T.InstancedBufferAttribute(new Float32Array(capacity*16),16).setUsage(T.DynamicDrawUsage);
-  mesh.instanceMatrix.setUsage(T.DynamicDrawUsage);mesh.frustumCulled=false;mesh.castShadow=mesh.receiveShadow=true;mesh.count=0;damage.attach(mesh,binding,{instanced:true});parent.add(mesh);this.parts.push({node,mesh,emission,signal,binding,baked,painted});
+  mesh.instanceMatrix.setUsage(T.DynamicDrawUsage);mesh.frustumCulled=false;mesh.castShadow=true;mesh.receiveShadow=!material.name?.startsWith('radar_');mesh.count=0;damage.attach(mesh,binding,{instanced:true});parent.add(mesh);this.parts.push({node,mesh,emission,signal,binding,baked,painted});
  });this.staticPrototype=category==='body'&&this.parts.every(p=>!p.binding.dynamic);this.world=new T.Matrix4();this.combined=new T.Matrix4();this.index=0;}
  begin(){this.index=0;this.damageDirty=this.rigidDirty=this.colorDirty=this.paintDirty=false;for(const p of this.parts)p.matrixDirty=p.emissionDirty=false;}
  motion(nodes){this.prototype.traverse(node=>{node.matrixAutoUpdate=false;});for(const node of nodes.filter(Boolean))node.matrixAutoUpdate=true;this.selectiveMotion=true;return this;}
@@ -83,6 +85,7 @@ export class PoseBatch{
 }
 
 export async function createVehicleLayer(T,scene,field,config,damage,onLoaded=()=>{}) {
+ let activeMission=null;
  const root=new T.Group();
  root.name='modular_vehicle_instances';
  scene.add(root);
@@ -126,6 +129,14 @@ export async function createVehicleLayer(T,scene,field,config,damage,onLoaded=()
  const kord=buildKord(T,gun,palette,kit);
  batchRigidMeshes(T,gun);
  const gunBatch=new PoseBatch(T,root,gun,capacity,damage,'weapon').motion([kord.yaw,kord.pitch,kord.recoil]);
+ const twin=new T.Group();twin.name='U02_twin';twin.position.copy(gun.position);
+ const twinKord=buildKord(T,twin,palette,kit);
+ const secondBarrel=twinKord.recoil.clone(true);secondBarrel.position.x=.23;twinKord.pitch.add(secondBarrel);twinKord.recoil.position.x=-.23;
+ batchRigidMeshes(T,twin);
+ const twinBatch=new PoseBatch(T,root,twin,capacity,damage,'weapon').motion([twinKord.yaw,twinKord.pitch,twinKord.recoil,secondBarrel]);
+ const sensor=createSensorModule(T,kit,palette);sensor.position.copy(gun.position);batchRigidMeshes(T,sensor);
+ const sensorBatch=new PoseBatch(T,root,sensor,capacity,damage,'equipment');
+ const sensorYaw=sensor.getObjectByName('camera_yaw');
  const flame=flamerAsset.scene;
  const mount=lods[0][1].batch.prototype.getObjectByName('upper_mount');
  mount.getWorldPosition(flame.position);
@@ -162,19 +173,20 @@ export async function createVehicleLayer(T,scene,field,config,damage,onLoaded=()
    const yaw=(x,y)=>aim?Math.atan2(x-aim[0],aim[1]-y):0,pitch=(x,y,z,low,high)=>aim?T.MathUtils.clamp(Math.atan2(aim[2]-z,Math.hypot(aim[0]-x,aim[1]-y)),low,high):0;
    if(kind==='bukhanka'){kord.yaw.rotation.z=yaw(0,-.65);kord.pitch.rotation.x=pitch(0,-.65,3.28,-.32,.48);}
    if(kind==='builder')builder.aim(unit.projector?.yaw??0,unit.projector?.pitch??0,false);
+   if(kind==='sensor')sensorYaw.rotation.z=radarAngle(unit,activeMission?.state.time??0);
    if(kind==='flamer'){flameYaw.rotation.z=yaw(flame.position.x,flame.position.y);flamePitch.rotation.x=pitch(flame.position.x,flame.position.y,flame.position.z+.422,-.22,.56);}
    if(kind==='raider')raiderYaw.rotation.z=yaw(0,-1.19);
    if(custom?.scav)poseScavUnit(custom,unit,{aim,travel:unit.wheelDistance??0,steer,scale,moving:unit.hp>0&&(unit.driveSpeed??0)>.1,suspension:suspensionDelta});
-   const prototypes=custom?[custom.root]:[...lods[0].map(e=>e.batch.prototype),kind==='bukhanka'?gun:kind==='builder'?builder.root:flame];
+   const prototypes=custom?[custom.root]:[...lods[0].map(e=>e.batch.prototype),kind==='bukhanka'?gun:kind==='builder'?builder.root:kind==='sensor'?sensor:flame];
    for(const prototype of prototypes){prototype.updateMatrixWorld(true);prototype.userData.damagePoseRevision=(prototype.userData.damagePoseRevision??0)+1;}
    for(const binding of animated)matrices.get(binding).multiplyMatrices(binding.node.matrixWorld,inverses.get(binding));
    return matrices;
   };
  }
- for(const [kind,batch] of [['bukhanka',gunBatch],['builder',builderBatch],['flamer',flameBatch]]){const bindings=[...modularBindings,...batch.parts.map(p=>p.binding)];damage.registerVehicle(kind,bindings,damagePose(bindings,kind));}
+ for(const [kind,batch] of [['bukhanka',gunBatch],['builder',builderBatch],['flamer',flameBatch],['twin-machinegun',twinBatch],['sensor',sensorBatch]]){const bindings=[...modularBindings,...batch.parts.map(p=>p.binding)];damage.registerVehicle(kind,bindings,damagePose(bindings,kind));}
  for(const [kind,batch] of [['command',commandBatch],['raider',raiderBatch]]){const bindings=batch.parts.map(p=>p.binding);damage.registerVehicle(kind,bindings,damagePose(bindings,kind));}
  for(const [kind,batch] of scavBatches){const bindings=batch.parts.map(p=>p.binding);damage.registerVehicle(kind,bindings,damagePose(bindings,kind),isInfantry(kind)?{parts:infantryParts}:{});}
- const extras=[builderBatch,gunBatch,flameBatch,commandBatch,raiderBatch,...scavBatches.values(),...modBatches.map(m=>m.batch)];
+ const extras=[builderBatch,gunBatch,flameBatch,twinBatch,sensorBatch,commandBatch,raiderBatch,...scavBatches.values(),...modBatches.map(m=>m.batch)];
  const transforms=new Map(),muzzles=new Map(),visible=[],workBeams=[],contacts=[];
  const contactShadows=createVehicleContactShadows(T,scene,field,scale);
  const dummy=new T.Object3D(),color=new T.Color(),scrapColor=new T.Color(),matrix=new T.Matrix4(),contact=new T.Vector3();
@@ -183,6 +195,7 @@ export async function createVehicleLayer(T,scene,field,config,damage,onLoaded=()
  let activeLod=1;
 
  function update(mission,cameraDistance,shotTimes,now,camera,buildingObjects,workTime=mission.state.time) {
+  activeMission=mission;
   if(cameraDistance>725)activeLod=2;
   else if(cameraDistance<212)activeLod=0;
   else if(activeLod===0&&cameraDistance>255||activeLod===2&&cameraDistance<625)activeLod=1;
@@ -259,6 +272,12 @@ export async function createVehicleLayer(T,scene,field,config,damage,onLoaded=()
     builder.aim(sweep?.yaw??unit.projector?.yaw??0,sweep?.pitch??unit.projector?.pitch??0,false);
     builderBatch.add(matrix,color,{projector:unit.hp>0&&unit.builderWorking?1:.015},damageInfo);
     if(unit.hp>0&&unit.builderWorking&&unit.builderContact)workBeams.push({from:new T.Vector3().setFromMatrixPosition(builder.emitter.matrixWorld).applyMatrix4(matrix),to:new T.Vector3(...(sweep?.world??unit.builderContact)),targetId:unit.task?.targetId,mode:unit.task?.type});
+   }else if(unit.kind==='sensor'){
+    sensorYaw.rotation.z=radarAngle(unit,workTime);
+    sensorBatch.add(matrix,color,{},damageInfo,[sensorYaw.rotation.z]);
+   }else if(unit.kind==='twin-machinegun'){
+    twinKord.yaw.rotation.z=yawTo(0,-.65);twinKord.pitch.rotation.x=pitchTo(0,-.65,3.28,-.32,.48);twinKord.recoil.position.y=secondBarrel.position.y=recoil;
+    twinBatch.add(matrix,color,{},damageInfo);muzzles.set(unit.id,new T.Vector3().setFromMatrixPosition(twinKord.muzzle.matrixWorld).applyMatrix4(matrix));
    }else if(unit.kind==='command'){
     commandBatch.add(matrix,color,{},damageInfo);
    }else if(unit.kind==='raider'){
@@ -285,12 +304,12 @@ export async function createVehicleLayer(T,scene,field,config,damage,onLoaded=()
  function makeDesignModel(components,paint){
   const [chassisId,bodyId,upperId]=components;
   if(chassisId!=='C01'||bodyId!=='B01')return null;
-  const source={U01:gun,U25:builder.root,'mission-flamer':flame}[upperId];
+  const source={U01:gun,U02:twin,U21:sensor,U25:builder.root,'mission-flamer':flame}[upperId];
   if(!source)return null;
   const assembled=new T.Group(),chassis=lods[0][0].batch.prototype.clone(true),body=lods[0][1].batch.prototype.clone(true),upper=source.clone(true);
   for(const node of [chassis,body,upper])node.traverse(part=>{
    part.matrixAutoUpdate=true;
-   if(part.isMesh)part.castShadow=part.receiveShadow=true;
+   if(part.isMesh){part.castShadow=true;part.receiveShadow=!part.material.name?.startsWith('radar_');}
    if(/(_wheel|_steer|_yaw|_pitch|recoil_1)$/.test(part.name)||part.name==='recoil_1')part.rotation.set(0,0,0);
    if(part.name==='sprung_frame')part.position.z=0;
   });

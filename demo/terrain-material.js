@@ -2,6 +2,7 @@
 import {terrainNoiseGLSL,roadEdgeGLSL} from './road-surface.js';
 import {loadTerrainPbr,terrainPbrDeclarations,terrainPbrSurface,terrainPbrNormals} from './terrain-pbr.js';
 import {createLocalRoadMask,localRoadGLSL} from './local-road-mask.js';
+import {rockyRidgeDeclarations,rockyRidgeNormals} from './rocky-ridges.js';
 export async function createTerrainMaterials(T,extent,{lightweightOverview=false}={}){
  const localRoads=createLocalRoadMask(T);
  const loader=new T.TextureLoader(),base='../assets/maps/alpha/',names=['dune-sand','bleached-sand','rust-clay','desert-gravel','scorched-rock','ash-earth','ruined-asphalt','weathered-concrete','transition-sand','dusty-sandstone','sandy-talus','weathered-limestone'];
@@ -20,6 +21,7 @@ export async function createTerrainMaterials(T,extent,{lightweightOverview=false
  ${terrainNoiseGLSL}
  ${roadEdgeGLSL}
  ${localRoadGLSL}
+ ${rockyRidgeDeclarations}
  vec3 terrainSample(float layer,vec2 uv){if(fastTerrain>.5){vec2 flow=vec2(tnoise(vTerrainPosition.xy/100.+layer),tnoise(vTerrainPosition.yx/137.-layer));return texture(terrainLayers,vec3(uv+(flow-.5)*1.8,layer)).rgb;}float k=tnoise(vTerrainPosition.xy/103.+layer)*7.,a=floor(k),f=fract(k);vec2 oa=sin(vec2(3.,7.)*(a+layer)),ob=sin(vec2(3.,7.)*(a+1.+layer));vec3 ca=texture(terrainLayers,vec3(uv+oa,layer)).rgb,cb=texture(terrainLayers,vec3(mat2(0.,-1.,1.,0.)*uv+ob,layer)).rgb;return mix(ca,cb,smoothstep(.15,.85,f));}
  vec3 harmonize(vec3 color,float saturation){float l=dot(color,vec3(.3,.59,.11));return mix(vec3(l),color,saturation);}
  vec3 agedAsphalt(vec2 p){
@@ -62,7 +64,7 @@ export async function createTerrainMaterials(T,extent,{lightweightOverview=false
   float rockDetail=(first==4.||first==9.||first==10.||first==11.)?.65:.16;terrainRelief=(mix(la,lb,chosen.b)-.14)*rockDetail;
   float grain=clamp(mix(la,lb,chosen.b)/max(.02,mix(sourceMean[int(first)],sourceMean[int(second)],chosen.b)),.76,1.25);
   vec3 baseColor=macroColor*mix(1.,grain,.55*(1.-pbrFade*.85));
-  baseColor=roadSurface(baseColor,(texture2D(roadDetail,vMapUv).g-.5)*24.);
+  baseColor=roadSurface(rockyRidgeSurface(baseColor,length(vViewPosition)),(texture2D(roadDetail,vMapUv).g-.5)*24.);
   diffuseColor.rgb*=baseColor;
  }else{
  vec3 m0=texture2D(control0,vMapUv).rgb,m1=texture2D(control1,vMapUv).rgb,m2=texture2D(control2,vMapUv).rgb,m3=texture2D(control3,vMapUv).rgb;
@@ -80,7 +82,7 @@ export async function createTerrainMaterials(T,extent,{lightweightOverview=false
  result=texture2D(macroAlbedo,vMapUv).rgb*mix(1.,textureGrain,.55*(1.-pbrFade*.85));
  terrainRelief=relief/max(total,.001);terrainRoughness=surfaceRoughness/max(total,.001);
  if(m2.g>.006){vec3 concrete=terrainSample(7.,p.xy/38.)*.87;result=mix(result,concrete,min(1.,m2.g));}
- result=roadSurface(result,(texture2D(roadDetail,vMapUv).g-.5)*24.);
+ result=roadSurface(rockyRidgeSurface(result,length(vViewPosition)),(texture2D(roadDetail,vMapUv).g-.5)*24.);
  diffuseColor.rgb*=result*(.92+tnoise(p.xy/350.)*.13);
  }
  terrainRelief=mix(terrainRelief,pavementRelief,pavementCoverage);terrainRoughness=mix(terrainRoughness,.79,pavementCoverage);
@@ -105,7 +107,7 @@ export async function createTerrainMaterials(T,extent,{lightweightOverview=false
   }
   ground*=mix(vec3(1.),grain,.63*detailFade);
  }
- ground=roadSurface(ground,(texture2D(roadDetail,vMapUv).g-.5)*24.);
+ ground=roadSurface(rockyRidgeSurface(ground,length(vViewPosition)),(texture2D(roadDetail,vMapUv).g-.5)*24.);
  diffuseColor.rgb*=ground*mix(vec3(1.04,1.,.95),vec3(1.),pavementCoverage);
  `;
  function configure(material,key,mode){
@@ -126,14 +128,15 @@ export async function createTerrainMaterials(T,extent,{lightweightOverview=false
    if(mode!=='light')shader.fragmentShader=shader.fragmentShader
     .replace('#include <normal_fragment_maps>',terrainPbrNormals)
     .replace('#include <roughnessmap_fragment>','#include <roughnessmap_fragment>\nroughnessFactor=terrainRoughness;');
+   shader.fragmentShader=shader.fragmentShader.replace('#include <normal_fragment_begin>','#include <normal_fragment_begin>\n'+rockyRidgeNormals);
   };
-  material.customProgramCacheKey=()=>key;
+  material.customProgramCacheKey=()=>key+'_rocky_ridges_v1';
   return material;
  }
  const markings=new T.MeshLambertMaterial({color:'#d1c8ad',transparent:true,opacity:.38,depthWrite:false,side:T.DoubleSide});markings.onBeforeCompile=shader=>{Object.assign(shader.uniforms,localRoads.uniforms);shader.uniforms.roadMask={value:roadDetail};shader.vertexShader='varying vec3 vMarkWorld;\n'+shader.vertexShader;shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvMarkWorld=(modelMatrix*vec4(position,1.)).xyz;');shader.fragmentShader='varying vec3 vMarkWorld;uniform sampler2D roadMask;\n'+roadEdgeGLSL+localRoadGLSL+shader.fragmentShader;shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
  vec2 roadUv=(vMarkWorld.xy+${(extent/2).toFixed(1)})/${extent.toFixed(1)};
  float inward=(texture2D(roadMask,roadUv).g-.5)*24.,footprint=fwidth(inward);
- diffuseColor.a*=(1.-localRoadReplacement(vMarkWorld.xy))*roadEdgeMask(inward,footprint);`);};markings.customProgramCacheKey=()=> 'road_paint_v3';
+ diffuseColor.a*=(1.-localRoadPaintReplacement(vMarkWorld.xy))*roadEdgeMask(inward,footprint);`);};markings.customProgramCacheKey=()=> 'road_paint_v4';
  // The distant continuation uses two regular samples, without the layer shader.
  const farTile=images[8];farTile.colorSpace=T.SRGBColorSpace;farTile.wrapS=farTile.wrapT=T.MirroredRepeatWrapping;farTile.repeat.set(extent/35,extent/35);
  const surround=new T.MeshLambertMaterial({map:farTile,vertexColors:true});surround.onBeforeCompile=shader=>{shader.uniforms.macroAlbedo={value:macro};shader.vertexShader='varying vec3 vSurroundPosition;\n'+shader.vertexShader;shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvSurroundPosition=(modelMatrix*vec4(position,1.)).xyz;');shader.fragmentShader='varying vec3 vSurroundPosition;\nuniform sampler2D macroAlbedo;\n'+shader.fragmentShader;shader.fragmentShader=shader.fragmentShader.replace('#include <map_fragment>',`#include <map_fragment>

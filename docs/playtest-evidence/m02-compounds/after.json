@@ -1,0 +1,12 @@
+{
+  "stage": "after",
+  "hashes": {
+    "terrain": "a99ae7aebee4ebe1599af1d72a3845f242c11dc197a54fa24d8d599adfed1ef4",
+    "navigation": "f3a68f8eff88921fb49808447e2f5d7ff02fa6a32a034b5d39a24c1f5ab8ac1c",
+    "roads": "ef73e37ab8120b0c0bd830fcdb13d3dfef7d210cb0619bb9b702f33bbaa2ea33",
+    "structures": "da1305238be158c0d11bff7e02deacad91a2f007471ef32a6cc980a46ddfe3e4",
+    "combat": "99c7d1b084e7b53b970671d970ef4f6ae5115b1003ffae17b90e20bef8b434bc"
+  },
+  "errors": [],
+  "resources": []
+}

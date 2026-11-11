@@ -240,9 +240,9 @@ export class CommandPlanner{
   const applied=[...new Set(record.assigned)].filter(id=>{const u=m.entity(id);return u?.hp>0&&u.commandRevision===record.revision&&!u.pendingOrder;});
   record.assigned.splice(0,record.assigned.length,...applied);record.status='queued';this.active=null;
  }
- advance(budgetMs=2){
+ advance(budgetMs=2,steps=Infinity){
   if(!(budgetMs>0))return 0;
-  const m=this.mission,started=performance.now(),deadline=started+Math.max(0,Math.min(2,budgetMs));
+  const m=this.mission,started=performance.now(),fixed=Number.isFinite(steps),deadline=fixed?Infinity:started+Math.max(0,Math.min(2,budgetMs));
   for(const record of m.state.commandOrders)if(record.awaitingTails&&!m.state.units.some(u=>ownsContinuation(u,record.revision)&&u.routeContinuation.ready)){
    delete record.awaitingTails;
    this.stats.applied+=Math.max(0,record.assigned.length-(record.reportedAssignments??record.assigned.length));
@@ -258,8 +258,8 @@ export class CommandPlanner{
     for(const unit of m.state.units)if(unit.pendingOrder?.revision===record.revision)unit.pendingOrder.status='planning';
    }
   }
-  this.nav.workDeadline=deadline;
-  while(performance.now()<deadline){
+  this.nav.workDeadline=fixed?-Infinity:deadline;
+  while(steps-->0&&performance.now()<deadline){
    if(this.active){
     const {record}=this.active;
     // A revision uniquely owns its pending members. Looking up every selected

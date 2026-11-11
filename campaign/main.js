@@ -33,6 +33,10 @@ import {installNavigationTelemetry} from './navigation-telemetry.js';
 const $ = id => document.getElementById(id);
 const stabilityGraph=createStabilityGraph();
 const saveKey = 'warGame.alpha.mission01.v1';
+const autoSaveKey='warGame.alpha.autosave.v1',checkpointKey='warGame.alpha.before-m02.v1';
+const diagnosticM02=new URLSearchParams(location.search).get('mission')==='m02';
+const latestSaveKey='warGame.alpha.latest-save.v1';
+function resumeData(){const latest=localStorage.getItem(latestSaveKey);return latest&&localStorage.getItem(latest)||localStorage.getItem(saveKey)||localStorage.getItem(autoSaveKey);}
 const dataUrl = '../assets/campaign/alpha/mission01/gameplay.json';
 const selected = new Set();
 const miniBackground = new Image();
@@ -75,6 +79,7 @@ function knownArtifact(mission){
 }
 function nextObjectiveHint(state,{plant,well},tasks,artifact,contact,southernApproach,warehouseHint){
   if(state.status!=='running')return '';
+  if(state.m02)return 'Разведайте юг, подавите четыре опорных пункта и соберите образцы.';
   if(state.flags.contact&&!state.flags.raidWon)return contact ? 'Отразите рейд на базу.' : 'Прикройте въезд к базе.';
   if(artifact)return 'Подберите артефакт.';
   if(!state.powered||!(state.oilLinked>0)){
@@ -127,8 +132,8 @@ function staticThreat(contact){
 }
 const isMobile = entity => entity?.owner === 'rai' && !!config.units[entity.kind];
 const hpColor = fraction => fraction > .58 ? '#9cdd69' : fraction > .28 ? '#f1cc58' : '#ed6a4d';
-const sampleNames = {'flamethrower':'Устройство №001','mg-ammo-1':'Образец со склада','mg-tower':'Узел башни'};
-const sampleIcons = {'flamethrower':'technology','mg-ammo-1':'ammunition','mg-tower':'turret-ring'};
+const sampleNames = {'flamethrower':'Устройство №001','mg-ammo-1':'Образец со склада','mg-tower':'Узел башни','flamer-upgrade':'Усиление огнемёта','twin-machinegun':'Спаренный пулемёт',sensor:'Сенсор','power-module':'Энергомодуль'};
+const sampleIcons = {'flamethrower':'technology','mg-ammo-1':'ammunition','mg-tower':'turret-ring','flamer-upgrade':'damage-upgrade','twin-machinegun':'twin-gun',sensor:'sensor','power-module':'power-upgrade'};
 const projectLabel = vehicle => latestVehicleProject(mission.state.designs,vehicle,config)?.name
   ?? (vehicle.projectId===vehicle.kind?null:vehicle.designName) ?? config.units[vehicle.kind]?.name;
 
@@ -253,7 +258,9 @@ function toggleAttackOrder(){if(orderMode==='attack')cancelMode();else beginOrde
 function toggleDemolitionOrder(){if(orderMode==='demolish')return cancelMode();cancelMode();orderMode='demolish';updateUi();}
 async function saveGame(notify = true) {
   try {
-    localStorage.setItem(saveKey, await mission.saveAsync());
+    const key=notify?saveKey:autoSaveKey;
+    localStorage.setItem(key, await mission.saveAsync());
+    localStorage.setItem(latestSaveKey,key);
     if (notify) toast('Операция сохранена');
     return true;
   } catch {
@@ -267,10 +274,13 @@ async function start(restore = false) {
   loadingGame=true;
   sound.unlock();
   try {
+  if(!restore&&diagnosticM02&&!mission.state.m02){const {prepareM02Diagnostic}=await import('./mission02-diagnostic.js');prepareM02Diagnostic(mission);}
+  const continuing=restore||!!mission.state.m02;
   if (restore) {
     try {
-      const data = localStorage.getItem(saveKey);
+      const data = restore==='map-backup'?localStorage.getItem('warGame.alpha.before-map-v2.v1'):restore==='checkpoint'?localStorage.getItem(checkpointKey):restore==='manual'?localStorage.getItem(saveKey):resumeData();
       if (!data) return toast('Сохранения ещё нет');
+      if(restore==='checkpoint')localStorage.setItem('warGame.alpha.before-map-v2.v1',await mission.saveAsync());
       mission.load(data);
       if(radio.director)restoreRadioStory(mission.state);
     } catch (error) {
@@ -283,14 +293,14 @@ async function start(restore = false) {
   await mainMenu.loading.stage('graphics');
   await world.prepareRendering?.(mission);
   await mainMenu.loading.stage('entry');
-  if(!restore)mission.state.storyConstruction={enabled:true,unlocked:['generator'],research:false,requiredBunkers:2};
+  if(!continuing)mission.state.storyConstruction={enabled:true,unlocked:['generator'],research:false,requiredBunkers:2};
   designer.close(false);
   paused = false;
   resultShown = false;
   resultPrepared=false;
   radio.reset();
-  if(!restore)radio.director.beginStory(mission);
-  if(!restore)startOpeningConstruction(mission);
+  if(!continuing)radio.director.beginStory(mission);
+  if(!continuing)startOpeningConstruction(mission);
   else restoreOpeningConstruction(mission);
   openingPlaying=!!mission.state.openingScene&&!mission.state.openingScene.handedOver;
   active=!openingPlaying;
@@ -341,7 +351,7 @@ function ordersAt(point, target, mode, append=false) {
   if(mode==='demolish'){
     if(!canDemolish(mission,target))return toast('Выберите своё готовое здание');
     action='demolish';destination=target;
-  } else if ((mode === 'attack'||!mode) && target?.owner === 'scavs') {
+  } else if ((mode === 'attack'||!mode) && ['scavs','unknown'].includes(target?.owner)) {
     action = 'attack';
     destination = target;
   } else if (mode === 'attack') {
@@ -727,7 +737,7 @@ function updateRoster() {
   const tiles=[...groups.values()].sort((a,b)=>Number(a.recovering)-Number(b.recovering)||types.get(a.design)-types.get(b.design));
   const visibleColumns=Math.min(tiles.length,columns);
   roster.style.setProperty('--roster-cols',Math.max(1,visibleColumns));
-  const tileKey=tile=>(tile.recovering?'repair:':'')+tile.units.map(unit=>unit.id).join('/');
+  const tileKey=tile=>(tile.recovering?'repair:':'')+tile.design+':'+tile.units.map(unit=>unit.id).join('/');
   const key=tiles.map(tileKey).join(',');
   if(key!==rosterKey){
     rosterKey=key;
@@ -783,7 +793,7 @@ function updateContext(first) {
   const projects = factory ? mission.factoryProjects() : [];
   const designs = factory ? s.designs.map(project => project.id + ':' + project.name).join(',') : '';
   const activeResearch = s.buildings.filter(b=>b.hp>0&&b.research).map(b=>b.research.key);
-  const key = [factories.map(f=>f.id).join(), first?.id, first?.completed, first?.clearing, first?.research?.key, activeResearch.join(), s.artifactKeys.join(), Object.keys(s.research).join(), thresholds, designs, builders().length,mission.researchUnlocked(),first?.workPriority,canSelectDemolition,orderMode,demolishers.length,!!first?.demolitionProgress].join('|');
+  const key = [first?.powerModule,!!first?.moduleConstruction,factories.map(f=>f.id).join(), first?.id, first?.completed, first?.clearing, first?.research?.key, activeResearch.join(), s.artifactKeys.join(), Object.keys(s.research).join(), thresholds, designs, builders().length,mission.researchUnlocked(),first?.workPriority,canSelectDemolition,orderMode,demolishers.length,!!first?.demolitionProgress].join('|');
   if (key !== actionKey) {
     actionKey = key;
     const items = [];
@@ -799,6 +809,11 @@ function updateContext(first) {
         const label=sampleNames[id]??'Неизвестный образец';
         add(label, spec.cost + ' нефти · ' + spec.seconds + ' с', () => mission.research(first.id,id), false, sampleIcons[id] ?? 'research').dataset.research = id;
       }
+    }
+    if(first?.owner==='rai'&&first.kind==='generator'&&first.completed&&s.research['power-module']&&!first.powerModule){
+      const control=add(first.moduleConstruction?'Продолжить установку энергомодуля':'Установить энергомодуль',config.powerModule.cost+' нефти · отдача вышек +25%',()=>mission.installPowerModule(first.id,chooseBuilder('generator').map(u=>u.id)),!builders().length,'power-upgrade');
+      control.dataset.powerModule='';
+      if(first.moduleConstruction){const progress=document.createElement('progress');progress.max=1;progress.className='production-progress';progress.dataset.powerProgress='';control.append(progress);}
     }
     if (first?.owner === 'rai' && first.completed === false) {
       add('Достроить', 'Отправить строителей', () => {
@@ -837,6 +852,7 @@ function updateContext(first) {
     updateFactoryRows($('actions'),mission,projects,paused);
     return;
   }
+  const moduleProgress=$('actions').querySelector('[data-power-progress]');if(moduleProgress&&first?.moduleConstruction)moduleProgress.value=oilOrderProgress(first.moduleConstruction,config.powerModule.seconds,config).progress;
   const job=first?.research;
   queue.hidden = !job;
   if (job) {
@@ -862,6 +878,10 @@ function flushUi() {
   if (!active) return;
   if(performance.now()>=blockedUntil){blockedOrders.clear();$('order-feedback').hidden=true;}
   const s = mission.state;
+  const oldMap=s.m02?.version===1,checkpointButton=$('m02-checkpoint');
+  checkpointButton.hidden=oldMap?!localStorage.getItem(checkpointKey):!localStorage.getItem('warGame.alpha.before-map-v2.v1');
+  const checkpointTitle=oldMap?'Вернуться к началу второй миссии на исправленной карте. Текущая партия останется в резервной копии.':'Восстановить партию, сохранённую перед переходом на исправленную карту';
+  checkpointButton.title=checkpointTitle;checkpointButton.setAttribute('aria-label',checkpointTitle);
   const journal=$('journal-entries'),entries=s.radioStory?.journal??[];
   const journalKey=JSON.stringify(entries);
   if(journal.dataset.contents!==journalKey){
@@ -907,6 +927,7 @@ function flushUi() {
       name.textContent = task.name;
       amount.textContent = task.progress ?? '';
       row.append(name,amount);
+      if(task.samples){const samples=document.createElement('span');samples.className='m02-samples';samples.textContent=task.samples.map(a=>(a.collected?'✓ ':'○ ')+a.name).join(' · ');row.append(samples);}
       return row;
     });
     $('objectives').replaceChildren(...rows);
@@ -930,7 +951,7 @@ function flushUi() {
     setButtonIcon(focus,focusIcons[marker.kind]??'focus',marker.label,focusDetails[marker.kind]);
     focus.classList.toggle('threat',marker.kind==='threat');
   }
-  const entityName = first && (projectLabel(first)
+  const entityName = first && ((first.owner==='unknown'?'Неизвестные · сенсор':null)??projectLabel(first)
     ?? config.buildings[first.kind]?.name ?? config.camps.find(camp=>camp.id===first.campId)?.name ?? 'Лагерь');
   $('selection').parentElement.hidden=!first;
   $('selection').textContent = group.length > 1 ? 'Группа · ' + group.length : entityName ?? '';
@@ -938,7 +959,7 @@ function flushUi() {
   const wellStatus=group.length===1&&first?.owner==='rai'&&first.kind==='derrick'&&first.completed
     ? ' · '+(first.powered?'Качает':s.powered?'Лимит АЭС':'Нет питания'):'';
   const buildingStatus=first?.completed===false?(oilFundingRemaining(first)>0?' · Нефть '+Math.floor(first.funding.paid)+'/'+first.cost:' · '+Math.floor(first.progress*100)+'%'):' HP';
-  $('details').textContent = first?.clearing ? 'Освобождение площадки' : first?.awaitingWorkers ? 'В очереди строителей' : first ? Math.ceil(hp) + '/' + maxHp + buildingStatus+wellStatus : '';
+  $('details').textContent = first?.clearing ? 'Освобождение площадки' : first?.awaitingWorkers ? 'В очереди строителей' : first ? Math.ceil(hp) + '/' + maxHp + buildingStatus+wellStatus+(first.powerModule?' · Энергомодуль +25%':'')+(first.kind==='flamer'&&s.research['flamer-upgrade']?' · Урон +20%':'') : '';
   $('attack-order').classList.toggle('active', orderMode === 'attack');
   $('attack-order').setAttribute('aria-pressed',String(orderMode==='attack'));
   $('attack-order').disabled = orderMode!=='attack'&&!commandSelection().some(unit => liveMobile(unit)&&config.units[unit.kind].damage > 0);
@@ -1135,11 +1156,13 @@ try {
   miniBackground.src = '../assets/maps/alpha/macro-albedo.jpg';
   installInput();
   let hasSave=false;
-  try { hasSave=!!localStorage.getItem(saveKey); } catch {}
+  try { hasSave=!!resumeData(); } catch {}
   await mainMenu.loading.finish();
   mainMenu.ready(hasSave);
   $('begin').onclick = () => start();
-  $('resume-save').onclick = $('load').onclick = () => start(true);
+  $('resume-save').onclick = () => start(true);
+  $('load').onclick = () => start('manual');
+  $('m02-checkpoint').onclick = () => start(mission.state.m02?.version===1?'checkpoint':'map-backup');
   $('save').onclick = () => saveGame();
   $('main-menu-return').onclick = async () => {if(await saveGame())location.reload();};
   $('pause').onclick = () => { paused = !paused; world.keys.clear(); updateUi(); };
@@ -1182,10 +1205,10 @@ try {
   }});
   $('results-open').onclick=()=>resultsView.show(mission);
   $('result-continue').onclick=async()=>{
-    if(typeof mission.enterM02!=='function'||enteringM02||mission.state.m02||mission.state.status!=='victory')return;
+    if(enteringM02||mission.state.m02||mission.state.status!=='victory')return;
     enteringM02=true;$('result-continue').disabled=true;
     try{
-      try{localStorage.setItem('warGame.alpha.before-m02.v1',await mission.saveAsync());}catch{return toast('Не удалось создать контрольное сохранение');}
+      try{localStorage.setItem(checkpointKey,await mission.saveAsync());}catch{return toast('Не удалось создать контрольное сохранение');}
       const result=mission.enterM02();if(!result.ok)return report(result);
       resultShown=false;resultPrepared=false;resultsView.hide();$('results-open').hidden=true;radio.reset();taskKey='';actionKey='';world.storySignals.show(null);
       await saveGame(false);updateUi();

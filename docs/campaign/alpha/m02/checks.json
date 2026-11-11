@@ -1,0 +1,61 @@
+{
+  "passed": 14,
+  "tests": [
+    {
+      "name": "m01 → m02 preserves the actual base, army, groups, orders, funding and fog",
+      "ms": 397
+    },
+    {
+      "name": "idempotent entry, legacy m01 victory load and all m02 checkpoints",
+      "ms": 153
+    },
+    {
+      "name": "authored zones, artifacts, exits, rally points and observer route are reachable",
+      "ms": 624
+    },
+    {
+      "name": "factory intervals, occupied exit, per-producer/global caps and destruction",
+      "ms": 584
+    },
+    {
+      "name": "four unique carrier artifacts, immediate research unlock and stable neutralization",
+      "ms": 250
+    },
+    {
+      "name": "free outpost order; victory needs four samples, not research or remote raiders",
+      "ms": 318
+    },
+    {
+      "name": "flamer damage +20% once across save/load, no automatic weapon replacement",
+      "ms": 182
+    },
+    {
+      "name": "twin gun research → designer → real production and combat",
+      "ms": 2325
+    },
+    {
+      "name": "sensor increases actual fog radius, cannot fire, loses current vision on death",
+      "ms": 171
+    },
+    {
+      "name": "builder installs one power module, preserves HP and oil-slot dependency",
+      "ms": 7588
+    },
+    {
+      "name": "observer: death before/while fleeing, death wins same tick, saved escape",
+      "ms": 867
+    },
+    {
+      "name": "radio uses live facts, cancels obsolete scenes and never replays its prologue",
+      "ms": 201
+    },
+    {
+      "name": "observer physically drives to the exit without teleporting",
+      "ms": 4401
+    },
+    {
+      "name": "defeat has priority and unsupported scenario saves fail before replacing the world",
+      "ms": 189
+    }
+  ]
+}

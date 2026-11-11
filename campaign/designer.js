@@ -9,13 +9,15 @@ const catalogue = {
   C01: {role:'wheeled', detail:'Полный привод', icon:'move', massKg:1120},
   B01: {role:'light', detail:'Кузов фургона', icon:'command', massKg:730, armor:'Без навесной', armorDetail:'Штатный стальной кузов без навесных бронепанелей'},
   U01: {role:'combat', detail:'Пулемёт', icon:'bukhanka', massKg:155},
+  U02: {role:'combat', detail:'Два ствола · урон +40%', icon:'twin-gun', massKg:195},
+  U21: {role:'recon', detail:'Обнаружение ×1,5 · без оружия', icon:'sensor', massKg:160},
   U25: {role:'builder', detail:'Стройка и ремонт', icon:'builder', massKg:175},
   'mission-flamer': {role:'combat', detail:'Ближний бой', icon:'flamer', tag:'ОГН', massKg:210},
 };
 
 const roleNames = {combat:'Боевые', builder:'Инженерные', support:'Поддержка', recon:'Разведка', wheeled:'Колёсные', tracked:'Гусеничные', light:'Лёгкие', heavy:'Тяжёлые', other:'Прочие'};
 const tons = new Intl.NumberFormat('ru-RU', {maximumFractionDigits:2});
-const partsPerPage = 4;
+const partsPerPage = 8;
 
 export class VehicleDesigner {
   constructor(panel, toggle, mission, {makeModel, onSave, onActiveChange}) {
@@ -226,7 +228,7 @@ export class VehicleDesigner {
     button.className = 'design-part';
     button.dataset.designComponent = id;
     button.setAttribute('aria-pressed', String(this.components[this.activeSlot] === id));
-    const known = ['C01', 'B01', 'U01', 'U25', 'mission-flamer'].includes(id);
+    const known = ['C01', 'B01', 'U01', 'U02', 'U21', 'U25', 'mission-flamer'].includes(id);
     setButtonIcon(button, known ? id : info.icon, info.name,
       [info.tag ?? id, info.detail, Number.isFinite(info.massKg) ? 'Масса ' + info.massKg + ' кг' : ''].filter(Boolean).join(' · '));
     button.onclick = () => this.choosePart(id, candidates);

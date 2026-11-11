@@ -1,4 +1,5 @@
 import {campBaseLayout} from './scav-base-layout.js';
+import {originalCampOpenings} from './mission01-terrain.js';
 
 // Authored service lanes in the existing flat yards. They belong to the map,
 // so destroying a camp does not remove its streets. No simulation per frame.
@@ -38,6 +39,7 @@ function rounded(points,width=20){
 }
 
 export function scavBaseRoads(field,config){
+ if(config.m01LayoutVersion===3)return originalCampRoads(field,config);
  const result=[];
  for(const data of config.camps){
   const camp={...data,...field.gridToWorld(data.grid)},layout=campBaseLayout(camp);if(!layout)continue;
@@ -56,4 +58,60 @@ export function scavBaseRoads(field,config){
   }
  }
  return result;
+}
+
+function originalCampRoads(field,config){
+ const p=field.gridToWorld;
+ const source=field.m01SourceNetworks?.network??field.missionTerrain?.network??field.roadNetwork;
+ const junction=grid=>{const target=p(grid),road=source?.paths?.find(r=>r.id==='nw-east--nw-west-13');return road?road.points.reduce((best,q)=>Math.hypot(q.x-target.x,q.y-target.y)<Math.hypot(best.x-target.x,best.y-target.y)?q:best):target;};
+ const plans=[
+  ['outpost-approach','nw-pocket',22,[[35.5,42.5],[35.5,41.5],[33.5,40.5],[28.5,40.5],[28.5,39]]],
+  ['outpost-yard','nw-pocket',20,[[28.5,39],[28.5,37],[29.5,37]]],
+  ['east-approach','nw-west',24,[[31,21.35],[38,22],[39.5,22],[39.5,20.5]]],
+  ['east-yard','nw-west',20,[[39.5,20.5],[40,19.8],[40,17.7]]],
+  ['northwest-approach','nw-east',24,[[15.4,18.7],[12.5,18.7],[12.5,16.25]]],
+  ['northwest-yard','nw-east',20,[[12.5,16.25],[12.5,13.8],[13,13.8]]],
+  ['hq-approach','west-south',24,[[17,24.5],[17.4,26],[16.5,27],[16.5,28.5]]],
+  ['hq-yard','west-south',20,[[16.5,28.5],[16.5,29.35],[19,29.35],[19,30.2]]],
+ ];
+ return plans.map(([name,campId,width,grid])=>{
+  const points=grid.map(p);if(['east-approach','northwest-approach','hq-approach'].includes(name))points[0]=junction(grid[0]);
+  const road={id:'m01-original-'+name,campId,m01LayoutVersion:3,width,points:rounded(points,width)};
+  if(name==='hq-approach'){
+   const sourceRoad=source?.paths?.find(r=>r.id==='nw-east--nw-west-13'),start=points[0];
+   const prefix=sourceRoad?{...sourceRoad,points:sourceRoad.points.slice(0,sourceRoad.points.indexOf(start)+1)}:null;
+   let distance=0;road.points.forEach((q,i)=>{if(i)distance+=Math.hypot(q.x-road.points[i-1].x,q.y-road.points[i-1].y);q.width=width+((start.width??sourceRoad?.width??width)-width)*Math.max(0,1-distance/48);});
+   const a=p([15,24]),b=p([20.5,35.5]);road.cutSourcePaint=true;road.replaceAreas=[{rect:[a.x,b.y,b.x,a.y],feather:2,preserveRoads:prefix?[prefix]:[]}];
+  }
+  return road;
+ });
+}
+
+export function syncScavBaseRoads(field,config){
+ if(field.m01RoadLayoutVersion===config.m01LayoutVersion)return false;
+ const terrain=field.missionTerrain;
+ if(terrain){
+  field.m01SourceNetworks??={network:terrain.network,southernNetwork:terrain.southernNetwork};
+  const trim=network=>({...network,paths:network.paths.map(road=>{
+   if(road.id!=='nw-east--nw-west-13')return road;
+   const point=field.gridToWorld([17,24.5]);let end=0;
+   for(let i=1;i<road.points.length;i++)if(Math.hypot(road.points[i].x-point.x,road.points[i].y-point.y)<Math.hypot(road.points[end].x-point.x,road.points[end].y-point.y))end=i;
+   return {...road,to:undefined,points:road.points.slice(0,end+1)};
+  })});
+  for(const key of ['network','southernNetwork'])terrain[key]=config.m01LayoutVersion===3?trim(field.m01SourceNetworks[key]):field.m01SourceNetworks[key];
+  field.roadNetwork=terrain.southern?terrain.southernNetwork:terrain.network;
+ }
+ const base=field.missionBaseRoads??field.localRoads??[];
+ const independent=base.filter(r=>!r.campId&&!r.id?.startsWith('m01-original-')&&!r.id?.startsWith('m02-'));
+ field.missionBaseRoads=[...independent,...scavBaseRoads(field,config)];
+ if(terrain){
+  field.m01SourceNavigations??={navigation:terrain.navigation,southernNavigation:terrain.southernNavigation};
+  const transitions=config.m01LayoutVersion===3?originalCampOpenings(field,config,field.missionBaseRoads.filter(r=>r.m01LayoutVersion===3),field.m01SourceNavigations.navigation):[];
+  for(const key of ['navigation','southernNavigation']){
+   const source=field.m01SourceNavigations[key];
+   terrain[key]=config.m01LayoutVersion===3?{...source,version:source.version+'-m01-original-v3',transitions:[...source.transitions,...transitions]}:source;
+  }
+  field.navigation=terrain.southern?terrain.southernNavigation:terrain.navigation;
+ }
+ field.m01RoadLayoutVersion=config.m01LayoutVersion;return true;
 }

@@ -325,6 +325,19 @@ export function createScavPrefab(T, kind, site) {
       box([1.52,.19,.74],[x,3.37,.91],mats.rust,[.13,0,0]);
     }
   }
+  if(kind!=='mg-tower'&&site.includes(':square-workshop')){
+    // Decorative annex and tools are damage parts of the workshop, never
+    // stand-alone solids. The actual factory exit remains completely clear.
+    fragment('repair_canopy','metal',()=>{
+      box([4.4,6.2,.14],[7.5,.1,3.05],mats.rust,[0,.06,0]);
+      for(const y of [-2.8,2.8])beam([9.4,y,0],[9.4,y,3.13],.16,mats.dark);
+      for(const x of [5.5,6.3,7.1,7.9,8.7,9.5])box([.065,6.2,.07],[x,.1,3.14],mats.rust);
+    });
+    fragment('repair_spares','equipment',()=>{
+      for(const [x,y] of [[6.2,.8],[7.25,1.4]])for(const z of [.3,.7])shape(new T.TorusGeometry(.48,.17,6,10),mats.dark,[x,y,z]);
+      box([1.6,.8,.7],[8,2,.35],mats.wood);box([1.4,.65,.18],[8,2,.8],mats.rust);
+    });
+  }
   if (kind !== 'mg-tower' && site !== 'nw-east') {
     for (const [x,y] of [[-4.45,-2.6],[-3.5,-3.2],[3.85,-2.7],[4.65,-2.55]]) {
       drum(.37,.96,[x,y,.48],mats.rust);

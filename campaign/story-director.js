@@ -3,6 +3,7 @@ import {parkRadioStory} from './radio-save.js';
 import {updateStoryConstruction,migrateStoryOpening} from './story-construction.js';
 import {openingConstructionReady} from './opening-construction.js';
 import {applyStoryEdits} from './story-edits.js';
+import {appendM02Story,m02RadioRules} from './mission02-radio.js';
 
 const terminal = status => ['done','skipped','cancelled'].includes(status);
 const sceneSignal = {r01:'intro',r14:'first-contact',r18:'raid-won',r36:'camp3-sighted',r41:'last-camp',r50:'outro'};
@@ -52,8 +53,8 @@ export class StoryDirector {
     if(event.type==='generator-breakdown')f.generatorBroken=true;
     if(event.type==='unit-damaged'&&mission.entity(event.target)?.campId===mission.state.camps[3]?.id)f.chiefAssault=true;
   }
-  facts(mission) {return storyFacts(mission,this.data);}
-  rules(f) {return storyRules(this,f);}
+  facts(mission) {return mission.state.m02?{battle:this.data.clock-this.data.lastCombat<3000,quiet:this.data.clock-this.data.lastCombat,victory:mission.state.status==='victory'}:storyFacts(mission,this.data);}
+  rules(f) {return this.mission.state.m02?m02RadioRules(this):storyRules(this,f);}
   suspend() {
     if(this.data?.active)parkRadioStory(this.data);
   }
@@ -83,7 +84,8 @@ export class StoryDirector {
       const rule=rules[d.active];
       // A started exchange finishes naturally. Attacks use the existing minimap
       // alert; neither combat nor an urgent report rewinds or replaces speech.
-      if(!rule)this.end('cancelled');
+      if(!rule||mission.state.m02&&!rule.valid)this.end('cancelled');
+      else if(mission.state.m02&&rule.priority>0&&f.battle){this.record(d.active).cursor=0;this.suspend();}
     }
     const eligible=[];
     for(const [id,rule] of Object.entries(rules)){
@@ -95,7 +97,7 @@ export class StoryDirector {
       }
       if(!rule.trigger||d.clock-d.lastEnd<sceneGapMs||rule.priority>0&&f.battle||rule.priority>=2&&(f.quiet<8000||d.clock-d.lastEnd<rule.gap*1000))continue;
       if(rule.priority===3&&d.clock-(d.facts.lastChatterAt??-Infinity)<45000)continue;
-      if(f.victory&&!finalScene(id))continue;
+      if(f.victory&&!finalScene(id)&&!id.startsWith('m02-'))continue;
       eligible.push({id,...rule});
     }
     eligible.sort((a,b)=>a.priority-b.priority);
@@ -115,7 +117,7 @@ export class StoryDirector {
     const order={r01:2,r02:0,r05:1,r21:0,r23:1};
     const announcement=scene.announcementCue?scene.cues.indexOf(scene.announcementCue):order[id];
     if(record.cursor>=announcement)(d.announced??={})[id]=true;
-    return {...line,storyScene:id,story:true,dialogue:true,chapter:sceneSignal[id]??'story-'+id,
+    return {...line,storyScene:id,story:true,dialogue:true,chapter:id.startsWith('m02-')?id:sceneSignal[id]??'story-'+id,
       token:`${id}:${record.cursor}`,priority:4-(rules[id]?.priority??2),station:this.script.speakers[line.speaker].name,
       portrait:line.portraitState||(line.speaker==='commander'?(finalScene(id)?'relaxed':'radio'):line.speaker==='warrant'?(finalScene(id)?'tea':'neutral'):'radio')};
   }
@@ -126,5 +128,10 @@ export async function loadMissionStory() {
   const load=async file=>{const response=await fetch(new URL(file,base));if(!response.ok)throw new Error(file+': '+response.status);return response.json();};
   const [original,originalAudio,service,edits]=await Promise.all([load('story-v2.json'),load('audio-v2.json'),load('factory-service-voice.json'),load('reviewed-dialogue.json')]);
   const {story,audio}=applyStoryEdits(original,originalAudio,edits);
-  return {...story,dialogue:story.dialogue.map(line=>({...line,clip:audio.clips[line.id]})),barks:[...story.barks.map(line=>({...line,clip:audio.clips[line.id]})),...service.barks]};
+  const m02Base=new URL('../assets/campaign/alpha/mission02/',import.meta.url);
+  const m02Load=async file=>{const r=await fetch(new URL(file,m02Base));if(!r.ok)throw new Error('m02 '+file+': '+r.status);return r.json();};
+  const [m02Script,m02Audio,m02Edits]=await Promise.all(['story.json','audio.json','reviewed-dialogue.json'].map(m02Load));
+  const m02=applyStoryEdits(m02Script,m02Audio,m02Edits);
+  m02.story.dialogue=m02.story.dialogue.map(line=>({...line,clip:m02.audio.clips[line.id]?.file?{...m02.audio.clips[line.id],base:m02Base.href}:null}));
+  return appendM02Story({...story,dialogue:story.dialogue.map(line=>({...line,clip:audio.clips[line.id]})),barks:[...story.barks.map(line=>({...line,clip:audio.clips[line.id]})),...service.barks]},m02.story);
 }

@@ -1,0 +1,378 @@
+{
+  "version": 1,
+  "audioStatus": "temporary-synthesis",
+  "scenes": [
+    {
+      "id": "m02-radio-start",
+      "title": "На юг",
+      "cues": [
+        "m02-radio-start-1",
+        "m02-radio-start-2"
+      ],
+      "triggerDescription": "Начало m02; отменяется после 90 секунд или победы."
+    },
+    {
+      "id": "m02-radio-entrance",
+      "title": "Проход",
+      "cues": [
+        "m02-radio-entrance-1",
+        "m02-radio-entrance-2"
+      ],
+      "triggerDescription": "Обнаружен проход; оба ДОТа живы."
+    },
+    {
+      "id": "m02-radio-entrance-changed",
+      "title": "Проход: обстановка изменилась",
+      "cues": [
+        "m02-radio-entrance-changed-1"
+      ],
+      "triggerDescription": "Обнаружен проход; остался один ДОТ."
+    },
+    {
+      "id": "m02-radio-entrance-clear",
+      "title": "Проход открыт",
+      "cues": [
+        "m02-radio-entrance-clear-1"
+      ],
+      "triggerDescription": "Обнаружен проход; оба ДОТа уничтожены."
+    },
+    {
+      "id": "m02-radio-factory-working",
+      "title": "Работающий завод",
+      "cues": [
+        "m02-radio-factory-working-1",
+        "m02-radio-factory-working-2"
+      ],
+      "triggerDescription": "Игрок видел выпуск или работу живого завода."
+    },
+    {
+      "id": "m02-radio-factory-destroyed",
+      "title": "Завод уничтожен",
+      "cues": [
+        "m02-radio-factory-destroyed-1",
+        "m02-radio-factory-destroyed-2"
+      ],
+      "triggerDescription": "Один из заводов уничтожен."
+    },
+    {
+      "id": "m02-radio-flamer-ready",
+      "title": "Огнемёт усилен",
+      "cues": [
+        "m02-radio-flamer-ready-1"
+      ],
+      "triggerDescription": "Исследовано усиление огнемёта."
+    },
+    {
+      "id": "m02-radio-twin-ready",
+      "title": "Спаренный пулемёт",
+      "cues": [
+        "m02-radio-twin-ready-1"
+      ],
+      "triggerDescription": "Исследован спаренный пулемёт."
+    },
+    {
+      "id": "m02-radio-sensor-ready",
+      "title": "Сенсор",
+      "cues": [
+        "m02-radio-sensor-ready-1",
+        "m02-radio-sensor-ready-2",
+        "m02-radio-sensor-ready-3"
+      ],
+      "triggerDescription": "Исследован сенсор; спокойный эфир."
+    },
+    {
+      "id": "m02-radio-observer-seen",
+      "title": "Неизвестные",
+      "cues": [
+        "m02-radio-observer-seen-1",
+        "m02-radio-observer-seen-2"
+      ],
+      "triggerDescription": "Наблюдатель обнаружен и ещё не ушёл."
+    },
+    {
+      "id": "m02-radio-observer-escaped",
+      "title": "Наблюдатель ушёл",
+      "cues": [
+        "m02-radio-observer-escaped-1"
+      ],
+      "triggerDescription": "Наблюдатель достиг выхода живым."
+    },
+    {
+      "id": "m02-radio-observer-destroyed",
+      "title": "Перехват",
+      "cues": [
+        "m02-radio-observer-destroyed-1"
+      ],
+      "triggerDescription": "Наблюдатель уничтожен."
+    },
+    {
+      "id": "m02-radio-energy-source",
+      "title": "Источник найден",
+      "cues": [
+        "m02-radio-energy-source-1",
+        "m02-radio-energy-source-2"
+      ],
+      "triggerDescription": "Сам энергоузел обнаружен и ещё существует."
+    },
+    {
+      "id": "m02-radio-power-recovered",
+      "title": "Образец энергомодуля",
+      "cues": [
+        "m02-radio-power-recovered-1"
+      ],
+      "triggerDescription": "Образец энергомодуля подобран, ещё не изучен."
+    },
+    {
+      "id": "m02-radio-victory",
+      "title": "Район зачищен",
+      "cues": [
+        "m02-radio-victory-1"
+      ],
+      "triggerDescription": "Победа: 4 опорных пункта и 4 образца."
+    },
+    {
+      "id": "m02-radio-power-researched",
+      "title": "Энергомодуль изучен",
+      "cues": [
+        "m02-radio-power-researched-1"
+      ],
+      "triggerDescription": "Исследован энергомодуль."
+    }
+  ],
+  "id": "alpha-m02",
+  "name": "Энергетический всплеск",
+  "campaign": "Операция «Рай»",
+  "revision": 1,
+  "speakers": {
+    "radio": {
+      "name": "Радист",
+      "voice": "denis",
+      "lengthScale": 0.97,
+      "pitchSemitones": 0.5,
+      "effect": "radio"
+    },
+    "commander": {
+      "name": "Командир",
+      "voice": "denis",
+      "lengthScale": 1.04,
+      "pitchSemitones": -1.0,
+      "effect": "clean"
+    },
+    "scientist": {
+      "name": "Учёный",
+      "voice": "dmitri",
+      "lengthScale": 1.06,
+      "pitchSemitones": 0.8,
+      "effect": "clean"
+    },
+    "warrant": {
+      "name": "Прапорщик",
+      "voice": "dmitri",
+      "lengthScale": 1.12,
+      "pitchSemitones": -1.6,
+      "effect": "clean"
+    },
+    "scout": {
+      "name": "Разведчик",
+      "voice": "denis",
+      "lengthScale": 1.0,
+      "pitchSemitones": 0.8,
+      "effect": "radio"
+    }
+  },
+  "dialogue": [
+    {
+      "id": "m02-radio-start-1",
+      "speaker": "radio",
+      "text": "Альфа, источник сигнала к югу. Координаты передаю.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "temporary-synthesis",
+      "clip": null
+    },
+    {
+      "id": "m02-radio-start-2",
+      "speaker": "commander",
+      "text": "Базу прикрыть. Основной группе — на выезд.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "temporary-synthesis",
+      "clip": null
+    },
+    {
+      "id": "m02-radio-entrance-1",
+      "speaker": "scout",
+      "text": "Проход перекрыт. Впереди два ДОТа.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "temporary-synthesis",
+      "clip": null
+    },
+    {
+      "id": "m02-radio-entrance-2",
+      "speaker": "commander",
+      "text": "Вижу. Сначала убираем укрепления.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "temporary-synthesis",
+      "clip": null
+    },
+    {
+      "id": "m02-radio-entrance-changed-1",
+      "speaker": "scout",
+      "text": "Укрепления в проходе подавлены частично. Проверяем дорогу.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "temporary-synthesis",
+      "clip": null
+    },
+    {
+      "id": "m02-radio-entrance-clear-1",
+      "speaker": "scout",
+      "text": "ДОТы в проходе уничтожены. Дорога на юг открыта.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "temporary-synthesis",
+      "clip": null
+    },
+    {
+      "id": "m02-radio-factory-working-1",
+      "speaker": "scout",
+      "text": "У них завод работает. Машины прямо из ворот идут.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "temporary-synthesis",
+      "clip": null
+    },
+    {
+      "id": "m02-radio-factory-working-2",
+      "speaker": "commander",
+      "text": "Тогда начнём с завода.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "temporary-synthesis",
+      "clip": null
+    },
+    {
+      "id": "m02-radio-factory-destroyed-1",
+      "speaker": "scout",
+      "text": "Завод уничтожен.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "temporary-synthesis",
+      "clip": null
+    },
+    {
+      "id": "m02-radio-factory-destroyed-2",
+      "speaker": "commander",
+      "text": "Принято. Осмотрите площадку.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "temporary-synthesis",
+      "clip": null
+    },
+    {
+      "id": "m02-radio-flamer-ready-1",
+      "speaker": "scientist",
+      "text": "Огнемёты доработали. Теперь мощнее.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "temporary-synthesis",
+      "clip": null
+    },
+    {
+      "id": "m02-radio-twin-ready-1",
+      "speaker": "scientist",
+      "text": "Спаренный пулемёт готов. Можно ставить в конструкторе.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "temporary-synthesis",
+      "clip": null
+    },
+    {
+      "id": "m02-radio-sensor-ready-1",
+      "speaker": "scientist",
+      "text": "Сенсор готов. Ставится вместо оружия, видит дальше.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "temporary-synthesis",
+      "clip": null
+    },
+    {
+      "id": "m02-radio-sensor-ready-2",
+      "speaker": "warrant",
+      "text": "То есть стрелять нечем?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "temporary-synthesis",
+      "clip": null
+    },
+    {
+      "id": "m02-radio-sensor-ready-3",
+      "speaker": "scientist",
+      "text": "Зато раньше узнаете, что пора уезжать.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "temporary-synthesis",
+      "clip": null
+    },
+    {
+      "id": "m02-radio-observer-seen-1",
+      "speaker": "scout",
+      "text": "Командир, чужая машина. На тех отбросов не похожа.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "temporary-synthesis",
+      "clip": null
+    },
+    {
+      "id": "m02-radio-observer-seen-2",
+      "speaker": "commander",
+      "text": "Попробуйте перехватить.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "temporary-synthesis",
+      "clip": null
+    },
+    {
+      "id": "m02-radio-observer-escaped-1",
+      "speaker": "scout",
+      "text": "Ушла из района. След потеряли.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "temporary-synthesis",
+      "clip": null
+    },
+    {
+      "id": "m02-radio-observer-destroyed-1",
+      "speaker": "scout",
+      "text": "Разведчик уничтожен. Маркировку записали.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "temporary-synthesis",
+      "clip": null
+    },
+    {
+      "id": "m02-radio-energy-source-1",
+      "speaker": "scout",
+      "text": "Источник нашли. Работает старый энергоузел.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "temporary-synthesis",
+      "clip": null
+    },
+    {
+      "id": "m02-radio-energy-source-2",
+      "speaker": "commander",
+      "text": "Охрану убрать. После боя осмотреть оборудование.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "temporary-synthesis",
+      "clip": null
+    },
+    {
+      "id": "m02-radio-power-recovered-1",
+      "speaker": "scout",
+      "text": "Энергомодуль нашли. Данные передали в НИИ.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "temporary-synthesis",
+      "clip": null
+    },
+    {
+      "id": "m02-radio-victory-1",
+      "speaker": "commander",
+      "text": "Район зачищен. Все четыре образца у нас.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "temporary-synthesis",
+      "clip": null
+    },
+    {
+      "id": "m02-radio-power-researched-1",
+      "speaker": "scientist",
+      "text": "Энергомодуль изучен. Теперь можно усилить нашу станцию.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "temporary-synthesis",
+      "clip": null
+    }
+  ],
+  "barks": []
+}

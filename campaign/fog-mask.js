@@ -73,15 +73,22 @@ export function createFogMask(T){
     }
     if(x1>=0)blurHistory(mission.explored,x0,y0,x1,y1);
     const sources=mission.visionSources;
-    const changed=reset||sources.length!==previousSources.length||mission.state.bounds.some((v,i)=>v!==previousBounds[i])
+    const boundsChanged=mission.state.bounds.some((v,i)=>v!==previousBounds[i]);
+    const changed=reset||sources.length!==previousSources.length||boundsChanged
       ||sources.some((v,i)=>v.x!==previousSources[i].x||v.y!==previousSources[i].y||v.radius!==previousSources[i].radius);
     if(changed){for(const source of previousSources)sourceRect(source);for(const source of sources)sourceRect(source);}
-    if(reset)dirty(0,0,textureSize-1,textureSize-1);
+    if(reset||boundsChanged)dirty(0,0,textureSize-1,textureSize-1);
     if(!changed&&x1<0)return false;
-    for(let y=0;y<textureSize;y++)for(let x=dirtyLeft[y];x<=dirtyRight[y];x++){
-      const i=y*textureSize+x;data[i*2]=0;data[i*2+1]=baseMask[i];stats.pixels++;
-    }
     const [left,top,right,bottom]=mission.state.bounds,feather=1.35;
+    const historyLeft=Math.ceil((left-.5)/gridStep-.5),historyRight=Math.floor((right+.5)/gridStep-.5);
+    for(let y=0;y<textureSize;y++){
+      const inRow=samples[y].grid>=top-.5&&samples[y].grid<=bottom+.5;
+      for(let x=dirtyLeft[y];x<=dirtyRight[y];x++){
+        const i=y*textureSize+x;data[i*2]=0;
+        // Historical exploration and its blur cannot reveal a locked sector.
+        data[i*2+1]=inRow&&x>=historyLeft&&x<=historyRight?baseMask[i]:0;stats.pixels++;
+      }
+    }
     const first=(centre,radius,bound)=>Math.max(0,Math.ceil(Math.max(centre-radius,bound-.5)/gridStep-.5));
     const last=(centre,radius,bound)=>Math.min(textureSize-1,Math.floor(Math.min(centre+radius,bound+.5)/gridStep-.5));
     for(const source of mission.visionSources){

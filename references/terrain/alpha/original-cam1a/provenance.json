@@ -1,0 +1,18 @@
+{
+  "source": "Warzone2100/warzone2100",
+  "retrieved": "2026-11-10",
+  "license": "https://github.com/Warzone2100/warzone2100/blob/master/COPYING",
+  "binarySources": "../original-cam1b/provenance.json",
+  "files": [
+    {
+      "file": "labels.json",
+      "url": "https://raw.githubusercontent.com/Warzone2100/warzone2100/master/data/base/wrf/cam1/cam1a/labels.json",
+      "sha256": "20deefa6fa6814e5649643332b31d34552891655d1e33f187b2630a0a39b5622"
+    },
+    {
+      "file": "cam1a.js",
+      "url": "https://raw.githubusercontent.com/Warzone2100/warzone2100/master/data/base/script/campaign/cam1a.js",
+      "sha256": "ab609d08d24e4325c57f13576a522bc97fa3f733f789f470982d4669a538a6f7"
+    }
+  ]
+}

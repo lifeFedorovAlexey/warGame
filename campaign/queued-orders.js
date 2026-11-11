@@ -4,7 +4,7 @@ import {canDemolish} from './building-demolition.js';
 import {pickupTarget,canCollectPickup} from './pickup-orders.js';
 
 const travel=new Set(['move','attack-move','attack']);
-const work=new Set(['build','repair','demolish']);
+const work=new Set(['build','repair','demolish','upgrade-power']);
 
 // Validate at submission without calculating a route from a future position.
 // The ordinary order path uses the same rules when the queued order starts.
@@ -12,6 +12,7 @@ export function orderCandidates(m,ids,action,target){
  if(!travel.has(action)&&!work.has(action)||!target||!Number.isFinite(target.x)||!Number.isFinite(target.y))return m.fail('Недопустимый приказ');
  if(action==='attack'&&(target.owner==='rai'||!m.entity(target.id)||!m.visibleAt(target.x,target.y)))return m.fail('Цель не обнаружена');
  if(action==='build'&&target.clearing)return m.fail('Техника освобождает площадку');
+ if(action==='upgrade-power'&&(target.kind!=='generator'||!target.completed||target.powerModule||!m.state.research['power-module']))return m.fail('АЭС не готова к установке энергомодуля');
  if(action==='demolish'&&!canDemolish(m,target))return m.fail('Выберите своё готовое здание');
  if(action==='repair'&&!repairableBuilding(m,target))return m.fail('Строители ремонтируют только готовые постройки');
  if(work.has(action)&&(target.owner!=='rai'||!m.entity(target.id)))return m.fail('Нужна своя техника или постройка');
@@ -52,7 +53,7 @@ function targetFor(m,head){
  }
  if(!head.target.id)return head.target;
  const target=m.entity(head.target.id);if(!target)return null;
- if(head.action==='build'&&target.completed||head.action==='repair'&&target.hp>=target.maxHp)return null;
+ if(head.action==='build'&&target.completed||head.action==='repair'&&target.hp>=target.maxHp||head.action==='upgrade-power'&&target.powerModule)return null;
  return target;
 }
 

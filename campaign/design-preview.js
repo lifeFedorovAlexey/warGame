@@ -101,7 +101,7 @@ export class DesignPreview {
     this.model = root;
     this.parts = [chassis, body, upper].map(node => ({node, base:node.position.clone()}));
     root.traverse(node => {
-      if (node.isMesh) node.castShadow = node.receiveShadow = true;
+      if (node.isMesh) { node.castShadow = true; node.receiveShadow = !node.material.name?.startsWith('radar_'); }
     });
     this.scene.add(root);
     root.updateMatrixWorld(true);
