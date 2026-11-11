@@ -273,9 +273,20 @@ export class PredictiveTraffic extends TrafficCoordinator{
   this.stats.maxPlanningOverrunMs=Math.max(this.stats.maxPlanningOverrunMs??0,elapsed-budget);
   this.planningDeadline=-Infinity;
  }
- advanceRoutes(mission,deadline,maneuver){
+ advanceFixedPlanning(mission){
+  // A bounded amount of the same searches, once at a simulation boundary.
+  // -Infinity makes their existing cooperative checkpoints yield by work,
+  // not by elapsed CPU time. No collision or route admission is bypassed.
+  this.publishPlanning(mission,Infinity);
+  this.advanceRoutes(mission,Infinity,false,256);
+  this.planner.advance(mission,1,512);
+  this.advanceRoutes(mission,Infinity,true,256);
+  this.publishPlanning(mission,Infinity);
+ }
+ advanceRoutes(mission,deadline,maneuver,steps=Infinity){
+  const fixed=Number.isFinite(steps);
   const jobKey=maneuver?'maneuverJob':'routeJob',navKey=maneuver?'maneuverNav':'routeNav';
-  while(performance.now()<deadline){
+  while(steps-->0&&performance.now()<deadline){
    let job=this[jobKey];
    if(job&&!this.validRoute(mission,job)){
     this.traceRoute(mission,job,'cancelled',{reason:this.routeInvalidation(mission,job),stage:'search'});
@@ -300,7 +311,7 @@ export class PredictiveTraffic extends TrafficCoordinator{
     this[jobKey]=job;this.stats.routeSearches++;this.traceRoute(mission,job,'started');
    }
    if(performance.now()>=deadline)break;
-   this[navKey].workDeadline=deadline;
+   this[navKey].workDeadline=fixed?-Infinity:deadline;
    const nextAt=performance.now(),step=job.iterator.next(),nextMs=performance.now()-nextAt;
    job.searchMs=(job.searchMs??0)+nextMs;job.maxNextMs=Math.max(job.maxNextMs??0,nextMs);
    // A generator yields between small geometry checks as well as at its
@@ -449,7 +460,7 @@ export class PredictiveTraffic extends TrafficCoordinator{
   }
   candidates.sort((a,b)=>b.saved-a.saved);
   for(const candidate of candidates.slice(0,2)){
-   if(performance.now()>=(mission.nav.workDeadline??Infinity))return;
+   if(!mission.state.m02&&performance.now()>=(mission.nav.workDeadline??Infinity))return;
    const {index,point,heading,saved}=candidate,end={...point,heading,kind:unit.kind};
    if(!mission.nav.lineClear(unit,point,false,true)||!mission.vehicleMotionClear(unit,unit,end)
     ||maneuverAdmissionBlocker(mission,unit,unit,end,mission.config.simulationStep))continue;

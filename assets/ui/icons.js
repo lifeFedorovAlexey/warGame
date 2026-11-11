@@ -14,6 +14,7 @@ const sheets = [
 const atlas = new Map(sheets.flatMap(sheet => sheet.names.map((name, index) => [name, {...sheet, index}])));
 export const iconGroups = sheets.filter(sheet => sheet.file.endsWith('-v2')).map(({file,names}) => ({file, names:[...names]}));
 const aliases = {bukhanka:'light-body', raider:'scout', C01:'wheels', B01:'body', U01:'machinegun', U25:'projector', 'mission-flamer':'flamer', flamethrower:'flamer', 'mg-ammo-1':'ammo-upgrade', focus:'waypoint'};
+Object.assign(aliases,{U02:'twin-gun',U21:'sensor','twin-machinegun':'twin-gun','flamer-upgrade':'damage-upgrade','power-module':'power-upgrade'});
 const root = new URL('./', import.meta.url);
 
 export function iconElement(name) {

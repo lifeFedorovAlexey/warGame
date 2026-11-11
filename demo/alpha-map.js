@@ -5,6 +5,7 @@ import {shapeMesaRims} from './mesa-shaping.js';
 import {createTerrainSurround} from './terrain-surround.js';
 import {refineRoadHeightfield} from './road-heightfield.js';
 import {createTerrainGeometry} from './terrain-geometry.js';
+import {installM02Terrain} from '../campaign/mission02-terrain.js';
 
 export async function createAlphaMap(T,{lightweightOverview=false}={}){
  const base='../assets/maps/alpha/';
@@ -14,6 +15,7 @@ export async function createAlphaMap(T,{lightweightOverview=false}={}){
   fetch(base+'roads.json').then(r=>{if(!r.ok)throw new Error('Roads '+r.status);return r.json();})
  ]);
  const baseField=createHeightfield(heightData),mesaShaping=shapeMesaRims(baseField),field=refineRoadHeightfield(baseField),grading=applyRoadGrades(field,roads),route=createMapRoute(field,routeData),root=new T.Group();root.name='Alpha_4064m_heightfield';
+ installM02Terrain(field);
  const materials=await createTerrainMaterials(T,field.extent,{lightweightOverview});
  field.roadBlendAt=materials.roadBlendAt;
  const meshSize=field.renderSize,terrainMesh=createTerrainGeometry(T,field,materials.overview),meshes=terrainMesh.meshes;for(const mesh of meshes)root.add(mesh);

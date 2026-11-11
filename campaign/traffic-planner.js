@@ -236,12 +236,12 @@ export class TrafficPlanner{
   job.timing.snapshotMs+=elapsed;
   this.stats.maxSnapshotMs=Math.max(this.stats.maxSnapshotMs,elapsed);
  }
- advance(mission,budgetMs=2){
+ advance(mission,budgetMs=2,steps=Infinity){
   // Zero budget is a strict no-op, including snapshot creation and counters.
   if(!(budgetMs>0))return;
   this.prunePassThrough(mission);
-  const start=performance.now(),deadline=start+Math.min(2,budgetMs);
-  while(performance.now()<deadline){
+  const start=performance.now(),fixed=Number.isFinite(steps),deadline=fixed?Infinity:start+Math.min(2,budgetMs);
+  while(steps-->0&&performance.now()<deadline){
    if(this.active&&!contextValid(mission,this.active)){
     this.discard(mission,this.active,'participant-or-topology-changed',changedParticipant(mission,this.active));this.active=null;
    }
@@ -276,7 +276,7 @@ export class TrafficPlanner{
     this.active=next;next.slices++;
    }
    if(performance.now()>=deadline)break;
-   const job=this.active;job.shadow.nav.workDeadline=deadline;
+   const job=this.active;job.shadow.nav.workDeadline=fixed?-Infinity:deadline;
    const stage=job.diagnostics.stage??'cycle',at=performance.now(),step=job.iterator.next(),elapsed=performance.now()-at;
    job.timing.searchMs+=elapsed;job.timing.maxNextMs=Math.max(job.timing.maxNextMs,elapsed);
    if(elapsed>2&&(elapsed>(job.loggedNextMs??0)+.5||at-(job.lastSlowAt??-Infinity)>1000)){
@@ -331,9 +331,10 @@ export class TrafficPlanner{
       job.validation=passageStillClear(mission,job,()=>job.validationDeadline);
      }
      // A long revalidation must not monopolise the ready queue either.
-     job.validationDeadline=Math.min(deadline,performance.now()+.5);
-     let checked;
-     while(performance.now()<job.validationDeadline){
+     const fixed=!!mission.state.m02;
+     job.validationDeadline=fixed?-Infinity:Math.min(deadline,performance.now()+.5);
+     let checked,steps=64;
+     while(fixed?steps-->0:performance.now()<job.validationDeadline){
       const nextAt=performance.now();checked=job.validation.next();const elapsed=performance.now()-nextAt;
       this.stats.maxRevalidationNextMs=Math.max(this.stats.maxRevalidationNextMs,elapsed);
       this.stats.maxNextMs=Math.max(this.stats.maxNextMs,elapsed);if(checked.done)break;

@@ -5,19 +5,26 @@ import {rasterizeLocalRoads} from './local-road-mask-raster.js';
 export function createLocalRoadMask(T){
   const empty=new T.DataTexture(new Uint8Array(4),1,1,T.RGBAFormat);empty.needsUpdate=true;
   const bounds={value:new T.Vector4(0,0,1,1)},texture={value:empty},enabled={value:0};
-  const size=1024;
+  const size=2048;
   let pixels,area,staticMask;
   function setRoads(paths,staticCount=0){
-    const segments=[];
-    for(const [index,road] of paths.entries())for(let i=1;i<road.points.length;i++){
-      const a=road.points[i-1],b=road.points[i];
-      segments.push({a,b,ra:(a.width??road.width)/2,rb:(b.width??road.width)/2,fixed:index<staticCount});
+    const segments=[],replacements=[];
+    for(const [index,road] of paths.entries()){
+      const fixed=index<staticCount;
+      const caps=[];
+      if(road.points.length>1)for(const [a,b,cap] of [[road.points[0],road.points[1],road.startCap??road.cap],[road.points.at(-1),road.points.at(-2),road.endCap??road.cap]]){
+        if(cap!=='butt')continue;
+        const length=Math.hypot(b.x-a.x,b.y-a.y);if(length)caps.push({x:a.x,y:a.y,dx:(b.x-a.x)/length,dy:(b.y-a.y)/length,radius:(a.width??road.width)/2+24});
+      }
+      for(let i=1;i<road.points.length;i++){
+        const a=road.points[i-1],b=road.points[i];segments.push({a,b,ra:(a.width??road.width)/2,rb:(b.width??road.width)/2,caps,cutSourcePaint:road.cutSourcePaint,fixed});
+      }
+      if(road.replaceRect)replacements.push({rect:road.replaceRect,feather:18,fixed});
+      for(const replacement of road.replaceAreas??[])replacements.push({...replacement,fixed});
     }
-    const replaceIndex=paths.findIndex(road=>road.replaceRect);
-    const replacements=replaceIndex<0?[]:[{rect:paths[replaceIndex].replaceRect,fixed:replaceIndex<staticCount}];
     if(!segments.length){enabled.value=0;return;}
-    const padding=32,minX=Math.min(...segments.flatMap(s=>[s.a.x,s.b.x]))-padding,minY=Math.min(...segments.flatMap(s=>[s.a.y,s.b.y]))-padding;
-    const maxX=Math.max(...segments.flatMap(s=>[s.a.x,s.b.x]))+padding,maxY=Math.max(...segments.flatMap(s=>[s.a.y,s.b.y]))+padding;
+    const padding=32,minX=Math.min(...segments.flatMap(s=>[s.a.x,s.b.x]),...replacements.map(p=>p.rect[0]))-padding,minY=Math.min(...segments.flatMap(s=>[s.a.y,s.b.y]),...replacements.map(p=>p.rect[1]))-padding;
+    const maxX=Math.max(...segments.flatMap(s=>[s.a.x,s.b.x]),...replacements.map(p=>p.rect[2]))+padding,maxY=Math.max(...segments.flatMap(s=>[s.a.y,s.b.y]),...replacements.map(p=>p.rect[3]))+padding;
     area={x:minX,y:minY,w:maxX-minX,h:maxY-minY};
     pixels??=new Uint8Array(size*size*4);
     const xs=Float64Array.from({length:size},(_,i)=>minX+(i+.5)/size*area.w);

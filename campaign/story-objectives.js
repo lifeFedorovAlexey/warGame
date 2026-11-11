@@ -3,6 +3,7 @@ import {constructionUnlocked,researchUnlocked,defenseReady} from './story-constr
 // Orders appear with the spoken assignment; actual construction never waits for radio.
 export function storyObjectives(mission,{radioEnabled=true}={}) {
   const s=mission.state,d=s.radioStory;
+  if(s.m02)return mission.objectives();
   if(s.status!=='running')return [];
   const told=id=>d?.announced?.[id]||['done','skipped'].includes(d?.scenes[id]?.status);
   const buildings=s.buildings.filter(e=>e.owner==='rai'&&e.hp>0);

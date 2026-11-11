@@ -1,0 +1,47 @@
+{
+  "source": "Warzone2100/warzone2100",
+  "license": "https://github.com/Warzone2100/warzone2100/blob/master/COPYING",
+  "retrieved": "2026-11-10",
+  "files": [
+    {
+      "file": "cam1b.gam",
+      "url": "https://raw.githubusercontent.com/Warzone2100/warzone2100/master/data/base/wrf/cam1/cam1b.gam",
+      "sha256": "224d5dea39a895e0afc2e5166ffc71362dbbc710f84c9a073daedbb1669d5193"
+    },
+    {
+      "file": "cam1a.gam",
+      "url": "https://raw.githubusercontent.com/Warzone2100/warzone2100/master/data/base/wrf/cam1/cam1a.gam",
+      "sha256": "61efd2ff836d8d2f5b351eb085ef6d0d258c538198c4963ae5d6c7f284a2195c"
+    },
+    {
+      "file": "cam1b-struct.bjo",
+      "url": "https://raw.githubusercontent.com/Warzone2100/warzone2100/master/data/base/wrf/cam1/cam1b/struct.bjo",
+      "sha256": "2c36d776bc484cbe3e536eb247103cd30ea5bc8e88e14a3f6f4476c58d0c4446"
+    },
+    {
+      "file": "cam1b-feat.bjo",
+      "url": "https://raw.githubusercontent.com/Warzone2100/warzone2100/master/data/base/wrf/cam1/cam1b/feat.bjo",
+      "sha256": "010252c1cf7abc745d2fd5972887d5063d70a5baea5414790e818486fd770a5e"
+    },
+    {
+      "file": "cam1b-labels.json",
+      "url": "https://raw.githubusercontent.com/Warzone2100/warzone2100/master/data/base/wrf/cam1/cam1b/labels.json",
+      "sha256": "b0219dfaaba3cb3ee7c114a71a2bde8b365f2e2e8925ebb84e3ece9c10aa0403"
+    },
+    {
+      "file": "cam1a-game.map",
+      "url": "https://raw.githubusercontent.com/Warzone2100/warzone2100/master/data/base/wrf/cam1/cam1a/game.map",
+      "sha256": "92f9167c730161a0b3f66c5da7c4a7016b6ace3da493d499b1f38ff91798774a"
+    },
+    {
+      "file": "cam1a-feat.bjo",
+      "url": "https://raw.githubusercontent.com/Warzone2100/warzone2100/master/data/base/wrf/cam1/cam1a/feat.bjo",
+      "sha256": "a7dc706d49a2a890be28554957c1a7aca8f38927e1fb0aaec1b495c33663b6a9"
+    },
+    {
+      "file": "cam1a-struct.bjo",
+      "url": "https://raw.githubusercontent.com/Warzone2100/warzone2100/master/data/base/wrf/cam1/cam1a/struct.bjo",
+      "sha256": "5d4f9729f3151ddc491a3909eff0e0d50e3e92db338ad3dba0fca0970784e095"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+import {createRequire} from 'node:module';
+import {legacyVictory} from './check-m01-original-layout.mjs';
+const require=createRequire(import.meta.url),{chromium}=require('C:/Users/Алексей/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const folder='docs/campaign/alpha/m01-original-layout';fs.mkdirSync(folder,{recursive:true});
+const legacy=legacyVictory().m;legacy.state.camps[3].cleared=false;legacy.enterM02();legacy.state.camps[3].cleared=true;delete legacy.state.m02.continuityVersion;const brokenSave=legacy.save();
+const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true,args:['--enable-unsafe-swiftshader','--use-angle=swiftshader']});
+try{
+ const page=await browser.newPage({viewport:{width:1440,height:900},deviceScaleFactor:1}),errors=[];
+ page.on('pageerror',e=>{errors.push(e.stack??e.message);console.error(e);});page.on('console',m=>{if(m.type()==='error')console.error(m.text());});page.on('response',r=>{if(r.status()>=400)errors.push(r.status()+' '+r.url());});
+ await page.addInitScript(()=>{localStorage.setItem('warGame.fieldRadio','off');localStorage.setItem('warGame.fieldSound','off');});
+ await page.goto('http://127.0.0.1:8773/campaign/');await page.waitForFunction(()=>window.campaign?.ready,null,{timeout:90000});
+ await page.locator('#begin').click();await page.waitForFunction(()=>campaign.state.dreamPlaying||campaign.state.openingPlaying);if(await page.evaluate(()=>campaign.state.dreamPlaying))await page.locator('[data-dream=skip]').click();await page.evaluate(()=>campaign.advance(40));await page.waitForFunction(()=>campaign.state.active,null,{timeout:60000});await page.locator('#pause').click();
+ await page.evaluate(()=>{campaign.radio.setEnabled(false);campaign.select([]);campaign.world.fixedRenderScale=1;campaign.world.renderer.setPixelRatio(1);});
+ assert(await page.evaluate(()=>{const m=campaign.mission;return !m.state.m02&&m.explored.filter(Boolean).length<128*128*.08&&m.state.bounds[3]===63;}));
+ await page.screenshot({path:folder+'/m01-start-fog.png'});
+ const view=async(grid,distance,file)=>{
+  await page.evaluate(({grid,distance})=>{const m=campaign.mission;m.explored.fill(255);m.visible.fill(255);m.visionSources=[{x:grid[0],y:grid[1],radius:90}];m.fogRevision++;campaign.world.centre(m.field.gridToWorld(grid),distance);},{grid,distance});
+  await page.waitForTimeout(450);await page.screenshot({path:folder+'/'+file+'.png'});
+ };
+ const camps=await page.evaluate(()=>campaign.mission.state.camps.map(c=>({id:c.id,grid:c.grid})));
+ for(const [i,c] of camps.entries())await view(c.grid,i===2?470:440,'m01-base-'+(i+1));
+ await view([25,31],1900,'m01-overview');
+ for(const [label,width,height] of [['landscape',844,390],['landscape-small',667,375]]){await page.setViewportSize({width,height});await view([19,31.5],430,'m01-hq-'+label);}assert(!await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth));
+ await page.setViewportSize({width:1440,height:900});
+ await page.evaluate(()=>{const m=campaign.mission;for(const e of [...m.state.units,...m.state.buildings])if(e.owner==='scavs')m.damage(e,1e6,null);m.state.camps.forEach(c=>c.cleared=true);});
+ await view([19,31.5],440,'m01-hq-cleared');
+ await page.evaluate(()=>campaign.mission.state.status='victory');await page.waitForFunction(()=>!document.querySelector('#result').hidden);
+ await page.locator('#result-continue').click();await page.waitForFunction(()=>campaign.mission.state.m02?.initialized);
+ assert(await page.locator('#result').isHidden());
+ const transfer=await page.evaluate(()=>({camps:campaign.mission.state.camps.map(c=>({id:c.id,grid:c.grid,cleared:c.cleared})),bases:Object.values(campaign.mission.state.m02.bases).map(b=>({id:b.id,state:b.state,inherited:b.inheritedFrom??null}))}));
+ assert(transfer.camps.every(c=>c.cleared));assert(transfer.bases.every(b=>!b.inherited&&b.state==='defended'));
+ await view([19,31.5],440,'m02-old-hq-stays-cleared');await view([15,71.5],590,'m02-separate-west-factory');
+ await page.evaluate(data=>{campaign.mission.load(data);campaign.radio.dismiss();},brokenSave);
+ assert.equal(await page.evaluate(()=>campaign.mission.state.m02.bases.hill_factory.inheritedFrom),'west-south');
+ await view([13.25,71.75],590,'legacy-m02-restored-plateau');
+ assert.equal(await page.evaluate(()=>campaign.mission.state.units.concat(campaign.mission.state.buildings).filter(e=>e.owner==='scavs'&&e.hp>0&&e.m02Base==='hill_factory').length),0);
+ await page.setViewportSize({width:390,height:844});await view([13.25,71.75],490,'legacy-m02-narrow');
+ assert.deepEqual(errors,[]);fs.writeFileSync(folder+'/browser.json',JSON.stringify({passed:true,camps,transfer,errors,checks:['four original m01 sites','road junctions','wide and narrow','real continue button','m01 destroyed HQ stays destroyed','four separate m02 bases','existing broken save repaired']},null,2));
+ console.log('PASS real game: original m01 layout, wide/narrow, continuation, conquered HQ persists, legacy m02 repair');
+}finally{await browser.close();}

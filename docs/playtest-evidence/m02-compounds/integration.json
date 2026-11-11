@@ -1,0 +1,30 @@
+{
+  "base": "6aa2560",
+  "scope": [
+    "approved m01 square workshop camp",
+    "m02 defended compounds with destructible walls and gates",
+    "connected roads and working aprons",
+    "sandstone ridges and distributed birches",
+    "required mission02 runtime and continuity"
+  ],
+  "passed": [
+    "14 mission02 scenario checks",
+    "1289 complete vehicle road sweeps",
+    "177 destructible m02 perimeter structures",
+    "all four bases covered by overlapping live fire",
+    "actual bus entry/exit at all bases",
+    "square camp and twelve-vehicle staging outside fire",
+    "save migration and wreck cleanup",
+    "m01 original layouts and driven route through all four yards",
+    "actual browser m01-to-m02 Continue button and legacy save repair",
+    "desktop 1440x900 and landscape 844x390 / 667x375, no browser/resource errors",
+    "93 birches / 67 pines, no added decorative collisions"
+  ],
+  "baselineFailure": {
+    "command": "node tools/check-mission.mjs --full",
+    "assertion": "Saved cliff pose receives a bounded exit route",
+    "reproducedOn": "unmodified main 6aa2560",
+    "note": "Historical cliff/two-tower fixtures run against a genuine initial main save; new layouts are checked by dedicated scenario/road/compound tests."
+  },
+  "additionalFix": "Moved m01 HQ staging grid to [18.79,14.57]; first twelve slots have at least 31m margin from tower fire, migrated in current-layout saves."
+}

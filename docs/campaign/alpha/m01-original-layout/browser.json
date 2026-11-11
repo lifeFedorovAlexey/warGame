@@ -1,0 +1,101 @@
+{
+  "passed": true,
+  "camps": [
+    {
+      "id": "nw-pocket",
+      "grid": [
+        29.5,
+        35.5
+      ]
+    },
+    {
+      "id": "nw-west",
+      "grid": [
+        40,
+        16.5
+      ]
+    },
+    {
+      "id": "nw-east",
+      "grid": [
+        14,
+        12.5
+      ]
+    },
+    {
+      "id": "west-south",
+      "grid": [
+        19,
+        31.5
+      ]
+    }
+  ],
+  "transfer": {
+    "camps": [
+      {
+        "id": "nw-pocket",
+        "grid": [
+          29.5,
+          35.5
+        ],
+        "cleared": true
+      },
+      {
+        "id": "nw-west",
+        "grid": [
+          40,
+          16.5
+        ],
+        "cleared": true
+      },
+      {
+        "id": "nw-east",
+        "grid": [
+          14,
+          12.5
+        ],
+        "cleared": true
+      },
+      {
+        "id": "west-south",
+        "grid": [
+          19,
+          31.5
+        ],
+        "cleared": true
+      }
+    ],
+    "bases": [
+      {
+        "id": "m02.base.east_factory",
+        "state": "defended",
+        "inherited": null
+      },
+      {
+        "id": "m02.base.hill_factory",
+        "state": "defended",
+        "inherited": null
+      },
+      {
+        "id": "m02.base.sensor_outpost",
+        "state": "defended",
+        "inherited": null
+      },
+      {
+        "id": "m02.base.energy_hub",
+        "state": "defended",
+        "inherited": null
+      }
+    ]
+  },
+  "errors": [],
+  "checks": [
+    "four original m01 sites",
+    "road junctions",
+    "wide and narrow",
+    "real continue button",
+    "m01 destroyed HQ stays destroyed",
+    "four separate m02 bases",
+    "existing broken save repaired"
+  ]
+}

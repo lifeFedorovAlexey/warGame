@@ -1,6 +1,10 @@
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
-import {Mission} from '../campaign/mission.js';
+import {Mission as CampaignMission} from '../campaign/mission.js';
+// These historical cliff, southern-sector and two-tower fixtures exercise
+// compatibility with the pre-redesign save. New layouts have separate tests.
+const legacyInitial=JSON.parse(fs.readFileSync(new URL('./fixtures/mission01-legacy-initial.json',import.meta.url),'utf8'));
+class Mission extends CampaignMission{constructor(config,field){super(config,field);this.load(structuredClone(legacyInitial));}}
 import {raidApproachSignal, southernApproachSignal, warehouseAdvanceHint, waterTower, waterTowerSignal} from '../campaign/threat-guidance.js';
 import {vehicleClearance} from '../campaign/vehicle-motion.js';
 import {createHeightfield} from '../demo/map-route.js';

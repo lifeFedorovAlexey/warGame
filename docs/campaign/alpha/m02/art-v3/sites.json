@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "roads": 8,
+  "wholeVehicleSegments": 1289,
+  "fortifications": 177,
+  "fenceHp": 320,
+  "originalStructures": 39,
+  "moduleSize": [
+    0.8999999761581421,
+    0.9172096415171621,
+    1.677152295748348
+  ],
+  "rotationPeriod": 12,
+  "freezeOnDestruction": true,
+  "courts": {
+    "changedVertices": 4326,
+    "maxChangeMetres": 14,
+    "maxAllowedChangeMetres": 14
+  },
+  "roadsGrading": {
+    "changedVertices": 3925,
+    "maxChangeMetres": 12,
+    "maxAllowedChangeMetres": 12,
+    "padVertices": 3359
+  }
+}
