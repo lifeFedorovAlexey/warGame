@@ -1,0 +1,680 @@
+{
+  "errors": [],
+  "scenarios": [
+    {
+      "site": "nw-east",
+      "part": "tank",
+      "initial": {
+        "hp": 1000,
+        "parts": [
+          {
+            "id": 0,
+            "name": "structure"
+          },
+          {
+            "id": 9,
+            "name": "weapon"
+          },
+          {
+            "id": 16,
+            "name": "leg_lower_-2.2_-2.2"
+          },
+          {
+            "id": 17,
+            "name": "leg_upper_-2.2_-2.2"
+          },
+          {
+            "id": 18,
+            "name": "brace_-2.2_-2.2"
+          },
+          {
+            "id": 19,
+            "name": "leg_lower_-2.2_2.2"
+          },
+          {
+            "id": 20,
+            "name": "leg_upper_-2.2_2.2"
+          },
+          {
+            "id": 21,
+            "name": "brace_-2.2_2.2"
+          },
+          {
+            "id": 22,
+            "name": "leg_lower_2.2_-2.2"
+          },
+          {
+            "id": 23,
+            "name": "leg_upper_2.2_-2.2"
+          },
+          {
+            "id": 24,
+            "name": "brace_2.2_-2.2"
+          },
+          {
+            "id": 25,
+            "name": "leg_lower_2.2_2.2"
+          },
+          {
+            "id": 26,
+            "name": "leg_upper_2.2_2.2"
+          },
+          {
+            "id": 27,
+            "name": "brace_2.2_2.2"
+          },
+          {
+            "id": 28,
+            "name": "platform"
+          },
+          {
+            "id": 29,
+            "name": "ladder_0"
+          },
+          {
+            "id": 30,
+            "name": "ladder_1"
+          },
+          {
+            "id": 31,
+            "name": "tank_base"
+          },
+          {
+            "id": 32,
+            "name": "tank"
+          },
+          {
+            "id": 33,
+            "name": "tank_roof"
+          },
+          {
+            "id": 34,
+            "name": "water_pipe"
+          },
+          {
+            "id": 35,
+            "name": "weapon_mount"
+          }
+        ],
+        "part": "tank"
+      },
+      "hit": {
+        "hit": {
+          "entityId": "b181",
+          "partId": 32,
+          "point": [
+            0.2716666658719192,
+            -0.6238738298416139,
+            9.680000305175781
+          ],
+          "worldPoint": [
+            -1476.7775000035763,
+            367.19256776571274,
+            44.19794920086861
+          ],
+          "normal": [
+            0,
+            0,
+            1
+          ],
+          "type": "shell",
+          "power": 110,
+          "hits": 1
+        },
+        "hp": 890,
+        "parts": []
+      },
+      "shot": {
+        "fired": true,
+        "before": 320,
+        "after": 308,
+        "weaponDetached": false
+      },
+      "destroyed": {
+        "hp": 0,
+        "remaining": []
+      }
+    },
+    {
+      "site": "nw-east",
+      "part": "leg_lower_-2.2_-2.2",
+      "initial": {
+        "hp": 1000,
+        "parts": [
+          {
+            "id": 0,
+            "name": "structure"
+          },
+          {
+            "id": 9,
+            "name": "weapon"
+          },
+          {
+            "id": 16,
+            "name": "leg_lower_-2.2_-2.2"
+          },
+          {
+            "id": 17,
+            "name": "leg_upper_-2.2_-2.2"
+          },
+          {
+            "id": 18,
+            "name": "brace_-2.2_-2.2"
+          },
+          {
+            "id": 19,
+            "name": "leg_lower_-2.2_2.2"
+          },
+          {
+            "id": 20,
+            "name": "leg_upper_-2.2_2.2"
+          },
+          {
+            "id": 21,
+            "name": "brace_-2.2_2.2"
+          },
+          {
+            "id": 22,
+            "name": "leg_lower_2.2_-2.2"
+          },
+          {
+            "id": 23,
+            "name": "leg_upper_2.2_-2.2"
+          },
+          {
+            "id": 24,
+            "name": "brace_2.2_-2.2"
+          },
+          {
+            "id": 25,
+            "name": "leg_lower_2.2_2.2"
+          },
+          {
+            "id": 26,
+            "name": "leg_upper_2.2_2.2"
+          },
+          {
+            "id": 27,
+            "name": "brace_2.2_2.2"
+          },
+          {
+            "id": 28,
+            "name": "platform"
+          },
+          {
+            "id": 29,
+            "name": "ladder_0"
+          },
+          {
+            "id": 30,
+            "name": "ladder_1"
+          },
+          {
+            "id": 31,
+            "name": "tank_base"
+          },
+          {
+            "id": 32,
+            "name": "tank"
+          },
+          {
+            "id": 33,
+            "name": "tank_roof"
+          },
+          {
+            "id": 34,
+            "name": "water_pipe"
+          },
+          {
+            "id": 35,
+            "name": "weapon_mount"
+          }
+        ],
+        "part": "leg_lower_-2.2_-2.2"
+      },
+      "hit": {
+        "hit": {
+          "entityId": "b186",
+          "partId": 16,
+          "point": [
+            -2.179068962732951,
+            -2.025735616683958,
+            1.0313565731048528
+          ],
+          "worldPoint": [
+            -1487.8058103322983,
+            360.8841897249222,
+            5.279052406549429
+          ],
+          "normal": [
+            -0.9965509641276503,
+            0.0034493210852589084,
+            0.08291126630501666
+          ],
+          "type": "shell",
+          "power": 110,
+          "hits": 1
+        },
+        "hp": 890,
+        "parts": []
+      },
+      "shot": {
+        "fired": true,
+        "before": 320,
+        "after": 308,
+        "weaponDetached": false
+      },
+      "destroyed": {
+        "hp": 0,
+        "remaining": []
+      }
+    },
+    {
+      "site": "nw-east",
+      "part": "weapon",
+      "initial": {
+        "hp": 1000,
+        "parts": [
+          {
+            "id": 0,
+            "name": "structure"
+          },
+          {
+            "id": 9,
+            "name": "weapon"
+          },
+          {
+            "id": 16,
+            "name": "leg_lower_-2.2_-2.2"
+          },
+          {
+            "id": 17,
+            "name": "leg_upper_-2.2_-2.2"
+          },
+          {
+            "id": 18,
+            "name": "brace_-2.2_-2.2"
+          },
+          {
+            "id": 19,
+            "name": "leg_lower_-2.2_2.2"
+          },
+          {
+            "id": 20,
+            "name": "leg_upper_-2.2_2.2"
+          },
+          {
+            "id": 21,
+            "name": "brace_-2.2_2.2"
+          },
+          {
+            "id": 22,
+            "name": "leg_lower_2.2_-2.2"
+          },
+          {
+            "id": 23,
+            "name": "leg_upper_2.2_-2.2"
+          },
+          {
+            "id": 24,
+            "name": "brace_2.2_-2.2"
+          },
+          {
+            "id": 25,
+            "name": "leg_lower_2.2_2.2"
+          },
+          {
+            "id": 26,
+            "name": "leg_upper_2.2_2.2"
+          },
+          {
+            "id": 27,
+            "name": "brace_2.2_2.2"
+          },
+          {
+            "id": 28,
+            "name": "platform"
+          },
+          {
+            "id": 29,
+            "name": "ladder_0"
+          },
+          {
+            "id": 30,
+            "name": "ladder_1"
+          },
+          {
+            "id": 31,
+            "name": "tank_base"
+          },
+          {
+            "id": 32,
+            "name": "tank"
+          },
+          {
+            "id": 33,
+            "name": "tank_roof"
+          },
+          {
+            "id": 34,
+            "name": "water_pipe"
+          },
+          {
+            "id": 35,
+            "name": "weapon_mount"
+          }
+        ],
+        "part": "weapon"
+      },
+      "hit": {
+        "hit": {
+          "entityId": "b191",
+          "partId": 9,
+          "point": [
+            -0.06999999781453427,
+            -1.4099999666213991,
+            13.3100004196167
+          ],
+          "worldPoint": [
+            -1478.3149999901655,
+            363.6550001502037,
+            60.53294971585274
+          ],
+          "normal": [
+            0,
+            0,
+            1
+          ],
+          "type": "shell",
+          "power": 300,
+          "hits": 1
+        },
+        "hp": 700,
+        "parts": []
+      },
+      "shot": {
+        "fired": true,
+        "before": 320,
+        "after": 308,
+        "weaponDetached": false
+      },
+      "destroyed": {
+        "hp": 0,
+        "remaining": []
+      }
+    },
+    {
+      "site": "nw-pocket",
+      "part": "platform",
+      "initial": {
+        "hp": 1000,
+        "parts": [
+          {
+            "id": 0,
+            "name": "structure"
+          },
+          {
+            "id": 9,
+            "name": "weapon"
+          },
+          {
+            "id": 16,
+            "name": "leg_lower_-2.2_-2.2"
+          },
+          {
+            "id": 17,
+            "name": "leg_upper_-2.2_-2.2"
+          },
+          {
+            "id": 18,
+            "name": "brace_-2.2_-2.2"
+          },
+          {
+            "id": 19,
+            "name": "leg_lower_-2.2_2.2"
+          },
+          {
+            "id": 20,
+            "name": "leg_upper_-2.2_2.2"
+          },
+          {
+            "id": 21,
+            "name": "brace_-2.2_2.2"
+          },
+          {
+            "id": 22,
+            "name": "leg_lower_2.2_-2.2"
+          },
+          {
+            "id": 23,
+            "name": "leg_upper_2.2_-2.2"
+          },
+          {
+            "id": 24,
+            "name": "brace_2.2_-2.2"
+          },
+          {
+            "id": 25,
+            "name": "leg_lower_2.2_2.2"
+          },
+          {
+            "id": 26,
+            "name": "leg_upper_2.2_2.2"
+          },
+          {
+            "id": 27,
+            "name": "brace_2.2_2.2"
+          },
+          {
+            "id": 28,
+            "name": "platform"
+          },
+          {
+            "id": 29,
+            "name": "ladder_0"
+          },
+          {
+            "id": 30,
+            "name": "ladder_1"
+          },
+          {
+            "id": 31,
+            "name": "shield"
+          },
+          {
+            "id": 32,
+            "name": "canopy"
+          },
+          {
+            "id": 33,
+            "name": "canopy_posts"
+          }
+        ],
+        "part": "platform"
+      },
+      "hit": {
+        "hit": {
+          "entityId": "b196",
+          "partId": 28,
+          "point": [
+            -0.6250000000000001,
+            0.6250000000000001,
+            9.270000457763672
+          ],
+          "worldPoint": [
+            -1480.8125,
+            372.8125,
+            42.352949887514114
+          ],
+          "normal": [
+            0,
+            0,
+            1
+          ],
+          "type": "shell",
+          "power": 110,
+          "hits": 1
+        },
+        "hp": 890,
+        "parts": []
+      },
+      "shot": {
+        "fired": true,
+        "before": 320,
+        "after": 308,
+        "weaponDetached": false
+      },
+      "destroyed": {
+        "hp": 0,
+        "remaining": []
+      }
+    },
+    {
+      "site": "nw-pocket",
+      "part": "weapon",
+      "initial": {
+        "hp": 1000,
+        "parts": [
+          {
+            "id": 0,
+            "name": "structure"
+          },
+          {
+            "id": 9,
+            "name": "weapon"
+          },
+          {
+            "id": 16,
+            "name": "leg_lower_-2.2_-2.2"
+          },
+          {
+            "id": 17,
+            "name": "leg_upper_-2.2_-2.2"
+          },
+          {
+            "id": 18,
+            "name": "brace_-2.2_-2.2"
+          },
+          {
+            "id": 19,
+            "name": "leg_lower_-2.2_2.2"
+          },
+          {
+            "id": 20,
+            "name": "leg_upper_-2.2_2.2"
+          },
+          {
+            "id": 21,
+            "name": "brace_-2.2_2.2"
+          },
+          {
+            "id": 22,
+            "name": "leg_lower_2.2_-2.2"
+          },
+          {
+            "id": 23,
+            "name": "leg_upper_2.2_-2.2"
+          },
+          {
+            "id": 24,
+            "name": "brace_2.2_-2.2"
+          },
+          {
+            "id": 25,
+            "name": "leg_lower_2.2_2.2"
+          },
+          {
+            "id": 26,
+            "name": "leg_upper_2.2_2.2"
+          },
+          {
+            "id": 27,
+            "name": "brace_2.2_2.2"
+          },
+          {
+            "id": 28,
+            "name": "platform"
+          },
+          {
+            "id": 29,
+            "name": "ladder_0"
+          },
+          {
+            "id": 30,
+            "name": "ladder_1"
+          },
+          {
+            "id": 31,
+            "name": "shield"
+          },
+          {
+            "id": 32,
+            "name": "canopy"
+          },
+          {
+            "id": 33,
+            "name": "canopy_posts"
+          }
+        ],
+        "part": "weapon"
+      },
+      "hit": {
+        "hit": {
+          "entityId": "b201",
+          "partId": 9,
+          "point": [
+            0.06999999781447742,
+            -1.5200000206629345,
+            10.949999809265137
+          ],
+          "worldPoint": [
+            -1477.6850000098348,
+            363.1599999070168,
+            49.912946969270706
+          ],
+          "normal": [
+            0,
+            0,
+            1
+          ],
+          "type": "shell",
+          "power": 300,
+          "hits": 1
+        },
+        "hp": 700,
+        "parts": []
+      },
+      "shot": {
+        "fired": true,
+        "before": 320,
+        "after": 308,
+        "weaponDetached": false
+      },
+      "destroyed": {
+        "hp": 0,
+        "remaining": []
+      }
+    }
+  ],
+  "legacy": {
+    "found": true,
+    "detached": [
+      [
+        "tank",
+        false
+      ],
+      [
+        "tank_roof",
+        false
+      ],
+      [
+        "weapon_mount",
+        false
+      ],
+      [
+        "weapon",
+        false
+      ]
+    ]
+  }
+}

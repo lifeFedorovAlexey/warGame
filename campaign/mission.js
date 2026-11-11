@@ -2589,6 +2589,8 @@ export class Mission{
    if(entity.hp<=0){if(entity.destroyedAt===undefined)legacyWrecks.push(entity);scheduleWreck(this,entity);}
   }
   this.updateUnrevealedCampLayout();migrateScavLayout(this);
+  // Live towers from older saves must not lose their weapon before destruction.
+  for(const building of this.state.buildings)if(building.owner==='scavs'&&building.kind==='mg-tower'&&building.hp>0&&building.damage)this.restoreLiveTowerParts?.(building);
   // Keep existing wells on their authored oil points after the base-yard edit.
   // This is a building relocation; vehicle positions and orders are untouched.
   for(const relocation of this.config.oilFieldRelocations??[]){
