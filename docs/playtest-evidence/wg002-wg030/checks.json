@@ -11,6 +11,7 @@
     "check-wg002-wg030-browser.mjs"
   ],
   "result": "passed",
+  "integration": "Verified again with main 996d7e1: transition waits for Recast preparation, restores controls and preserves restart snapshots. Finale, camera limits, restart checks and the full browser scenario passed.",
   "endingRevision": "Existing play/restart/menu icons centered on the map, with tooltips and accessible names; no permanent text labels, automatic memorial, backdrop or corner block. Browser actions verified: continue, restart M01/M02 with backup and untouched manual save, return to menu, explicit report. Other checks retained from the initial WG-002/WG-030 group.",
   "browser": "Edge, ANGLE D3D11, 1440x900 / 844x390 / 667x375",
   "limitations": "Prepared terminal scenarios, not a full playthrough; browser subtitles advanced for sequence validation; audio disabled."

@@ -127,7 +127,9 @@ try{
   await page.locator('#results-open').click();await page.waitForFunction(()=>!document.querySelector('#result').hidden);
   report.manualReport=true;await page.locator('#result-close').click();await page.keyboard.press('Escape');
   await page.locator('#ending-continue').click();
-  await page.waitForFunction(()=>campaign.mission.state.m02&&campaign.mission.state.status==='running'&&document.querySelector('#result').hidden,null,{timeout:30000});
+  // M02 state appears before its navigation mesh is ready. Wait for the
+  // transition handler to finish before checking restored game controls.
+  await page.waitForFunction(()=>campaign.mission.state.m02&&campaign.mission.state.status==='running'&&!document.querySelector('#ending-continue').disabled&&document.querySelector('#result').hidden,null,{timeout:30000});
   report.nextMission=await page.evaluate(()=>({controls:campaign.world.controls.enabled,ending:document.querySelector('#mission-ending').hidden,commands:getComputedStyle(document.querySelector('#commands')).display}));
   assert(report.nextMission.controls&&report.nextMission.ending&&report.nextMission.commands!=='none');
   // An ordinary M02 radio exchange must retain camera control.
