@@ -13,7 +13,7 @@ import {passageStillOpen,preparePassageEgress} from './passage-egress.js';
 import {vehicleRecipes,starterProjects,matchingRecipe,projectDesignation,designNameKey,projectAssemblyKey,latestVehicleProjects,latestVehicleProject} from './vehicle-designs.js';
 import {vehiclePaint} from './vehicle-paint.js';
 import {chooseProductionFactory,productionCancellation,productionFactories,rebalanceProduction} from './factory-production.js';
-import {isCampPerimeter,updateCampPerimeters} from './camp-demolition.js';
+import {isCampPerimeter,updateCampPerimeters,advanceCampDemolition} from './camp-demolition.js';
 import {availableOil,oilFundingRemaining,oilRefund,beginOilFlow,finishOilFlow,transferOil,fundedWorkTime,repairWithOil} from './oil-economy.js';
 import {angleDelta} from './builder-kinematics.js';
 import {workProjection,projectorHasSight} from './builder-optics.js';
@@ -2428,9 +2428,9 @@ export class Mission{
   for(const unit of this.state.units)if(unit.owner==='rai'&&unit.hp>0&&!insideFactory(unit))stamp(unit,this.unitSpec(unit).vision);for(const b of this.state.buildings)if(b.owner==='rai'&&b.hp>0&&b.completed)stamp(b,this.buildingSpec(b).vision);
  }
  updateMission(){
-  if(this.state.m02){updateM02(this);return;}
   if(this.state.status!=='running')return;
   updateCampPerimeters(this);
+  if(this.state.m02){updateM02(this);return;}
   const s=this.state,captured=s.camps.filter(c=>c.cleared).length;
   for(const camp of s.camps){if(camp.cleared)continue;const hostile=[...s.units,...s.buildings].some(e=>e.campId===camp.id&&e.owner==='scavs'&&e.hp>0&&!isCampPerimeter(e)&&!e.campResource);if(!hostile){camp.cleared=true;captureCampResources(this,camp);this.emit('camp-cleared',{camp:camp.id});if(camp.artifact&&!camp.artifactSpawned){const point=this.nav.nearest(camp.x+35,camp.y,8)??camp;s.artifacts.push({id:this.id('a'),key:camp.artifact,x:point.x,y:point.y,collected:false});camp.artifactSpawned=true;}}}
   for(const artifact of s.artifacts)if(!artifact.collected&&s.units.some(u=>u.owner==='rai'&&u.hp>0&&distance(u,artifact)<24)){artifact.collected=true;if(!s.artifactKeys.includes(artifact.key))s.artifactKeys.push(artifact.key);this.emit('artifact-collected',{key:artifact.key});if(artifact.key!=='mg-tower')this.cinematic('artifact-'+artifact.key);}
@@ -2563,8 +2563,9 @@ export class Mission{
   if(distance(unit,point)<1)unit.path.shift();return true;
  }
  finishPendingStep(){if(this.pendingTick&&!this.unitIndexActive)this.continueTick();}
- tick(dt){this.continueTick();if(this.state.status!=='running')return;if(!this.state.m02)this.trafficCoordinator.advancePlanning(this,2);this.beginTick(dt);this.continueTick();}
+ tick(dt){this.continueTick();if(this.state.status!=='running'){advanceCampDemolition(this,dt);return;}if(!this.state.m02)this.trafficCoordinator.advancePlanning(this,2);this.beginTick(dt);this.continueTick();}
  advance(seconds,{budgetMs=Infinity,rate=1}={}){
+  if(!this.pendingTick&&this.state.status!=='running')return advanceCampDemolition(this,seconds);
   const frameStarted=performance.now();
   if(!this.commandPlanner&&this.state.commandOrders?.some(order=>['queued','planning'].includes(order.status)))this.commandPlanner=new CommandPlanner(this);
   // Command routes, local recovery and publication share one frame allowance.
@@ -2586,7 +2587,7 @@ export class Mission{
   const catchup=budgetMs>0?Math.min(2.5,Math.max(0,backlog-.1)*20):0;
   const deadline=budgeted?frameStarted+budgetMs+catchup:Infinity;
   while(this.pendingTick||this.accumulator+1e-8>=this.config.simulationStep){
-   if(!this.pendingTick){this.accumulator-=this.config.simulationStep;if(this.state.status!=='running')continue;this.beginTick(this.config.simulationStep,budgeted);}
+   if(!this.pendingTick){this.accumulator-=this.config.simulationStep;if(this.state.status!=='running'){advanceCampDemolition(this,this.config.simulationStep);continue;}this.beginTick(this.config.simulationStep,budgeted);}
    if(!this.continueTick(deadline))break;ticks++;
    if(performance.now()>=deadline)break;
   }

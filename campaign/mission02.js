@@ -1,3 +1,4 @@
+import {isCampPerimeter} from './camp-demolition.js';
 import layout from '../assets/campaign/alpha/mission02/layout.js';
 import {M02} from './mission02-config.js';
 import {updateCampaignProductionSteps} from './scav-production.js';
@@ -120,7 +121,10 @@ export function updateM02(mission){
  const entrance=mission.field.gridToWorld(m.version===1?[38,84]:layout.entranceGrid);
  if(allies.some(u=>distance(u,entrance)<300)||m.entranceIds.some(id=>visible(live.get(id))))m.entranceSeen=true;
  for(const [id,base] of Object.entries(m.bases)){
-  const structures=base.structureIds.map(id=>live.get(id)).filter(Boolean),guards=base.garrisonIds.map(id=>live.get(id)).filter(Boolean);
+  // Auxiliary stores/barracks count too, including in older saves.
+  // Capturable resources transfer when the base is neutralized.
+  const ids=new Set(base.structureIds),structures=s.buildings.filter(b=>b.hp>0&&b.owner==='scavs'&&!isCampPerimeter(b)&&!b.campResource
+   &&(ids.has(b.id)||b.m02Base===id||b.campId===base.id)),guards=base.garrisonIds.map(id=>live.get(id)).filter(Boolean);
   base.destroyedIds=[...base.structureIds,...base.garrisonIds].filter(id=>!live.has(id));
   if(structures.some(visible)||guards.some(visible))base.discovered=true;
   const near=allies.some(u=>distance(u,base.gate)<(M02.factories[id]?.radius??350));
