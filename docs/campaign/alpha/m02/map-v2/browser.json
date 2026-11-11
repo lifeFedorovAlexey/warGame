@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "bounds": [
+    0,
+    0,
+    53,
+    127
+  ],
+  "errors": [],
+  "screenshots": 6,
+  "checkpointRestart": true,
+  "legacyBackupRestored": true
+}

@@ -1,0 +1,80 @@
+{
+  "passed": true,
+  "reference": false,
+  "cases": {
+    "parked": {
+      "hash": "7b8ed8892bf6270b61c8e56c5007eb368cf32f074d679cd00bf8e598d1d311d2",
+      "cells": 598
+    },
+    "moving": {
+      "hash": "2b8cb6a4b2a25f87de3a64a8e67e05f04eedf2c2b84da79d6836ea54a0bd173b",
+      "cells": 16
+    },
+    "avoid-moving": {
+      "hash": "bc6a242cc05a799cf1c6e09d92cc7dcdf075c55b0a95ec7f549966337584c6a3",
+      "cells": 102
+    },
+    "ignore-unit": {
+      "hash": "8c259232cfed7d27bfaea7f91465da5212fc3837072051e2cee17ed6d3b90482",
+      "cells": 410
+    },
+    "hidden-enemies": {
+      "hash": "463a308c2ba46ab5a44447afbac7b2ef10df52d82566a162b1e75806761ab044",
+      "cells": 514
+    },
+    "escape-start": {
+      "hash": "715f0e67fb72a1f4ef0b4028b31aa2ce1feb12d5e78aa3aad658d145dde92e3f",
+      "cells": 597
+    },
+    "avoid-point": {
+      "hash": "4c4764e2c54ec095a03580193a0ea04719d2ec83e4569e8b19690e5420028128",
+      "cells": 599
+    },
+    "command-corridor": {
+      "hash": "b4b5bf19f87a4f72bf7924bd51e9d5cab63675750ab8e358b76a26972516203e",
+      "cells": 1
+    }
+  },
+  "timings": [
+    {
+      "name": "parked",
+      "maxSliceMs": 3.476699999999994,
+      "yields": 24
+    },
+    {
+      "name": "moving",
+      "maxSliceMs": 1.907700000000034,
+      "yields": 1
+    },
+    {
+      "name": "avoid-moving",
+      "maxSliceMs": 2.0907999999999447,
+      "yields": 4
+    },
+    {
+      "name": "ignore-unit",
+      "maxSliceMs": 1.8648000000000593,
+      "yields": 8
+    },
+    {
+      "name": "hidden-enemies",
+      "maxSliceMs": 2.0879999999999654,
+      "yields": 9
+    },
+    {
+      "name": "escape-start",
+      "maxSliceMs": 1.803899999999885,
+      "yields": 8
+    },
+    {
+      "name": "avoid-point",
+      "maxSliceMs": 2.8903999999999996,
+      "yields": 11
+    },
+    {
+      "name": "command-corridor",
+      "maxSliceMs": 2.481800000000021,
+      "yields": 1
+    }
+  ]
+}

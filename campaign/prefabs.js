@@ -4,6 +4,8 @@ import {buildIndustrialStructure} from './industrial-buildings.js';
 import {buildDefenseTower} from './defense-tower.js';
 import {buildBaseSign} from './base-sign.js';
 import {createFactoryShutter} from './factory-service-effects.js';
+import {addPowerModuleModel,createRadarAntenna,buildSensorTower} from './mission02-models.js';
+import {vehicleKit} from './field-vehicles.js';
 
 // Replaceable engineering prefabs. Dimensions and anchors belong to gameplay.json.
 export function createBuildingPrefab(T,kind,spec){
@@ -67,6 +69,8 @@ export function createBuildingPrefab(T,kind,spec){
  }else if(kind==='mg-tower'){
   tower=buildDefenseTower(T,[w,d,h],{box,rod,cylinder,mesh,part},{paint,steel,concrete,dark});
   part('weapon',{material:'equipment',detachable:true,strength:210},()=>{});
+ }else if(kind==='scav-sensor'){
+  buildSensorTower(T,{box,rod,cylinder},{paint,steel,concrete,dark});
  }else{
   box([w,d,h*.72],[0,0,h*.38],steel);box([w*1.08,d*1.06,.25],[0,0,h*.77],paint);for(let j=0;j<4;j++)box([w*.12,.12,h*.18],[(j-1.5)*w*.22,-d*.51,h*.5],dark);
  }
@@ -76,6 +80,14 @@ export function createBuildingPrefab(T,kind,spec){
  if(kind==='factory')part('factory_exit_shutter',{material:'metal',detachable:true,strength:110},id=>root.getObjectByName('building_structure').add(createFactoryShutter(T,d,id,damageParts,true)));
  if(oilPump)root.getObjectByName('building_structure').add(oilPump);
  if(tower){tower.traverse(node=>{if(node.isMesh)node.userData.damageParts=damageParts;});root.getObjectByName('building_structure').add(tower);}
+ if(kind==='generator')addPowerModuleModel(T,root.getObjectByName('building_structure'));
+ if(kind==='scav-sensor'){
+  const kit=vehicleKit(T),structure=root.getObjectByName('building_structure'),mount=new T.Group();mount.name='radar_mount';mount.userData.damageDynamic=true;structure.add(mount);
+  kit.cylinder(mount,.25,.8,[0,0,5.62],steel,'Z',16);
+  for(const x of [-.45,.45]){kit.box(mount,[.14,.40,.65],[x,-.1,6.12],paint);kit.cylinder(mount,.18,.2,[x,0,6.35],steel,'X',16);}
+  const dish=createRadarAntenna(T,kit,{olive:paint,steel,dark},1.65);dish.rotation.x=Math.PI/2-.34;dish.position.set(0,-.65,6.35);mount.add(dish);
+  for(const x of [-.45,.45])kit.rod(mount,[x,-.1,6.35],[x,-.48,6.35],.07,paint);
+ }
  const contact=new T.Object3D();contact.name='work_contact';contact.position.set(0,rail.position[1]-rail.depth/2,rail.position[2]);root.add(contact);
  for(const [key,point] of Object.entries({work:spec.workAnchor,exit:spec.exitAnchor}).filter(([,value])=>value)){const anchor=new T.Object3D();anchor.name=key+'_anchor';anchor.position.set(...point);root.add(anchor);}
  return root;

@@ -5,6 +5,7 @@ import {StoryDirector} from '../campaign/story-director.js';
 import {storyObjectives} from '../campaign/story-objectives.js';
 import {constructionUnlocked,researchUnlocked,defenseReady} from '../campaign/story-construction.js';
 import {applyStoryEdits} from '../campaign/story-edits.js';
+import {storyMilestoneNotice} from '../campaign/story-milestones.js';
 const base='assets/campaign/alpha/mission01/';
 const read=file=>JSON.parse(fs.readFileSync(base+file,'utf8'));
 const originalStory=read('story-v2.json'),originalAudio=read('audio-v2.json'),applied=read('reviewed-dialogue.json');
@@ -25,7 +26,8 @@ for(const cue of [...source.dialogue,...source.barks]){
 }
 assert.equal(userCount,112);
 for(const id of ['m01-v3-r24-l001','m01-v3-r24-l002','m01-v3-r24-l003'])assert.equal(audio.clips[id].origin,'user-recording',id);
-assert.equal(source.dialogue.find(c=>c.id==='m01-s02-l008').text,'Значит ВОСПОМИНАНИЯ,  Спи дальше.');
+assert.equal(source.dialogue.find(c=>c.id==='m01-s02-l008').text,'Значит, воспоминания. Спи дальше.');
+assert.equal(source.dialogue.find(c=>c.id==='m01-s05-l004').text,'Учёные будут изучать находки. Получат новые чертежи — смогут другую технику собирать.');
 assert.deepEqual(source.scenes.find(s=>s.id==='p04').cues,['m01-s03-l001','m01-v3-builder-crooked-plinth']);
 assert(!source.dialogue.some(c=>c.id==='m01-s03-l003'),'The disabled sign reply must not play');
 for(const sceneId of ['r21','r22','r23','r24','r24a','r25','r26','r27','r29','r30-alt','r31','r32','r33','r35','r36']){
@@ -80,11 +82,11 @@ function fixture(startImmediately=true){
  f.finish();f.tick();assert.equal(storyObjectives(f.mission)[0].id,'power');
  f.building('derrick');s.oilLinked=1;assert.equal(f.tick().storyScene,'r04');assert(f.unlocked('factory'));
  f.finish();assert.equal(f.tick().storyScene,'r05');f.finish();f.tick();assert.equal(storyObjectives(f.mission)[0].id,'factory');
- f.building('factory');assert.equal(f.tick().storyScene,'r06');assert(f.unlocked('lab'));f.finish();
+ f.building('factory');assert.equal(f.tick().storyScene,'r11','The NII order takes the first free slot after factory completion');assert(f.unlocked('lab'));
+ assert(!s.buildings.some(b=>b.kind==='lab'));assert(!researchUnlocked(s));f.finish();
+ assert.equal(f.tick().storyScene,'r06');f.finish();
  assert.equal(f.tick().storyScene,'r08');f.finish();
  f.director.note({type:'unit-produced',kind:'bukhanka'},f.mission);assert.equal(f.tick().storyScene,'r09');f.finish();
- assert.equal(f.tick(13).storyScene,'r11','The factory prompts the NII order before construction starts, without announcing an upgrade');
- assert(!s.buildings.some(b=>b.kind==='lab'));assert(!researchUnlocked(s));f.finish();
  assert.equal(f.tick(3),null,'The second science exchange waits for the completed NII');
  f.building('lab');assert.equal(f.tick().storyScene,'r13');assert(researchUnlocked(s));f.finish();
  s.units.push({id:'raid',owner:'scavs',hp:100,x:20,y:0});s.flags.raidIds=['raid'];s.flags.contact=true;
@@ -123,7 +125,7 @@ for(const keys of [['mg-tower','flamethrower','mg-ammo-1'],['mg-ammo-1','mg-towe
  const f=fixture();f.finish();
  for(const key of keys){
   f.mission.state.artifactKeys.push(key);f.mission.state.research[key]=true;
-  assert.equal(f.tick().storyScene,{'flamethrower':'r30-alt','mg-ammo-1':'r33','mg-tower':'r39'}[key]);f.finish();
+  for(const id of {'flamethrower':['r26','r27','r29'],'mg-ammo-1':['r33'],'mg-tower':['r39']}[key]){assert.equal(f.tick().storyScene,id);f.finish();}
  }
 }
 {
@@ -132,7 +134,9 @@ for(const keys of [['mg-tower','flamethrower','mg-ammo-1'],['mg-ammo-1','mg-towe
  f.mission.state.research.flamethrower=true;assert.equal(f.tick().storyScene,'r29');f.finish();assert.equal(f.tick(),null);
  const fast=fixture();fast.finish();fast.mission.state.artifactKeys.push('flamethrower');fast.tick();fast.director.completeLine();
  fast.mission.state.research.flamethrower=true;assert.equal(fast.tick().storyScene,'r26');fast.finish();
- assert.equal(fast.tick().storyScene,'r30-alt');assert.equal(fast.director.record('r26').status,'done');
+ assert.equal(fast.tick().storyScene,'r27');fast.finish();assert.equal(fast.tick().storyScene,'r29');assert.equal(fast.director.record('r26').status,'done');
+ const skipped=fixture();skipped.finish();skipped.mission.state.artifactKeys.push('flamethrower');skipped.tick();skipped.director.skip();
+ skipped.mission.state.research.flamethrower=true;assert.equal(skipped.tick().storyScene,'r30-alt','A deliberately skipped setup uses the self-contained report');
 }
 // Each artifact has its own exchange, regardless of collection order. The
 // original upgrade recording follows ammunition research, not van production.
@@ -180,16 +184,43 @@ for(const keys of [['flamethrower','mg-ammo-1'],['mg-ammo-1','flamethrower']]){
 }
 // Discoveries identify the actual camp, without false ordinals on another route.
 {
- const f=fixture();f.finish();f.mission.state.camps[1].cleared=true;
+ const f=fixture();f.finish();f.mission.state.camps[1].cleared=true;f.heard('r32');
  const core=f.building('camp-core',true,'scavs','camp0');assert.equal(f.tick().storyScene,'r24a');f.finish();
  core.hp=0;f.mission.state.camps[0].cleared=true;assert.equal(f.tick().storyScene,'r25');f.finish();
  const tower=f.building('mg-tower',true,'scavs','camp2');assert.equal(f.tick().storyScene,'r36');f.finish();
- tower.hp=0;f.mission.state.artifactKeys.push('mg-tower');assert.equal(f.tick().storyScene,'r38');f.finish();
+ tower.hp=0;assert.notEqual(f.tick()?.storyScene,'r38','A destroyed tower alone does not mean its whole camp is clear');
+ f.mission.state.camps[2].cleared=true;f.mission.state.artifactKeys.push('mg-tower');assert.equal(f.tick().storyScene,'r38');f.finish();
  const hq=f.building('camp-core',true,'scavs','camp3');assert.equal(f.tick().storyScene,'r41');f.finish();
  assert.equal(f.tick().storyScene,'r42');f.director.completeLine();
  f.mission.effects=[{type:'shot',from:'player',targetId:hq.id}];assert.equal(f.tick().storyScene,'r42');assert.equal(f.director.record('r42').cursor,1);f.finish();
  assert.equal(f.tick().storyScene,'r46');f.finish();hq.hp=0;f.mission.effects=[];f.tick(20);
  assert.equal(f.director.record('r42').status,'done');assert(!f.director.data.scenes.r45);
+}
+// The third cleared camp opens radio contact while the army is still on the
+// road. No visibility, research or quiet period is required, in either order.
+for(const last of [2,1,0]){
+ const f=fixture();f.finish();const s=f.mission.state;
+ const hq=f.building('camp-core',true,'scavs','camp3');f.mission.visibleAt=()=>false;
+ for(let i=0;i<3;i++)if(i!==last)s.camps[i].cleared=true;
+ f.heard('r25','r32','r38');
+ assert.equal(f.tick(),null,'Two cleared camps must not start remote negotiations');
+ const report=['r25','r32','r38'][last];delete f.director.data.scenes[report];
+ s.camps[last].cleared=true;s.research['mg-tower']=true;
+ f.mission.effects=[{type:'shot',from:'player',targetId:hq.id}];
+ assert.equal(f.tick().storyScene,report,'Acknowledge the camp that was actually cleared third');f.finish();
+ assert.equal(f.tick(1.999),null);assert.equal(f.tick(.001).storyScene,'r41','Introduce Petrovich in the first radio slot, before research');f.finish();
+ f.mission.state=JSON.parse(JSON.stringify(s));
+ f.tick(0);
+ assert.equal(f.tick().storyScene,'r42','Save/load, an unseen HQ and active combat cannot delay the conversation');
+ const reply=f.director.cue().id;f.director.completeLine();const next=f.tick(0).id;assert.notEqual(next,reply);
+ f.mission.state.buildings.find(b=>b.id===hq.id).hp=0;f.mission.state.camps[3].cleared=true;f.mission.state.status='victory';
+ assert.equal(f.tick().id,next,'A started exchange finishes even if the player quickly destroys the HQ');f.finish();
+ assert.equal(f.director.record('r42').status,'done');
+}
+{
+ const f=fixture();f.finish();f.mission.visibleAt=()=>false;
+ f.building('camp-core',true,'scavs','camp3').hp=0;f.mission.state.camps.forEach(c=>c.cleared=true);
+ f.heard('r25','r32','r38');assert.equal(f.tick().storyScene,'r47','Do not start a new negotiation with an already defeated chief');
 }
 // Saves resume an answer; repeated hits and urgent reports never rewind it.
 {
@@ -276,4 +307,57 @@ for(const enabled of [false,true]){
  assert.equal(f.tick().id,'m01-v3-nuclear-power-ready','Old saves resume the revised report safely');
  assert(!source.dialogue.some(c=>c.text==='Почему электричества нет?'));
 }
-console.log(`PASS: integrated opening, complete exchanges through construction/research, ${userCount} original recordings, uninterrupted combat dialogue, two-second scene gaps, native and old saves, finale`);
+// Approach warning and election exchange do not require waiting until the
+// attackers enter direct vision, and a shot cannot invalidate the conversation.
+{
+ const f=fixture();f.finish();const s=f.mission.state;
+ f.mission.visibleAt=()=>false;s.flags.contact=true;s.flags.raidIds=['raid'];
+ s.units.push({id:'raid',owner:'scavs',hp:100,x:200,y:0});
+ assert.equal(f.tick().storyScene,'r14');f.mission.effects=[{type:'shot',from:'raid'}];f.finish();
+ assert.equal(f.tick().storyScene,'r16','The election setup remains eligible after shooting starts');
+ const texts=[];while(f.director.data.active==='r16'){texts.push(f.director.cue().text);f.director.completeLine();}
+ assert(texts.some(t=>t.includes('выборы')));
+}
+// All camp outcomes are reports, not ambient chatter. Collecting/researching
+// immediately or fighting at another camp must not silently retire them.
+{
+ const f=fixture();f.finish();const s=f.mission.state;
+ f.mission.effects=[{type:'shot',from:'other-camp'}];s.camps[1].cleared=true;
+ assert.equal(f.tick().storyScene,'r32','A cleared warehouse is acknowledged before its sample is collected');
+ assert(f.director.cue().text.includes('Склад наш!'));f.finish();
+ s.artifactKeys.push('mg-ammo-1');s.research['mg-ammo-1']=true;
+ assert.equal(f.tick().storyScene,'r33');assert(f.director.cue().text.includes('трофейные патронные ленты'));f.finish();
+ s.camps[2].cleared=true;s.research['mg-tower']=true;
+ assert.equal(f.tick().storyScene,'r38','Unseen tower destruction still acknowledges its camp');f.finish();
+ assert.equal(f.tick().storyScene,'r39');f.finish();
+ s.camps[3].cleared=true;s.status='victory';
+ assert.equal(f.tick().storyScene,'r47','The last camp report survives simultaneous victory');f.finish();
+}
+{
+ const f=fixture();f.finish();const s=f.mission.state;
+ f.building('factory',false);assert.equal(f.tick().storyScene,'r06');
+ s.camps[0].cleared=true;s.camps[1].cleared=true;s.artifactKeys.push('flamethrower');s.research.flamethrower=true;
+ f.mission.effects=[{type:'shot',from:'other-camp'}];f.finish();
+ const spoken=[];
+ for(const scene of ['r25','r26','r27','r29','r32']){
+  assert.equal(f.tick().storyScene,scene,'Keep the artifact exchange together before unrelated reports');
+  if(scene==='r27'){f.director.completeLine();f.mission.state=JSON.parse(JSON.stringify(s));assert.equal(f.tick(0).id,'m01-s08-l006');}
+  while(f.director.data.active===scene){spoken.push(f.director.cue().text);f.director.completeLine();}
+ }
+ const tapeSetup=spoken.findIndex(t=>t.includes('Всё собрано на синей изоленте'));
+ const tapeQuestion=spoken.findIndex(t=>t==='А зачем синяя?');
+ const tapeReply=spoken.findIndex(t=>t.includes('чтобы жёлтая не разматывалась'));
+ assert(tapeSetup>=0&&tapeQuestion>tapeSetup&&tapeReply>tapeQuestion,'The revised tape joke keeps its setup, question and reply in order');
+}
+{
+ const f=fixture();f.finish();f.building('factory');f.mission.effects=[{type:'shot',from:'raid'}];
+ assert.equal(f.tick().storyScene,'r11','A firefight cannot defer the NII order behind factory chatter');
+ const started=fixture();started.finish();started.building('factory');started.building('lab',false);
+ assert.notEqual(started.tick()?.storyScene,'r11','Do not order construction that the player already started');
+ const s=f.mission.state;s.camps[1].name='Склад';
+ const notice=storyMilestoneNotice([{type:'camp-cleared',camp:'camp1'},{type:'artifact-collected',key:'mg-ammo-1'}],f.mission);
+ assert(notice.includes('зачищен')&&notice.includes('патронов')&&notice.includes('западного склада'));
+ assert(!notice.includes('доставлен в НИИ'),'Collection does not assert delivery to an unbuilt lab');
+ assert(storyMilestoneNotice([{type:'research-complete',key:'flamethrower'}],f.mission).includes('из лагеря у ущелья'));
+}
+console.log(`PASS: integrated opening, prompt NII order, election during combat, camp acknowledgements, coherent artifact chains, ${userCount} original recordings, two-second scene gaps, native and old saves, finale`);

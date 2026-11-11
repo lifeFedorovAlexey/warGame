@@ -47,7 +47,7 @@ export function checkBuildingPlacement(mission,kind,x,y,angle=0,{checkMoney=true
  const {config,field}=mission,spec=config.buildings[kind],rotation=buildingRotation(angle);
  if(!spec)return {ok:false,reason:'Неизвестное здание',x,y,rotation};
  const [halfWidth,halfDepth]=buildingHalfSize(spec,config.worldScale,rotation);
- const structures=mission.state.buildings.filter(b=>b.hp>0||b.damage?.wreck);
+ const structures=[...mission.state.buildings.filter(b=>b.hp>0||b.damage?.wreck),...mission.nav.solids.filter(b=>b.environment)];
  let site={kind,x,y,rotation,halfWidth,halfDepth,blockers:[]};
  if(snap&&!spec.requiresOil)site=snapBuilding(site,structures.filter(b=>mission.exploredAt(b.x,b.y)),buildingGridStep(config));
  if(spec.requiresOil){

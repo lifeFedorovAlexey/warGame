@@ -60,11 +60,11 @@ try{
    else await finishLine();
   }
  };
- const addBuilding=async(kind,dx,dy)=>page.evaluate(({kind,dx,dy})=>{
+ const addBuilding=async(kind,dx,dy,completed=true)=>page.evaluate(({kind,dx,dy,completed})=>{
   const {mission}=campaign,p=kind==='derrick'?mission.field.gridToWorld(mission.config.oilFields[0]):mission.field.gridToWorld(mission.config.startGrid);
-  const e=mission.addStructure(kind,'rai',{x:p.x+dx,y:p.y+dy},{completed:true,progress:1});
+  const e=mission.addStructure(kind,'rai',{x:p.x+dx,y:p.y+dy},{completed,progress:completed?1:.5});
   mission.updateEconomy(0);mission.updateFog();campaign.advance(0);return e.id;
- },{kind,dx,dy});
+ },{kind,dx,dy,completed});
  const unlocked=kind=>page.evaluate(k=>campaign.mission.constructionUnlocked(k),kind);
  if(stageFourOnly){
   // Start a real saved mission at the factory milestone for focused voice QA.
@@ -109,7 +109,7 @@ try{
   if(i===2)await page.waitForFunction(()=>!document.querySelector('#field-tasks').hidden);
  }});
  const opening=await page.evaluate(()=>({lines:campaign.radio.testTransmissions,time:campaign.mission.state.time,opening:campaign.mission.state.radioStory.includeOpening}));
- assert.equal(opening.lines.length,12);assert(opening.time>20);assert(opening.opening);
+ assert.equal(opening.lines.length,11);assert(opening.time>20);assert(opening.opening);
  for(const line of opening.lines)assert(line.finished-line.presented>=(line.duration-.12)*1000,JSON.stringify(line));
  for(let i=1;i<opening.lines.length;i++){
   // Between these scenes the player watches the actual builder finish the wall.
@@ -138,9 +138,11 @@ try{
  await page.waitForFunction(()=>document.querySelector('#field-objectives').textContent.includes('нефтяную вышку'));
  await screenshot('oil-task-desktop');await screenshot('oil-task-narrow',true);await page.setViewportSize({width:1440,height:900});
  await addBuilding('derrick',0,0);await playScene('r04',{natural:true});await playScene('r05',{natural:true,check:async()=>assert.equal(await unlocked('factory'),true),snap:'factory-order-desktop'});
- await addBuilding('factory',-170,120);await playScene('r06',{natural:true,check:async i=>{
+ const factory=await addBuilding('factory',-170,120,false);await playScene('r06',{natural:true,check:async i=>{
   if(i===1){await screenshot('constructor-dialogue-desktop');await screenshot('constructor-dialogue-narrow',true);}
  }});
+ await page.evaluate(id=>{Object.assign(campaign.mission.entity(id),{completed:true,progress:1});campaign.advance(0);},factory);
+ await playScene('r11',{natural:true,check:async i=>{if(i===1){await screenshot('nii-order-desktop');await screenshot('nii-order-narrow',true);}}});
  await playScene('r08',{natural:true,check:async()=>{await screenshot('factory-ready-desktop');await screenshot('factory-ready-narrow',true);}});
  assert.equal(await unlocked('lab'),true);
  await page.evaluate(()=>{const m=campaign.mission;m.state.statistics.produced++;campaign.radio.director.note({type:'unit-produced',kind:'bukhanka'},m);campaign.advance(0);});
@@ -148,19 +150,19 @@ try{
  }
  await page.evaluate(()=>{const d=campaign.radio.director.data;d.clock+=13000;campaign.advance(0);});
  assert.notEqual(await page.evaluate(()=>campaign.radio.entry?.storyScene),'r10','First van production does not announce an upgrade');
+ if(stageFourOnly){
  const stageCue=await page.evaluate(()=>campaign.radio.entry?.id);
  assert.equal(stageCue,'m01-s05-l002','The next order is the NII, while no laboratory exists');
  const stageSave=await page.evaluate(()=>campaign.mission.save());
  await page.evaluate(saved=>{campaign.radio.reset();campaign.mission.load(saved);campaign.advance(0);},stageSave);
  assert.equal(await page.evaluate(()=>campaign.mission.state.radioStory.scenes.r09.status),'done');
  assert.equal(await page.evaluate(()=>campaign.radio.entry?.id),stageCue,'Loading resumes the NII order without replaying completed factory dialogue');
+ }else assert.equal(await page.evaluate(()=>campaign.radio.director.heard('r11')),true,'The NII order already preceded the production report');
  if(!stageThreeOnly){
- await waitCue('m01-s05-l002');
+ if(stageFourOnly)await waitCue('m01-s05-l002');
  assert.equal(await page.evaluate(()=>campaign.mission.state.buildings.some(b=>b.kind==='lab'&&b.hp>0)),false,'The NII construction order starts before a laboratory exists');
  const lab=await addBuilding('lab',40,160);
- const raidDuringSpeech=await page.evaluate(()=>{const m=campaign.mission;m.updateMission();return{started:m.state.flags.raidStarted,scene:campaign.radio.entry.storyScene};});
- assert.deepEqual(raidDuringSpeech,{started:true,scene:'r11'},'The raid starts from the base state while the NII exchange is still running');
- await playScene('r11',{natural:true,check:async i=>{if(i===1){await screenshot('nii-order-desktop');await screenshot('nii-order-narrow',true);}}});
+ if(stageFourOnly)await playScene('r11',{natural:true,check:async i=>{if(i===1){await screenshot('nii-order-desktop');await screenshot('nii-order-narrow',true);}}});
  await playScene('r13',{natural:true,check:async i=>{if(i===2){await screenshot('nii-ready-desktop');await screenshot('nii-ready-narrow',true);}}});
  const science=await page.evaluate(ids=>ids.map(id=>campaign.radio.testTransmissions.findLast(line=>line.id===id)),story.scenes.filter(s=>['r11','r13'].includes(s.id)).flatMap(s=>s.cues));
  for(const line of science)assert(line.finished-line.presented>=(line.duration-.12)*1000,JSON.stringify(line));
@@ -169,7 +171,7 @@ try{
  assert.equal(await page.evaluate(()=>campaign.mission.researchUnlocked()),true);
  if(!stageFourOnly){
  const result=await page.evaluate(id=>{const m=campaign.mission;m.state.artifactKeys.push('flamethrower');m.state.energy=2400;const result=m.research(id,'flamethrower');m.entity(id).research.progress=.99999;m.updateEconomy(.2);campaign.advance(0);return{ok:result.ok,unlocked:m.state.research.flamethrower};},lab);
- assert.deepEqual(result,{ok:true,unlocked:true});await playScene('r30-alt',{snap:'research-desktop'});
+ assert.deepEqual(result,{ok:true,unlocked:true});await playScene('r26');await playScene('r27');await playScene('r29',{snap:'research-desktop'});
  const ammo=await page.evaluate(id=>{const m=campaign.mission;m.state.artifactKeys.push('mg-ammo-1');m.state.energy=2400;const result=m.research(id,'mg-ammo-1');m.entity(id).research.progress=.99999;m.updateEconomy(.2);campaign.advance(0);return{ok:result.ok,unlocked:m.state.research['mg-ammo-1']};},lab);
  assert.deepEqual(ammo,{ok:true,unlocked:true});await playScene('r33');
  await page.evaluate(()=>{campaign.radio.director.data.clock+=3000;campaign.advance(0);});await playScene('r10',{snap:'original-bukhanka-monologue'});

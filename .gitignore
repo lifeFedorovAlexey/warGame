@@ -4,6 +4,7 @@ __pycache__/
 demo/previews/
 demo/reports/
 tools/.runtime-media/
+tools/.runtime-names/
 assets/campaign/**/audio-source/
 assets/campaign/**/audio-source-v*/
 .codex-attachments/
@@ -14,3 +15,5 @@ docs/campaign/dialogue-drafts/**/.history/
 .dsh-acl-recovery/
 # Legacy generated full-map runs. Curated regression fixtures remain tracked.
 tools/fixtures/navigation-map-samples/
+# Local dynamic-radio drafts, original-media backup and revision history.
+docs/campaign/dialogue-drafts/dynamic-radio/

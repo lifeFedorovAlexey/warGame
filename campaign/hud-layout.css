@@ -23,6 +23,38 @@
 .selection-title[hidden] { display: none; }
 .selection-title strong { font-size: 11px; font-weight: 600; }
 .selection-title small { font-size: 10px; }
+.personnel-service {display:inline-flex;align-items:center;flex-wrap:wrap;gap:4px;vertical-align:middle;}
+#selection .personnel-service {pointer-events:auto;cursor:help;}
+.personnel-rank {display:inline-flex;align-items:center;gap:4px;max-width:100%;min-width:0;}
+.personnel-rank-mark {display:inline-flex;align-items:center;flex:none;}
+.personnel-rank-mark .rank-insignia {width:22px;height:58px;color:#c9b47b;}
+.personnel-award {display:inline-flex;align-items:center;color:#c9b47b;vertical-align:middle;}
+.personnel-award-icon {width:17px;height:22px;flex:none;}
+#selection :is(.rank-insignia,.personnel-award-icon) {filter:drop-shadow(0 1px 1px #111a10);}
+.personnel-award small {font-size:9px;}
+.personnel-award-names {display:block;margin-top:4px;color:#c9b47b;font-size:11px;line-height:1.5;}
+#selection {min-width:0;overflow-wrap:anywhere;}
+.personnel-record {display:block;margin-top:3px;font-size:11px;line-height:1.5;font-weight:400;color:#d0d0b5;}
+.personnel-record>span {display:block;}
+#selection .personnel-award-names {font-size:11px;line-height:1.45;font-weight:400;white-space:pre-line;}
+#selection .personnel-identity {display:block;}
+#personnel-notice {position:fixed;z-index:12;top:68px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:12px;max-width:380px;width:max-content;pointer-events:none;color:#e2d2a3;text-shadow:0 1px 2px #10170f,0 2px 5px #10170f;animation:personnel-arrival .3s ease-out;}
+#personnel-notice[hidden] {display:none;}
+#personnel-notice small,#personnel-notice strong,#personnel-notice .personnel-notice-detail {display:block;}
+#personnel-notice small {font:500 10px/1.5 "Segoe UI",sans-serif;letter-spacing:.13em;text-transform:uppercase;color:#c6c8a8;}
+#personnel-notice strong {font:600 18px/1.4 "Segoe UI",sans-serif;}
+#personnel-notice .personnel-notice-detail {font-size:13px;line-height:1.45;}
+.personnel-notice-icon {display:flex;align-items:center;flex:none;filter:drop-shadow(0 1px 2px #152015);}
+.personnel-notice-icon .rank-insignia {width:26px;height:73px;}
+.personnel-notice-icon .personnel-award-icon {width:35px;height:42px;}
+@keyframes personnel-arrival {from {opacity:0;translate:0 -5px;}to {opacity:1;translate:0 0;}}
+@media(max-width:700px) {
+ #personnel-notice {top:106px;max-width:calc(100vw - 28px);gap:9px;}
+ #personnel-notice strong {font-size:16px;}
+ #personnel-notice .personnel-notice-detail {font-size:12px;}
+ .personnel-notice-icon .rank-insignia {width:21px;height:59px;}
+}
+@media(prefers-reduced-motion:reduce){#personnel-notice{animation:none;}}
 .squad { max-width: 280px; }
 .army-roster { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: start; gap: 6px; }
 #select-army.icon-button { --button-size: 40px; --icon-size: 34px; padding: 3px; }
@@ -61,7 +93,7 @@
 #placement p { font-size: 10px; flex-basis:100%; }
 #placement button.icon-button, #select-blocked.icon-button { --button-size: 32px; --icon-size: 26px; }
 #order-feedback { font-size: 10px; padding: 0; }
-#toast { top: auto; bottom: calc(var(--hud-bottom) + 12px); font-size: 12px; }
+#toast { top: auto; bottom: calc(var(--hud-bottom) + 12px); width: max-content; max-width: min(520px, calc(100vw - 32px)); font-size: 12px; line-height: 1.45; white-space: pre-line; text-align: center; background: none; border: 0; border-radius: 0; padding: 0; text-shadow: 0 1px 3px #111a10, 0 2px 6px #111a10; }
 #result { bottom: calc(var(--hud-bottom) + 16px); }
 
 @media (max-width: 1100px) {
@@ -106,19 +138,28 @@
 #designer .designer-paint-row[hidden],#designer .designer-cards[hidden] {display:none;}
 body:has(#designer[open]) #toast {visibility:hidden;}
 #designer :is(.designer-tabs button, .design-part) {
-  --icon-size: 44px; display: inline-flex; align-items: center; justify-content: center;
-  width: 100%; min-width: 0; height: 56px; padding: 4px; gap: 0;
+  --icon-size: 48px; --button-size: 64px; display: inline-flex; align-items: center; justify-content: center;
+  width: 100%; min-width: 0; height: 64px; padding: 4px; gap: 0;
 }
-#designer .designer-cards { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; }
-#designer .design-part { --icon-size: 48px; flex: 0 0 60px; width: 60px; height: 60px; }
+#designer .designer-cards { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); justify-content: stretch; gap: 4px; }
+#designer .design-part { flex: none; width: 100%; }
 #designer .design-part svg { width: var(--icon-size); height: var(--icon-size); }
 #designer :is(.designer-tabs button, .design-part, .designer-filters button):is(:hover,[aria-pressed=true]) { background: transparent; box-shadow: none; }
 #designer :is(.designer-tabs button, .design-part)[aria-pressed=true]::after { content: ''; }
 #designer button:focus-visible { outline: none; }
 #designer .designer-filters { justify-content: center; }
-#designer .designer-filters button.icon-button { --button-size: 32px; --icon-size: 26px; padding: 3px; }
+#designer .designer-filters button.icon-button { --button-size: 44px; --icon-size: 34px; padding: 3px; }
 #designer .designer-pagination button.icon-button { --button-size: 28px; --icon-size: 22px; width: 28px; height: 28px; padding: 2px; }
-#designer .designer-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 0; }
+#designer .designer-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 20px; padding: 0; }
+#designer .designer-stats dt { font-size: 11px; }
+#designer .designer-stats dd { font-size: 14px; }
+#designer { background: transparent; }
+body:has(#designer[open]) #mission-hud { visibility: hidden; }
+body:has(#designer[open]) #designer { visibility: visible; }
+#designer #design-form { padding: 12px 22px; gap: 18px; text-shadow: 0 1px 3px #111a10; }
+#designer .garage-config { gap: 12px; }
+#designer .garage-view-controls { background: none; }
+#designer .designer-name input { background: transparent; padding-left: 0; }
 #designer .design-salvage-options { box-shadow: none; }
 #designer .design-salvage-options .designer-stats { grid-template-columns: 1fr 1fr; margin-top: 12px; }
 #designer .design-salvage summary.icon-button { --button-size: 32px; --icon-size: 26px; padding: 3px; }
@@ -126,8 +167,11 @@ body:has(#designer[open]) #toast {visibility:hidden;}
 #designer .designer-name button.icon-button { width: 30px; min-width: 30px; padding: 3px; }
 #designer .garage-view-controls button.icon-button { width: 30px; height: 30px; padding: 3px; }
 @media (max-height: 520px), (max-width: 680px) {
-  #designer :is(.designer-tabs button, .design-part) { --icon-size: 34px; height: 44px; }
-  #designer .design-part { flex-basis: 48px; width: 48px; }
+  #designer :is(.designer-tabs button, .design-part) { --icon-size: 40px; --button-size: 52px; height: 52px; }
+  #designer .design-part { width: 100%; }
+  #designer #design-form { padding: 8px 12px; gap: 10px; }
+  #designer .garage-config { gap: 6px; }
+  #designer .designer-stats { grid-template-columns: repeat(4,minmax(0,1fr)); gap: 8px; }
 }
 /* Paint samples are free colour marks, with a check on the chosen finish. */
 #designer .designer-paint-row {display:flex;align-items:center;justify-content:center;gap:8px;min-width:0;}

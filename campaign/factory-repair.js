@@ -1,4 +1,4 @@
-import {availableOil,spendOil} from './oil-economy.js';
+import {oilFundingRemaining,spendOil} from './oil-economy.js';
 import {insideFactory,factoryPriority,factoryVisitors} from './factory-garage.js';
 // Service uses the same simulation clock and oil stock as construction.
 // A bay is assigned once per economy step, never once per search/frame slice.
@@ -17,9 +17,11 @@ export function rememberRetreatOrder(mission,unit){
  const origin=unit.yieldReturn?.home??unit;
  const type=pending?.type??task?.type;
  const target=pending?.target??unit.routeOrder?.destination??task??origin;
- const action=['move','attack-move','attack'].includes(type)?type:'move';
+ const work=mission.unitSpec(unit).role==='builder'&&['build','repair','demolish','upgrade-power'].includes(type);
+ const action=work||['move','attack-move','attack'].includes(type)?type:'move';
  const result={action,target:{x:target.x??origin.x,y:target.y??origin.y},origin:{x:origin.x,y:origin.y}};
  if(action==='attack')result.target.id=pending?.target.id??task?.targetId;
+ if(work){result.target.id=pending?.target.id??task?.targetId;return result;}
  // Track a formation relative to another member's accepted slot. If that
  // group receives a later march while this car is at the factory, rejoin its
  // current destination rather than the obsolete battlefield coordinates.
@@ -35,6 +37,13 @@ export function rememberRetreatOrder(mission,unit){
 }
 export function retreatReturnOrder(mission,unit){
  const resume=unit.combatRetreat?.resume;if(!resume)return null;
+ if(['build','repair','demolish','upgrade-power'].includes(resume.action)){
+  const target=mission.entity(resume.target.id);
+  const needed=target?.hp>0&&target.owner===unit.owner&&
+   (resume.action==='build'?!target.completed:resume.action==='repair'?target.hp<target.maxHp:
+    resume.action==='upgrade-power'?!target.powerModule:true);
+  return needed?{action:resume.action,target}:{action:'move',target:resume.origin};
+ }
  if(resume.action==='attack'){
   const enemy=mission.entity(resume.target.id);
   if(enemy?.hp>0&&mission.enemyOf(unit,enemy)&&mission.visibleAt(enemy.x,enemy.y))return {action:'attack',target:enemy};
@@ -57,15 +66,17 @@ export function updateFactoryRepairs(mission,structures,dt){
    .sort((a,b)=>a.factoryVisit.arrived-b.factoryVisit.arrived||a.id.localeCompare(b.id));
   for(const [index,unit] of waiting.entries()){
    const retreat=unit.combatRetreat??={},visit=unit.factoryVisit;
-   if(factoryPriority(factory)==='production'&&factory.queue.length){retreat.service='waiting-production';continue;}
+   const order=factory.queue[0],productionReady=order&&!(order.progress>=1&&factory.exitBlocked)
+    &&(oilFundingRemaining(order)===0||mission.state.energy>0);
+   if(factoryPriority(factory)==='production'&&productionReady){retreat.service='waiting-production';continue;}
    if(index>0){retreat.service='waiting-bay';continue;}
    const seconds=Math.min(dt,(unit.maxHp-unit.hp)/service.hpPerSecond);
-   const oil=factoryPriority(factory)==='repair'?mission.state.energy:availableOil(mission.state);
+   const oil=mission.state.energy;
    const affordable=service.energyPerSecond>0?Math.min(seconds,oil/service.energyPerSecond):seconds;
    if(affordable<=0){retreat.service='waiting-energy';continue;}
    if(visit.repairStartHp===undefined){visit.repairStartHp=unit.hp;mission.emit('factory-repair-start',{unit:unit.id,factory:factory.id});}
    retreat.service='repairing';unit.hp=Math.min(unit.maxHp,unit.hp+service.hpPerSecond*affordable);
-   spendOil(mission,service.energyPerSecond*affordable,{reserved:factoryPriority(factory)==='repair'});
+   spendOil(mission,service.energyPerSecond*affordable,{reserved:true});
    factory.activeRepair={unitId:unit.id,progress:(unit.hp-visit.repairStartHp)/Math.max(1,unit.maxHp-visit.repairStartHp)};
    if(unit.hp===unit.maxHp&&unit.damage){
     // Restore mechanical parts as well as HP. Keep installed upgrades and

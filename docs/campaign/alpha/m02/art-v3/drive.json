@@ -1,0 +1,54 @@
+{
+  "army": 20,
+  "visits": [
+    {
+      "id": "east_factory",
+      "arrived": true,
+      "seconds": 120,
+      "reorders": 1,
+      "retriedVehicles": [
+        {
+          "id": "u2",
+          "retries": 1
+        },
+        {
+          "id": "u187",
+          "retries": 1
+        }
+      ],
+      "maxDistance": 156.6932590129904
+    },
+    {
+      "id": "sensor_outpost",
+      "arrived": true,
+      "seconds": 51,
+      "reorders": 0,
+      "retriedVehicles": [],
+      "maxDistance": 164.05019428641862
+    },
+    {
+      "id": "energy_hub",
+      "arrived": true,
+      "seconds": 70,
+      "reorders": 0,
+      "retriedVehicles": [],
+      "maxDistance": 167.8899370902212
+    },
+    {
+      "id": "hill_factory",
+      "arrived": true,
+      "seconds": 127,
+      "reorders": 0,
+      "retriedVehicles": [],
+      "maxDistance": 149.73241411973885
+    },
+    {
+      "id": "home",
+      "arrived": true,
+      "seconds": 162,
+      "reorders": 0,
+      "retriedVehicles": [],
+      "maxDistance": 164.58118870108854
+    }
+  ]
+}

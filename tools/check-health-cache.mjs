@@ -21,4 +21,15 @@ const stableRect=rect.version,stableValues=values.version;draw(['a']);assert.equ
 const hpVersion=values.version;a.hp=20;draw(['a']);assert(values.version>hpVersion,'Critical damage updates immediately');
 a.hp=0;draw(['a']);assert.equal(bars.root.visible,false,'Death immediately removes the bar');
 const c={...b,id:'c',hp:30};mission.state.units=[c];poses.set(c.id,poses.get(b.id));draw(['c']);assert.equal(bars.root.geometry.instanceCount,1,'New damaged body appears immediately');
+mission.state.campaign={personnel:{crews:{c:{memberIds:['fighter']}},soldiers:{fighter:{rank:'lance-corporal'}}}};
+c.hp=c.maxHp;draw([]);assert.equal(bars.root.geometry.instanceCount,1,'Full-health promoted crew remains identifiable');
+const ranks=bars.root.geometry.attributes.barRank,rankVersion=ranks.version;
+assert(ranks.getX(0)>0);assert.equal(bars.hitAreas.length,1);assert.equal(bars.hitAreas[0].rank,'lance-corporal');
+draw([]);assert.equal(ranks.version,rankVersion,'No unchanged rank buffer upload');
+mission.state.campaign.personnel.soldiers.fighter.rank='captain';draw([]);
+assert(ranks.version>rankVersion,'Promotion invalidates cache without health, pose or camera changes');
+const hit=bars.hitAreas[0];assert.equal(bars.rankAt(hit.x+10,hit.y+14).id,'c');
+c.factoryVisit={phase:'inside'};draw([]);assert.equal(bars.root.visible,false);assert.equal(bars.rankAt(hit.x+10,hit.y+14),null,'Garage rank is neither drawn nor clickable');
+delete c.factoryVisit;mission.state.campaign.personnel.soldiers.fighter.rank='private';draw([]);assert.equal(bars.root.visible,false,'Private has no invented star');
+draw(['c']);assert.equal(ranks.getX(0),0);assert.equal(bars.hitAreas.length,0);
 console.log(JSON.stringify({passed:true,cases:['unchanged upload','selection membership swap','kind at same hp/maxHp','owner with unchanged visibility','critical damage','death','spawn']}));

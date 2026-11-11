@@ -56,7 +56,7 @@ try{
  const movement=await page.evaluate(()=>{const c=campaign,u=c.mission.entity(c.selected[0]),start={x:u.x,y:u.y};for(let i=0;i<20;i++)c.advance(.1);return Math.hypot(u.x-start.x,u.y-start.y);});
  assert(movement>2,'The vehicle actually starts driving after a minimap order');
  const revision=order.revision;await click([26,46],'left');assert.notDeepEqual(await camera(),before);assert.equal(await page.evaluate(()=>campaign.mission.state.commandOrders.at(-1).revision),revision,'Left-click pans without a command');
- await page.locator('#attack-order').click();await click([24,48],'left');order=await page.evaluate(()=>campaign.mission.state.commandOrders.at(-1));assert.equal(order.action,'attack-move');assert.equal(await page.evaluate(()=>campaign.state.orderMode),'attack');
+ await page.locator('#attack-order').click();await click([24,48],'right');order=await page.evaluate(()=>campaign.mission.state.commandOrders.at(-1));assert.equal(order.action,'attack-move');assert.equal(await page.evaluate(()=>campaign.state.orderMode),'attack');
  const targetGrid=await page.evaluate(()=>{const m=campaign.mission;m.visible.fill(255);m.explored.fill(255);m.visionSources=[{x:26,y:43,radius:38}];m.fogRevision++;const e=m.entity(miniFixture.enemy);return m.field.worldToGrid(e.x,e.y);});
  await click(targetGrid);order=await page.evaluate(()=>campaign.mission.state.commandOrders.at(-1));assert.equal(order.action,'attack');assert.equal(order.target.id,setup.enemy);
  await page.setViewportSize({width:390,height:844});await page.waitForTimeout(300);await click([23,50]);assert.equal(await page.evaluate(()=>campaign.mission.state.commandOrders.at(-1).action),'attack-move');

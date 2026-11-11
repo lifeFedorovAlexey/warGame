@@ -1,6 +1,7 @@
 import {setButtonIcon} from '../assets/ui/icons.js';
 import {raidApproachSignal, southernApproachSignal, visibleRaidContact, waterTowerSignal} from './threat-guidance.js';
 import {setCharacterPortrait} from './character-portraits.js';
+import {m02Signal} from './mission02.js';
 
 const messages = {
   'first-contact': { station: 'Разведка', speaker:'scout', portrait:'radio', text: 'Отбросы в ущелье. Прикройте въезд!' },
@@ -33,6 +34,7 @@ function relevant(entry, mission, now) {
 }
 
 export function missionSignal(chapter, mission) {
+  if(mission.state.m02)return ['m02-radio-start','m02-radio-power-recovered'].includes(chapter)?m02Signal(mission):null;
   const {config, field, state} = mission;
   const mark = (point, label, kind, distance) => point && {x:point.x,y:point.y,label,kind,distance};
   if (chapter === 'intro') {
@@ -105,7 +107,8 @@ export class FieldRadio {
 
   dismiss() {
     const entry = this.entry;
-    if (entry?.story) this.director.skip();
+    if (entry?.dynamic) this.dynamic.engine.completeLine();
+    else if (entry?.story) this.director.skip();
     else if (entry?.dialogue) {
       const progress = this.mission.state.fieldDialogue ??= {};
       progress[entry.chapter] = entry.index + 1;
@@ -170,11 +173,21 @@ export class FieldRadio {
 
   consumeStory(mission,now) {
     this.mission=mission;
+    this.dynamic?.bind();
+    // Finish a complete recorded fragment before yielding the shared channel.
+    if(this.entry?.dynamic){
+      if(now<this.until)return;
+      this.dynamic.engine.completeLine();this.hide();
+    }
     // Legacy chapter flags still drive objectives and signals, but no longer enqueue duplicate speech.
     for(const chapter of [...mission.state.pendingCinematics])mission.finishCinematic(chapter);
     if(this.entry?.story&&now>=this.until){this.director.completeLine();this.hide();}
     const next=this.director.update(mission,now,{enabled:this.enabled});
-    if(!next){if(this.entry)this.hide();return;}
+    if(!next){
+      if(this.entry)this.hide();
+      if(this.enabled){const dynamic=this.dynamic?.next({storyLock:!!this.director.data?.active,audioBusy:this.audioBusy?.()});if(dynamic)this.present(dynamic,mission,now);}
+      return;
+    }
     if(this.entry?.story&&this.entry.token===next.token)return;
     this.present(next,mission,now);
   }
@@ -186,7 +199,7 @@ export class FieldRadio {
     this.current = missionSignal(chapter, mission);
     this.focus.hidden = !this.current;
     if (this.current) setButtonIcon(this.focus, this.current.kind === 'guidance' ? 'derrick' : 'focus', this.current.label);
-    this.panel.querySelector('strong').textContent = station;
+    this.panel.querySelector('strong').textContent = station+(entry.id?.startsWith('m02-')&&!entry.clip?.file?' · без озвучки':'');
     this.panel.querySelector('p').textContent = text;
     this.panel.hidden = false;
     this.until = now + (entry.dialogue ? Math.max(2200, text.length * 60) : Math.min(6700, 3000 + text.length * 28));

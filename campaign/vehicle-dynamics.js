@@ -6,7 +6,7 @@ import {fieldEffects} from './field-modifications.js';
 const standard=Object.freeze({acceleration:28,braking:22,steeringLimit:.67,steeringRate:3.6,pivotRate:Math.PI,turnPenalty:1.9,wheelbase:2.6,maneuverForward:13,maneuverReverse:9});
 // C01 chassis + B01 body are shared by all three module variants. Scale
 // belongs to that assembly, independent of the gun/projector or its paint.
-const modularKinds=new Set(['bukhanka','flamer','builder']),modularScale=.9;
+const modularKinds=new Set(['bukhanka','flamer','builder','twin-machinegun','sensor']),modularScale=.9;
 export const vehicleSizeScale=unit=>modularKinds.has(typeof unit==='string'?unit:unit.kind)?modularScale:1;
 const modular=Object.freeze({...standard,wheelbase:standard.wheelbase*modularScale});
 const light=Object.freeze({...modular,acceleration:36,braking:26,steeringLimit:.72,turnPenalty:.85,maneuverForward:17,maneuverReverse:11});

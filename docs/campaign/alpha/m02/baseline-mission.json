@@ -1,0 +1,6 @@
+{
+  "source": "HEAD:campaign/mission.js with current shared dependencies",
+  "exitCode": 1,
+  "stdout": "",
+  "stderr": "node:internal/modules/run_main:107\n    triggerUncaughtException(\n    ^\n\nAssertionError [ERR_ASSERTION]: Saved cliff pose receives a bounded exit route\n    at file:///D:/warGame/tools/check-m02-baseline.tmp.mjs:89:41\n    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)\n    at async node:internal/modules/esm/loader:647:26\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {\n  generatedMessage: false,\n  code: 'ERR_ASSERTION',\n  actual: false,\n  expected: true,\n  operator: '==',\n  diff: 'simple'\n}\n\nNode.js v24.22.0\n"
+}

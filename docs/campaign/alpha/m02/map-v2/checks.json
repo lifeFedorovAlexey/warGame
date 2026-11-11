@@ -1,0 +1,22 @@
+{
+  "passed": true,
+  "originalStructures": 39,
+  "defenses": 31,
+  "roads": 8,
+  "roadSegments": 1289,
+  "maxGrade": 0.26887822151184054,
+  "bounds": [
+    0,
+    0,
+    53,
+    127
+  ],
+  "radar": [
+    30.5,
+    88.5
+  ],
+  "oil": [
+    28.3,
+    110
+  ]
+}

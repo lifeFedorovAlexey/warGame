@@ -11,8 +11,20 @@ export function createScavBasePrefab(T,kind,site,span=7,variant='0',profile=null
  };
  const beam=(a,b,w,mat=2)=>{const v=new T.Vector3(...b).sub(new T.Vector3(...a)),g=new T.BoxGeometry(w,w,v.length()).toNonIndexed();g.applyQuaternion(new T.Quaternion().setFromUnitVectors(new T.Vector3(0,0,1),v.normalize()));g.translate(...a.map((n,i)=>(n+b[i])/2));g.setAttribute('damagePart',new T.Float32BufferAttribute(new Float32Array(g.attributes.position.count).fill(part),1));batches[mat].push(g);};
  const panel=(id,name,fn)=>{part=id;parts[id]={name,material:'metal',detachable:true,strength:70};fn();part=0;};
- if(kind==='scav-fence'){
+ if(kind==='scav-fence'&&variant==='service-gate'){
+  for(const x of [-span/2,0,span/2])box(.22,.24,2.8,x,.06,1.25,2);
+  for(const side of [-1,1])panel(side<0?16:17,'service_gate_leaf_'+side,()=>{
+   box(span/2-.22,.12,2.25,side*span/4,-.08,1.27,0);
+   for(const z of [.45,2.1])box(span/2-.24,.15,.14,side*span/4,-.18,z,2);
+   beam([side*.16,-.2,.45],[side*(span/2-.2),-.2,2.1],.12,3);
+  });
+ }else if(kind==='scav-fence'){
   const count=Math.ceil(span/1.55),w=span/count,v=Number(variant)||0;
+  if(String(variant).startsWith('reinforced')){
+   box(span,.48,.65,0,.08,.2,1);
+   for(const x of [-span/2,span/2]){box(.4,.65,2.9,x,.16,1.25,2);box(.8,1.1,.35,x,.16,-.05,1);}
+   for(const z of [.75,2.1])box(span,.22,.2,0,.21,z,2);
+  }
   for(let i=0;i<=count;i++){const x=-span/2+i*w;box(.15,.19,3.1,x,.08,1.12,3,0,(i%2?.025:-.02));}
   for(const z of [.45,1.65])box(span,.13,.15,0,.1,z,2);
   for(let i=0;i<count;i++){const x=-span/2+(i+.5)*w,h=1.9+((i+v)%3)*.17;
@@ -23,6 +35,17 @@ export function createScavBasePrefab(T,kind,site,span=7,variant='0',profile=null
    });
   }
   for(let i=0;i<count;i++)beam([-span/2+i*w,.1,2.6],[-span/2+(i+1)*w,.1,2.44],.035,2);
+ }else if(kind==='scav-gate'&&variant==='m02-open-leaf'){
+  // Same scrap gate, sized to half the actual entrance and held open along
+  // the road. Both the hinge post and the leaf belong to the damage system.
+  const hinge=-span/2;
+  box(.40,.42,4.2,0,hinge,1.8,2);box(.85,.85,.3,0,hinge,.05,1);
+  panel(16,'gate_leaf',()=>{
+   box(.14,span-.18,2.4,0,0,1.4,0);
+   for(const z of [.35,2.55])beam([-.1,hinge,z],[-.1,span/2,z],.15,2);
+   beam([-.1,hinge,.4],[-.1,span/2,2.5],.14,3);
+   for(let y=hinge+.2;y<span/2;y+=.4)box(.07,.05,2.3,-.12,y,1.4,1);
+  });
  }else if(kind==='scav-gate'){
   box(.38,.42,5.2,0,-2.3,2.05,2);box(.9,.85,.3,0,-2.3,0,3);
   for(const z of [.5,2.45])beam([0,-2.25,z],[0,2.7,z],.13);

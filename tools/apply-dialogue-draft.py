@@ -43,7 +43,14 @@ def measured(path):
             'trailingSilence':max(0,duration-(audible[-1]+1)*.01)}
 
 
-def apply(through_scene, expected_revision=None, from_scene=None, report_name='applied-stage-iii.json'):
+def apply(through_scene, expected_revision=None, from_scene=None, report_name='applied-stage-iii.json', mission_id='alpha-m01', allow_subtitles=False):
+    from dialogue_editor import mission_info
+    info = mission_info(mission_id)
+    if not info:
+        raise ValueError('Unknown mission: ' + mission_id)
+    BASE = info['path']
+    DRAFT = ROOT / 'docs/campaign/dialogue-drafts' / mission_id / 'draft.json'
+    TARGET = BASE / 'reviewed-dialogue.json'
     if not re.fullmatch(r'[a-zA-Z0-9_-]+\.json', report_name):
         raise ValueError('Report must be a JSON filename')
     raw = DRAFT.read_bytes()
@@ -69,7 +76,7 @@ def apply(through_scene, expected_revision=None, from_scene=None, report_name='a
     result = {'schemaVersion':1, 'draftRevision':snapshot['revision'], 'draftSha256':hashlib.sha256(raw).hexdigest(),
               'throughScene':through_scene,'appliedAt':datetime.now(timezone.utc).isoformat(),
               'scenes':[],'dialogue':[],'clips':{}}
-    base_story = read(BASE/'story-v2.json')
+    base_story = read(BASE/('story-v2.json' if (BASE/'story-v2.json').exists() else 'story.json'))
     base_scenes = {scene['id']:scene for scene in base_story['scenes']}
     stale_transcripts, removed, uploads = [], [], []
     promoted = set()
@@ -95,6 +102,12 @@ def apply(through_scene, expected_revision=None, from_scene=None, report_name='a
                 raise ValueError('Per-line portrait requires a separate reviewed image import: ' + key)
             clip = line.get('audio')
             if not clip:
+                if allow_subtitles:
+                    result['clips'][key] = None
+                    result['dialogue'].append({'id':key,'speaker':line['speaker'],'text':line['text'],
+                        'pauseAfter':line.get('pauseAfter',.2),'recordingStatus':'missing','notes':line.get('notes',''),
+                        **({'portraitState':line['portraitState']} if line.get('portraitState') else {})})
+                    continue
                 raise ValueError('Missing audio: ' + key)
             file = (ROOT/clip['file']).resolve()
             allowed = [BASE.resolve(), (DRAFT.parent/'media').resolve()]
@@ -155,5 +168,7 @@ if __name__ == '__main__':
     parser.add_argument('--revision',type=int)
     parser.add_argument('--from-scene')
     parser.add_argument('--report',default='applied-stage-iii.json')
+    parser.add_argument('--mission',default='alpha-m01')
+    parser.add_argument('--allow-subtitles',action='store_true',help='Explicitly publish missing recordings as subtitles')
     args = parser.parse_args()
-    apply(args.through_scene,args.revision,args.from_scene,args.report)
+    apply(args.through_scene,args.revision,args.from_scene,args.report,args.mission,args.allow_subtitles)

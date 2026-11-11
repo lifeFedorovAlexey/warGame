@@ -1,0 +1,19 @@
+{
+  "passed": true,
+  "army": 20,
+  "methods": [
+    "order",
+    "submitOrder"
+  ],
+  "ticks": 600,
+  "budgets": [
+    "unlimited",
+    0.01,
+    0.1
+  ],
+  "cameras": [
+    "stationary",
+    "moving, rotating, changing aspect"
+  ],
+  "runs": 8
+}
