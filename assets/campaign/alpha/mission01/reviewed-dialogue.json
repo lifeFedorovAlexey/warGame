@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "draftRevision": 220,
-  "draftSha256": "1c5043ff3241222489be8ed397529c87ee35b77771d3939975d6458ba5943d11",
+  "draftRevision": 225,
+  "draftSha256": "36d72be8c87ebe178d6db39481b32afbb01bb5a99afc406536cdaad124cc29bc",
   "throughScene": "r36",
-  "appliedAt": "2026-11-11T22:00:11.180169+00:00",
+  "appliedAt": "2026-11-12T00:27:23.322485+00:00",
   "scenes": [
     {
       "id": "p01",
@@ -107,6 +107,8 @@
       "id": "r01a",
       "title": "Кофе — электростанция уже строится",
       "cues": [
+        "m01-v3-general-coffee",
+        "m01-r01a-power-building",
         "m01-v3-r01a-l001"
       ],
       "sourceLine": 108,
@@ -121,6 +123,8 @@
       "id": "r01b",
       "title": "Кофе — электростанция уже готова",
       "cues": [
+        "m01-v3-general-coffee",
+        "m01-r01b-power-ready",
         "m01-v3-r01b-l001"
       ],
       "sourceLine": 108,
@@ -598,14 +602,22 @@
     },
     {
       "id": "r42",
-      "title": "Два процента просят помощи",
+      "title": "Первое обращение Петровича",
       "cues": [
-        "m01-v4-r42-l001",
-        "m01-v4-r42-l002",
-        "m01-v4-r42-l003",
-        "m01-v4-r42-l004",
-        "m01-v4-r42-l005",
-        "m01-v4-r42-l006"
+        "m01-s11-l001",
+        "m01-s11-l002",
+        "m01-s11-l003",
+        "m01-s11-l004",
+        "m01-s11-l005",
+        "m01-s11-l006",
+        "m01-s11-l007",
+        "m01-s11-l008",
+        "m01-v5-r42-l009",
+        "m01-v5-r42-l010",
+        "m01-v5-r42-l011",
+        "m01-v5-r42-l012",
+        "m01-v5-r42-l013",
+        "m01-v5-r42-l014"
       ],
       "sourceLine": 747,
       "sections": [
@@ -879,7 +891,7 @@
     {
       "id": "m01-v3-r25-l001",
       "speaker": "scout",
-      "text": "Лагерь зачищен. Нашли довоенное оборудование. Отбросы пытались переделать его в самогонный аппарат.",
+      "text": "Лагерь зачищен. Нашли установку: бак, шланги, довоенный блок. На самогонный аппарат похоже.",
       "pauseAfter": 0.2,
       "recordingStatus": "Т",
       "notes": ""
@@ -1055,7 +1067,7 @@
     {
       "id": "m01-s03-l001",
       "speaker": "warrant",
-      "text": "Криво повесил.",
+      "text": "Неужели проверка скоро?",
       "pauseAfter": 0.2,
       "recordingStatus": "Т",
       "notes": ""
@@ -1063,7 +1075,7 @@
     {
       "id": "m01-v3-builder-crooked-plinth",
       "speaker": "builder",
-      "text": "Так постамент кривой.",
+      "text": "Да. Через пару дней прилетят.",
       "pauseAfter": 0.2,
       "recordingStatus": "Т",
       "notes": ""
@@ -1303,7 +1315,7 @@
     {
       "id": "m01-v3-general-coffee",
       "speaker": "general",
-      "text": "А кофе почему нет?",
+      "text": "К моему приезду кофе будет?",
       "pauseAfter": 0.2,
       "recordingStatus": "Т",
       "notes": ""
@@ -1311,7 +1323,7 @@
     {
       "id": "m01-s06-l008",
       "speaker": "commander",
-      "text": "Потому что электричества нет.",
+      "text": "У нас электричества ещё нет.",
       "pauseAfter": 0.2,
       "recordingStatus": "Т",
       "notes": ""
@@ -1431,7 +1443,7 @@
     {
       "id": "m01-s05-l012",
       "speaker": "commander",
-      "text": "Не получится из букв «Ж», «О», «П», «А»... То есть «УАЗ» — собрать слово «счастье»... Я имел в виду — танк.",
+      "text": "Из букв «У», «А», «З» слово «танк» не собирается.",
       "pauseAfter": 0.2,
       "recordingStatus": "Т",
       "notes": ""
@@ -1504,48 +1516,6 @@
       "recordingStatus": "Т"
     },
     {
-      "id": "m01-v4-r42-l001",
-      "speaker": "chief",
-      "text": "У меня тут республика! Меня народ выбрал!",
-      "pauseAfter": 0.25,
-      "recordingStatus": "Т"
-    },
-    {
-      "id": "m01-v4-r42-l002",
-      "speaker": "commander",
-      "text": "И сколько набрал?",
-      "pauseAfter": 0.25,
-      "recordingStatus": "Т"
-    },
-    {
-      "id": "m01-v4-r42-l003",
-      "speaker": "chief",
-      "text": "Девяносто восемь процентов!",
-      "pauseAfter": 0.25,
-      "recordingStatus": "Т"
-    },
-    {
-      "id": "m01-v4-r42-l004",
-      "speaker": "commander",
-      "text": "Прапорщик, записывай: два процента населения просят нашей помощи.",
-      "pauseAfter": 0.25,
-      "recordingStatus": "Т"
-    },
-    {
-      "id": "m01-v4-r42-l005",
-      "speaker": "warrant",
-      "text": "А они знают?",
-      "pauseAfter": 0.25,
-      "recordingStatus": "Т"
-    },
-    {
-      "id": "m01-v4-r42-l006",
-      "speaker": "commander",
-      "text": "Потом объясним.",
-      "pauseAfter": 0.25,
-      "recordingStatus": "Т"
-    },
-    {
       "id": "m01-v4-r49-l001",
       "speaker": "general",
       "text": "Докладывайте. Город восстановлен?",
@@ -1606,6 +1576,118 @@
       "speaker": "general",
       "text": "Вот поэтому и выезжайте.",
       "pauseAfter": 0.25,
+      "recordingStatus": "Т"
+    },
+    {
+      "id": "m01-r01a-power-building",
+      "speaker": "commander",
+      "pauseAfter": 0.2,
+      "text": "Электростанция уже строится.",
+      "recordingStatus": "Т"
+    },
+    {
+      "id": "m01-r01b-power-ready",
+      "speaker": "commander",
+      "pauseAfter": 0.2,
+      "text": "Электростанция уже работает.",
+      "recordingStatus": "Т"
+    },
+    {
+      "id": "m01-s11-l001",
+      "speaker": "chief",
+      "text": "Слышь, командир! Вы чё к нам пристали?! Мы тут уже сто лет живём!",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т"
+    },
+    {
+      "id": "m01-s11-l002",
+      "speaker": "commander",
+      "text": "Какое у вас государственное образование?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т"
+    },
+    {
+      "id": "m01-s11-l003",
+      "speaker": "chief",
+      "text": "Чего?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т"
+    },
+    {
+      "id": "m01-s11-l004",
+      "speaker": "commander",
+      "text": "Кто у вас главный?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т"
+    },
+    {
+      "id": "m01-s11-l005",
+      "speaker": "chief",
+      "text": "Петрович.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т"
+    },
+    {
+      "id": "m01-s11-l006",
+      "speaker": "commander",
+      "text": "Должность?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т"
+    },
+    {
+      "id": "m01-s11-l007",
+      "speaker": "chief",
+      "text": "Ну… Петрович.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т"
+    },
+    {
+      "id": "m01-s11-l008",
+      "speaker": "commander",
+      "text": "Конституция имеется?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т"
+    },
+    {
+      "id": "m01-v5-r42-l009",
+      "speaker": "chief",
+      "text": "А у тебя?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т"
+    },
+    {
+      "id": "m01-v5-r42-l010",
+      "speaker": "commander",
+      "text": "У меня приказ.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т"
+    },
+    {
+      "id": "m01-v5-r42-l011",
+      "speaker": "chief",
+      "text": "Вот и у меня. Только я сам отдаю.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т"
+    },
+    {
+      "id": "m01-v5-r42-l012",
+      "speaker": "commander",
+      "text": "Прикажи себе сдаться. Заодно дисциплину проверим.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т"
+    },
+    {
+      "id": "m01-v5-r42-l013",
+      "speaker": "chief",
+      "text": "Да ты сначала зайди сюда!",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т"
+    },
+    {
+      "id": "m01-v5-r42-l014",
+      "speaker": "commander",
+      "text": "Слышали, ребята? Нас пригласили. Заходим.",
+      "pauseAfter": 0.2,
       "recordingStatus": "Т"
     }
   ],
@@ -1991,18 +2073,25 @@
       "text": "Впереди ещё один лагерь. У ворот часовые, за ограждением какие-то баллоны таскают. Похоже, не самогон."
     },
     "m01-v3-r25-l001": {
-      "file": "recordings/reviewed/m01-v3-r25-l001-dd44a3c494ba.mp3",
-      "duration": 6.687333333333333,
-      "leadingSilence": 0.15,
-      "trailingSilence": 0.22733333333333317,
+      "file": "recordings/elevenlabs/m01-v3-r25-l001-51a847cc8765.mp3",
       "speaker": "scout",
-      "sha256": "dd44a3c494ba6c28997a527a7f8e70bd6690fabaeefae5ff3b37bec5a9e86117",
-      "bytes": 123934,
-      "origin": "user-recording",
-      "sourceName": "ElevenLabs_2026-11-10T18_27_19_Mishka Yaponcik - Odessa Rogue Charm_pvc_s50_sim75_v4.mp3",
-      "draftRevision": 184,
-      "transcriptSource": "owner-workshop",
-      "text": "Лагерь зачищен. Нашли довоенное оборудование. Отбросы пытались переделать его в самогонный аппарат."
+      "text": "Лагерь зачищен. Нашли установку: бак, шланги, довоенный блок. На самогонный аппарат похоже.",
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "51a847cc87652d587f9734e6073b45520c1a9215d2b7f22317b186dbb6695f4d",
+      "bytes": 102025,
+      "duration": 6.32,
+      "leadingSilence": 0.01,
+      "trailingSilence": 0.17999999999999972,
+      "generatedAt": "2026-11-12T00:02:34.782Z",
+      "replaces": "recordings/elevenlabs/m01-v3-r25-l001-12ab4f065f10.mp3",
+      "spokenText": "[brisk, clipped delivery] Лагерь зачищен. Нашли установку: бак, шланги, довоенный блок. [dryly amused, brisk delivery] На самогонный аппарат похоже."
     },
     "m01-v3-r25-l002": {
       "file": "recordings/reviewed/m01-v3-r25-l002-2eb2e25e06c8.mp3",
@@ -2305,34 +2394,46 @@
       "text": "Ну что ж. Раз дипломатия не удалась — придётся нанести визит лично."
     },
     "m01-s03-l001": {
-      "file": "recordings/warrant/m01-s03-l001.mp3",
-      "duration": 1.5673333333333332,
-      "leadingSilence": 0.22,
-      "trailingSilence": 0.43733333333333313,
+      "file": "recordings/elevenlabs/m01-s03-l001-5587e90fa1b7.mp3",
       "speaker": "warrant",
-      "sha256": "bd64fa8e549c91dffb9bfc35373ddc789e0b025ab75e7b5fb994e299dd64d5a6",
-      "bytes": 42014,
-      "origin": "user-recording",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s03-l001"
+      "text": "Неужели проверка скоро?",
+      "spokenText": "[curious, conversational] Неужели проверка скоро?",
+      "voiceId": "6A9D8WSMm4rFsg2DWFeE",
+      "voiceName": "Egor Gadzhiyev - Clear and Commanding",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact",
-      "text": "Криво повесил."
+      "sha256": "5587e90fa1b7bca784fc57eb13aee30cc2130eac45c43a4e8c79e08dbc6e4dbe",
+      "bytes": 30554,
+      "generatedAt": "2026-11-12T00:08:46.432Z",
+      "duration": 1.84,
+      "leadingSilence": 0.04,
+      "trailingSilence": 0.3600000000000001,
+      "replaces": "recordings/warrant/m01-s03-l001.mp3"
     },
     "m01-v3-builder-crooked-plinth": {
-      "file": "recordings/reviewed/m01-v3-builder-crooked-plinth-8e0311c0b77a.mp3",
-      "duration": 1.8024583333333333,
-      "leadingSilence": 0.1,
-      "trailingSilence": 0.3224583333333333,
+      "file": "recordings/elevenlabs/m01-v3-builder-crooked-plinth-42f96579a802.mp3",
       "speaker": "builder",
-      "sha256": "8e0311c0b77abdb367ebe7fc71dfc745c48cca922b140d2da23d0beec4225f0d",
-      "bytes": 45776,
-      "origin": "user-recording",
-      "sourceName": "ElevenLabs_2026-11-09T17_21_12_Alexandr Vlasov - Vibrant and Energetic_pvc_s50_sim75_v4.mp3",
-      "draftRevision": 148,
-      "transcriptSource": "owner-workshop",
-      "text": "Так постамент кривой."
+      "text": "Да. Через пару дней прилетят.",
+      "spokenText": "[matter-of-fact, brisk delivery] Да. Через пару дней прилетят.",
+      "voiceId": "txnCCHHGKmYIwrn7HfHQ",
+      "voiceName": "Alexandr Vlasov - Vibrant and Energetic",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "42f96579a8021308b9b56d6653f5247f4b26da288da3f39d1801961839d53bcd",
+      "bytes": 36823,
+      "generatedAt": "2026-11-12T00:08:46.892Z",
+      "duration": 2.24,
+      "leadingSilence": 0.01,
+      "trailingSilence": 0.3100000000000003,
+      "replaces": "recordings/reviewed/m01-v3-builder-crooked-plinth-8e0311c0b77a.mp3"
     },
     "m01-s02-l003": {
       "file": "recordings/commander/m01-s02-l003.mp3",
@@ -2760,34 +2861,46 @@
       "text": "Опять копать?! "
     },
     "m01-v3-general-coffee": {
-      "file": "recordings/reviewed/m01-v3-general-coffee-e0340deb6dc0.mp3",
-      "duration": 1.8808333333333334,
-      "leadingSilence": 0.05,
-      "trailingSilence": 0.3108333333333333,
+      "file": "recordings/elevenlabs/m01-v3-general-coffee-db283f1c2750.mp3",
       "speaker": "general",
-      "sha256": "e0340deb6dc0ff40d7df7d1fa1fc4db78b48a5a573cf1f159b81f434f0f11acd",
-      "bytes": 47030,
-      "origin": "user-recording",
-      "sourceName": "ElevenLabs_2026-11-09T17_34_43_Artem Lebedev - Captivating and Engaging_pvc_s50_sim75_v4.mp3",
-      "draftRevision": 70,
-      "transcriptSource": "owner-workshop",
-      "text": "А кофе почему нет?"
+      "text": "К моему приезду кофе будет?",
+      "spokenText": "[casually expectant] К моему приезду кофе будет?",
+      "voiceId": "rQOBu7YxCDxGiFdTm28w",
+      "voiceName": "Artem Lebedev - Captivating and Engaging",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "db283f1c2750405f84b963bca1ecfe6482213c74d3ee14ed33830fc3a1cfdc87",
+      "bytes": 35569,
+      "generatedAt": "2026-11-12T00:08:47.788Z",
+      "duration": 2.16,
+      "leadingSilence": 0.06,
+      "trailingSilence": 0.3400000000000001,
+      "replaces": "recordings/reviewed/m01-v3-general-coffee-e0340deb6dc0.mp3"
     },
     "m01-s06-l008": {
-      "file": "recordings/commander/m01-s07-l002.mp3",
-      "duration": 2.429375,
-      "leadingSilence": 0.13,
-      "trailingSilence": 0.339375,
+      "file": "recordings/elevenlabs/m01-s06-l008-4aa8351e1c75.mp3",
       "speaker": "commander",
-      "sha256": "3ddb97446f3b9e7db327117aec79f5c37d7ed2b226154a1e936dacb0c406ef2f",
-      "bytes": 55807,
-      "origin": "user-recording",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s06-l008"
+      "text": "У нас электричества ещё нет.",
+      "spokenText": "[dry, matter-of-fact delivery] У нас электричества ещё нет.",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact",
-      "text": "Потому что электричества нет."
+      "sha256": "4aa8351e1c7559d7d66579e6de3665088c0477710e69240ca69f87ce383c99b7",
+      "bytes": 40585,
+      "generatedAt": "2026-11-12T00:08:48.410Z",
+      "duration": 2.48,
+      "leadingSilence": 0.21,
+      "trailingSilence": 0.3599999999999999,
+      "replaces": "recordings/commander/m01-s07-l002.mp3"
     },
     "m01-v3-general-build-power": {
       "file": "recordings/reviewed/m01-v3-general-build-power-024fc11c6559.mp3",
@@ -2987,19 +3100,25 @@
       "text": "В конструкторе подбирайте модули, завод соберёт. Заказывайте что угодно."
     },
     "m01-s05-l012": {
-      "file": "recordings/reviewed/m01-s05-l012-d190e97ede4d.mp3",
-      "duration": 10.840833333333334,
-      "leadingSilence": 0.05,
-      "trailingSilence": 0.1608333333333345,
+      "file": "recordings/elevenlabs/m01-s05-l012-1cdc78ee3df8.mp3",
       "speaker": "commander",
-      "sha256": "d190e97ede4d534ba217ec01b75713449aa19d3c9bde90c13a2d944f441403fc",
-      "bytes": 190390,
-      "origin": "user-recording",
-      "sourceName": "ElevenLabs_2026-11-09T18_41_16_comandorNig_gen_s50_sim75_v4.mp3",
-      "draftRevision": 70,
-      "transcriptSource": "owner-workshop",
-      "text": "Не получится из букв «Ж», «О», «П», «А»...тоесть «УАЗ» — собрать слово «счастье»...я имел ввиду -  танк.",
-      "textEditedAfterUpload": true
+      "text": "Из букв «У», «А», «З» слово «танк» не собирается.",
+      "spokenText": "[dry, conversational] Из букв «У», «А», «Зэ» слово «танк» не собирается.",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "1cdc78ee3df8bd0ef163ed2c1e9a75c6e993bd50dd3d504aee6799dbf9e1be92",
+      "bytes": 76529,
+      "generatedAt": "2026-11-12T00:12:58.912Z",
+      "duration": 4.72,
+      "leadingSilence": 0.03,
+      "trailingSilence": 0.17999999999999972,
+      "replaces": "recordings/reviewed/m01-s05-l012-d190e97ede4d.mp3"
     },
     "m01-s05-l013": {
       "file": "recordings/reviewed/m01-s05-l013-0aedb6128dc0.mp3",
@@ -3060,126 +3179,6 @@
       },
       "textMatch": "exact",
       "text": "Вот «Буханку» опять обновили. Зря, конечно. Хорошая была машина. Сорок лет ничего не меняли — и правильно делали. А теперь ручку дверную другую поставили. Спрашивается, зачем?"
-    },
-    "m01-v4-r42-l001": {
-      "file": "recordings/elevenlabs/m01-v4-r42-l001-39ce575ac34e.mp3",
-      "text": "У меня тут республика! Меня народ выбрал!",
-      "voiceId": "hD8aK7CmEPgH3mbFO08e",
-      "voiceName": "Ivo - Calming, chill and narrative",
-      "modelId": "eleven_v4",
-      "voiceSettings": {
-        "stability": 0.5,
-        "similarityBoost": 0.75
-      },
-      "origin": "elevenlabs-synthesis",
-      "sha256": "39ce575ac34ed065e4001184b25c5eb01ba8f01e7dd9c5eef3169766331678a3",
-      "bytes": 53541,
-      "duration": 3.28,
-      "leadingSilence": 0.03,
-      "trailingSilence": 0.17999999999999972,
-      "speaker": "chief",
-      "generatedAt": "2026-11-11T20:58:07.148Z",
-      "draftRevision": 218
-    },
-    "m01-v4-r42-l002": {
-      "file": "recordings/elevenlabs/m01-v4-r42-l002-0af437e4200d.mp3",
-      "text": "И сколько набрал?",
-      "voiceId": "5mJA7umOnM5ycymymd6P",
-      "voiceName": "comandorNig",
-      "modelId": "eleven_v4",
-      "voiceSettings": {
-        "stability": 0.5,
-        "similarityBoost": 0.75
-      },
-      "origin": "elevenlabs-synthesis",
-      "sha256": "0af437e4200d706603d7f1351e64c4d41d8114109b8be33b5800ab252829a71e",
-      "bytes": 21358,
-      "duration": 1.28,
-      "leadingSilence": 0.04,
-      "trailingSilence": 0.1299999999999999,
-      "speaker": "commander",
-      "generatedAt": "2026-11-11T20:58:06.488Z",
-      "draftRevision": 218
-    },
-    "m01-v4-r42-l003": {
-      "file": "recordings/elevenlabs/m01-v4-r42-l003-d2114b0ee91c.mp3",
-      "text": "Девяносто восемь процентов!",
-      "voiceId": "hD8aK7CmEPgH3mbFO08e",
-      "voiceName": "Ivo - Calming, chill and narrative",
-      "modelId": "eleven_v4",
-      "voiceSettings": {
-        "stability": 0.5,
-        "similarityBoost": 0.75
-      },
-      "origin": "elevenlabs-synthesis",
-      "sha256": "d2114b0ee91cce91cbdd583f1c8a1f1f53004801f86b1fdc96753b6989bb1389",
-      "bytes": 38077,
-      "duration": 2.32,
-      "leadingSilence": 0.0,
-      "trailingSilence": 0.3099999999999996,
-      "speaker": "chief",
-      "generatedAt": "2026-11-11T20:58:07.612Z",
-      "draftRevision": 218
-    },
-    "m01-v4-r42-l004": {
-      "file": "recordings/elevenlabs/m01-v4-r42-l004-e667d6703f40.mp3",
-      "text": "Прапорщик, записывай: два процента населения просят нашей помощи.",
-      "voiceId": "5mJA7umOnM5ycymymd6P",
-      "voiceName": "comandorNig",
-      "modelId": "eleven_v4",
-      "voiceSettings": {
-        "stability": 0.5,
-        "similarityBoost": 0.75
-      },
-      "origin": "elevenlabs-synthesis",
-      "sha256": "e667d6703f40e8a650ac77e807b1ae8232d33cd0cb4b7b378e086c716270ca9c",
-      "bytes": 74021,
-      "duration": 4.56,
-      "leadingSilence": 0.04,
-      "trailingSilence": 0.15999999999999925,
-      "speaker": "commander",
-      "generatedAt": "2026-11-11T20:58:08.878Z",
-      "draftRevision": 218
-    },
-    "m01-v4-r42-l005": {
-      "file": "recordings/elevenlabs/m01-v4-r42-l005-3dbab5842e10.mp3",
-      "text": "А они знают?",
-      "voiceId": "6A9D8WSMm4rFsg2DWFeE",
-      "voiceName": "Egor Gadzhiyev - Clear and Commanding",
-      "modelId": "eleven_v4",
-      "voiceSettings": {
-        "stability": 0.5,
-        "similarityBoost": 0.75
-      },
-      "origin": "elevenlabs-synthesis",
-      "sha256": "3dbab5842e1059db53060356d316d8dd39b55b54212024f7f3a4e17d8f315ad1",
-      "bytes": 20105,
-      "duration": 1.2,
-      "leadingSilence": 0.04,
-      "trailingSilence": 0.2599999999999999,
-      "speaker": "warrant",
-      "generatedAt": "2026-11-11T20:58:08.502Z",
-      "draftRevision": 218
-    },
-    "m01-v4-r42-l006": {
-      "file": "recordings/elevenlabs/m01-v4-r42-l006-0ec03acaee8a.mp3",
-      "text": "Потом объясним.",
-      "voiceId": "5mJA7umOnM5ycymymd6P",
-      "voiceName": "comandorNig",
-      "modelId": "eleven_v4",
-      "voiceSettings": {
-        "stability": 0.5,
-        "similarityBoost": 0.75
-      },
-      "origin": "elevenlabs-synthesis",
-      "sha256": "0ec03acaee8aea318e2a39ec0131d5cf1a1c432231b8283791b4eee73fadbe2c",
-      "bytes": 21358,
-      "duration": 1.28,
-      "leadingSilence": 0.09,
-      "trailingSilence": 0.27,
-      "speaker": "commander",
-      "generatedAt": "2026-11-11T20:58:09.363Z",
-      "draftRevision": 218
     },
     "m01-v4-r49-l001": {
       "file": "recordings/elevenlabs/m01-v4-r49-l001-748b8b06357d.mp3",
@@ -3360,6 +3359,326 @@
       "speaker": "general",
       "generatedAt": "2026-11-11T20:58:14.903Z",
       "draftRevision": 218
+    },
+    "m01-r01a-power-building": {
+      "file": "recordings/elevenlabs/m01-r01a-power-building-6b2ece13e5e8.mp3",
+      "speaker": "commander",
+      "text": "Электростанция уже строится.",
+      "spokenText": "[matter-of-fact, brisk delivery] Электростанция уже строится.",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "6b2ece13e5e8ff398754ef3b359db1fad6cc4ea1caf547204282bc544d40e11c",
+      "bytes": 34315,
+      "generatedAt": "2026-11-12T00:08:49.101Z",
+      "duration": 2.08,
+      "leadingSilence": 0.2,
+      "trailingSilence": 0.16999999999999993
+    },
+    "m01-r01b-power-ready": {
+      "file": "recordings/elevenlabs/m01-r01b-power-ready-e03f239d1273.mp3",
+      "speaker": "commander",
+      "text": "Электростанция уже работает.",
+      "spokenText": "[matter-of-fact, brisk delivery] Электростанция уже работает.",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "e03f239d1273cf8d3ac0df04b4c9c6f709cde0de38198798ea21facfc33fedf4",
+      "bytes": 35569,
+      "generatedAt": "2026-11-12T00:08:49.573Z",
+      "duration": 2.16,
+      "leadingSilence": 0.06,
+      "trailingSilence": 0.26
+    },
+    "m01-s11-l001": {
+      "file": "recordings/elevenlabs/m01-s11-l001-b5757000d3f2.mp3",
+      "duration": 4.72,
+      "leadingSilence": 0.04,
+      "trailingSilence": 0.3099999999999996,
+      "speaker": "chief",
+      "text": "Слышь, командир! Вы чё к нам пристали?! Мы тут уже сто лет живём!",
+      "sha256": "b5757000d3f2934c8cc3cc0af69bf3072a4bef4fea58c9144f822fc544991ce1",
+      "bytes": 76529,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "hD8aK7CmEPgH3mbFO08e",
+      "voiceName": "Ivo - Calming, chill and narrative",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:23:42.181Z",
+      "draftRevision": 217
+    },
+    "m01-s11-l002": {
+      "file": "recordings/elevenlabs/m01-s11-l002-f67cdd75de30.mp3",
+      "duration": 2.64,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.10999999999999988,
+      "speaker": "commander",
+      "text": "Какое у вас государственное образование?",
+      "sha256": "f67cdd75de306b365521e5bb310d73ad8bda47c392abaf226e2372655ff54186",
+      "bytes": 43510,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:23:43.515Z",
+      "draftRevision": 217
+    },
+    "m01-s11-l003": {
+      "file": "recordings/elevenlabs/m01-s11-l003-f55b022a480d.mp3",
+      "duration": 1.2,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.35,
+      "speaker": "chief",
+      "text": "Чего?",
+      "sha256": "f55b022a480db8f68dc157eb0cb1bf1adcf223efd6823f1fb9aa0fd89ef7db6b",
+      "bytes": 20105,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "hD8aK7CmEPgH3mbFO08e",
+      "voiceName": "Ivo - Calming, chill and narrative",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:23:44.433Z",
+      "draftRevision": 217
+    },
+    "m01-s11-l004": {
+      "file": "recordings/elevenlabs/m01-s11-l004-4e300026b671.mp3",
+      "duration": 1.28,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.1499999999999999,
+      "speaker": "commander",
+      "text": "Кто у вас главный?",
+      "sha256": "4e300026b67107467d944d96082659b78685dc7cba1ef0250c18261ed1c2101f",
+      "bytes": 21358,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:23:45.350Z",
+      "draftRevision": 217
+    },
+    "m01-s11-l005": {
+      "file": "recordings/elevenlabs/m01-s11-l005-dc2761e92dbd.mp3",
+      "duration": 1.36,
+      "leadingSilence": 0.06,
+      "trailingSilence": 0.18000000000000016,
+      "speaker": "chief",
+      "text": "Петрович.",
+      "sha256": "dc2761e92dbd004751b2f871da368481a1982a57ca7f7a71919b235c622b2496",
+      "bytes": 23030,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "hD8aK7CmEPgH3mbFO08e",
+      "voiceName": "Ivo - Calming, chill and narrative",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:23:46.251Z",
+      "draftRevision": 217
+    },
+    "m01-s11-l006": {
+      "file": "recordings/elevenlabs/m01-s11-l006-563d746d9757.mp3",
+      "duration": 1.04,
+      "leadingSilence": 0.02,
+      "trailingSilence": 0.28,
+      "speaker": "commander",
+      "text": "Должность?",
+      "sha256": "563d746d9757bd8302c7848ca2bb8c56866007a4665f4a97fe1a0ca378b203ca",
+      "bytes": 17597,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:23:47.040Z",
+      "draftRevision": 217
+    },
+    "m01-s11-l007": {
+      "file": "recordings/elevenlabs/m01-s11-l007-227f54bb39fa.mp3",
+      "duration": 2.24,
+      "leadingSilence": 0.03,
+      "trailingSilence": 0.18000000000000016,
+      "speaker": "chief",
+      "text": "Ну… Петрович.",
+      "sha256": "227f54bb39fa1f26489144b87892a4375a87442469e7a62aaeb735646fb938f3",
+      "bytes": 36823,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "hD8aK7CmEPgH3mbFO08e",
+      "voiceName": "Ivo - Calming, chill and narrative",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:23:48.043Z",
+      "draftRevision": 217
+    },
+    "m01-s11-l008": {
+      "file": "recordings/elevenlabs/m01-s11-l008-f972f8c51555.mp3",
+      "duration": 1.92,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.16999999999999993,
+      "speaker": "commander",
+      "text": "Конституция имеется?",
+      "sha256": "f972f8c515553170d75b10bbc4095840ea08c110f8c1cdc3064d4193e851815a",
+      "bytes": 31807,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:23:49.272Z",
+      "draftRevision": 217
+    },
+    "m01-v5-r42-l009": {
+      "file": "recordings/elevenlabs/m01-v5-r42-l009-90cba10f36d1.mp3",
+      "speaker": "chief",
+      "text": "А у тебя?",
+      "spokenText": "[challenging, curt] А у тебя?",
+      "voiceId": "hD8aK7CmEPgH3mbFO08e",
+      "voiceName": "Ivo - Calming, chill and narrative",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "90cba10f36d109def1aa9bf8d6b7741ec3eaaa22a68b3bd08bfe8869f2f31f69",
+      "bytes": 18851,
+      "generatedAt": "2026-11-12T00:26:22.552Z",
+      "duration": 1.12,
+      "leadingSilence": 0.2,
+      "trailingSilence": 0.29000000000000004
+    },
+    "m01-v5-r42-l010": {
+      "file": "recordings/elevenlabs/m01-v5-r42-l010-a07ed3bc68bf.mp3",
+      "speaker": "commander",
+      "text": "У меня приказ.",
+      "spokenText": "[dry, firm] У меня приказ.",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "a07ed3bc68bf555bd4d091d3e4ae0869e79914f97c4eed95ba0bc2fb1a1a1930",
+      "bytes": 26792,
+      "generatedAt": "2026-11-12T00:26:22.272Z",
+      "duration": 1.6,
+      "leadingSilence": 0.21,
+      "trailingSilence": 0.3500000000000001
+    },
+    "m01-v5-r42-l011": {
+      "file": "recordings/elevenlabs/m01-v5-r42-l011-f7c11885572a.mp3",
+      "speaker": "chief",
+      "text": "Вот и у меня. Только я сам отдаю.",
+      "spokenText": "[defiant, smug] Вот и у меня. Только я сам отдаю.",
+      "voiceId": "hD8aK7CmEPgH3mbFO08e",
+      "voiceName": "Ivo - Calming, chill and narrative",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "f7c11885572afdde657e772c600d7466be99db65a92e2b18be0245eff6ef9496",
+      "bytes": 44764,
+      "generatedAt": "2026-11-12T00:26:23.541Z",
+      "duration": 2.72,
+      "leadingSilence": 0.02,
+      "trailingSilence": 0.2200000000000002
+    },
+    "m01-v5-r42-l012": {
+      "file": "recordings/elevenlabs/m01-v5-r42-l012-8fe62faa07e4.mp3",
+      "speaker": "commander",
+      "text": "Прикажи себе сдаться. Заодно дисциплину проверим.",
+      "spokenText": "[dryly amused, clipped delivery] Прикажи себе сдаться. Заодно дисциплину проверим.",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "8fe62faa07e445c23c2f664e2852a997023b4d40736c79823ae7df6abc5ee0b3",
+      "bytes": 62318,
+      "generatedAt": "2026-11-12T00:26:23.971Z",
+      "duration": 3.84,
+      "leadingSilence": 0.08,
+      "trailingSilence": 0.18999999999999995
+    },
+    "m01-v5-r42-l013": {
+      "file": "recordings/elevenlabs/m01-v5-r42-l013-76aac33a7283.mp3",
+      "speaker": "chief",
+      "text": "Да ты сначала зайди сюда!",
+      "spokenText": "[angry, defiant] Да ты сначала зайди сюда!",
+      "voiceId": "hD8aK7CmEPgH3mbFO08e",
+      "voiceName": "Ivo - Calming, chill and narrative",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "76aac33a72835b76e9cd2bb490126deb98ca2fa78f79380d8b5c069eba1866f4",
+      "bytes": 35569,
+      "generatedAt": "2026-11-12T00:26:24.524Z",
+      "duration": 2.16,
+      "leadingSilence": 0.02,
+      "trailingSilence": 0.30000000000000004
+    },
+    "m01-v5-r42-l014": {
+      "file": "recordings/elevenlabs/m01-v5-r42-l014-c41e47f01629.mp3",
+      "speaker": "commander",
+      "text": "Слышали, ребята? Нас пригласили. Заходим.",
+      "spokenText": "[confident, dryly amused] Слышали, ребята? Нас пригласили. Заходим.",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "c41e47f016291691713b0d2a05ee4b2e159ed9681d9b3293cbccc3c4d69ad275",
+      "bytes": 57303,
+      "generatedAt": "2026-11-12T00:26:25.297Z",
+      "duration": 3.52,
+      "leadingSilence": 0.08,
+      "trailingSilence": 0.1200000000000001
     }
   }
 }

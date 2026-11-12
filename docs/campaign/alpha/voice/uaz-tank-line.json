@@ -1,0 +1,68 @@
+{
+  "status": "awaiting-owner-listening-before-merge",
+  "approval": "Owner approved exact subtitle and requested separate pronunciation of letters; only commander line changes.",
+  "reservedCredits": 72,
+  "generatedRecordings": 1,
+  "originalAudioPreserved": true,
+  "openingHandoffUnchanged": true,
+  "mission03LoadingAndDepartureUnchanged": true,
+  "missions": {
+    "01": {
+      "sourceRevision": 223,
+      "savedRevision": 224,
+      "changedCues": [
+        "m01-s05-l012"
+      ],
+      "clips": {
+        "m01-s05-l012": {
+          "file": "recordings/elevenlabs/m01-s05-l012-1cdc78ee3df8.mp3",
+          "speaker": "commander",
+          "text": "Из букв «У», «А», «З» слово «танк» не собирается.",
+          "spokenText": "[dry, conversational] Из букв «У», «А», «Зэ» слово «танк» не собирается.",
+          "voiceId": "5mJA7umOnM5ycymymd6P",
+          "voiceName": "comandorNig",
+          "modelId": "eleven_v4",
+          "origin": "elevenlabs-synthesis",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "sha256": "1cdc78ee3df8bd0ef163ed2c1e9a75c6e993bd50dd3d504aee6799dbf9e1be92",
+          "bytes": 76529,
+          "generatedAt": "2026-11-12T00:12:58.912Z",
+          "duration": 4.72,
+          "leadingSilence": 0.03,
+          "trailingSilence": 0.17999999999999972,
+          "replaces": "recordings/reviewed/m01-s05-l012-d190e97ede4d.mp3"
+        }
+      },
+      "scenes": [
+        {
+          "id": "r06",
+          "title": "Выданная бронетехника",
+          "lines": [
+            {
+              "id": "m01-s05-l011",
+              "speaker": "general",
+              "text": "В конструкторе подбирайте модули, завод соберёт. Заказывайте что угодно.",
+              "audio": "docs/campaign/dialogue-drafts/alpha-m01/media/94f75ea6f77360fbee3f1b879de74973d6a14ccdcba05500af7c732f3dd7a253.mp3"
+            },
+            {
+              "id": "m01-s05-l012",
+              "speaker": "commander",
+              "text": "Из букв «У», «А», «З» слово «танк» не собирается.",
+              "audio": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-s05-l012-1cdc78ee3df8.mp3"
+            },
+            {
+              "id": "m01-s05-l013",
+              "speaker": "general",
+              "text": "Читайте мелкий шрифт в доступных чертежах: «Доработать напильником».",
+              "audio": "docs/campaign/dialogue-drafts/alpha-m01/media/0aedb6128dc0c4327653a24952d60c80a043b8a262e39f95d846258a681ef7ff.mp3"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "note": "Reserved credit estimate, not a verified account debit."
+}
