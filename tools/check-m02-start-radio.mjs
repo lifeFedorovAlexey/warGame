@@ -26,7 +26,8 @@ for(const cue of cues){
 }
 assert.equal(audio.clips[cues[0]].sha256,'84d48f6554e6f96960c97427611631ffcbfb21c75a565ddec8933d1ba8202411');
 assert.equal(audio.clips[cues.at(-1)].sha256,'bafddb0be0d69e91f923b0c3f9e28d67e417d5a8b74e24b8e9d278f9206b2124');
-for(const s of original.scenes.filter(s=>s.id!==id)){
+const editedScenes=new Set(edits.scenes.map(s=>s.id));
+for(const s of original.scenes.filter(s=>!editedScenes.has(s.id))){
  assert.deepEqual(story.scenes.find(scene=>scene.id===s.id),s);
  for(const cue of s.cues){assert.deepEqual(story.dialogue.find(l=>l.id===cue),original.dialogue.find(l=>l.id===cue));assert.deepEqual(audio.clips[cue],originalAudio.clips[cue]);}
 }
@@ -51,11 +52,11 @@ function fixture(elapsed=0){
 }
 // A briefing that never began still expires after ninety seconds, including combat.
 for(const combat of [false,true]){
- const f=fixture(combat?89:90);
- if(combat){f.director.note({type:'unit-damaged'},f.mission);assert.equal(f.tick(),null);}
+ const f=fixture(90);
+ if(combat)f.director.note({type:'unit-damaged'},f.mission);
  assert.equal(f.tick(4),null);assert(!f.director.heard(id));assert(!f.director.data.scenes[id]);
 }
-// Starting late, battle and a save during the pause must not lose or rewind lines.
+// Starting late, battle and a save must not interrupt, lose or rewind lines.
 {
  const f=fixture(89),played=[];
  for(const cue of cues){
@@ -64,22 +65,26 @@ for(const combat of [false,true]){
   assert.equal(f.tick(2)?.id,cue,'A hit does not cut a playing line');
   f.director.completeLine();
   if(cue!==cues.at(-1)){
-   assert.equal(f.director.data.active,null,'Pause at the line boundary');
+   assert.equal(f.director.data.active,id,'Story keeps the channel at the line boundary');
    const cursor=f.director.record(id).cursor;
-   f.reload();assert.equal(f.tick(),null);assert.equal(f.director.record(id).cursor,cursor);
-   assert.equal(f.tick(3)?.id,cues[cursor],'Resume the next line beyond the old deadline');
+   f.reload();assert.equal(f.director.record(id).cursor,cursor);
+   assert.equal(f.tick()?.id,cues[cursor],'Resume the next line immediately, even beyond the old deadline');
   }
  }
  assert.deepEqual(played,cues);assert(f.director.heard(id));assert(f.mission.state.time-f.mission.state.m02.startedAt>90);
 }
-// Urgent contact can use the combat pause, then the opening continues at its answer.
+// A newly seen contact waits for the started story exchange to finish.
 {
  const f=fixture(89);assert.equal(f.tick()?.id,cues[0]);
  f.director.note({type:'unit-damaged'},f.mission);f.mission.state.m02.entranceSeen=true;
  assert.equal(f.tick()?.id,cues[0]);f.director.completeLine();
- assert.equal(f.tick()?.storyScene,'m02-radio-entrance');f.finish();
- assert.equal(f.tick(3)?.id,cues[1]);
+ assert.equal(f.tick()?.id,cues[1]);f.finish();
+ assert.equal(f.tick(2)?.storyScene,'m02-radio-entrance');
+}
+// Explicit radio-off/save pauses still preserve the current line.
+{
+ const f=fixture(89);assert(f.tick());f.director.completeLine();assert.equal(f.tick()?.id,cues[1]);
  f.tick(10,false);f.reload();assert.equal(f.tick()?.id,cues[1],'Radio off/load resumes only the interrupted line');
  f.mission.state.status='victory';assert.notEqual(f.tick()?.storyScene,id);assert.equal(f.director.record(id).status,'cancelled');
 }
-console.log('PASS: M02 six-line opening, exact approved text, reused recordings, 90-second late-start expiry, combat boundary pauses, saved cursor, urgent contact, mission completion and unchanged orders');
+console.log('PASS: M02 six-line opening, exact approved text, reused recordings, late-start expiry, uninterrupted combat playback, saved cursor, queued contact, mission completion and unchanged orders');

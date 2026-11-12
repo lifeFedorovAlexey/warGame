@@ -1,6 +1,6 @@
 {
-  "revision": 2,
-  "savedAt": "2026-11-12T07:33:59.583994+00:00",
+  "revision": 5,
+  "savedAt": "2026-11-12T09:50:33.960220+00:00",
   "document": {
     "id": "alpha-m02",
     "title": "Энергетический всплеск",
@@ -50,6 +50,13 @@
         "lengthScale": 1.16,
         "pitchSemitones": -0.5,
         "effect": "clean"
+      },
+      "raider": {
+        "name": "Отброс",
+        "voice": "dmitri",
+        "lengthScale": 0.98,
+        "pitchSemitones": -1.4,
+        "effect": "radio"
       }
     },
     "scenes": [
@@ -64,10 +71,10 @@
           "m02-v2-start-4",
           "m02-radio-start-2"
         ],
-        "triggerDescription": "Начало m02. Не начатая сцена доступна первые 90 секунд; начатый разговор продолжается после этого срока. Во время боя пауза между репликами, затем продолжение с той же позиции. Отмена при завершении миссии.",
+        "triggerDescription": "Начало m02. Не начатая сцена доступна первые 90 секунд; начатый разговор продолжается после этого срока и звучит целиком, в том числе во время боя. Отмена при завершении миссии.",
         "kind": "sequence",
         "section": "Сюжет",
-        "trigger": "Начало m02. Не начатая сцена доступна первые 90 секунд; начатый разговор продолжается после этого срока. Во время боя пауза между репликами, затем продолжение с той же позиции. Отмена при завершении миссии.",
+        "trigger": "Начало m02. Не начатая сцена доступна первые 90 секунд; начатый разговор продолжается после этого срока и звучит целиком, в том числе во время боя. Отмена при завершении миссии.",
         "notes": "",
         "enabled": true
       },
@@ -76,7 +83,14 @@
         "title": "Проход",
         "cues": [
           "m02-radio-entrance-1",
-          "m02-radio-entrance-2"
+          "m02-v4-council-1",
+          "m02-v4-council-2",
+          "m02-v4-council-3",
+          "m02-v4-council-4",
+          "m02-v4-council-5",
+          "m02-v4-council-6",
+          "m02-v4-council-7",
+          "m02-v4-council-8"
         ],
         "triggerDescription": "Обнаружен проход; оба ДОТа живы.",
         "kind": "sequence",
@@ -143,7 +157,9 @@
         "id": "m02-radio-flamer-ready",
         "title": "Огнемёт усилен",
         "cues": [
-          "m02-radio-flamer-ready-1"
+          "m02-v3-flamer-1",
+          "m02-v3-flamer-2",
+          "m02-v3-flamer-3"
         ],
         "triggerDescription": "Исследовано усиление огнемёта.",
         "kind": "sequence",
@@ -375,7 +391,7 @@
         }
       },
       "m02-radio-entrance-2": {
-        "enabled": true,
+        "enabled": false,
         "notes": "",
         "portraitState": "",
         "portrait": null,
@@ -606,7 +622,7 @@
         }
       },
       "m02-radio-flamer-ready-1": {
-        "enabled": true,
+        "enabled": false,
         "notes": "",
         "portraitState": "",
         "portrait": null,
@@ -1193,6 +1209,358 @@
           "duration": 5.52,
           "leadingSilence": 0.01,
           "trailingSilence": 0.15999999999999925
+        }
+      },
+      "m02-v3-flamer-1": {
+        "id": "m02-v3-flamer-1",
+        "key": "m02-v3-flamer-1",
+        "speaker": "scientist",
+        "text": "Огнемёты усилил. На баллонах написано: «Щадящая зачистка».",
+        "pauseAfter": 0.2,
+        "recordingStatus": "Т",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission02/recordings/elevenlabs/m02-v3-flamer-1-9567a646a521.mp3",
+          "speaker": "scientist",
+          "text": "Огнемёты усилил. На баллонах написано: «Щадящая зачистка».",
+          "spokenText": "[matter-of-fact] Огнемёты усилил. На баллонах написано: «Щадящая зачистка».",
+          "voiceId": "1KGG4Q8LqRdNII9xBurw",
+          "voiceName": "M. Danisch - Narrator",
+          "modelId": "eleven_v4",
+          "origin": "elevenlabs-synthesis",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "sha256": "9567a646a52179911152979f1a1677c0a535fcc2e8c0f0081b250759c39405c0",
+          "bytes": 77783,
+          "generatedAt": "2026-11-12T09:29:03.258Z",
+          "duration": 4.8,
+          "leadingSilence": 0.03,
+          "trailingSilence": 0.33999999999999986
+        }
+      },
+      "m02-v3-flamer-2": {
+        "id": "m02-v3-flamer-2",
+        "key": "m02-v3-flamer-2",
+        "speaker": "warrant",
+        "text": "Это что, ещё со Вьетнама?",
+        "pauseAfter": 0.2,
+        "recordingStatus": "Т",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission02/recordings/elevenlabs/m02-v3-flamer-2-28dd0a8eb08a.mp3",
+          "speaker": "warrant",
+          "text": "Это что, ещё со Вьетнама?",
+          "spokenText": "[skeptical] Это что, ещё со Вьетнама?",
+          "voiceId": "6A9D8WSMm4rFsg2DWFeE",
+          "voiceName": "Egor Gadzhiyev - Clear and Commanding",
+          "modelId": "eleven_v4",
+          "origin": "elevenlabs-synthesis",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "sha256": "28dd0a8eb08a9e9b5edf759bd63a375fdb29d76dfe545b022ab9277cacf99473",
+          "bytes": 38077,
+          "generatedAt": "2026-11-12T09:29:02.392Z",
+          "duration": 2.32,
+          "leadingSilence": 0.13,
+          "trailingSilence": 0.2999999999999998
+        }
+      },
+      "m02-v3-flamer-3": {
+        "id": "m02-v3-flamer-3",
+        "key": "m02-v3-flamer-3",
+        "speaker": "scientist",
+        "text": "Баллоны новые. Инструкция старая.",
+        "pauseAfter": 0.2,
+        "recordingStatus": "Т",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission02/recordings/elevenlabs/m02-v3-flamer-3-b9b331c471bc.mp3",
+          "speaker": "scientist",
+          "text": "Баллоны новые. Инструкция старая.",
+          "spokenText": "[dry] Баллоны новые. Инструкция старая.",
+          "voiceId": "1KGG4Q8LqRdNII9xBurw",
+          "voiceName": "M. Danisch - Narrator",
+          "modelId": "eleven_v4",
+          "origin": "elevenlabs-synthesis",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "sha256": "b9b331c471bc1f529e305d6b86a9a2a1ef6bdc4b7247d45febdc4eb5c2e3af4b",
+          "bytes": 54795,
+          "generatedAt": "2026-11-12T09:29:03.910Z",
+          "duration": 3.36,
+          "leadingSilence": 0.19,
+          "trailingSilence": 0.33999999999999986
+        }
+      },
+      "m02-v4-council-1": {
+        "id": "m02-v4-council-1",
+        "key": "m02-v4-council-1",
+        "speaker": "raider",
+        "text": "Проезд закрыт. Совет согласовал с партнёрами.",
+        "pauseAfter": 0.2,
+        "recordingStatus": "Т",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission02/recordings/elevenlabs/m02-v4-council-1-67c055698077.mp3",
+          "speaker": "raider",
+          "text": "Проезд закрыт. Совет согласовал с партнёрами.",
+          "spokenText": "[matter-of-fact] Проезд закрыт. Совет согласовал с партнёрами.",
+          "voiceId": "hD8aK7CmEPgH3mbFO08e",
+          "voiceName": "Ivo - Calming, chill and narrative",
+          "modelId": "eleven_v4",
+          "origin": "elevenlabs-synthesis",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "sha256": "67c05569807749f72127949fd6dabfe1dcd7b257b52022f8744e78c057df5a3f",
+          "bytes": 48526,
+          "generatedAt": "2026-11-12T09:36:00.160Z",
+          "duration": 2.96,
+          "leadingSilence": 0.11,
+          "trailingSilence": 0.27
+        }
+      },
+      "m02-v4-council-2": {
+        "id": "m02-v4-council-2",
+        "key": "m02-v4-council-2",
+        "speaker": "commander",
+        "text": "А сам ваш совет что-нибудь решает?",
+        "pauseAfter": 0.2,
+        "recordingStatus": "Т",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission02/recordings/elevenlabs/m02-v4-council-2-5ca42c53efef.mp3",
+          "speaker": "commander",
+          "text": "А сам ваш совет что-нибудь решает?",
+          "spokenText": "[dry, skeptical] А сам ваш совет что-нибудь решает?",
+          "voiceId": "5mJA7umOnM5ycymymd6P",
+          "voiceName": "comandorNig",
+          "modelId": "eleven_v4",
+          "origin": "elevenlabs-synthesis",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "sha256": "5ca42c53efef865eec8c1356a53c6c36ce27e15d16ab9a08e824d21aa62bf278",
+          "bytes": 47272,
+          "generatedAt": "2026-11-12T09:36:00.068Z",
+          "duration": 2.88,
+          "leadingSilence": 0.19,
+          "trailingSilence": 0.2999999999999998
+        }
+      },
+      "m02-v4-council-3": {
+        "id": "m02-v4-council-3",
+        "key": "m02-v4-council-3",
+        "speaker": "raider",
+        "text": "Мы всё сами решаем.",
+        "pauseAfter": 0.2,
+        "recordingStatus": "Т",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission02/recordings/elevenlabs/m02-v4-council-3-fdfb7f839427.mp3",
+          "speaker": "raider",
+          "text": "Мы всё сами решаем.",
+          "spokenText": "[matter-of-fact] Мы всё сами решаем.",
+          "voiceId": "hD8aK7CmEPgH3mbFO08e",
+          "voiceName": "Ivo - Calming, chill and narrative",
+          "modelId": "eleven_v4",
+          "origin": "elevenlabs-synthesis",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "sha256": "fdfb7f839427a0e1af59defe19799b566073dde55f7df5ada8c62343b5720a37",
+          "bytes": 30554,
+          "generatedAt": "2026-11-12T09:36:01.123Z",
+          "duration": 1.84,
+          "leadingSilence": 0.03,
+          "trailingSilence": 0.43000000000000016
+        }
+      },
+      "m02-v4-council-4": {
+        "id": "m02-v4-council-4",
+        "key": "m02-v4-council-4",
+        "speaker": "commander",
+        "text": "А если партнёрам не понравится?",
+        "pauseAfter": 0.2,
+        "recordingStatus": "Т",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission02/recordings/elevenlabs/m02-v4-council-4-1b011fc39de4.mp3",
+          "speaker": "commander",
+          "text": "А если партнёрам не понравится?",
+          "spokenText": "[dry, skeptical] А если партнёрам не понравится?",
+          "voiceId": "5mJA7umOnM5ycymymd6P",
+          "voiceName": "comandorNig",
+          "modelId": "eleven_v4",
+          "origin": "elevenlabs-synthesis",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "sha256": "1b011fc39de4d7763e5e54560e13c776892ff482eb6e04926f830f81f572671f",
+          "bytes": 38077,
+          "generatedAt": "2026-11-12T09:36:01.435Z",
+          "duration": 2.32,
+          "leadingSilence": 0.22,
+          "trailingSilence": 0.2799999999999998
+        }
+      },
+      "m02-v4-council-5": {
+        "id": "m02-v4-council-5",
+        "key": "m02-v4-council-5",
+        "speaker": "raider",
+        "text": "Ну, совет поменяет решение.",
+        "pauseAfter": 0.2,
+        "recordingStatus": "Т",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission02/recordings/elevenlabs/m02-v4-council-5-9446848baf56.mp3",
+          "speaker": "raider",
+          "text": "Ну, совет поменяет решение.",
+          "spokenText": "[matter-of-fact] Ну, совет поменяет решение.",
+          "voiceId": "hD8aK7CmEPgH3mbFO08e",
+          "voiceName": "Ivo - Calming, chill and narrative",
+          "modelId": "eleven_v4",
+          "origin": "elevenlabs-synthesis",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "sha256": "9446848baf56cf8bc1b9cfe405b404ff24a6c9c9a7e9ef4fd56bc0a4e807cdd8",
+          "bytes": 39331,
+          "generatedAt": "2026-11-12T09:36:02.293Z",
+          "duration": 2.4,
+          "leadingSilence": 0.07,
+          "trailingSilence": 0.18999999999999995
+        }
+      },
+      "m02-v4-council-6": {
+        "id": "m02-v4-council-6",
+        "key": "m02-v4-council-6",
+        "speaker": "commander",
+        "text": "А если не поменяет?",
+        "pauseAfter": 0.2,
+        "recordingStatus": "Т",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission02/recordings/elevenlabs/m02-v4-council-6-f89b54c9f3d4.mp3",
+          "speaker": "commander",
+          "text": "А если не поменяет?",
+          "spokenText": "[dry, skeptical] А если не поменяет?",
+          "voiceId": "5mJA7umOnM5ycymymd6P",
+          "voiceName": "comandorNig",
+          "modelId": "eleven_v4",
+          "origin": "elevenlabs-synthesis",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "sha256": "f89b54c9f3d49779d0e8fab5b347527d35dca28bf61e79fc3e3c1efd45558c08",
+          "bytes": 31807,
+          "generatedAt": "2026-11-12T09:36:02.548Z",
+          "duration": 1.92,
+          "leadingSilence": 0.18,
+          "trailingSilence": 0.3599999999999999
+        }
+      },
+      "m02-v4-council-7": {
+        "id": "m02-v4-council-7",
+        "key": "m02-v4-council-7",
+        "speaker": "raider",
+        "text": "Тогда партнёры поменяют совет.",
+        "pauseAfter": 0.2,
+        "recordingStatus": "Т",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission02/recordings/elevenlabs/m02-v4-council-7-727b6657064d.mp3",
+          "speaker": "raider",
+          "text": "Тогда партнёры поменяют совет.",
+          "spokenText": "[matter-of-fact] Тогда партнёры поменяют совет.",
+          "voiceId": "hD8aK7CmEPgH3mbFO08e",
+          "voiceName": "Ivo - Calming, chill and narrative",
+          "modelId": "eleven_v4",
+          "origin": "elevenlabs-synthesis",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "sha256": "727b6657064d4ea23ac4c3351bde8574e2794f7927a161b5b2405484253519c6",
+          "bytes": 36823,
+          "generatedAt": "2026-11-12T09:36:03.543Z",
+          "duration": 2.24,
+          "leadingSilence": 0.1,
+          "trailingSilence": 0.3500000000000001
+        }
+      },
+      "m02-v4-council-8": {
+        "id": "m02-v4-council-8",
+        "key": "m02-v4-council-8",
+        "speaker": "commander",
+        "text": "Но только если согласует это решение.",
+        "pauseAfter": 0.2,
+        "recordingStatus": "Т",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission02/recordings/elevenlabs/m02-v4-council-8-64a66c25776e.mp3",
+          "speaker": "commander",
+          "text": "Но только если согласует это решение.",
+          "spokenText": "[dry, skeptical] Но только если согласует это решение.",
+          "voiceId": "5mJA7umOnM5ycymymd6P",
+          "voiceName": "comandorNig",
+          "modelId": "eleven_v4",
+          "origin": "elevenlabs-synthesis",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "sha256": "64a66c25776e594e63821d3fc6fd27373f9286db540d20112117e661beed1787",
+          "bytes": 47272,
+          "generatedAt": "2026-11-12T09:36:03.985Z",
+          "duration": 2.88,
+          "leadingSilence": 0.09,
+          "trailingSilence": 0.2999999999999998
         }
       }
     },
