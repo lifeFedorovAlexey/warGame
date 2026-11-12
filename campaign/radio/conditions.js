@@ -71,6 +71,7 @@ export function validateLibrary(library){
  for(const rule of library.rules){
   if(!/^[\w.:-]+$/.test(rule.id)||ids.has(rule.id))throw Error('Повторяющийся ID ситуации');ids.add(rule.id);
   if(!METRICS.includes(rule.countMetric)||!['wired','derivable','unavailable'].includes(rule.support))throw Error('Неверный счётчик или статус');
+  if(rule.delivery!=null&&!['notification','reaction','summary','idle'].includes(rule.delivery))throw Error('Неверный порядок передачи');
   if(!['order','incident','squad','global'].includes(rule.scope)||!Array.isArray(rule.roles)||!rule.roles.length||rule.roles.some(r=>!['driver','builder','commander','radio','scout','technician','warrant'].includes(r)))throw Error('Неверная область агрегации или роли');
   for(const [key,min,max] of [['windowSimSeconds',0,60],['cooldown',0,600],['expiresAfter',1,600],['priority',0,100]])if(!Number.isFinite(rule[key])||rule[key]<min||rule[key]>max)throw Error('Неверное значение '+key);
   validateCondition(rule.preconditions);

@@ -3,6 +3,7 @@ from pathlib import Path
 import json
 import re
 from radio_dialogue_content import enrich
+from radio_dispatch_content import apply_dispatch_content
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'assets/radio'
@@ -209,7 +210,7 @@ def build():
  enrich(rules,phrases,library['dictionaries'],library['settings'])
  for voice in library['characters']:voice['gender']='f' if voice['voiceId'] in ('voice-3','voice-5') else 'm'
  library['characters']=[c for c in library['characters'] if c['voiceId']!='voice-5']
- return library
+ return apply_dispatch_content(library)
 
 if __name__=='__main__':
  OUT.mkdir(parents=True,exist_ok=True)

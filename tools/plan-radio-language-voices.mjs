@@ -24,7 +24,7 @@ for(const rule of library.rules.filter(r=>r.enabled&&r.support==='wired'))for(co
  const fields=phrases.flatMap(p=>[...p.text.matchAll(/\{([^}:]+)(?::[^}]+)?\}/g)].map(m=>m[1]));
  if(fields.some(k=>!['killedCrewCount','destroyedVehicleCount'].includes(k)))continue;
  for(const count of fields.length?[1,2,3,5]:[null]){
-  const premium=!!(graph.humor||graph.remembrance||rule.priority>=78||rule.id==='damage.panic_failed');
+  const premium=!!(graph.humor||graph.remembrance||rule.priority>=78||rule.id==='damage.panic_failed'||phrases.some(p=>p.emotion==='urgent'));
   const rows=[];
   for(const phrase of phrases)for(const voice of profiles){
    if(phrase.speakerGender&&phrase.speakerGender!==voice.gender||phrase.voiceId&&phrase.voiceId!==voice.profile)continue;
@@ -36,7 +36,8 @@ for(const rule of library.rules.filter(r=>r.enabled&&r.support==='wired'))for(co
    if(old&&old.voiceId!==voice.voiceId)throw Error('Crew voice changed');
    if(old)continue;
    const id='review-'+hash(voice.profile+'\0'+text).slice(0,20);
-   const spokenText=(graph.remembrance||rule.id==='damage.panic_failed'?'[somber] ':graph.humor?'[dry] ':'')+text;
+   const direction=phrase.emotion==='urgent'?'[urgent, strained voice] ':graph.remembrance||rule.id==='damage.panic_failed'?'[somber] ':graph.humor?'[dry] ':phrase.emotion==='relieved'&&premium?'[relieved, excited voice] ':'';
+   const spokenText=direction+text;
    rows.push({id,kind:'radio',...voice,text,spokenText,modelId:premium?'eleven_v4':'eleven_flash_v2_5',
     phraseId:phrase.id,estimatedCredits:Math.ceil([...spokenText].length*(premium?1:.5))});
   }

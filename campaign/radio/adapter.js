@@ -5,6 +5,8 @@ import {CrewStories} from './crew-stories.js';
 import {CrewBanter,banterCrew} from './crew-banter.js';
 import {loadRecordedSpeech,activeRadioVoice} from './audio.js';
 import {RetreatIncidents,mergeRetreatLibrary} from './retreat-incidents.js';
+import {CombatReports} from './combat-reports.js';
+import {upgradeDispatch} from './dispatch-policy.js';
 
 export const ENGINE_EVENTS={
  'factory-repair-start':'repair.start_factory','factory-repair-complete':'repair.complete',
@@ -89,6 +91,7 @@ export class MissionRadio{
   this.intel=new TacticalIntel(saved?.intel);this.crewStories=new CrewStories(saved?.crewStories);
   this.banter=new CrewBanter(saved?.banter);
   this.retreatIncidents=new RetreatIncidents(saved?.retreatIncidents);
+  this.combatReports=new CombatReports(saved?.combatReports);
   this.eventWindows=new Map(saved?.eventWindows??[]);
   this.unitIds=new Set(m.state.units.filter(u=>u.owner==='rai').map(u=>u.id));
   if(this.warmingUp)this.clearStartupQueue();
@@ -116,9 +119,10 @@ export class MissionRadio{
  destroyedTarget(target,source,{exploded=false}={}){return this.safe(()=>{
   if(!['scavs','unknown'].includes(target.owner)||source?.owner!=='rai'||target.hp>0||!this.mission.visibleAt(target.x,target.y))return;
   const operation=this.assignments.get(source.id)?.orderId??'unit:'+source.id;
-  this.event('combat.target_destroyed',{rootCauseId:'destroyed:'+target.id,incidentId:this.windowScope('combat.target_destroyed',operation),
-   actorIds:[source.id],affectedIds:[source.id],targetIds:[target.id],
-   facts:{explosionConfirmed:exploded,resolution:'resolved'},flags:{confirmed:true,hasCombat:true}});
+  if(this.warmingUp)return;
+  this.engine.state.lastCombat=this.time;
+  const window=this.engine.index.get('combat.target_destroyed')?.[0]?.windowSimSeconds??18;
+  this.combatReports.destroyed(target,source,operation,this.time,window,(type,data)=>this.event(type,data),{exploded});
  });}
  event(type,data={}){
   // Let the opening story establish the channel. Do not save up early chatter.
@@ -209,6 +213,7 @@ export class MissionRadio{
   this.intel.scan(this.mission,(group,rows)=>this.event('recon.enemy_first_seen',{incidentId:this.windowScope('recon.enemy_first_seen',group),targetIds:rows.map(r=>r.id),facts:{confirmed:true},flags:{confirmed:true}}));
   this.crewStories.tick(this.mission,this.engine,(type,data)=>this.event(type,data));
   this.banter.tick(this.mission,this.engine,(type,data)=>this.event(type,data));
+  this.combatReports.tick(this.time,this.engine,(type,data)=>this.event(type,data));
   this.traffic.update(this.time,(type,data)=>{if(type==='traffic.jam_resolved')this.rememberTraffic(data);this.event(type,data);},this.library.settings.trafficConfirmSeconds??10);
   this.engine.tick(Math.round(this.time/(this.mission.config.simulationStep??.1)),this.time);
  });}
@@ -278,8 +283,8 @@ export class MissionRadio{
   }
   return {speakers,relevant,combat:this.time-(this.engine.state.lastCombat??-100)<8};
  }
- next(options){this.bind();if(this.warmingUp){this.clearStartupQueue();return null;}const line=this.engine.next(this.time,options);if(line&&this.crews.has(line.crewId))this.crews.get(line.crewId).lastSpoken=this.time;return line;}
- save(){this.bind();this.mission.state.dynamicRadio={version:1,engine:this.engine.save(),traffic:this.traffic.save(),previous:[...this.previous],orders:[...this.orders],assignments:[...this.assignments],retreatOrders:[...this.retreatOrders],eventWindows:[...this.eventWindows],crews:[...this.crews],memories:[...this.memories],intel:this.intel.save(),crewStories:this.crewStories.save(),banter:this.banter.save(),retreatIncidents:this.retreatIncidents.save()};}
+ next(options){this.bind();if(this.warmingUp){this.clearStartupQueue();return null;}const line=this.engine.next(this.time,options);if(line){this.combatReports.spoken(this.engine.active,this.time);if(this.crews.has(line.crewId))this.crews.get(line.crewId).lastSpoken=this.time;}return line;}
+ save(){this.bind();this.mission.state.dynamicRadio={version:1,engine:this.engine.save(),traffic:this.traffic.save(),previous:[...this.previous],orders:[...this.orders],assignments:[...this.assignments],retreatOrders:[...this.retreatOrders],eventWindows:[...this.eventWindows],crews:[...this.crews],memories:[...this.memories],intel:this.intel.save(),crewStories:this.crewStories.save(),banter:this.banter.save(),retreatIncidents:this.retreatIncidents.save(),combatReports:this.combatReports.save()};}
 }
 
 export async function loadRadioLibrary(){
@@ -287,5 +292,5 @@ export async function loadRadioLibrary(){
  const response=await fetch('/api/radio/published').catch(()=>null);
  const seed=await fetch(new URL('../../assets/radio/situations_catalog.json',import.meta.url));
  if(!seed.ok){if(response?.ok)return (await response.json()).document;throw Error('Библиотека радио недоступна');}
- const defaults=await seed.json();return response?.ok?mergeRetreatLibrary((await response.json()).document,defaults):defaults;
+ const defaults=await seed.json();return response?.ok?upgradeDispatch(mergeRetreatLibrary((await response.json()).document,defaults),defaults):defaults;
 }

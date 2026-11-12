@@ -11,6 +11,7 @@ import subprocess
 import zipfile
 import dialogue_editor as legacy
 from radio_speech import speech
+from radio_dispatch_content import upgrade_dispatch
 
 ROOT = legacy.ROOT
 STORE = ROOT / 'docs/campaign/dialogue-drafts/dynamic-radio'
@@ -90,6 +91,7 @@ def load(published=False):
                 for node in graph['nodes']:
                     phrase = node['phraseId']
                     document['phrases'].setdefault(phrase, seed['phrases'][phrase])
+    upgrade_dispatch(document, seed)
     return result
 
 def validate(document):

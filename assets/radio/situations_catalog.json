@@ -22,7 +22,8 @@
     "maxRoutineQueue": 2,
     "maxRoutineTurns": 3,
     "maxPacketSeconds": 16,
-    "bawdyInterval": 150
+    "bawdyInterval": 150,
+    "dispatchRevision": 1
   },
   "rules": [
     {
@@ -282,6 +283,26 @@
               "humor": true,
               "combatHumor": false,
               "bawdy": true
+            },
+            {
+              "id": "command.move.single.ack-plus-1",
+              "weight": 1,
+              "nodes": [
+                {
+                  "phraseId": "command.move.single.ack-plus-1",
+                  "affectedSpeaker": false
+                }
+              ]
+            },
+            {
+              "id": "command.move.single.ack-plus-2",
+              "weight": 1,
+              "nodes": [
+                {
+                  "phraseId": "command.move.single.ack-plus-2",
+                  "affectedSpeaker": false
+                }
+              ]
             }
           ]
         },
@@ -599,6 +620,26 @@
               "humor": true,
               "combatHumor": false,
               "bawdy": true
+            },
+            {
+              "id": "command.move.group.ack-plus-1",
+              "weight": 1,
+              "nodes": [
+                {
+                  "phraseId": "command.move.group.ack-plus-1",
+                  "affectedSpeaker": false
+                }
+              ]
+            },
+            {
+              "id": "command.move.group.ack-plus-2",
+              "weight": 1,
+              "nodes": [
+                {
+                  "phraseId": "command.move.group.ack-plus-2",
+                  "affectedSpeaker": false
+                }
+              ]
             }
           ]
         },
@@ -865,6 +906,26 @@
               "humor": true,
               "combatHumor": false,
               "bawdy": true
+            },
+            {
+              "id": "command.move.mass.ack-plus-1",
+              "weight": 1,
+              "nodes": [
+                {
+                  "phraseId": "command.move.mass.ack-plus-1",
+                  "affectedSpeaker": false
+                }
+              ]
+            },
+            {
+              "id": "command.move.mass.ack-plus-2",
+              "weight": 1,
+              "nodes": [
+                {
+                  "phraseId": "command.move.mass.ack-plus-2",
+                  "affectedSpeaker": false
+                }
+              ]
             }
           ]
         }
@@ -996,6 +1057,26 @@
                 }
               ],
               "specificity": 0
+            },
+            {
+              "id": "command.attack.single.ack-plus-1",
+              "weight": 1,
+              "nodes": [
+                {
+                  "phraseId": "command.attack.single.ack-plus-1",
+                  "affectedSpeaker": false
+                }
+              ]
+            },
+            {
+              "id": "command.attack.single.ack-plus-2",
+              "weight": 1,
+              "nodes": [
+                {
+                  "phraseId": "command.attack.single.ack-plus-2",
+                  "affectedSpeaker": false
+                }
+              ]
             }
           ]
         },
@@ -1233,6 +1314,26 @@
                 }
               ],
               "specificity": 0
+            },
+            {
+              "id": "command.attack.group.ack-plus-1",
+              "weight": 1,
+              "nodes": [
+                {
+                  "phraseId": "command.attack.group.ack-plus-1",
+                  "affectedSpeaker": false
+                }
+              ]
+            },
+            {
+              "id": "command.attack.group.ack-plus-2",
+              "weight": 1,
+              "nodes": [
+                {
+                  "phraseId": "command.attack.group.ack-plus-2",
+                  "affectedSpeaker": false
+                }
+              ]
             }
           ]
         },
@@ -1402,6 +1503,26 @@
                 }
               ],
               "specificity": 0
+            },
+            {
+              "id": "command.attack.mass.ack-plus-1",
+              "weight": 1,
+              "nodes": [
+                {
+                  "phraseId": "command.attack.mass.ack-plus-1",
+                  "affectedSpeaker": false
+                }
+              ]
+            },
+            {
+              "id": "command.attack.mass.ack-plus-2",
+              "weight": 1,
+              "nodes": [
+                {
+                  "phraseId": "command.attack.mass.ack-plus-2",
+                  "affectedSpeaker": false
+                }
+              ]
             }
           ]
         }
@@ -1509,6 +1630,26 @@
                 }
               ],
               "specificity": 0
+            },
+            {
+              "id": "command.attack_move.single.ack-plus-1",
+              "weight": 1,
+              "nodes": [
+                {
+                  "phraseId": "command.attack_move.single.ack-plus-1",
+                  "affectedSpeaker": false
+                }
+              ]
+            },
+            {
+              "id": "command.attack_move.single.ack-plus-2",
+              "weight": 1,
+              "nodes": [
+                {
+                  "phraseId": "command.attack_move.single.ack-plus-2",
+                  "affectedSpeaker": false
+                }
+              ]
             }
           ]
         },
@@ -1673,6 +1814,26 @@
                 }
               ],
               "specificity": 0
+            },
+            {
+              "id": "command.attack_move.group.ack-plus-1",
+              "weight": 1,
+              "nodes": [
+                {
+                  "phraseId": "command.attack_move.group.ack-plus-1",
+                  "affectedSpeaker": false
+                }
+              ]
+            },
+            {
+              "id": "command.attack_move.group.ack-plus-2",
+              "weight": 1,
+              "nodes": [
+                {
+                  "phraseId": "command.attack_move.group.ack-plus-2",
+                  "affectedSpeaker": false
+                }
+              ]
             }
           ]
         },
@@ -1837,6 +1998,26 @@
                 }
               ],
               "specificity": 0
+            },
+            {
+              "id": "command.attack_move.mass.ack-plus-1",
+              "weight": 1,
+              "nodes": [
+                {
+                  "phraseId": "command.attack_move.mass.ack-plus-1",
+                  "affectedSpeaker": false
+                }
+              ]
+            },
+            {
+              "id": "command.attack_move.mass.ack-plus-2",
+              "weight": 1,
+              "nodes": [
+                {
+                  "phraseId": "command.attack_move.mass.ack-plus-2",
+                  "affectedSpeaker": false
+                }
+              ]
             }
           ]
         }
@@ -1944,6 +2125,26 @@
                 }
               ],
               "specificity": 0
+            },
+            {
+              "id": "command.stop.single.ack-plus-1",
+              "weight": 1,
+              "nodes": [
+                {
+                  "phraseId": "command.stop.single.ack-plus-1",
+                  "affectedSpeaker": false
+                }
+              ]
+            },
+            {
+              "id": "command.stop.single.ack-plus-2",
+              "weight": 1,
+              "nodes": [
+                {
+                  "phraseId": "command.stop.single.ack-plus-2",
+                  "affectedSpeaker": false
+                }
+              ]
             }
           ]
         },
@@ -2091,6 +2292,26 @@
                 }
               ],
               "specificity": 0
+            },
+            {
+              "id": "command.stop.group.ack-plus-1",
+              "weight": 1,
+              "nodes": [
+                {
+                  "phraseId": "command.stop.group.ack-plus-1",
+                  "affectedSpeaker": false
+                }
+              ]
+            },
+            {
+              "id": "command.stop.group.ack-plus-2",
+              "weight": 1,
+              "nodes": [
+                {
+                  "phraseId": "command.stop.group.ack-plus-2",
+                  "affectedSpeaker": false
+                }
+              ]
             }
           ]
         },
@@ -2204,6 +2425,26 @@
                 }
               ],
               "specificity": 0
+            },
+            {
+              "id": "command.stop.mass.ack-plus-1",
+              "weight": 1,
+              "nodes": [
+                {
+                  "phraseId": "command.stop.mass.ack-plus-1",
+                  "affectedSpeaker": false
+                }
+              ]
+            },
+            {
+              "id": "command.stop.mass.ack-plus-2",
+              "weight": 1,
+              "nodes": [
+                {
+                  "phraseId": "command.stop.mass.ack-plus-2",
+                  "affectedSpeaker": false
+                }
+              ]
             }
           ]
         }
@@ -3619,6 +3860,26 @@
                 }
               ],
               "specificity": 0
+            },
+            {
+              "id": "command.build.single.ack-plus-1",
+              "weight": 1,
+              "nodes": [
+                {
+                  "phraseId": "command.build.single.ack-plus-1",
+                  "affectedSpeaker": false
+                }
+              ]
+            },
+            {
+              "id": "command.build.single.ack-plus-2",
+              "weight": 1,
+              "nodes": [
+                {
+                  "phraseId": "command.build.single.ack-plus-2",
+                  "affectedSpeaker": false
+                }
+              ]
             }
           ]
         },
@@ -3688,6 +3949,26 @@
                 }
               ],
               "specificity": 0
+            },
+            {
+              "id": "command.build.group.ack-plus-1",
+              "weight": 1,
+              "nodes": [
+                {
+                  "phraseId": "command.build.group.ack-plus-1",
+                  "affectedSpeaker": false
+                }
+              ]
+            },
+            {
+              "id": "command.build.group.ack-plus-2",
+              "weight": 1,
+              "nodes": [
+                {
+                  "phraseId": "command.build.group.ack-plus-2",
+                  "affectedSpeaker": false
+                }
+              ]
             }
           ]
         },
@@ -3757,6 +4038,26 @@
                 }
               ],
               "specificity": 0
+            },
+            {
+              "id": "command.build.mass.ack-plus-1",
+              "weight": 1,
+              "nodes": [
+                {
+                  "phraseId": "command.build.mass.ack-plus-1",
+                  "affectedSpeaker": false
+                }
+              ]
+            },
+            {
+              "id": "command.build.mass.ack-plus-2",
+              "weight": 1,
+              "nodes": [
+                {
+                  "phraseId": "command.build.mass.ack-plus-2",
+                  "affectedSpeaker": false
+                }
+              ]
             }
           ]
         }
@@ -11892,7 +12193,7 @@
     {
       "id": "combat.target_destroyed",
       "eventType": "combat.target_destroyed",
-      "title": "Цель уничтожена",
+      "title": "Итог боя: состав подбитых целей",
       "category": "combat",
       "support": "wired",
       "source": "Mission.damage confirmed enemy destruction, own attacker and visible target",
@@ -11902,12 +12203,22 @@
       "windowSimSeconds": 18,
       "scope": "incident",
       "priority": 72,
-      "cooldown": 35,
+      "cooldown": 0,
       "expiresAfter": 35,
       "legacyOverride": false,
       "interruptible": true,
       "preconditions": {
-        "all": []
+        "all": [
+          {
+            "field": "uniqueTargetCount",
+            "op": "gte",
+            "value": 2
+          },
+          {
+            "field": "facts.destroyedComposition",
+            "op": "known"
+          }
+        ]
       },
       "roles": [
         "driver",
@@ -11917,734 +12228,23 @@
       ],
       "tiers": [
         {
-          "id": "single",
-          "min": 1,
-          "graphs": [
-            {
-              "id": "combat.target_destroyed.single",
-              "weight": 1,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.single.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                }
-              ],
-              "specificity": 0
-            },
-            {
-              "id": "combat.target_destroyed.single.written-v2",
-              "weight": 1,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.single.written-v2.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                }
-              ],
-              "specificity": 0
-            },
-            {
-              "id": "combat.target_destroyed.single.written-v3",
-              "weight": 1,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.single.written-v3.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                }
-              ],
-              "specificity": 0
-            },
-            {
-              "id": "combat.target_destroyed.single.written-v4",
-              "weight": 1,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.single.written-v4.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                }
-              ],
-              "specificity": 0
-            },
-            {
-              "id": "combat.target_destroyed.single.written-v5",
-              "weight": 1,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.single.written-v5.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                }
-              ],
-              "specificity": 0
-            },
-            {
-              "id": "combat.target_destroyed.single.written-v6",
-              "weight": 1,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.single.written-v6.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                }
-              ],
-              "specificity": 0
-            },
-            {
-              "id": "combat.target_destroyed.single.written-v7",
-              "weight": 1,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.single.written-v7.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                }
-              ],
-              "specificity": 0
-            },
-            {
-              "id": "combat.target_destroyed.single.written-v8",
-              "weight": 1,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.single.written-v8.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                }
-              ],
-              "specificity": 0
-            },
-            {
-              "id": "combat.target_destroyed.single.pop-v1",
-              "weight": 3,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.single.pop-v1.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                },
-                {
-                  "phraseId": "combat.target_destroyed.single.pop-v1.2",
-                  "differentSpeaker": true,
-                  "speakerSlot": 1
-                }
-              ],
-              "specificity": 0,
-              "humor": true,
-              "combatHumor": true,
-              "requires": {
-                "field": "facts.explosionConfirmed",
-                "op": "eq",
-                "value": true
-              }
-            },
-            {
-              "id": "combat.target_destroyed.single.pop-v2",
-              "weight": 3,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.single.pop-v2.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                },
-                {
-                  "phraseId": "combat.target_destroyed.single.pop-v2.2",
-                  "differentSpeaker": true,
-                  "speakerSlot": 1
-                }
-              ],
-              "specificity": 0,
-              "humor": true,
-              "combatHumor": true,
-              "requires": {
-                "field": "facts.explosionConfirmed",
-                "op": "eq",
-                "value": true
-              }
-            },
-            {
-              "id": "combat.target_destroyed.single.pop-v3",
-              "weight": 3,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.single.pop-v3.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                },
-                {
-                  "phraseId": "combat.target_destroyed.single.pop-v3.2",
-                  "differentSpeaker": true,
-                  "speakerSlot": 1
-                }
-              ],
-              "specificity": 0,
-              "humor": true,
-              "combatHumor": true,
-              "requires": {
-                "field": "facts.explosionConfirmed",
-                "op": "eq",
-                "value": true
-              }
-            }
-          ]
-        },
-        {
           "id": "group",
           "min": 2,
           "graphs": [
             {
-              "id": "combat.target_destroyed.group",
-              "weight": 3,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.group.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                },
-                {
-                  "phraseId": "combat.target_destroyed.group.2",
-                  "differentSpeaker": true,
-                  "speakerSlot": 1
-                }
-              ],
-              "specificity": 0
-            },
-            {
-              "id": "combat.target_destroyed.group.written-v2",
-              "weight": 3,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.group.written-v2.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                },
-                {
-                  "phraseId": "combat.target_destroyed.group.written-v2.2",
-                  "differentSpeaker": true,
-                  "speakerSlot": 1
-                }
-              ],
-              "specificity": 0
-            },
-            {
-              "id": "combat.target_destroyed.group.written-v3",
+              "id": "combat.target_destroyed.summary.v1",
               "weight": 1,
               "nodes": [
                 {
-                  "phraseId": "combat.target_destroyed.group.written-v3.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
+                  "phraseId": "combat.target_destroyed.summary.v1",
+                  "affectedSpeaker": false
                 }
-              ],
-              "specificity": 0
-            },
-            {
-              "id": "combat.target_destroyed.group.written-v4",
-              "weight": 3,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.group.written-v4.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                },
-                {
-                  "phraseId": "combat.target_destroyed.group.written-v4.2",
-                  "differentSpeaker": true,
-                  "speakerSlot": 1
-                }
-              ],
-              "specificity": 0
-            },
-            {
-              "id": "combat.target_destroyed.group.written-v5",
-              "weight": 3,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.group.written-v5.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                },
-                {
-                  "phraseId": "combat.target_destroyed.group.written-v5.2",
-                  "differentSpeaker": true,
-                  "speakerSlot": 1
-                }
-              ],
-              "specificity": 0
-            },
-            {
-              "id": "combat.target_destroyed.group.written-v6",
-              "weight": 1,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.group.written-v6.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                }
-              ],
-              "specificity": 0
-            },
-            {
-              "id": "combat.target_destroyed.group.written-v7",
-              "weight": 3,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.group.written-v7.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                },
-                {
-                  "phraseId": "combat.target_destroyed.group.written-v7.2",
-                  "differentSpeaker": true,
-                  "speakerSlot": 1
-                }
-              ],
-              "specificity": 0
-            },
-            {
-              "id": "combat.target_destroyed.group.written-v8",
-              "weight": 1,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.group.written-v8.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                }
-              ],
-              "specificity": 0
-            },
-            {
-              "id": "combat.target_destroyed.group.exchange-v1",
-              "weight": 3,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.group.exchange-v1.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                },
-                {
-                  "phraseId": "combat.target_destroyed.group.exchange-v1.2",
-                  "differentSpeaker": true,
-                  "speakerSlot": 1
-                },
-                {
-                  "phraseId": "combat.target_destroyed.group.exchange-v1.3",
-                  "differentSpeaker": true,
-                  "speakerSlot": 0
-                }
-              ],
-              "specificity": 0
-            },
-            {
-              "id": "combat.target_destroyed.group.exchange-v2",
-              "weight": 3,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.group.exchange-v2.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                },
-                {
-                  "phraseId": "combat.target_destroyed.group.exchange-v2.2",
-                  "differentSpeaker": true,
-                  "speakerSlot": 1
-                },
-                {
-                  "phraseId": "combat.target_destroyed.group.exchange-v2.3",
-                  "differentSpeaker": true,
-                  "speakerSlot": 0
-                }
-              ],
-              "specificity": 0
-            },
-            {
-              "id": "combat.target_destroyed.group.exchange-v3",
-              "weight": 3,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.group.exchange-v3.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                },
-                {
-                  "phraseId": "combat.target_destroyed.group.exchange-v3.2",
-                  "differentSpeaker": true,
-                  "speakerSlot": 1
-                }
-              ],
-              "specificity": 0
-            },
-            {
-              "id": "combat.target_destroyed.group.exchange-v4",
-              "weight": 3,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.group.exchange-v4.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                },
-                {
-                  "phraseId": "combat.target_destroyed.group.exchange-v4.2",
-                  "differentSpeaker": true,
-                  "speakerSlot": 1
-                }
-              ],
-              "specificity": 0
-            },
-            {
-              "id": "combat.target_destroyed.group.pop-v1",
-              "weight": 3,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.group.pop-v1.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                },
-                {
-                  "phraseId": "combat.target_destroyed.group.pop-v1.2",
-                  "differentSpeaker": true,
-                  "speakerSlot": 1
-                }
-              ],
-              "specificity": 0,
-              "humor": true,
-              "combatHumor": true,
-              "requires": {
-                "field": "facts.explosionConfirmed",
-                "op": "eq",
-                "value": true
-              }
-            },
-            {
-              "id": "combat.target_destroyed.group.pop-v2",
-              "weight": 3,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.group.pop-v2.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                },
-                {
-                  "phraseId": "combat.target_destroyed.group.pop-v2.2",
-                  "differentSpeaker": true,
-                  "speakerSlot": 1
-                }
-              ],
-              "specificity": 0,
-              "humor": true,
-              "combatHumor": true,
-              "requires": {
-                "field": "facts.explosionConfirmed",
-                "op": "eq",
-                "value": true
-              }
-            },
-            {
-              "id": "combat.target_destroyed.group.pop-v3",
-              "weight": 3,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.group.pop-v3.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                },
-                {
-                  "phraseId": "combat.target_destroyed.group.pop-v3.2",
-                  "differentSpeaker": true,
-                  "speakerSlot": 1
-                }
-              ],
-              "specificity": 0,
-              "humor": true,
-              "combatHumor": true,
-              "requires": {
-                "field": "facts.explosionConfirmed",
-                "op": "eq",
-                "value": true
-              }
-            }
-          ]
-        },
-        {
-          "id": "mass",
-          "min": 8,
-          "graphs": [
-            {
-              "id": "combat.target_destroyed.mass",
-              "weight": 3,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.mass.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                },
-                {
-                  "phraseId": "combat.target_destroyed.mass.2",
-                  "differentSpeaker": true,
-                  "speakerSlot": 1
-                }
-              ],
-              "specificity": 0
-            },
-            {
-              "id": "combat.target_destroyed.mass.written-v2",
-              "weight": 3,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.mass.written-v2.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                },
-                {
-                  "phraseId": "combat.target_destroyed.mass.written-v2.2",
-                  "differentSpeaker": true,
-                  "speakerSlot": 1
-                }
-              ],
-              "specificity": 0
-            },
-            {
-              "id": "combat.target_destroyed.mass.written-v3",
-              "weight": 1,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.mass.written-v3.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                }
-              ],
-              "specificity": 0
-            },
-            {
-              "id": "combat.target_destroyed.mass.written-v4",
-              "weight": 3,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.mass.written-v4.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                },
-                {
-                  "phraseId": "combat.target_destroyed.mass.written-v4.2",
-                  "differentSpeaker": true,
-                  "speakerSlot": 1
-                }
-              ],
-              "specificity": 0
-            },
-            {
-              "id": "combat.target_destroyed.mass.written-v5",
-              "weight": 3,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.mass.written-v5.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                },
-                {
-                  "phraseId": "combat.target_destroyed.mass.written-v5.2",
-                  "differentSpeaker": true,
-                  "speakerSlot": 1
-                }
-              ],
-              "specificity": 0
-            },
-            {
-              "id": "combat.target_destroyed.mass.written-v6",
-              "weight": 1,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.mass.written-v6.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                }
-              ],
-              "specificity": 0
-            },
-            {
-              "id": "combat.target_destroyed.mass.written-v7",
-              "weight": 3,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.mass.written-v7.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                },
-                {
-                  "phraseId": "combat.target_destroyed.mass.written-v7.2",
-                  "differentSpeaker": true,
-                  "speakerSlot": 1
-                }
-              ],
-              "specificity": 0
-            },
-            {
-              "id": "combat.target_destroyed.mass.written-v8",
-              "weight": 1,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.mass.written-v8.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                }
-              ],
-              "specificity": 0
-            },
-            {
-              "id": "combat.target_destroyed.mass.exchange-v1",
-              "weight": 3,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.mass.exchange-v1.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                },
-                {
-                  "phraseId": "combat.target_destroyed.mass.exchange-v1.2",
-                  "differentSpeaker": true,
-                  "speakerSlot": 1
-                },
-                {
-                  "phraseId": "combat.target_destroyed.mass.exchange-v1.3",
-                  "differentSpeaker": true,
-                  "speakerSlot": 0
-                }
-              ],
-              "specificity": 0
-            },
-            {
-              "id": "combat.target_destroyed.mass.exchange-v2",
-              "weight": 3,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.mass.exchange-v2.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                },
-                {
-                  "phraseId": "combat.target_destroyed.mass.exchange-v2.2",
-                  "differentSpeaker": true,
-                  "speakerSlot": 1
-                },
-                {
-                  "phraseId": "combat.target_destroyed.mass.exchange-v2.3",
-                  "differentSpeaker": true,
-                  "speakerSlot": 0
-                }
-              ],
-              "specificity": 0
-            },
-            {
-              "id": "combat.target_destroyed.mass.exchange-v3",
-              "weight": 3,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.mass.exchange-v3.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                },
-                {
-                  "phraseId": "combat.target_destroyed.mass.exchange-v3.2",
-                  "differentSpeaker": true,
-                  "speakerSlot": 1
-                }
-              ],
-              "specificity": 0
-            },
-            {
-              "id": "combat.target_destroyed.mass.exchange-v4",
-              "weight": 3,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.mass.exchange-v4.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                },
-                {
-                  "phraseId": "combat.target_destroyed.mass.exchange-v4.2",
-                  "differentSpeaker": true,
-                  "speakerSlot": 1
-                }
-              ],
-              "specificity": 0
-            },
-            {
-              "id": "combat.target_destroyed.mass.pop-v1",
-              "weight": 3,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.mass.pop-v1.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                },
-                {
-                  "phraseId": "combat.target_destroyed.mass.pop-v1.2",
-                  "differentSpeaker": true,
-                  "speakerSlot": 1
-                }
-              ],
-              "specificity": 0,
-              "humor": true,
-              "combatHumor": true,
-              "requires": {
-                "field": "facts.explosionConfirmed",
-                "op": "eq",
-                "value": true
-              }
-            },
-            {
-              "id": "combat.target_destroyed.mass.pop-v2",
-              "weight": 3,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.mass.pop-v2.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                },
-                {
-                  "phraseId": "combat.target_destroyed.mass.pop-v2.2",
-                  "differentSpeaker": true,
-                  "speakerSlot": 1
-                }
-              ],
-              "specificity": 0,
-              "humor": true,
-              "combatHumor": true,
-              "requires": {
-                "field": "facts.explosionConfirmed",
-                "op": "eq",
-                "value": true
-              }
-            },
-            {
-              "id": "combat.target_destroyed.mass.pop-v3",
-              "weight": 3,
-              "nodes": [
-                {
-                  "phraseId": "combat.target_destroyed.mass.pop-v3.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                },
-                {
-                  "phraseId": "combat.target_destroyed.mass.pop-v3.2",
-                  "differentSpeaker": true,
-                  "speakerSlot": 1
-                }
-              ],
-              "specificity": 0,
-              "humor": true,
-              "combatHumor": true,
-              "requires": {
-                "field": "facts.explosionConfirmed",
-                "op": "eq",
-                "value": true
-              }
+              ]
             }
           ]
         }
-      ]
+      ],
+      "delivery": "summary"
     },
     {
       "id": "combat.flank",
@@ -19822,10 +19422,10 @@
       "reason": "",
       "enabled": true,
       "countMetric": "affectedUnitCount",
-      "windowSimSeconds": 18,
+      "windowSimSeconds": 0.5,
       "scope": "incident",
-      "priority": 58,
-      "cooldown": 35,
+      "priority": 81,
+      "cooldown": 0,
       "expiresAfter": 35,
       "legacyOverride": false,
       "interruptible": true,
@@ -20480,7 +20080,8 @@
             }
           ]
         }
-      ]
+      ],
+      "delivery": "notification"
     },
     {
       "id": "repair.queue_enter",
@@ -21026,10 +20627,10 @@
       "reason": "",
       "enabled": true,
       "countMetric": "affectedUnitCount",
-      "windowSimSeconds": 18,
+      "windowSimSeconds": 0.5,
       "scope": "incident",
-      "priority": 65,
-      "cooldown": 35,
+      "priority": 81,
+      "cooldown": 0,
       "expiresAfter": 35,
       "legacyOverride": false,
       "interruptible": true,
@@ -21191,7 +20792,8 @@
             }
           ]
         }
-      ]
+      ],
+      "delivery": "notification"
     },
     {
       "id": "energy.generator_stop",
@@ -23402,10 +23004,10 @@
       "reason": "",
       "enabled": true,
       "countMetric": "uniqueObjectCount",
-      "windowSimSeconds": 18,
+      "windowSimSeconds": 0.5,
       "scope": "incident",
-      "priority": 35,
-      "cooldown": 35,
+      "priority": 80,
+      "cooldown": 0,
       "expiresAfter": 16,
       "legacyOverride": false,
       "interruptible": true,
@@ -23579,7 +23181,8 @@
             }
           ]
         }
-      ]
+      ],
+      "delivery": "notification"
     },
     {
       "id": "construction.complete",
@@ -23591,10 +23194,10 @@
       "reason": "",
       "enabled": true,
       "countMetric": "uniqueObjectCount",
-      "windowSimSeconds": 18,
+      "windowSimSeconds": 0.5,
       "scope": "incident",
-      "priority": 55,
-      "cooldown": 35,
+      "priority": 84,
+      "cooldown": 0,
       "expiresAfter": 35,
       "legacyOverride": false,
       "interruptible": true,
@@ -24050,7 +23653,8 @@
             }
           ]
         }
-      ]
+      ],
+      "delivery": "notification"
     },
     {
       "id": "construction.destroyed",
@@ -24774,10 +24378,10 @@
       "reason": "",
       "enabled": true,
       "countMetric": "uniqueObjectCount",
-      "windowSimSeconds": 18,
+      "windowSimSeconds": 0.5,
       "scope": "incident",
-      "priority": 35,
-      "cooldown": 35,
+      "priority": 80,
+      "cooldown": 0,
       "expiresAfter": 16,
       "legacyOverride": false,
       "interruptible": true,
@@ -24951,7 +24555,8 @@
             }
           ]
         }
-      ]
+      ],
+      "delivery": "notification"
     },
     {
       "id": "factory.vehicle_complete",
@@ -24963,10 +24568,10 @@
       "reason": "",
       "enabled": true,
       "countMetric": "affectedUnitCount",
-      "windowSimSeconds": 18,
+      "windowSimSeconds": 0.5,
       "scope": "incident",
-      "priority": 50,
-      "cooldown": 35,
+      "priority": 82,
+      "cooldown": 0,
       "expiresAfter": 35,
       "legacyOverride": false,
       "interruptible": true,
@@ -25386,7 +24991,8 @@
             }
           ]
         }
-      ]
+      ],
+      "delivery": "notification"
     },
     {
       "id": "factory.queue_start",
@@ -25843,10 +25449,10 @@
       "reason": "",
       "enabled": true,
       "countMetric": "affectedUnitCount",
-      "windowSimSeconds": 18,
+      "windowSimSeconds": 0.5,
       "scope": "incident",
-      "priority": 52,
-      "cooldown": 35,
+      "priority": 83,
+      "cooldown": 0,
       "expiresAfter": 35,
       "legacyOverride": false,
       "interruptible": true,
@@ -26120,7 +25726,8 @@
             }
           ]
         }
-      ]
+      ],
+      "delivery": "notification"
     },
     {
       "id": "research.start",
@@ -26309,10 +25916,10 @@
       "reason": "",
       "enabled": true,
       "countMetric": "uniqueObjectCount",
-      "windowSimSeconds": 18,
+      "windowSimSeconds": 0.5,
       "scope": "incident",
-      "priority": 60,
-      "cooldown": 35,
+      "priority": 84,
+      "cooldown": 0,
       "expiresAfter": 35,
       "legacyOverride": false,
       "interruptible": true,
@@ -26600,7 +26207,8 @@
             }
           ]
         }
-      ]
+      ],
+      "delivery": "notification"
     },
     {
       "id": "research.artifact_delivered",
@@ -35669,6 +35277,167 @@
           ]
         }
       ]
+    },
+    {
+      "id": "combat.kill_confirmed",
+      "eventType": "combat.kill_confirmed",
+      "title": "Подбитая цель: короткое подтверждение",
+      "category": "combat",
+      "support": "wired",
+      "source": "Mission.damage confirmed enemy destruction, own attacker and visible target",
+      "reason": "",
+      "enabled": true,
+      "countMetric": "uniqueTargetCount",
+      "windowSimSeconds": 0,
+      "scope": "incident",
+      "priority": 86,
+      "cooldown": 0,
+      "expiresAfter": 8,
+      "legacyOverride": false,
+      "interruptible": true,
+      "preconditions": {
+        "all": []
+      },
+      "roles": [
+        "driver",
+        "builder",
+        "commander",
+        "radio"
+      ],
+      "tiers": [
+        {
+          "id": "single",
+          "min": 1,
+          "graphs": [
+            {
+              "id": "combat.kill_confirmed.single.v1",
+              "weight": 1,
+              "nodes": [
+                {
+                  "phraseId": "combat.kill_confirmed.single.v1",
+                  "affectedSpeaker": true
+                }
+              ],
+              "requires": {
+                "field": "facts.followup",
+                "op": "eq",
+                "value": false
+              }
+            },
+            {
+              "id": "combat.kill_confirmed.single.v2",
+              "weight": 1,
+              "nodes": [
+                {
+                  "phraseId": "combat.kill_confirmed.single.v2",
+                  "affectedSpeaker": true
+                }
+              ],
+              "requires": {
+                "field": "facts.followup",
+                "op": "eq",
+                "value": false
+              }
+            },
+            {
+              "id": "combat.kill_confirmed.single.v3",
+              "weight": 1,
+              "nodes": [
+                {
+                  "phraseId": "combat.kill_confirmed.single.v3",
+                  "affectedSpeaker": true
+                }
+              ],
+              "requires": {
+                "field": "facts.followup",
+                "op": "eq",
+                "value": true
+              }
+            },
+            {
+              "id": "combat.kill_confirmed.single.v4",
+              "weight": 1,
+              "nodes": [
+                {
+                  "phraseId": "combat.kill_confirmed.single.v4",
+                  "affectedSpeaker": true
+                }
+              ],
+              "requires": {
+                "field": "facts.followup",
+                "op": "eq",
+                "value": true
+              }
+            }
+          ]
+        },
+        {
+          "id": "group",
+          "min": 2,
+          "graphs": [
+            {
+              "id": "combat.kill_confirmed.group.count",
+              "weight": 1,
+              "nodes": [
+                {
+                  "phraseId": "combat.kill_confirmed.group.count",
+                  "affectedSpeaker": true
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "delivery": "reaction"
+    },
+    {
+      "id": "combat.kill_banter",
+      "eventType": "combat.kill_banter",
+      "title": "После боя: шутка про медаль",
+      "category": "combat",
+      "support": "wired",
+      "source": "Mission.damage confirmed enemy destruction, own attacker and visible target",
+      "reason": "",
+      "enabled": true,
+      "countMetric": "uniqueTargetCount",
+      "windowSimSeconds": 0,
+      "scope": "incident",
+      "priority": 2,
+      "cooldown": 180,
+      "expiresAfter": 20,
+      "legacyOverride": false,
+      "interruptible": true,
+      "preconditions": {
+        "field": "uniqueTargetCount",
+        "op": "gte",
+        "value": 3
+      },
+      "roles": [
+        "driver",
+        "builder",
+        "commander",
+        "radio"
+      ],
+      "tiers": [
+        {
+          "id": "group",
+          "min": 3,
+          "graphs": [
+            {
+              "id": "combat.kill_banter.medal",
+              "weight": 1,
+              "nodes": [
+                {
+                  "phraseId": "combat.kill_banter.medal",
+                  "affectedSpeaker": false
+                }
+              ],
+              "humor": true
+            }
+          ]
+        }
+      ],
+      "delivery": "idle"
     }
   ],
   "phrases": {
@@ -41394,7 +41163,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.group.1": {
@@ -41407,7 +41176,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.group.2": {
@@ -41420,7 +41189,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.mass.1": {
@@ -41433,7 +41202,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.mass.2": {
@@ -41446,7 +41215,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.mass.3": {
@@ -67128,7 +66897,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.single.written-v3.1": {
@@ -67141,7 +66910,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.single.written-v4.1": {
@@ -67154,7 +66923,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.single.written-v5.1": {
@@ -67167,7 +66936,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.single.written-v6.1": {
@@ -67180,7 +66949,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.single.written-v7.1": {
@@ -67193,7 +66962,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.single.written-v8.1": {
@@ -67206,7 +66975,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.group.written-v2.1": {
@@ -67219,7 +66988,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.group.written-v2.2": {
@@ -67232,7 +67001,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.group.written-v3.1": {
@@ -67245,7 +67014,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.group.written-v4.1": {
@@ -67258,7 +67027,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.group.written-v4.2": {
@@ -67271,7 +67040,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.group.written-v5.1": {
@@ -67284,7 +67053,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.group.written-v5.2": {
@@ -67297,7 +67066,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.group.written-v6.1": {
@@ -67310,7 +67079,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.group.written-v7.1": {
@@ -67323,7 +67092,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.group.written-v7.2": {
@@ -67336,7 +67105,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.group.written-v8.1": {
@@ -67349,7 +67118,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.group.exchange-v1.1": {
@@ -67362,7 +67131,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.group.exchange-v1.2": {
@@ -67375,7 +67144,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.group.exchange-v1.3": {
@@ -67388,7 +67157,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.group.exchange-v2.1": {
@@ -67401,7 +67170,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.group.exchange-v2.2": {
@@ -67414,7 +67183,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.group.exchange-v2.3": {
@@ -67427,7 +67196,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.group.exchange-v3.1": {
@@ -67440,7 +67209,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.group.exchange-v3.2": {
@@ -67453,7 +67222,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.group.exchange-v4.1": {
@@ -67466,7 +67235,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.group.exchange-v4.2": {
@@ -67479,7 +67248,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.mass.written-v2.1": {
@@ -67492,7 +67261,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.mass.written-v2.2": {
@@ -67505,7 +67274,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.mass.written-v3.1": {
@@ -67518,7 +67287,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.mass.written-v4.1": {
@@ -67531,7 +67300,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.mass.written-v4.2": {
@@ -67544,7 +67313,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.mass.written-v5.1": {
@@ -67557,7 +67326,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.mass.written-v5.2": {
@@ -67570,7 +67339,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.mass.written-v6.1": {
@@ -67583,7 +67352,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.mass.written-v7.1": {
@@ -67596,7 +67365,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.mass.written-v7.2": {
@@ -67609,7 +67378,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.mass.written-v8.1": {
@@ -67622,7 +67391,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.mass.exchange-v1.1": {
@@ -67635,7 +67404,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.mass.exchange-v1.2": {
@@ -67648,7 +67417,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.mass.exchange-v1.3": {
@@ -67661,7 +67430,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.mass.exchange-v2.1": {
@@ -67674,7 +67443,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.mass.exchange-v2.2": {
@@ -67687,7 +67456,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.mass.exchange-v2.3": {
@@ -67700,7 +67469,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.mass.exchange-v3.1": {
@@ -67713,7 +67482,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.mass.exchange-v3.2": {
@@ -67726,7 +67495,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.mass.exchange-v4.1": {
@@ -67739,7 +67508,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "combat.target_destroyed.mass.exchange-v4.2": {
@@ -67752,7 +67521,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "relieved"
     },
     "damage.vehicle_destroyed.single.unknown-v2.1": {
@@ -68571,7 +68340,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "dry"
     },
     "combat.target_destroyed.single.pop-v1.2": {
@@ -68584,7 +68353,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "dry"
     },
     "combat.target_destroyed.single.pop-v2.1": {
@@ -68597,7 +68366,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "dry"
     },
     "combat.target_destroyed.single.pop-v2.2": {
@@ -68610,7 +68379,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "dry"
     },
     "combat.target_destroyed.single.pop-v3.1": {
@@ -68623,7 +68392,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "dry"
     },
     "combat.target_destroyed.single.pop-v3.2": {
@@ -68636,7 +68405,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "dry"
     },
     "combat.target_destroyed.group.pop-v1.1": {
@@ -68649,7 +68418,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "dry"
     },
     "combat.target_destroyed.group.pop-v1.2": {
@@ -68662,7 +68431,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "dry"
     },
     "combat.target_destroyed.group.pop-v2.1": {
@@ -68675,7 +68444,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "dry"
     },
     "combat.target_destroyed.group.pop-v2.2": {
@@ -68688,7 +68457,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "dry"
     },
     "combat.target_destroyed.group.pop-v3.1": {
@@ -68701,7 +68470,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "dry"
     },
     "combat.target_destroyed.group.pop-v3.2": {
@@ -68714,7 +68483,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "dry"
     },
     "combat.target_destroyed.mass.pop-v1.1": {
@@ -68727,7 +68496,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "dry"
     },
     "combat.target_destroyed.mass.pop-v1.2": {
@@ -68740,7 +68509,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "dry"
     },
     "combat.target_destroyed.mass.pop-v2.1": {
@@ -68753,7 +68522,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "dry"
     },
     "combat.target_destroyed.mass.pop-v2.2": {
@@ -68766,7 +68535,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "dry"
     },
     "combat.target_destroyed.mass.pop-v3.1": {
@@ -68779,7 +68548,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "dry"
     },
     "combat.target_destroyed.mass.pop-v3.2": {
@@ -68792,7 +68561,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "dry"
     },
     "idle.group_no_order.single.traffic-memory.1": {
@@ -74154,6 +73923,494 @@
       "pauseAfter": 0.2,
       "archived": false,
       "emotion": "somber"
+    },
+    "combat.kill_confirmed.single.v1": {
+      "id": "combat.kill_confirmed.single.v1",
+      "text": "Есть! Готов!",
+      "role": "driver",
+      "kind": "report",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "relieved",
+      "identify": false
+    },
+    "combat.kill_confirmed.single.v2": {
+      "id": "combat.kill_confirmed.single.v2",
+      "text": "У меня минус один!",
+      "role": "driver",
+      "kind": "report",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "relieved",
+      "identify": false
+    },
+    "combat.kill_confirmed.single.v3": {
+      "id": "combat.kill_confirmed.single.v3",
+      "text": "Ещё один!",
+      "role": "driver",
+      "kind": "report",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "relieved",
+      "identify": false
+    },
+    "combat.kill_confirmed.single.v4": {
+      "id": "combat.kill_confirmed.single.v4",
+      "text": "И этот готов!",
+      "role": "driver",
+      "kind": "report",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "relieved",
+      "identify": false
+    },
+    "combat.kill_confirmed.group.count": {
+      "id": "combat.kill_confirmed.group.count",
+      "text": "У меня минус {facts.killCountWord}!",
+      "role": "driver",
+      "kind": "report",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "relieved",
+      "identify": false
+    },
+    "combat.target_destroyed.summary.v1": {
+      "id": "combat.target_destroyed.summary.v1",
+      "text": "Всего: {facts.destroyedComposition}.",
+      "role": "driver",
+      "kind": "report",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "calm",
+      "identify": false
+    },
+    "combat.kill_banter.medal": {
+      "id": "combat.kill_banter.medal",
+      "text": "За такое, наверное, медаль дадут.",
+      "role": "driver",
+      "kind": "dry_joke",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "dry",
+      "identify": false
+    },
+    "command.attack_move.single.ack-plus-1": {
+      "id": "command.attack_move.single.ack-plus-1",
+      "text": "Плюс.",
+      "role": "driver",
+      "kind": "ack",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "calm"
+    },
+    "command.attack_move.single.ack-plus-2": {
+      "id": "command.attack_move.single.ack-plus-2",
+      "text": "Плюс-плюс.",
+      "role": "driver",
+      "kind": "ack",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "calm"
+    },
+    "command.attack_move.group.ack-plus-1": {
+      "id": "command.attack_move.group.ack-plus-1",
+      "text": "Плюс.",
+      "role": "driver",
+      "kind": "ack",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "calm"
+    },
+    "command.attack_move.group.ack-plus-2": {
+      "id": "command.attack_move.group.ack-plus-2",
+      "text": "Плюс-плюс.",
+      "role": "driver",
+      "kind": "ack",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "calm"
+    },
+    "command.attack_move.mass.ack-plus-1": {
+      "id": "command.attack_move.mass.ack-plus-1",
+      "text": "Плюс.",
+      "role": "driver",
+      "kind": "ack",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "calm"
+    },
+    "command.attack_move.mass.ack-plus-2": {
+      "id": "command.attack_move.mass.ack-plus-2",
+      "text": "Плюс-плюс.",
+      "role": "driver",
+      "kind": "ack",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "calm"
+    },
+    "command.build.single.ack-plus-1": {
+      "id": "command.build.single.ack-plus-1",
+      "text": "Плюс.",
+      "role": "driver",
+      "kind": "ack",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "calm"
+    },
+    "command.build.single.ack-plus-2": {
+      "id": "command.build.single.ack-plus-2",
+      "text": "Плюс-плюс.",
+      "role": "driver",
+      "kind": "ack",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "calm"
+    },
+    "command.build.group.ack-plus-1": {
+      "id": "command.build.group.ack-plus-1",
+      "text": "Плюс.",
+      "role": "driver",
+      "kind": "ack",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "calm"
+    },
+    "command.build.group.ack-plus-2": {
+      "id": "command.build.group.ack-plus-2",
+      "text": "Плюс-плюс.",
+      "role": "driver",
+      "kind": "ack",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "calm"
+    },
+    "command.build.mass.ack-plus-1": {
+      "id": "command.build.mass.ack-plus-1",
+      "text": "Плюс.",
+      "role": "driver",
+      "kind": "ack",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "calm"
+    },
+    "command.build.mass.ack-plus-2": {
+      "id": "command.build.mass.ack-plus-2",
+      "text": "Плюс-плюс.",
+      "role": "driver",
+      "kind": "ack",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "calm"
+    },
+    "command.move.single.ack-plus-1": {
+      "id": "command.move.single.ack-plus-1",
+      "text": "Плюс.",
+      "role": "driver",
+      "kind": "ack",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "calm"
+    },
+    "command.move.single.ack-plus-2": {
+      "id": "command.move.single.ack-plus-2",
+      "text": "Плюс-плюс.",
+      "role": "driver",
+      "kind": "ack",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "calm"
+    },
+    "command.move.group.ack-plus-1": {
+      "id": "command.move.group.ack-plus-1",
+      "text": "Плюс.",
+      "role": "driver",
+      "kind": "ack",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "calm"
+    },
+    "command.move.group.ack-plus-2": {
+      "id": "command.move.group.ack-plus-2",
+      "text": "Плюс-плюс.",
+      "role": "driver",
+      "kind": "ack",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "calm"
+    },
+    "command.move.mass.ack-plus-1": {
+      "id": "command.move.mass.ack-plus-1",
+      "text": "Плюс.",
+      "role": "driver",
+      "kind": "ack",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "calm"
+    },
+    "command.move.mass.ack-plus-2": {
+      "id": "command.move.mass.ack-plus-2",
+      "text": "Плюс-плюс.",
+      "role": "driver",
+      "kind": "ack",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "calm"
+    },
+    "command.attack.single.ack-plus-1": {
+      "id": "command.attack.single.ack-plus-1",
+      "text": "Плюс.",
+      "role": "driver",
+      "kind": "ack",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "calm"
+    },
+    "command.attack.single.ack-plus-2": {
+      "id": "command.attack.single.ack-plus-2",
+      "text": "Плюс-плюс.",
+      "role": "driver",
+      "kind": "ack",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "calm"
+    },
+    "command.attack.group.ack-plus-1": {
+      "id": "command.attack.group.ack-plus-1",
+      "text": "Плюс.",
+      "role": "driver",
+      "kind": "ack",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "calm"
+    },
+    "command.attack.group.ack-plus-2": {
+      "id": "command.attack.group.ack-plus-2",
+      "text": "Плюс-плюс.",
+      "role": "driver",
+      "kind": "ack",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "calm"
+    },
+    "command.attack.mass.ack-plus-1": {
+      "id": "command.attack.mass.ack-plus-1",
+      "text": "Плюс.",
+      "role": "driver",
+      "kind": "ack",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "calm"
+    },
+    "command.attack.mass.ack-plus-2": {
+      "id": "command.attack.mass.ack-plus-2",
+      "text": "Плюс-плюс.",
+      "role": "driver",
+      "kind": "ack",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "calm"
+    },
+    "command.stop.single.ack-plus-1": {
+      "id": "command.stop.single.ack-plus-1",
+      "text": "Плюс.",
+      "role": "driver",
+      "kind": "ack",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "calm"
+    },
+    "command.stop.single.ack-plus-2": {
+      "id": "command.stop.single.ack-plus-2",
+      "text": "Плюс-плюс.",
+      "role": "driver",
+      "kind": "ack",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "calm"
+    },
+    "command.stop.group.ack-plus-1": {
+      "id": "command.stop.group.ack-plus-1",
+      "text": "Плюс.",
+      "role": "driver",
+      "kind": "ack",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "calm"
+    },
+    "command.stop.group.ack-plus-2": {
+      "id": "command.stop.group.ack-plus-2",
+      "text": "Плюс-плюс.",
+      "role": "driver",
+      "kind": "ack",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "calm"
+    },
+    "command.stop.mass.ack-plus-1": {
+      "id": "command.stop.mass.ack-plus-1",
+      "text": "Плюс.",
+      "role": "driver",
+      "kind": "ack",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "calm"
+    },
+    "command.stop.mass.ack-plus-2": {
+      "id": "command.stop.mass.ack-plus-2",
+      "text": "Плюс-плюс.",
+      "role": "driver",
+      "kind": "ack",
+      "source": "tts",
+      "audio": null,
+      "portrait": null,
+      "voiceId": null,
+      "pauseAfter": 0.18,
+      "archived": false,
+      "emotion": "calm"
     }
   },
   "characters": [

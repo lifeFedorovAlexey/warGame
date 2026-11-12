@@ -1,4 +1,5 @@
 import {RadioEngine,aggregateContext} from './engine.js';
+import {russianNumber} from './conditions.js';
 import {composition} from './tactical-intel.js';
 
 // Explicit editor fixture, never attached to a Mission or its authoritative state.
@@ -24,9 +25,11 @@ export function simulateRadio(library,{type='command.move',count=20,hits=1,order
   incidentId:type.startsWith('command.')?undefined:'incident-1',orderIds:type==='traffic.network_overload'?Array.from({length:orders},(_,i)=>'order-'+i):undefined,
   squadId:squad,actorIds:ids,affectedIds:ids,targetIds:ids,objectIds:ids,
   facts:{destroyedIds:ids.slice(0,losses),killedIds:Array.from({length:killed},(_,i)=>'dead-'+i),woundedIds:Array.from({length:wounded},(_,i)=>'wounded-'+i),
-   crewKnown,woundedKnown:true,explosionConfirmed,resolution:type==='traffic.jam_resolved'?'resolved':'ongoing',incidentStartedAt:simTime-12,trafficProgress:0,hitCount:type==='damage.hit'?1:0},
+   crewKnown,woundedKnown:true,explosionConfirmed,followup:false,killCountWord:russianNumber(count),
+   destroyedComposition:composition(ids.map((id,i)=>({id,kind:i===ids.length-1&&ids.length>1?'mg-tower':'raider'}))),
+   resolution:type==='traffic.jam_resolved'?'resolved':'ongoing',incidentStartedAt:simTime-12,trafficProgress:0,hitCount:type==='damage.hit'?1:0},
   flags:{confirmed:true,hasCombat:combat}});
- const readyAt=Math.max(simTime+10,...[...engine.pending.values()].map(b=>b.end));
+ const readyAt=Math.max(simTime,...[...engine.pending.values()].map(b=>b.end));
  for(const bucket of engine.pending.values())contexts.push(enrich(aggregateContext(bucket,readyAt)));
  engine.tick(Math.round(readyAt*10),readyAt);
  const candidates=structuredClone(engine.state.queue),lines=[];

@@ -1,6 +1,7 @@
 import {compileCondition,stableHash,validateLibrary} from './conditions.js';
 import {radioClip} from './audio.js';
 import {renderRadioLine,speechKey} from './wording.js';
+import {promptDelivery,dispatchPriority} from './dispatch-policy.js';
 
 const sorted=values=>[...new Set(values??[])].sort();
 const limitMap=(map,cap)=>{while(map.size>cap)map.delete(map.keys().next().value);};
@@ -63,6 +64,10 @@ export class RadioEngine{
   if(saved&&this.state.librarySignature!==librarySignature){this.state.queue=[];this.state.batch=[];}
   this.state.librarySignature=librarySignature;
   this.pending=new Map(this.state.pending.map(b=>[b.key,b]));this.seen=new Map(this.state.seen);this.roots=new Map(this.state.roots);
+  for(const b of this.pending.values()){
+   const rule=this.index.get(b.type)?.find(r=>r.enabled);
+   if(rule)b.end=Math.min(b.end,b.start+rule.windowSimSeconds);
+  }
   this.state.batch??=[];this.state.lastDecisionAt??=-10000;
   this.phraseUses=new Map(this.state.phraseUses??[]);
   this.produced=new Map(this.state.produced);this.cooldowns=new Map(this.state.cooldowns);this.active=null;
@@ -101,6 +106,9 @@ export class RadioEngine{
    this.scopes.set(key,this.state.frequencies[event.type]??0);this.state.frequencies[event.type]=(this.state.frequencies[event.type]??0)+1;limitMap(this.scopes,4096);
   }
   bucket.historicalFrequency=this.scopes.get(key);ingest(bucket,event);this.pending.set(key,bucket);this.state.stats.ingested++;
+  if(rule.delivery==='reaction'){
+   this.resolve(bucket,event.simTime);this.pending.delete(key);return true;
+  }
   // Urgent transitions bypass the ordinary window, but are still deduplicated and bounded.
   if(event.flags?.urgent&&!bucket.urgentReported){bucket.urgentReported=true;this.resolve(bucket,event.simTime);}
   return true;
@@ -118,24 +126,32 @@ export class RadioEngine{
    if(!rule.legacyOverride&&this.legacy(rule,context)){this.reject('legacy-owner');continue;}
    const snap=this.snapshot(context),speakers=(snap.speakers??[]).filter(s=>s.alive&&s.combatReady!==false&&s.radioChannel==='rai');
    const tier=[...rule.tiers].sort((a,b)=>b.min-a.min).find(t=>context[rule.countMetric]>=t.min);if(!tier)continue;
-   const key=[bucket.key,tier.id,context.resolution].join('|');if(this.produced.has(key))return this.reject('incident-tier-already-produced');
+   const key=[bucket.key,tier.id,context.resolution,...(rule.delivery==='reaction'?context.targetIds:[])].join('|');if(this.produced.has(key))return this.reject('incident-tier-already-produced');
    if(!speakers.length)return this.reject('no-live-speaker');
    if(snap.relevant===false)return this.reject('stale-state');
    if(bucket.type.startsWith('idle.')&&snap.combat&&this.settings.quietInCombat)return this.reject('combat-suppresses-banter');
    const episode=this.choose(rule,tier,context,speakers,now);if(!episode)return this.reject('truth-or-repeat-guard');
    const item={id:key,ruleId:rule.id,type:bucket.type,scopeKey:bucket.key,tier:tier.id,context,lines:episode.lines,graphId:episode.id,personal:episode.personal,remembrance:episode.remembrance,bawdy:episode.bawdy,humor:episode.humor,combatHumor:episode.combatHumor,
-    priority:rule.priority,interruptible:rule.interruptible,expiresAtSimTime:now+rule.expiresAfter,createdAt:now,
+    priority:rule.priority,delivery:rule.delivery,interruptible:rule.interruptible,expiresAtSimTime:now+rule.expiresAfter,createdAt:now,
     cooldown:rule.cooldown,cursor:0,duration:episode.lines.reduce((n,l)=>n+Math.max(2.2,l.text.length*.06)+(l.pauseAfter??.12),0)};
    this.produced.set(key,now);limitMap(this.produced,this.settings.maxHistory);
    this.state.stats.candidates++;
    // A resolved incident supersedes its pending reports, never its historical losses.
-   if(context.resolution==='resolved')this.state.queue=this.state.queue.filter(q=>!context.incidentIds.some(id=>q.context.incidentIds.includes(id)));
+   if(context.resolution==='resolved')this.state.queue=this.state.queue.filter(q=>q.delivery==='reaction'||!context.incidentIds.some(id=>q.context.incidentIds.includes(id)));
    this.state.queue=this.state.queue.filter(q=>q.scopeKey!==bucket.key);
+   this.state.batch=this.state.batch.filter(q=>q.scopeKey!==bucket.key);
    this.state.queue.push(item);this.state.queue.sort((a,b)=>b.priority-a.priority||a.createdAt-b.createdAt||a.id.localeCompare(b.id));
    const routineSlots=Math.max(0,(this.settings.maxRoutineQueue??2)-this.state.batch.filter(q=>q.priority<40).length);
    const routine=new Set(this.state.queue.filter(q=>q.priority<40).sort((a,b)=>b.createdAt-a.createdAt).slice(0,routineSlots));
    this.state.queue=this.state.queue.filter(q=>q.priority>=40||routine.has(q));
-   let duration=this.state.batch.reduce((n,q)=>n+q.duration,0);this.state.queue=this.state.queue.filter((q,i)=>{duration+=q.duration;return i<this.settings.maxQueue-this.state.batch.length&&(i===0&&this.state.batch.length===0||duration<=this.settings.maxQueuedDuration);});
+   // Reserve bounded space for readiness and short reactions. A long summary
+   // cannot evict a completed building before it reaches the channel.
+   let duration=this.state.batch.filter(q=>!promptDelivery(q)).reduce((n,q)=>n+q.duration,0),count=this.state.batch.filter(q=>!promptDelivery(q)).length;
+   const promptCounts={notification:this.state.batch.filter(q=>q.delivery==='notification').length,reaction:this.state.batch.filter(q=>q.delivery==='reaction').length};
+   this.state.queue=this.state.queue.filter(q=>{
+    if(promptDelivery(q))return ++promptCounts[q.delivery]<=(q.delivery==='notification'?8:3);
+    duration+=q.duration;return ++count<=this.settings.maxQueue&&(count===1||duration<=this.settings.maxQueuedDuration);
+   });
    return item;
   }
   return this.reject('no-matching-rule');
@@ -181,6 +197,7 @@ export class RadioEngine{
  choose(rule,tier,context,speakers,now=context.windowEndTick){
   const eligible=[],speakerOrder=this.speakerOrder(context);
   for(const graph of tier.graphs){
+   if(rule.delivery==='notification'&&(graph.humor||graph.nodes.some(n=>['question','dry_joke'].includes(this.library.phrases[n.phraseId]?.kind))))continue;
    if(graph.bawdy&&!this.bawdyReady(now))continue;
    if(graph.personal&&(now-((graph.remembrance?this.state.lastRemembranceAt:this.state.lastPersonalAt)??-Infinity)<180||stableHash(context.scopeKey+'|personal')/4294967296>(graph.chance??1)))continue;
    if(rule.priority<80&&graph.nodes.length>(this.settings.maxRoutineTurns??2))continue;
@@ -188,7 +205,7 @@ export class RadioEngine{
    const humor=graph.humor||graph.nodes.some(n=>this.library.phrases[n.phraseId]?.kind==='dry_joke');
    if(humor&&((context.combatContext&&!graph.combatHumor)||now-(this.state.lastLoss??-Infinity)<45||context.destroyedVehicleCount>0||context.killedCrewCount>0||context.woundedCrewCount>0||this.settings.humorLevel<=0))continue;
    const lines=[],slots=new Map();let prior=null,valid=true;
-   for(const node of graph.nodes){
+   for(const node of rule.delivery==='notification'?graph.nodes.slice(0,1):graph.nodes){
     const p=this.library.phrases[node.phraseId];if(!p||p.archived||!this.phraseGuards.get(p.id)(context)){valid=false;break;}
     if((p.kind==='question'||p.kind==='answer')&&context.facts[p.fact]==null){valid=false;break;}
     let options=speakers.filter(s=>rule.roles.includes(s.role)&&(!node.affectedSpeaker||context.affectedIds.includes(s.unitId))&&(!node.differentSpeaker||s.crewId!==prior?.crewId)&&(!p.voiceId||s.voiceId===p.voiceId)&&(!p.speakerGender||s.gender===p.speakerGender)&&(!node.speakerFact||s.crewId===context.facts[node.speakerFact])&&(!graph.speakersFromMemory||context.memorySpeakerIds?.includes(s.crewId)));
@@ -236,22 +253,28 @@ export class RadioEngine{
   const total=pool.reduce((n,g)=>n+weight(g),0);let pick=stableHash([this.missionId,context.windowStartTick,context.scopeKey,tier.id].join('|'))/4294967296*total;
   for(const graph of pool){pick-=weight(graph);if(pick<0)return graph;}return pool.at(-1);
  }
+ eligible(q,now){
+  if(q.delivery==='idle'&&(this.snapshot(q.context).combat||
+   [...this.state.queue,...this.state.batch].some(other=>other!==q&&other.delivery!=='idle'&&other.priority>q.priority)||
+   [...this.pending.values()].some(b=>this.index.get(b.type)?.some(r=>r.enabled&&r.priority>=40))))return false;
+  return promptDelivery(q)||q.priority>=80||['squad:'+q.context.squadId,'unit:'+q.lines[0].crewId,'scope:'+q.scopeKey,'event:'+q.type+':'+q.context.squadId].every(k=>now>=(this.cooldowns.get(k)??-Infinity));
+ }
  selectBatch(simTime){
   if(simTime-this.state.lastDecisionAt<(this.settings.dispatchSeconds??2))return;
   this.state.lastDecisionAt=simTime;
   this.state.stats.decisions=(this.state.stats.decisions??0)+1;
-  if(this.state.batch.length&&this.state.queue.some(q=>q.priority>this.state.batch[0].priority)){
+  if(this.state.batch.length&&this.state.queue.some(q=>this.eligible(q,simTime)&&dispatchPriority(q,simTime)>dispatchPriority(this.state.batch[0],simTime))){
    this.state.queue.push(...this.state.batch);this.state.batch=[];
   }
   const fresh=q=>q.expiresAtSimTime>=simTime&&!this.repeatBlocked(q.lines,q.context,simTime,{pending:false})&&this.snapshot(q.context).relevant!==false;
-  this.state.queue=this.state.queue.filter(fresh).sort((a,b)=>b.priority-a.priority||a.createdAt-b.createdAt||a.id.localeCompare(b.id));
+  this.state.queue=this.state.queue.filter(fresh).sort((a,b)=>dispatchPriority(b,simTime)-dispatchPriority(a,simTime)||a.createdAt-b.createdAt||a.id.localeCompare(b.id));
   this.state.batch=this.state.batch.filter(fresh);
   if(this.state.batch.length||simTime-this.state.lastChannel<this.settings.channelCooldown)return;
-  const eligible=q=>q.priority>=80||['squad:'+q.context.squadId,'unit:'+q.lines[0].crewId,'scope:'+q.scopeKey,'event:'+q.type+':'+q.context.squadId].every(k=>simTime>=(this.cooldowns.get(k)??-Infinity));
+  const eligible=q=>this.eligible(q,simTime);
   const index=this.state.queue.findIndex(eligible);if(index<0)return;
   const first=this.state.queue.splice(index,1)[0];this.state.batch=[first];
   const related=q=>q.context.affectedIds.some(id=>first.context.affectedIds.includes(id))||first.context.squadId!=='global'&&q.context.squadId===first.context.squadId;
-  const companion=this.state.queue.findIndex(q=>eligible(q)&&related(q)&&q.priority>=first.priority-10&&Math.abs(q.createdAt-first.createdAt)<=5&&q.lines.length+first.lines.length<=3&&q.duration+first.duration<=(this.settings.maxPacketSeconds??12));
+  const companion=this.state.queue.findIndex(q=>q.delivery===first.delivery&&eligible(q)&&related(q)&&q.priority>=first.priority-10&&Math.abs(q.createdAt-first.createdAt)<=5&&q.lines.length+first.lines.length<=3&&q.duration+first.duration<=(this.settings.maxPacketSeconds??12));
   if(companion>=0)this.state.batch.push(this.state.queue.splice(companion,1)[0]);
   this.state.stats.packets=(this.state.stats.packets??0)+1;
   this.state.lastPacket={at:simTime,priority:first.priority,events:this.state.batch.map(q=>q.type)};
@@ -259,16 +282,17 @@ export class RadioEngine{
  bawdyReady(now){return this.settings.humorLevel>0&&now-(this.state.lastBawdyAt??-Infinity)>=(this.settings.bawdyInterval??150)&&now-(this.state.lastLoss??-Infinity)>=60&&now-(this.state.lastCombat??-Infinity)>=20&&now-(this.state.lastRemembranceAt??-Infinity)>=180;}
  next(simTime,{storyLock=false,audioBusy=false}={}){
   if(!this.enabled||storyLock||audioBusy)return null;
+  if(this.active?.cursor>=this.active?.lines.length)this.active=null;
   if(this.active?.expiresAtSimTime<simTime&&simTime-this.state.lastChannel>(this.settings.maxPacketSeconds??12))this.active=null;
   this.selectBatch(simTime);
-  if(this.state.queue.some(q=>q.priority>Math.max(this.active?.priority??-1,this.state.batch[0]?.priority??-1)))return null;
   if(this.active){
    if(this.active.cursor>=this.active.lines.length)this.active=null;
-   else if(this.active.interruptible&&[...this.state.batch,...this.state.queue].some(q=>q.priority>this.active.priority))this.active=null;
+   else if(this.active.interruptible&&this.state.batch.some(q=>this.eligible(q,simTime)&&dispatchPriority(q,simTime)>dispatchPriority(this.active,simTime)))this.active=null;
   }
   if(!this.active){
-   this.state.batch=this.state.batch.filter(q=>!this.repeatBlocked(q.lines,q.context,simTime,{pending:false}));
+   this.state.batch=this.state.batch.filter(q=>q.expiresAtSimTime>=simTime&&!this.repeatBlocked(q.lines,q.context,simTime,{pending:false}));
    if(!this.state.batch.length)return null;
+   if(!this.eligible(this.state.batch[0],simTime))return null;
    this.active=this.state.batch.shift();
   }
   const q=this.active,line=q.lines[q.cursor],snapshot=this.snapshot(q.context);

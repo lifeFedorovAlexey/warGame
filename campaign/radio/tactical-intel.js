@@ -10,12 +10,23 @@ const types={
  bunker:[['пулемётный ДОТ','пулемётных ДОТа','пулемётных ДОТов'],'masculine'],
  flamer:[['огнемётная машина','огнемётные машины','огнемётных машин'],'feminine'],
  bukhanka:[['машина с пулемётом','машины с пулемётами','машин с пулемётами'],'feminine'],
+ 'scav-rifleman':[['стрелок','стрелка','стрелков'],'masculine'],
+ 'scav-grenadier':[['гранатомётчик','гранатомётчика','гранатомётчиков'],'masculine'],
+ 'scav-barracks':[['казарма','казармы','казарм'],'feminine'],
+ 'scav-store':[['склад','склада','складов'],'masculine'],
+ 'scav-fence':[['секция забора','секции забора','секций забора'],'feminine'],
+ 'scav-gate':[['ворота','ворот','ворот'],'neuter'],
+ generator:[['генератор','генератора','генераторов'],'masculine'],
+ derrick:[['нефтяная вышка','нефтяные вышки','нефтяных вышек'],'feminine'],
+ factory:[['завод','завода','заводов'],'masculine'],
+ lab:[['лаборатория','лаборатории','лабораторий'],'feminine'],
 };
 const capital=s=>s?s[0].toLocaleUpperCase('ru')+s.slice(1):'';
 export function composition(rows){
  const unique=new Map(rows.map(r=>[r.id,r])),counts=new Map();
  for(const row of unique.values())counts.set(row.kind,(counts.get(row.kind)??0)+1);
  const parts=[...counts].sort(([a],[b])=>a.localeCompare(b)).map(([kind,count])=>{
+  if(kind==='scav-gate')return count===1?'ворота':({2:'двое',3:'трое',4:'четверо'}[count]??russianNumber(count))+' ворот';
   const [forms,gender]=types[kind]??[['боевая машина','боевые машины','боевых машин'],'feminine'];
   return russianCount(count,forms).replace(/^\d+/,russianNumber(count,gender));
  });

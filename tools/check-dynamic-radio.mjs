@@ -16,9 +16,9 @@ const live=Array.from({length:25},(_,i)=>({crewId:'c'+i,unitId:'u'+i,callSign:'�
 // Core tests use a fixed three-second window; shipped timings are tested separately below.
 const engine=(saved)=>{const fixture=structuredClone(library);for(const rule of fixture.rules)rule.windowSimSeconds=3;return new RadioEngine(fixture,{snapshot:()=>({speakers:live}),saved});};
 const event=(extra={})=>({id:'one',tickId:1,simTime:0,type:'command.move',orderId:'o1',actorIds:['u0'],affectedIds:['u0'],facts:{accepted:true},...extra});
-test('229 situations, exact category counts and 25 legacy IDs',()=>{
- assert.equal(library.rules.length,229);assert.equal(Object.keys(JSON.parse(fs.readFileSync('assets/radio/legacy_25_mapping.json'))).length,25);validateLibrary(library);
- assert.deepEqual(Object.values(Object.groupBy(library.rules,r=>r.category)).map(v=>v.length),[26,20,27,28,19,10,15,5,12,7,15,18,5,15,7]);
+test('231 situations, exact category counts and 25 legacy IDs',()=>{
+ assert.equal(library.rules.length,231);assert.equal(Object.keys(JSON.parse(fs.readFileSync('assets/radio/legacy_25_mapping.json'))).length,25);validateLibrary(library);
+ assert.deepEqual(Object.values(Object.groupBy(library.rules,r=>r.category)).map(v=>v.length),[26,20,27,30,19,10,15,5,12,7,15,18,5,15,7]);
 });
 test('1 / 5 / 20 vehicles, one accepted order = one different graph',()=>{
  for(const [count,tier] of [[1,'single'],[5,'group'],[20,'mass']]){const r=simulateRadio(library,{count});assert.equal(r.candidates.length,1);assert.equal(r.candidates[0].tier,tier);assert.equal(r.contexts[0].distinctOrderCount,1);assert.equal(r.contexts[0].affectedUnitCount,count);assert(r.lines.length>=1);if(r.lines.length>1)assert.notEqual(r.lines[0].crewId,r.lines[1].crewId);}
@@ -121,7 +121,8 @@ test('200/300 remain confirmed personnel facts; dry retreat and explosion exchan
  assert.equal(russianCount(3,library.dictionaries.morphology.threeHundred),'3 трёхсотых');
  const retreat=simulateRadio(library,{type:'command.retreat',count:5,tone:'dry',combat:true});assert(retreat.lines.some(l=>/перегруппир|ман[её]вр/i.test(l.text)));
  assert.equal(simulateRadio(library,{type:'combat.target_destroyed',count:1,tone:'dry',combat:true,explosionConfirmed:false}).lines.length,0);
- const pop=simulateRadio(library,{type:'combat.target_destroyed',count:1,tone:'dry',combat:true,explosionConfirmed:true});assert(pop.lines.some(l=>l.text.includes('хлопок')));
+ const medal=simulateRadio(library,{type:'combat.kill_banter',count:3,tone:'dry'});assert(medal.lines.some(l=>l.text.includes('медаль')));
+ assert.equal(simulateRadio(library,{type:'combat.kill_banter',count:3,tone:'dry',combat:true}).lines.length,0);
  assert.equal(simulateRadio(library,{type:'combat.target_destroyed',count:1,tone:'dry',combat:true,explosionConfirmed:true,losses:1,killed:1}).lines.length,0);
 });
 test('20 per-unit callbacks deduplicate order identity but retain exact actors',()=>{
@@ -256,7 +257,7 @@ test('every wired type produces a valid branch in the shared simulator',()=>{
  for(const rule of library.rules.filter(r=>r.support==='wired')){
   const l=structuredClone(library);l.rules.find(r=>r.id===rule.id).enabled=true;
   for(const tier of l.rules.find(r=>r.id===rule.id).tiers)for(const graph of tier.graphs)if(graph.personal)graph.chance=1;
-  const result=simulateRadio(l,{type:rule.eventType,count:20,losses:rule.id==='idle.quiet'?0:3,orders:rule.eventType==='traffic.network_overload'?20:1});
+  const result=simulateRadio(l,{type:rule.eventType,count:20,losses:rule.id==='idle.quiet'||rule.delivery==='idle'?0:3,orders:rule.eventType==='traffic.network_overload'?20:1});
   assert(result.candidates.length>0,rule.id);assert(result.lines.length>0,rule.id);
  }
 });
@@ -427,9 +428,9 @@ test('recent banter does not suppress grief; grief suppresses further personal c
  assert.equal(e.state.queue.length,0);
 });
 
-test('shipped collection waits 18 seconds for routine reports and 12 for hits; dispatch remains two',()=>{
+test('shipped collection keeps long summaries but readiness takes half a second; dispatch remains two',()=>{
  assert.equal(library.settings.dispatchSeconds,2);
- for(const [type,seconds] of [['command.move',18],['repair.complete',18],['construction.complete',18],['factory.vehicle_complete',18],['damage.hit',12]]){
+ for(const [type,seconds] of [['command.move',18],['repair.complete',.5],['construction.complete',.5],['factory.vehicle_complete',.5],['damage.hit',12]]){
   const e=new RadioEngine(structuredClone(library),{snapshot:()=>({speakers:live})});
   e.event(event({type,simTime:15,tickId:150,objectIds:['factory'],facts:{accepted:true,resolution:'resolved'}}));
   e.tick(200,15+seconds-.01);assert.equal(e.state.queue.length,0,type);assert.equal(e.pending.size,1,type);
@@ -447,20 +448,20 @@ test('real hits share a full window across old clock boundaries and save/load',(
  m.state.time=27.9;observer.tick();assert(!observer.engine.pending.has(scope));
  m.state.time=28;m.damage(unit,1,enemy);assert.notEqual([...observer.engine.pending.values()].find(b=>b.type==='damage.hit').key,scope);
 });
-test('different workshops and construction objects form one complete 18-second report',()=>{
+test('simultaneous readiness combines briefly; a later building does not wait for a long report',()=>{
  const m=fixture(),a=m.addUnit('bukhanka','rai',{x:0,y:0}),b=m.addUnit('bukhanka','rai',{x:100,y:0});
  const radio=m.radioObserver=new MissionRadio(m,structuredClone(library));
  radio.note({id:'repair-a',type:'factory-repair-complete',unit:a.id,factory:'factory-a'});
- m.state.time=30;radio.note({id:'repair-b',type:'factory-repair-complete',unit:b.id,factory:'factory-b'});
+ m.state.time=15.2;radio.note({id:'repair-b',type:'factory-repair-complete',unit:b.id,factory:'factory-b'});
  const repair=[...radio.engine.pending.values()].filter(p=>p.type==='repair.complete');
  assert.equal(repair.length,1);assert.deepEqual(new Set(repair[0].affectedIds),new Set([a.id,b.id]));
  assert.deepEqual(new Set(repair[0].objectIds),new Set(['factory-a','factory-b']));
- m.state.time=32.9;radio.tick();assert.equal(radio.engine.state.queue.length,0);
- m.state.time=33;radio.tick();assert.equal(radio.engine.state.queue[0].context.affectedUnitCount,2);assert.equal(radio.engine.state.queue[0].tier,'group');
+ m.state.time=15.49;radio.tick();assert.equal(radio.engine.state.queue.length,0);
+ m.state.time=15.5;radio.tick();assert.equal(radio.engine.state.queue[0].context.affectedUnitCount,2);assert.equal(radio.engine.state.queue[0].tier,'group');
  radio.note({id:'build-a',type:'construction-complete',building:'building-a'});
  m.state.time=44;radio.note({id:'build-b',type:'construction-complete',building:'building-b'});
- const builds=[...radio.engine.pending.values()].filter(p=>p.type==='construction.complete');assert.equal(builds.length,1);
- assert.equal(builds[0].objectIds.length,2);
+ const builds=[...radio.engine.pending.values()].filter(p=>p.type==='construction.complete');assert.equal(builds.length,2);
+ assert(builds.every(b=>b.objectIds.length===1));
 });
 test('real losses warn immediately and combine later losses into a 20-second summary',()=>{
  const m=fixture(),survivor=m.addUnit('bukhanka','rai',{x:0,y:0}),lost=[1,2].map(i=>m.addUnit('bukhanka','rai',{x:i*100,y:0}));

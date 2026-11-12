@@ -1,0 +1,118 @@
+{
+  "creditsReserved": 440,
+  "modelId": "eleven_v4",
+  "reason": "Owner requested a panicked delivery for blocked retreat.",
+  "promptingSource": "https://elevenlabs.io/docs/overview/capabilities/text-to-speech/best-practices",
+  "clips": [
+    {
+      "file": "assets/radio/recordings/radio-dispatch/voice-1-fe354cc3805423c3.mp3",
+      "text": "Не могу выйти! Проезд закрыт, помогите!",
+      "voice": "voice-1",
+      "voiceId": "JKtNvDNrWu33P1xzttP2",
+      "voiceName": "Ivan - Energetic and Sassy",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "emotion": "urgent",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "fe354cc3805423c346046ff68b83f40ff106ec35eb295cf9af08415e5c133c62",
+      "bytes": 58557,
+      "duration": 3.6,
+      "leadingSilence": 0.11,
+      "trailingSilence": 0.26000000000000023,
+      "spokenText": "[panicked, breathless voice] Не могу выйти! [shouting urgently] Проезд закрыт, помогите!",
+      "previousFile": "assets/radio/recordings/language-review/voice-1-c7765afa1fb4f3b7.mp3",
+      "previousSha256": "c7765afa1fb4f3b7ca0c2bafd0b2d37aa4fca34902cacf2e0b2f8b0e2dfb7d7c"
+    },
+    {
+      "file": "assets/radio/recordings/radio-dispatch/voice-2-9346a2ed388a0b5d.mp3",
+      "text": "Не могу выйти! Проезд закрыт, помогите!",
+      "voice": "voice-2",
+      "voiceId": "6YjFofyVXU1ASguf2hTJ",
+      "voiceName": "Maxim - Conversational & Natural",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "emotion": "urgent",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "9346a2ed388a0b5dc494e5091c2096ac1ce26334832c985cc491a449b4c8b213",
+      "bytes": 59811,
+      "duration": 3.68,
+      "leadingSilence": 0.09,
+      "trailingSilence": 0.28000000000000025,
+      "spokenText": "[panicked, breathless voice] Не могу выйти! [shouting urgently] Проезд закрыт, помогите!",
+      "previousFile": "assets/radio/recordings/language-review/voice-2-ee0eb32c299dd241.mp3",
+      "previousSha256": "ee0eb32c299dd2416a101f34c820bbec06d41ce213c477349073618e492f2df5"
+    },
+    {
+      "file": "assets/radio/recordings/radio-dispatch/voice-3-5b92ffeb773cb73f.mp3",
+      "text": "Не могу выйти! Проезд закрыт, помогите!",
+      "voice": "voice-3",
+      "voiceId": "GN4wbsbejSnGSa1AzjH5",
+      "voiceName": "Ekaterina - Soft, Silky and Tender",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "emotion": "urgent",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "5b92ffeb773cb73fa734690c3ebe041aab6d4b96f20c62e1ca709c16acf6f2c5",
+      "bytes": 58557,
+      "duration": 3.6,
+      "leadingSilence": 0.07,
+      "trailingSilence": 0.2799999999999998,
+      "spokenText": "[panicked, breathless voice] Не могу выйти! [shouting urgently] Проезд закрыт, помогите!",
+      "previousFile": "assets/radio/recordings/language-review/voice-3-a6c850b8a8c8708d.mp3",
+      "previousSha256": "a6c850b8a8c8708d1ecef05a2be9e3802e9046cf763a3c5c5786ae922114f14e"
+    },
+    {
+      "file": "assets/radio/recordings/radio-dispatch/voice-4-f0d100ea3b6777bd.mp3",
+      "text": "Не могу выйти! Проезд закрыт, помогите!",
+      "voice": "voice-4",
+      "voiceId": "txnCCHHGKmYIwrn7HfHQ",
+      "voiceName": "Alexandr Vlasov - Vibrant and Energetic",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "emotion": "urgent",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "f0d100ea3b6777bd7ffba2ed3fadc535e77eba7b854800e4305fd5d9efd20c01",
+      "bytes": 59811,
+      "duration": 3.68,
+      "leadingSilence": 0.07,
+      "trailingSilence": 0.27,
+      "spokenText": "[panicked, breathless voice] Не могу выйти! [shouting urgently] Проезд закрыт, помогите!",
+      "previousFile": "assets/radio/recordings/language-review/voice-4-94df6354347fac0e.mp3",
+      "previousSha256": "94df6354347fac0ea95f259b9cd4e75942d8781b85b00521387db36808442d26"
+    },
+    {
+      "file": "assets/radio/recordings/radio-dispatch/voice-6-e2c11f30db5d6bb8.mp3",
+      "text": "Не могу выйти! Проезд закрыт, помогите!",
+      "voice": "voice-6",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "emotion": "urgent",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "e2c11f30db5d6bb8fa9c1ff8781f8124d54dd1bf55adab9933d3e491e0fd8d05",
+      "bytes": 59811,
+      "duration": 3.68,
+      "leadingSilence": 0.11,
+      "trailingSilence": 0.26000000000000023,
+      "spokenText": "[panicked, breathless voice] Не могу выйти! [shouting urgently] Проезд закрыт, помогите!",
+      "previousFile": "assets/radio/recordings/language-review/voice-6-405ac5f4652eea04.mp3",
+      "previousSha256": "405ac5f4652eea04ee187720ea5f930446abf539c09e3f0960fb7c94661055aa"
+    }
+  ]
+}
