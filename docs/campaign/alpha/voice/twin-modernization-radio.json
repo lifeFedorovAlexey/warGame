@@ -1,0 +1,36 @@
+{
+  "oldScene": "r10",
+  "oldSceneEnabled": false,
+  "newScene": {
+    "id": "unit-twin-modernized",
+    "title": "Первое переоснащение на спарку",
+    "cues": [
+      "warrant:upgrade"
+    ],
+    "enabled": true,
+    "notes": "",
+    "triggerDescription": "Первое успешно завершённое переоснащение существующей машины на спарку через обновление завода. Один раз за кампанию, в свободный эфир после сюжетных реплик."
+  },
+  "sourceDraftRevision": 226,
+  "savedDraftRevision": 227,
+  "textAndCuesPreserved": true,
+  "clip": {
+    "file": "warrant-radio/upgrade.mp3",
+    "duration": 14.367333333333333,
+    "leadingSilence": 0.11,
+    "trailingSilence": 0.2673333333333332,
+    "speaker": "warrant",
+    "sha256": "1d1f17d3c1067f7de3725a75aeda47afc38e62541226ae8fed41d30d3435db2b",
+    "bytes": 246814,
+    "origin": "user-recording",
+    "reusedFrom": {
+      "catalog": "warrant-radio/manifest.json",
+      "cueId": "upgrade"
+    },
+    "textMatch": "exact",
+    "text": "Вот «Буханку» опять обновили. Зря, конечно. Хорошая была машина. Сорок лет ничего не меняли — и правильно делали. А теперь ручку дверную другую поставили. Спрашивается, зачем?"
+  },
+  "newRecordings": 0,
+  "credits": 0,
+  "trigger": "Completed U01 → U02 retrofit in modernizeAfterRepair; campaign firstTwinModernization milestone, independent of previous r10 progress."
+}

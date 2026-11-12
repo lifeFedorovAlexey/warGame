@@ -1,0 +1,98 @@
+{
+  "status": "review-ready",
+  "previewPort": 8769,
+  "draftRevision": 227,
+  "reservedCredits": 109,
+  "newRecordings": 1,
+  "tape": {
+    "variants": [
+      {
+        "scene": "r29",
+        "played": [
+          "m01-s08-l013",
+          "m01-s08-l014",
+          "m01-s08-l015",
+          "m01-s08-l018",
+          "m01-s08-l019"
+        ],
+        "transitionMs": 8.299999952316284,
+        "approximateAudibleGapMs": 360.66666666666913,
+        "answerReadyBeforeQuestion": true
+      },
+      {
+        "scene": "r30-alt",
+        "played": [
+          "m01-v3-r30-alt-l001",
+          "m01-s08-l015",
+          "m01-s08-l018",
+          "m01-s08-l019"
+        ],
+        "transitionMs": 5.299999952316284,
+        "approximateAudibleGapMs": 360.66666666666737,
+        "answerReadyBeforeQuestion": true
+      }
+    ],
+    "screenshots": [
+      {
+        "path": "campaign/previews/tape-color-link/game-desktop.png",
+        "width": 1440,
+        "height": 900
+      },
+      {
+        "path": "campaign/previews/tape-color-link/game-landscape.png",
+        "width": 844,
+        "height": 390
+      },
+      {
+        "path": "campaign/previews/tape-color-link/game-small-landscape.png",
+        "width": 667,
+        "height": 375
+      }
+    ],
+    "errors": [],
+    "recordedAnswerUnchanged": true
+  },
+  "modernization": {
+    "errors": [],
+    "screenshots": [
+      {
+        "path": "campaign/previews/twin-modernization-radio/game-desktop.png",
+        "width": 1440,
+        "height": 900
+      },
+      {
+        "path": "campaign/previews/twin-modernization-radio/game-landscape.png",
+        "width": 844,
+        "height": 390
+      },
+      {
+        "path": "campaign/previews/twin-modernization-radio/game-small-landscape.png",
+        "width": 667,
+        "height": 375
+      }
+    ],
+    "voices": [
+      {
+        "scene": "unit-twin-modernized",
+        "file": "warrant-radio/upgrade.mp3",
+        "duration": 14.367333333333333,
+        "ended": true
+      }
+    ],
+    "milestone": {
+      "unitId": "u1",
+      "factoryId": "b416",
+      "at": 0.2,
+      "radioPlayed": true
+    }
+  },
+  "checks": [
+    "Research and button press alone never trigger monologue",
+    "Only actual completed existing-car U01 to U02 retrofit triggers event",
+    "Old r10 states do not block event",
+    "Completed event survives save and mission change without replay",
+    "Disabled scenes do not add channel delay",
+    "Legacy radio does not queue monologue after ammunition research",
+    "r27 and r33 preserved"
+  ]
+}

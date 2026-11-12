@@ -28,6 +28,19 @@ export class StoryDirector {
       this.data=state;this.lastNow=null;
       parkRadioStory(state);
       migrateStoryOpening(mission,state);
+      // Disabled material stays editable, but cannot resume from an old save
+      // or consume a radio slot before the next enabled scene.
+      for(const scene of this.scenes.values())if(scene.enabled===false){
+        const record=this.record(scene.id);
+        if(!terminal(record.status)){record.status='skipped';record.endedAt=state.clock;}
+      }
+      // Older saves retain the actual retrofit on the car, even without the
+      // campaign milestone. A newly produced twin has no such record.
+      const retrofitted=(mission.state.units??[]).find(u=>u.modernization?.from==='U01'&&u.modernization.to==='U02');
+      if(retrofitted){
+        const campaign=mission.state.campaign??={version:1,results:{}};
+        campaign.firstTwinModernization??={unitId:retrofitted.id,factoryId:retrofitted.modernization.factoryId,at:retrofitted.modernization.at,radioPlayed:false};
+      }
       // A revised exchange may have fewer lines than the saved version.
       for(const [id,record] of Object.entries(state.scenes)){
         if(!terminal(record.status)&&record.cursor>=(this.scenes.get(id)?.cues.length??Infinity))record.cursor=0;
@@ -57,13 +70,26 @@ export class StoryDirector {
     if(event.type==='unit-damaged'&&mission.entity(event.target)?.campId===mission.state.camps[3]?.id)f.chiefAssault=true;
   }
   facts(mission) {return mission.state.m02||mission.state.m03?{battle:this.data.clock-this.data.lastCombat<3000,quiet:this.data.clock-this.data.lastCombat,victory:mission.state.status==='victory'}:storyFacts(mission,this.data);}
-  rules(f) {return this.mission.state.m03?m03RadioRules(this):this.mission.state.m02?m02RadioRules(this):storyRules(this,f);}
+  rules(f) {
+    const s=this.mission.state,rules=s.m03?m03RadioRules(this):s.m02?m02RadioRules(this):storyRules(this,f);
+    const milestone=s.campaign?.firstTwinModernization,id='unit-twin-modernized';
+    if(milestone&&!milestone.radioPlayed&&this.scenes.has(id)&&this.scenes.get(id).enabled!==false){
+      // Mission transitions cancel old scene records. The campaign event must
+      // survive that cancellation independently of the retired r10 trigger.
+      const record=this.record(id);
+      if(terminal(record.status)){record.status='pending';record.cursor=0;}
+      rules[id]={priority:2,gap:0,valid:s.status==='running',trigger:!s.m02||!!s.m03||this.finished('m02-radio-twin-ready')};
+    }
+    return rules;
+  }
   suspend() {
     if(this.data?.active)parkRadioStory(this.data);
   }
   end(status='done') {
     const d=this.data,id=d.active;if(!id)return;
     const record=this.record(id);record.status=status;record.endedAt=d.clock;
+    if(id==='unit-twin-modernized'&&['done','skipped'].includes(status)&&this.mission.state.campaign?.firstTwinModernization)
+      this.mission.state.campaign.firstTwinModernization.radioPlayed=true;
     d.active=null;d.lastEnd=d.clock;d.lastScene=id;
     if(id==='r19'&&status==='done'&&!d.journal.some(item=>item.id==='outcasts'))
       d.journal.push({id:'outcasts',title:'Отбросы',text:'Местные вооружённые формирования. Живут на свалках и используют восстановленную технику.'});
@@ -92,7 +118,7 @@ export class StoryDirector {
     }
     const eligible=[];
     for(const [id,rule] of Object.entries(rules)){
-      if(!this.scenes.has(id)||this.finished(id)||id===d.active)continue;
+      if(!this.scenes.has(id)||this.scenes.get(id).enabled===false||this.finished(id)||id===d.active)continue;
       if(opening&&id!==opening&&rule.priority>0&&!f.victory)continue;
       if(!rule.valid){
         if(this.data.scenes[id]){const record=this.record(id);record.status='cancelled';record.endedAt=d.clock;}

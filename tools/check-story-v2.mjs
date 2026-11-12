@@ -12,7 +12,7 @@ const originalStory=read('story-v2.json'),originalAudio=read('audio-v2.json'),ap
 const {story:source,audio}=applyStoryEdits(originalStory,originalAudio,applied);
 const script={...source,dialogue:source.dialogue.map(c=>({...c,clip:audio.clips[c.id]}))};
 const hash=data=>createHash('sha256').update(data).digest('hex');
-assert.equal(source.revision,5);assert.equal(source.scenes.length,55);
+assert.equal(source.revision,5);assert.equal(source.scenes.length,56);
 assert.equal(hash(fs.readFileSync(source.source.path)),source.source.sha256);
 const original=read('audio.json'),portraits=read('portraits/manifest.json');
 const finalRecording=clip=>['user-recording','elevenlabs-synthesis'].includes(clip?.origin);
@@ -28,7 +28,7 @@ for(const cue of [...source.dialogue,...source.barks]){
  assert(clip.duration>0);
  if(cue.speaker!=='past')assert(portraits.characters[cue.speaker],cue.speaker);
 }
-assert.equal(userCount,101);assert.equal(elevenlabsCount,75);
+assert.equal(userCount,100);assert.equal(elevenlabsCount,76);
 assert.equal(audio.clips['m01-s07-l014'].voiceName,'Mishka Yaponcik - Odessa Rogue Charm');
 assert.equal(hash(fs.readFileSync(base+'recordings/reviewed/m01-s07-l014-4e14be06b9b1.mp3')),'4e14be06b9b1155f9d172d2ad351ef622770b629d1241313303b233a4ca38308');
 for(const id of ['m01-v3-r24-l001','m01-v3-r24-l002','m01-v3-r24-l003'])assert.equal(audio.clips[id].origin,'user-recording',id);
@@ -37,7 +37,7 @@ assert.equal(source.dialogue.find(c=>c.id==='m01-s05-l004').text,'Учёные �
 assert.deepEqual(source.scenes.find(s=>s.id==='p04').cues,['m01-s03-l001','m01-v3-builder-crooked-plinth']);
 assert(!source.dialogue.some(c=>c.id==='m01-s03-l003'),'The disabled sign reply must not play');
 for(const sceneId of ['r21','r22','r23','r24','r24a','r25','r26','r27','r29','r30-alt','r31','r32','r33','r35','r36']){
- for(const id of source.scenes.find(s=>s.id===sceneId).cues)assert.equal(audio.clips[id].origin,id==='m01-v3-r25-l001'?'elevenlabs-synthesis':'user-recording',id);
+ for(const id of source.scenes.find(s=>s.id===sceneId).cues)assert.equal(audio.clips[id].origin,['m01-v3-r25-l001','m01-s08-l015'].includes(id)?'elevenlabs-synthesis':'user-recording',id);
 }
 assert.equal(source.dialogue.find(c=>c.id==='m01-s07-l016').text,'Нам и прикрученное надо. Дай отвёртку.');
 assert.equal(source.dialogue.find(c=>c.id==='m01-s07-l016').speaker,'builder');
@@ -61,6 +61,12 @@ assert.deepEqual(petrovich.slice(7).map(l=>l.text),[
  'Слышали, ребята? Нас пригласили. Заходим.',
 ]);
 assert(!source.dialogue.some(l=>l.id.startsWith('m01-v4-r42-')||['m01-s11-l009','m01-s11-l010'].includes(l.id)));
+for(const scene of ['r29','r30-alt'])assert.deepEqual(source.scenes.find(s=>s.id===scene).cues.slice(-3),['m01-s08-l015','m01-s08-l018','m01-s08-l019']);
+assert.equal(audio.clips['m01-s08-l015'].text,'Бак от трактора, форсунка от котла. Поверх заводской жёлтой изоленты отбросы намотали синюю.');
+assert.equal(audio.clips['m01-s08-l018'].sha256,'c7597953606c127f669d0c840123c04edac8afb53b4602fb38a1cc611b5c4d88');
+assert.equal(audio.clips['m01-s08-l019'].sha256,'bff461588b006787ccd34bb7824d70dc4e23949ccd8653abab088f88dd42dee4');
+assert.equal(source.scenes.find(s=>s.id==='r10').enabled,false);
+assert.deepEqual(source.scenes.find(s=>s.id==='unit-twin-modernized').cues,source.scenes.find(s=>s.id==='r10').cues);
 assert.deepEqual(applyStoryEdits(source,audio,applied),{story:source,audio},'Applied snapshots are idempotent');
 assert.deepEqual(originalStory,read('story-v2.json'),'Applying a snapshot does not mutate the base');
 assert.deepEqual(originalAudio,read('audio-v2.json'));
@@ -183,14 +189,13 @@ for(const keys of [['flamethrower','mg-ammo-1'],['mg-ammo-1','flamethrower']]){
   assert(!transmissions.slice(start).some(c=>c.id==='warrant:upgrade'),'Picking up an artifact is not an upgrade');
   s.research[key]=true;play(key==='flamethrower'?'r29':'r33');
   if(key==='mg-ammo-1'){
-   // A save between the report and the comment must keep the pending comment.
+   // Ammunition research no longer queues the retained modernization monologue.
    f.mission.state=JSON.parse(JSON.stringify(f.mission.state));
-   assert.equal(f.tick(0),null);assert.equal(f.tick(1),null);f.tick(1);play('r10');
-   assert.equal(transmissions.at(-1).clip.origin,'user-recording');
+   assert.equal(f.tick(0),null);assert.equal(f.tick(1),null);assert.equal(f.tick(1),null);
    assert(!transmissions.slice(start).some(c=>/изолент/i.test(c.text)),'Ammunition does not repeat the flamethrower joke');
   }
  }
- assert.equal(transmissions.filter(c=>c.id==='warrant:upgrade').length,1);
+ assert.equal(transmissions.filter(c=>c.id==='warrant:upgrade').length,0);
  assert.equal(transmissions.filter(c=>c.id==='m01-s08-l005').length,1);
  f.mission.state=JSON.parse(JSON.stringify(f.mission.state));
  assert.equal(f.tick(60),null,'Completed artifact exchanges and the upgrade comment do not replay after loading');
@@ -199,11 +204,13 @@ for(const keys of [['flamethrower','mg-ammo-1'],['mg-ammo-1','flamethrower']]){
  const f=fixture();f.finish();
  // A pre-fix save may have parked the comment before any upgrade existed.
  f.director.data.scenes.r10={status:'playing',cursor:0};
+ const lastEnd=f.director.data.lastEnd;
  f.mission.state=JSON.parse(JSON.stringify(f.mission.state));
  assert.equal(f.tick(),null);assert.equal(f.tick(60),null);
+ assert.equal(f.director.record('r10').status,'skipped');assert.equal(f.director.data.lastEnd,lastEnd,'Disabling an old saved monologue must not add a channel delay');
  f.mission.state.research['mg-ammo-1']=true;
  assert.equal(f.tick().storyScene,'r33');f.finish();
- assert.equal(f.tick(2).storyScene,'r10','Upgrading the starting vans does not require producing another van');f.finish();
+ assert.equal(f.tick(2),null,'Ammunition research does not play the disabled monologue');
 }
 // Discoveries identify the actual camp, without false ordinals on another route.
 {
@@ -285,7 +292,7 @@ for(const enabled of [false,true]){
  const f=fixture(false);f.mission.state.statistics.produced=1;
  f.mission.state.radioStory={version:2,scriptRevision:4,clock:10,scenes:{'05':{status:'done'}},facts:{},journal:[],lastEnd:0,lastCombat:-30000};
  f.tick();assert.equal(f.director.record('r09').status,'skipped');
- assert.equal(f.director.data.scenes.r10,undefined,'Legacy van production must not retire an unheard upgrade comment');
+ assert.equal(f.director.data.scenes.r10.status,'skipped','The retired research trigger stays disabled in legacy saves');
 }
 // Chatter requires real movement or queues, with at least 45 seconds between exchanges.
 {
@@ -374,7 +381,7 @@ for(const enabled of [false,true]){
   if(scene==='r27'){f.director.completeLine();f.mission.state=JSON.parse(JSON.stringify(s));assert.equal(f.tick(0).id,'m01-s08-l006');}
   while(f.director.data.active===scene){spoken.push(f.director.cue().text);f.director.completeLine();}
  }
- const tapeSetup=spoken.findIndex(t=>t.includes('Всё собрано на синей изоленте'));
+ const tapeSetup=spoken.findIndex(t=>t.includes('Поверх заводской жёлтой изоленты отбросы намотали синюю'));
  const tapeQuestion=spoken.findIndex(t=>t==='А зачем синяя?');
  const tapeReply=spoken.findIndex(t=>t.includes('чтобы жёлтая не разматывалась'));
  assert(tapeSetup>=0&&tapeQuestion>tapeSetup&&tapeReply>tapeQuestion,'The revised tape joke keeps its setup, question and reply in order');

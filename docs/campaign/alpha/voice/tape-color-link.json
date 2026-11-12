@@ -1,0 +1,152 @@
+{
+  "status": "awaiting-owner-listening-before-merge",
+  "approval": "Owner approved exact new scientist setup in both paths; preserve question and full answer including intentional acting pauses.",
+  "reservedCredits": 109,
+  "generatedRecordings": 1,
+  "originalAudioPreserved": true,
+  "openingHandoffUnchanged": true,
+  "mission03LoadingAndDepartureUnchanged": true,
+  "missions": {
+    "01": {
+      "sourceRevision": 225,
+      "savedRevision": 226,
+      "changedCues": [
+        "m01-s08-l015"
+      ],
+      "clips": {
+        "m01-s08-l015": {
+          "file": "recordings/elevenlabs/m01-s08-l015-29df48d34f92.mp3",
+          "speaker": "scientist",
+          "text": "Бак от трактора, форсунка от котла. Поверх заводской жёлтой изоленты отбросы намотали синюю.",
+          "spokenText": "[matter-of-fact] Бак от трактора, форсунка от котла. Поверх заводской жёлтой изоленты отбросы намотали синюю.",
+          "voiceId": "1KGG4Q8LqRdNII9xBurw",
+          "voiceName": "M. Danisch - Narrator",
+          "modelId": "eleven_v4",
+          "origin": "elevenlabs-synthesis",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "sha256": "29df48d34f92e310b06dbb3ff73ff8f88791e59982a4a4380690dbcd1dc94ff1",
+          "bytes": 114981,
+          "generatedAt": "2026-11-12T00:39:04.407Z",
+          "duration": 7.12,
+          "leadingSilence": 0.03,
+          "trailingSilence": 0.3899999999999997,
+          "replaces": "recordings/reviewed/m01-s08-l015-2dfd76f6a327.mp3"
+        }
+      },
+      "scenes": [
+        {
+          "id": "r27",
+          "title": "Демонтаж",
+          "lines": [
+            {
+              "id": "m01-s08-l005",
+              "speaker": "scout",
+              "text": "Товарищ командир, синюю изоленту сняли.",
+              "audio": "docs/campaign/dialogue-drafts/alpha-m01/media/b7aac5e180513da3313de20cecaca7152dbc26e29d634aa519f20df3e00f43aa.mp3"
+            },
+            {
+              "id": "m01-s08-l006",
+              "speaker": "commander",
+              "text": "Отлично. И что за агрегат?",
+              "audio": "assets/campaign/alpha/mission01/recordings/commander/m01-s08-l006.mp3"
+            },
+            {
+              "id": "m01-s08-l007",
+              "speaker": "scout",
+              "text": "Неизвестно. Под ней жёлтая.",
+              "audio": "docs/campaign/dialogue-drafts/alpha-m01/media/4733347e3efff285dd3baaf317e19cf7026df1fb39935cd63ea831d5b5c55b65.mp3"
+            },
+            {
+              "id": "m01-s08-l008",
+              "speaker": "commander",
+              "text": "Ну снимайте и жёлтую.",
+              "audio": "assets/campaign/alpha/mission01/recordings/commander/m01-s08-l008.mp3"
+            },
+            {
+              "id": "m01-s08-l009",
+              "speaker": "scout",
+              "text": "Никак нельзя.",
+              "audio": "docs/campaign/dialogue-drafts/alpha-m01/media/5ca0c82687aa7a9e448db9e4db5e333f07c8f7dc262ff0412b789cfce951a015.mp3"
+            },
+            {
+              "id": "m01-s08-l011",
+              "speaker": "scout",
+              "text": "Она, похоже, заводская.",
+              "audio": "docs/campaign/dialogue-drafts/alpha-m01/media/cf6e2a4ce812c7853eb8806ab75821880f706d6d7284fa170e3334852f5fbef3.mp3"
+            }
+          ]
+        },
+        {
+          "id": "r29",
+          "title": "Огнемёт опознан",
+          "lines": [
+            {
+              "id": "m01-s08-l013",
+              "speaker": "scientist",
+              "text": "Разобрались с находкой. Это огнемёт. Причём действующий.",
+              "audio": "docs/campaign/dialogue-drafts/alpha-m01/media/b0364776def26a5c5d259e8ed5607594355ab4536520a6c9194fec8219b2219b.mp3"
+            },
+            {
+              "id": "m01-s08-l014",
+              "speaker": "commander",
+              "text": "И что обнаружили?",
+              "audio": "assets/campaign/alpha/mission01/recordings/commander/m01-s08-l014.mp3"
+            },
+            {
+              "id": "m01-s08-l015",
+              "speaker": "scientist",
+              "text": "Бак от трактора, форсунка от котла. Поверх заводской жёлтой изоленты отбросы намотали синюю.",
+              "audio": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-s08-l015-29df48d34f92.mp3"
+            },
+            {
+              "id": "m01-s08-l018",
+              "speaker": "commander",
+              "text": "А зачем синяя?",
+              "audio": "assets/campaign/alpha/mission01/recordings/commander/m01-s08-l018.mp3"
+            },
+            {
+              "id": "m01-s08-l019",
+              "speaker": "scientist",
+              "text": "Если учесть все нюансы конструкции и использованные детали... Вывод очевиден... Синяя изолента нужна, чтобы жёлтая не разматывалась.",
+              "audio": "docs/campaign/dialogue-drafts/alpha-m01/media/bff461588b006787ccd34bb7824d70dc4e23949ccd8653abab088f88dd42dee4.mp3"
+            }
+          ]
+        },
+        {
+          "id": "r30-alt",
+          "title": "Огнемёт — самостоятельный доклад",
+          "lines": [
+            {
+              "id": "m01-v3-r30-alt-l001",
+              "speaker": "scientist",
+              "text": "Разобрались с находкой. Это огнемёт. Причём действующий.",
+              "audio": "docs/campaign/dialogue-drafts/alpha-m01/media/b0364776def26a5c5d259e8ed5607594355ab4536520a6c9194fec8219b2219b.mp3"
+            },
+            {
+              "id": "m01-s08-l015",
+              "speaker": "scientist",
+              "text": "Бак от трактора, форсунка от котла. Поверх заводской жёлтой изоленты отбросы намотали синюю.",
+              "audio": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-s08-l015-29df48d34f92.mp3"
+            },
+            {
+              "id": "m01-s08-l018",
+              "speaker": "commander",
+              "text": "А зачем синяя?",
+              "audio": "assets/campaign/alpha/mission01/recordings/commander/m01-s08-l018.mp3"
+            },
+            {
+              "id": "m01-s08-l019",
+              "speaker": "scientist",
+              "text": "Если учесть все нюансы конструкции и использованные детали... Вывод очевиден... Синяя изолента нужна, чтобы жёлтая не разматывалась.",
+              "audio": "docs/campaign/dialogue-drafts/alpha-m01/media/bff461588b006787ccd34bb7824d70dc4e23949ccd8653abab088f88dd42dee4.mp3"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "note": "Reserved credit estimate, not a verified account debit."
+}

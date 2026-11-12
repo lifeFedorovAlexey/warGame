@@ -18,6 +18,8 @@ export function modernizeAfterRepair(m,f,u){
  u.kind='twin-machinegun';u.components=[...(u.components??m.config.units.bukhanka.components)];u.components[2]='U02';
  // Keep the physical car, ID, health, experience, paint, engine and field armour.
  u.modernization={from:'U01',to:'U02',factoryId:f.id,at:m.state.time,cost};
+ const campaign=m.state.campaign??={version:1,results:{}};
+ campaign.firstTwinModernization??={unitId:u.id,factoryId:f.id,at:m.state.time,radioPlayed:false};
  if(u.projectId==='bukhanka'){delete u.projectId;delete u.designName;}
  if(u.damage)u.damage.revision++;
  m.emit('vehicle-modernized',{unit:u.id,factory:f.id,from:'U01',to:'U02',cost});return true;

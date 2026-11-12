@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "draftRevision": 225,
-  "draftSha256": "36d72be8c87ebe178d6db39481b32afbb01bb5a99afc406536cdaad124cc29bc",
+  "draftRevision": 227,
+  "draftSha256": "7a1d9bdc8dc476a4c61b13349060215d5df01a1527f624991e627b17c7643bf5",
   "throughScene": "r36",
-  "appliedAt": "2026-11-12T00:27:23.322485+00:00",
+  "appliedAt": "2026-11-12T00:44:47.573787+00:00",
   "scenes": [
     {
       "id": "p01",
@@ -241,7 +241,7 @@
       ],
       "triggerDescription": "исследованы боеприпасы из второго артефакта (mg-ammo-1), завершён доклад 33–34, прошло 2 секунды спокойного эфира. Выпуск первой машины и выезд с базы этот монолог не запускают.",
       "notes": "",
-      "enabled": true
+      "enabled": false
     },
     {
       "id": "r11",
@@ -502,6 +502,7 @@
       "title": "Огнемёт — самостоятельный доклад",
       "cues": [
         "m01-v3-r30-alt-l001",
+        "m01-s08-l015",
         "m01-s08-l018",
         "m01-s08-l019"
       ],
@@ -669,6 +670,16 @@
       "cues": [],
       "enabled": false,
       "notes": "Послесловие «А если работает?» удалено владельцем. Финал заканчивается сценой r50."
+    },
+    {
+      "id": "unit-twin-modernized",
+      "title": "Первое переоснащение на спарку",
+      "cues": [
+        "warrant:upgrade"
+      ],
+      "enabled": true,
+      "notes": "",
+      "triggerDescription": "Первое успешно завершённое переоснащение существующей машины на спарку через обновление завода. Один раз за кампанию, в свободный эфир после сюжетных реплик."
     }
   ],
   "dialogue": [
@@ -995,7 +1006,7 @@
     {
       "id": "m01-s08-l015",
       "speaker": "scientist",
-      "text": "Бак от трактора, форсунка от котла. Всё собрано на синей изоленте.",
+      "text": "Бак от трактора, форсунка от котла. Поверх заводской жёлтой изоленты отбросы намотали синюю.",
       "pauseAfter": 0.2,
       "recordingStatus": "Т",
       "notes": ""
@@ -2268,18 +2279,25 @@
       "text": "И что обнаружили?"
     },
     "m01-s08-l015": {
-      "file": "recordings/reviewed/m01-s08-l015-2dfd76f6a327.mp3",
-      "duration": 5.720833333333333,
-      "leadingSilence": 0.05,
-      "trailingSilence": 0.2908333333333335,
+      "file": "recordings/elevenlabs/m01-s08-l015-29df48d34f92.mp3",
       "speaker": "scientist",
-      "sha256": "2dfd76f6a32725b31907842dbee9de4cd410a16c0daac48206ff8dbf55850cf2",
-      "bytes": 108470,
-      "origin": "user-recording",
-      "sourceName": "ElevenLabs_2026-11-10T18_40_30_M. Danisch - Narrator_pvc_s50_sim75_v4.mp3",
-      "draftRevision": 184,
-      "transcriptSource": "owner-workshop",
-      "text": "Бак от трактора, форсунка от котла. Всё собрано на синей изоленте."
+      "text": "Бак от трактора, форсунка от котла. Поверх заводской жёлтой изоленты отбросы намотали синюю.",
+      "spokenText": "[matter-of-fact] Бак от трактора, форсунка от котла. Поверх заводской жёлтой изоленты отбросы намотали синюю.",
+      "voiceId": "1KGG4Q8LqRdNII9xBurw",
+      "voiceName": "M. Danisch - Narrator",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "29df48d34f92e310b06dbb3ff73ff8f88791e59982a4a4380690dbcd1dc94ff1",
+      "bytes": 114981,
+      "generatedAt": "2026-11-12T00:39:04.407Z",
+      "duration": 7.12,
+      "leadingSilence": 0.03,
+      "trailingSilence": 0.3899999999999997,
+      "replaces": "recordings/reviewed/m01-s08-l015-2dfd76f6a327.mp3"
     },
     "m01-v3-r21-l001": {
       "file": "recordings/reviewed/m01-v3-r21-l001-f8027ae17544.mp3",

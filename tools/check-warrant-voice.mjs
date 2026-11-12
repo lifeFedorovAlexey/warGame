@@ -86,13 +86,9 @@ try {
     radio.consume(mission, performance.now());
   });
   await page.waitForFunction(() => sound.storyPlayback?.chapter === 'research-mg-ammo-1');
-  assert.deepEqual(await page.evaluate(() => radio.queue.map(entry => entry.chapter)), ['warrant-upgrade']);
+  assert.deepEqual(await page.evaluate(() => radio.queue.map(entry => entry.chapter)), []);
   await page.evaluate(() => { radio.until = 0; radio.consume(mission, performance.now()); });
-  await page.waitForFunction(() => sound.storyPlayback?.chapter === 'warrant-upgrade');
-  const upgrade = await page.evaluate(() => ({duration:sound.storyPlayback.source.buffer.duration, captionRemaining:(radio.until - performance.now()) / 1000, text:document.querySelector('#radio p').textContent}));
-  assert(Math.abs(upgrade.duration - 14.367) < .05);
-  assert(upgrade.captionRemaining > 13.5, 'The complete long remark keeps its subtitle visible');
-  assert.equal(upgrade.text, read(base + 'warrant-radio/manifest.json').clips.upgrade.text);
+  assert.notEqual(await page.evaluate(() => sound.storyPlayback?.chapter), 'warrant-upgrade', 'Ammunition research does not queue the modernization monologue');
   await page.evaluate(() => {
     mission.state.status = 'victory';
     mission.state.pendingCinematics.push('victory');
@@ -170,7 +166,7 @@ try {
   assert.equal(reactionChecks.length, Object.keys(reactions).length);
   for (const reaction of reactionChecks) assert(Math.abs(reaction.duration - audio.reactions[reaction.id].duration) < .05);
   assert.deepEqual(errors, []);
-  console.log(JSON.stringify({canonicalLines:queue.lines.length, commanderLines:commanderQueue.lines.length, recordedDialogue:played, reactions:reactionChecks, victorySeconds:victory.duration, upgradeSeconds:upgrade.duration, stopSeconds:stop.duration, caption:true, priorityInterrupt:true, commandInterrupt:true, repeatCooldown:true, mute:true}));
+  console.log(JSON.stringify({canonicalLines:queue.lines.length, commanderLines:commanderQueue.lines.length, recordedDialogue:played, reactions:reactionChecks, victorySeconds:victory.duration, upgradeAfterAmmo:false, stopSeconds:stop.duration, caption:true, priorityInterrupt:true, commandInterrupt:true, repeatCooldown:true, mute:true}));
 } finally {
   await browser.close();
 }

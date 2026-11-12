@@ -145,9 +145,6 @@ export class FieldRadio {
       if (!this.enabled || !messages[chapter]) continue;
       const priority = priorities[chapter] ?? 0;
       this.queue.push({chapter, ...messages[chapter], priority, queuedAt:now});
-      if (chapter === 'research-mg-ammo-1') {
-        this.queue.push({chapter:'warrant-upgrade', ...messages['warrant-upgrade'], priority:0, queuedAt:now});
-      }
       queued = true;
     }
     if (!this.enabled) return;
