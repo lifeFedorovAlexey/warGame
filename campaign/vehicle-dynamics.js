@@ -10,9 +10,10 @@ const modularKinds=new Set(['bukhanka','flamer','builder','twin-machinegun','sen
 export const vehicleSizeScale=unit=>modularKinds.has(typeof unit==='string'?unit:unit.kind)?modularScale:1;
 const modular=Object.freeze({...standard,wheelbase:standard.wheelbase*modularScale});
 const light=Object.freeze({...modular,acceleration:36,braking:26,steeringLimit:.72,turnPenalty:.85,maneuverForward:17,maneuverReverse:11});
+const scout=Object.freeze({...standard,acceleration:44,braking:32,steeringLimit:.82,steeringRate:4.8,wheelbase:2.3,turnPenalty:.6,maneuverForward:20,maneuverReverse:13});
 const loadedDynamics=new WeakMap();
 export function vehicleDynamics(unit){
- const base=unit.kind==='bukhanka'?light:modularKinds.has(unit.kind)?modular:standard,effects=fieldEffects(unit);
+ const base=unit.kind==='scav-zaporozhets'?scout:unit.kind==='bukhanka'?light:modularKinds.has(unit.kind)?modular:standard,effects=fieldEffects(unit);
  if(!effects.massKg)return base;
  const saved=loadedDynamics.get(unit);if(saved?.effects===effects&&saved.base===base)return saved.value;
  const value={...base,acceleration:base.acceleration*effects.acceleration,braking:base.braking*effects.braking,steeringRate:base.steeringRate*effects.steeringRate,maneuverForward:base.maneuverForward*effects.speed,maneuverReverse:base.maneuverReverse*effects.speed};

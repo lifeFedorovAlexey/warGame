@@ -1,0 +1,93 @@
+{
+  "before": [
+    {
+      "time": 0,
+      "active": 1
+    },
+    {
+      "time": 1000,
+      "active": 1
+    },
+    {
+      "time": 2000,
+      "active": 1
+    },
+    {
+      "time": 3000,
+      "active": 0
+    },
+    {
+      "time": 4000,
+      "active": 0
+    },
+    {
+      "time": 5000,
+      "active": 0
+    },
+    {
+      "time": 6000,
+      "active": 1
+    },
+    {
+      "time": 7000,
+      "active": 1
+    },
+    {
+      "time": 8000,
+      "active": 1
+    },
+    {
+      "time": 9000,
+      "active": 0
+    }
+  ],
+  "after": [
+    {
+      "time": 0,
+      "active": 1
+    },
+    {
+      "time": 1000,
+      "active": 1
+    },
+    {
+      "time": 2000,
+      "active": 1
+    },
+    {
+      "time": 3000,
+      "active": 1
+    },
+    {
+      "time": 4000,
+      "active": 1
+    },
+    {
+      "time": 5000,
+      "active": 1
+    },
+    {
+      "time": 6000,
+      "active": 1
+    },
+    {
+      "time": 7000,
+      "active": 1
+    },
+    {
+      "time": 8000,
+      "active": 1
+    },
+    {
+      "time": 9000,
+      "active": 1
+    }
+  ],
+  "movingTargets": true,
+  "simultaneousSites": true,
+  "cycling": true,
+  "firstEvent": true,
+  "expiry": true,
+  "bounded": 16,
+  "saveLoad": true
+}

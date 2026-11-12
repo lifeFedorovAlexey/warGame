@@ -1,0 +1,1794 @@
+{
+  "hits": {
+    "scav-zaporozhets:produced": 179,
+    "scav-zaporozhets:guard": 56,
+    "raider:guard": 38,
+    "scav-rifleman:guard": 3,
+    "raider:produced": 316,
+    "scav-grenadier:guard": 1,
+    "scav-firetruck:produced": 103
+  },
+  "peak": 26,
+  "saveLoad": false,
+  "mode": "opening",
+  "time": 299.9999999999997,
+  "status": "running",
+  "raids": {
+    "raidStarted": true,
+    "raidIds": [
+      "u165",
+      "u166",
+      "u167",
+      "u168"
+    ],
+    "contact": true,
+    "raidWon": true
+  },
+  "events": [
+    {
+      "id": "e180",
+      "type": "scav-produced",
+      "time": 30.600000000000165,
+      "camp": "nw-pocket",
+      "building": "b6",
+      "unit": "u179",
+      "kind": "scav-zaporozhets"
+    },
+    {
+      "id": "e182",
+      "type": "scav-produced",
+      "time": 30.90000000000017,
+      "camp": "nw-west",
+      "building": "b11",
+      "unit": "u181",
+      "kind": "raider"
+    },
+    {
+      "id": "e184",
+      "type": "scav-produced",
+      "time": 31.200000000000173,
+      "camp": "nw-east",
+      "building": "b18",
+      "unit": "u183",
+      "kind": "scav-zaporozhets"
+    },
+    {
+      "id": "e186",
+      "type": "scav-produced",
+      "time": 31.400000000000176,
+      "camp": "nw-pocket",
+      "building": "b35",
+      "unit": "u185",
+      "kind": "scav-rifleman"
+    },
+    {
+      "id": "e188",
+      "type": "scav-produced",
+      "time": 31.60000000000018,
+      "camp": "nw-west",
+      "building": "b63",
+      "unit": "u187",
+      "kind": "scav-rifleman"
+    },
+    {
+      "id": "e190",
+      "type": "scav-produced",
+      "time": 31.70000000000018,
+      "camp": "nw-east",
+      "building": "b92",
+      "unit": "u189",
+      "kind": "scav-rifleman"
+    },
+    {
+      "id": "e192",
+      "type": "scav-produced",
+      "time": 60.800000000000594,
+      "camp": "nw-pocket",
+      "building": "b6",
+      "unit": "u191",
+      "kind": "raider"
+    },
+    {
+      "id": "e194",
+      "type": "scav-produced",
+      "time": 61.1000000000006,
+      "camp": "nw-west",
+      "building": "b11",
+      "unit": "u193",
+      "kind": "scav-zaporozhets"
+    },
+    {
+      "id": "e196",
+      "type": "scav-produced",
+      "time": 61.3000000000006,
+      "camp": "nw-east",
+      "building": "b18",
+      "unit": "u195",
+      "kind": "scav-firetruck"
+    },
+    {
+      "id": "e198",
+      "type": "scav-produced",
+      "time": 61.500000000000604,
+      "camp": "nw-pocket",
+      "building": "b35",
+      "unit": "u197",
+      "kind": "scav-rifleman"
+    },
+    {
+      "id": "e200",
+      "type": "scav-produced",
+      "time": 61.90000000000061,
+      "camp": "nw-west",
+      "building": "b63",
+      "unit": "u199",
+      "kind": "scav-rifleman"
+    },
+    {
+      "id": "e202",
+      "type": "scav-produced",
+      "time": 62.00000000000061,
+      "camp": "nw-east",
+      "building": "b92",
+      "unit": "u201",
+      "kind": "scav-rifleman"
+    },
+    {
+      "id": "e204",
+      "type": "scav-produced",
+      "time": 91.0999999999991,
+      "camp": "nw-pocket",
+      "building": "b6",
+      "unit": "u203",
+      "kind": "scav-zaporozhets"
+    },
+    {
+      "id": "e206",
+      "type": "scav-produced",
+      "time": 91.39999999999908,
+      "camp": "nw-west",
+      "building": "b11",
+      "unit": "u205",
+      "kind": "raider"
+    },
+    {
+      "id": "e208",
+      "type": "scav-produced",
+      "time": 91.59999999999907,
+      "camp": "nw-east",
+      "building": "b18",
+      "unit": "u207",
+      "kind": "raider"
+    },
+    {
+      "id": "e210",
+      "type": "scav-produced",
+      "time": 91.69999999999906,
+      "camp": "nw-pocket",
+      "building": "b35",
+      "unit": "u209",
+      "kind": "scav-grenadier"
+    },
+    {
+      "id": "e212",
+      "type": "scav-produced",
+      "time": 92.19999999999904,
+      "camp": "nw-west",
+      "building": "b63",
+      "unit": "u211",
+      "kind": "scav-grenadier"
+    },
+    {
+      "id": "e214",
+      "type": "scav-sortie",
+      "time": 95.79999999999883,
+      "camp": "nw-pocket",
+      "building": "b6",
+      "group": "scav-wave213",
+      "count": 3,
+      "productionType": "vehicles"
+    },
+    {
+      "id": "e216",
+      "type": "scav-sortie",
+      "time": 99.09999999999864,
+      "camp": "nw-west",
+      "building": "b11",
+      "group": "scav-wave215",
+      "count": 3,
+      "productionType": "vehicles"
+    },
+    {
+      "id": "e218",
+      "type": "scav-sortie",
+      "time": 104.49999999999834,
+      "camp": "nw-east",
+      "building": "b18",
+      "group": "scav-wave217",
+      "count": 3,
+      "productionType": "vehicles"
+    },
+    {
+      "id": "e229",
+      "type": "scav-produced",
+      "time": 121.49999999999737,
+      "camp": "nw-pocket",
+      "building": "b6",
+      "unit": "u228",
+      "kind": "scav-zaporozhets"
+    },
+    {
+      "id": "e231",
+      "type": "scav-produced",
+      "time": 121.69999999999736,
+      "camp": "nw-west",
+      "building": "b11",
+      "unit": "u230",
+      "kind": "raider"
+    },
+    {
+      "id": "e233",
+      "type": "scav-produced",
+      "time": 121.79999999999735,
+      "camp": "nw-east",
+      "building": "b18",
+      "unit": "u232",
+      "kind": "scav-zaporozhets"
+    },
+    {
+      "id": "e235",
+      "type": "scav-produced",
+      "time": 121.89999999999735,
+      "camp": "nw-pocket",
+      "building": "b35",
+      "unit": "u234",
+      "kind": "scav-rifleman"
+    },
+    {
+      "id": "e238",
+      "type": "raid-start",
+      "time": 137.79999999999646
+    },
+    {
+      "id": "e240",
+      "type": "under-attack",
+      "time": 139.79999999999634,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e243",
+      "type": "under-attack",
+      "time": 141.19999999999627,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e244",
+      "type": "under-attack",
+      "time": 142.5999999999962,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e245",
+      "type": "under-attack",
+      "time": 143.9999999999961,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e246",
+      "type": "under-attack",
+      "time": 145.39999999999603,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e247",
+      "type": "under-attack",
+      "time": 146.79999999999595,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e248",
+      "type": "under-attack",
+      "time": 148.19999999999587,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e251",
+      "type": "under-attack",
+      "time": 149.5999999999958,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e253",
+      "type": "under-attack",
+      "time": 150.9999999999957,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e255",
+      "type": "under-attack",
+      "time": 152.09999999999565,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e257",
+      "type": "scav-produced",
+      "time": 152.39999999999563,
+      "camp": "nw-pocket",
+      "building": "b6",
+      "unit": "u256",
+      "kind": "raider"
+    },
+    {
+      "id": "e259",
+      "type": "scav-produced",
+      "time": 152.59999999999562,
+      "camp": "nw-west",
+      "building": "b11",
+      "unit": "u258",
+      "kind": "scav-zaporozhets"
+    },
+    {
+      "id": "e261",
+      "type": "scav-produced",
+      "time": 152.6999999999956,
+      "camp": "nw-east",
+      "building": "b18",
+      "unit": "u260",
+      "kind": "scav-firetruck"
+    },
+    {
+      "id": "e263",
+      "type": "under-attack",
+      "time": 153.19999999999558,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e264",
+      "type": "under-attack",
+      "time": 154.4999999999955,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e265",
+      "type": "under-attack",
+      "time": 155.69999999999544,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e266",
+      "type": "under-attack",
+      "time": 156.79999999999538,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e267",
+      "type": "under-attack",
+      "time": 157.9999999999953,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e268",
+      "type": "under-attack",
+      "time": 159.29999999999524,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e269",
+      "type": "under-attack",
+      "time": 160.79999999999515,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e270",
+      "type": "under-attack",
+      "time": 161.99999999999508,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e271",
+      "type": "under-attack",
+      "time": 163.09999999999502,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e272",
+      "type": "under-attack",
+      "time": 164.29999999999495,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e274",
+      "type": "under-attack",
+      "time": 165.59999999999488,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e275",
+      "type": "under-attack",
+      "time": 167.0999999999948,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e276",
+      "type": "under-attack",
+      "time": 168.29999999999472,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e279",
+      "type": "under-attack",
+      "time": 169.39999999999466,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e284",
+      "type": "under-attack",
+      "time": 171.19999999999456,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e287",
+      "type": "under-attack",
+      "time": 173.09999999999445,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e292",
+      "type": "under-attack",
+      "time": 174.49999999999437,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e296",
+      "type": "under-attack",
+      "time": 175.5999999999943,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e297",
+      "type": "under-attack",
+      "time": 175.7999999999943,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e302",
+      "type": "under-attack",
+      "time": 176.69999999999425,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e303",
+      "type": "under-attack",
+      "time": 176.99999999999423,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e311",
+      "type": "under-attack",
+      "time": 177.99999999999417,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e314",
+      "type": "under-attack",
+      "time": 179.2999999999941,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e317",
+      "type": "under-attack",
+      "time": 180.79999999999401,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e319",
+      "type": "under-attack",
+      "time": 181.99999999999395,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e322",
+      "type": "scav-produced",
+      "time": 182.7999999999939,
+      "camp": "nw-pocket",
+      "building": "b6",
+      "unit": "u321",
+      "kind": "scav-zaporozhets"
+    },
+    {
+      "id": "e324",
+      "type": "scav-produced",
+      "time": 182.9999999999939,
+      "camp": "nw-west",
+      "building": "b11",
+      "unit": "u323",
+      "kind": "raider"
+    },
+    {
+      "id": "e325",
+      "type": "under-attack",
+      "time": 183.09999999999388,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e327",
+      "type": "scav-produced",
+      "time": 183.09999999999388,
+      "camp": "nw-east",
+      "building": "b18",
+      "unit": "u326",
+      "kind": "raider"
+    },
+    {
+      "id": "e329",
+      "type": "under-attack",
+      "time": 184.29999999999382,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e332",
+      "type": "under-attack",
+      "time": 185.59999999999374,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e335",
+      "type": "scav-sortie",
+      "time": 186.69999999999368,
+      "camp": "nw-pocket",
+      "building": "b6",
+      "group": "scav-wave334",
+      "count": 3,
+      "productionType": "vehicles"
+    },
+    {
+      "id": "e336",
+      "type": "under-attack",
+      "time": 187.09999999999366,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e339",
+      "type": "under-attack",
+      "time": 188.2999999999936,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e341",
+      "type": "scav-sortie",
+      "time": 188.69999999999357,
+      "camp": "nw-west",
+      "building": "b11",
+      "group": "scav-wave340",
+      "count": 3,
+      "productionType": "vehicles"
+    },
+    {
+      "id": "e342",
+      "type": "under-attack",
+      "time": 189.39999999999353,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e344",
+      "type": "under-attack",
+      "time": 190.69999999999345,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e346",
+      "type": "under-attack",
+      "time": 191.89999999999338,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e347",
+      "type": "under-attack",
+      "time": 193.3999999999933,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e348",
+      "type": "under-attack",
+      "time": 194.19999999999325,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e350",
+      "type": "under-attack",
+      "time": 194.59999999999323,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e352",
+      "type": "scav-sortie",
+      "time": 195.89999999999316,
+      "camp": "nw-east",
+      "building": "b18",
+      "group": "scav-wave351",
+      "count": 3,
+      "productionType": "vehicles"
+    },
+    {
+      "id": "e353",
+      "type": "under-attack",
+      "time": 196.09999999999314,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e354",
+      "type": "under-attack",
+      "time": 196.39999999999313,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e355",
+      "type": "under-attack",
+      "time": 197.29999999999308,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e357",
+      "type": "under-attack",
+      "time": 198.799999999993,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e359",
+      "type": "under-attack",
+      "time": 199.89999999999293,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e363",
+      "type": "under-attack",
+      "time": 201.29999999999285,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e366",
+      "type": "under-attack",
+      "time": 202.3999999999928,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e368",
+      "type": "under-attack",
+      "time": 203.59999999999272,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e370",
+      "type": "under-attack",
+      "time": 205.09999999999263,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e372",
+      "type": "under-attack",
+      "time": 206.29999999999256,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e375",
+      "type": "under-attack",
+      "time": 207.3999999999925,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e377",
+      "type": "under-attack",
+      "time": 208.69999999999243,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e379",
+      "type": "under-attack",
+      "time": 209.89999999999236,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e380",
+      "type": "under-attack",
+      "time": 210.9999999999923,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e381",
+      "type": "under-attack",
+      "time": 212.29999999999222,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e383",
+      "type": "scav-produced",
+      "time": 212.99999999999218,
+      "camp": "nw-pocket",
+      "building": "b6",
+      "unit": "u382",
+      "kind": "scav-zaporozhets"
+    },
+    {
+      "id": "e384",
+      "type": "under-attack",
+      "time": 213.49999999999216,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e386",
+      "type": "scav-produced",
+      "time": 214.2999999999921,
+      "camp": "nw-west",
+      "building": "b11",
+      "unit": "u385",
+      "kind": "raider"
+    },
+    {
+      "id": "e388",
+      "type": "scav-produced",
+      "time": 214.3999999999921,
+      "camp": "nw-east",
+      "building": "b18",
+      "unit": "u387",
+      "kind": "scav-zaporozhets"
+    },
+    {
+      "id": "e389",
+      "type": "under-attack",
+      "time": 214.5999999999921,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e392",
+      "type": "under-attack",
+      "time": 215.89999999999202,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e393",
+      "type": "under-attack",
+      "time": 217.09999999999195,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e395",
+      "type": "under-attack",
+      "time": 218.1999999999919,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e398",
+      "type": "under-attack",
+      "time": 219.49999999999181,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e399",
+      "type": "under-attack",
+      "time": 221.2999999999917,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e400",
+      "type": "under-attack",
+      "time": 222.19999999999166,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e403",
+      "type": "under-attack",
+      "time": 223.0999999999916,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e407",
+      "type": "under-attack",
+      "time": 225.0999999999915,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e409",
+      "type": "under-attack",
+      "time": 226.39999999999142,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e411",
+      "type": "under-attack",
+      "time": 227.49999999999136,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e412",
+      "type": "under-attack",
+      "time": 228.5999999999913,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e415",
+      "type": "under-attack",
+      "time": 229.69999999999123,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e416",
+      "type": "under-attack",
+      "time": 229.69999999999123,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e419",
+      "type": "under-attack",
+      "time": 230.79999999999117,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e420",
+      "type": "under-attack",
+      "time": 230.79999999999117,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e427",
+      "type": "under-attack",
+      "time": 231.8999999999911,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e428",
+      "type": "under-attack",
+      "time": 231.8999999999911,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e433",
+      "type": "under-attack",
+      "time": 232.99999999999105,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e434",
+      "type": "under-attack",
+      "time": 232.99999999999105,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e437",
+      "type": "under-attack",
+      "time": 235.09999999999093,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e439",
+      "type": "under-attack",
+      "time": 235.7999999999909,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e443",
+      "type": "under-attack",
+      "time": 237.4999999999908,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e445",
+      "type": "under-attack",
+      "time": 237.79999999999077,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e448",
+      "type": "under-attack",
+      "time": 239.69999999999067,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e450",
+      "type": "under-attack",
+      "time": 240.49999999999062,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e451",
+      "type": "under-attack",
+      "time": 240.8999999999906,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e454",
+      "type": "under-attack",
+      "time": 241.89999999999054,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e455",
+      "type": "under-attack",
+      "time": 242.09999999999053,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e460",
+      "type": "under-attack",
+      "time": 243.09999999999047,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e462",
+      "type": "under-attack",
+      "time": 243.29999999999046,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e465",
+      "type": "scav-produced",
+      "time": 243.49999999999045,
+      "camp": "nw-pocket",
+      "building": "b6",
+      "unit": "u464",
+      "kind": "raider"
+    },
+    {
+      "id": "e467",
+      "type": "under-attack",
+      "time": 244.4999999999904,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e469",
+      "type": "under-attack",
+      "time": 244.69999999999038,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e471",
+      "type": "scav-produced",
+      "time": 244.99999999999037,
+      "camp": "nw-west",
+      "building": "b11",
+      "unit": "u470",
+      "kind": "scav-zaporozhets"
+    },
+    {
+      "id": "e474",
+      "type": "scav-produced",
+      "time": 245.19999999999035,
+      "camp": "nw-east",
+      "building": "b18",
+      "unit": "u473",
+      "kind": "scav-firetruck"
+    },
+    {
+      "id": "e476",
+      "type": "under-attack",
+      "time": 245.69999999999033,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e478",
+      "type": "under-attack",
+      "time": 246.0999999999903,
+      "target": "u3",
+      "x": -1590,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e481",
+      "type": "under-attack",
+      "time": 246.79999999999026,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e485",
+      "type": "under-attack",
+      "time": 248.69999999999015,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e487",
+      "type": "under-attack",
+      "time": 250.49999999999005,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e488",
+      "type": "under-attack",
+      "time": 252.29999999998995,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e490",
+      "type": "under-attack",
+      "time": 254.09999999998985,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e491",
+      "type": "under-attack",
+      "time": 255.89999999998975,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e492",
+      "type": "under-attack",
+      "time": 257.6999999999901,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e493",
+      "type": "under-attack",
+      "time": 259.4999999999905,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e495",
+      "type": "under-attack",
+      "time": 261.2999999999909,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e496",
+      "type": "under-attack",
+      "time": 263.0999999999913,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e497",
+      "type": "under-attack",
+      "time": 264.89999999999173,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e498",
+      "type": "under-attack",
+      "time": 266.69999999999214,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e499",
+      "type": "under-attack",
+      "time": 268.49999999999255,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e500",
+      "type": "under-attack",
+      "time": 270.29999999999296,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e501",
+      "type": "under-attack",
+      "time": 272.0999999999934,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e503",
+      "type": "under-attack",
+      "time": 273.8999999999938,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e505",
+      "type": "scav-produced",
+      "time": 274.19999999999385,
+      "camp": "nw-pocket",
+      "building": "b6",
+      "unit": "u504",
+      "kind": "scav-zaporozhets"
+    },
+    {
+      "id": "e506",
+      "type": "under-attack",
+      "time": 275.6999999999942,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e508",
+      "type": "scav-produced",
+      "time": 275.89999999999424,
+      "camp": "nw-west",
+      "building": "b11",
+      "unit": "u507",
+      "kind": "raider"
+    },
+    {
+      "id": "e510",
+      "type": "scav-produced",
+      "time": 275.99999999999426,
+      "camp": "nw-east",
+      "building": "b18",
+      "unit": "u509",
+      "kind": "raider"
+    },
+    {
+      "id": "e511",
+      "type": "under-attack",
+      "time": 277.4999999999946,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e513",
+      "type": "scav-sortie",
+      "time": 278.8999999999949,
+      "camp": "nw-pocket",
+      "building": "b6",
+      "group": "scav-wave512",
+      "count": 3,
+      "productionType": "vehicles"
+    },
+    {
+      "id": "e514",
+      "type": "under-attack",
+      "time": 279.299999999995,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e516",
+      "type": "scav-sortie",
+      "time": 280.8999999999954,
+      "camp": "nw-west",
+      "building": "b11",
+      "group": "scav-wave515",
+      "count": 3,
+      "productionType": "vehicles"
+    },
+    {
+      "id": "e518",
+      "type": "under-attack",
+      "time": 281.0999999999954,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e519",
+      "type": "under-attack",
+      "time": 282.8999999999958,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e520",
+      "type": "under-attack",
+      "time": 284.69999999999624,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e522",
+      "type": "under-attack",
+      "time": 286.49999999999665,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e524",
+      "type": "scav-sortie",
+      "time": 287.89999999999696,
+      "camp": "nw-east",
+      "building": "b18",
+      "group": "scav-wave523",
+      "count": 3,
+      "productionType": "vehicles"
+    },
+    {
+      "id": "e525",
+      "type": "under-attack",
+      "time": 288.29999999999706,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e526",
+      "type": "under-attack",
+      "time": 290.09999999999746,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e527",
+      "type": "under-attack",
+      "time": 291.79999999999785,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e529",
+      "type": "under-attack",
+      "time": 292.7999999999981,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e530",
+      "type": "under-attack",
+      "time": 293.89999999999833,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e531",
+      "type": "under-attack",
+      "time": 295.29999999999865,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e532",
+      "type": "under-attack",
+      "time": 296.3999999999989,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e534",
+      "type": "under-attack",
+      "time": 297.3999999999991,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e535",
+      "type": "under-attack",
+      "time": 298.79999999999944,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    },
+    {
+      "id": "e536",
+      "type": "under-attack",
+      "time": 299.9999999999997,
+      "target": "u5",
+      "x": -1534,
+      "y": 260,
+      "building": false
+    }
+  ],
+  "producers": [
+    {
+      "id": "b6",
+      "camp": "nw-pocket",
+      "type": "vehicles",
+      "count": 9,
+      "waiting": [],
+      "nextAt": 304.19999999999385,
+      "waves": 3,
+      "waitingUnits": []
+    },
+    {
+      "id": "b11",
+      "camp": "nw-west",
+      "type": "vehicles",
+      "count": 9,
+      "waiting": [],
+      "nextAt": 305.89999999999424,
+      "waves": 3,
+      "waitingUnits": []
+    },
+    {
+      "id": "b18",
+      "camp": "nw-east",
+      "type": "vehicles",
+      "count": 9,
+      "waiting": [],
+      "nextAt": 305.99999999999426,
+      "waves": 3,
+      "waitingUnits": []
+    },
+    {
+      "id": "b28",
+      "camp": "west-south",
+      "type": "vehicles",
+      "count": 0,
+      "waiting": [],
+      "nextAt": null,
+      "waitingUnits": []
+    },
+    {
+      "id": "b35",
+      "camp": "nw-pocket",
+      "type": "infantry",
+      "count": 4,
+      "waiting": [
+        "u185",
+        "u197",
+        "u209",
+        "u234"
+      ],
+      "nextAt": 151.89999999999736,
+      "retryAt": 299.3499999999995,
+      "waitingUnits": [
+        {
+          "id": "u185",
+          "kind": "scav-rifleman",
+          "x": -993.0023606641469,
+          "y": 853.5962789539082,
+          "remaining": 0,
+          "task": null,
+          "navigation": "destination-reached"
+        },
+        {
+          "id": "u197",
+          "kind": "scav-rifleman",
+          "x": -983.8396829092496,
+          "y": 864.5751375630671,
+          "remaining": 0,
+          "task": null,
+          "navigation": "destination-reached"
+        },
+        {
+          "id": "u209",
+          "kind": "scav-grenadier",
+          "x": -976.1334661613153,
+          "y": 864.4788098537184,
+          "remaining": 0,
+          "task": null,
+          "navigation": "destination-reached"
+        },
+        {
+          "id": "u234",
+          "kind": "scav-rifleman",
+          "x": -967.0532111366974,
+          "y": 864.1177313855906,
+          "remaining": 0,
+          "task": null,
+          "navigation": "destination-reached"
+        }
+      ]
+    },
+    {
+      "id": "b63",
+      "camp": "nw-west",
+      "type": "infantry",
+      "count": 3,
+      "waiting": [
+        "u187",
+        "u199",
+        "u211"
+      ],
+      "nextAt": 122.19999999999904,
+      "retryAt": 299.44999999999953,
+      "waitingUnits": [
+        {
+          "id": "u187",
+          "kind": "scav-rifleman",
+          "x": -862.3591049106395,
+          "y": 1352.7835187671683,
+          "remaining": 0,
+          "task": null,
+          "navigation": "destination-reached"
+        },
+        {
+          "id": "u199",
+          "kind": "scav-rifleman",
+          "x": -853.3086637338113,
+          "y": 1352.8417376276766,
+          "remaining": 0,
+          "task": null,
+          "navigation": "destination-reached"
+        },
+        {
+          "id": "u211",
+          "kind": "scav-grenadier",
+          "x": -842.9293929069509,
+          "y": 1352.7030505020518,
+          "remaining": 0,
+          "task": null,
+          "navigation": "destination-reached"
+        }
+      ]
+    },
+    {
+      "id": "b92",
+      "camp": "nw-east",
+      "type": "infantry",
+      "count": 2,
+      "waiting": [
+        "u189",
+        "u201"
+      ],
+      "nextAt": 92.00000000000061,
+      "retryAt": 299.3499999999995,
+      "waitingUnits": [
+        {
+          "id": "u189",
+          "kind": "scav-rifleman",
+          "x": -1710.2184532744088,
+          "y": 1600.167358778862,
+          "remaining": 0,
+          "task": null,
+          "navigation": "destination-reached"
+        },
+        {
+          "id": "u201",
+          "kind": "scav-rifleman",
+          "x": -1701.0645366260483,
+          "y": 1600.1320748227101,
+          "remaining": 0,
+          "task": null,
+          "navigation": "destination-reached"
+        }
+      ]
+    },
+    {
+      "id": "b122",
+      "camp": "west-south",
+      "type": "infantry",
+      "count": 0,
+      "waiting": [],
+      "nextAt": null,
+      "waitingUnits": []
+    }
+  ]
+}

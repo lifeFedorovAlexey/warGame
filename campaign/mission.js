@@ -46,6 +46,7 @@ import {resumeCycleRoute} from './traffic-cycle.js';
 import {corridorBlocker,reserveManeuverCorridor} from './traffic-corridor.js';
 import {vehicleDynamics,rollSteeringDamage,updateSteeringDamage} from './vehicle-dynamics.js';
 import {SCAV_PROFILES,SCAV_ROSTERS,isInfantry} from './scav-unit-profiles.js';
+import {infantryNavigator} from './infantry-navigation.js';
 import {placeExtraCampGuards,updateScavReinforcements} from './scav-reinforcements.js';
 import {alertScavs,updateScavCombat} from './scav-ai.js';
 import {configureCombat,configureArmyCombat,armyCombatPolicy,normalizeCombatPolicy,rememberHostileHit,cancelCombatRetreat,automaticCombatTarget,forceCombatRetreat} from './combat-policy.js';
@@ -255,7 +256,18 @@ export class Mission{
   // Old saves may retain a slope exception. Level walls have no such bypass.
   delete unit.terrainEscape;return null;
  }
- *vehiclePathSteps(unit,goal,{avoidMoving=false,avoidPoint=null,fallback=true,ignoreUnits=null,obstacles=this.state.units,escapeSteepStart=unit.owner==='rai',...options}={}){
+ *vehiclePathSteps(unit,goal,options={}){
+  if(!isInfantry(unit))return yield* this.vehiclePathUsingSteps(unit,goal,options);
+  const nav=infantryNavigator(this.nav),search=this.vehiclePathUsingSteps(unit,goal,options);
+  let result;
+  do{
+   const previous=this.nav;nav.workDeadline=previous.workDeadline;
+   this.nav=nav;try{result=search.next();}finally{this.nav=previous;}
+   if(!result.done)yield;
+  }while(!result.done);
+  return result.value;
+ }
+ *vehiclePathUsingSteps(unit,goal,{avoidMoving=false,avoidPoint=null,fallback=true,ignoreUnits=null,obstacles=this.state.units,escapeSteepStart=unit.owner==='rai',...options}={}){
   const terrainEscape=escapeSteepStart?this.terrainEscapeFor(unit):null;
   const occupied=this.nav.occupied,changed=[],pendingCells=new Set(),scale=this.config.worldScale;
   // Preparing dense vehicle masks can outlast a frame. Keep these cells
@@ -997,6 +1009,7 @@ export class Mission{
  attack(attacker,target,spec){
   if(!spec.damage||attacker.cooldown>0||partMissing(attacker.damage,9)||distance(attacker,target)>spec.range||!this.lineOfSight(attacker,target))return false;
   attacker.cooldown=spec.cooldown;
+  if(attacker.owner!==target.owner&&(attacker.owner==='rai'||target.owner==='rai'))this.lastPlayerCombatAt=this.state.time;
   const weapon=spec.weapon??(attacker.kind==='flamer'?'flame':'mg');
   if(weapon==='grenade'){
    const scale=this.config.worldScale,to={x:target.x,y:target.y,z:this.field.heightAt(target.x,target.y)+.2};
@@ -2609,7 +2622,7 @@ export class Mission{
    }
   }
   if(!next){
-   if(this.state.time-(unit.lastWalkRepath??-10)>1.5){unit.path=this.nav.findPath(unit,unit.path.at(-1))??unit.path;unit.lastWalkRepath=this.state.time;}
+   if(this.state.time-(unit.lastWalkRepath??-10)>1.5){unit.path=infantryNavigator(this.nav).findPath(unit,unit.path.at(-1))??unit.path;unit.lastWalkRepath=this.state.time;}
    return false;
   }
   unit.x=next.x;unit.y=next.y;unit.heading=next.heading;unit.driveSpeed=travel/dt;unit.wheelDistance=(unit.wheelDistance??0)+travel;

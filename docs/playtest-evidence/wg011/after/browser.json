@@ -1,0 +1,93 @@
+{
+  "errors": [],
+  "screens": [
+    {
+      "width": 1440,
+      "height": 900,
+      "minimap": {
+        "x": 1292,
+        "y": 756,
+        "width": 132,
+        "height": 132
+      }
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "minimap": {
+        "x": 740,
+        "y": 290,
+        "width": 88,
+        "height": 88
+      }
+    },
+    {
+      "width": 667,
+      "height": 375,
+      "minimap": {
+        "x": 567,
+        "y": 279,
+        "width": 88,
+        "height": 88
+      }
+    }
+  ],
+  "initial": {
+    "pings": [],
+    "notices": "Обнаружен артефакт"
+  },
+  "reminders": [
+    {
+      "kind": "artifact",
+      "key": "artifact:m02.artifact.sensor",
+      "reminder": true,
+      "x": -1056,
+      "y": -852
+    },
+    {
+      "kind": "enemyObjective",
+      "key": "camp:m02.base.east_factory",
+      "reminder": true,
+      "x": -976,
+      "y": -515.1999999999998
+    },
+    {
+      "kind": "enemyObjective",
+      "key": "camp:m02.base.hill_factory",
+      "reminder": true,
+      "x": -1712,
+      "y": -368
+    }
+  ],
+  "cameraMoved": false,
+  "combat": {
+    "firstShot": true,
+    "deferred": true,
+    "deadline": [
+      {
+        "kind": "attack",
+        "protected": false
+      },
+      {
+        "kind": "artifact",
+        "protected": true
+      },
+      {
+        "kind": "enemyObjective",
+        "protected": true
+      },
+      {
+        "kind": "enemyObjective",
+        "protected": true
+      }
+    ],
+    "survivesHits": true,
+    "expired": true
+  },
+  "afterCompletion": [
+    {
+      "kind": "enemyObjective",
+      "key": "camp:m02.base.hill_factory"
+    }
+  ]
+}

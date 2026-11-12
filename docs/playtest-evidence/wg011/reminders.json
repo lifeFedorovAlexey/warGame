@@ -1,0 +1,11 @@
+{
+  "checks": [
+    "two known hostile bases red, uncollected artifact blue, hidden sites excluded, thirty-second repeats without messages",
+    "completion removes active marks, progress restarts the delay, pause freezes reminder time",
+    "live fire takes priority; reminders resume after combat alerts expire",
+    "loading is silent and mission results clear transient reminders",
+    "M02 discovered active bases only; neutralized bases and completed tasks stay silent",
+    "objective reminders cannot evict sixteen active attack alerts",
+    "expedition countdown keeps reminders active at the known evacuation site"
+  ]
+}

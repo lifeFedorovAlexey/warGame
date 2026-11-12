@@ -133,6 +133,7 @@ function nextObjectiveHint(state,{plant,well},tasks,artifact,contact,southernApp
 }
 function tacticalFocus(contact,{well,threat=staticThreat(contact),artifact=knownArtifact(mission),southernApproach=missionSignal('last-camp',mission)}=firstPowerSites()){
   if(mission.state.status!=='running')return null;
+  const attack=minimapView?.alerts.attackFocus(performance.now());if(attack)return attack;
   if(contact)return {x:contact.x,y:contact.y,kind:'threat',label:'К контакту',distance:420};
   if(threat)return threat;
   if(artifact)return {x:artifact.x,y:artifact.y,kind:'artifact',label:'К артефакту',distance:300};
@@ -953,7 +954,7 @@ function flushUi() {
   setButtonIcon($('tempo'), speedIcon(speed), 'Скорость ×' + speed);
   const tasks = mission.objectives();
   const assigned=storyObjectives(mission,{radioEnabled:radio.enabled});
-  if(active)minimapView.observe(assigned,performance.now());
+  if(active)minimapView.observe(assigned,performance.now(),{paused:paused||document.hidden});
   $('objective-count').textContent = assigned.length || '';
   const nextTasks = JSON.stringify(assigned);
   if (nextTasks !== taskKey) {
@@ -982,11 +983,13 @@ function flushUi() {
   if(signal?.kind==='guidance'&&sites.well?.x===signal.x&&sites.well.y===signal.y)presentSignal(null);
   const focus=$('objective-focus');
   focus.hidden=!marker;
+  focus.classList.toggle('threat',marker?.kind==='threat');
+  focus.classList.toggle('under-attack',!!marker?.attack);
+  if(!marker){focus.setAttribute('aria-label','К цели');focus.removeAttribute('title');}
   if(marker){
     const focusIcons={threat:'attack',guidance:'derrick',artifact:'research',recon:'radar'};
     const focusDetails={guidance:'ЛКМ по нефтяной точке — поставить вышку',artifact:'ПКМ по ящику — подобрать'};
     setButtonIcon(focus,focusIcons[marker.kind]??'focus',marker.label,focusDetails[marker.kind]);
-    focus.classList.toggle('threat',marker.kind==='threat');
   }
   const entityName = first && ((first.owner==='unknown'?'Неизвестные · сенсор':null)??projectLabel(first)
     ?? config.buildings[first.kind]?.name ?? config.camps.find(camp=>camp.id===first.campId)?.name ?? 'Лагерь');
@@ -1090,6 +1093,7 @@ function frame(now) {
   ending.update(dt,radio.current);
   pruneSelection();
   const renderStarted=performance.now();
+  world.attackPulses.set(active&&mission.state.status==='running'?minimapView.alerts.active(now):[]);
   world.update(mission, selected, dt, (active||openingPlaying) && !paused && mission.state.status==='running',active);
   const debugStarted=performance.now();
   navigationTelemetry?.rendered(world.vehicles.transforms);
@@ -1261,8 +1265,9 @@ try {
     const signal=tacticalFocus(visibleRaidContact(mission));
     if(!signal)return;
     document.querySelector('.settings').open = false;
-    presentSignal(signal);
+    if(!signal.attack)presentSignal(signal);
     focusSignal(signal);
+    if(signal.attack){minimapView.alerts.nextAttack();updateUi();}
   };
   $('select-blocked').onclick = () => {
     const live=[...blockedOrders].map(id=>mission.entity(id)).filter(Boolean);

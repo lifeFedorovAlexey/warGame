@@ -79,6 +79,9 @@ button.active { border-color: #e5db9d; box-shadow: inset 0 -2px #e5db9d; }
 #objectives small { font-size: 11px; color: #d6c994; font-variant-numeric: tabular-nums; }
 .top .resources #objective-focus { --button-size: 32px; --icon-size: 26px; min-height: 26px; margin: 0; padding: 2px; pointer-events: auto; color: #f3e8ba; text-shadow: 0 1px 3px #171511; }
 #objective-focus.threat { color: #ffd0af; }
+#objective-focus.under-attack .game-icon { animation: attack-focus-pulse 1.2s ease-in-out infinite; }
+@keyframes attack-focus-pulse { 50% { filter: brightness(1.6); opacity: .65; } }
+@media (prefers-reduced-motion: reduce) { #objective-focus.under-attack .game-icon { animation: none; } }
 #minimap-panel { position: fixed; z-index: 3; right: var(--edge); bottom: var(--edge); overflow: hidden; }
 #minimap { display: block; width: var(--map-size); height: var(--map-size); cursor: crosshair; }
 #minimap-panel button { width: 100%; border: 0; border-radius: 0; font-size: 11px; padding: 3px; }

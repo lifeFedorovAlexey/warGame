@@ -1,0 +1,605 @@
+{
+  "hits": {},
+  "peak": 12,
+  "saveLoad": false,
+  "mode": "m02",
+  "groups": [
+    {
+      "id": "m02.group.hill_factory.0",
+      "type": "patrol",
+      "units": [
+        "u432",
+        "u434",
+        "u436",
+        "u438"
+      ],
+      "target": {
+        "x": -768,
+        "y": -976
+      }
+    },
+    {
+      "id": "m02.group.hill_factory.1",
+      "type": "patrol",
+      "units": [
+        "u442",
+        "u446",
+        "u448",
+        "u450"
+      ],
+      "target": {
+        "x": -768,
+        "y": -976
+      }
+    },
+    {
+      "id": "m02.group.hill_factory.2",
+      "type": "patrol",
+      "units": [
+        "u457",
+        "u460",
+        "u462",
+        "u464"
+      ],
+      "target": {
+        "x": -768,
+        "y": -976
+      }
+    }
+  ],
+  "bases": {
+    "east_factory": {
+      "id": "m02.base.east_factory",
+      "name": "Восточная площадка",
+      "discovered": false,
+      "state": "defended",
+      "structureIds": [
+        "m02.original.42",
+        "m02.east_factory.scav-factory0",
+        "m02.original.53",
+        "m02.original.54",
+        "m02.original.56",
+        "m02.original.3450"
+      ],
+      "garrisonIds": [
+        "u203",
+        "u204",
+        "u205"
+      ],
+      "destroyedIds": [],
+      "messages": [],
+      "rally": [
+        {
+          "x": -976,
+          "y": -515.1999999999998
+        },
+        {
+          "x": -976,
+          "y": -547.1999999999998
+        },
+        {
+          "x": -976,
+          "y": -483.1999999999998
+        },
+        {
+          "x": -1008,
+          "y": -547.1999999999998
+        },
+        {
+          "x": -944,
+          "y": -547.1999999999998
+        },
+        {
+          "x": -944,
+          "y": -483.1999999999998
+        },
+        {
+          "x": -976,
+          "y": -579.1999999999998
+        },
+        {
+          "x": -976,
+          "y": -451.1999999999998
+        },
+        {
+          "x": -906.453340507187,
+          "y": -496.56502875261833
+        },
+        {
+          "x": -940,
+          "y": -452.84617092752023
+        },
+        {
+          "x": -1012,
+          "y": -452.84617092752023
+        },
+        {
+          "x": -1045.546659492813,
+          "y": -496.56502875261833
+        }
+      ],
+      "gate": {
+        "x": -976,
+        "y": -515.1999999999998
+      },
+      "factoryId": "m02.east_factory.scav-factory0",
+      "production": {
+        "active": false,
+        "nextAt": 12,
+        "waiting": [],
+        "count": 0,
+        "waves": 0,
+        "retryAt": 0,
+        "alarmed": false
+      },
+      "artifact": {
+        "id": "m02.artifact.flamer_upgrade",
+        "key": "flamer-upgrade",
+        "carrierId": "m02.east_factory.scav-factory0",
+        "carrierPosition": {
+          "x": -976,
+          "y": -393.5999999999999
+        },
+        "point": {
+          "x": -976,
+          "y": -454.5999999999999
+        },
+        "state": "sealed"
+      }
+    },
+    "hill_factory": {
+      "id": "m02.base.hill_factory",
+      "name": "Завод на плато",
+      "discovered": false,
+      "state": "defended",
+      "structureIds": [
+        "m02.original.3252",
+        "m02.original.3253",
+        "m02.original.3425",
+        "m02.hill_factory.scav-factory0",
+        "m02.original.3453",
+        "m02.original.3454",
+        "m02.original.3456",
+        "m02.original.3475",
+        "m02.original.3476",
+        "m02.original.3477",
+        "m02.original.3478"
+      ],
+      "garrisonIds": [
+        "u217",
+        "u218",
+        "u219",
+        "u220"
+      ],
+      "destroyedIds": [],
+      "messages": [],
+      "rally": [
+        {
+          "x": -1712,
+          "y": -368
+        },
+        {
+          "x": -1744,
+          "y": -368
+        },
+        {
+          "x": -1680,
+          "y": -368
+        },
+        {
+          "x": -1744,
+          "y": -400
+        },
+        {
+          "x": -1744,
+          "y": -336
+        },
+        {
+          "x": -1680,
+          "y": -336
+        },
+        {
+          "x": -1776,
+          "y": -368
+        },
+        {
+          "x": -1640,
+          "y": -368
+        },
+        {
+          "x": -1649.6461709275204,
+          "y": -332
+        },
+        {
+          "x": -1676,
+          "y": -305.6461709275204
+        },
+        {
+          "x": -1730.6349712473816,
+          "y": -298.4533405071871
+        },
+        {
+          "x": -1774.3538290724796,
+          "y": -332
+        }
+      ],
+      "gate": {
+        "x": -1712,
+        "y": -368
+      },
+      "factoryId": "m02.hill_factory.scav-factory0",
+      "production": {
+        "active": true,
+        "nextAt": 270.5999999999899,
+        "waiting": [],
+        "count": 12,
+        "waves": 3,
+        "retryAt": 0,
+        "alarmed": false
+      },
+      "artifact": {
+        "id": "m02.artifact.twin_machinegun",
+        "key": "twin-machinegun",
+        "carrierId": "m02.hill_factory.scav-factory0",
+        "carrierPosition": {
+          "x": -1552,
+          "y": -256
+        },
+        "point": {
+          "x": -1552,
+          "y": -317
+        },
+        "state": "sealed"
+      }
+    },
+    "sensor_outpost": {
+      "id": "m02.base.sensor_outpost",
+      "name": "Разведывательный форпост",
+      "discovered": false,
+      "state": "defended",
+      "structureIds": [
+        "m02.sensor_outpost.scav-sensor0",
+        "m02.original.3237",
+        "m02.original.3238",
+        "m02.original.3239",
+        "m02.fort.sensor_outpost.watch.nw",
+        "m02.fort.sensor_outpost.watch.se",
+        "m02.fort.sensor_outpost.watch.ne",
+        "m02.fort.sensor_outpost.watch.sw"
+      ],
+      "garrisonIds": [
+        "u225",
+        "u226"
+      ],
+      "destroyedIds": [],
+      "messages": [],
+      "rally": [
+        {
+          "x": -982.4000000000001,
+          "y": -848
+        },
+        {
+          "x": -1014.4000000000001,
+          "y": -848
+        },
+        {
+          "x": -950.4000000000001,
+          "y": -848
+        },
+        {
+          "x": -950.4000000000001,
+          "y": -816
+        },
+        {
+          "x": -1046.4,
+          "y": -848
+        },
+        {
+          "x": -918.4000000000001,
+          "y": -848
+        },
+        {
+          "x": -972.0472381958992,
+          "y": -886.6370330515628
+        },
+        {
+          "x": -920.0461709275205,
+          "y": -812
+        },
+        {
+          "x": -946.4000000000001,
+          "y": -785.6461709275204
+        },
+        {
+          "x": -963.7650287526186,
+          "y": -917.546659492813
+        },
+        {
+          "x": -878.4000000000001,
+          "y": -848
+        },
+        {
+          "x": -892.3333580064185,
+          "y": -796
+        }
+      ],
+      "gate": {
+        "x": -982.4000000000001,
+        "y": -848
+      },
+      "artifact": {
+        "id": "m02.artifact.sensor",
+        "key": "sensor",
+        "carrierId": "m02.sensor_outpost.scav-sensor0",
+        "carrierPosition": {
+          "x": -1056,
+          "y": -800
+        },
+        "point": {
+          "x": -1056,
+          "y": -852
+        },
+        "state": "sealed"
+      }
+    },
+    "energy_hub": {
+      "id": "m02.base.energy_hub",
+      "name": "Южный энергоузел",
+      "discovered": false,
+      "state": "defended",
+      "structureIds": [
+        "m02.original.61",
+        "m02.energy_hub.generator1",
+        "m02.energy_hub.scav-factory0",
+        "m02.original.248",
+        "m02.original.249",
+        "m02.original.961",
+        "m02.original.1017",
+        "m02.original.1018",
+        "m02.original.1019",
+        "m02.original.1272",
+        "m02.original.3426",
+        "m02.original.3427",
+        "m02.original.3428",
+        "m02.original.3479",
+        "m02.original.3480",
+        "m02.fort.energy_hub.watch.nw",
+        "m02.fort.energy_hub.watch.ne",
+        "m02.fort.energy_hub.watch.sw",
+        "m02.fort.energy_hub.watch.se",
+        "m02.fort.energy_hub.watch.s",
+        "m02.fort.energy_hub.entry.n",
+        "m02.fort.energy_hub.entry.s"
+      ],
+      "garrisonIds": [
+        "u243",
+        "u244",
+        "u245",
+        "u246",
+        "u247"
+      ],
+      "destroyedIds": [],
+      "messages": [],
+      "rally": [
+        {
+          "x": -972.8,
+          "y": -1408
+        },
+        {
+          "x": -1004.8,
+          "y": -1408
+        },
+        {
+          "x": -940.8,
+          "y": -1408
+        },
+        {
+          "x": -940.8,
+          "y": -1440
+        },
+        {
+          "x": -940.8,
+          "y": -1376
+        },
+        {
+          "x": -1036.8,
+          "y": -1408
+        },
+        {
+          "x": -908.8,
+          "y": -1408
+        },
+        {
+          "x": -936.8,
+          "y": -1345.6461709275204
+        },
+        {
+          "x": -991.4349712473814,
+          "y": -1338.453340507187
+        },
+        {
+          "x": -1035.1538290724795,
+          "y": -1372
+        },
+        {
+          "x": -1035.1538290724795,
+          "y": -1444
+        },
+        {
+          "x": -910.4461709275204,
+          "y": -1444
+        }
+      ],
+      "gate": {
+        "x": -972.8,
+        "y": -1408
+      },
+      "artifact": {
+        "id": "m02.artifact.power_module",
+        "key": "power-module",
+        "carrierId": "m02.energy_hub.generator1",
+        "carrierPosition": {
+          "x": -1248,
+          "y": -1449.6
+        },
+        "point": {
+          "x": -1248,
+          "y": -1537.6
+        },
+        "state": "sealed"
+      },
+      "factoryId": "m02.energy_hub.scav-factory0",
+      "production": {
+        "active": false,
+        "nextAt": 16,
+        "waiting": [],
+        "count": 0,
+        "waves": 0,
+        "retryAt": 0,
+        "alarmed": false
+      }
+    }
+  },
+  "time": 299.9999999999997,
+  "status": "running",
+  "raids": {
+    "raidWon": true,
+    "raidStarted": true,
+    "lastRevealed": true
+  },
+  "events": [
+    {
+      "id": "e433",
+      "type": "scav-produced",
+      "time": 18.099999999999987,
+      "unit": "u432",
+      "kind": "raider",
+      "name": "Рейдер",
+      "first": false
+    },
+    {
+      "id": "e435",
+      "type": "scav-produced",
+      "time": 36.10000000000024,
+      "unit": "u434",
+      "kind": "scav-zaporozhets",
+      "name": "Запорожец",
+      "first": false
+    },
+    {
+      "id": "e437",
+      "type": "scav-produced",
+      "time": 54.1000000000005,
+      "unit": "u436",
+      "kind": "scav-firetruck",
+      "name": "Пожарная машина",
+      "first": false
+    },
+    {
+      "id": "e439",
+      "type": "scav-produced",
+      "time": 72.10000000000018,
+      "unit": "u438",
+      "kind": "raider",
+      "name": "Рейдер",
+      "first": false
+    },
+    {
+      "id": "e441",
+      "type": "scav-sortie",
+      "time": 107.09999999999819,
+      "building": "m02.hill_factory.scav-factory0",
+      "group": "m02.group.hill_factory.0",
+      "count": 4
+    },
+    {
+      "id": "e443",
+      "type": "scav-produced",
+      "time": 107.09999999999819,
+      "unit": "u442",
+      "kind": "scav-zaporozhets",
+      "name": "Запорожец",
+      "first": false
+    },
+    {
+      "id": "e447",
+      "type": "scav-produced",
+      "time": 125.09999999999717,
+      "unit": "u446",
+      "kind": "scav-firetruck",
+      "name": "Пожарная машина",
+      "first": false
+    },
+    {
+      "id": "e449",
+      "type": "scav-produced",
+      "time": 143.09999999999616,
+      "unit": "u448",
+      "kind": "raider",
+      "name": "Рейдер",
+      "first": false
+    },
+    {
+      "id": "e451",
+      "type": "scav-produced",
+      "time": 161.09999999999513,
+      "unit": "u450",
+      "kind": "scav-zaporozhets",
+      "name": "Запорожец",
+      "first": false
+    },
+    {
+      "id": "e456",
+      "type": "scav-sortie",
+      "time": 198.599999999993,
+      "building": "m02.hill_factory.scav-factory0",
+      "group": "m02.group.hill_factory.1",
+      "count": 4
+    },
+    {
+      "id": "e458",
+      "type": "scav-produced",
+      "time": 198.599999999993,
+      "unit": "u457",
+      "kind": "scav-firetruck",
+      "name": "Пожарная машина",
+      "first": false
+    },
+    {
+      "id": "e461",
+      "type": "scav-produced",
+      "time": 216.59999999999198,
+      "unit": "u460",
+      "kind": "raider",
+      "name": "Рейдер",
+      "first": false
+    },
+    {
+      "id": "e463",
+      "type": "scav-produced",
+      "time": 234.59999999999096,
+      "unit": "u462",
+      "kind": "scav-zaporozhets",
+      "name": "Запорожец",
+      "first": false
+    },
+    {
+      "id": "e465",
+      "type": "scav-produced",
+      "time": 252.59999999998993,
+      "unit": "u464",
+      "kind": "scav-firetruck",
+      "name": "Пожарная машина",
+      "first": false
+    },
+    {
+      "id": "e476",
+      "type": "scav-sortie",
+      "time": 299.5999999999996,
+      "building": "m02.hill_factory.scav-factory0",
+      "group": "m02.group.hill_factory.2",
+      "count": 4
+    }
+  ],
+  "producers": []
+}

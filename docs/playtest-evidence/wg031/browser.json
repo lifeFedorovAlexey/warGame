@@ -1,0 +1,32 @@
+{
+  "errors": [],
+  "screens": [
+    {
+      "width": 1440,
+      "height": 900,
+      "hits": 2,
+      "elapsed": 2.499999999999858,
+      "pulses": 1,
+      "focus": "Постройка под огнём",
+      "drawCalls": 205
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "hits": 2,
+      "elapsed": 2.499999999999858,
+      "pulses": 1,
+      "focus": "Постройка под огнём",
+      "drawCalls": 261
+    },
+    {
+      "width": 667,
+      "height": 375,
+      "hits": 2,
+      "elapsed": 2.499999999999858,
+      "pulses": 1,
+      "focus": "Постройка под огнём",
+      "drawCalls": 241
+    }
+  ]
+}

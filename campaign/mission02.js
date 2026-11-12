@@ -137,7 +137,7 @@ export function updateM02(mission){
   const p=base.production,cfg=M02.factories[id];
   if(p){
    p.alarmed ||= near||base.destroyedIds.length>0;
-   if(!p.active&&(near||cfg.activation==='south'&&(allies.some(u=>mission.field.worldToGrid(u.x,u.y)[1]>108)||s.time-m.startedAt>=cfg.delay))){p.active=true;p.activatedAt=s.time;p.nextAt=s.time+cfg.seconds;}
+   if(!p.active&&(near||s.time-m.startedAt>=cfg.delay||cfg.activation==='south'&&allies.some(u=>mission.field.worldToGrid(u.x,u.y)[1]>108))){p.active=true;p.activatedAt=s.time;p.nextAt=s.time+cfg.seconds;}
    if(!live.has(base.factoryId)||base.state==='neutralized'){p.stopped=true;p.waiting=[];}
    if(p.count&&visible(live.get(base.factoryId)))base.productionObserved=true;
   }
