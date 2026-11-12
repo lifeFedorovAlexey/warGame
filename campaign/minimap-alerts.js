@@ -93,14 +93,17 @@ export class MinimapAlerts{
   for(const p of this.reminders.update(tasks,targets,now,{...options,attacking}))indicate(p,true);
   this.silent=false;
  }
- event(event,now){
+ event(event,now,audible=true){
   if(event.type!=='under-attack'||!point(event))return;
   this.bind();this.combatUntil=now+MINIMAP_PING_MS;
   this.pings=this.pings.filter(p=>!p.reminder||p.combatProtected);
   const active=this.active(now),near=active.find(p=>p.kind==='attack'&&(event.target&&p.target===event.target||Math.hypot(p.x-event.x,p.y-event.y)<100));
   const alert=near??this.ping('attack',event,now);
-  if(alert)Object.assign(alert,{x:event.x,y:event.y,target:event.target,building:event.building,until:now+MINIMAP_PING_MS});
-  return !!alert&&!near;
+  if(!alert)return false;
+  Object.assign(alert,{x:event.x,y:event.y,target:event.target,building:event.building,until:now+MINIMAP_PING_MS});
+  if(!audible||alert.alarmed)return false;
+  alert.alarmed=true;
+  return true;
  }
  signal(signal,chapter,now){
   if(!point(signal)||!chapter||signal.kind==='anomaly')return;

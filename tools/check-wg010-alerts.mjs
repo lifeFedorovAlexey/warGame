@@ -15,7 +15,13 @@ a.event({type:'under-attack',target:'factory',x:700,y:500,building:true},500);as
 const first=a.attackFocus(500);a.nextAttack();const second=a.attackFocus(500);assert.notEqual(first.target,second.target);assert.match(second.label,/2\/2/);
 a.nextAttack();assert.equal(a.attackFocus(500).target,first.target);
 assert.equal(a.active(3500).length,0,'Warnings fade three real seconds after the last actual hit');
-for(let i=0;i<40;i++)a.event({type:'under-attack',x:i*200,y:0,target:'storm'+i},4000);assert.equal(a.active(4000).length,16);
-mission.state={...mission.state};a.observe(mission,[],4001);assert.equal(a.active(4001).length,0,'Transient attacks do not replay after loading');
+const watched={type:'under-attack',x:10,y:10,target:subject.id};
+assert.equal(a.event(watched,3600,false),false,'An attack in view is silent');
+assert.equal(a.active(3600).length,1,'A silent attack still marks the map');
+assert.equal(a.event(watched,3700,true),true,'A further hit after panning away can sound the alarm');
+assert.equal(a.event(watched,3800,true),false,'Sustained offscreen hits do not retrigger the alarm');
+assert.equal(a.event(watched,6900,true),true,'A new offscreen attack can trigger the alarm');
+for(let i=0;i<40;i++)a.event({type:'under-attack',x:i*200,y:0,target:'storm'+i},7000);assert.equal(a.active(7000).length,16);
+mission.state={...mission.state};a.observe(mission,[],7001);assert.equal(a.active(7001).length,0,'Transient attacks do not replay after loading');
 const folder='docs/playtest-evidence/wg010';fs.mkdirSync(folder,{recursive:true});
 fs.writeFileSync(folder+'/alerts.json',JSON.stringify({before,after,movingTargets:true,simultaneousSites:true,cycling:true,firstEvent:true,expiry:true,bounded:16,saveLoad:true},null,2));console.log('PASS WG-010 sustained attacks, moving targets, separate sites, cycling, bounded alerts and load reset');
