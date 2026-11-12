@@ -73,7 +73,7 @@ export function updateFactoryRows(root,mission,projects,paused){
    setButtonIcon(control,priority==='repair'?'repair-depot':'produce','Приоритет: '+(priority==='repair'?'ремонт':'производство'));
    control.append(...children);control.dataset.factoryPriority=priority;
   }
-  const inside=visits.filter(u=>u.factoryVisit?.phase==='inside').length;
+  const inside=visits.filter(u=>u.factoryVisit?.phase==='inside'&&u.factoryVisit.factoryId===factory.id&&!u.factoryVisit.nextFactoryId).length;
   const status='Ремонт: '+visits.length+' (в цехе '+inside+', на подходе '+(visits.length-inside)+') · Сборка: '+factory.queue.length;
   control.title=control.getAttribute('aria-label')+' · '+(priority==='repair'?'Сначала ремонт, затем сборка':'Сначала сборка, затем ремонт')+' · '+status+' · Переключить';
   const count=control.querySelector('.production-count'),progress=control.querySelector('progress');

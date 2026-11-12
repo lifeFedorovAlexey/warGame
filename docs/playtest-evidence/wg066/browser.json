@@ -1,0 +1,58 @@
+{
+  "before": false,
+  "errors": [],
+  "captures": [
+    {
+      "name": "desktop",
+      "width": 1440,
+      "height": 900,
+      "overflow": [],
+      "counts": [
+        19,
+        2,
+        1,
+        2
+      ]
+    },
+    {
+      "name": "landscape",
+      "width": 844,
+      "height": 390,
+      "overflow": [],
+      "counts": [
+        19,
+        2,
+        1,
+        2
+      ]
+    }
+  ],
+  "events": [],
+  "initial": {
+    "before": [
+      24,
+      0,
+      0,
+      0
+    ],
+    "queues": [
+      19,
+      2,
+      1,
+      2
+    ],
+    "outside": [
+      0,
+      2,
+      0,
+      2
+    ],
+    "source": "b182",
+    "factories": [
+      "b182",
+      "b183",
+      "b184",
+      "b185"
+    ]
+  }
+}

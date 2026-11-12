@@ -66,10 +66,10 @@ const results=[];
 {
  const {m,factories:[a,b]}=fixture(),u=car(m);u.combatRetreat.home={id:a.id};
  a.workPriority='production';a.queue=[{kind:'bukhanka',progress:0}];
- for(const phase of ['gate','entering','inside','leaving','departure']){
+ for(const phase of ['entering','inside','leaving','departure']){
   u.factoryVisit={factoryId:a.id,phase};assert.equal(chooseRepairFactory(m,u),a);assert(!repairChoiceDue(m,u));
  }
- u.factoryVisit.phase='waiting';assert(repairChoiceDue(m,u));assert(!repairChoiceDue(m,u));
+ u.factoryVisit.phase='gate';assert(repairChoiceDue(m,u));assert(!repairChoiceDue(m,u));
  m.state.time+=2;assert(repairChoiceDue(m,u));u.detour={};m.state.time+=2;assert(!repairChoiceDue(m,u));
  delete u.detour;a.hp=0;assert.notEqual(chooseRepairFactory(m,u),a);
  results.push({case:'doorway ownership, recheck interval, active manoeuvres and destroyed factory'});
