@@ -3,8 +3,15 @@ import {createPolylineQuery} from './polyline-query.js';
 // Shared geography for both missions. Grid coordinates are the game's native
 // north-up coordinates; the concept camera never rotates the authored map.
 const controls=[[8.42,59.69],[9.8,62],[14,64],[20.5,64.4],[22.4,68],[24,73],[25.6,79.5],[26.2,82],[29,84.2],[34,84.5],[39,84.5],[44,86],[49,89],[54.5,92]];
+// Leave room for two vehicle streams and the navigation wall grid at both edges.
+export const MIN_BRIDGE_WIDTH=56;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const lineQueries=new WeakMap();
+// Blend the wide span back into the existing road on dry land at each end.
+export function bridgeWidthAt(bridge,along){
+ const distance=Math.min(along,bridge.length-along),t=clamp(distance/34,0,1),blend=t*t*(3-2*t);
+ return bridge.approachWidth+(bridge.width-bridge.approachWidth)*blend;
+}
 export function nearestOnLine(points,x,y){
  let query=lineQueries.get(points);if(!query){query=createPolylineQuery(points);lineQueries.set(points,query);}
  return query.nearest(x,y)??{distance:Infinity};
@@ -30,7 +37,7 @@ export function installRiverTerrain(field,roads){
     if(!path.some(p=>sample(p.x,p.y).distance<18))continue;
     let travelled=0;
     const deck=path.map((p,j)=>{if(j)travelled+=Math.hypot(p.x-path[j-1].x,p.y-path[j-1].y);return {...p,z:field.heightAt(p.x,p.y)+.22,along:travelled};});
-    bridges.push({id:'river-bridge-'+bridges.length,road:road.id,width:Math.max(road.width,28),points:deck,length:travelled,bounds:[Math.min(...deck.map(p=>p.x)),Math.min(...deck.map(p=>p.y)),Math.max(...deck.map(p=>p.x)),Math.max(...deck.map(p=>p.y))]});
+    bridges.push({id:'river-bridge-'+bridges.length,road:road.id,width:Math.max(road.width,MIN_BRIDGE_WIDTH),approachWidth:road.width,points:deck,length:travelled,bounds:[Math.min(...deck.map(p=>p.x)),Math.min(...deck.map(p=>p.y)),Math.max(...deck.map(p=>p.x)),Math.max(...deck.map(p=>p.y))]});
    }
   }
  }
@@ -40,7 +47,7 @@ export function installRiverTerrain(field,roads){
    if(x<l-pad||x>r+pad||y<b-pad||y>t+pad)continue;
    const q=nearestOnLine(bridge.points,x,y);
    // Flat end caps, so support cannot extend into water beyond an abutment.
-   if(q.distance<=bridge.width/2+margin&&q.along>.05&&q.along<bridge.length-.05)return {...q,bridge};
+   if(q.distance<=bridgeWidthAt(bridge,q.along)/2+margin&&q.along>.05&&q.along<bridge.length-.05)return {...q,bridge};
   }
   return null;
  }

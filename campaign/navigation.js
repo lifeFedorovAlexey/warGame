@@ -132,8 +132,12 @@ export class TerrainNavigator{
   for(const [along,side,depth,span] of [['x','y','halfWidth','halfDepth'],['y','x','halfDepth','halfWidth']]){
    const direction=Math.sign(to[along]-from[along]);
    if(!direction)continue;
-   for(let i=0;i<this.solids.length;i++)for(let j=i+1;j<this.solids.length;j++){
-    const a=this.solids[i],b=this.solids[j];
+   // A valid throat needs both sides to be this long and their overlap to be
+   // at least scale*8. Smaller solids can never pass those same tests below;
+   // exclude them before the quadratic pair search, preserving pair order.
+   const candidates=this.solids.filter(s=>s[span]>=scale*6&&s[depth]>=scale*4);
+   for(let i=0;i<candidates.length;i++)for(let j=i+1;j<candidates.length;j++){
+    const a=candidates[i],b=candidates[j];
     const low=Math.max(a[along]-a[depth],b[along]-b[depth]);
     const high=Math.min(a[along]+a[depth],b[along]+b[depth]);
     if(high-low<scale*8)continue;

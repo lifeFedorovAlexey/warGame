@@ -1,6 +1,7 @@
 import {sceneryBuilder} from './environment-geometry.js';
 import {damWaterNormals} from './dam-water.js';
 import {damWorld,DAM_DRAINAGE_OUTFALL} from './dam-layout.js';
+import {bridgeWidthAt} from './river-terrain.js';
 
 // The gorge and bridge support are authored terrain; small surface detail is
 // visual only. There are no invisible prop colliders or new camp entities.
@@ -30,11 +31,11 @@ export function createRiverEnvironment(T,field,dam,addFog,terrain){
   }
  }
  for(const bridge of river.bridges){
-  const truss=bridge.road==='junction-3--junction-7-8',half=bridge.width/2,points=bridge.points;
+  const truss=bridge.road==='junction-3--junction-7-8',points=bridge.points;
   // One continuous ribbon avoids overlapping sloped slabs and z-fighting.
   const deckVertices=[],deckUvs=[],deckIndices=[];
   for(let i=0;i<points.length;i++){
-   const p=points[i],a=points[Math.max(0,i-1)],b=points[Math.min(points.length-1,i+1)],len=Math.hypot(b.x-a.x,b.y-a.y);
+   const p=points[i],a=points[Math.max(0,i-1)],b=points[Math.min(points.length-1,i+1)],len=Math.hypot(b.x-a.x,b.y-a.y),half=bridgeWidthAt(bridge,p.along)/2;
    for(const side of [-1,1]){const x=p.x-(b.y-a.y)/len*half*side,y=p.y+(b.x-a.x)/len*half*side;deckVertices.push(x,y,p.z);deckUvs.push((x+field.half)/field.extent,(y+field.half)/field.extent);}
    if(i){const j=(i-1)*2;deckIndices.push(j,j+2,j+1,j+1,j+2,j+3);}
   }
@@ -51,8 +52,8 @@ export function createRiverEnvironment(T,field,dam,addFog,terrain){
   // Thin expansion joints mark the actual threshold. Wing walls sit beside
   // the carriageway: the bridge is legible without a different asphalt tile.
   for(const [index,adjacent] of [[0,1],[points.length-1,points.length-2]]){
-   const p=points[index],q=points[adjacent],dx=q.x-p.x,dy=q.y-p.y,len=Math.hypot(dx,dy),ux=dx/len,uy=dy/len,angle=Math.atan2(dy,dx);
-   box([.55,bridge.width,.06],[p.x+ux*.5,p.y+uy*.5,p.z+.09],joint,[0,0,angle]);
+   const p=points[index],q=points[adjacent],dx=q.x-p.x,dy=q.y-p.y,len=Math.hypot(dx,dy),ux=dx/len,uy=dy/len,angle=Math.atan2(dy,dx),half=bridgeWidthAt(bridge,p.along)/2;
+   box([.55,half*2,.06],[p.x+ux*.5,p.y+uy*.5,p.z+.09],joint,[0,0,angle]);
    for(const side of [-1,1]){
     const x=p.x-uy*(half+1.1)*side,y=p.y+ux*(half+1.1)*side;
     box([5.5,2.2,2.1],[x+ux*1.1,y+uy*1.1,p.z+.1],concrete,[0,0,angle]);
@@ -60,26 +61,27 @@ export function createRiverEnvironment(T,field,dam,addFog,terrain){
    }
   }
   for(let i=1;i<points.length;i++){
-   const a=points[i-1],b=points[i],dx=b.x-a.x,dy=b.y-a.y,length=Math.hypot(dx,dy),angle=Math.atan2(dy,dx),z=(a.z+b.z)/2;
+   const a=points[i-1],b=points[i],dx=b.x-a.x,dy=b.y-a.y,length=Math.hypot(dx,dy),angle=Math.atan2(dy,dx),z=(a.z+b.z)/2,halfA=bridgeWidthAt(bridge,a.along)/2,halfB=bridgeWidthAt(bridge,b.along)/2,half=(halfA+halfB)/2;
    const at=(side,above=0)=>[(a.x+b.x)/2-dy/length*side,(a.y+b.y)/2+dx/length*side,z+above];
    for(const side of [-1,1]){
-    box([length+.12,.7,1.1],at(side*(half+.7),.5),concrete,[0,0,angle]);
+    const edgeDx=dx-dy/length*(halfB-halfA)*side,edgeDy=dy+dx/length*(halfB-halfA)*side,edgeAngle=Math.atan2(edgeDy,edgeDx);
+    box([Math.hypot(edgeDx,edgeDy)+.12,.7,1.1],at(side*(half+.7),.5),concrete,[0,0,edgeAngle]);
     if(i%4===0)box([length,.25,.035],at(side*(half-1.6),.18),paint,[0,0,angle]);
    }
    if(i%4<2)box([length,.4,.04],at(0,.18),paint,[0,0,angle]);
   }
   const stride=truss?6:8;
   for(let i=0;i<points.length;i+=stride){
-   const p=points[i],next=points[Math.min(points.length-1,i+stride)],h=truss?12:2;
+   const p=points[i],next=points[Math.min(points.length-1,i+stride)],h=truss?12:3.2,half=bridgeWidthAt(bridge,p.along)/2,nextHalf=bridgeWidthAt(bridge,next.along)/2;
    const a=points[Math.max(0,i-1)],b=points[Math.min(points.length-1,i+1)],len=Math.hypot(b.x-a.x,b.y-a.y),nx=-(b.y-a.y)/len,ny=(b.x-a.x)/len;
    for(const side of [-1,1]){
-    const x=p.x+nx*(half+1)*side,y=p.y+ny*(half+1)*side,xx=next.x+nx*(half+1)*side,yy=next.y+ny*(half+1)*side;
-    rod([x,y,p.z+.7],[x,y,p.z+h],truss?.48:.18,steel);
-    if(next!==p){rod([x,y,p.z+h],[xx,yy,next.z+h],truss?.42:.14,steel);if(truss){rod([x,y,p.z+1],[xx,yy,next.z+h],.28,steel);rod([x,y,p.z+h],[xx,yy,next.z+1],.28,steel);}}
+    const x=p.x+nx*(half+1)*side,y=p.y+ny*(half+1)*side,xx=next.x+nx*(nextHalf+1)*side,yy=next.y+ny*(nextHalf+1)*side;
+    rod([x,y,p.z+.7],[x,y,p.z+h],truss?.48:.28,steel);
+    if(next!==p){rod([x,y,p.z+h],[xx,yy,next.z+h],truss?.42:.22,steel);if(truss){rod([x,y,p.z+1],[xx,yy,next.z+h],.28,steel);rod([x,y,p.z+h],[xx,yy,next.z+1],.28,steel);}}
    }
    if(truss&&i%12===0)rod([p.x-nx*(half+1),p.y-ny*(half+1),p.z+h],[p.x+nx*(half+1),p.y+ny*(half+1),p.z+h],.4,steel);
    if(i%16===0){const bottom=river.terrainHeightAt(p.x,p.y),height=p.z-bottom-1;
-    if(height>2)box([6,bridge.width-4,height],[p.x,p.y,bottom+height/2],concrete,[0,0,Math.atan2(b.y-a.y,b.x-a.x)]);
+    if(height>2)box([6,half*2-4,height],[p.x,p.y,bottom+height/2],concrete,[0,0,Math.atan2(b.y-a.y,b.x-a.x)]);
    }
   }
  }

@@ -11,3 +11,7 @@
 | `debris-fall.ogg` | [iwanPlays · Bricks/Stones/Rocks/Gravel Falling](https://freesound.org/people/iwanPlays/sounds/567249/) | Участок 0,435–1,455 с, замедлен до 78% для осыпания обломков. |
 
 В записи iwanPlays использованы [adamgryu · Rocks.wav](https://freesound.org/s/336023/), [AlanCat · rockfall2a.wav](https://freesound.org/s/389303/) и [spookymodem · Falling Rock.wav](https://freesound.org/s/202098/).
+
+## Сигнал нападения
+
+`attack-warning.ogg` — [Mixkit · Emergency alert alarm, № 1007](https://mixkit.co/free-sound-effects/alarm/), [Mixkit Sound Effects Free License](https://mixkit.co/license/modal/sfxFree/), разрешено использование в видеоиграх. Взяты первые 1,8 секунды, смягчены высокие частоты, отрегулирована громкость и добавлены затухания; формат Ogg Opus, моно.

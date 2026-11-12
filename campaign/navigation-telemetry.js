@@ -21,7 +21,7 @@ export function installNavigationTelemetry(mission,context){
  };
  mission.recordTrafficDiagnostic=data=>record('traffic-job',data);
  const unitRow=(unit,detail=false)=>({
-  id:unit.id,kind:unit.kind,owner:unit.owner,trafficOnScreen:unit.trafficOnScreen??null,...point(unit),heading:round(unit.heading),speed:round(unit.driveSpeed),
+  id:unit.id,kind:unit.kind,owner:unit.owner,...point(unit),heading:round(unit.heading),speed:round(unit.driveSpeed),
   collision:(()=>{const shape=vehicleEnvelope(unit,mission.config.worldScale,mission.field);return {shape:shape.ellipse?'ellipse':'rectangle',width:round(shape.width*2),length:round(shape.depth*2),x:round(shape.x),y:round(shape.y)};})(),
   steering:round(unit.steering),steeringRequested:round(unit.steeringRequested),
   steeringFault:unit.steeringFault?{since:round(unit.steeringFault.since),...steeringDamageAt(unit.steeringFault,mission.state.time)}:null,
@@ -103,7 +103,7 @@ export function installNavigationTelemetry(mission,context){
    motionHistory.set(unit,history);
   }
   const stalled=active.filter(unit=>(unit.navigation?.waitSeconds??0)>2);
-  record('heartbeat',{trafficCamera:mission.trafficCamera,collision:{...collisionStatistics},ui,status:mission.state.status,wallGapMs:round(gap),simProgress:round(simProgress),
+  record('heartbeat',{collision:{...collisionStatistics},ui,status:mission.state.status,wallGapMs:round(gap),simProgress:round(simProgress),
    total:units.length,active:active.length,stalled:stalled.map(unit=>unit.id),pendingTick:tick,
    maxAdvanceMs:round(maximumAdvance),maxTickMs:round(maximumTick),maxFrameGapMs:round(maximumFrameGap),
    dispatcher:mission.trafficCoordinator.statistics,local:mission.trafficCoordinator.stats,
@@ -208,7 +208,7 @@ export function installNavigationTelemetry(mission,context){
  window.addEventListener('pagehide',()=>{
   record('pagehide');navigator.sendBeacon(endpoint,new Blob([JSON.stringify({session,events:queue.slice(-50)})],{type:'text/plain'}));
  });
- record('session-start',{build:'live-navigation-2026-11-09-r51.1-empty-command-route',collisionModel:'ellipse-model-extrema',offscreenAlliesPassThrough:true,bukhankaSizeScale:vehicleSizeScale('bukhanka'),vehicleSizeScales:Object.fromEntries(['bukhanka','flamer','builder'].map(kind=>[kind,vehicleSizeScale(kind)])),steeringDamage:STEERING_DAMAGE,terrainPolicy:mission.nav.terrainAllowed.version,controller:mission.trafficCoordinator.constructor.name,
+ record('session-start',{build:'live-navigation-2026-11-09-r51.1-empty-command-route',collisionModel:'ellipse-model-extrema',bukhankaSizeScale:vehicleSizeScale('bukhanka'),vehicleSizeScales:Object.fromEntries(['bukhanka','flamer','builder'].map(kind=>[kind,vehicleSizeScale(kind)])),steeringDamage:STEERING_DAMAGE,terrainPolicy:mission.nav.terrainAllowed.version,controller:mission.trafficCoordinator.constructor.name,
   simulationStep:mission.config.simulationStep,cpuBudget:mission.config.simulationCpuBudgetMs});void flush();
  return {session,record,flush,frame(now){maximumFrameGap=Math.max(maximumFrameGap,now-lastFrame);lastFrame=now;},
   frameWork(timings){for(const [stage,ms] of Object.entries(timings)){

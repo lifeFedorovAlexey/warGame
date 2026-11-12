@@ -13,14 +13,13 @@ function occupiedShoulder(mission,unit,lane,scale){
 
 // Retreating vehicles choose a free nearby shoulder; attack traffic keeps the
 // centre. The chosen side survives transient motion in the opposite stream.
-function opposingRetreatLane(mission,unit,road,target,scale){
+function opposingRetreatLane(mission,unit,road,target,targetRoad,scale){
  const retreating=!!unit.combatRetreat,attacking=['attack','attack-move'].includes(unit.task?.type)||!!unit.combatDeployment;
  if(!retreating&&!attacking)return null;
  const roads=mission.nav.roads,seg=road.segment,dx=target.x-unit.x,dy=target.y-unit.y,d=Math.hypot(dx,dy);
  if(d<scale*8)return null;
  const alignment=(dx*seg.ux+dy*seg.uy)/d;
- const targetRoad=retreating?roads.nearest(target,scale*8):null;
- const along=targetRoad?.segment?.pathId===seg.pathId
+ const along=retreating&&targetRoad.segment.pathId===seg.pathId
   ?targetRoad.segment.progress+targetRoad.along-seg.progress-road.along:null;
  if(!(Math.abs(along??0)>scale*2)&&Math.abs(alignment)<.55)return null;
  const direction=Math.sign(Math.abs(along??0)>scale*2?along:alignment),ux=seg.ux*direction,uy=seg.uy*direction;
@@ -64,17 +63,20 @@ function opposingRetreatLane(mission,unit,road,target,scale){
 export function roadDrivingLane(mission,unit,point,scale){
  const roads=mission.nav.roads,start=roads.nearest(unit,scale*8);
  const routeMargin=unit.combatRetreat?scale*8:0;
- if(!start||!roads.nearest(point,routeMargin))return null;
- let target=point;
+ if(!start)return null;
+ const pointRoad=roads.nearestWaypoint(point,routeMargin);
+ if(!pointRoad)return null;
+ let target=point,targetRoad=pointRoad;
  // A short intermediate centre-line point must not switch lane keeping off.
  // Look along this accepted road leg only; an explicit exit into the field
  // ends the lookahead and retains the player's off-road route.
- if(start)for(const next of unit.path){
-  const at=roads.nearest(next,routeMargin);
+ for(const next of unit.path){
+  const at=next===point?pointRoad:roads.nearestWaypoint(next,routeMargin);
   if(!at||at.segment.pathId!==start.segment.pathId)break;
-  target=next;if(!unit.combatRetreat&&distance(unit,next)>=40)break;
+  target=next;targetRoad=at;
+  if(!unit.combatRetreat&&distance(unit,next)>=40)break;
  }
- const lane=opposingRetreatLane(mission,unit,start,target,scale)??roads.rightLane(unit,target,scale);
+ const lane=opposingRetreatLane(mission,unit,start,target,targetRoad,scale)??roads.rightLane(unit,target,scale);
  return lane;
 }
 

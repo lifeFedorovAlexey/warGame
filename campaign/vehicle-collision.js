@@ -52,7 +52,6 @@ const hasPassage=(a,b)=>a.trafficPassThrough?.revision===a.commandRevision
 export function trafficCollisionRequired(a,b){
  if(a?.factoryVisit?.phase==='inside'||b?.factoryVisit?.phase==='inside')return false;
  if(!alliedVehicles(a,b))return true;
- if(a.trafficOnScreen===false&&b.trafficOnScreen===false)return false;
  return !(hasPassage(a,b)||hasPassage(b,a))||factoryTransfer(a)||factoryTransfer(b);
 }
 

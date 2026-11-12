@@ -58,9 +58,9 @@ try{
   for(let n=0;n<800&&f.queue.length;n++){m.state.time+=.1;m.updateEconomy(.1);m.state.units=m.state.units.filter(u=>u.factoryVisit);m.rebuildNavigation();}
   const hp=cars[0].hp;m.updateEconomy(1);review.refresh();return {orders:f.queue.length,hpBefore:hp,hpAfter:cars[0].hp};});
  assert.equal(report.next.orders,0);assert(report.next.hpAfter>report.next.hpBefore);await capture('WG-034-after-production');
- // A click in an overloaded row still chooses the factory that finishes sooner.
+ // An order from the catalogue chooses the factory that finishes sooner.
  report.order=await page.evaluate(()=>{const m=campaign.mission,[a,b]=review.factories;a.queue=Array.from({length:3},(_,i)=>({kind:'builder',cost:150,progress:0,funding:{paid:150},orderSerial:20+i}));b.queue=[];m.state.energy=2400;review.refresh();return {a:a.id,b:b.id};});
- await page.locator('[data-factory-row]').first().locator('[data-factory-production]').first().click();
+ await page.locator('[data-factory-production]').first().click();
  assert.equal(await page.evaluate(()=>review.factories[1].queue.length),1);await page.evaluate(()=>review.refresh());
  // Model lifecycle: no sign survives a destroyed or removed factory.
  const lifecycle=await page.evaluate(()=>{const m=campaign.mission,f=review.factories[0],w=campaign.world,save=m.save();f.hp=0;review.refresh();const removed=!w.buildingObjects.get(f.id).getObjectByName('factory_status_board');m.load(save);review.factories=review.factories.map(f=>m.entity(f.id));review.refresh();return {removed,restored:!!w.buildingObjects.get(f.id).getObjectByName('factory_status_board')};});

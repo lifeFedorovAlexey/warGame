@@ -1,13 +1,12 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {Mission} from '../campaign/mission.js';
-import {createHeightfield} from '../demo/map-route.js';
+import {makeField,makeMission} from './m02-fixture.mjs';
 import {chooseProductionFactory} from '../campaign/factory-production.js';
 import {oilReserved} from '../campaign/oil-economy.js';
 const json=p=>JSON.parse(fs.readFileSync(p,'utf8'));
-const config=json('assets/campaign/alpha/mission01/gameplay.json'),field=createHeightfield(json('assets/maps/alpha/heightfield.json'));
+const config=json('assets/campaign/alpha/mission01/gameplay.json'),field=makeField();
 function fixture(){
- const m=new Mission(config,field),p=field.gridToWorld(config.startGrid);
+ const m=makeMission(field),p=field.gridToWorld(config.startGrid);
  const a=m.addStructure('factory','rai',{x:p.x+170,y:p.y+100},{completed:true,progress:1});
  const b=m.addStructure('factory','rai',{x:p.x-170,y:p.y+100},{completed:true,progress:1});
  m.state.energy=2400;return {m,a,b};
@@ -32,6 +31,7 @@ function fixture(){
  const active=a.queue[0];m.produce(b.id,'bukhanka',{distributed:true});assert.equal(a.queue[0],active);
  assert.equal(a.queue.length,2);assert.equal(b.queue.length,1);
  b.exitBlocked=true;assert.equal(chooseProductionFactory(m,b.id),a);delete b.exitBlocked;a.queue.pop();
+ b.queue[0].funding.paid=b.queue[0].cost;b.queue[0].progress=.9;
  const u=m.state.units.find(u=>u.owner==='rai');u.hp=u.maxHp/2;u.factoryVisit={factoryId:a.id,phase:'inside'};
  assert.equal(chooseProductionFactory(m,a.id),b,'Repair is read live before the next economy tick');
  a.workPriority='production';assert.equal(chooseProductionFactory(m,a.id),a);

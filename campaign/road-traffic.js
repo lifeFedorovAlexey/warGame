@@ -16,6 +16,7 @@ export class RoadTraffic {
     this.field = field;
     this.buckets = new Map();
     this.routes = new Map();
+    this.waypoints = new WeakMap();
     this.junctionLinks = new Map();
     // The road index is immutable until the navigator rebuilds it. Keep exact
     // queries for persistent waypoints and repeated previews, never rounded
@@ -98,6 +99,14 @@ export class RoadTraffic {
     if(cached.results.size>=8)cached.results.clear();
     cached.results.set(radius,nearest);
     return nearest?{...nearest}:null;
+  }
+
+  nearestWaypoint(point, radius) {
+    const {x,y}=point, cached=this.waypoints.get(point);
+    if (cached && cached.x===x && cached.y===y && cached.radius===radius) return cached.road;
+    const road=this.nearest(point,radius);
+    this.waypoints.set(point,{x,y,radius,road});
+    return road;
   }
 
   coverage(x, y) {

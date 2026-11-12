@@ -164,7 +164,7 @@ export class PredictiveTraffic extends TrafficCoordinator{
   // gets another bounded attempt after a delay, never a permanent veto.
   const witness=JSON.stringify([intent,mission.nav.topologyRevision,unit.x,unit.y,unit.heading,
    mission.nearbyUnits(unit,Math.max(100,distance(unit,goal)+30)).filter(other=>other.hp>0)
-    .map(other=>[other.id,other.x,other.y,other.heading,other.kind,other.trafficOnScreen??true,other.path?.length>0])]);
+    .map(other=>[other.id,other.x,other.y,other.heading,other.kind,trafficCollisionRequired(unit,other),other.path?.length>0])]);
   const previous=this.routeAttempts.get(unit);
   if(previous?.witness===witness&&mission.state.time<previous.retryAt)return;
   this.routeAttempts.set(unit,{witness,retryAt:mission.state.time+2});
@@ -194,7 +194,7 @@ export class PredictiveTraffic extends TrafficCoordinator{
   const geometryKey=JSON.stringify([intent,mission.nav.topologyRevision,origin,unit.path]);
   const witness=JSON.stringify([geometryKey,
    mission.nearbyUnits(unit,maximumTravel+scale*8).filter(other=>other.hp>0)
-    .map(other=>[other.id,other.x,other.y,other.heading,other.driveSpeed,other.trafficOnScreen??true,other.path?.length>0])]);
+    .map(other=>[other.id,other.x,other.y,other.heading,other.driveSpeed,trafficCollisionRequired(unit,other),other.path?.length>0])]);
   const previous=this.maneuverAttempts.get(unit);
   if(previous?.witness===witness&&mission.state.time<previous.retryAt)return false;
   // Repeating the same six-leg beam cannot discover a turn it just pruned.
@@ -299,7 +299,7 @@ export class PredictiveTraffic extends TrafficCoordinator{
     // is no copy of the simulation and no search for a complete yield chain.
     const facade=Object.create(mission);facade.nav=this[navKey];
     job.source={...job.unit,path:job.unit.path.map(point=>({...point}))};
-    const obstacles=mission.state.units.map(body=>({id:body.id,kind:body.kind,hp:body.hp,owner:body.owner,trafficOnScreen:body.trafficOnScreen,
+    const obstacles=mission.state.units.map(body=>({id:body.id,kind:body.kind,hp:body.hp,owner:body.owner,
      commandRevision:body.commandRevision,trafficPassThrough:body.trafficPassThrough&&structuredClone(body.trafficPassThrough),
      factoryVisit:body.factoryVisit&&{phase:body.factoryVisit.phase},
      x:body.x,y:body.y,heading:body.heading,path:body.path?.length?[{}]:[]}));
@@ -626,15 +626,15 @@ export class PredictiveTraffic extends TrafficCoordinator{
   // arc into a forward-facing cost and force another gear change.
   const backingArrival=final&&remaining<radius*3&&(Math.abs(turn)>Math.PI/3||unit.reversing||previous?.speed<0);
   const nearby=mission.nearbyUnits(unit,100).filter(other=>other!==unit&&other.hp>0);
-  const visible=unit.trafficOnScreen,neighbours=[];
+  const neighbours=[];
   const bodies=nearby.map(other=>{
    const collides=trafficCollisionRequired(unit,other);
    if(collides)neighbours.push(other);
-   return [other,other.trafficOnScreen,collides];
+   return [other,collides];
   });
   const current=()=>mission.state===world&&mission.nav.topologyRevision===topology&&unit.hp>0&&!unit.pendingOrder&&unit.x===origin.x&&unit.y===origin.y
-   &&unit.heading===origin.heading&&this.routeIntent(unit)===intent&&unit.trafficOnScreen===visible
-   &&bodies.every(([body,wasVisible,collides])=>body.trafficOnScreen===wasVisible&&trafficCollisionRequired(unit,body)===collides);
+   &&unit.heading===origin.heading&&this.routeIntent(unit)===intent
+   &&bodies.every(([body,collides])=>trafficCollisionRequired(unit,body)===collides);
   const forecasts=neighbours.map(other=>{
    const lane=this.intents.get(other.id)?.roadLane;
    const key=[other.x,other.y,other.heading,other.kind,other.driveSpeed,other.reversing,other.steering,
@@ -680,8 +680,8 @@ export class PredictiveTraffic extends TrafficCoordinator{
    for(let i=0;i<10;i++){
     if(performance.now()>=mission.nav.workDeadline){
      account();this.stats.controlYields=(this.stats.controlYields??0)+1;yield;sliceAt=performance.now();
-     // Camera changes can restore collisions while a control search is paused.
-     // A new command or changed visibility discards the unexecuted candidates.
+     // A new command or changed collision permissions can invalidate a search
+     // while it is suspended between frames.
      if(!current()){this.stats.controlDiscards=(this.stats.controlDiscards??0)+1;finish();return false;}
     }
     const step=intervals[i],target=preview(pose),feedback=steering===preferred&&speed>=0?routeSteering(pose,target,scale,speed)

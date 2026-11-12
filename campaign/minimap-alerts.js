@@ -99,6 +99,7 @@ export class MinimapAlerts{
   const active=this.active(now),near=active.find(p=>p.kind==='attack'&&(event.target&&p.target===event.target||Math.hypot(p.x-event.x,p.y-event.y)<100));
   const alert=near??this.ping('attack',event,now);
   if(alert)Object.assign(alert,{x:event.x,y:event.y,target:event.target,building:event.building,until:now+MINIMAP_PING_MS});
+  return !!alert&&!near;
  }
  signal(signal,chapter,now){
   if(!point(signal)||!chapter||signal.kind==='anomaly')return;

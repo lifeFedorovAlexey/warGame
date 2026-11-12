@@ -6,7 +6,8 @@ const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const assignment=u=>u.factoryVisit?.factoryId??u.combatRetreat?.home?.id;
 const queueTime=u=>u.factoryVisit?.queued??u.combatRetreat?.started??0;
 const queueOrder=(a,b)=>queueTime(a)-queueTime(b)||a.id.localeCompare(b.id);
-const committed=u=>['gate','entering','inside','leaving','departure'].includes(u.factoryVisit?.phase);
+const committed=u=>['entering','inside','leaving','departure'].includes(u.factoryVisit?.phase)
+ ||u.factoryVisit?.phase==='gate'&&u.navigation?.reason!=='factory-route-unavailable';
 
 export function needsFactoryVisit(m,unit,factory){
  return unit.hp<unit.maxHp||needsModernization(m,factory,unit);

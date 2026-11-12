@@ -32,7 +32,7 @@ const ambienceBase = '../assets/campaign/alpha/mission01/field-ambience/';
 const combatBase = '../assets/campaign/alpha/mission01/combat-sfx/';
 const combatFiles = {
   mg:'mg-burst.ogg', flame:'flame-roar.ogg', armor:'armor-hit.ogg',
-  structure:'structure-hit.ogg', debris:'debris-fall.ogg',
+  structure:'structure-hit.ogg', debris:'debris-fall.ogg', alarm:'attack-warning.ogg',
 };
 const combatVoiceLimit = 10;
 const voiceKinds = ['select', 'move', 'attack', 'build', 'stop'];
@@ -662,6 +662,16 @@ export class FieldSound {
   }
 
   signal(kind) {
+    if(kind==='attack-alarm'){
+      const buffer=this.combatClips.get('alarm');
+      if(!buffer||!this.limit(kind,8))return;
+      const source=this.context.createBufferSource();
+      source.buffer=buffer;
+      source.connect(this.effectsOutput);
+      source.onended=()=>source.disconnect();
+      source.start();
+      return;
+    }
     if (!this.limit(kind, .18)) return;
     if (kind === 'radio') this.transient({duration:.13, frequency:1180, end:710, level:.055});
     else if (kind === 'complete') this.transient({duration:.25, frequency:320, end:480, level:.048, tone:'sine'});

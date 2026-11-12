@@ -1,18 +1,16 @@
 import assert from 'node:assert/strict';
-import * as T from '../demo/vendor/three.module.js';
 import {fixture} from './check-start-latency-coordinator.mjs';
-import {createTrafficVisibility} from '../campaign/traffic-visibility.js';
+import {trafficCollisionRequired} from '../campaign/vehicle-collision.js';
 
 // Exercise the shared engine boundary with each campaign tag. Scenario events
-// belong to their mission suites; visibility and route scheduling must not
-// choose an implementation based on these tags.
+// belong to their mission suites. The camera and mission tag do not change
+// collision or route scheduling.
 const rows=[];
 for(const tag of ['m01','m02','m03']){
  const m=fixture(),unit=m.addUnit('bukhanka','rai',{x:0,y:0}),other=m.addUnit('bukhanka','rai',{x:2000,y:2000});
  if(tag!=='m01')m.state[tag]={};
- const camera=new T.PerspectiveCamera(43,16/9,1,22000);camera.up.set(0,0,1);camera.position.set(0,-300,300);camera.lookAt(0,0,0);
- const visibility=createTrafficVisibility(T,camera,m.field,m.config);visibility.update(m);
- assert.equal(unit.trafficOnScreen,true);assert.equal(other.trafficOnScreen,false,tag+' uses real frustum visibility');
+ unit.trafficOnScreen=other.trafficOnScreen=false;
+ assert(trafficCollisionRequired(unit,other),tag+' ignores legacy camera flags');
  const submitted=m.submitOrder([unit.id],'move',{x:0,y:180});assert(submitted.ok);
  m.advance(0,{budgetMs:0});assert(unit.pendingOrder,'Zero budget cannot do route work');
  let frames=0;

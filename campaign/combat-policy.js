@@ -325,7 +325,10 @@ export function* updateCombatRetreat(mission, unit, spec, dt) {
   if(!retreat.home||replacement.id!==retreat.home.id||replacement.x!==retreat.home.x||replacement.y!==retreat.home.y){
     // A destroyed factory (or a newly built one replacing the fallback base)
     // changes the service destination, including while already en route.
-    if(unit.factoryVisit&&['approach','waiting'].includes(unit.factoryVisit.phase))delete unit.factoryVisit;
+    if(unit.factoryVisit&&['approach','waiting','gate'].includes(unit.factoryVisit.phase)){
+      if(existingBase?.garageGate===unit.id)delete existingBase.garageGate;
+      delete unit.factoryVisit;
+    }
     if(existingBase&&replacement.id!==existingBase.id)mission.emit('factory-repair-rerouted',{unit:unit.id,from:existingBase.id,to:replacement.id});
     retreat.home=replacement;
     if(retreat.phase!=='cover'){
@@ -370,11 +373,8 @@ export function* updateCombatRetreat(mission, unit, spec, dt) {
       yield* currentRetreatSteps(mission.moveSteps(unit,dt),current);
       return true;
     }
-    if(busy){
-      unit.driveSpeed=0;
-      navigationDecision(unit,'WAITING_RESERVATION','retreat-cover-until-repair-free',busy,'resume-repair');
-      return true;
-    }
+    // The garage can assign a safe waiting point even while its gate is in
+    // use. A parked car in cover must not wait for the whole queue to clear.
     delete retreat.phase;
     delete retreat.destination;
     retreat.status='planning';

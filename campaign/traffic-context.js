@@ -7,7 +7,7 @@ export const SEARCH_OUTCOME=Object.freeze({FOUND:'FOUND',LOCAL_SEARCH_EXHAUSTED:
 // connectivity proof may produce that outcome. Local failures get a retry.
 export const LOCAL_RETRY_SECONDS=2;
 const retreatIntent=u=>{if(!u.combatRetreat)return null;const {threat,...intent}=u.combatRetreat;return intent;};
-export const trafficPoseKey=u=>JSON.stringify([u.x,u.y,u.heading,u.kind,u.owner,u.hp>0,u.trafficOnScreen??true]);
+export const trafficPoseKey=u=>JSON.stringify([u.x,u.y,u.heading,u.kind,u.owner,u.hp>0]);
 export const trafficBodyKey=u=>JSON.stringify([trafficPoseKey(u),u.hp>=u.maxHp,
  !u.retreatSuppressed&&u.hp<=u.maxHp*({light:.8,heavy:.35}[u.combatPolicy?.retreat]??0),
  damageMobility(u.damage),u.steeringFault?.since??null,!!u.damage?.wreck,u.commandRevision,u.pendingOrder,u.path,u.task,u.routeOrder,u.reverseDebt,
