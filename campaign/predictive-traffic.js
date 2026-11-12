@@ -281,20 +281,9 @@ export class PredictiveTraffic extends TrafficCoordinator{
   this.stats.maxPlanningOverrunMs=Math.max(this.stats.maxPlanningOverrunMs??0,elapsed-budget);
   this.planningDeadline=-Infinity;
  }
- advanceFixedPlanning(mission){
-  // A bounded amount of the same searches, once at a simulation boundary.
-  // -Infinity makes their existing cooperative checkpoints yield by work,
-  // not by elapsed CPU time. No collision or route admission is bypassed.
-  this.publishPlanning(mission,Infinity);
-  this.advanceRoutes(mission,Infinity,false,256);
-  this.planner.advance(mission,1,512);
-  this.advanceRoutes(mission,Infinity,true,256);
-  this.publishPlanning(mission,Infinity);
- }
- advanceRoutes(mission,deadline,maneuver,steps=Infinity){
-  const fixed=Number.isFinite(steps);
+ advanceRoutes(mission,deadline,maneuver){
   const jobKey=maneuver?'maneuverJob':'routeJob',navKey=maneuver?'maneuverNav':'routeNav';
-  while(steps-->0&&performance.now()<deadline){
+  while(performance.now()<deadline){
    let job=this[jobKey];
    if(job&&!this.validRoute(mission,job)){
     this.traceRoute(mission,job,'cancelled',{reason:this.routeInvalidation(mission,job),stage:'search'});
@@ -319,7 +308,7 @@ export class PredictiveTraffic extends TrafficCoordinator{
     this[jobKey]=job;this.stats.routeSearches++;this.traceRoute(mission,job,'started');
    }
    if(performance.now()>=deadline)break;
-   this[navKey].workDeadline=fixed?-Infinity:deadline;
+   this[navKey].workDeadline=deadline;
    const nextAt=performance.now(),step=job.iterator.next(),nextMs=performance.now()-nextAt;
    job.searchMs=(job.searchMs??0)+nextMs;job.maxNextMs=Math.max(job.maxNextMs??0,nextMs);
    // A generator yields between small geometry checks as well as at its
@@ -474,7 +463,7 @@ export class PredictiveTraffic extends TrafficCoordinator{
   }
   candidates.sort((a,b)=>b.saved-a.saved);
   for(const candidate of candidates.slice(0,2)){
-   if(!mission.state.m02&&performance.now()>=(mission.nav.workDeadline??Infinity))return;
+   if(performance.now()>=(mission.nav.workDeadline??Infinity))return;
    const {index,point,heading,saved}=candidate,end={...point,heading,kind:unit.kind};
    if(!mission.nav.lineClear(unit,point,false,true)||!mission.vehicleMotionClear(unit,unit,end)
     ||maneuverAdmissionBlocker(mission,unit,unit,end,mission.config.simulationStep))continue;
@@ -607,8 +596,17 @@ export class PredictiveTraffic extends TrafficCoordinator{
   const passingProgress=pose=>passingLane?(pose.x-origin.x)*passingLane.ux+(pose.y-origin.y)*passingLane.uy:0;
   // Field passing has the same moving lookahead as a road lane. Treating
   // its short lateral target as a parking spot made both cars crawl.
-  const lanePose=(car,pose,lane)=>({...car,...pose,navigation:{waitSeconds:0},
-   ...(lane.retreatShoulder?{combatRetreat:{...car.combatRetreat,shoulderSide:lane.retreatSide,shoulderPath:lane.path,shoulderDirection:lane.direction}}:{})});
+  const laneViews=new WeakMap();
+  const lanePose=(car,pose,lane)=>{
+   // Reuse a lightweight preview instead of copying personnel, damage, orders
+   // and cargo at every projected position. The inherited context is read-only.
+   let view=laneViews.get(car);
+   if(!view){view=Object.create(car);view.navigation={waitSeconds:0};laneViews.set(car,view);}
+   view.x=pose.x;view.y=pose.y;view.heading=pose.heading;
+   if(lane.retreatShoulder)view.combatRetreat={...car.combatRetreat,shoulderSide:lane.retreatSide,shoulderPath:lane.path,shoulderDirection:lane.direction};
+   else delete view.combatRetreat;
+   return view;
+  };
   const preview=pose=>roadLane?roadDrivingLane(mission,lanePose(unit,pose,roadLane),unit.path[0],scale)??goal
    :passingLane?{x:goal.x+passingLane.ux*passingProgress(pose),y:goal.y+passingLane.uy*passingProgress(pose)}:goal;
   const motionCost=pose=>{
@@ -676,7 +674,7 @@ export class PredictiveTraffic extends TrafficCoordinator{
    if(pass&&!backingArrival&&best&&best.score<initialCost-.05)break;
    for(const steering of new Set(steerings))for(const speed of speedPasses[pass]){
    this.stats.samples++;
-   const control={speed,steering},rejected=new Set();let pose=unit,first=null,clearance=Infinity,valid=true,travel=0,time=mission.state.time;
+   const control={speed,steering},rejected=new Set();let pose=unit,shape=vehicleEnvelope(unit,scale,mission.field),first=null,clearance=Infinity,valid=true,travel=0,time=mission.state.time;
    // Execution is exactly the first predicted interval, including braking.
    // It must not execute a faster, separately calculated approach step.
    for(let i=0;i<10;i++){
@@ -695,7 +693,7 @@ export class PredictiveTraffic extends TrafficCoordinator{
     // Reuse each predicted envelope across all neighbours and candidates.
     // The threshold must also prove the preferred-control clearance below;
     // a smaller early-out bound could needlessly reject that fast path.
-    const shape=vehicleEnvelope(next,scale,mission.field);
+    if(next.x!==pose.x||next.y!==pose.y||next.heading!==pose.heading)shape=vehicleEnvelope(next,scale,mission.field);
     for(const forecast of forecasts){
      const gap=envelopeClearance(shape,forecast.shapes[i],scale*.8+.001);
      clearance=Math.min(clearance,gap);
@@ -713,10 +711,11 @@ export class PredictiveTraffic extends TrafficCoordinator{
    const score=motionCost(scoringPose)+(speed<0?travel*.3:0)
     +(previous?Math.abs(steering-previous.steering)*.1:0)+.1/(Math.max(0,clearance)+1);
    if(!best||score<best.score)best={score,control,pose:first};
-   // A safe, productive route-following rollout already corrects its wheel
-   // angle as it approaches the target. Do not replace it with an alternating
-   // full-lock sample merely for a tiny terminal score difference.
-   if(!backingArrival&&steering===preferred&&speed===forwardSpeed&&first.driveSpeed>.01&&clearance>scale*.8&&motionCost(pose)<initialCost-.05){
+   // The preferred rollout has passed every terrain, swept-body and future
+   // clearance check. If it makes forward progress, keep it. Requiring an
+   // additional comfort gap here made dense columns sample all alternative
+   // arcs on every tick even though their intended movement was already safe.
+   if(!backingArrival&&steering===preferred&&speed===forwardSpeed&&first.driveSpeed>.01&&motionCost(pose)<initialCost-.05){
     if(!mission.vehicleMotionClear(unit,unit,first,.52,blockers))continue;
     Object.assign(unit,first);this.controls.set(unit.id,control);
     navigationDecision(unit,'MOVING','following-clear-route',null,'follow-route',targetSpeed);

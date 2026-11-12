@@ -60,7 +60,7 @@ export function enterM02(mission){
  const inherited=s.buildings.filter(b=>b.hp>0||b.damage?.wreck);
  mission.rebuildNavigation();
  for(const unit of s.units){
-  unit.trafficOnScreen=true;
+  delete unit.trafficOnScreen;
   if(unit.task?.targetId&&!live.has(unit.task.targetId)){unit.task=null;unit.path=[];delete unit.routeOrder;delete unit.combatDeployment;}
  }
  for(const authored of layout.bases){
