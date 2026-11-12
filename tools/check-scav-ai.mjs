@@ -51,4 +51,18 @@ for(const [kind,range] of [['scav-grenadier',140],['scav-firetruck',160]]){
   assert.deepEqual(enemy.task,destination,'Raid resumes its destination after contact ends');
   checks.push('raid destination survives a skirmish');
 }
+{
+  const m=fixture(),home={x:p.x,y:p.y+210};
+  const guard=add(m,'raider','scavs',0,0,{guard:home,scavHome:home});
+  const plan=m.vehiclePathSteps;
+  let searches=0;
+  m.vehiclePathSteps=function*(unit,...args){
+    if(unit===guard)searches++;
+    return yield* plan.call(this,unit,...args);
+  };
+  step(m,[guard],12);
+  assert(Math.hypot(guard.x-home.x,guard.y-home.y)<=14,'The guard returns home');
+  assert.equal(searches,1,'The guard keeps its valid return path across the former replan interval');
+  checks.push('guard returns without discarding a valid route');
+}
 console.log(JSON.stringify({checks}));

@@ -23,6 +23,17 @@ function rallyPoints(layout,type,index,building){
  // middle of the entrance empty for the next vehicle and the infantry.
  return [34,-34,48,-48,62,-62].map(side=>({x:gate.x+n.x*depth-n.y*side,y:gate.y+n.y*depth+n.x*side}));
 }
+function retryProduction(mission,production){
+ const revision=mission.nav.topologyRevision;
+ production.retryDelay=production.retryRevision===revision?Math.min(2,(production.retryDelay??.25)*2):.5;
+ production.retryRevision=revision;
+ production.retryAt=mission.state.time+production.retryDelay;
+}
+function clearProductionRetry(production){
+ delete production.retryAt;
+ delete production.retryDelay;
+ delete production.retryRevision;
+}
 function* produce(mission,building,camp){
  const production=building.scavProduction,layout=campBaseLayout(camp),scale=mission.config.worldScale;
  const types=roster(camp,production.type),kind=types[production.count%types.length];
@@ -39,12 +50,13 @@ function* produce(mission,building,camp){
    const destination=path.at(-1);
    const unit=mission.addUnit(kind,'scavs',pose,{heading,path,campId:camp.id,reinforcement:true,producerId:building.id,scavAssembly:building.id,guard:{...layout.gate},task:{type:'move',...destination},routeOrder:{revision:2,request:{...destination},destination:{...destination}}});
    production.waiting.push(unit.id);production.count++;production.nextAt=mission.state.time+SCAV_PRODUCTION.seconds;
+   clearProductionRetry(production);
    mission.emit('scav-produced',{camp:camp.id,building:building.id,unit:unit.id,kind});return;
   }
   yield;
  }
  // An occupied doorway holds one finished unit; it never spawns through another.
- production.retryAt=mission.state.time+.25;
+ retryProduction(mission,production);
 }
 function* dispatch(mission,building,camp){
  const production=building.scavProduction,units=production.waiting.map(id=>mission.entity(id)).filter(Boolean);
@@ -53,13 +65,14 @@ function* dispatch(mission,building,camp){
  // and gate are checked for each member. Planning yields within the frame budget.
  for(const unit of units){
   const last=yield* mission.vehiclePathSteps(unit,target,{maxGoalDistance:80});
-  if(!last?.length){production.retryAt=mission.state.time+.25;return;}
+  if(!last?.length){retryProduction(mission,production);return;}
   paths.push(last);yield;
  }
  if(building.hp<=0)return;
  const group=mission.id('scav-wave');
  units.forEach((unit,index)=>{if(unit.hp<=0)return;unit.path=paths[index];unit.task={type:'move',...target};unit.raid=true;unit.scavWave=group;delete unit.scavAssembly;delete unit.scavHome;delete unit.scavResumeTask;delete unit.routeOrder;});
  production.waiting=[];production.waves=(production.waves??0)+1;
+ clearProductionRetry(production);
  mission.emit('scav-sortie',{camp:camp.id,building:building.id,group,count:units.length,productionType:production.type});
 }
 export function updateScavProduction(mission){
@@ -94,7 +107,7 @@ export function updateScavProduction(mission){
    }
    p.nextAt??=now+SCAV_PRODUCTION.seconds;
    p.waiting=p.waiting.filter(id=>mission.entity(id)?.scavAssembly===building.id);
-   if(p.retryAt>now)continue;
+   if(p.retryAt>now&&(p.retryRevision===undefined||p.retryRevision===baseNav.topologyRevision))continue;
    const limits=SCAV_PRODUCTION[p.type];
    let steps;
    if(p.waiting.length>=limits.size){

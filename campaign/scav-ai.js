@@ -77,8 +77,10 @@ export function* updateScavCombat(mission,unit,spec,dt){
   if(unit.task&&unit.task.type!=='scav-return')return false;
   if(unit.scavHome&&!unit.raid&&distance(unit,unit.scavHome)>14){
     unit.task={type:'scav-return',x:unit.scavHome.x,y:unit.scavHome.y};
-    if(now-(unit.scavRepathAt??-Infinity)>=2){
-      const path=yield* mission.vehiclePathSteps(unit,unit.scavHome,{maxGoalDistance:16});
+    // Keep following the accepted route. Movement already requests a new
+    // path if its terrain connection breaks or an obstacle cannot be passed.
+    if(!unit.path.length&&!unit.detour&&!unit.yieldReturn&&now-(unit.scavRepathAt??-Infinity)>=2){
+      const path=yield* mission.vehiclePathSteps(unit,unit.scavHome,{maxGoalDistance:14});
       if(path)unit.path=path;
       unit.scavRepathAt=now;
     }
