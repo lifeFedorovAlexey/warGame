@@ -10,7 +10,11 @@ try{
  report.alarms=await page.evaluate(async()=>{
   const c=campaign,m=c.mission,w=c.world,T=await import('/demo/vendor/three.module.js'),p=m.field.gridToWorld(m.config.startGrid);
   const {FieldSound}=await import('/campaign/field-sound.js'),signal=FieldSound.prototype.signal;
-  let alarms=0;
+  const {MINIMAP_COLORS}=await import('/campaign/minimap-alerts.js');
+  const minimap=document.querySelector('#minimap').getContext('2d'),clear=minimap.clearRect,stroke=minimap.stroke;
+  let alarms=0,minimapAttacks=0;
+  minimap.clearRect=function(...args){minimapAttacks=0;return clear.apply(this,args);};
+  minimap.stroke=function(...args){if(this.strokeStyle===MINIMAP_COLORS.attack)minimapAttacks++;return stroke.apply(this,args);};
   FieldSound.prototype.signal=function(kind){if(kind==='attack-alarm')alarms++;return signal.call(this,kind);};
   c.radio.setEnabled(false);m.state.units=[];m.state.buildings=[];m.state.camps=[];m.updateMission=()=>{};m.drainEvents();m.drainEffects();
   const u=m.addUnit('bukhanka','rai',p),f=m.addStructure('generator','rai',{x:p.x+620,y:p.y+80},{completed:true,progress:1}),enemy=m.addUnit('raider','scavs',{x:p.x+900,y:p.y+600});
@@ -19,14 +23,14 @@ try{
   const hit=(...targets)=>{m.state.time+=1;for(const target of targets)m.damage(target,1,enemy);c.advance(0);};
   hit(u);const inView=alarms;
   hit(f);const outOfView=alarms-inView;
-  window.attackReview={u,f,enemy,centre,get alarms(){return alarms;},timer:setInterval(()=>hit(u,f),500)};
+  window.attackReview={u,f,enemy,centre,get alarms(){return alarms;},get minimapAttacks(){return minimapAttacks;},timer:setInterval(()=>hit(u,f),500)};
   return {inView,outOfView};
  });
  if(!baseline)assert.deepEqual(report.alarms,{inView:0,outOfView:1});
  for(const [width,height] of [[1440,900],[844,390],[667,375]]){
   await page.setViewportSize({width,height});await page.evaluate(()=>attackReview.centre());await page.waitForTimeout(700);
-  const state=await page.evaluate(()=>({pulses:campaign.world.attackPulses?.count??0,focus:document.querySelector('#objective-focus').getAttribute('aria-label'),enemyVisible:campaign.mission.visibleAt(attackReview.enemy.x,attackReview.enemy.y),mesh:campaign.world.scene.getObjectByName('friendly_attack_pulses')?.geometry.drawRange.count??0}));
-  assert(!state.enemyVisible);if(!baseline){assert(state.pulses>0);assert.match(state.focus,/под огнём/);assert(state.mesh<=16*32*6);}
+  const state=await page.evaluate(()=>({minimapAttacks:attackReview.minimapAttacks,focus:document.querySelector('#objective-focus').getAttribute('aria-label'),enemyVisible:campaign.mission.visibleAt(attackReview.enemy.x,attackReview.enemy.y),worldHighlight:!!campaign.world.scene.getObjectByName('friendly_attack_pulses')}));
+  assert(!state.enemyVisible);if(!baseline){assert.equal(state.minimapAttacks,2);assert.equal(state.worldHighlight,false);assert.match(state.focus,/под огнём/);}
   await page.screenshot({path:`${folder}/attack-${width}.png`});report.screens.push({width,height,...state});
  }
  if(!baseline){
@@ -37,8 +41,8 @@ try{
   await page.screenshot({path:folder+'/second-attack-667.png'});
  }
  await page.evaluate(()=>clearInterval(attackReview.timer));await page.waitForTimeout(3400);
- report.expired=await page.evaluate(()=>({pulses:campaign.world.attackPulses?.count??0,focus:document.querySelector('#objective-focus').getAttribute('aria-label')}));
- if(!baseline){assert.equal(report.expired.pulses,0);assert(!report.expired.focus?.includes('под огнём'));}
+ report.expired=await page.evaluate(()=>({minimapAttacks:attackReview.minimapAttacks,focus:document.querySelector('#objective-focus').getAttribute('aria-label')}));
+ if(!baseline){assert.equal(report.expired.minimapAttacks,0);assert(!report.expired.focus?.includes('под огнём'));}
  assert.deepEqual(report.errors,[]);console.log(JSON.stringify(report));
 }catch(error){report.failure=error.stack;if(page)await page.screenshot({path:folder+'/failure.png'}).catch(()=>{});throw error;}
 finally{fs.writeFileSync(folder+'/browser.json',JSON.stringify(report,null,2));await b.close();}
