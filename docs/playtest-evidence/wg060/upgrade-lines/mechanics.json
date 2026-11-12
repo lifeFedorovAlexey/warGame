@@ -1,0 +1,77 @@
+{
+  "checks": [
+    {
+      "case": "designer advances along studied tiers and keeps independent roles",
+      "initial": [
+        "bukhanka",
+        "builder",
+        "flamer",
+        "sensor"
+      ],
+      "twin": [
+        "builder",
+        "flamer",
+        "twin-machinegun",
+        "sensor"
+      ],
+      "heavy": [
+        "builder",
+        "flamer",
+        "sensor",
+        "heavy-machinegun"
+      ]
+    },
+    {
+      "case": "bukhanka → twin-machinegun",
+      "cost": 15,
+      "transitions": [
+        {
+          "from": "bukhanka",
+          "to": "twin-machinegun",
+          "time": 9.299999999999983
+        }
+      ]
+    },
+    {
+      "case": "twin-machinegun → heavy-machinegun",
+      "cost": 65,
+      "transitions": [
+        {
+          "from": "twin-machinegun",
+          "to": "heavy-machinegun",
+          "time": 9.399999999999983
+        }
+      ]
+    },
+    {
+      "case": "bukhanka → heavy-machinegun",
+      "cost": 80,
+      "transitions": [
+        {
+          "from": "bukhanka",
+          "to": "heavy-machinegun",
+          "time": 9.299999999999983
+        }
+      ]
+    },
+    {
+      "case": "legacy research state with heavy unlocked does not offer inferior machineguns"
+    },
+    {
+      "case": "factory auto-update accepts a healthy twin and upgrades it to heavy"
+    },
+    {
+      "case": "heavy refit waits for its own price, then charges once"
+    },
+    {
+      "case": "research completed en route is considered when refitting inside the factory"
+    },
+    {
+      "case": "mixed tiers report the total price and preserve independent weapons",
+      "cost": 145
+    },
+    {
+      "case": "independent cannon line stays separate; its own declared successor uses the same update system"
+    }
+  ]
+}

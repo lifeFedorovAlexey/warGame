@@ -4,6 +4,7 @@ import {makeMission} from './m02-fixture.mjs';
 import {setFactoryModernization,modernizeAfterRepair} from '../campaign/factory-modernization.js';
 import {applyStoryEdits} from '../campaign/story-edits.js';
 import {StoryDirector} from '../campaign/story-director.js';
+import {fixture as flatFixture} from './check-start-latency-coordinator.mjs';
 globalThis.document={querySelectorAll:()=>[]};
 const {FieldRadio}=await import('../campaign/field-radio.js');
 delete globalThis.document;
@@ -58,4 +59,16 @@ assert.equal(m.state.campaign.firstTwinModernization.unitId,unitId);assert.equal
 // Old saves can prove a completed retrofit through its persisted U01 -> U02 record.
 m.load(pending);delete m.state.campaign.firstTwinModernization;run=driver(m);
 assert.equal(m.state.campaign.firstTwinModernization.unitId,unitId);
-console.log('PASS: actual paid retrofit only; old r10 ignored; waits for briefing; campaign/load persistence; no repeat on later cars; legacy retrofit recovery');
+// The current selected-unit button uses modernizationRequested, not the
+// factory-wide switch, and may skip the twin tier when a heavy gun is unlocked.
+for(const heavy of [false,true]){
+ const selected=flatFixture(),plant=selected.addStructure('factory','rai',{x:0,y:250},{completed:true,progress:1});
+ const car=selected.addUnit('bukhanka','rai',{x:0,y:100});selected.rebuildNavigation();
+ selected.state.research['twin-machinegun']=true;selected.state.research['heavy-machinegun']=heavy;selected.state.energy=1000;
+ assert(selected.modernize([car.id]).ok);assert(!plant.autoModernize);assert(!selected.state.campaign?.firstTwinModernization);
+ car.hp=car.maxHp;car.factoryVisit={factoryId:plant.id,phase:'inside'};
+ assert(modernizeAfterRepair(selected,plant,car));assert(!car.modernizationRequested);
+ assert.equal(car.kind,heavy?'heavy-machinegun':'twin-machinegun');
+ assert.equal(!!selected.state.campaign?.firstTwinModernization,!heavy,'Only an actual twin retrofit qualifies');
+}
+console.log('PASS: completed twin retrofit via both update controls; other upgrades excluded; old r10 ignored; waits for briefing; campaign/load persistence; no repeat; legacy recovery');

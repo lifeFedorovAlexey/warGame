@@ -1252,7 +1252,7 @@ try {
   $('rotate-building').oncontextmenu=event=>{event.preventDefault();rotatePlacement(-1);};
   $('placement-snap').onclick=()=>{snapBuildings=!snapBuildings;updatePlacement();};
   $('attack-order').onclick=toggleAttackOrder;
-  combatMenu=new CombatMenu({button:$('combat-modes'),mission,onOpen:()=>cancelMode(),onChange:result=>{if(report(result))sound.signal('order');updateUi();}});
+  combatMenu=new CombatMenu({button:$('combat-modes'),mission,selection:()=>[...selected],onOpen:()=>cancelMode(),onChange:result=>{if(report(result))sound.signal('order');updateUi();}});
   $('home').onclick = () => {
     document.querySelector('.settings').open = false;
     world.centre(world.field.gridToWorld(config.startGrid), 360);

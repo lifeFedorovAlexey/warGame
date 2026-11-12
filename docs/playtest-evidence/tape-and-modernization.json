@@ -94,5 +94,13 @@
     "Disabled scenes do not add channel delay",
     "Legacy radio does not queue monologue after ammunition research",
     "r27 and r33 preserved"
-  ]
+  ],
+  "mergeIntegration": {
+    "mainCommit": "c6b1607",
+    "checks": [
+      "Factory-wide and selected-unit upgrade controls both qualify only after completed twin retrofit",
+      "Direct heavy-machinegun upgrade does not trigger twin monologue",
+      "Modernization radio and story logic checks passed on combined code"
+    ]
+  }
 }

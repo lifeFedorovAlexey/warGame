@@ -1,0 +1,14 @@
+{
+  "revision": "49d32b1",
+  "research": [
+    "twin-machinegun",
+    "heavy-machinegun"
+  ],
+  "constructor": [
+    "builder",
+    "twin-machinegun",
+    "heavy-machinegun"
+  ],
+  "twinEligible": 0,
+  "source": "Reproduced with production Mission and modernizationSelection before this correction"
+}

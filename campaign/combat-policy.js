@@ -91,6 +91,7 @@ export function rememberHostileHit(mission, unit, source) {
   invalidate();
 }
 export function cancelCombatRetreat(unit, suppress=true) {
+  delete unit.modernizationRequested;
   delete unit.combatRetreat;
   delete unit.retreatPush;
   if(!inFactoryInterior(unit))delete unit.factoryVisit;
@@ -147,6 +148,7 @@ export function forceCombatRetreat(mission,ids){
  if(!units.length)return mission.fail('Не выбрана техника');
  mission.commandPlanner?.cancel(units.map(unit=>unit.id));
  for(const unit of units){
+  delete unit.modernizationRequested;
   const threat=retreatThreat(mission,unit,mission.unitSpec(unit));
   clearMotion(unit);
   unit.builderWorking=false;unit.builderContact=null;
@@ -333,7 +335,7 @@ export function* updateCombatRetreat(mission, unit, spec, dt) {
     }
   }
   const serviceBase=retreat.home?.id&&mission.entity(retreat.home.id);
-  const garage=serviceBase?.kind==='factory'&&(unit.factoryVisit||retreat.service!=='complete'&&needsFactoryVisit(unit,serviceBase));
+  const garage=serviceBase?.kind==='factory'&&(unit.factoryVisit||retreat.service!=='complete'&&needsFactoryVisit(mission,unit,serviceBase));
   const inCover=retreat.phase==='cover';
   const busy=garage?repairBlocker(mission,unit,serviceBase):null;
   const stalled=unit.navigation?.waitSeconds>=.6||retreat.status==='blocked';
