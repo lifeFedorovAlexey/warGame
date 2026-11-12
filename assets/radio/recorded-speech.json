@@ -902,20 +902,6 @@
         "leadingSilence": 0.06,
         "trailingSilence": 0.17999999999999994
       },
-      "Взяли под огонь!": {
-        "file": "assets/radio/recordings/elevenlabs-10k/voice-1-33d03b78a36c2c35.mp3",
-        "text": "Взяли под огонь!",
-        "voice": "voice-1",
-        "voiceId": "JKtNvDNrWu33P1xzttP2",
-        "voiceName": "Ivan - Energetic and Sassy",
-        "modelId": "eleven_v4",
-        "origin": "elevenlabs-synthesis",
-        "sha256": "33d03b78a36c2c358eed63acd3f134a585163c2509c08c76a12acf1f9b4cd187",
-        "bytes": 24284,
-        "duration": 1.44,
-        "leadingSilence": 0.02,
-        "trailingSilence": 0.15999999999999992
-      },
       "Заткните их!": {
         "file": "assets/radio/recordings/elevenlabs-10k/voice-1-0781ebec509ddb41.mp3",
         "text": "Заткните их!",
@@ -3996,20 +3982,6 @@
         "duration": 1.76,
         "leadingSilence": 0.03,
         "trailingSilence": 0.16999999999999993
-      },
-      "Взяли под огонь!": {
-        "file": "assets/radio/recordings/elevenlabs-10k/voice-2-43f5319baf7885e0.mp3",
-        "text": "Взяли под огонь!",
-        "voice": "voice-2",
-        "voiceId": "6YjFofyVXU1ASguf2hTJ",
-        "voiceName": "Maxim - Conversational & Natural",
-        "modelId": "eleven_v4",
-        "origin": "elevenlabs-synthesis",
-        "sha256": "43f5319baf7885e043fbbf91e5ee932c507ac4b671e9a8a5459d6d5ae549140f",
-        "bytes": 26792,
-        "duration": 1.6,
-        "leadingSilence": 0.02,
-        "trailingSilence": 0.42000000000000015
       },
       "Заткните их!": {
         "file": "assets/radio/recordings/elevenlabs-10k/voice-2-b6c4c0f513869515.mp3",
@@ -7106,20 +7078,6 @@
         "leadingSilence": 0.05,
         "trailingSilence": 0.1399999999999999
       },
-      "Взяли под огонь!": {
-        "file": "assets/radio/recordings/elevenlabs-10k/voice-3-63aae4a63df67a2e.mp3",
-        "text": "Взяли под огонь!",
-        "voice": "voice-3",
-        "voiceId": "GN4wbsbejSnGSa1AzjH5",
-        "voiceName": "Ekaterina - Soft, Silky and Tender",
-        "modelId": "eleven_v4",
-        "origin": "elevenlabs-synthesis",
-        "sha256": "63aae4a63df67a2e0b9358a58eff0a77c7ed8030bbaa82fef43cd29095a8adc0",
-        "bytes": 23030,
-        "duration": 1.36,
-        "leadingSilence": 0.02,
-        "trailingSilence": 0.19000000000000017
-      },
       "Заткните их!": {
         "file": "assets/radio/recordings/elevenlabs-10k/voice-3-c0c0b921bb8de2ae.mp3",
         "text": "Заткните их!",
@@ -10201,20 +10159,6 @@
         "leadingSilence": 0.05,
         "trailingSilence": 0.17999999999999994
       },
-      "Взяли под огонь!": {
-        "file": "assets/radio/recordings/elevenlabs-10k/voice-4-e1a6f9b4288cb1b8.mp3",
-        "text": "Взяли под огонь!",
-        "voice": "voice-4",
-        "voiceId": "txnCCHHGKmYIwrn7HfHQ",
-        "voiceName": "Alexandr Vlasov - Vibrant and Energetic",
-        "modelId": "eleven_v4",
-        "origin": "elevenlabs-synthesis",
-        "sha256": "e1a6f9b4288cb1b889cfdc14018f5b4f5c8b5e9be5338fb71086a08f5e1a3b1e",
-        "bytes": 25538,
-        "duration": 1.52,
-        "leadingSilence": 0.02,
-        "trailingSilence": 0.18999999999999995
-      },
       "Заткните их!": {
         "file": "assets/radio/recordings/elevenlabs-10k/voice-4-d2b2b168125391e9.mp3",
         "text": "Заткните их!",
@@ -13295,20 +13239,6 @@
         "duration": 1.92,
         "leadingSilence": 0.06,
         "trailingSilence": 0.16999999999999993
-      },
-      "Взяли под огонь!": {
-        "file": "assets/radio/recordings/elevenlabs-10k/voice-6-1ce62a1edbd2c4bc.mp3",
-        "text": "Взяли под огонь!",
-        "voice": "voice-6",
-        "voiceId": "RLRdvNFwJJct2XZOgfzy",
-        "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
-        "modelId": "eleven_v4",
-        "origin": "elevenlabs-synthesis",
-        "sha256": "1ce62a1edbd2c4bc6bc466b855b47a6b5c648804b89a7bc5abd56f67a5ec41da",
-        "bytes": 28046,
-        "duration": 1.68,
-        "leadingSilence": 0.02,
-        "trailingSilence": 0.33999999999999986
       },
       "Заткните их!": {
         "file": "assets/radio/recordings/elevenlabs-10k/voice-6-9fd16fe5e93221a0.mp3",

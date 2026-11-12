@@ -10,9 +10,23 @@ NOTIFICATIONS = {
 ACK_RULES = {'command.move', 'command.attack', 'command.attack_move', 'command.build', 'command.stop'}
 DISPATCH_RULES = {*NOTIFICATIONS, 'combat.target_destroyed',
                   'combat.kill_confirmed', 'combat.kill_banter', *ACK_RULES}
+REJECTED_TEXTS = {'Взяли под огонь!'}
+
+
+def retire_phrases(library, seed=None):
+    rejected = set(library['settings'].get('retiredTexts', [])) | REJECTED_TEXTS
+    if seed: rejected.update(seed['settings'].get('retiredTexts', []))
+    library['settings']['retiredTexts'] = sorted(rejected)
+    ids = {key for key, phrase in library['phrases'].items() if phrase['text'] in rejected}
+    for key in ids: library['phrases'][key]['archived'] = True
+    for rule in library['rules']:
+        for tier in rule['tiers']:
+            tier['graphs'] = [g for g in tier['graphs'] if not any(n['phraseId'] in ids for n in g['nodes'])]
+    return library
 
 
 def apply_dispatch_content(library):
+    retire_phrases(library)
     if library['settings'].get('dispatchRevision', 0) >= 1:
         return library
     rules = {r['id']: r for r in library['rules']}
@@ -81,6 +95,7 @@ def apply_dispatch_content(library):
 
 def upgrade_dispatch(library, seed):
     """Upgrade saved editor documents once; preserve enabled switches and other edits."""
+    retire_phrases(library, seed)
     if library['settings'].get('dispatchRevision', 0) >= 1:
         return library
     existing = {r['id']: r for r in library['rules']}

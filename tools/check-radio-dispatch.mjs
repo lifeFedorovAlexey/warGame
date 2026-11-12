@@ -105,3 +105,20 @@ test('old pending readiness timing upgrades on load and draft migration is idemp
  const once=JSON.stringify(old);upgradeDispatch(old,seed);assert.equal(JSON.stringify(old),once);
 });
 console.log('Radio dispatch checks complete.');
+test('rejected fire reports cannot return from an old publication or a saved queue',()=>{
+ const old=structuredClone(seed),rule=old.rules.find(r=>r.id==='damage.hit'),id='old-rejected-fire';
+ old.settings.retiredTexts=[];
+ old.phrases[id]={...old.phrases[rule.tiers[0].graphs[0].nodes[0].phraseId],id,text:'Взяли под огонь!',archived:false};
+ rule.tiers[0].graphs=[{id,weight:1,nodes:[{phraseId:id}]}];
+ const previous=new RadioEngine(old,{snapshot:()=>({speakers})});
+ previous.event(event('damage.hit',0,{flags:{urgent:true},facts:{enemyFire:true,hitCount:1}}));
+ assert(previous.state.queue.some(q=>q.lines.some(l=>l.text.includes('Взяли под огонь'))));
+ const saved=structuredClone(previous.save());
+ upgradeDispatch(old,seed);
+ assert(old.phrases[id].archived);
+ assert(!old.rules.some(r=>r.tiers.some(t=>t.graphs.some(g=>g.nodes.some(n=>old.phrases[n.phraseId].text==='Взяли под огонь!')))));
+ const restored=new RadioEngine(old,{saved,snapshot:()=>({speakers})});
+ assert.equal(restored.state.queue.length,0);
+ const bank=JSON.parse(fs.readFileSync('assets/radio/recorded-speech.json','utf8'));
+ assert(Object.values(bank.clips).every(clips=>!clips['Взяли под огонь!']));
+});

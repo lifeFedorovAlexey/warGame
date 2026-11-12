@@ -23,7 +23,10 @@
     "maxRoutineTurns": 3,
     "maxPacketSeconds": 16,
     "bawdyInterval": 150,
-    "dispatchRevision": 1
+    "dispatchRevision": 1,
+    "retiredTexts": [
+      "Взяли под огонь!"
+    ]
   },
   "rules": [
     {
@@ -14951,23 +14954,6 @@
               }
             },
             {
-              "id": "damage.hit.single.enemy-fire-v3",
-              "weight": 1,
-              "nodes": [
-                {
-                  "phraseId": "damage.hit.single.enemy-fire-v3.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                }
-              ],
-              "specificity": 0,
-              "requires": {
-                "field": "facts.enemyFire",
-                "op": "eq",
-                "value": true
-              }
-            },
-            {
               "id": "damage.hit.single.enemy-fire-v4",
               "weight": 1,
               "nodes": [
@@ -15515,28 +15501,6 @@
               }
             },
             {
-              "id": "damage.hit.group.enemy-fire-v3",
-              "weight": 3,
-              "nodes": [
-                {
-                  "phraseId": "damage.hit.group.enemy-fire-v3.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                },
-                {
-                  "phraseId": "damage.hit.group.enemy-fire-v3.2",
-                  "differentSpeaker": true,
-                  "speakerSlot": 1
-                }
-              ],
-              "specificity": 0,
-              "requires": {
-                "field": "facts.enemyFire",
-                "op": "eq",
-                "value": true
-              }
-            },
-            {
               "id": "damage.hit.group.enemy-fire-v4",
               "weight": 3,
               "nodes": [
@@ -16034,28 +15998,6 @@
                 },
                 {
                   "phraseId": "damage.hit.mass.enemy-fire-v2.2",
-                  "differentSpeaker": true,
-                  "speakerSlot": 1
-                }
-              ],
-              "specificity": 0,
-              "requires": {
-                "field": "facts.enemyFire",
-                "op": "eq",
-                "value": true
-              }
-            },
-            {
-              "id": "damage.hit.mass.enemy-fire-v3",
-              "weight": 3,
-              "nodes": [
-                {
-                  "phraseId": "damage.hit.mass.enemy-fire-v3.1",
-                  "differentSpeaker": false,
-                  "speakerSlot": 0
-                },
-                {
-                  "phraseId": "damage.hit.mass.enemy-fire-v3.2",
                   "differentSpeaker": true,
                   "speakerSlot": 1
                 }
@@ -67807,7 +67749,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "urgent"
     },
     "damage.hit.single.enemy-fire-v4.1": {
@@ -67950,7 +67892,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "urgent"
     },
     "damage.hit.group.enemy-fire-v3.2": {
@@ -68171,7 +68113,7 @@
       "portrait": null,
       "voiceId": null,
       "pauseAfter": 0.18,
-      "archived": false,
+      "archived": true,
       "emotion": "urgent"
     },
     "damage.hit.mass.enemy-fire-v3.2": {

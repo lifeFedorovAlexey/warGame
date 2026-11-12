@@ -1,6 +1,6 @@
 {
   "name": "wargame",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "private": true,
   "description": "Modular vehicle game assets and local review arena",
   "scripts": {

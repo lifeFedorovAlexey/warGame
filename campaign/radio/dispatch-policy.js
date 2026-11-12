@@ -6,6 +6,11 @@ export const DISPATCH_RULES=[...NOTIFICATIONS,...ACK_RULES,'combat.target_destro
 export const promptDelivery=q=>q.delivery==='notification'||q.delivery==='reaction';
 export const dispatchPriority=(q,now)=>q.delivery==='notification'&&now-q.createdAt>=6?Math.max(94,q.priority):q.priority;
 export function upgradeDispatch(library,seed){
+ const retired=new Set([...(library.settings.retiredTexts??[]),...(seed.settings.retiredTexts??[])]);
+ library.settings.retiredTexts=[...retired].sort();
+ const ids=new Set(Object.values(library.phrases).filter(p=>retired.has(p.text)).map(p=>p.id));
+ for(const id of ids)library.phrases[id].archived=true;
+ for(const rule of library.rules)for(const tier of rule.tiers)tier.graphs=tier.graphs.filter(g=>!g.nodes.some(n=>ids.has(n.phraseId)));
  if((library.settings.dispatchRevision??0)>=1)return library;
  for(const rule of seed.rules.filter(r=>DISPATCH_RULES.includes(r.id))){
   const index=library.rules.findIndex(r=>r.id===rule.id),current=library.rules[index];
