@@ -99,5 +99,5 @@ export function createMinimap(canvas,{world,mission,selected,background,notify})
    ctx.stroke();ctx.restore();
   }
  }
- return {alerts,render,observe:(tasks,now,options)=>alerts.observe(mission,tasks,now,options),reset(silent){alerts.reset(silent);world.attackPulses?.set([]);refreshed=-Infinity;},invalidate(){refreshed=-Infinity;}};
+ return {alerts,render,observe:(tasks,now,options)=>alerts.observe(mission,tasks,now,options),reset(silent){alerts.reset(silent);refreshed=-Infinity;},invalidate(){refreshed=-Infinity;}};
 }

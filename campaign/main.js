@@ -1091,7 +1091,6 @@ function frame(now) {
   ending.update(dt,radio.current);
   pruneSelection();
   const renderStarted=performance.now();
-  world.attackPulses.set(active&&mission.state.status==='running'?minimapView.alerts.active(now):[]);
   world.update(mission, selected, dt, (active||openingPlaying) && !paused && mission.state.status==='running',active);
   const debugStarted=performance.now();
   navigationTelemetry?.rendered(world.vehicles.transforms);

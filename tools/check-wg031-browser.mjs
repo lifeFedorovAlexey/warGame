@@ -28,7 +28,7 @@ try{
    if(i>=4&&await page.evaluate(()=>battleReview.hits>0))break;
   }
   await page.waitForTimeout(150);
-  const result=await page.evaluate(()=>({hits:battleReview.hits,elapsed:campaign.mission.state.time-battleReview.start,pulses:campaign.world.attackPulses.count,focus:document.querySelector('#objective-focus').getAttribute('aria-label'),drawCalls:campaign.world.renderer.info.render.calls}));
+  const result=await page.evaluate(()=>({hits:battleReview.hits,elapsed:campaign.mission.state.time-battleReview.start,focus:document.querySelector('#objective-focus').getAttribute('aria-label'),drawCalls:campaign.world.renderer.info.render.calls}));
   assert(result.hits>0,'Autonomous enemies hit the player in the actual renderer');assert.match(result.focus,/под огнём/);
   await page.screenshot({path:`${folder}/battle-${width}.png`});report.screens.push({width,height,...result});
  }
