@@ -157,6 +157,12 @@ export class PredictiveTraffic extends TrafficCoordinator{
     }
    }});
  }
+ cancelFiringApproach(mission,unit){
+  const job=this.routes.get(unit.id);if(job?.kind!=='firing')return;
+  job.iterator?.return();this.routes.delete(unit.id);
+  if(this.routeJob===job)this.routeJob=null;
+  this.stats.routeDiscards++;this.traceRoute(mission,job,'cancelled',{reason:'firing-position-filled'});
+ }
  requestRoute(mission,unit){
   const goal=this.routeGoal(unit);
   if(!goal||unit.pendingOrder||unit.detour||unit.jointTraffic||this.routes.has(unit.id))return;

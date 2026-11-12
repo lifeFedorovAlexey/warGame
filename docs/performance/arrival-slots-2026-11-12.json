@@ -1,0 +1,316 @@
+{
+  "version": "0.1.9",
+  "baseline": "8028d6779456981b532d6f3c76c4cd434dd9621b",
+  "scope": [
+    "Firing positions fill by actual progress; distant reservations can be exchanged",
+    "Factory waiting points persist, grow/shrink at the tail and survive saves",
+    "Gate priority uses observed arrival, without speed or ETA comparisons",
+    "Common arrival reservation and route-prefix reuse helpers; no mission or camera branches"
+  ],
+  "checks": {
+    "frontage": [
+      {
+        "name": "arrival order over nominal ownership, rai, reversed IDs false",
+        "passed": true
+      },
+      {
+        "name": "arrival order over nominal ownership, rai, reversed IDs true",
+        "passed": true
+      },
+      {
+        "name": "arrival order over nominal ownership, scavs, reversed IDs false",
+        "passed": true
+      },
+      {
+        "name": "arrival order over nominal ownership, scavs, reversed IDs true",
+        "passed": true
+      },
+      {
+        "name": "protect arrived",
+        "passed": true
+      },
+      {
+        "name": "protect near",
+        "passed": true
+      },
+      {
+        "name": "protect retreat",
+        "passed": true
+      },
+      {
+        "name": "protect pending",
+        "passed": true
+      },
+      {
+        "name": "protect direct move",
+        "passed": true
+      },
+      {
+        "name": "protect other group",
+        "passed": true
+      },
+      {
+        "name": "protect damaged",
+        "passed": true
+      },
+      {
+        "name": "finish borrowed passage before changing positions",
+        "passed": true
+      },
+      {
+        "name": "fill unclaimed vacancy",
+        "passed": true
+      },
+      {
+        "name": "interrupted by stop",
+        "passed": true
+      },
+      {
+        "name": "interrupted by move",
+        "passed": true
+      },
+      {
+        "name": "interrupted by retreat",
+        "passed": true
+      },
+      {
+        "name": "interrupted by target moved",
+        "passed": true
+      },
+      {
+        "name": "interrupted by new front arrival",
+        "passed": true
+      },
+      {
+        "name": "cache occupied positions until relevant change",
+        "passed": true,
+        "checksBeforeVacancy": 4
+      },
+      {
+        "name": "physical staggered arrival",
+        "gap": 3.6519012223131995,
+        "frontArrival": 1.3,
+        "rearArrival": 3.600000000000002,
+        "shots": [
+          "u180",
+          "u181"
+        ],
+        "positions": [
+          {
+            "x": -15.654652727130859,
+            "y": 119.5376442819543,
+            "status": "arrived",
+            "goal": {
+              "x": -15.652388475509012,
+              "y": 119.9152777677805
+            }
+          },
+          {
+            "x": 15.347948920753158,
+            "y": 120.053768139166,
+            "status": "arrived",
+            "goal": {
+              "x": 15.652388475509024,
+              "y": 119.9152777677805
+            }
+          }
+        ],
+        "passed": true
+      }
+    ],
+    "groupOrders": [
+      {
+        "action": "attack",
+        "count": 12,
+        "cpuMs": 287.31609999999995,
+        "checks": 3225,
+        "fired": 12,
+        "sustained": 12,
+        "gap": 7.872092618714772,
+        "solidGap": 7.872092618714772,
+        "passingOverlaps": 0,
+        "fills": 7,
+        "exchanges": 0
+      },
+      {
+        "action": "attack-move",
+        "count": 12,
+        "cpuMs": 385.5929,
+        "checks": 5733,
+        "fired": 12,
+        "sustained": 12,
+        "gap": 0.27299282949285586,
+        "solidGap": 0.27299282949285586,
+        "passingOverlaps": 0,
+        "fills": 8,
+        "exchanges": 0
+      }
+    ],
+    "factory": [
+      {
+        "name": "actual first arrival enters before earlier distant order",
+        "passed": true
+      },
+      {
+        "name": "busy entrance retains physical arrival order",
+        "passed": true
+      },
+      {
+        "name": "persistent points grow and shrink only at tail; save/load",
+        "passed": true
+      },
+      {
+        "name": "near arrival fills front vacancy and reuses distant car route",
+        "passed": true
+      },
+      {
+        "name": "500 repair requests allocate 500 reusable points",
+        "passed": true,
+        "steps": 501,
+        "maxMs": 0.562099999999873
+      },
+      {
+        "name": "new direct order cancels suspended queue allocation",
+        "passed": true
+      },
+      {
+        "name": "physical repair queue 0",
+        "seconds": 183.39999999999387,
+        "cpuMs": 634.2067000000002,
+        "released": 8,
+        "gap": 0.14127232319876465,
+        "passed": true
+      },
+      {
+        "name": "physical repair queue 1.5707963267948966",
+        "seconds": 183.39999999999387,
+        "cpuMs": 566.5158000000001,
+        "released": 8,
+        "gap": 0.24750032657571056,
+        "passed": true
+      }
+    ],
+    "realMapQueues": [
+      {
+        "map": "m01",
+        "released": 12,
+        "seconds": 282.3,
+        "saveLoad": true
+      },
+      {
+        "map": "m02",
+        "released": 12,
+        "seconds": 288.8,
+        "saveLoad": true
+      }
+    ],
+    "browser": {
+      "passed": true,
+      "results": [
+        "right ground: HP > 80% only",
+        "left ground: all selected vehicles",
+        "right after manual move still respects HP",
+        "injured-only selection cannot override retreat",
+        "right button opens settings for an injured-only selection",
+        "right ground: HP > 35% only",
+        "retreat disabled: all living combat vehicles",
+        "right enemy: explicit attack also respects HP"
+      ],
+      "errors": []
+    },
+    "autoRetreatCases": 23,
+    "retreatInterruptionCases": 8,
+    "nativeEnemyAiCases": 8,
+    "factoryEconomyPriorityCases": 10,
+    "stand": {
+      "build": {
+        "schemaVersion": 1,
+        "version": "0.1.9",
+        "buildNumber": 309,
+        "buildId": "0.1.9+build.309.8028d67.dirty",
+        "commit": "8028d6779456981b532d6f3c76c4cd434dd9621b",
+        "branch": "codex/campaign-driving-performance",
+        "dirty": true
+      },
+      "repair": {
+        "count": 6,
+        "points": 6,
+        "phases": [
+          "entering",
+          "waiting",
+          "waiting",
+          "waiting",
+          "waiting",
+          "waiting"
+        ]
+      },
+      "battle": {
+        "cars": 30,
+        "fills": 5,
+        "deployed": 30,
+        "targetHp": 96422.5
+      },
+      "errors": []
+    }
+  },
+  "stress500": {
+    "baseline": false,
+    "count": 500,
+    "ticks": 20,
+    "simulationSeconds": 2.0000000000000004,
+    "cpuMs": 5357.056100000002,
+    "tickMs": {
+      "p50": 228.5576000000001,
+      "p95": 798.2869999999966,
+      "max": 798.2869999999966
+    },
+    "moved": 402,
+    "enemyMoved": 227,
+    "damaged": 0,
+    "motion": {
+      "hardStops": 1,
+      "maxSpeedLoss": 15.535967360428673
+    },
+    "predictive": {
+      "samples": 66959,
+      "projections": 457379,
+      "maxDecisionMs": 6.724599999997736,
+      "emergencyStops": 150,
+      "routeSearches": 6,
+      "routePublications": 2,
+      "routeDiscards": 239,
+      "maxPlanningMs": 3.043600000000879,
+      "maxPlanningOverrunMs": 1.043600000000879,
+      "forecastPairChecks": 3048964,
+      "forecastPairsCulled": 11375586,
+      "maxControlSliceMs": 6.724599999997736,
+      "forecastCacheHits": 303514,
+      "brakingProfiles": 15260,
+      "forecastClearanceHits": 71089,
+      "brakingFallbacks": 1004
+    }
+  },
+  "limitations": [
+    "500-vehicle movement is still slower than real time: 2 simulation seconds required about 5.36 seconds of CPU in this run. This set does not claim to resolve the remaining global performance bottleneck.",
+    "Generic jam passing remains for ordinary traffic. Filling a combat arrival position now disallows passing through either participant, waits for existing crossings to finish and checks actual endpoint occupancy. Both 12-car group scenarios in the final run had zero overlap. This does not claim to repair every pre-existing jam-controller case.",
+    "The full legacy suite is not green. The following failures were also reproduced with campaign source from baseline 8028d67."
+  ],
+  "baselineFailures": [
+    {
+      "check": "check-combat-deployment.mjs",
+      "failure": "Second-contact replacement assertion"
+    },
+    {
+      "check": "check-combat-reserves.mjs",
+      "failure": "Synthetic oracle omits trafficCoordinator; requestFiringApproach access throws"
+    },
+    {
+      "check": "check-factory-garage.mjs",
+      "failure": "First-tick fixture expects approach, existing controller reports waiting"
+    },
+    {
+      "check": "check-factory-frame-budget.mjs",
+      "failure": "Fixture labelled blocked produces immediately; expected pending exit proof absent"
+    }
+  ]
+}

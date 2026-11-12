@@ -5,6 +5,9 @@ import {checkManeuver} from './vehicle-motion.js';
 import {navigationDecision} from './navigation-state.js';
 import {movementCombatTarget} from './combat-orders.js';
 import {checkedCycleActive} from './traffic-cycle.js';
+import {firingSlots,slotCost,validPosition} from './firing-positions.js';
+import {advanceFiringFrontage} from './combat-frontage.js';
+export {validPosition} from './firing-positions.js';
 
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const combatTask=task=>['attack','attack-move'].includes(task?.type);
@@ -12,17 +15,6 @@ const resetMotion=unit=>{
   for(const key of ['passage','detour','traffic','trafficHold','passingLane','driveWatch','failedArcs','reverseDebt','combatArrivalBlockedAt','combatArrivalGoal','combatParking'])delete unit[key];
 };
 export function cancelCombatDeployment(unit){delete unit.combatDeployment;delete unit.combatGroup;delete unit.combatContactAt;delete unit.combatResume;delete unit.combatArrivalBlockedAt;delete unit.combatArrivalGoal;delete unit.combatParking;delete unit.attackRouteTarget;delete unit.attackFailedConditions;delete unit.combatDisengage;}
-function firingSlots(spec,scale,angle,anchor){
-  const spacing=scale*7,slots=[];
-  for(let radius=spec.range*.78;radius>=spec.range*.38;radius-=spacing){
-    const columns=Math.max(2,Math.floor(radius*Math.PI*2/spacing/2)*2);
-    for(let column=0;column<columns;column++){
-      const offset=(column%2?1:-1)*(Math.floor(column/2)+.5)*spacing/radius;
-      slots.push({x:anchor.x+Math.cos(angle+offset)*radius,y:anchor.y+Math.sin(angle+offset)*radius});
-    }
-  }
-  return slots;
-}
 function* reserveSlot(mission,unit,deployment){
   const slots=firingSlots(mission.unitSpec(unit),mission.config.worldScale,deployment.angle,deployment.anchor);
   const reserved=mission.state.units.filter(other=>other!==unit&&other.hp>0&&other.combatDeployment?.group===deployment.group)
@@ -56,11 +48,6 @@ export function combatPositionConditions(mission,unit,anchor){
     })].join('|');cache.values.set(key,value);
   }
   return unit.x+','+unit.y+','+unit.heading+'|'+value;
-}
-function slotCost(unit,point,scale){
-  const d=distance(unit,point),heading=Math.atan2(unit.x-point.x,point.y-unit.y);
-  const turn=Math.atan2(Math.sin(heading-unit.heading),Math.cos(heading-unit.heading));
-  return d*d+turn*turn*scale*scale*12;
 }
 
 // Only members with their own nearby contact leave an attack-move route.
@@ -112,14 +99,6 @@ function* beginDeployment(mission,unit,target){
     member.task={type:'combat-position',...deployment.slot};
   }
   return true;
-}
-export function validPosition(mission,unit,target,point,reserved){
-  const scale=mission.config.worldScale,spec=mission.unitSpec(unit);
-  if(!mission.inBounds(point.x,point.y)||!mission.exploredAt(point.x,point.y)
-    ||distance(point,target)>spec.range*.97||distance(point,target)<spec.range*.36
-    ||reserved.some(other=>distance(point,other)<scale*5.3))return false;
-  const pose={...unit,...point,heading:Math.atan2(point.x-target.x,target.y-point.y)};
-  return mission.lineOfSight(pose,target)&&mission.vehicleMotionClear(unit,pose,pose);
 }
 // Pure proposal: no vehicle state is changed while the search is suspended.
 // The dispatcher can run this outside the physical simulation step and
@@ -241,7 +220,7 @@ export function* updateCombatDeployment(mission,unit,spec,dt){
     deployment.anchor={x:target.x,y:target.y};deployment.rejectedSlots=[];deployment.retryAt=0;delete deployment.conditions;
   }
   const stalled=(unit.driveWatch?.attempts??0)>0;
-  if(stalled&&inFirePosition&&!unit.detour?.parking){
+  if(stalled&&inFirePosition&&!unit.detour?.parking&&!deployment.compacting){
     deployment.slot=deployment.goal={x:unit.x,y:unit.y};deployment.status='arrived';
     unit.task={type:'combat-position',...deployment.goal};unit.path=[];resetMotion(unit);
   }else if((unit.driveWatch?.attempts??0)>=2&&!unit.detour&&mission.state.time>=(deployment.relocateAt??0)){
@@ -260,6 +239,10 @@ export function* updateCombatDeployment(mission,unit,spec,dt){
     if(deployment.exhausted)return true;
     if(!(yield* reserveSlot(mission,unit,deployment))){if(unit.combatDeployment===deployment&&!unit.pendingOrder)deployment.exhausted=true;return true;}
     deployment.retryAt=0;
+  }
+  if(deployment.status==='arrived'||deployment.goal&&distance(unit,deployment.goal)<mission.config.worldScale*3){
+    yield* advanceFiringFrontage(mission,unit,deployment,target);
+    if(unit.combatDeployment!==deployment||unit.pendingOrder||unit.combatRetreat)return true;
   }
   if(deployment.status==='arrived'&&distance(unit,target)<=spec.range&&mission.lineOfSight(unit,target)){
     navigationDecision(unit,'ARRIVED','firing-position',null,'engage-target');
@@ -305,10 +288,10 @@ export function* updateCombatDeployment(mission,unit,spec,dt){
   if(deployment.goal&&unit.task?.type==='combat-position'&&distance(unit.task,deployment.goal)>.01){
     deployment.slot=deployment.goal={x:unit.task.x,y:unit.task.y};
   }
-  if(deployment.goal&&inFirePosition&&distance(unit,deployment.goal)<mission.config.worldScale*2.5&&!unit.detour){
+  if(deployment.goal&&inFirePosition&&distance(unit,deployment.goal)<mission.config.worldScale*2.5&&!unit.detour&&!deployment.compacting){
     deployment.goal={x:unit.x,y:unit.y};unit.path=[];resetMotion(unit);
   }
-  if(deployment.goal&&!unit.path.length&&distance(unit,deployment.goal)<8){deployment.status='arrived';unit.driveSpeed=0;}
+  if(deployment.goal&&!unit.path.length&&distance(unit,deployment.goal)<8){deployment.status='arrived';unit.driveSpeed=0;delete deployment.compacting;}
   return true;
 }
 

@@ -6,10 +6,11 @@ import {CommandPlanner} from './command-planner.js';
 import {retreatReturnOrder} from './factory-repair.js';
 import {corridorBlocker,invalidateTrafficCorridors} from './traffic-corridor.js';
 import {needsModernization,modernizeAfterRepair} from './factory-modernization.js';
+import {factoryPoint,terrainSegmentClear,prepareFactoryQueue,factoryWaitingPoint} from './factory-waiting.js';
+export {factoryPoint} from './factory-waiting.js';
 
 export const insideFactory=u=>u.factoryVisit?.phase==='inside';
 export const factoryPriority=f=>f.workPriority??'repair';
-export function factoryPoint(m,f,x,y){const a=f.rotation??0,c=Math.cos(a),s=Math.sin(a),scale=m.config.worldScale;return{x:f.x+(x*c-y*s)*scale,y:f.y+(x*s+y*c)*scale};}
 export function factoryVisitors(m,f){return m.state.units.filter(u=>u.hp>0&&u.factoryVisit?.factoryId===f.id);}
 export function factoryProductionPaused(m,f){
  const canRepair=m.state.energy>0||(m.buildingSpec(f).repair?.energyPerSecond??1.5)===0;
@@ -26,18 +27,9 @@ function exitOwner(m,f){
  const ready=visitors.filter(u=>insideFactory(u)&&(u.hp>=u.maxHp&&!needsModernization(m,f,u)||f.hp<=0)).sort((a,b)=>a.factoryVisit.arrived-b.factoryVisit.arrived);
  const owner=current??ready[0];f.garageExit=owner?.id;return owner;
 }
-function terrainSegmentClear(terrain,field,a,b){
- if(terrain.clearSegment)return terrain.clearSegment(a,b);
- // The slope-grid navigator exposes a point predicate; authored level maps
- // additionally expose exact wall/segment intersections. Honour either map.
- const steps=Math.max(1,Math.ceil(Math.hypot(b.x-a.x,b.y-a.y)/Math.min(8,(field.cellMetres??32)/4)));
- for(let i=0;i<=steps;i++)if(!terrain(a.x+(b.x-a.x)*i/steps,a.y+(b.y-a.y)*i/steps))return false;
- return true;
-}
-function factoryParkingPoint(m,f,u){
+function factoryDeparturePoint(m,f,u){
  const visit=u.factoryVisit,scale=m.config.worldScale,terrain=m.nav.terrainAllowed;
- const waiting=visit.phase==='waiting';
- const direction=waiting||visit.frontDeparture?-1:1,door=factoryPoint(m,f,0,direction*18);
+ const direction=visit.frontDeparture?-1:1,door=factoryPoint(m,f,0,direction*18);
  const geometry=[m.nav.topologyRevision,f.x,f.y,f.rotation??0,visit.phase,direction].join(':');
  const poseAt=p=>({...u,...p,heading:f.rotation??0});
  const exitSpace=p=>{const pose=poseAt(p);return clearOfVehicles(u,pose,m.state.units,scale,false,pose,m.field);};
@@ -51,7 +43,6 @@ function factoryParkingPoint(m,f,u){
  for(let offset=0;offset<248;offset++){
   const index=(visit.slot+offset)%120,side=index%2?1:-1,column=Math.floor(index/2)%3,row=Math.floor(index/6);
   const angle=(offset-120)%16*Math.PI/8,ring=28+Math.floor((offset-120)/16)*8;
-  if(waiting&&offset>=120&&Math.sin(angle)>0)continue;
   const p=offset>=120?factoryPoint(m,f,Math.cos(angle)*ring,Math.sin(angle)*ring)
    :factoryPoint(m,f,side*(9+column*7),direction*(23+row*7));
   if(visit.rejectedWaitPoints?.includes(p.x+','+p.y))continue;
@@ -94,7 +85,7 @@ function* driveTo(m,u,goal,dt,current,approaching=false){
    if(approaching&&u.combatRetreat)(u.combatRetreat.unavailableFactories??={})[visit.factoryId]=
     {at:m.state.time,revision:m.nav.topologyRevision,x:u.x,y:u.y};
    if(visit.phase==='departure'||visit.phase==='waiting'){
-    (visit.rejectedWaitPoints??=[]).push(goal.x+','+goal.y);delete visit.waitingPoint;delete visit.waitGeometry;
+    (visit.rejectedWaitPoints??=[]).push(goal.x+','+goal.y);delete visit.waitingPoint;delete visit.waitGeometry;delete visit.waitSlot;
    }
   }
  }
@@ -176,20 +167,22 @@ export function tryEnterFactory(m,u,f,blockers){
 
 function gateOwner(m,visitors,door){
  const entering=visitors.find(u=>u.factoryVisit.phase==='entering');
- if(entering)return entering;
  const distance=u=>Math.hypot(u.x-door.x,u.y-door.y);
- // Preserve arrival order among cars able to approach the gate. Cars still
- // crossing the map do not hold it for the entire trip.
- return visitors.find(u=>u.factoryVisit.phase==='gate')??visitors.filter(u=>{
+ // Record physical arrival, not the time the repair order was issued.
+ // Travelling cars cannot reserve the head of the queue from across the map.
+ const ready=visitors.filter(u=>{
   const visit=u.factoryVisit;
-  return ['approach','waiting'].includes(visit.phase)&&!u.pendingOrder&&!u.proposedOrder
+  return ['approach','waiting','gate'].includes(visit.phase)&&!u.pendingOrder&&!u.proposedOrder
    &&m.state.time>=(visit.gateRetryAt??0)&&(distance(u)<m.config.worldScale*26
     ||visit.waitingPoint&&!u.path.length&&Math.hypot(u.x-visit.waitingPoint.x,u.y-visit.waitingPoint.y)<2);
- }).sort((a,b)=>(a.factoryVisit.queued??0)-(b.factoryVisit.queued??0)||distance(a)-distance(b)||a.id.localeCompare(b.id))[0];
+ });
+ for(const u of ready)u.factoryVisit.queueArrivedAt??=m.state.time;
+ return entering??ready.find(u=>u.factoryVisit.phase==='gate')??ready.sort((a,b)=>a.factoryVisit.queueArrivedAt-b.factoryVisit.queueArrivedAt
+  ||distance(a)-distance(b)||a.id.localeCompare(b.id))[0];
 }
 
 export function* updateFactoryVisit(m,u,f,dt){
- const visit=u.factoryVisit??createVisit(m,u,f),retreat=u.combatRetreat;
+ const visit=u.factoryVisit??createVisit(m,u,f),retreat=u.combatRetreat,world=m.state;
  const door=factoryPoint(m,f,0,-18),exit=factoryPoint(m,f,0,18),bay=factoryPoint(m,f,0,-3);
  // Migrate cars at the former front exit through the hall if the return
  // sweep is free. Otherwise finish their original departure from the front.
@@ -210,11 +203,12 @@ export function* updateFactoryVisit(m,u,f,dt){
    visit.phase='approach';resetDrive(u);delete visit.waitingPoint;delete visit.waitGeometry;
   }
  }
- const current=()=>u.hp>0&&u.factoryVisit===visit;
+ const current=()=>m.state===world&&u.hp>0&&u.factoryVisit===visit&&!u.pendingOrder&&!u.proposedOrder;
  if(f.id!==visit.factoryId){resetDrive(u);delete u.factoryVisit;return false;}
  if(!f.hp&&['approach','waiting','gate'].includes(visit.phase)){resetDrive(u);delete u.factoryVisit;return false;}
  modernizeAfterRepair(m,f,u);
  const visitors=factoryVisitors(m,f),entering=visitors.find(other=>other.factoryVisit.phase==='entering');
+ yield* prepareFactoryQueue(m,f,visitors);if(!current())return true;
  const gate=gateOwner(m,visitors,door);
  f.garageGate=gate?.id;
  const outgoing=exitOwner(m,f);
@@ -223,11 +217,12 @@ export function* updateFactoryVisit(m,u,f,dt){
   if(visit.phase!==phase){
    resetDrive(u);
    delete visit.retryAt;delete visit.waitingPoint;delete visit.waitGeometry;
+   delete visit.waitSlot;
    delete visit.rejectedOccupancy;delete visit.rejectedWaitPoints;
    visit.phase=phase;
   }
   if(phase==='waiting'){
-   const point=factoryParkingPoint(m,f,u);
+   const point=yield* factoryWaitingPoint(m,f,u,current);if(!current())return true;
    if(retreat){retreat.status='moving';retreat.phase='home';retreat.service='waiting-bay';if(point)retreat.destination=point;}
    if(!point){
     u.driveSpeed=0;
@@ -290,7 +285,7 @@ export function* updateFactoryVisit(m,u,f,dt){
   }
  }
  if(visit.phase==='departure'){
-  const park=factoryParkingPoint(m,f,u);
+  const park=factoryDeparturePoint(m,f,u);
   if(!park){u.driveSpeed=0;if(retreat)retreat.service='waiting-apron-space';return true;}
   if(yield* driveTo(m,u,park,dt,current)){
    resetDrive(u);delete u.factoryVisit;delete f.garageExit;

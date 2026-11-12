@@ -1,9 +1,10 @@
 {
   "name": "wargame",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "private": true,
   "description": "Modular vehicle game assets and local review arena",
   "scripts": {
+    "check:arrival-slots": "node tools/check-combat-frontage.mjs && node tools/check-firing-fill-flow.mjs && node tools/check-factory-arrival-queue.mjs",
     "check:radio": "node tools/check-dynamic-radio.mjs",
     "check:radio:browser": "node tools/check-dynamic-radio-browser.mjs",
     "check:assets": "python tools/reference_pack.py --check",

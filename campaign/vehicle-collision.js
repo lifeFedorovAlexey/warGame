@@ -51,7 +51,10 @@ const factoryTransfer=u=>{
  const phase=u.factoryVisit?.phase;
  return phase==='approach'||phase==='waiting'||phase==='gate'||phase==='entering'||phase==='inside'||phase==='leaving'||phase==='departure';
 };
-export const jamPassThroughAllowed=(a,b)=>alliedVehicles(a,b)&&!factoryTransfer(a)&&!factoryTransfer(b);
+// Filling a reserved arrival position must leave a real vacancy behind it.
+// A jam shortcut through another hull would invalidate that reservation.
+export const jamPassThroughAllowed=(a,b)=>alliedVehicles(a,b)&&!factoryTransfer(a)&&!factoryTransfer(b)
+ &&!a.combatDeployment?.compacting&&!b.combatDeployment?.compacting;
 const hasPassage=(a,b)=>a.trafficPassThrough?.revision===a.commandRevision
  &&a.trafficPassThrough?.pairs.some(pair=>pair.id===b.id);
 export function trafficCollisionRequired(a,b){
