@@ -5,6 +5,17 @@ import {preloadMenuMedia} from './menu-media.js';
 // Hotspots follow the painted signs without overlaying a second copy of the art.
 const root=document.getElementById('welcome'),stage=root.querySelector('.menu-art');
 const settings=document.getElementById('main-menu-settings'),status=document.getElementById('loading-status');
+// Read once with the page, so reopening the menu cannot relabel an older game
+// session after another checkout has been deployed on the server.
+fetch(new URL('../api/build',import.meta.url),{cache:'no-store'}).then(async response=>{
+  if(!response.ok)return;
+  const build=await response.json(),label=document.getElementById('menu-build');
+  if(typeof build.version!=='string'||!Number.isInteger(build.buildNumber))return;
+  const suffix=build.dirty?' · локальные правки':build.branch!=='main'?' · предпросмотр':'';
+  label.textContent=`v${build.version} · сборка ${build.buildNumber}${suffix}`;
+  label.title=`${build.buildId} · ${build.branch}`;
+  label.hidden=false;
+}).catch(()=>{});
 const loading=createLoadingProgress(root);
 const music=document.getElementById('menu-music'),soundToggle=document.getElementById('sound-toggle');
 const media=preloadMenuMedia(stage.querySelector('img'),music);
