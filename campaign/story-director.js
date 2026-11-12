@@ -98,8 +98,6 @@ export class StoryDirector {
     const id=this.data?.active;if(!id)return;
     const record=this.record(id);record.cursor++;
     if(record.cursor>=this.scenes.get(id).cues.length)this.end();
-    // The M02 opening yields after a full spoken line, preserving its place.
-    else if(id==='m02-radio-start'&&this.data.clock-this.data.lastCombat<3000)this.suspend();
   }
   skip(){this.end('skipped');}
   update(mission,now,{enabled=true}={}) {
@@ -116,7 +114,6 @@ export class StoryDirector {
       // A started exchange finishes naturally. Attacks use the existing minimap
       // alert; neither combat nor an urgent report rewinds or replaces speech.
       if(!rule||(mission.state.m02||mission.state.m03)&&!rule.valid)this.end('cancelled');
-      else if((mission.state.m02||mission.state.m03)&&d.active!=='m02-radio-start'&&rule.priority>0&&f.battle){this.record(d.active).cursor=0;this.suspend();}
     }
     const eligible=[];
     for(const [id,rule] of Object.entries(rules)){
@@ -126,8 +123,10 @@ export class StoryDirector {
         if(this.data.scenes[id]){const record=this.record(id);record.status='cancelled';record.endedAt=d.clock;}
         continue;
       }
-      if(!rule.trigger||d.clock-d.lastEnd<sceneGapMs||rule.priority>0&&f.battle||rule.priority>=2&&(f.quiet<8000||d.clock-d.lastEnd<rule.gap*1000))continue;
-      if(rule.priority===3&&d.clock-(d.facts.lastChatterAt??-Infinity)<45000)continue;
+      if(!rule.trigger||d.clock-d.lastEnd<sceneGapMs||rule.priority>=2&&d.clock-d.lastEnd<rule.gap*1000)continue;
+      // Only incidental chatter waits for quiet. Ready plot scenes retain the
+      // channel through incoming damage, including between their spoken lines.
+      if(rule.priority===3&&(f.battle||f.quiet<8000||d.clock-(d.facts.lastChatterAt??-Infinity)<45000))continue;
       if(f.victory&&!finalScene(id)&&!milestoneScenes.has(id)&&!/^m0[23]-/.test(id))continue;
       eligible.push({id,...rule});
     }
