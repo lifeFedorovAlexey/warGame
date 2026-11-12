@@ -61,7 +61,7 @@ function factoryParkingPoint(m,f,u){
  const poseAt=p=>({...u,...p,heading:f.rotation??0});
  const exitSpace=p=>{const pose=poseAt(p);return clearOfVehicles(u,pose,m.state.units,scale,false,pose,m.field);};
  if(visit.waitGeometry===geometry&&visit.waitingPoint&&(u.path.length||exitSpace(visit.waitingPoint)))return visit.waitingPoint;
- if(!visit.waitingPoint&&m.state.time<(visit.retryAt??0))return null;
+ if(visit.waitGeometry===geometry&&!visit.waitingPoint&&m.state.time<(visit.retryAt??0))return null;
  const level=terrain.levelAt?.(f.x,f.y);
  const claimed=m.state.units.filter(other=>other!==u&&other.hp>0&&other.factoryVisit).map(other=>other.factoryVisit.waitingPoint).filter(Boolean);
  const occupancy=JSON.stringify(claimed);
@@ -89,7 +89,7 @@ function factoryParkingPoint(m,f,u){
   m.emit('navigation-retreat-destination-rejected',{unit:u.id,factory:f.id,destination:previous,replacement:point,reason:'outside-factory-apron'});
  }
  visit.waitGeometry=geometry;visit.waitingPoint=point;
- if(!point)visit.retryAt=m.state.time+.25;
+ if(!point)visit.retryAt=m.state.time+1;
  return point;
 }
 function createVisit(m,u,f){
@@ -197,12 +197,14 @@ function gateOwner(m,visitors,door){
  const entering=visitors.find(u=>u.factoryVisit.phase==='entering');
  if(entering)return entering;
  const distance=u=>Math.hypot(u.x-door.x,u.y-door.y);
+ // Preserve arrival order among cars able to approach the gate. Cars still
+ // crossing the map do not hold it for the entire trip.
  return visitors.find(u=>u.factoryVisit.phase==='gate')??visitors.filter(u=>{
   const visit=u.factoryVisit;
   return ['approach','waiting'].includes(visit.phase)&&!u.pendingOrder&&!u.proposedOrder
    &&m.state.time>=(visit.gateRetryAt??0)&&(distance(u)<m.config.worldScale*26
     ||visit.waitingPoint&&!u.path.length&&Math.hypot(u.x-visit.waitingPoint.x,u.y-visit.waitingPoint.y)<2);
- }).sort((a,b)=>distance(a)-distance(b)||a.factoryVisit.queued-b.factoryVisit.queued||a.id.localeCompare(b.id))[0];
+ }).sort((a,b)=>(a.factoryVisit.queued??0)-(b.factoryVisit.queued??0)||distance(a)-distance(b)||a.id.localeCompare(b.id))[0];
 }
 
 export function* updateFactoryVisit(m,u,f,dt){
@@ -251,7 +253,10 @@ export function* updateFactoryVisit(m,u,f,dt){
   if(phase==='waiting'){
    const point=factoryParkingPoint(m,f,u);
    if(retreat){retreat.status='moving';retreat.phase='home';retreat.service='waiting-bay';if(point)retreat.destination=point;}
-   if(point&&(yield* driveTo(m,u,point,dt,current)))
+   if(!point){
+    u.driveSpeed=0;
+    navigationDecision(u,'BLOCKED','factory-apron-full',gate?.id??null,'wait-for-factory-apron');
+   }else if(yield* driveTo(m,u,point,dt,current))
     navigationDecision(u,'WAITING_RESERVATION','factory-door-in-use',gate?.id??null,'wait-for-factory-door');
    return true;
   }
@@ -262,7 +267,9 @@ export function* updateFactoryVisit(m,u,f,dt){
    &&u.navigation?.waitSeconds>=.5&&m.state.time>=(f.garageClearAt??0);
   const blockers=clearApron?new Set():undefined;
   if(!tryEnterFactory(m,u,f,blockers)&&(yield* driveTo(m,u,door,dt,current,true))){
-   if(blockers?.size&&m.clearFactoryApronSteps){
+   if(outgoing){
+    navigationDecision(u,'WAITING_RESERVATION','factory-door-in-use',outgoing.id,'wait-for-factory-door');
+   }else if(blockers?.size&&m.clearFactoryApronSteps){
     f.garageClearAt=m.state.time+1;
     navigationDecision(u,'BLOCKED','factory-entry-clearance',[...blockers].map(other=>other.id),'clear-doorway');
     yield* m.clearFactoryApronSteps(f,{...u,heading:f.rotation??0},blockers,current,true);

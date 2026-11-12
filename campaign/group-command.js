@@ -1,6 +1,6 @@
 import {vehicleEnvelope} from './vehicle-collision.js';
 import {assignFormation} from './formation-assignment.js';
-import {isAutomaticRepair,inFactoryInterior} from './combat-retreat-state.js';
+import {isAutomaticRepair,inFactoryInterior,strandedRetreat} from './combat-retreat-state.js';
 
 /** @typedef {'auto'|'column'|'line'|'dispersed'|'concentrate'} Formation */
 export const FORMATIONS=Object.freeze(['auto','column','line','dispersed','concentrate']);
@@ -60,7 +60,10 @@ export function expandCommandIds(mission,ids,{includeRepairing=false,action=null
  });
  // Explicitly selected cars outside the garage obey the player. Expanding
  // a healthy leader's group must not recall unselected repair visitors.
- const expanded=new Set(ids.filter(id=>includeRepairing||!inFactoryInterior(byId.get(id))&&(!keepRepairing||available(id))));
+ const expanded=new Set(ids.filter(id=>{
+  const unit=byId.get(id);
+  return includeRepairing||!inFactoryInterior(unit)&&(!keepRepairing||available(id)||strandedRetreat(unit));
+ }));
  for(const group of mission.state.commandGroups??[])if(expanded.has(group.leaderId)&&available(group.leaderId))
   for(const member of liveMembers(mission,group,byId))if(available(member.id))expanded.add(member.id);
  return [...expanded];

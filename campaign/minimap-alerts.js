@@ -23,11 +23,11 @@ export function objectiveLocation(mission,task){
 // Only discovery history is saved; expired alerts never replay after loading.
 export class MinimapAlerts{
  constructor(notify=()=>{},mission=null){this.notify=notify;this.mission=mission;this.reset();}
- reset(silent=false){this.state=null;this.silent=silent;this.pings=[];this.attacks=[];this.signals=new Set();this.lastMessage=new Map();this.reminders=new ObjectiveReminders();}
+ reset(silent=false){this.state=null;this.silent=silent;this.pings=[];this.focusIndex=0;this.signals=new Set();this.lastMessage=new Map();this.reminders=new ObjectiveReminders();}
  bind(mission=this.mission){
   if(!mission)return;this.mission=mission;const s=mission.state;
   if(this.state===s)return;
-  this.state=s;this.pings=[];this.attacks=[];this.signals.clear();this.lastMessage.clear();
+  this.state=s;this.pings=[];this.focusIndex=0;this.signals.clear();this.lastMessage.clear();
   this.reminders.reset();
   this.lastCombatAt=mission.lastPlayerCombatAt;this.combatUntil=0;
   const saved=s.minimapNotices??={artifacts:[],objectives:[],locations:[]};
@@ -50,7 +50,20 @@ export class MinimapAlerts{
   if(p.combatProtected)alert.combatProtected=true;
   this.pings.push(alert);return alert;
  }
- active(now){this.bind();this.pings=this.pings.filter(p=>now<p.until);return this.pings;}
+ active(now){
+  this.bind();this.pings=this.pings.filter(p=>now<p.until);
+  for(const p of this.pings)if(p.kind==='attack'){
+   const target=this.mission?.entity?.(p.target);
+   if(target?.owner==='rai'){p.x=target.x;p.y=target.y;}
+  }
+  return this.pings;
+ }
+ attackFocus(now){
+  const attacks=this.active(now).filter(p=>p.kind==='attack');if(!attacks.length)return null;
+  const index=this.focusIndex%attacks.length,p=attacks[index];
+  return {...p,kind:'threat',attack:true,distance:420,label:(p.building?'Постройка под огнём':'Техника под огнём')+(attacks.length>1?` · ${index+1}/${attacks.length}`:'')};
+ }
+ nextAttack(){this.focusIndex++;}
  observe(mission,tasks,now,options={}){
   const s=mission.state;if(s.status!=='running'){this.pings=[];this.reminders.reset();return;}
   this.bind(mission);
@@ -80,15 +93,17 @@ export class MinimapAlerts{
   for(const p of this.reminders.update(tasks,targets,now,{...options,attacking}))indicate(p,true);
   this.silent=false;
  }
- event(event,now){
+ event(event,now,audible=true){
   if(event.type!=='under-attack'||!point(event))return;
   this.bind();this.combatUntil=now+MINIMAP_PING_MS;
   this.pings=this.pings.filter(p=>!p.reminder||p.combatProtected);
-  this.attacks=this.attacks.filter(a=>now-a.born<6000);
-  if(this.attacks.some(a=>Math.hypot(a.x-event.x,a.y-event.y)<100))return;
-  if(this.attacks.length>=32)this.attacks.shift();
-  this.attacks.push({x:event.x,y:event.y,born:now});
-  this.ping('attack',event,now);
+  const active=this.active(now),near=active.find(p=>p.kind==='attack'&&(event.target&&p.target===event.target||Math.hypot(p.x-event.x,p.y-event.y)<100));
+  const alert=near??this.ping('attack',event,now);
+  if(!alert)return false;
+  Object.assign(alert,{x:event.x,y:event.y,target:event.target,building:event.building,until:now+MINIMAP_PING_MS});
+  if(!audible||alert.alarmed)return false;
+  alert.alarmed=true;
+  return true;
  }
  signal(signal,chapter,now){
   if(!point(signal)||!chapter||signal.kind==='anomaly')return;

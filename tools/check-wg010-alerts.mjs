@@ -1,0 +1,27 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {execFileSync} from 'node:child_process';
+import {MinimapAlerts} from '../campaign/minimap-alerts.js';
+const old=execFileSync('git',['show','c6b1607:campaign/minimap-alerts.js'],{encoding:'utf8'});
+const {MinimapAlerts:Before}=await import('data:text/javascript;base64,'+Buffer.from(old).toString('base64'));
+const subject={id:'ally',owner:'rai',x:10,y:10,hp:100};
+const mission={state:{status:'running',artifacts:[],buildings:[],units:[subject],camps:[]},entity:id=>id===subject.id?subject:null,config:{},exploredAt:()=>true};
+function sustained(Type){const a=new Type(()=>{},mission),timeline=[];a.observe(mission,[],0);
+ for(let time=0;time<=9000;time+=1000){a.event({type:'under-attack',target:'ally',x:10,y:10},time);timeline.push({time,active:a.active(time).filter(p=>p.kind==='attack').length});}return timeline;}
+const before=sustained(Before),after=sustained(MinimapAlerts);assert(before.some(p=>!p.active));assert(after.every(p=>p.active===1));
+const a=new MinimapAlerts(()=>{},mission);a.event({type:'under-attack',target:'ally',x:10,y:10},0);a.observe(mission,[],1);assert.equal(a.active(1).length,1,'First damage event must survive initial HUD observation');
+subject.x=60;subject.y=30;assert.equal(a.active(500)[0].x,60,'Signal follows the attacked friendly, not an old patch of ground');
+a.event({type:'under-attack',target:'factory',x:700,y:500,building:true},500);assert.equal(a.active(500).length,2);
+const first=a.attackFocus(500);a.nextAttack();const second=a.attackFocus(500);assert.notEqual(first.target,second.target);assert.match(second.label,/2\/2/);
+a.nextAttack();assert.equal(a.attackFocus(500).target,first.target);
+assert.equal(a.active(3500).length,0,'Warnings fade three real seconds after the last actual hit');
+const watched={type:'under-attack',x:10,y:10,target:subject.id};
+assert.equal(a.event(watched,3600,false),false,'An attack in view is silent');
+assert.equal(a.active(3600).length,1,'A silent attack still marks the map');
+assert.equal(a.event(watched,3700,true),true,'A further hit after panning away can sound the alarm');
+assert.equal(a.event(watched,3800,true),false,'Sustained offscreen hits do not retrigger the alarm');
+assert.equal(a.event(watched,6900,true),true,'A new offscreen attack can trigger the alarm');
+for(let i=0;i<40;i++)a.event({type:'under-attack',x:i*200,y:0,target:'storm'+i},7000);assert.equal(a.active(7000).length,16);
+mission.state={...mission.state};a.observe(mission,[],7001);assert.equal(a.active(7001).length,0,'Transient attacks do not replay after loading');
+const folder='docs/playtest-evidence/wg010';fs.mkdirSync(folder,{recursive:true});
+fs.writeFileSync(folder+'/alerts.json',JSON.stringify({before,after,movingTargets:true,simultaneousSites:true,cycling:true,firstEvent:true,expiry:true,bounded:16,saveLoad:true},null,2));console.log('PASS WG-010 sustained attacks, moving targets, separate sites, cycling, bounded alerts and load reset');

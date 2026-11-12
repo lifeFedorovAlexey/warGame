@@ -150,7 +150,6 @@ if(process.argv.includes('--summarize')){
      previous=stamp;
      if(wall>seconds*1000)break;
      const frameStart=performance.now();
-     w.updateTrafficVisibility(m);
      m.advance(Math.min(.65,dt/1000)*rate,{budgetMs:m.config.simulationCpuBudgetMs,rate});
      const advanced=performance.now();
      w.update(m,selected,dt/1000,true);

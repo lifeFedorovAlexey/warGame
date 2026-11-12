@@ -133,6 +133,7 @@ function nextObjectiveHint(state,{plant,well},tasks,artifact,contact,southernApp
 }
 function tacticalFocus(contact,{well,threat=staticThreat(contact),artifact=knownArtifact(mission),southernApproach=missionSignal('last-camp',mission)}=firstPowerSites()){
   if(mission.state.status!=='running')return null;
+  const attack=minimapView?.alerts.attackFocus(performance.now());if(attack)return attack;
   if(contact)return {x:contact.x,y:contact.y,kind:'threat',label:'К контакту',distance:420};
   if(threat)return threat;
   if(artifact)return {x:artifact.x,y:artifact.y,kind:'artifact',label:'К артефакту',distance:300};
@@ -874,6 +875,7 @@ function updateContext(first) {
       if(running||first.demolitionProgress){const progress=document.createElement('progress');progress.className='production-progress';progress.dataset.demolitionProgress='';progress.max=1;progress.setAttribute('aria-label','Снос здания');control.append(progress);}
     }
     if(factory)items.unshift(createFactoryRows(mission,factories,projects,{
+      factoryId:first.id,
       act:action=>{const result=action();report(result);if(result.ok)sound.signal('order');updateUi();},
       focus:id=>{const f=mission.entity(id);if(f){select([id],false,false);world.centre(f,360);}},
     }));
@@ -982,11 +984,13 @@ function flushUi() {
   if(signal?.kind==='guidance'&&sites.well?.x===signal.x&&sites.well.y===signal.y)presentSignal(null);
   const focus=$('objective-focus');
   focus.hidden=!marker;
+  focus.classList.toggle('threat',marker?.kind==='threat');
+  focus.classList.toggle('under-attack',!!marker?.attack);
+  if(!marker){focus.setAttribute('aria-label','К цели');focus.removeAttribute('title');}
   if(marker){
     const focusIcons={threat:'attack',guidance:'derrick',artifact:'research',recon:'radar'};
     const focusDetails={guidance:'ЛКМ по нефтяной точке — поставить вышку',artifact:'ПКМ по ящику — подобрать'};
     setButtonIcon(focus,focusIcons[marker.kind]??'focus',marker.label,focusDetails[marker.kind]);
-    focus.classList.toggle('threat',marker.kind==='threat');
   }
   const entityName = first && ((first.owner==='unknown'?'Неизвестные · сенсор':null)??projectLabel(first)
     ?? config.buildings[first.kind]?.name ?? config.camps.find(camp=>camp.id===first.campId)?.name ?? 'Лагерь');
@@ -1012,7 +1016,7 @@ function events() {
   const batch=mission.drainEvents(),ordinaryNotice=text=>{if(performance.now()>milestoneToastUntil)toast(text);};
   personnelNotices.consume(batch,mission,performance.now());
   for (const event of batch) {
-    if(active)minimapView.alerts.event(event,performance.now());
+    if(active&&event.type==='under-attack'&&minimapView.alerts.event(event,performance.now(),!world.inView(event)))sound.signal('attack-alarm');
     radio?.director?.note(event,mission);
     if(event.type==='construction-complete'&&config.buildings[event.kind]?.storyOnly)continue;
     sound?.storyEvent?.(event);
@@ -1065,9 +1069,6 @@ function frame(now) {
   perf?.begin(now);
   const frameWorkStarted=performance.now();
   let stabilityTicks=0,stabilitySimulationMs=0;
-  // Preserve the original input order: advance camera controls in world.update
-  // AFTER simulation. This read reuses the previous render's visibility cache.
-  world.updateTrafficVisibility(mission);
   if (active || openingPlaying) {
     if (!paused) {const measuring=stabilityGraph.enabled,start=measuring?performance.now():0;const completed=mission.advance(dt * speed,{budgetMs:mission.config.simulationCpuBudgetMs,rate:speed});if(measuring){stabilityTicks=Number.isFinite(completed)?completed:0;stabilitySimulationMs=performance.now()-start;}}
     events();
@@ -1090,6 +1091,7 @@ function frame(now) {
   ending.update(dt,radio.current);
   pruneSelection();
   const renderStarted=performance.now();
+  world.attackPulses.set(active&&mission.state.status==='running'?minimapView.alerts.active(now):[]);
   world.update(mission, selected, dt, (active||openingPlaying) && !paused && mission.state.status==='running',active);
   const debugStarted=performance.now();
   navigationTelemetry?.rendered(world.vehicles.transforms);
@@ -1261,8 +1263,9 @@ try {
     const signal=tacticalFocus(visibleRaidContact(mission));
     if(!signal)return;
     document.querySelector('.settings').open = false;
-    presentSignal(signal);
+    if(!signal.attack)presentSignal(signal);
     focusSignal(signal);
+    if(signal.attack){minimapView.alerts.nextAttack();updateUi();}
   };
   $('select-blocked').onclick = () => {
     const live=[...blockedOrders].map(id=>mission.entity(id)).filter(Boolean);

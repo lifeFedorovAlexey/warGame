@@ -1,0 +1,8 @@
+{
+  "checks": [
+    "narrow alley, physical collision sweeps, isolated and suspended searches, topology refresh",
+    "authored four-unit first raid, post-victory reinforcement timer, destroyed producer stays stopped",
+    "early assault activates the attacked camp without activating all camps",
+    "legacy patrol, one available survivor, engaged teammate retained for the next sortie"
+  ]
+}

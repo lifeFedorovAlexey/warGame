@@ -1,0 +1,227 @@
+{
+  "date": "2026-11-12",
+  "baseCommit": "db2283e",
+  "branch": "codex/campaign-driving-performance",
+  "merged": false,
+  "changes": [
+    "One wall-time planning budget across every mission; remove fixed-work mission overrides and forced camera visibility",
+    "Exact indexed polyline and cached road queries; no rounded terrain or collision results",
+    "Lightweight lane previews and reuse of immutable collision envelopes/proofs",
+    "Accept an already safe productive preferred rollout without searching for extra comfort clearance",
+    "Render completed vehicle samples continuously across suspended, early and late physics updates",
+    "Service asynchronous searches between fixed steps during large offline advances"
+  ],
+  "benchmark": {
+    "fixture": "docs/campaign/alpha/m02/playthrough-50.json",
+    "order": "46 combat vehicles attack-move to east_factory gate",
+    "setup": {
+      "time": 846.2000000001239,
+      "units": 70,
+      "army": 46,
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 (0x00002786) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "centre": {
+        "x": -932.4122024401447,
+        "y": -553.8646234772492
+      }
+    },
+    "viewport": [
+      1440,
+      900
+    ],
+    "renderScale": 1,
+    "profiled": false,
+    "sourceHashesVerified": true,
+    "before": {
+      "wallSeconds": 15.056699999928474,
+      "simulationSeconds": 3.800000000000864,
+      "simulationRate": 0.2523793394315431,
+      "frameMs": {
+        "count": 822,
+        "p50": 16.699999928474426,
+        "p95": 16.899999976158142,
+        "p99": 77.20000004768372,
+        "max": 207.20000004768372,
+        "total": 15033.800000071526
+      },
+      "simulationCallMs": {
+        "count": 821,
+        "p50": 7,
+        "p95": 7.899999976158142,
+        "p99": 67.90000009536743,
+        "max": 198.60000002384186,
+        "total": 7388.299999117851
+      },
+      "framesOver33": 30,
+      "framesOver50": 15,
+      "pendingOrders": 0,
+      "moved": 45,
+      "renderScale": 1
+    },
+    "after": {
+      "wallSeconds": 15.061899999976157,
+      "simulationSeconds": 10.800000000002456,
+      "simulationRate": 0.7170410107635525,
+      "frameMs": {
+        "count": 902,
+        "p50": 16.699999928474426,
+        "p95": 16.899999976158142,
+        "p99": 17.700000047683716,
+        "max": 21.600000023841858,
+        "total": 15033.899999976158
+      },
+      "simulationCallMs": {
+        "count": 901,
+        "p50": 6.699999928474426,
+        "p95": 7.899999976158142,
+        "p99": 9.400000095367432,
+        "max": 12.899999976158142,
+        "total": 5867.699998497963
+      },
+      "framesOver33": 0,
+      "framesOver50": 0,
+      "pendingOrders": 0,
+      "moved": 45,
+      "renderScale": 1
+    },
+    "simulationSpeedup": 2.8411240491341685,
+    "limitation": "This dense 46-vehicle bridge column still runs below real-time simulation speed, despite stable frame pacing. Frame rate alone is not the simulation rate."
+  },
+  "verification": {
+    "passedSuites": [
+      "check-road-query-cache.mjs",
+      "check-road-nearest.mjs",
+      "check-polyline-query.mjs",
+      "check-vehicle-presentation.mjs",
+      "check-campaign-planning.mjs",
+      "check-river-map.mjs",
+      "check-collision-separation.mjs",
+      "check-traffic-visibility-cache.mjs",
+      "check-traffic-camera-rate.mjs",
+      "check-scrap-attachments.mjs",
+      "check-salvage.mjs",
+      "check-command-immediate-motion.mjs",
+      "check-responsive-input.mjs",
+      "check-combat-planning-budget.mjs",
+      "check-dense-column-driving.mjs",
+      "check-stopped-leader-progress.mjs",
+      "check-m03-drive.mjs",
+      "check-campaign-driving-browser.mjs"
+    ],
+    "otherMaps": [
+      {
+        "map": "m01",
+        "movement": {
+          "distance": 86.0604317616062,
+          "remaining": 3.9395682383938038,
+          "wallSeconds": 3.337,
+          "simulationSeconds": 3.3000000000000016
+        },
+        "viewports": [
+          [
+            1440,
+            900
+          ],
+          [
+            844,
+            390
+          ]
+        ],
+        "errors": []
+      },
+      {
+        "map": "m03",
+        "movement": {
+          "distance": 85.52151100111395,
+          "remaining": 4.478488998886003,
+          "wallSeconds": 3.3772999999523163,
+          "simulationSeconds": 3.400000000000773
+        },
+        "viewports": [
+          [
+            1440,
+            900
+          ],
+          [
+            844,
+            390
+          ]
+        ],
+        "errors": []
+      }
+    ],
+    "m03Routes": [
+      {
+        "route": "centre",
+        "simulationSeconds": 161.50000000003672,
+        "cpuMs": 1723.4641,
+        "worstGrade": 0.6172795751333277,
+        "checks": 322
+      },
+      {
+        "route": "east",
+        "simulationSeconds": 286.00000000006503,
+        "cpuMs": 3346.7955999999995,
+        "worstGrade": 0.6492586199565412,
+        "checks": 571
+      },
+      {
+        "route": "west",
+        "simulationSeconds": 198.00000000004502,
+        "cpuMs": 2328.128199999999,
+        "worstGrade": 0.6492586199565167,
+        "checks": 395
+      }
+    ],
+    "previousFailures": [
+      {
+        "suite": "check-factory-frame-budget.mjs",
+        "status": 1,
+        "baselineStatus": 1
+      },
+      {
+        "suite": "check-traffic-live-contracts.mjs",
+        "status": 1,
+        "baselineStatus": 1
+      },
+      {
+        "suite": "check-m02.mjs",
+        "status": 1,
+        "baselineStatus": 1
+      },
+      {
+        "suite": "check-command-planner.mjs",
+        "status": 1,
+        "baselineStatus": 1
+      },
+      {
+        "suite": "check-simulation-budget.mjs",
+        "status": 1,
+        "baselineStatus": 1
+      },
+      {
+        "suite": "check-large-vehicle-broadphase.mjs",
+        "status": 1,
+        "baselineStatus": 1
+      },
+      {
+        "suite": "check-m03.mjs",
+        "status": 1,
+        "baselineStatus": 1
+      }
+    ],
+    "previousFailureNotes": "Failures were also reproduced on original sources. M03 transport stops at 9/10 boarded on both versions; driving all three expedition routes passes. Live contracts fail the same two-evacuating-blockers assertion after restoring their local fixture.",
+    "screenshots": [
+      "campaign/reports/perf-general/column-fast-path/wide.png",
+      "campaign/reports/perf-general/column-fast-path/narrow.png",
+      "campaign/reports/perf-general/m01-landscape.png",
+      "campaign/reports/perf-general/m03-landscape.png"
+    ],
+    "browserErrors": []
+  },
+  "reproduction": [
+    "Start tools/serve.py on an unused local review port, then an isolated Edge CDP session.",
+    "Set WARGAME_URL and CDP_URL as appropriate.",
+    "node tools/bench-campaign-driving.mjs --label=before --baseline-ref=db2283e --seconds=15",
+    "node tools/bench-campaign-driving.mjs --label=after --seconds=15"
+  ]
+}

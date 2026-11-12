@@ -18,3 +18,9 @@ export function isAutomaticRepair(unit,spec){
 // Only the physical doorway/interior transfer owns a pose hidden inside the
 // building. Approaching and waiting outside remain directly controllable.
 export const inFactoryInterior=unit=>['entering','inside','leaving'].includes(unit?.factoryVisit?.phase);
+
+export function strandedRetreat(unit){
+ if(inFactoryInterior(unit)||unit.path?.length||unit.detour||unit.yieldReturn||unit.jointTraffic||unit.pendingOrder)return false;
+ const reason=unit.navigation?.reason;
+ return unit.combatRetreat?.status==='blocked'||reason==='factory-route-unavailable'||reason==='factory-apron-full';
+}

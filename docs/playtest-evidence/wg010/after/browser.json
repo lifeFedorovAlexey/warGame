@@ -1,0 +1,47 @@
+{
+  "errors": [],
+  "screens": [
+    {
+      "width": 1440,
+      "height": 900,
+      "pulses": 1,
+      "focus": "Техника под огнём · 1/2",
+      "enemyVisible": false,
+      "mesh": 144
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "pulses": 1,
+      "focus": "Техника под огнём · 1/2",
+      "enemyVisible": false,
+      "mesh": 144
+    },
+    {
+      "width": 667,
+      "height": 375,
+      "pulses": 1,
+      "focus": "Техника под огнём · 1/2",
+      "enemyVisible": false,
+      "mesh": 144
+    }
+  ],
+  "focus": {
+    "target": [
+      -948,
+      400,
+      3.517682194709778
+    ],
+    "factory": {
+      "x": -948,
+      "y": 400
+    },
+    "selected": [
+      "u432"
+    ]
+  },
+  "expired": {
+    "pulses": 0,
+    "focus": "К цели"
+  }
+}

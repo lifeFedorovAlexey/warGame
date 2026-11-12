@@ -1,0 +1,33 @@
+{
+  "errors": [],
+  "screens": [
+    {
+      "width": 1440,
+      "height": 900,
+      "pulses": 0,
+      "focus": "К цели",
+      "enemyVisible": false,
+      "mesh": 0
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "pulses": 0,
+      "focus": "К цели",
+      "enemyVisible": false,
+      "mesh": 0
+    },
+    {
+      "width": 667,
+      "height": 375,
+      "pulses": 0,
+      "focus": "К цели",
+      "enemyVisible": false,
+      "mesh": 0
+    }
+  ],
+  "expired": {
+    "pulses": 0,
+    "focus": "К цели"
+  }
+}

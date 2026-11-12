@@ -15,7 +15,9 @@ export function modificationEffects(recipes,baseMass=2005){
  return {massKg,speed:ratio**.35,acceleration:ratio,braking:ratio**.6,steeringRate:ratio**.5};
 }
 const effectsCache=new WeakMap(),specCache=new WeakMap();
+const unloadedEffects=Object.freeze(modificationEffects([]));
 export function fieldEffects(unit){
+ if(!unit.damage?.parts)return unloadedEffects;
  let row=effectsCache.get(unit);const revision=unit.damage?.revision??-1;
  if(row&&row.damage===unit.damage&&row.revision===revision&&row.kind===unit.kind)return row.effects;
  const effects=modificationEffects(Object.values(FIELD_RECIPES).filter(r=>fieldInstalled(unit,r.part)),vehicleBaseMass(unit.kind));

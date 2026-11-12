@@ -12,7 +12,8 @@ const m=prepareM02Diagnostic(makeMission());m.state.status='victory';m.load(m.sa
 for(const spec of [...Object.values(m.config.units),...Object.values(m.config.buildings)])spec.damage=0;
 const pad=m.transportSite(),existing=new Set(m.state.units.filter(u=>u.owner==='rai').map(u=>u.id));
 const obstructing=m.state.units.filter(u=>u.owner==='rai'&&Math.abs(u.x-pad.x)<pad.halfWidth+12&&Math.abs(u.y-pad.y)<pad.halfDepth+12);if(obstructing.length){assert(m.submitOrder(obstructing.map(u=>u.id),'move',{x:pad.x-220,y:pad.y+230}).ok);m.advance(40);}assert(m.requestTransport().ok);m.advance(29);const ids=[];
-for(let i=0;i<20;i++)ids.push(m.addUnit(i===9?'builder':'bukhanka','rai',{x:pad.x-100+i%4*36,y:260+Math.floor(i/4)*36},{heading:pad.heading}).id);
+// The second spawn clears the relocated oil well next to the landing apron.
+for(let i=0;i<20;i++)ids.push(m.addUnit(i===9?'builder':'bukhanka','rai',{x:pad.x-100+i%4*36,y:i===1?281:260+Math.floor(i/4)*36},{heading:pad.heading}).id);
 const veteran=m.entity(ids[0]);veteran.hp=veteran.maxHp*.73;veteran.paint='sand';veteran.designName='М03 — ветеран';
 const veteranCrew=m.state.campaign.personnel.crews[veteran.id].memberIds[0];m.state.campaign.personnel.soldiers[veteranCrew].kills=7;
 const preserved={hp:veteran.hp,maxHp:veteran.maxHp,paint:veteran.paint,designName:veteran.designName,components:structuredClone(veteran.components)};

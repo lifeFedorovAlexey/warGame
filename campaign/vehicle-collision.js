@@ -9,6 +9,7 @@ const fieldCar = [[1.03, -.075, 2.18, .43, .47], [.96, -.06, 2.10, 1.48, .78]];
 const cached = new WeakMap();
 export const collisionStatistics={queries:0,axisSeparated:0,penetrationQueries:0,poseGapCacheHits:0,radiusSeparated:0};
 const exactPoseGaps=new WeakMap(),solidEnvelopes=new WeakMap();
+const thresholdPoseGaps=new WeakMap();
 const skin = .055;
 // Owner-requested close-passing tolerance for every vehicle assembly.
 // Rendering keeps the full model size; people keep their existing footprint.
@@ -51,7 +52,6 @@ const hasPassage=(a,b)=>a.trafficPassThrough?.revision===a.commandRevision
 export function trafficCollisionRequired(a,b){
  if(a?.factoryVisit?.phase==='inside'||b?.factoryVisit?.phase==='inside')return false;
  if(!alliedVehicles(a,b))return true;
- if(a.trafficOnScreen===false&&b.trafficOnScreen===false)return false;
  return !(hasPassage(a,b)||hasPassage(b,a))||factoryTransfer(a)||factoryTransfer(b);
 }
 
@@ -140,10 +140,16 @@ export function footprintContact(a,b,separation=Infinity){
 }
 export const footprintGap=(a,b,separation=Infinity)=>footprintContact(a,b,separation).gap;
 // These pose envelopes are immutable: movement creates a new envelope. Only
-// cache the full signed-distance result, never a threshold-only search result.
+// Keep exact distances and threshold proofs separate. A threshold proof is
+// reusable only with the very same threshold, never as an exact distance.
 // Both keys are weak so completed search poses cannot accumulate here.
 function poseGap(a,b,separation=Infinity){
- if(separation!==Infinity)return footprintGap(a,b,separation);
+ if(separation!==Infinity){
+  let pairs=thresholdPoseGaps.get(a);const known=pairs?.get(b);
+  if(known?.separation===separation){collisionStatistics.thresholdCacheHits=(collisionStatistics.thresholdCacheHits??0)+1;return known.gap;}
+  const gap=footprintGap(a,b,separation);
+  if(!pairs){pairs=new WeakMap();thresholdPoseGaps.set(a,pairs);}pairs.set(b,{separation,gap});return gap;
+ }
  let pairs=exactPoseGaps.get(a);const known=pairs?.get(b);
  if(known!==undefined){collisionStatistics.poseGapCacheHits++;return known;}
  const gap=footprintGap(a,b);

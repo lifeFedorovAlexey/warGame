@@ -1,5 +1,4 @@
 import {perf} from './performance.js';
-import {createTrafficVisibility} from './traffic-visibility.js';
 import * as T from 'three';
 import {OrbitControls} from '../demo/vendor/OrbitControls.js';
 import {campaignCameraLimits,keepCameraAboveTerrain} from './camera-limits.js';
@@ -7,6 +6,7 @@ import {createAlphaMap} from '../demo/alpha-map.js';
 import {createDesertSky} from '../demo/sky.js';
 import {createVehicleLayer} from './vehicle-layer.js';
 import {createHealthBars} from './health-bars.js';
+import {createAttackPulses} from './attack-pulses.js';
 import {createFactoryServiceEffects,factoryShutterDamagePose} from './factory-service-effects.js';
 import {createFactoryRoadView} from './factory-road-view.js';
 import {createFactoryStatusBoards} from './factory-status-board.js';
@@ -138,6 +138,7 @@ export async function createCampaignWorld(host,config,sound,loading){
  const oilMarkers=(expedition?[]:config.oilFields).map(grid=>{const p=field.gridToWorld(grid),root=new T.Group();root.position.set(p.x,p.y,field.heightAt(p.x,p.y)+.25);const ring=new T.Mesh(new T.RingGeometry(10,11.5,24),new T.MeshBasicMaterial({color:'#baac72',transparent:true,opacity:.65,side:T.DoubleSide,depthWrite:false}));root.add(ring);const pipe=new T.Mesh(new T.CylinderGeometry(1.7,2,3,10),new T.MeshStandardMaterial({color:'#44463b',metalness:.6,roughness:.8}));pipe.rotation.x=Math.PI/2;pipe.position.z=1.5;root.add(pipe);scene.add(root);return{root,...p};});
  const artifactObjects=new Map();
  const orderRoutes=createOrderRoutes(T,scene,field);
+ const attackPulses=createAttackPulses(T,scene,field,vehicles.transforms);
  const ringGeometry=new T.RingGeometry(1,1.08,64),selectedMaterial=new T.MeshBasicMaterial({color:'#c0ce93',transparent:true,opacity:.85,depthWrite:false,side:T.DoubleSide,polygonOffset:true,polygonOffsetFactor:-1}),selectionRings=[];
  const blockerMaterial=new T.MeshBasicMaterial({color:'#ff352b',transparent:true,opacity:.95,depthWrite:false,side:T.DoubleSide,polygonOffset:true,polygonOffsetFactor:-1});
  selectionRoot.name='selection_rings';
@@ -206,6 +207,11 @@ export async function createCampaignWorld(host,config,sound,loading){
   return selected;
  }
  function screen(entity,height=8){const pose=entity.id&&vehicles.transforms.get(entity.id);const point=pose?screenPoint.copy(pose.position):screenPoint.set(entity.x,entity.y,field.heightAt(entity.x,entity.y));point.z+=height;point.project(camera);const rect=viewport;return{x:(point.x+1)*rect.width/2+rect.left,y:(1-point.y)*rect.height/2+rect.top,visible:point.z>-1&&point.z<1};}
+ function inView(point){
+  camera.updateMatrixWorld();
+  const {x,y,visible}=screen(point),{left,top,width,height}=viewport;
+  return visible&&x>=left&&x<=left+width&&y>=top&&y<=top+height;
+ }
  function centre(entity,distance){const offset=camera.position.clone().sub(controls.target);controls.maxPolarAngle=normalCameraLimit;controls.target.set(entity.x,entity.y,field.heightAt(entity.x,entity.y));if(distance)offset.setLength(distance);camera.position.copy(controls.target).add(offset);controls.update();}
  function focusStorySignal(signal,foreground){
   if(signal.kind!=='anomaly'){centre(signal,signal.distance);return;}
@@ -327,14 +333,12 @@ export async function createCampaignWorld(host,config,sound,loading){
   position.needsUpdate=true;
  }
  function commandMarker(point,hostile=false){marker.position.set(point.x,point.y,field.heightAt(point.x,point.y)+.4);marker.material.color.set(hostile?'#f4a081':'#cfb473');marker.visible=true;markerUntil=performance.now()+1000;}
- const trafficVisibility=createTrafficVisibility(T,camera,field,config),updateTrafficVisibility=trafficVisibility.update;
  function prepareFrame(mission,dt){
   const distance=camera.position.distanceTo(controls.target),pan=distance*dt*.7;let dx=(keys.has('KeyD')?1:0)-(keys.has('KeyA')?1:0),dy=(keys.has('KeyW')?1:0)-(keys.has('KeyS')?1:0);if(controls.enabled&&(dx||dy)){const right=panRight.setFromMatrixColumn(camera.matrixWorld,0);right.z=0;right.normalize();const forward=panForward.set(-right.y,right.x,0);const offset=right.multiplyScalar(dx*pan).addScaledVector(forward,dy*pan);camera.position.add(offset);controls.target.add(offset);}
   const bounds=mission.state.bounds,nw=field.gridToWorld(bounds.slice(0,2)),se=field.gridToWorld(bounds.slice(2));
   const tx=controls.enabled?T.MathUtils.clamp(controls.target.x,nw.x,se.x):controls.target.x,ty=controls.enabled?T.MathUtils.clamp(controls.target.y,se.y,nw.y):controls.target.y;
   camera.position.x+=tx-controls.target.x;camera.position.y+=ty-controls.target.y;
   controls.target.x=tx;controls.target.y=ty;controls.update();keepCameraAboveTerrain(camera,controls,field,minimumCameraHeight);
-  updateTrafficVisibility(mission);
  }
  function update(mission,selected,dt,live=false,showHealth=true){
   mission02Sites.update(mission);
@@ -538,8 +542,9 @@ export async function createCampaignWorld(host,config,sound,loading){
   }
   orderRoutes.update(mission,selected,camera,viewport.width,viewport.height,now);
   healthBars.update(mission,selected,camera,viewport.width,viewport.height,showHealth);
+  attackPulses.update(mission,camera,now*1000,viewport.height);
   renderer.render(scene,camera);
   lastWorldTime=time;
  }
- return{renderer,scene,camera,controls,terrain,field,vehicles,damage,healthBars,orderRoutes,setShadowQuality,prepareRendering,shaderPreparation,ground,pickEntity,screen,centre,focusStorySignal,setGhost,commandMarker,drawMinimapFog:fog.drawMinimap,storySignals,update,prepareFrame,updateTrafficVisibility,keys,buildingObjects:buildings,get minimumCameraHeight(){return minimumCameraHeight;},set minimumCameraHeight(value){minimumCameraHeight=value;},set fixedRenderScale(value){fixedRenderScale=value;},get fixedRenderScale(){return fixedRenderScale;},get statistics(){return{drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,vehicleDrawCalls:vehicles.drawCalls,vehicleLod:vehicles.lod,dustParticles:particles.length,dustLimit:256,...combat.statistics,...groundEffects.statistics,headlightBeams:headlightCount,projectors:construction.active,frameMs:frameAverage*1000,renderScale:renderer.getPixelRatio(),terrainMode,shadowUpdates,shadowQuality,shadowHz,fog:fog.stats,damage:damage.statistics};}};
+ return{renderer,scene,camera,controls,terrain,field,vehicles,damage,healthBars,attackPulses,orderRoutes,setShadowQuality,prepareRendering,shaderPreparation,ground,pickEntity,screen,inView,centre,focusStorySignal,setGhost,commandMarker,drawMinimapFog:fog.drawMinimap,storySignals,update,prepareFrame,keys,buildingObjects:buildings,get minimumCameraHeight(){return minimumCameraHeight;},set minimumCameraHeight(value){minimumCameraHeight=value;},set fixedRenderScale(value){fixedRenderScale=value;},get fixedRenderScale(){return fixedRenderScale;},get statistics(){return{drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,vehicleDrawCalls:vehicles.drawCalls,vehicleLod:vehicles.lod,dustParticles:particles.length,dustLimit:256,...combat.statistics,...groundEffects.statistics,headlightBeams:headlightCount,projectors:construction.active,frameMs:frameAverage*1000,renderScale:renderer.getPixelRatio(),terrainMode,shadowUpdates,shadowQuality,shadowHz,fog:fog.stats,damage:damage.statistics};}};
 }

@@ -17,7 +17,8 @@ assert.equal(alerts.active(4000)[0].kind,'objective');alerts.observe(mission,[{.
 const beforeAttackMessages=messages.length;
 alerts.event({type:'under-attack',x:800,y:800,building:false},5000);
 for(let t=5001;t<7500;t+=10)alerts.event({type:'under-attack',x:805,y:805,building:true},t);
-assert.equal(alerts.pings.filter(p=>p.kind==='attack').length,1,'Burst fire is coalesced');assert.equal(alerts.active(8000).length,0,'Repeated hits do not extend the ping');
+assert.equal(alerts.pings.filter(p=>p.kind==='attack').length,1,'Burst fire is coalesced');assert.equal(alerts.active(8000).filter(p=>p.kind==='attack').length,1,'Continued fire keeps one warning alive');
+assert.equal(alerts.active(10500).length,0,'Warning expires after fire stops');
 alerts.event({type:'under-attack',x:805,y:805,building:true},11000);assert.equal(alerts.active(11000).length,1);
 assert.equal(messages.length,beforeAttackMessages,'Attacks use the existing visual ping without an extra announcement');
 const restored=new MinimapAlerts(()=>assert.fail('Saved discoveries must not replay'));restored.reset(true);restored.observe({...mission,state:JSON.parse(JSON.stringify(mission.state))},tasks,12000);assert.equal(restored.pings.length,0);

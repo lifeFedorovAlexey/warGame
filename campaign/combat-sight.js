@@ -3,6 +3,12 @@ import {generatorLayout} from './generator-layout.js';
 import {M02_STATION_SCALE} from './mission02-base-layout.js';
 
 const profiles=new Map();
+const volumeRadii=new WeakMap();
+function sightRadius(boxes){
+ let radius=volumeRadii.get(boxes);if(radius!==undefined)return radius;
+ radius=0;for(const [x,y,,width,depth] of boxes)radius=Math.max(radius,Math.hypot(Math.abs(x)+width/2,Math.abs(y)+depth/2));
+ volumeRadii.set(boxes,radius);return radius;
+}
 // Local metres: [centre x, centre y, bottom, width, depth, top]. These are
 // opaque structural volumes from the existing prefabs, not the larger
 // construction exclusion footprint. Open pump/tower frames stay open.
@@ -54,6 +60,7 @@ function rayBox(ax,ay,az,bx,by,bz,box,progress){
 
 export function clearCombatSight(mission,from,to){
  const field=mission.field,scale=mission.config.worldScale;
+ const left=Math.min(from.x,to.x),right=Math.max(from.x,to.x),bottom=Math.min(from.y,to.y),top=Math.max(from.y,to.y);
  const a=field.heightAt(from.x,from.y)+(['mg-tower','m03-flame-tower'].includes(from.kind)?12:SCAV_PROFILES[from.kind]?.height??3.2)*scale;
  const targetSpec=mission.config.buildings[to.kind];
  const targetHeight=targetSpec?(targetSpec.realSizeMetres?.[2]??3.2)*(to.kind==='mg-tower'?.74:.42):isInfantry(to)?1:1.5;
@@ -67,6 +74,10 @@ export function clearCombatSight(mission,from,to){
   if(building.hp<=0||building.id===from.id||building.id===to.id)continue;
   const spec=mission.buildingSpec(building),boxes=sightVolumes(building,spec,scale);
   if(!boxes.length)continue;
+  // The radius encloses every rotated structural volume. Buildings outside
+  // the ray's XY bounds cannot occlude it, so avoid terrain and ray tests.
+  const radius=sightRadius(boxes)*scale;
+  if(building.x+radius<left||building.x-radius>right||building.y+radius<bottom||building.y-radius>top)continue;
   const c=Math.cos(building.rotation??0),s=Math.sin(building.rotation??0),z=building.groundHeight??field.heightAt(building.x,building.y),
    fx=(from.x-building.x)/scale,fy=(from.y-building.y)/scale,tx=(to.x-building.x)/scale,ty=(to.y-building.y)/scale;
   const progress=building.completed?1:Math.max(0,Math.min(1,building.progress??1));

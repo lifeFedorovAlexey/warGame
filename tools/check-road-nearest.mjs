@@ -27,6 +27,13 @@ for(const x of [-200,-100,0,100,200])for(const radius of [0,5,32])for(const epsi
 }
 for(const {point,radius} of points)assert.deepEqual(roads.nearest(point,radius),reference.call(roads,point,radius));
 assert.equal(roads.nearest({x:0,y:150},20).segment.pathId,'tie-first','The equal-distance winner retains insertion order');
+const waypoint={x:0,y:150};
+assert.equal(roads.nearestWaypoint(waypoint,0),null);
+const projected=roads.nearestWaypoint(waypoint,20);
+assert.equal(roads.nearestWaypoint(waypoint,20),projected,'Repeated steering previews reuse the same projection');
+assert.deepEqual(projected,roads.nearest(waypoint,20));
+waypoint.x=20;
+assert.deepEqual(roads.nearestWaypoint(waypoint,20),roads.nearest(waypoint,20),'Moving a waypoint invalidates the projection');
 const authored=new RoadTraffic({roadNetwork:JSON.parse(fs.readFileSync('assets/maps/alpha/roads.json','utf8'))});
 const realPoints=Array.from({length:12000},(_,i)=>({point:{x:random()*4096-2048,y:random()*4096-2048},radius:[0,5,32,155][i%4]}));
 for(const {point,radius} of realPoints)assert.deepEqual(authored.nearest(point,radius),reference.call(authored,point,radius));

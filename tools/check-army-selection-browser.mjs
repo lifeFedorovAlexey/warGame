@@ -27,21 +27,25 @@ try{
   const critical=m.addUnit('bukhanka','rai',{x:p.x-40,y:p.y+85});critical.hp=critical.maxHp*.3;
   const retreating=m.addUnit('bukhanka','rai',{x:p.x+80,y:p.y-35});retreating.combatRetreat={status:'travelling'};
   const repairing=m.addUnit('bukhanka','rai',{x:p.x+120,y:p.y-35});repairing.factoryVisit={factoryId:'test-factory',phase:'waiting'};repairing.hp=repairing.maxHp*.9;
+  const stranded=m.addUnit('bukhanka','rai',{x:p.x+120,y:p.y+40});stranded.hp=stranded.maxHp*.4;
+  stranded.factoryVisit={factoryId:'test-factory',phase:'waiting'};
+  stranded.navigation={reason:'factory-route-unavailable'};
   m.addUnit('bukhanka','scavs',{x:p.x+700,y:p.y});m.addUnit('bukhanka','rai',{x:p.x+750,y:p.y},{hp:0});
   c.select([worker.id],false,false);c.advance(0);c.world.centre(p,360);
-  return {ready:ready.map(u=>u.id),worker:worker.id,wounded:wounded.id,critical:critical.id};
+  return {ready:ready.map(u=>u.id),stranded:stranded.id,worker:worker.id,wounded:wounded.id,critical:critical.id};
  });
  const selected=()=>page.evaluate(()=>campaign.selected),state=()=>page.evaluate(()=>campaign.mission.state.units.map(u=>({id:u.id,task:u.task,path:u.path,combatPolicy:u.combatPolicy,combatRetreat:u.combatRetreat,factoryVisit:u.factoryVisit})));
  const original=await state(),camera=await page.evaluate(()=>campaign.world.controls.target.toArray());
- await page.keyboard.press('F2');assert.deepEqual(new Set(await selected()),new Set(fixture.ready));assert.deepEqual(await state(),original);
+ const available=[...fixture.ready,fixture.stranded];
+ await page.keyboard.press('F2');assert.deepEqual(new Set(await selected()),new Set(available));assert.deepEqual(await state(),original);
  assert.deepEqual(await page.evaluate(()=>campaign.world.controls.target.toArray()),camera);
- assert.equal(await page.locator('#select-army').getAttribute('aria-pressed'),'true');
- await page.evaluate(id=>campaign.select([id],false,false),fixture.worker);await page.locator('#select-army').click();assert.deepEqual(new Set(await selected()),new Set(fixture.ready));
+ await page.waitForFunction(()=>document.getElementById('select-army').getAttribute('aria-pressed')==='true');
+ await page.evaluate(id=>campaign.select([id],false,false),fixture.worker);await page.locator('#select-army').click();assert.deepEqual(new Set(await selected()),new Set(available));
  await page.keyboard.press('KeyF');await page.keyboard.press('F2');assert.equal(await page.evaluate(()=>campaign.state.orderMode),'attack');assert.deepEqual(await state(),original);await page.keyboard.press('Escape');
  await page.locator('#combat-modes').click();await page.locator('[data-policy=retreat][data-value=heavy]').click();await page.keyboard.press('Escape');await page.keyboard.press('F2');
- assert.deepEqual(new Set(await selected()),new Set([...fixture.ready,fixture.wounded]));
+ assert.deepEqual(new Set(await selected()),new Set([...available,fixture.wounded]));
  await page.locator('#combat-modes').click();await page.locator('[data-policy=response][data-value=ignore]').click();await page.keyboard.press('Escape');await page.keyboard.press('F2');
- assert.deepEqual(new Set(await selected()),new Set([...fixture.ready,fixture.wounded]),'Hold fire remains selectable and keeps its fire policy');
+ assert.deepEqual(new Set(await selected()),new Set([...available,fixture.wounded]),'Hold fire remains selectable and keeps its fire policy');
  assert(await page.evaluate(ids=>ids.every(id=>campaign.mission.entity(id).combatPolicy.response==='ignore'),fixture.ready));
  await page.locator('#design-toggle').click();await page.locator('#project-name').focus();const beforeTyping=await selected();await page.keyboard.press('F2');assert.deepEqual(await selected(),beforeTyping);await page.locator('[data-close-designer]').click();
  await page.evaluate(id=>{campaign.select([id],false,false);const input=document.createElement('div');input.id='typing-test';input.contentEditable='true';document.body.append(input);input.focus();},fixture.worker);
@@ -51,12 +55,13 @@ try{
   const button=document.getElementById('select-army'),r=button.getBoundingClientRect(),icon=button.querySelector('svg'),i=icon.getBoundingClientRect(),roster=document.getElementById('roster').getBoundingClientRect(),css=getComputedStyle(button);
   return {inViewport:r.left>=0&&r.top>=0&&r.right<=innerWidth&&r.bottom<=innerHeight,beside:r.right<=roster.left,centered:Math.abs(r.x+r.width/2-i.x-i.width/2)<.5&&Math.abs(r.y+r.height/2-i.y-i.height/2)<.5,icon:icon.getBBox().width>0,background:css.backgroundColor,border:css.borderTopWidth,caption:button.textContent.trim(),key:button.getAttribute('aria-keyshortcuts')};
  });
- for(const [label,width,height] of [['wide',1440,900],['narrow',390,844],['landscape',844,390]]){
+ for(const [label,width,height] of [['wide',1440,900],['landscape',844,390],['small-landscape',667,375]]){
   await page.setViewportSize({width,height});await page.waitForTimeout(250);const a=await audit();assert(a.inViewport&&a.beside&&a.centered&&a.icon,JSON.stringify(a));assert.equal(a.border,'0px');assert.equal(a.background,'rgba(0, 0, 0, 0)');assert.equal(a.caption,'');assert.equal(a.key,'F2');
   await page.screenshot({path:folder+'/'+label+'.png'});
  }
  await page.setViewportSize({width:1440,height:900});await page.waitForTimeout(150);await page.locator('.squad').screenshot({path:folder+'/controls.png'});
  await page.evaluate(id=>{for(const u of campaign.mission.state.units)if(u.kind!=='builder')u.hp=0;campaign.select([id],false,false);campaign.advance(0);},fixture.worker);
- assert(await page.locator('#select-army').isDisabled());await page.keyboard.press('F2');assert.deepEqual(await selected(),[fixture.worker]);
+ await page.waitForFunction(()=>document.getElementById('select-army').disabled);
+ await page.keyboard.press('F2');assert.deepEqual(await selected(),[fixture.worker]);
  assert.deepEqual(errors,[]);console.log('PASS: F2 and button, offscreen army, retreat modes, repairs excluded, preserved orders/fire policy/attack cursor, typing guard, empty army, desktop/narrow/landscape');
 }finally{await browser.close();}
