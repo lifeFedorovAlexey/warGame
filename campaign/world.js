@@ -16,7 +16,7 @@ import {createScavBasePrefab} from './scav-base-prefabs.js';
 import {createScavEmplacement} from './scav-emplacement.js';
 import {createScavYardSurface} from './scav-yard-surface.js';
 import {aimTowerWeapon,towerDamagePose} from './tower-weapon.js';
-import {mgRecoil} from './mg-burst.js';
+import {mgRecoil,twinBarrelDelay} from './mg-burst.js';
 import {createShadowCasters} from './shadow-casters.js';
 import {createGroundEffects} from './ground-effects.js';
 import {updateOilPump} from './oil-pump.js';
@@ -397,10 +397,11 @@ export async function createCampaignWorld(host,config,sound,loading){
    const fade=unit.damage?.wreck&&unit.removeAt>0?T.MathUtils.clamp(time-unit.removeAt+2,0,2):0;
    const scan=unit.kind==='sensor'?radarAngle(unit,time+(live?mission.accumulator:0)):0;
    const shotAge=now-(shotTimes.get(unit.id)??-Infinity);
-   const recoil=unit.kind==='bukhanka'||unit.kind==='raider'?mgRecoil(shotAge):shotAge<.065?now:0;
+   const recoil=unit.kind==='bukhanka'||unit.kind==='raider'||unit.kind==='twin-machinegun'?mgRecoil(shotAge):shotAge<.065?now:0;
+   const secondRecoil=unit.kind==='twin-machinegun'?mgRecoil(shotAge-twinBarrelDelay):0;
    shadowCasters.watch(unit.id,unit.kind,unit.damage?.wreck,position.x,position.y,position.z,heading,
     blend(unit.previousSteering,unit.steering),blend(unit.previousWheelDistance,unit.wheelDistance),
-    unit.projector?.yaw,unit.projector?.pitch,aim?.x,aim?.y,aim?.z,recoil,
+    unit.projector?.yaw,unit.projector?.pitch,aim?.x,aim?.y,aim?.z,recoil,secondRecoil,
     representation?.lod,fade,scan,matrix.elements[2],matrix.elements[6],matrix.elements[10]);
   }
   groundEffects.update(dt,vehicles.visible,distance);
@@ -459,7 +460,7 @@ export async function createCampaignWorld(host,config,sound,loading){
    const aimed=building&&aimTowerWeapon(building,from,field,config.worldScale,event.to,0);
    const mount=aimed??building?.getObjectByName('muzzle');
    const start=vehicles.muzzles.get(from.id)??(mount?mount.getWorldPosition(new T.Vector3()):new T.Vector3(from.x,from.y,(from.groundHeight??field.heightAt(from.x,from.y))+(from.kind==='mg-tower'?10.8:1.5)*config.worldScale));
-   combat.spawn(start,end,event.weapon,now,camera,event);
+   combat.spawn(start,end,event.weapon,now,camera,{...event,barrels:from.kind==='twin-machinegun'?2:1});
    if(aimed&&from.aimTarget!==event.to)aimTowerWeapon(building,from,field,config.worldScale);
   }
   combat.updateBurning(mission,vehicles.transforms);
@@ -468,8 +469,8 @@ export async function createCampaignWorld(host,config,sound,loading){
    if(!target||target.owner!=='rai'&&!mission.visibleAt(target.x,target.y))return null;
    const p=combatContact(start,target,config,field);
    return new T.Vector3(p.x,p.y,p.z);
-  },id=>{
-   if(visibleIds.has(id))return vehicles.muzzles.get(id);
+  },(id,barrel=0)=>{
+   if(visibleIds.has(id))return (barrel===1?vehicles.secondaryMuzzles:vehicles.muzzles).get(id)??null;
    const attacker=mission.state.buildings.find(building=>building.id===id&&building.hp>0);
    if(!attacker||attacker.owner!=='rai'&&!mission.visibleAt(attacker.x,attacker.y))return null;
    return buildings.get(id)?.getObjectByName('muzzle')?.getWorldPosition(new T.Vector3());

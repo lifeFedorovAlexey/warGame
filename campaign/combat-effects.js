@@ -5,7 +5,7 @@ import {createExplosionEffects} from './explosion-effects.js';
 
 export function createCombatEffects(T,scene,scale,sound,field) {
   const limit=128,impactLimit=32,source=new T.Vector3(),target=new T.Vector3();
-  const roundLimit=limit*mgRoundCount;
+  const roundLimit=limit*mgRoundCount*2;
   const shots=[],impacts=[],matrix=new T.Object3D(),forward=new T.Vector3(0,1,0);
   const tracer=new T.InstancedMesh(new T.CylinderGeometry(.27,.5,1,5),new T.MeshBasicMaterial({
     color:'#ffe39a',transparent:true,opacity:.91,depthWrite:false,toneMapped:false,blending:T.AdditiveBlending
@@ -60,15 +60,16 @@ export function createCombatEffects(T,scene,scale,sound,field) {
   }
 
   return {
-    spawn(start,end,weapon,now,camera,{from,targetId,surface='armor',destroyed=false}={}) {
+    spawn(start,end,weapon,now,camera,{from,targetId,surface='armor',destroyed=false,barrels=1}={}) {
       if(weapon==='grenade')return;
       const round=roundFrom(start,end,weapon);
       if(!round)return;
-      shots.push({from,start,end,weapon,born:now,targetId,surface,destroyed,rounds:[round]});
+      barrels=weapon==='mg'&&barrels===2?2:1;
+      shots.push({from,start,end,weapon,barrels,born:now,targetId,surface,destroyed,rounds:[round]});
       if(weapon==='flame')flame.spawn(start,end,now,round.flight);
       if(shots.length>limit)shots.shift();
       const {gain,pan}=spatial(start,camera);
-      sound?.shot(weapon,gain,pan);
+      sound?.shot(weapon,gain,pan,barrels);
     },
     hit,
     explode(point,radius,now,camera){explosions.spawn(point,radius,now);const {gain,pan}=spatial(point,camera);sound?.impact(gain,pan,'debris');},
@@ -91,11 +92,15 @@ export function createCombatEffects(T,scene,scale,sound,field) {
       flareLight.intensity=0;
       for(let i=shots.length-1;i>=0;i--){
         const shot=shots[i],age=now-shot.born,fire=shot.weapon==='flame';
-        const burst=shot.weapon==='mg',roundCount=burst?mgRoundCount:1;
-        const liveMuzzle=burst?resolveMuzzle?.(shot.from):null;
+        const burst=shot.weapon==='mg',barrels=burst?shot.barrels:1,roundCount=burst?mgRoundCount*barrels:1;
+        // Resolve each barrel once per frame. Hidden/removed shooters return
+        // null, cancelling their remaining pulses exactly as for a single gun.
+        const primary=burst?resolveMuzzle?.(shot.from,0):null;
+        const secondary=barrels===2?resolveMuzzle?.(shot.from,1):null;
         let finished=true;
         for(let j=0;j<roundCount;j++){
-          const elapsed=age-j*mgRoundSpacing;
+          const liveMuzzle=j%barrels===0?primary:secondary;
+          const elapsed=age-j*mgRoundSpacing/barrels;
           if(elapsed< -1e-9){finished=false;break;}
           if(shot.rounds[j]===undefined){
             if(liveMuzzle===null)shot.rounds[j]=null;

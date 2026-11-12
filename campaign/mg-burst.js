@@ -1,6 +1,7 @@
 // The three transients in combat-sfx/mg-burst.ogg are spaced by 120 ms.
 export const mgRoundCount = 3;
 export const mgRoundSpacing = .12;
+export const twinBarrelDelay = mgRoundSpacing / 2;
 export const mgFlashDuration = .065;
 
 export function mgRecoil(age) {

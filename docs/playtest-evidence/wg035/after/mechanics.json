@@ -1,0 +1,36 @@
+[
+  {
+    "ammo": false,
+    "results": [
+      {
+        "kind": "bukhanka",
+        "damage": 9,
+        "cooldown": 0.55,
+        "range": 145
+      },
+      {
+        "kind": "twin-machinegun",
+        "damage": 12.599999999999994,
+        "cooldown": 0.55,
+        "range": 145
+      }
+    ]
+  },
+  {
+    "ammo": true,
+    "results": [
+      {
+        "kind": "bukhanka",
+        "damage": 11.25,
+        "cooldown": 0.55,
+        "range": 145
+      },
+      {
+        "kind": "twin-machinegun",
+        "damage": 15.75,
+        "cooldown": 0.55,
+        "range": 145
+      }
+    ]
+  }
+]
