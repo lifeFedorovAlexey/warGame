@@ -3,8 +3,8 @@ import layout from '../assets/campaign/alpha/mission02/layout.js';
 export const M02={
  id:'m02',version:2,bounds:[0,0,53,127],checkInterval:.5,globalCap:40,maxRaids:2,
  factories:{
-  east_factory:{seconds:12,size:6,cap:12,activation:'proximity',radius:390,roster:['raider','scav-zaporozhets']},
-  hill_factory:{seconds:18,size:6,patrolSize:4,cap:12,activation:'immediate',radius:400,roster:['raider','scav-zaporozhets','scav-firetruck']},
+  east_factory:{seconds:12,size:6,cap:12,activation:'proximity',delay:120,radius:390,roster:['raider','scav-zaporozhets']},
+  hill_factory:{seconds:18,size:6,patrolSize:4,raidDelay:120,cap:12,activation:'immediate',radius:400,roster:['raider','scav-zaporozhets','scav-firetruck']},
   energy_hub:{seconds:16,size:8,cap:16,activation:'south',delay:360,radius:500,roster:['raider','scav-bus','scav-firetruck']},
  },
  technologies:{east_factory:'flamer-upgrade',hill_factory:'twin-machinegun',sensor_outpost:'sensor',energy_hub:'power-module'},

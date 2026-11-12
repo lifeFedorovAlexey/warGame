@@ -1,0 +1,84 @@
+{
+  "hits": {},
+  "peak": 0,
+  "saveLoad": true,
+  "mode": "opening",
+  "time": 299.9999999999997,
+  "status": "running",
+  "raids": {},
+  "events": [],
+  "producers": [
+    {
+      "id": "b6",
+      "camp": "nw-pocket",
+      "type": "vehicles",
+      "count": 0,
+      "waiting": [],
+      "nextAt": null,
+      "waitingUnits": []
+    },
+    {
+      "id": "b11",
+      "camp": "nw-west",
+      "type": "vehicles",
+      "count": 0,
+      "waiting": [],
+      "nextAt": null,
+      "waitingUnits": []
+    },
+    {
+      "id": "b18",
+      "camp": "nw-east",
+      "type": "vehicles",
+      "count": 0,
+      "waiting": [],
+      "nextAt": null,
+      "waitingUnits": []
+    },
+    {
+      "id": "b28",
+      "camp": "west-south",
+      "type": "vehicles",
+      "count": 0,
+      "waiting": [],
+      "nextAt": null,
+      "waitingUnits": []
+    },
+    {
+      "id": "b35",
+      "camp": "nw-pocket",
+      "type": "infantry",
+      "count": 0,
+      "waiting": [],
+      "nextAt": null,
+      "waitingUnits": []
+    },
+    {
+      "id": "b63",
+      "camp": "nw-west",
+      "type": "infantry",
+      "count": 0,
+      "waiting": [],
+      "nextAt": null,
+      "waitingUnits": []
+    },
+    {
+      "id": "b92",
+      "camp": "nw-east",
+      "type": "infantry",
+      "count": 0,
+      "waiting": [],
+      "nextAt": null,
+      "waitingUnits": []
+    },
+    {
+      "id": "b122",
+      "camp": "west-south",
+      "type": "infantry",
+      "count": 0,
+      "waiting": [],
+      "nextAt": null,
+      "waitingUnits": []
+    }
+  ]
+}

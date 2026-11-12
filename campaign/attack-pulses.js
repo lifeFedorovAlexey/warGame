@@ -13,7 +13,8 @@ export function createAttackPulses(T,scene,field,transforms){
  function update(mission,camera,now,height){
   count=0;let cursor=0;
   const vertex=(x,y,alpha)=>{
-   positions.set([x,y,field.heightAt(x,y)+1.2],cursor*3);tints.set([1,.28,.12,alpha],cursor*4);cursor++;
+   const p=cursor*3,c=cursor*4;positions[p]=x;positions[p+1]=y;positions[p+2]=field.heightAt(x,y)+1.2;
+   tints[c]=1;tints[c+1]=.28;tints[c+2]=.12;tints[c+3]=alpha;cursor++;
   };
   for(const p of pings){
    if(p.kind!=='attack'||now>=p.until||count>=capacity)continue;
