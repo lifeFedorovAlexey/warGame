@@ -26,7 +26,8 @@ for(const cue of cues){
 }
 assert.equal(audio.clips[cues[0]].sha256,'84d48f6554e6f96960c97427611631ffcbfb21c75a565ddec8933d1ba8202411');
 assert.equal(audio.clips[cues.at(-1)].sha256,'bafddb0be0d69e91f923b0c3f9e28d67e417d5a8b74e24b8e9d278f9206b2124');
-for(const s of original.scenes.filter(s=>s.id!==id)){
+const editedScenes=new Set(edits.scenes.map(s=>s.id));
+for(const s of original.scenes.filter(s=>!editedScenes.has(s.id))){
  assert.deepEqual(story.scenes.find(scene=>scene.id===s.id),s);
  for(const cue of s.cues){assert.deepEqual(story.dialogue.find(l=>l.id===cue),original.dialogue.find(l=>l.id===cue));assert.deepEqual(audio.clips[cue],originalAudio.clips[cue]);}
 }

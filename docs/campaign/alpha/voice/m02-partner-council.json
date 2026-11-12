@@ -1,0 +1,337 @@
+{
+  "scene": "m02-radio-entrance",
+  "status": "awaiting-owner-listening-before-merge",
+  "approval": "Approved by owner in audit chat 01a1ccf2-3b06-7710-809e-d0a5dc9fbadd on 2026-11-12, including final commander line.",
+  "sourceDraftRevision": 3,
+  "savedDraftRevision": 4,
+  "generatedRecordings": 8,
+  "reusedRecordings": 1,
+  "reservedCredits": 378,
+  "originalAudioPreserved": true,
+  "otherScenesUnchanged": true,
+  "cues": [
+    "m02-radio-entrance-1",
+    "m02-v4-council-1",
+    "m02-v4-council-2",
+    "m02-v4-council-3",
+    "m02-v4-council-4",
+    "m02-v4-council-5",
+    "m02-v4-council-6",
+    "m02-v4-council-7",
+    "m02-v4-council-8"
+  ],
+  "retiredCues": [
+    "m02-radio-entrance-2"
+  ],
+  "trigger": "Обнаружен проход; оба ДОТа живы.",
+  "lines": [
+    {
+      "id": "m02-v4-council-1",
+      "kind": "story",
+      "speaker": "raider",
+      "profile": "story-raider",
+      "voiceId": "hD8aK7CmEPgH3mbFO08e",
+      "voiceName": "Ivo - Calming, chill and narrative",
+      "text": "Проезд закрыт. Совет согласовал с партнёрами.",
+      "spokenText": "[matter-of-fact] Проезд закрыт. Совет согласовал с партнёрами.",
+      "modelId": "eleven_v4",
+      "estimatedCredits": 62
+    },
+    {
+      "id": "m02-v4-council-2",
+      "kind": "story",
+      "speaker": "commander",
+      "profile": "story-commander",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "text": "А сам ваш совет что-нибудь решает?",
+      "spokenText": "[dry, skeptical] А сам ваш совет что-нибудь решает?",
+      "modelId": "eleven_v4",
+      "estimatedCredits": 51
+    },
+    {
+      "id": "m02-v4-council-3",
+      "kind": "story",
+      "speaker": "raider",
+      "profile": "story-raider",
+      "voiceId": "hD8aK7CmEPgH3mbFO08e",
+      "voiceName": "Ivo - Calming, chill and narrative",
+      "text": "Мы всё сами решаем.",
+      "spokenText": "[matter-of-fact] Мы всё сами решаем.",
+      "modelId": "eleven_v4",
+      "estimatedCredits": 36
+    },
+    {
+      "id": "m02-v4-council-4",
+      "kind": "story",
+      "speaker": "commander",
+      "profile": "story-commander",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "text": "А если партнёрам не понравится?",
+      "spokenText": "[dry, skeptical] А если партнёрам не понравится?",
+      "modelId": "eleven_v4",
+      "estimatedCredits": 48
+    },
+    {
+      "id": "m02-v4-council-5",
+      "kind": "story",
+      "speaker": "raider",
+      "profile": "story-raider",
+      "voiceId": "hD8aK7CmEPgH3mbFO08e",
+      "voiceName": "Ivo - Calming, chill and narrative",
+      "text": "Ну, совет поменяет решение.",
+      "spokenText": "[matter-of-fact] Ну, совет поменяет решение.",
+      "modelId": "eleven_v4",
+      "estimatedCredits": 44
+    },
+    {
+      "id": "m02-v4-council-6",
+      "kind": "story",
+      "speaker": "commander",
+      "profile": "story-commander",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "text": "А если не поменяет?",
+      "spokenText": "[dry, skeptical] А если не поменяет?",
+      "modelId": "eleven_v4",
+      "estimatedCredits": 36
+    },
+    {
+      "id": "m02-v4-council-7",
+      "kind": "story",
+      "speaker": "raider",
+      "profile": "story-raider",
+      "voiceId": "hD8aK7CmEPgH3mbFO08e",
+      "voiceName": "Ivo - Calming, chill and narrative",
+      "text": "Тогда партнёры поменяют совет.",
+      "spokenText": "[matter-of-fact] Тогда партнёры поменяют совет.",
+      "modelId": "eleven_v4",
+      "estimatedCredits": 47
+    },
+    {
+      "id": "m02-v4-council-8",
+      "kind": "story",
+      "speaker": "commander",
+      "profile": "story-commander",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "text": "Но только если согласует это решение.",
+      "spokenText": "[dry, skeptical] Но только если согласует это решение.",
+      "modelId": "eleven_v4",
+      "estimatedCredits": 54
+    }
+  ],
+  "clips": {
+    "m02-radio-entrance-1": {
+      "file": "recordings/elevenlabs/m02-radio-entrance-1-8c79427eb926.mp3",
+      "duration": 2.8,
+      "leadingSilence": 0.04,
+      "trailingSilence": 0.16999999999999993,
+      "speaker": "scout",
+      "text": "Проход перекрыт. Впереди два ДОТа.",
+      "sha256": "8c79427eb92670d8afb3ee4889a81a4fc80a2c79f066d73b04e6628762758a57",
+      "bytes": 46018,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:58:24.979Z",
+      "draftRevision": 0
+    },
+    "m02-v4-council-1": {
+      "file": "recordings/elevenlabs/m02-v4-council-1-67c055698077.mp3",
+      "speaker": "raider",
+      "text": "Проезд закрыт. Совет согласовал с партнёрами.",
+      "spokenText": "[matter-of-fact] Проезд закрыт. Совет согласовал с партнёрами.",
+      "voiceId": "hD8aK7CmEPgH3mbFO08e",
+      "voiceName": "Ivo - Calming, chill and narrative",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "67c05569807749f72127949fd6dabfe1dcd7b257b52022f8744e78c057df5a3f",
+      "bytes": 48526,
+      "generatedAt": "2026-11-12T09:36:00.160Z",
+      "duration": 2.96,
+      "leadingSilence": 0.11,
+      "trailingSilence": 0.27
+    },
+    "m02-v4-council-2": {
+      "file": "recordings/elevenlabs/m02-v4-council-2-5ca42c53efef.mp3",
+      "speaker": "commander",
+      "text": "А сам ваш совет что-нибудь решает?",
+      "spokenText": "[dry, skeptical] А сам ваш совет что-нибудь решает?",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "5ca42c53efef865eec8c1356a53c6c36ce27e15d16ab9a08e824d21aa62bf278",
+      "bytes": 47272,
+      "generatedAt": "2026-11-12T09:36:00.068Z",
+      "duration": 2.88,
+      "leadingSilence": 0.19,
+      "trailingSilence": 0.2999999999999998
+    },
+    "m02-v4-council-3": {
+      "file": "recordings/elevenlabs/m02-v4-council-3-fdfb7f839427.mp3",
+      "speaker": "raider",
+      "text": "Мы всё сами решаем.",
+      "spokenText": "[matter-of-fact] Мы всё сами решаем.",
+      "voiceId": "hD8aK7CmEPgH3mbFO08e",
+      "voiceName": "Ivo - Calming, chill and narrative",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "fdfb7f839427a0e1af59defe19799b566073dde55f7df5ada8c62343b5720a37",
+      "bytes": 30554,
+      "generatedAt": "2026-11-12T09:36:01.123Z",
+      "duration": 1.84,
+      "leadingSilence": 0.03,
+      "trailingSilence": 0.43000000000000016
+    },
+    "m02-v4-council-4": {
+      "file": "recordings/elevenlabs/m02-v4-council-4-1b011fc39de4.mp3",
+      "speaker": "commander",
+      "text": "А если партнёрам не понравится?",
+      "spokenText": "[dry, skeptical] А если партнёрам не понравится?",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "1b011fc39de4d7763e5e54560e13c776892ff482eb6e04926f830f81f572671f",
+      "bytes": 38077,
+      "generatedAt": "2026-11-12T09:36:01.435Z",
+      "duration": 2.32,
+      "leadingSilence": 0.22,
+      "trailingSilence": 0.2799999999999998
+    },
+    "m02-v4-council-5": {
+      "file": "recordings/elevenlabs/m02-v4-council-5-9446848baf56.mp3",
+      "speaker": "raider",
+      "text": "Ну, совет поменяет решение.",
+      "spokenText": "[matter-of-fact] Ну, совет поменяет решение.",
+      "voiceId": "hD8aK7CmEPgH3mbFO08e",
+      "voiceName": "Ivo - Calming, chill and narrative",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "9446848baf56cf8bc1b9cfe405b404ff24a6c9c9a7e9ef4fd56bc0a4e807cdd8",
+      "bytes": 39331,
+      "generatedAt": "2026-11-12T09:36:02.293Z",
+      "duration": 2.4,
+      "leadingSilence": 0.07,
+      "trailingSilence": 0.18999999999999995
+    },
+    "m02-v4-council-6": {
+      "file": "recordings/elevenlabs/m02-v4-council-6-f89b54c9f3d4.mp3",
+      "speaker": "commander",
+      "text": "А если не поменяет?",
+      "spokenText": "[dry, skeptical] А если не поменяет?",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "f89b54c9f3d49779d0e8fab5b347527d35dca28bf61e79fc3e3c1efd45558c08",
+      "bytes": 31807,
+      "generatedAt": "2026-11-12T09:36:02.548Z",
+      "duration": 1.92,
+      "leadingSilence": 0.18,
+      "trailingSilence": 0.3599999999999999
+    },
+    "m02-v4-council-7": {
+      "file": "recordings/elevenlabs/m02-v4-council-7-727b6657064d.mp3",
+      "speaker": "raider",
+      "text": "Тогда партнёры поменяют совет.",
+      "spokenText": "[matter-of-fact] Тогда партнёры поменяют совет.",
+      "voiceId": "hD8aK7CmEPgH3mbFO08e",
+      "voiceName": "Ivo - Calming, chill and narrative",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "727b6657064d4ea23ac4c3351bde8574e2794f7927a161b5b2405484253519c6",
+      "bytes": 36823,
+      "generatedAt": "2026-11-12T09:36:03.543Z",
+      "duration": 2.24,
+      "leadingSilence": 0.1,
+      "trailingSilence": 0.3500000000000001
+    },
+    "m02-v4-council-8": {
+      "file": "recordings/elevenlabs/m02-v4-council-8-64a66c25776e.mp3",
+      "speaker": "commander",
+      "text": "Но только если согласует это решение.",
+      "spokenText": "[dry, skeptical] Но только если согласует это решение.",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "64a66c25776e594e63821d3fc6fd27373f9286db540d20112117e661beed1787",
+      "bytes": 47272,
+      "generatedAt": "2026-11-12T09:36:03.985Z",
+      "duration": 2.88,
+      "leadingSilence": 0.09,
+      "trailingSilence": 0.2999999999999998
+    }
+  },
+  "note": "Reserved credits are not a verified account debit.",
+  "previewSeconds": 23.84,
+  "verification": {
+    "allCuesPlayedOnce": true,
+    "controlsEnabled": true,
+    "browserErrors": [],
+    "viewports": [
+      [
+        1440,
+        900
+      ],
+      [
+        844,
+        390
+      ],
+      [
+        667,
+        375
+      ]
+    ],
+    "evidence": "campaign/previews/m02-partner-council/verification.json",
+    "actualApproachTrigger": true,
+    "liveBunkerCases": [
+      2,
+      1,
+      0
+    ],
+    "guardDeathCancelsConversation": true,
+    "originalScoutRecordingReused": true
+  }
+}

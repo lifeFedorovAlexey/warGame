@@ -1,6 +1,6 @@
 {
   "name": "wargame",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "private": true,
   "description": "Modular vehicle game assets and local review arena",
   "scripts": {
@@ -61,7 +61,8 @@
     "check:m02:map": "node tools/check-m02-map.mjs",
     "check:m02:map-drive": "node tools/check-m02-map-drive.mjs",
     "check:m02:map-browser": "node tools/check-m02-map-browser.mjs",
-    "check:radio:dispatch": "node tools/check-radio-dispatch.mjs"
+    "check:radio:dispatch": "node tools/check-radio-dispatch.mjs",
+    "check:m02:radio": "node tools/check-m02-start-radio.mjs && node tools/check-m02-partner-council.mjs"
   },
   "devDependencies": {
     "gltf-validator": "^2.0.0-dev.3.10"

@@ -1,0 +1,142 @@
+{
+  "scene": "m02-radio-flamer-ready",
+  "status": "awaiting-owner-listening-before-merge",
+  "approval": "Owner approved exact three-line exchange and requested voicing on 2026-11-12.",
+  "sourceDraftRevision": 2,
+  "savedDraftRevision": 3,
+  "generatedRecordings": 3,
+  "reservedCredits": 151,
+  "originalAudioPreserved": true,
+  "otherScenesUnchanged": true,
+  "cues": [
+    "m02-v3-flamer-1",
+    "m02-v3-flamer-2",
+    "m02-v3-flamer-3"
+  ],
+  "retiredCues": [
+    "m02-radio-flamer-ready-1"
+  ],
+  "trigger": "Исследовано усиление огнемёта.",
+  "lines": [
+    {
+      "id": "m02-v3-flamer-1",
+      "kind": "story",
+      "speaker": "scientist",
+      "profile": "story-scientist",
+      "voiceId": "1KGG4Q8LqRdNII9xBurw",
+      "voiceName": "M. Danisch - Narrator",
+      "text": "Огнемёты усилил. На баллонах написано: «Щадящая зачистка».",
+      "spokenText": "[matter-of-fact] Огнемёты усилил. На баллонах написано: «Щадящая зачистка».",
+      "modelId": "eleven_v4",
+      "estimatedCredits": 75
+    },
+    {
+      "id": "m02-v3-flamer-2",
+      "kind": "story",
+      "speaker": "warrant",
+      "profile": "story-warrant",
+      "voiceId": "6A9D8WSMm4rFsg2DWFeE",
+      "voiceName": "Egor Gadzhiyev - Clear and Commanding",
+      "text": "Это что, ещё со Вьетнама?",
+      "spokenText": "[skeptical] Это что, ещё со Вьетнама?",
+      "modelId": "eleven_v4",
+      "estimatedCredits": 37
+    },
+    {
+      "id": "m02-v3-flamer-3",
+      "kind": "story",
+      "speaker": "scientist",
+      "profile": "story-scientist",
+      "voiceId": "1KGG4Q8LqRdNII9xBurw",
+      "voiceName": "M. Danisch - Narrator",
+      "text": "Баллоны новые. Инструкция старая.",
+      "spokenText": "[dry] Баллоны новые. Инструкция старая.",
+      "modelId": "eleven_v4",
+      "estimatedCredits": 39
+    }
+  ],
+  "clips": {
+    "m02-v3-flamer-1": {
+      "file": "recordings/elevenlabs/m02-v3-flamer-1-9567a646a521.mp3",
+      "speaker": "scientist",
+      "text": "Огнемёты усилил. На баллонах написано: «Щадящая зачистка».",
+      "spokenText": "[matter-of-fact] Огнемёты усилил. На баллонах написано: «Щадящая зачистка».",
+      "voiceId": "1KGG4Q8LqRdNII9xBurw",
+      "voiceName": "M. Danisch - Narrator",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "9567a646a52179911152979f1a1677c0a535fcc2e8c0f0081b250759c39405c0",
+      "bytes": 77783,
+      "generatedAt": "2026-11-12T09:29:03.258Z",
+      "duration": 4.8,
+      "leadingSilence": 0.03,
+      "trailingSilence": 0.33999999999999986
+    },
+    "m02-v3-flamer-2": {
+      "file": "recordings/elevenlabs/m02-v3-flamer-2-28dd0a8eb08a.mp3",
+      "speaker": "warrant",
+      "text": "Это что, ещё со Вьетнама?",
+      "spokenText": "[skeptical] Это что, ещё со Вьетнама?",
+      "voiceId": "6A9D8WSMm4rFsg2DWFeE",
+      "voiceName": "Egor Gadzhiyev - Clear and Commanding",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "28dd0a8eb08a9e9b5edf759bd63a375fdb29d76dfe545b022ab9277cacf99473",
+      "bytes": 38077,
+      "generatedAt": "2026-11-12T09:29:02.392Z",
+      "duration": 2.32,
+      "leadingSilence": 0.13,
+      "trailingSilence": 0.2999999999999998
+    },
+    "m02-v3-flamer-3": {
+      "file": "recordings/elevenlabs/m02-v3-flamer-3-b9b331c471bc.mp3",
+      "speaker": "scientist",
+      "text": "Баллоны новые. Инструкция старая.",
+      "spokenText": "[dry] Баллоны новые. Инструкция старая.",
+      "voiceId": "1KGG4Q8LqRdNII9xBurw",
+      "voiceName": "M. Danisch - Narrator",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "b9b331c471bc1f529e305d6b86a9a2a1ef6bdc4b7247d45febdc4eb5c2e3af4b",
+      "bytes": 54795,
+      "generatedAt": "2026-11-12T09:29:03.910Z",
+      "duration": 3.36,
+      "leadingSilence": 0.19,
+      "trailingSilence": 0.33999999999999986
+    }
+  },
+  "note": "Reserved credits are not a verified account debit.",
+  "previewSeconds": 10.88,
+  "verification": {
+    "allCuesPlayedOnce": true,
+    "controlsEnabled": true,
+    "browserErrors": [],
+    "viewports": [
+      [
+        1440,
+        900
+      ],
+      [
+        844,
+        390
+      ],
+      [
+        667,
+        375
+      ]
+    ],
+    "evidence": "campaign/previews/m02-gentle-cleanup/verification.json"
+  }
+}
