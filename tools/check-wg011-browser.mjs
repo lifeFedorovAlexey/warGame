@@ -60,6 +60,7 @@ try{
    // Freeze only the pulse's visual phase for comparable screenshots.
    await page.evaluate(()=>{for(const p of reviewAlerts.pings)if(p.combatProtected){p.born=performance.now()-450;p.until=performance.now()+3000;}});
    await page.screenshot({path:`${folder}/combat-${width}.png`});
+   if(width===1440)await page.locator('#minimap').screenshot({path:folder+'/minimap-corners.png'});
   }
   await page.waitForTimeout(700);
   report.combat.survivesHits=await page.evaluate(()=>reviewAlerts.active(performance.now()).some(p=>p.combatProtected));assert(report.combat.survivesHits);
