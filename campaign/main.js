@@ -1016,7 +1016,7 @@ function events() {
   const batch=mission.drainEvents(),ordinaryNotice=text=>{if(performance.now()>milestoneToastUntil)toast(text);};
   personnelNotices.consume(batch,mission,performance.now());
   for (const event of batch) {
-    if(active&&minimapView.alerts.event(event,performance.now()))sound.signal('attack-alarm');
+    if(active&&event.type==='under-attack'&&minimapView.alerts.event(event,performance.now(),!world.inView(event)))sound.signal('attack-alarm');
     radio?.director?.note(event,mission);
     if(event.type==='construction-complete'&&config.buildings[event.kind]?.storyOnly)continue;
     sound?.storyEvent?.(event);

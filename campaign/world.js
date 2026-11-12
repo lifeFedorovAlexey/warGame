@@ -207,6 +207,11 @@ export async function createCampaignWorld(host,config,sound,loading){
   return selected;
  }
  function screen(entity,height=8){const pose=entity.id&&vehicles.transforms.get(entity.id);const point=pose?screenPoint.copy(pose.position):screenPoint.set(entity.x,entity.y,field.heightAt(entity.x,entity.y));point.z+=height;point.project(camera);const rect=viewport;return{x:(point.x+1)*rect.width/2+rect.left,y:(1-point.y)*rect.height/2+rect.top,visible:point.z>-1&&point.z<1};}
+ function inView(point){
+  camera.updateMatrixWorld();
+  const {x,y,visible}=screen(point),{left,top,width,height}=viewport;
+  return visible&&x>=left&&x<=left+width&&y>=top&&y<=top+height;
+ }
  function centre(entity,distance){const offset=camera.position.clone().sub(controls.target);controls.maxPolarAngle=normalCameraLimit;controls.target.set(entity.x,entity.y,field.heightAt(entity.x,entity.y));if(distance)offset.setLength(distance);camera.position.copy(controls.target).add(offset);controls.update();}
  function focusStorySignal(signal,foreground){
   if(signal.kind!=='anomaly'){centre(signal,signal.distance);return;}
@@ -541,5 +546,5 @@ export async function createCampaignWorld(host,config,sound,loading){
   renderer.render(scene,camera);
   lastWorldTime=time;
  }
- return{renderer,scene,camera,controls,terrain,field,vehicles,damage,healthBars,attackPulses,orderRoutes,setShadowQuality,prepareRendering,shaderPreparation,ground,pickEntity,screen,centre,focusStorySignal,setGhost,commandMarker,drawMinimapFog:fog.drawMinimap,storySignals,update,prepareFrame,keys,buildingObjects:buildings,get minimumCameraHeight(){return minimumCameraHeight;},set minimumCameraHeight(value){minimumCameraHeight=value;},set fixedRenderScale(value){fixedRenderScale=value;},get fixedRenderScale(){return fixedRenderScale;},get statistics(){return{drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,vehicleDrawCalls:vehicles.drawCalls,vehicleLod:vehicles.lod,dustParticles:particles.length,dustLimit:256,...combat.statistics,...groundEffects.statistics,headlightBeams:headlightCount,projectors:construction.active,frameMs:frameAverage*1000,renderScale:renderer.getPixelRatio(),terrainMode,shadowUpdates,shadowQuality,shadowHz,fog:fog.stats,damage:damage.statistics};}};
+ return{renderer,scene,camera,controls,terrain,field,vehicles,damage,healthBars,attackPulses,orderRoutes,setShadowQuality,prepareRendering,shaderPreparation,ground,pickEntity,screen,inView,centre,focusStorySignal,setGhost,commandMarker,drawMinimapFog:fog.drawMinimap,storySignals,update,prepareFrame,keys,buildingObjects:buildings,get minimumCameraHeight(){return minimumCameraHeight;},set minimumCameraHeight(value){minimumCameraHeight=value;},set fixedRenderScale(value){fixedRenderScale=value;},get fixedRenderScale(){return fixedRenderScale;},get statistics(){return{drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,vehicleDrawCalls:vehicles.drawCalls,vehicleLod:vehicles.lod,dustParticles:particles.length,dustLimit:256,...combat.statistics,...groundEffects.statistics,headlightBeams:headlightCount,projectors:construction.active,frameMs:frameAverage*1000,renderScale:renderer.getPixelRatio(),terrainMode,shadowUpdates,shadowQuality,shadowHz,fog:fog.stats,damage:damage.statistics};}};
 }
