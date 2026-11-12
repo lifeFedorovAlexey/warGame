@@ -100,7 +100,7 @@ export async function createCampaignWorld(host,config,sound,loading){
  const mission02Sites=expedition?absentEnvironment():createMission02Sites(T,field,addFog);scene.add(mission02Sites.root);
  const scavYardSurface=expedition?absentEnvironment():createScavYardSurface(T,field,addFog);scene.add(scavYardSurface.root);
  if(!expedition){
-  const trail=scavYardSurface.trail(mountainTrail.map(field.gridToWorld),23);
+  const trail=scavYardSurface.trail(mountainTrail.map(field.gridToWorld),20);
   trail.name='mountain_trail';terrain.root.add(trail);
  }
  const dressing=expedition?absentEnvironment():createDesertDressing(T,field,config,[...terrain.roadPaths,...baseYard.roads,...field.m02Roads],dam.layout,addFog);scene.add(dressing.root);

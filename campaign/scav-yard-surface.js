@@ -15,6 +15,18 @@ export function createScavYardSurface(T,field,addFog){
   };
   material.customProgramCacheKey=()=> 'scav_ground_alpha_v1';addFog(material);materials[kind]=material;
  }
+
+ function surface(kind,vertices,uv,alpha,indices){
+  const g=new T.BufferGeometry();
+  g.setAttribute('position',new T.Float32BufferAttribute(vertices,3));
+  g.setAttribute('uv',new T.Float32BufferAttribute(uv,2));
+  g.setAttribute('groundAlpha',new T.Float32BufferAttribute(alpha,1));
+  if(indices)g.setIndex(indices);
+  g.computeVertexNormals();
+  const mesh=new T.Mesh(g,materials[kind]);mesh.receiveShadow=true;mesh.userData.decorative=true;
+  return mesh;
+ }
+
  function patch(camp,rect,kind,fade,outline=null,step=field.renderCell){
   const [l,b,r,t]=rect.map((v,i)=>v+(i%2?camp.y:camp.x)),vertices=[],uv=[],alpha=[];
   const opacity=(x,y)=>{
@@ -40,24 +52,32 @@ export function createScavYardSurface(T,field,addFog){
    put(x,y,sw);put(east,y,se);put(east,north,ne);
    put(x,y,sw);put(east,north,ne);put(x,north,nw);
   }
-  const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(vertices,3));g.setAttribute('uv',new T.Float32BufferAttribute(uv,2));g.setAttribute('groundAlpha',new T.Float32BufferAttribute(alpha,1));g.computeVertexNormals();
-  const mesh=new T.Mesh(g,materials[kind]);mesh.receiveShadow=true;mesh.userData.decorative=true;root.add(mesh);
-  return mesh;
+  root.add(surface(kind,vertices,uv,alpha));
  }
 
  function trail(points,width){
   const curve=new T.CatmullRomCurve3(points.map(p=>new T.Vector3(p.x,p.y,0)));
-  const centre=curve.getSpacedPoints(Math.ceil(curve.getLength()/10));
-  const left=[],right=[];
+  const length=curve.getLength(),segments=Math.ceil(length/3),centre=curve.getSpacedPoints(segments);
+  // Two worn ruts sit inside a softer band of compacted gravel.
+  const profile=[[-1,0],[-.79,.1],[-.61,.42],[-.44,.47],[-.23,.17],[0,.08],
+   [.23,.17],[.44,.45],[.61,.4],[.79,.1],[1,0]];
+  const vertices=[],uv=[],alpha=[],indices=[],columns=profile.length;
   for(let i=0;i<centre.length;i++){
    const p=centre[i],a=centre[Math.max(0,i-1)],b=centre[Math.min(centre.length-1,i+1)];
-   const taper=Math.min(1,i/3,(centre.length-1-i)/3),radius=(width/2+1.8*Math.sin(i*.8))*taper;
-   const scale=radius/Math.hypot(b.x-a.x,b.y-a.y),dx=(b.y-a.y)*scale,dy=(a.x-b.x)*scale;
-   left.push([p.x-dx,p.y-dy]);right.push([p.x+dx,p.y+dy]);
+   const along=length*i/segments,endFade=T.MathUtils.smoothstep(Math.min(along,length-along),0,17);
+   const radius=width/2+Math.sin(along*.11)*.85,scale=radius/Math.hypot(b.x-a.x,b.y-a.y);
+   for(const [offset,opacity] of profile){
+    const x=p.x+(b.y-a.y)*scale*offset,y=p.y+(a.x-b.x)*scale*offset;
+    const wear=.86+.09*Math.sin(along*.21+offset*2)+.05*Math.sin(along*.61-offset);
+    vertices.push(x,y,field.heightAt(x,y)+.22);uv.push(x/15,y/15);alpha.push(opacity*endFade*wear);
+   }
+   if(i===0)continue;
+   for(let j=0;j<columns-1;j++){
+    const start=(i-1)*columns+j,next=start+columns;
+    indices.push(start,start+1,next,start+1,next+1,next);
+   }
   }
-  const outline=[...left,...right.reverse().slice(1,-1)],xs=outline.map(p=>p[0]),ys=outline.map(p=>p[1]);
-  const bounds=[Math.min(...xs)-3,Math.min(...ys)-3,Math.max(...xs)+3,Math.max(...ys)+3];
-  return patch({x:0,y:0},bounds,'gravel',6,outline,field.renderCell/2);
+  return surface('gravel',vertices,uv,alpha,indices);
  }
  let signature='';
  function update(mission){
