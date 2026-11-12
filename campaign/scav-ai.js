@@ -1,3 +1,4 @@
+import {firingGroundAllowed} from './firing-ground.js';
 // Enemy contacts are observations, not a view of the player's fog or live
 // coordinates of an unseen target. Shared alerts retain their original time.
 const memorySeconds=8;
@@ -49,7 +50,7 @@ export function* updateScavCombat(mission,unit,spec,dt){
     if(['move','attack-move'].includes(unit.task?.type)&&!unit.scavResumeTask)unit.scavResumeTask={...unit.task};
     if(target){
       unit.task={type:'attack',targetId:target.id};
-      if(distance(unit,target)<=spec.range&&mission.lineOfSight(unit,target)){
+      if(distance(unit,target)<=spec.range&&mission.lineOfSight(unit,target)&&firingGroundAllowed(mission,unit)){
         unit.path=[];unit.driveSpeed=0;unit.steering=(unit.steering??0)*.68;
         mission.attack(unit,target,spec);return true;
       }

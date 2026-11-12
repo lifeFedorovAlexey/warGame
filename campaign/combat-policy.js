@@ -86,7 +86,11 @@ export function rememberHostileHit(mission, unit, source) {
   if(!source?.id||source.owner===unit.owner){invalidate();return;}
   const spec=mission.config.units[source.kind]??mission.buildingSpec(source);
   unit.lastHostileHit={id:source.id,x:source.x,y:source.y,time:mission.state.time,range:spec.range??0};
-  unit.retreatSuppressed=false;
+  // Damage updates threat memory, but cannot revoke active direct control.
+  // A later attack/settings change explicitly restores the retreat policy.
+  const directMove=unit.pendingOrder?.type==='move'||unit.task?.type==='move'
+    &&(unit.routeOrder?.type??'move')==='move'&&!unit.combatRetreat&&!unit.factoryVisit;
+  if(!directMove)unit.retreatSuppressed=false;
   if(unit.combatRetreat){unit.combatRetreat.threat={...unit.lastHostileHit};delete unit.combatRetreat.failedSignature;}
   invalidate();
 }

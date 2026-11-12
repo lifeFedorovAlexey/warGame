@@ -22,6 +22,7 @@ export class RoadTraffic {
     // queries for persistent waypoints and repeated previews, never rounded
     // positions: narrow road edges must retain their original classification.
     this.pointQueries = new WeakMap();
+    this.coverageCache = new Array(8192);
     this.querySerial = 0;
     this.intersections = (field.roadNetwork?.nodes ?? []).filter(node => node.degree > 2 || node.base);
     for (const [pathIndex,path] of [...(field.roadNetwork?.paths ?? []),...localRoads].entries()) {
@@ -115,8 +116,15 @@ export class RoadTraffic {
 
   coverage(x, y) {
     if (this.field.roadBlendAt) return clamp(this.field.roadBlendAt(x, y), 0, 1);
+    // Forecasts and braking profiles revisit exact coordinates using fresh
+    // pose objects. Share only the immutable road surface result; a hash
+    // collision evicts an entry and never rounds a road-edge classification.
+    let hash=Math.imul(Math.floor(x*256),0x9e3779b1)^Math.imul(Math.floor(y*256),0x85ebca6b);
+    const slot=(hash^(hash>>>16))&(this.coverageCache.length-1),cached=this.coverageCache[slot];
+    if(cached&&cached.x===x&&cached.y===y)return cached.value;
     const closest = this.nearest({x, y});
-    return closest ? clamp((closest.width / 2 - closest.distance) / 2.5, 0, 1) : 0;
+    const value=closest ? clamp((closest.width / 2 - closest.distance) / 2.5, 0, 1) : 0;
+    this.coverageCache[slot]={x,y,value};return value;
   }
 
   factor(x, y) {

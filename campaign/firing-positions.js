@@ -1,3 +1,4 @@
+import {firingGroundAllowed} from './firing-ground.js';
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 
 export function firingSlots(spec,scale,angle,anchor){
@@ -25,5 +26,5 @@ export function validPosition(mission,unit,target,point,reserved){
     ||distance(point,target)>spec.range*.97||distance(point,target)<spec.range*.36
     ||reserved.some(other=>distance(point,other)<scale*5.3))return false;
   const pose=firingPose(unit,point,target);
-  return mission.lineOfSight(pose,target)&&mission.vehicleMotionClear(unit,pose,pose);
+  return firingGroundAllowed(mission,unit,pose)&&mission.lineOfSight(pose,target)&&mission.vehicleMotionClear(unit,pose,pose);
 }

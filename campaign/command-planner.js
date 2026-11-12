@@ -105,7 +105,15 @@ export class CommandPlanner{
    this.stats.reused++;return {ok:true,assigned:units.length,assignedIds:units.map(u=>u.id),pending:units.filter(u=>ownsPending(u,previous.revision)).length,revision:previous.revision,reused:true};
   }
   const stopped=new Set(units.filter(unit=>unit.pendingOrder?.type==='stop').map(unit=>unit.id));
-  const preserveAccepted=unit=>!stopped.has(unit.id)&&!!(unit.path?.length||unit.task||unit.detour||unit.yieldReturn||unit.jointTraffic);
+  // A direct move takes control from combat, repair and borrowed traffic
+  // immediately. Keeping those controllers alive until a replacement route
+  // finished made a left click continue the very order it was cancelling.
+  // Ordinary manual travel can retain its checked route during a replacement.
+  const preserveAccepted=unit=>!stopped.has(unit.id)
+   &&(action!=='move'||unit.task?.type==='move'&&!unit.combatDeployment&&!unit.combatRetreat&&!unit.factoryVisit
+     &&!unit.combatResume&&!unit.combatGroup&&!unit.yieldReturn&&!unit.jointTraffic
+     &&(unit.routeOrder?.type??'move')==='move')
+   &&!!(unit.path?.length||unit.task||unit.detour||unit.yieldReturn||unit.jointTraffic);
   this.cancel(units.map(u=>u.id),true);
   const revision=m.state.commandRevision=(m.state.commandRevision??0)+1;
   const cohorts=action==='attack'?[]:coupledStarts(m,units,target);

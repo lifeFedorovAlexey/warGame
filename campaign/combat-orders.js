@@ -13,6 +13,9 @@ export function* interruptedCombatTargets(mission,units){
  const ids=new Set();
  for(const [index,unit] of units.entries()){
   if(index%8===0||performance.now()>=(mission.nav.workDeadline??Infinity))yield;
+  // Only an actual engagement is being interrupted. An idle car's first
+  // attack-move must not silently exclude an enemy already within range.
+  if(!movementEngaged(unit)&&unit.task?.type!=='attack'&&!unit.combatDisengage?.length)continue;
   for(const id of unit.combatDisengage??[])ids.add(id);
   const explicit=unit.combatDeployment?.targetId??(unit.task?.type==='attack'?unit.task.targetId:null);
   if(explicit)ids.add(explicit);

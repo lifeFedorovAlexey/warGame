@@ -112,12 +112,12 @@ function order(m,units,action,target,append=false){const result=m.submitOrder(un
  const m=progressMission(),u=add(m,0,0,'builder'),b=m.addStructure('lab','rai',{x:0,y:90},{completed:true,progress:1,groundHeight:0});
  b.hp=b.maxHp-5;m.rebuildNavigation();order(m,[u],'repair',b,true);order(m,[u],'move',{x:0,y:240},true);
  // Pause just after work has committed, while parking reservations are being
- // released. A new async Move is proposed against that accepted work order.
+ // released. A new direct Move must immediately take control from the work.
  const release=m.releaseParkingGoalsSteps;m.releaseParkingGoalsSteps=function*(...args){yield;return yield* release.apply(this,args);};
  const controller=m.updateUnitSteps(u,.1);while(!u.task){assert(!controller.next().done);}
- order(m,[u],'move',{x:-100,y:180});assert(u.proposedOrder);const replacement=u.proposedOrder;
+ order(m,[u],'move',{x:-100,y:180});assert(u.pendingOrder);assert(!u.proposedOrder);const replacement=u.pendingOrder;
  for(let step=controller.next();!step.done;step=controller.next()){}
- assert.equal(u.proposedOrder,replacement,'Finishing an old queued search must not cancel the replacement');assert(!u.orderQueue);
+ assert.equal(u.pendingOrder,replacement,'Finishing an old queued search must not cancel the replacement');assert(!u.orderQueue);
  run(m,()=>idle(u));assert(distance(u,{x:-100,y:180})<2.1);
  report.push({case:'new Move wins even while a queued work command is finishing publication'});
 }

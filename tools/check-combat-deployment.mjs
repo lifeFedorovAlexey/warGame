@@ -9,7 +9,9 @@ const results=[];
 {
  const m=fixture(),units=Array.from({length:4},(_,i)=>m.addUnit('bukhanka','rai',{x:(i%2)*30,y:-Math.floor(i/2)*30}));
  const first=m.addStructure('generator','scavs',{x:0,y:150},{hp:100000,completed:true,progress:1});
- const second=m.addStructure('generator','scavs',{x:65,y:170},{hp:100000,completed:true,progress:1});m.rebuildNavigation();
+ // Keep this contact within every member's own vision. At (65,170) the
+ // rear car starts outside 210 m and must continue marching before contact.
+ const second=m.addStructure('generator','scavs',{x:60,y:165},{hp:100000,completed:true,progress:1});m.rebuildNavigation();
  assert(m.order(units.map(u=>u.id),'attack-move',{x:0,y:350}).ok);m.advance(.1);
  assert(units.every(u=>u.combatDeployment?.targetId===first.id));
  m.damage(first,100001,units[0]);
@@ -60,7 +62,7 @@ for(const action of ['attack-move','attack']){
  const m=fixture(),units=Array.from({length:6},(_,i)=>m.addUnit('bukhanka','rai',{x:0,y:-i*30}));
  const target=m.addStructure('generator','scavs',{x:0,y:190},{hp:100000,completed:true,progress:1});m.rebuildNavigation();
  const goal={x:0,y:350};m.order(units.map(u=>u.id),'attack-move',goal);m.advance(.1);m.finishPendingStep();
- const deployment=structuredClone(units[0].combatDeployment);
+ const deployment=JSON.parse(JSON.stringify(units[0].combatDeployment));
  const copy=fixture();copy.load(m.save());assert.deepEqual(copy.entity(units[0].id).combatDeployment,deployment,'Deployment survives save/load');
  copy.state.bounds=m.state.bounds.slice();copy.rebuildNavigation();
  assert(copy.order(units.map(u=>u.id),'attack-move',goal).ok);
@@ -71,13 +73,16 @@ for(const action of ['attack-move','attack']){
  assert.equal(units[0].task.y,deployment.resume.y);
 }
 {
- const m=fixture(),units=Array.from({length:50},(_,i)=>m.addUnit('bukhanka','rai',{x:(i%5-2)*35,y:-Math.floor(i/5)*30}));
+ // All participants need their own contact before they can form a reserve.
+ // The old 300 m column left most cars outside vision, still marching.
+ const m=fixture(),units=Array.from({length:50},(_,i)=>m.addUnit('bukhanka','rai',{x:(i%10-4.5)*24,y:120-Math.floor(i/10)*24}));
  const target=m.addStructure('generator','scavs',{x:0,y:190},{hp:100000,completed:true,progress:1});m.rebuildNavigation();
  assert(m.order(units.map(u=>u.id),'attack-move',{x:0,y:350}).ok);m.advance(.1);m.finishPendingStep();
  const active=units.filter(u=>u.combatDeployment?.slot),reserve=units.filter(u=>u.combatDeployment?.status==='reserve');
  assert(active.length>=6&&active.length<50&&reserve.length>0,'Limited frontage keeps a reserve');
  assert.equal(new Set(active.map(u=>u.combatDeployment.index)).size,active.length,'Every firing slot has a single owner');
- const freed=active[0].combatDeployment.index;m.stop([active[0].id]);
+ // A stopped living hull still occupies space. A loss actually releases it.
+ const freed=active[0].combatDeployment.index;m.damage(active[0],active[0].hp+1,target);
  for(let i=0;i<25;i++)m.advance(.1);
  assert(reserve.some(u=>u.combatDeployment?.index===freed),'Reserve replaces a unit that leaves its slot');
  console.log(JSON.stringify({case:'50-unit frontage',active:active.length,reserve:reserve.length}));

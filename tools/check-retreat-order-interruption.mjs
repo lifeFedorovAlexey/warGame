@@ -45,15 +45,20 @@ for(const change of ['construction','death']){
  const {m,u}=setup();m.stop([u.id]);u.hp=u.maxHp*.7;
  m.setCombatPolicy([u.id],{retreat:'light',response:'ignore'});
  const goal={x:160,y:0},response=m.submitOrder([u.id],'move',goal);assert(response.ok);
+ const enemy=m.addUnit('raider','scavs',{x:0,y:-80});m.damage(u,1,enemy);
  // A controller may run before the new command's route has been calculated.
  m.updateUnit(u,.1);
  assert.equal(u.pendingOrder?.revision,response.revision,'A manual move must not be silently replaced by an older automatic retreat rule');
  for(let i=0;i<40&&u.pendingOrder;i++)m.advance(1/80,{budgetMs:6});
  assert(!u.pendingOrder);assert.deepEqual(u.routeOrder.request,goal);assert(!u.combatRetreat);
- // New enemy damage is a new event; the still-enabled retreat rule resumes.
- const enemy=m.addUnit('raider','scavs',{x:0,y:-80});m.damage(u,1,enemy);m.updateUnit(u,.1);
- assert(u.combatRetreat,'A newer hostile hit reactivates the retained retreat policy');
- results.push({case:'new manual move wins over existing damage; newer damage reactivates retreat',passed:true});
+ // Hits during direct movement must not revoke LMB control under fire.
+ m.damage(u,1,enemy);m.updateUnit(u,.1);
+ assert(!u.combatRetreat,'A newer hostile hit cannot steal an active direct move');
+ assert.deepEqual(u.routeOrder.request,goal);assert(u.retreatSuppressed);
+ // Once direct movement has finished, damage can activate auto-retreat again.
+ u.task=null;u.path=[];m.damage(u,1,enemy);m.updateUnit(u,.1);
+ assert(u.combatRetreat);
+ results.push({case:'direct movement survives hostile hits; completed movement releases control',passed:true});
 }
 fs.mkdirSync('campaign/reports',{recursive:true});fs.writeFileSync('campaign/reports/retreat-order-interruption.json',JSON.stringify({results},null,2));
 console.log(JSON.stringify({results},null,2));

@@ -22,6 +22,7 @@ import {workProjection,projectorHasSight} from './builder-optics.js';
 import {setBuilderAutoRepair,assignAutomaticRepair,releaseInvalidRepairTarget,repairableBuilding} from './builder-auto-repair.js';
 import {combatContact} from './combat-contact.js';
 import {clearCombatSight} from './combat-sight.js';
+import {firingGroundAllowed} from './firing-ground.js';
 import {recordDamage} from './damage-contact.js';
 import {destroyDamage,damageMobility,partMissing,upgradeDamageState} from './damage-state.js';
 import {ensureSalvage,updateSalvage,armorMultiplier,salvageFromWreck,availableFieldRecipes,modificationInstalled,touchesSalvage,salvagePickupReach,canInstallRecipe,syncFieldHp} from './vehicle-salvage.js';
@@ -35,6 +36,9 @@ import {syncScavBaseRoads} from './scav-base-roads.js';
 import {installCampResources,captureCampResources} from './camp-resources.js';
 import {migrateScavLayout} from './scav-layout-migration.js';
 const completeSteps=iterator=>{let step;do{step=iterator.next();}while(!step.done);return step.value;};
+// Vehicle envelopes are immutable exact poses. Share their grid masks across
+// requests; a moved/rotated/resized body gets a different envelope and mask.
+const navigationBodyMasks=new WeakMap();
 import {UnitSpatialIndex} from './unit-spatial-index.js';
 import {vehicleContact,impactPower,fallbackVehicleImpact,resolveVehicleOverlapsSteps} from './vehicle-impact.js';
 import {kickContactRock} from './vehicle-contact-rock.js';
@@ -282,20 +286,38 @@ export class Mission{
    if(other===unit||unit.id&&other.id===unit.id||ignoreUnits?.has(other)||!vehicleObstacle(other)||!trafficCollisionRequired(unit,other)||other.hp>0&&other.owner!==unit.owner&&!this.visibleAt(other.x,other.y))continue;
    if(other.hp>0&&other.path.length&&(!avoidMoving||distance(unit,other)>56))continue;
    const shape=vehicleEnvelope(other,scale,this.field),radius=vehicleRadiusBound(other.kind,scale)+padding;
-   const gap=p=>footprintGap({x:p.x,y:p.y,radius:0},shape)-padding;
+   // Rasterization needs only an inside/outside proof. Exact penetration is
+   // needed only when an embedded start compares its possible escape cells.
+   const gap=(p,exact=false)=>footprintGap({x:p.x,y:p.y,radius:0},shape,exact?Infinity:padding)-padding;
    const bound=(shape.ellipse?Math.max(shape.width,shape.depth):Math.hypot(shape.width,shape.depth))+padding+1e-6;
    const outside=p=>(p.x-shape.x)**2+(p.y-shape.y)**2>=bound*bound;
-   const startGap=outside(unit)?0:gap(unit);
+   const startGap=outside(unit)?0:gap(unit,true);
+   const cacheable=startGap>=0;
+   const maskKey=cacheable?[this.nav.cell,this.nav.size,this.field.half,padding].join('|'):null;
+   const masks=cacheable?navigationBodyMasks.get(shape):null,known=masks?.get(maskKey);
+   if(known){
+    for(const i of known){
+     if(performance.now()>=(this.nav.workDeadline??Infinity))yield;
+     if(occupied[i]||pendingCells.has(i))continue;
+     const p=this.nav.position(i%this.nav.size,Math.floor(i/this.nav.size));
+     if(distance(unit,p)>this.nav.cell*.78){pendingCells.add(i);changed.push(i);}
+    }
+    continue;
+   }
+   const cells=cacheable?[]:null;
    const [col,row]=this.nav.grid(other.x,other.y),r=Math.ceil(radius/this.nav.cell),size=this.nav.size;
    for(let y=Math.max(0,row-r);y<=Math.min(size-1,row+r);y++)for(let x=Math.max(0,col-r);x<=Math.min(size-1,col+r);x++){
     if(performance.now()>=(this.nav.workDeadline??Infinity))yield;
     const i=y*size+x,p=this.nav.position(x,y);
-    if(occupied[i]||pendingCells.has(i)||distance(unit,p)<=this.nav.cell*.78||outside(p))continue;
+    if(outside(p)||!cells&&(occupied[i]||pendingCells.has(i)||distance(unit,p)<=this.nav.cell*.78))continue;
     // Plan for the whole vehicle, not a point which drives into a neighbour's
     // side before it can turn. A close start can leave the inflated envelope.
-    const clearance=gap(p),escape=startGap<0&&clearance>=startGap-.01&&distance(unit,p)<this.nav.cell*2.5;
+    const clearance=gap(p,startGap<0),escape=startGap<0&&clearance>=startGap-.01&&distance(unit,p)<this.nav.cell*2.5;
+    if(clearance<0)cells?.push(i);
+    if(occupied[i]||pendingCells.has(i)||distance(unit,p)<=this.nav.cell*.78)continue;
     if(clearance<0&&!escape){pendingCells.add(i);changed.push(i);}
    }
+   if(cells){const entries=masks??new Map();entries.set(maskKey,cells);if(!masks)navigationBodyMasks.set(shape,entries);}
   }
   if(avoidPoint){
    const [col,row]=this.nav.grid(avoidPoint.x,avoidPoint.y),size=this.nav.size;
@@ -539,16 +561,18 @@ export class Mission{
  attackPath(...args){this.finishPendingStep();return completeSteps(this.attackPathSteps(...args));}
  *attackPathSteps(unit,target,reserved=[]){
   const spec=this.unitSpec(unit);
-  if(distance(unit,target)<=spec.range&&this.lineOfSight(unit,target))return[];
+  const allowed=point=>firingGroundAllowed(this,unit,point,Math.atan2(point.x-target.x,target.y-point.y));
+  if(distance(unit,target)<=spec.range&&this.lineOfSight(unit,target)&&firingGroundAllowed(this,unit))return[];
   const last=unit.task?.targetId===target.id&&unit.path.at(-1);
-  if(unit.detour&&last&&distance(last,target)<=spec.range&&this.lineOfSight({...unit,...last},target))return unit.path;
+  if(unit.detour&&last&&allowed(last)&&distance(last,target)<=spec.range&&this.lineOfSight({...unit,...last},target))return unit.path;
   const angle=Math.atan2(unit.y-target.y,unit.x-target.x);
   for(const radius of [spec.range*.82,spec.range*.94,spec.range*.68]){
    for(const offset of [0,.28,-.28,.55,-.55,.9,-.9,1.4,-1.4,Math.PI]){
     const goal={x:target.x+Math.cos(angle+offset)*radius,y:target.y+Math.sin(angle+offset)*radius};
-    if(!this.inBounds(goal.x,goal.y))continue;
-    const path=(yield* this.vehiclePathSteps(unit,goal,{maxGoalDistance:16})),end=path?.at(-1);
-    if(!end||distance(end,target)>spec.range||!this.lineOfSight({...unit,...end},target))continue;
+    if(!this.inBounds(goal.x,goal.y)||!allowed(goal))continue;
+    const path=(yield* this.vehiclePathSteps(unit,goal,{maxGoalDistance:16,acceptEnd:allowed,
+     acceptEndKey:'firing-ground:'+unit.kind+':'+target.x+','+target.y})),end=path?.at(-1);
+    if(!end||!allowed(end)||distance(end,target)>spec.range||!this.lineOfSight({...unit,...end},target))continue;
     if(reserved.some(point=>distance(end,point)<this.config.worldScale*4.55))continue;
     if(this.state.units.some(other=>other!==unit&&other.hp>0&&other.owner===unit.owner&&!other.path.length&&distance(end,other)<this.config.worldScale*4.55))continue;
     return path;
@@ -614,16 +638,16 @@ export class Mission{
    if(unit.pendingOrder?.started)continue;
    const order=unit.routeOrder;
    const deployment=unit.combatDeployment;
-   if(deployment&&(action==='attack'&&deployment.resume.targetId===target.id
+   if(deployment&&firingGroundAllowed(this,unit,deployment.goal??unit)&&(action==='attack'&&deployment.resume.targetId===target.id
      ||action==='attack-move'&&!disengage.length&&order?.type===action&&order.revision===routeOrderRevision&&distance(order.request,target)<3)){
     repeat.set(unit.id,deployment.goal??unit);continue;
    }
-   if(travel&&order?.revision===routeOrderRevision&&(order.formation??'auto')===formationMode&&(order.type??'move')===action&&distance(order.request,target)<3){
+   if(travel&&(action!=='attack-move'||firingGroundAllowed(this,unit,order?.destination??unit))&&order?.revision===routeOrderRevision&&(order.formation??'auto')===formationMode&&(order.type??'move')===action&&distance(order.request,target)<3){
     if(unit.task?.type===action&&unit.path.length)repeat.set(unit.id,unit.path.at(-1));
     else if(!unit.task&&distance(unit,order.destination)<5)repeat.set(unit.id,unit);
    }
    const last=unit.task?.type==='attack'&&unit.task.targetId===target.id&&unit.path.at(-1);
-   if(action==='attack'&&last&&distance(last,target)<=this.unitSpec(unit).range&&this.lineOfSight({...unit,...last},target))repeat.set(unit.id,last);
+   if(action==='attack'&&last&&firingGroundAllowed(this,unit,last)&&distance(last,target)<=this.unitSpec(unit).range&&this.lineOfSight({...unit,...last},target))repeat.set(unit.id,last);
   }
   const finishRepeat=function*(mission,unit){
    const job=mission.commandJob;
@@ -703,7 +727,9 @@ export class Mission{
    if(this.commandJob)this.commandJob.currentUnit=unit.id;
    if(repeat.has(unit.id)){yield* finishRepeat(this,unit);if(unit.passage)preceding=unit.id;continue;}
    const side=(index%columns-(columns-1)/2)*formationSpacing, row=Math.floor(index/columns)*formationSpacing;
-   const heldDestination=(this.commandJob?.tailSources?.has(unit.id)?unit.routeContinuation?.destination:null)??unit.pendingOrder?.destination;
+   const parkingAllowed=point=>action!=='attack-move'||firingGroundAllowed(this,unit,point,direction);
+   const retainedDestination=(this.commandJob?.tailSources?.has(unit.id)?unit.routeContinuation?.destination:null)??unit.pendingOrder?.destination;
+   const heldDestination=retainedDestination&&parkingAllowed(retainedDestination)?retainedDestination:null;
    const formation={...(heldDestination??requestedFormation?.slots.get(unit.id)??{x:goal.x+right.x*side-forward.x*row,y:goal.y+right.y*side-forward.y*row})};
    if(passage)formation[passage.along]+=passageShift*passage.direction;
    const parkingRadius=units.length>1?this.config.worldScale*11:0;
@@ -712,16 +738,17 @@ export class Mission{
     const approach=distance(planningUnit,passage.entrance)<.01?[{...passage.entrance}]
      :yield* this.vehiclePathSteps(planningUnit,passage.entrance,{maxGoalDistance:10,ignoreUnits:convoy});
     const departureRadius=egress?this.config.worldScale*18:parkingRadius;
-    const far=(yield* this.movePathSteps(departure,formation,reserved,departureRadius,false,beyondPassage))
-     ??(yield* this.movePathSteps(departure,goal,reserved,departureRadius,false,beyondPassage));
+    const allowed=point=>beyondPassage(point)&&parkingAllowed(point);
+    const far=(yield* this.movePathSteps(departure,formation,reserved,departureRadius,false,allowed))
+     ??(yield* this.movePathSteps(departure,goal,reserved,departureRadius,false,allowed));
     if(approach?.length&&far?.length&&distance(approach.at(-1),passage.entrance)<.1){
      viaPassage=[...approach,egress?.start??passage.exit,...far];
     }
    }
    if(egress&&!viaPassage){failUnit(unit);continue;}
    let path=heldDestination?(yield* this.vehiclePathSteps(planningUnit,heldDestination,{maxGoalDistance:.01,fallback:false})):action==='attack'?(yield* this.attackPathSteps(planningUnit,target,reserved)):['build','repair','demolish','upgrade-power'].includes(action)?(yield* this.workPathSteps(planningUnit,target,workOffset)):viaPassage??(arrivals
-    ?(yield* arrivals.path(planningUnit,formation,{pathOptions:formationOptions}))
-    :(yield* this.movePathSteps(planningUnit,formation,reserved,parkingRadius,false,()=>true,formationOptions))??(yield* this.movePathSteps(planningUnit,goal,reserved,parkingRadius,false,()=>true,formationOptions)));
+    ?(yield* arrivals.path(planningUnit,formation,{pathOptions:formationOptions,allowed:parkingAllowed}))
+    :(yield* this.movePathSteps(planningUnit,formation,reserved,parkingRadius,false,parkingAllowed,formationOptions))??(yield* this.movePathSteps(planningUnit,goal,reserved,parkingRadius,false,parkingAllowed,formationOptions)));
    let remainingEscape=null;
    if(!path&&travel){
     const [startCol,startRow]=this.nav.grid(unit.x,unit.y);
@@ -738,7 +765,7 @@ export class Mission{
     for(const legs of starts){
      const exit=checkManeuver(unit,legs,scale,allowed);
      if(!exit)continue;
-     const onwardPath=(yield* this.movePathSteps(exit,formation,reserved,parkingRadius))??(yield* this.movePathSteps(exit,goal,reserved,parkingRadius));
+     const onwardPath=(yield* this.movePathSteps(exit,formation,reserved,parkingRadius,false,parkingAllowed))??(yield* this.movePathSteps(exit,goal,reserved,parkingRadius,false,parkingAllowed));
      if(!onwardPath?.length)continue;
      const turn=planManeuver(exit,onwardPath[0],{scale,allowed,attempts:2,reverseBudget:0,maximumLegs:5});
      if(!turn)continue;
@@ -806,7 +833,7 @@ export class Mission{
    cancelCombatRetreat(unit,!combat);
    cancelCombatDeployment(unit);
    if(disengage.length)unit.combatDisengage=[...disengage];
-   if(combat&&units.length>1)unit.combatGroup=combatGroup;
+   if(combat)unit.combatGroup=combatGroup;
    unit.path=path;unit.task={type:action,targetId,x:destination.x,y:destination.y,workOffset};
    delete unit.mergeTraffic;changedTraffic.add(unit.id);
    if(remainingEscape)unit.detour=remainingEscape;
@@ -2296,7 +2323,7 @@ export class Mission{
   if(yield* updateCombatDeployment(this,unit,spec,dt))return;
   if(unit.task?.type==='attack-move'){
    const enemy=movementCombatTarget(this,unit,spec);
-   if(enemy){
+   if(enemy&&firingGroundAllowed(this,unit)){
     navigationDecision(unit,'ARRIVED','engaging-visible-target',enemy.id,'resume-after-engagement');
     unit.driveSpeed=0;unit.steering=(unit.steering??0)*.68;
     this.attack(unit,enemy,spec);
@@ -2321,7 +2348,7 @@ export class Mission{
   let target=unit.task?.targetId?this.entity(unit.task.targetId):null;
   if(unit.task?.targetId&&(!target||unit.task.type==='build'&&target.completed)){unit.task=null;unit.path=[];if(unit.tool>.01)unit.foldTime=2.6;target=null;}
   if(unit.task?.type==='attack'&&target&&spec.damage){
-   if(distance(unit,target)<=spec.range&&this.lineOfSight(unit,target)){
+   if(distance(unit,target)<=spec.range&&this.lineOfSight(unit,target)&&firingGroundAllowed(this,unit)){
     unit.path=[];navigationDecision(unit,'ARRIVED','engaging-visible-target',target.id,'follow-if-target-leaves-range');this.attack(unit,target,spec);
    }else if(!unit.path.length||unit.attackRouteTarget&&distance(unit.attackRouteTarget,target)>spec.range*.2){
     const conditions=combatPositionConditions(this,unit,target);

@@ -5,8 +5,9 @@ import {checkManeuver} from './vehicle-motion.js';
 import {navigationDecision} from './navigation-state.js';
 import {movementCombatTarget} from './combat-orders.js';
 import {checkedCycleActive} from './traffic-cycle.js';
-import {firingSlots,slotCost,validPosition} from './firing-positions.js';
+import {firingSlots,slotCost,validPosition,firingPose} from './firing-positions.js';
 import {advanceFiringFrontage} from './combat-frontage.js';
+import {firingGroundAllowed} from './firing-ground.js';
 export {validPosition} from './firing-positions.js';
 
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
@@ -26,14 +27,15 @@ function* reserveSlot(mission,unit,deployment){
     const slot=slots[index];if(target&&validPosition(mission,unit,target,slot,reserved))eligible.push({slot,index,cost:slotCost(unit,slot,mission.config.worldScale)});
   }
   if(unit.combatDeployment!==deployment||unit.pendingOrder)return false;
-  eligible.sort((a,b)=>a.cost-b.cost||a.index-b.index);
+  eligible.sort((a,b)=>{const depth=distance(a.slot,deployment.anchor)-distance(b.slot,deployment.anchor);
+    return (Math.abs(depth)>.01?depth:a.cost-b.cost)||a.index-b.index;});
   const rejected=deployment.rejectedSlots??=[];
   const available=eligible.filter(({index})=>!rejected.includes(index));
   // Failed approaches remain rejected until the actual obstacles or reserved
   // positions change. Exhausting a list must not restart an identical search.
   const index=available[0]?.index??-1;
   if(index<0)return false;
-  deployment.index=index;deployment.slot=slots[index];deployment.status='planning';return true;
+  deployment.index=index;deployment.slot=slots[index];deployment.status='planning';deployment.compacting=true;return true;
 }
 export function combatPositionConditions(mission,unit,anchor){
   let cache=mission.combatConditions;
@@ -61,7 +63,10 @@ function* beginDeployment(mission,unit,target){
     &&(other.task.type==='attack'||distance(other,target)<=mission.unitSpec(other).vision&&mission.lineOfSight(other,target)))
     .sort((a,b)=>distance(a,target)-distance(b,target)||a.id.localeCompare(b.id)).slice(0,100);
   const existing=mission.state.units.filter(other=>other.hp>0&&other.combatDeployment?.group===unit.combatGroup&&other.combatDeployment.targetId===target.id);
-  if(members.length<2&&!existing.length)return false;
+  // The leading vehicle must reserve a position even before a distant
+  // follower sees the contact. Falling back to single-car attack-move here
+  // stopped that leader at maximum range and closed the column's entrance.
+  if(!members.length)return false;
   const centre=members.reduce((p,u)=>({x:p.x+u.x/members.length,y:p.y+u.y/members.length}),{x:0,y:0});
   const angle=existing[0]?.combatDeployment.angle??Math.atan2(centre.y-target.y,centre.x-target.x);
   const group=unit.combatGroup;
@@ -73,29 +78,33 @@ function* beginDeployment(mission,unit,target){
     const deployment=member.combatDeployment={targetId:target.id,group,angle,index:null,slot:null,anchor:{x:target.x,y:target.y},
       resume:{...member.task},marchPath:member.path.map(point=>({...point})),
       marchOrigin:{x:member.x,y:member.y,heading:member.heading},marchTopology:mission.nav.topologyRevision,retryAt:0,status:'reserve'};
-    // A vehicle already in a sound firing position need not drive circles
-    // merely to satisfy a formation template.
-    const spec=mission.unitSpec(member);
-    if(distance(member,target)<=spec.range&&mission.lineOfSight(member,target)){
-      deployment.index='hold:'+member.id;deployment.slot=deployment.goal={x:member.x,y:member.y};deployment.status='arrived';
-    }
     member.task={type:'combat-position',...(deployment.slot??{x:member.x,y:member.y})};member.path=[];resetMotion(member);
   }
   const moving=members.filter(member=>member.combatDeployment.status!=='arrived'),scale=mission.config.worldScale;
   const held=[...existing,...members].map(member=>member.combatDeployment.goal??member.combatDeployment.slot).filter(Boolean);
   const options=moving.map(member=>firingSlots(mission.unitSpec(member),scale,angle,target)),count=Math.max(0,...options.map(slots=>slots.length));
-  const deployments=moving.map(member=>member.combatDeployment),costs=[];
+  const deployments=moving.map(member=>member.combatDeployment),costs=[],depths=[];
+  let maximumTravel=0,maximumDepth=0;
   for(const [row,member] of moving.entries()){
-    const values=[];costs.push(values);
+    const values=[],ranks=[];costs.push(values);depths.push(ranks);
+    const inner=distance(options[row].at(-1)??target,target);
     for(let index=0;index<count+moving.length;index++){
       if(index%8===0)yield;
-      const point=options[row][index];values.push(point&&validPosition(mission,member,target,point,held)?slotCost(member,point,scale):1e8+index);
+      const point=options[row][index],valid=point&&validPosition(mission,member,target,point,held);
+      const travel=valid?slotCost(member,point,scale):null,depth=valid?Math.round((distance(point,target)-inner)/(scale*7)):0;
+      values.push(travel);ranks.push(depth);
+      if(valid){maximumTravel=Math.max(maximumTravel,travel);maximumDepth=Math.max(maximumDepth,depth);}
     }
   }
+  // Fill the front available row before reserving the rear. Travel only
+  // breaks ties within those rows; no speed or arrival-time prediction.
+  const depthPenalty=(maximumTravel+1)*(moving.length+1),unavailable=(maximumDepth*depthPenalty+maximumTravel+1)*(moving.length+1);
+  for(const [row,values] of costs.entries())for(let index=0;index<values.length;index++)
+    values[index]=values[index]===null?unavailable+index:values[index]+depths[row][index]*depthPenalty;
   const assignments=yield* assignFormationSteps(costs);
-  for(const [row,index] of assignments.entries())if(index<count&&costs[row][index]<1e8&&moving[row].combatDeployment===deployments[row]&&!moving[row].pendingOrder){
+  for(const [row,index] of assignments.entries())if(index<count&&costs[row][index]<unavailable&&moving[row].combatDeployment===deployments[row]&&!moving[row].pendingOrder){
     const member=moving[row],deployment=member.combatDeployment;
-    deployment.index=index;deployment.slot=options[row][index];deployment.status='planning';
+    deployment.index=index;deployment.slot=options[row][index];deployment.status='planning';deployment.compacting=true;
     member.task={type:'combat-position',...deployment.slot};
   }
   return true;
@@ -214,7 +223,15 @@ export function* updateCombatDeployment(mission,unit,spec,dt){
     }
     return true;
   }
-  const inFirePosition=fireTarget&&distance(unit,fireTarget)<=spec.range&&mission.lineOfSight(unit,fireTarget);
+  const levelGround=firingGroundAllowed(mission,unit);
+  const inFirePosition=levelGround&&fireTarget&&distance(unit,fireTarget)<=spec.range&&mission.lineOfSight(unit,fireTarget);
+  // Saved positions and local recovery may predate the terrain constraint.
+  // Release an invalid reservation once, then use the ordinary shared slots.
+  if(deployment.status==='arrived'&&!levelGround||deployment.goal&&!firingGroundAllowed(mission,unit,firingPose(unit,deployment.goal,target))){
+    deployment.index=null;deployment.slot=null;deployment.goal=null;deployment.status='reserve';
+    delete deployment.conditions;delete deployment.exhausted;delete deployment.compacting;
+    unit.path=[];resetMotion(unit);
+  }
   if(!unit.path.length&&distance(deployment.anchor,target)>spec.range*.2){
     if(deployment.slot){deployment.slot.x+=target.x-deployment.anchor.x;deployment.slot.y+=target.y-deployment.anchor.y;}
     deployment.anchor={x:target.x,y:target.y};deployment.rejectedSlots=[];deployment.retryAt=0;delete deployment.conditions;
@@ -244,7 +261,7 @@ export function* updateCombatDeployment(mission,unit,spec,dt){
     yield* advanceFiringFrontage(mission,unit,deployment,target);
     if(unit.combatDeployment!==deployment||unit.pendingOrder||unit.combatRetreat)return true;
   }
-  if(deployment.status==='arrived'&&distance(unit,target)<=spec.range&&mission.lineOfSight(unit,target)){
+  if(deployment.status==='arrived'&&levelGround&&distance(unit,target)<=spec.range&&mission.lineOfSight(unit,target)){
     navigationDecision(unit,'ARRIVED','firing-position',null,'engage-target');
     unit.driveSpeed=0;return true;
   }
@@ -288,10 +305,10 @@ export function* updateCombatDeployment(mission,unit,spec,dt){
   if(deployment.goal&&unit.task?.type==='combat-position'&&distance(unit.task,deployment.goal)>.01){
     deployment.slot=deployment.goal={x:unit.task.x,y:unit.task.y};
   }
-  if(deployment.goal&&inFirePosition&&distance(unit,deployment.goal)<mission.config.worldScale*2.5&&!unit.detour&&!deployment.compacting){
+  if(deployment.goal&&inFirePosition&&firingGroundAllowed(mission,unit)&&distance(unit,deployment.goal)<mission.config.worldScale*2.5&&!unit.detour&&!deployment.compacting){
     deployment.goal={x:unit.x,y:unit.y};unit.path=[];resetMotion(unit);
   }
-  if(deployment.goal&&!unit.path.length&&distance(unit,deployment.goal)<8){deployment.status='arrived';unit.driveSpeed=0;delete deployment.compacting;}
+  if(deployment.goal&&!unit.path.length&&firingGroundAllowed(mission,unit)&&distance(unit,deployment.goal)<8){deployment.status='arrived';unit.driveSpeed=0;delete deployment.compacting;}
   return true;
 }
 
@@ -324,6 +341,7 @@ export function* updateCombatParking(mission,unit){
     .map(other=>other.task?.type==='attack-move'?other.task:other);
   const allowed=point=>distance(point,parking.anchor)<=scale*14
     &&!parking.failed.some(goal=>distance(goal,point)<scale*2)
+    &&firingGroundAllowed(mission,unit,point)
     &&mission.vehicleMotionClear(unit,{...unit,...point},{...unit,...point});
   // A free grid cell may require driving around the whole parked formation.
   // First seek a reachable nearby pose, then reserve that actual endpoint.

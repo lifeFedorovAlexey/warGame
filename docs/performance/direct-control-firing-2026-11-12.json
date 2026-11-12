@@ -1,0 +1,696 @@
+{
+  "version": "0.1.10",
+  "baseline": "92f0ebc3d64ce10fede4920fa65137e6b3fca4a5",
+  "scope": [
+    "Active combat, service and traffic controllers yield ownership to direct movement immediately",
+    "Hostile hits preserve active direct movement; attacks still use HP-based withdrawal",
+    "First attack-move contact reserves a front firing row even before followers arrive; fresh orders do not exclude visible enemies",
+    "Firing destinations require a level hull footprint for both armies; traversal and direct moves still allow ramps",
+    "Exact surface caching, threshold body masks, and mask reuse for unchanged hull poses"
+  ],
+  "checks": {
+    "directControl": {
+      "results": [
+        {
+          "phase": "attack",
+          "passed": true
+        },
+        {
+          "phase": "attack-move",
+          "passed": true
+        },
+        {
+          "phase": "firing",
+          "passed": true
+        },
+        {
+          "phase": "filling",
+          "passed": true
+        },
+        {
+          "phase": "retreat",
+          "passed": true
+        },
+        {
+          "phase": "factory-waiting",
+          "passed": true
+        },
+        {
+          "phase": "factory-gate",
+          "passed": true
+        },
+        {
+          "phase": "building",
+          "passed": true
+        },
+        {
+          "phase": "direct click cancels suspended filling before publication",
+          "passed": true
+        }
+      ]
+    },
+    "column": {
+      "results": [
+        {
+          "count": 1,
+          "startY": 0,
+          "cpuMs": 85.38280000000003,
+          "firstReservation": {
+            "time": 1.3,
+            "range": 81.6
+          },
+          "fired": 1,
+          "minGap": null,
+          "shots": [
+            {
+              "id": "u180",
+              "first": 2.1000000000000005,
+              "last": 59.70000000000058
+            }
+          ]
+        },
+        {
+          "count": 8,
+          "startY": 0,
+          "cpuMs": 311.86369999999994,
+          "firstReservation": {
+            "time": 1.0999999999999999,
+            "range": 81.6
+          },
+          "fired": 8,
+          "minGap": 0.28799685617482806,
+          "shots": [
+            {
+              "id": "u180",
+              "first": 2.1000000000000005,
+              "last": 59.70000000000058
+            },
+            {
+              "id": "u181",
+              "first": 3.5000000000000018,
+              "last": 59.90000000000058
+            },
+            {
+              "id": "u182",
+              "first": 5.1999999999999975,
+              "last": 59.80000000000058
+            },
+            {
+              "id": "u183",
+              "first": 6.5999999999999925,
+              "last": 60.00000000000058
+            },
+            {
+              "id": "u184",
+              "first": 8.499999999999986,
+              "last": 59.500000000000576
+            },
+            {
+              "id": "u185",
+              "first": 9.499999999999982,
+              "last": 59.90000000000058
+            },
+            {
+              "id": "u186",
+              "first": 11.399999999999975,
+              "last": 60.00000000000058
+            },
+            {
+              "id": "u187",
+              "first": 12.299999999999972,
+              "last": 59.70000000000058
+            }
+          ]
+        },
+        {
+          "count": 12,
+          "startY": 0,
+          "cpuMs": 543.429,
+          "firstReservation": {
+            "time": 0.9999999999999999,
+            "range": 81.6
+          },
+          "fired": 12,
+          "minGap": 0.2675889384540482,
+          "shots": [
+            {
+              "id": "u180",
+              "first": 2.1000000000000005,
+              "last": 59.70000000000058
+            },
+            {
+              "id": "u181",
+              "first": 3.5000000000000018,
+              "last": 59.90000000000058
+            },
+            {
+              "id": "u182",
+              "first": 5.1999999999999975,
+              "last": 59.80000000000058
+            },
+            {
+              "id": "u183",
+              "first": 6.5999999999999925,
+              "last": 60.00000000000058
+            },
+            {
+              "id": "u184",
+              "first": 8.199999999999987,
+              "last": 59.80000000000058
+            },
+            {
+              "id": "u185",
+              "first": 9.499999999999982,
+              "last": 59.90000000000058
+            },
+            {
+              "id": "u186",
+              "first": 11.599999999999975,
+              "last": 59.80000000000058
+            },
+            {
+              "id": "u187",
+              "first": 12.499999999999972,
+              "last": 59.90000000000058
+            },
+            {
+              "id": "u188",
+              "first": 14.399999999999965,
+              "last": 60.00000000000058
+            },
+            {
+              "id": "u189",
+              "first": 15.399999999999961,
+              "last": 59.80000000000058
+            },
+            {
+              "id": "u190",
+              "first": 17.199999999999974,
+              "last": 59.80000000000058
+            },
+            {
+              "id": "u191",
+              "first": 18.39999999999999,
+              "last": 59.80000000000058
+            }
+          ]
+        },
+        {
+          "count": 8,
+          "startY": 90,
+          "cpuMs": 233.56220000000008,
+          "firstReservation": {
+            "time": 0.7,
+            "range": 81.60000000000001
+          },
+          "fired": 8,
+          "minGap": 0.2726888767335655,
+          "shots": [
+            {
+              "id": "u180",
+              "first": 0.7,
+              "last": 59.500000000000576
+            },
+            {
+              "id": "u181",
+              "first": 0.7,
+              "last": 59.500000000000576
+            },
+            {
+              "id": "u182",
+              "first": 2.500000000000001,
+              "last": 59.500000000000576
+            },
+            {
+              "id": "u183",
+              "first": 3.5000000000000018,
+              "last": 59.90000000000058
+            },
+            {
+              "id": "u184",
+              "first": 4.999999999999998,
+              "last": 59.60000000000058
+            },
+            {
+              "id": "u185",
+              "first": 6.399999999999993,
+              "last": 59.80000000000058
+            },
+            {
+              "id": "u186",
+              "first": 8.399999999999986,
+              "last": 60.00000000000058
+            },
+            {
+              "id": "u187",
+              "first": 9.399999999999983,
+              "last": 59.80000000000058
+            }
+          ]
+        }
+      ]
+    },
+    "terrain": {
+      "results": [
+        "flat platforms at either height; slope/edge rejected; direct driving unchanged",
+        "rai: attack planning and live controller leave slope",
+        "scavs: attack planning and live controller leave slope",
+        "group reservations and saved arrived positions reject slopes",
+        "sync attack-move destination excludes slope",
+        "shared async attack-move destination excludes slope"
+      ]
+    },
+    "bridge0": {
+      "result": {
+        "accepted": [
+          {
+            "id": "u432",
+            "pending": "move",
+            "revision": 2
+          },
+          {
+            "id": "u433",
+            "pending": "move",
+            "revision": 2
+          },
+          {
+            "id": "u434",
+            "pending": "move",
+            "revision": 2
+          },
+          {
+            "id": "u435",
+            "pending": "move",
+            "revision": 2
+          },
+          {
+            "id": "u436",
+            "pending": "move",
+            "revision": 2
+          },
+          {
+            "id": "u437",
+            "pending": "move",
+            "revision": 2
+          }
+        ],
+        "goal": {
+          "x": -783.8176537444583,
+          "y": -886.3674259131061,
+          "z": 2.0339009903462397
+        },
+        "units": [
+          {
+            "id": "u432",
+            "displacement": 100.90519211593454,
+            "distanceBefore": 95.67222774156363,
+            "distanceAfter": 23.693168256638817,
+            "firstMotion": 4.300000000000001,
+            "hp": 320,
+            "request": {
+              "x": -783.8176537444583,
+              "y": -886.3674259131061
+            },
+            "destination": {
+              "x": -807.5365005440175,
+              "y": -890.0302535774993
+            },
+            "arrivalDistance": 0.4070225626067866,
+            "retreat": false,
+            "reason": "destination-reached"
+          },
+          {
+            "id": "u433",
+            "displacement": 81.24217580990751,
+            "distanceBefore": 98.16132321280575,
+            "distanceAfter": 34.41092953553277,
+            "firstMotion": 4.300000000000001,
+            "hp": 320,
+            "request": {
+              "x": -783.8176537444583,
+              "y": -886.3674259131061
+            },
+            "destination": {
+              "x": -763.7616346092923,
+              "y": -858.9857514491538
+            },
+            "arrivalDistance": 0.4705274980994571,
+            "retreat": false,
+            "reason": "destination-reached"
+          },
+          {
+            "id": "u434",
+            "displacement": 97.92932762692097,
+            "distanceBefore": 98.17690638423227,
+            "distanceAfter": 0.2920422384356178,
+            "firstMotion": 4.300000000000001,
+            "hp": 320,
+            "request": {
+              "x": -783.8176537444583,
+              "y": -886.3674259131061
+            },
+            "destination": {
+              "x": -783.8176537444583,
+              "y": -886.3674259131061
+            },
+            "arrivalDistance": 0.2920422384356178,
+            "retreat": false,
+            "reason": "destination-reached"
+          },
+          {
+            "id": "u435",
+            "displacement": 82.4687399165456,
+            "distanceBefore": 105.29062441045855,
+            "distanceAfter": 24.37073386815554,
+            "firstMotion": 4.300000000000001,
+            "hp": 320,
+            "request": {
+              "x": -783.8176537444583,
+              "y": -886.3674259131061
+            },
+            "destination": {
+              "x": -787.4804814088515,
+              "y": -862.6485791135469
+            },
+            "arrivalDistance": 0.37206178026538295,
+            "retreat": false,
+            "reason": "destination-reached"
+          },
+          {
+            "id": "u436",
+            "displacement": 95.006047819177,
+            "distanceBefore": 105.31967875626562,
+            "distanceAfter": 23.741157233489808,
+            "firstMotion": 4.300000000000001,
+            "hp": 320,
+            "request": {
+              "x": -783.8176537444583,
+              "y": -886.3674259131061
+            },
+            "destination": {
+              "x": -760.0988069448991,
+              "y": -882.704598248713
+            },
+            "arrivalDistance": 0.32525713052068084,
+            "retreat": false,
+            "reason": "destination-reached"
+          },
+          {
+            "id": "u437",
+            "displacement": 84.27400375267254,
+            "distanceBefore": 116.20923286296811,
+            "distanceAfter": 34.056922240185045,
+            "firstMotion": 4.300000000000001,
+            "hp": 320,
+            "request": {
+              "x": -783.8176537444583,
+              "y": -886.3674259131061
+            },
+            "destination": {
+              "x": -811.1993282084106,
+              "y": -866.3114067779401
+            },
+            "arrivalDistance": 0.17716099675166014,
+            "retreat": false,
+            "reason": "destination-reached"
+          }
+        ]
+      },
+      "errors": []
+    },
+    "bridge1": {
+      "result": {
+        "accepted": [
+          {
+            "id": "u432",
+            "pending": "move",
+            "revision": 2
+          },
+          {
+            "id": "u433",
+            "pending": "move",
+            "revision": 2
+          },
+          {
+            "id": "u434",
+            "pending": "move",
+            "revision": 2
+          },
+          {
+            "id": "u435",
+            "pending": "move",
+            "revision": 2
+          },
+          {
+            "id": "u436",
+            "pending": "move",
+            "revision": 2
+          },
+          {
+            "id": "u437",
+            "pending": "move",
+            "revision": 2
+          }
+        ],
+        "goal": {
+          "x": -939.6566411952135,
+          "y": -535.8099549452743,
+          "z": 4.068983156768354
+        },
+        "units": [
+          {
+            "id": "u432",
+            "displacement": 126.5176785492973,
+            "distanceBefore": 150.71024635553547,
+            "distanceAfter": 24.286536147823732,
+            "firstMotion": 4.699999999999999,
+            "hp": 320,
+            "request": {
+              "x": -939.6566411952135,
+              "y": -535.8099549452743
+            },
+            "destination": {
+              "x": -963.6524584126227,
+              "y": -535.3618968366652
+            },
+            "arrivalDistance": 0.33980054874719934,
+            "retreat": false,
+            "reason": "destination-reached"
+          },
+          {
+            "id": "u433",
+            "displacement": 176.77569063215395,
+            "distanceBefore": 153.48596137417303,
+            "distanceAfter": 23.69919806691986,
+            "firstMotion": 4.300000000000001,
+            "hp": 320,
+            "request": {
+              "x": -939.6566411952135,
+              "y": -535.8099549452743
+            },
+            "destination": {
+              "x": -915.6608239778044,
+              "y": -536.2580130538834
+            },
+            "arrivalDistance": 0.4993315079504282,
+            "retreat": false,
+            "reason": "destination-reached"
+          },
+          {
+            "id": "u434",
+            "displacement": 161.49410687593252,
+            "distanceBefore": 151.1198741864824,
+            "distanceAfter": 47.66792186870217,
+            "firstMotion": 4.4,
+            "hp": 320,
+            "request": {
+              "x": -939.6566411952135,
+              "y": -535.8099549452743
+            },
+            "destination": {
+              "x": -940.5527574124318,
+              "y": -583.8015893800925
+            },
+            "arrivalDistance": 0.420718496001141,
+            "retreat": false,
+            "reason": "destination-reached"
+          },
+          {
+            "id": "u435",
+            "displacement": 176.01276590446582,
+            "distanceBefore": 159.2805773512956,
+            "distanceAfter": 33.61445116973703,
+            "firstMotion": 4.300000000000001,
+            "hp": 320,
+            "request": {
+              "x": -939.6566411952135,
+              "y": -535.8099549452743
+            },
+            "destination": {
+              "x": -916.1088820864135,
+              "y": -560.2538302712926
+            },
+            "arrivalDistance": 0.32928778483726007,
+            "retreat": false,
+            "reason": "destination-reached"
+          },
+          {
+            "id": "u436",
+            "displacement": 150.4561830836953,
+            "distanceBefore": 154.68954195979225,
+            "distanceAfter": 53.701308827849175,
+            "firstMotion": 4.4,
+            "hp": 320,
+            "request": {
+              "x": -939.6566411952135,
+              "y": -535.8099549452743
+            },
+            "destination": {
+              "x": -964.5485746298409,
+              "y": -583.3535312714835
+            },
+            "arrivalDistance": 0.2895070433474571,
+            "retreat": false,
+            "reason": "destination-reached"
+          },
+          {
+            "id": "u437",
+            "displacement": 128.32614286910865,
+            "distanceBefore": 161.20946749283183,
+            "distanceAfter": 75.95913683593982,
+            "firstMotion": 4.4,
+            "hp": 320,
+            "request": {
+              "x": -939.6566411952135,
+              "y": -535.8099549452743
+            },
+            "destination": {
+              "x": -962.3082840867953,
+              "y": -463.3744451844377
+            },
+            "arrivalDistance": 0.3436877464927055,
+            "retreat": false,
+            "reason": "destination-reached"
+          }
+        ]
+      },
+      "errors": []
+    },
+    "browserControls": {
+      "passed": true,
+      "results": [
+        "right ground: HP > 80% only",
+        "left ground: all selected vehicles",
+        "right after manual move still respects HP",
+        "injured-only selection cannot override retreat",
+        "right button opens settings for an injured-only selection",
+        "right ground: HP > 35% only",
+        "retreat disabled: all living combat vehicles",
+        "right enemy: explicit attack also respects HP"
+      ],
+      "errors": []
+    },
+    "liveBase": {
+      "build": {
+        "schemaVersion": 1,
+        "version": "0.1.10",
+        "buildNumber": 310,
+        "buildId": "0.1.10+build.310.92f0ebc.dirty",
+        "commit": "92f0ebc3d64ce10fede4920fa65137e6b3fca4a5",
+        "branch": "codex/campaign-driving-performance",
+        "dirty": true
+      },
+      "repair": {
+        "count": 6,
+        "points": 6,
+        "phases": [
+          "entering",
+          "waiting",
+          "waiting",
+          "waiting",
+          "waiting",
+          "waiting"
+        ]
+      },
+      "battle": {
+        "cars": 30,
+        "fills": 0,
+        "checkedGoals": 1289,
+        "fired": 16,
+        "deployed": 25,
+        "targetHp": 97682.5
+      },
+      "errors": []
+    },
+    "bodyMasks": {
+      "cases": 36,
+      "identicalToExactOracle": true,
+      "exactPenetrationQueries": 95,
+      "optimizedPenetrationQueries": 32
+    },
+    "additionalPassed": [
+      "check-command-immediate-motion",
+      "check-retreat-order-interruption",
+      "check-attack-retreat-threshold",
+      "check-combat-deployment",
+      "check-combat-frontage",
+      "check-firing-fill-flow",
+      "check-factory-arrival-queue",
+      "check-scav-ai",
+      "check-order-route-state",
+      "check-shift-orders",
+      "check-road-query-cache",
+      "check-collision-separation",
+      "check-large-vehicle-broadphase",
+      "check-wg-bridge-traffic"
+    ],
+    "deployment": {
+      "columnAttack": 10,
+      "columnAttackMove": 10,
+      "reserve": {
+        "active": 36,
+        "waiting": 14
+      },
+      "liveTowerRetreatSurvived": true,
+      "saveLoad": true
+    }
+  },
+  "performance": {
+    "scenario": "500 vehicles at a real M02 bridge: 250 player, 250 native enemy; 20 completed simulation ticks",
+    "beforeLocalOptimizations": {
+      "ticks": 20,
+      "simulationSeconds": 2.0000000000000004,
+      "cpuMs": 5198.6235
+    },
+    "afterThresholdAndSurfaceCache": {
+      "ticks": 20,
+      "simulationSeconds": 2.0000000000000004,
+      "cpuMs": 4442.665
+    },
+    "finalIsolatedRun": {
+      "ticks": 20,
+      "simulationSeconds": 2.0000000000000004,
+      "cpuMs": 4307.9752,
+      "moved": 475,
+      "enemyMoved": 228,
+      "damaged": 0
+    },
+    "note": "Exploratory CPU timings, not rendering FPS or a controlled statistical speedup. Final run includes the later first-contact correction. 500 vehicles still take more CPU time than simulated time."
+  },
+  "limitations": [
+    "No claim that every existing saved traffic jam or all 500-vehicle performance problems are fixed.",
+    "Browser bridge tests isolate traffic by disabling weapon damage; damage ownership and live-tower withdrawal have separate checks.",
+    "Live M02 battle checks valid firing endpoints and multiple shooters, not all 30 cars surviving or arriving."
+  ],
+  "sourceHashes": {
+    "combat-deployment": "f176f235b3e1b7d03c80dd93ba132a2b61b27359c30ebee3d661ca61ea5afdc6",
+    "combat-orders": "a34e25f6785d11c43e8a1ebb8413efaf2856471963d416bbcc318852d202ed0d",
+    "combat-policy": "0208b8b1d24d99d26e450aa0cabba8b054cbea55fabf9c67374bad0ca9451a9a",
+    "command-planner": "99dc3b77b8423ff9a0bb5b6119f48f7fcb2957a162d1fe634e3098978980088d",
+    "firing-ground": "db4ef4baa7c116309acf27f2261d50b3e10f765dc0f5ed45465db5f4542028ee",
+    "firing-positions": "379d1b14cf54d6df508a7a5d197e53fb8188998b07c9a3ba635ac1cd17a750b7",
+    "mission": "b3ca921bdbc54a85ab3b602094159cd9a49f61edc4826cef33758cc43de50dee",
+    "road-traffic": "91688676e9375921d5c7e36572389b15bbbc784bbc97dc1c469e91608e7ec324",
+    "scav-ai": "1589e821d263d05b14fcd3b1499a41e9671b9a2ef070dac81a660b2c11ad276a"
+  }
+}

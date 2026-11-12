@@ -21,6 +21,8 @@ const roads=new RoadTraffic({roadNetwork:{paths}}),point={x:0,y:0};
 for(let i=0;i<4000;i++){
  point.x=i%17===0?64*(i%7-3):random()*1500-750;point.y=random()*1500-750;
  for(const radius of [0,24,155,0,24])assert.deepEqual(roads.nearest(point,radius),reference(roads,point,radius));
+ const nearest=reference(roads,point),coverage=nearest?Math.max(0,Math.min(1,(nearest.width/2-nearest.distance)/2.5)):0;
+ for(let repeat=0;repeat<3;repeat++)assert.equal(roads.coverage(point.x,point.y),coverage,'Surface cache preserves exact road edges');
 }
 const first=roads.nearest(paths[0].points[0]);first.x+=1000;
 assert.deepEqual(roads.nearest(paths[0].points[0]),reference(roads,paths[0].points[0]),'Returned records cannot corrupt the cache');

@@ -41,7 +41,7 @@ for(const action of ['attack','attack-move']){
   // The existing generic jam controller can explicitly lend passing space.
   // Report those overlaps separately; never classify one as solid clearance.
   assert(solidGap>=0,'Every physical tick obeys solid hull collisions');assert(cars.every(u=>u.hp===u.maxHp),'No friendly collision damage');
-  if(!ref&&!process.argv.includes('--diagnose')){assert(moves.length>0,'Ordinary group orders must use forward filling');assert(fired.size===cars.length,'Every car must reach firing range');}
+  if(!ref&&!process.argv.includes('--diagnose')){assert(fired.size===cars.length,'Every car must reach firing range');assert.equal(result.sustained,cars.length,'Followers must join sustained fire, not remain trapped behind the first arrival');}
   if(action==='attack-move'){
     const resumed=cars.map(u=>structuredClone(u.combatDeployment?.resume??u.task));m.damage(target,100001,cars[0]);
     for(let i=0;i<50;i++){m.advance(.1);m.finishPendingStep();m.effects=[];}
