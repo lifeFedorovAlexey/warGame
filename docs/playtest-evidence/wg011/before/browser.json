@@ -1,0 +1,41 @@
+{
+  "errors": [],
+  "screens": [
+    {
+      "width": 1440,
+      "height": 900,
+      "minimap": {
+        "x": 1292,
+        "y": 756,
+        "width": 132,
+        "height": 132
+      }
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "minimap": {
+        "x": 740,
+        "y": 290,
+        "width": 88,
+        "height": 88
+      }
+    },
+    {
+      "width": 667,
+      "height": 375,
+      "minimap": {
+        "x": 567,
+        "y": 279,
+        "width": 88,
+        "height": 88
+      }
+    }
+  ],
+  "initial": {
+    "pings": [],
+    "notices": "Обнаружен артефакт"
+  },
+  "reminders": [],
+  "cameraMoved": false
+}

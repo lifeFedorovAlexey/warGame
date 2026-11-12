@@ -954,7 +954,7 @@ function flushUi() {
   setButtonIcon($('tempo'), speedIcon(speed), 'Скорость ×' + speed);
   const tasks = mission.objectives();
   const assigned=storyObjectives(mission,{radioEnabled:radio.enabled});
-  if(active)minimapView.observe(assigned,performance.now());
+  if(active)minimapView.observe(assigned,performance.now(),{paused:paused||document.hidden});
   $('objective-count').textContent = assigned.length || '';
   const nextTasks = JSON.stringify(assigned);
   if (nextTasks !== taskKey) {

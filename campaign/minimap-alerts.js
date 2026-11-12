@@ -1,4 +1,5 @@
-export const MINIMAP_COLORS={friendlyUnit:'#43c768',friendlyBuilding:'#adeba2',enemyUnit:'#e34c43',enemyBuilding:'#e34c4399',artifact:'#62b7ff',objective:'#64ed84',attack:'#ff514b'};
+import {objectiveTargets,ObjectiveReminders} from './objective-reminders.js';
+export const MINIMAP_COLORS={friendlyUnit:'#43c768',friendlyBuilding:'#adeba2',enemyUnit:'#e34c43',enemyBuilding:'#e34c4399',artifact:'#62b7ff',objective:'#64ed84',enemyObjective:'#ed685a',attack:'#ff514b'};
 export const MINIMAP_PING_MS=3000;
 const point=p=>p&&Number.isFinite(p.x)&&Number.isFinite(p.y);
 
@@ -22,11 +23,12 @@ export function objectiveLocation(mission,task){
 // Only discovery history is saved; expired alerts never replay after loading.
 export class MinimapAlerts{
  constructor(notify=()=>{},mission=null){this.notify=notify;this.mission=mission;this.reset();}
- reset(silent=false){this.state=null;this.silent=silent;this.pings=[];this.focusIndex=0;this.signals=new Set();this.lastMessage=new Map();}
+ reset(silent=false){this.state=null;this.silent=silent;this.pings=[];this.focusIndex=0;this.signals=new Set();this.lastMessage=new Map();this.reminders=new ObjectiveReminders();}
  bind(mission=this.mission){
   if(!mission)return;this.mission=mission;const s=mission.state;
   if(this.state===s)return;
   this.state=s;this.pings=[];this.focusIndex=0;this.signals.clear();this.lastMessage.clear();
+  this.reminders.reset();
   const saved=s.minimapNotices??={artifacts:[],objectives:[],locations:[]};
   this.saved=saved;this.artifacts=new Set(saved.artifacts);this.objectives=new Set(saved.objectives);this.locations=new Set(saved.locations);
  }
@@ -35,7 +37,11 @@ export class MinimapAlerts{
   if(!point(p))return;
   this.active(now);
   if(this.pings.some(a=>a.kind===kind&&Math.hypot(a.x-p.x,a.y-p.y)<72))return;
-  if(this.pings.length>=16)this.pings.shift();
+  if(this.pings.length>=16){
+   const disposable=this.pings.findIndex(p=>p.kind!=='attack');
+   if(disposable<0&&kind!=='attack')return;
+   this.pings.splice(disposable<0?0:disposable,1);
+  }
   const alert={kind,x:p.x,y:p.y,born:now,until:now+MINIMAP_PING_MS};this.pings.push(alert);return alert;
  }
  active(now){
@@ -52,26 +58,34 @@ export class MinimapAlerts{
   return {...p,kind:'threat',attack:true,distance:420,label:(p.building?'Постройка под огнём':'Техника под огнём')+(attacks.length>1?` · ${index+1}/${attacks.length}`:'')};
  }
  nextAttack(){this.focusIndex++;}
- observe(mission,tasks,now){
-  const s=mission.state;if(s.status!=='running')return;
+ observe(mission,tasks,now,options={}){
+  const s=mission.state;if(s.status!=='running'){this.pings=[];this.reminders.reset();return;}
   this.bind(mission);
+  const targets=objectiveTargets(mission,tasks,objectiveLocation),keys=new Set(targets.map(p=>p.key));
+  this.pings=this.pings.filter(p=>!p.objectiveKey||keys.has(p.objectiveKey));
+  const indicate=(p,reminder=false)=>{const ping=this.ping(p.kind,p,now);if(ping)Object.assign(ping,{objectiveKey:p.key,reminder});};
   const remember=(set,key,list)=>{set.add(key);list.push(key);};
   for(const a of s.artifacts){
-   if(a.collected||!mission.exploredAt(a.x,a.y)||this.artifacts.has(a.id))continue;
+   if(a.collected||!mission.inBounds(a.x,a.y)||!mission.exploredAt(a.x,a.y)||this.artifacts.has(a.id))continue;
    remember(this.artifacts,a.id,this.saved.artifacts);
-   if(!this.silent){this.ping('artifact',a,now);this.message('artifact','Обнаружен артефакт',now);}
+   if(!this.silent){indicate({...a,kind:'artifact',key:'artifact:'+a.id});this.message('artifact','Обнаружен артефакт',now);}
   }
   for(const task of tasks){
    // Discovery already has its blue alert; do not cover it with a green one.
-   if(task.id.startsWith('pickup-'))continue;
-   const fresh=!this.objectives.has(task.id),p=objectiveLocation(mission,task),key=p&&task.id+'|'+p.key;
+   if(task.done||task.id.startsWith('pickup-'))continue;
+   const fresh=!this.objectives.has(task.id);
    if(fresh){remember(this.objectives,task.id,this.saved.objectives);if(!this.silent)this.message('objective','Новая цель: '+task.name,now);}
-   if(p&&!this.locations.has(key)){remember(this.locations,key,this.saved.locations);if(!this.silent)this.ping('objective',p,now);}
   }
+  for(const p of targets)if(p.kind!=='artifact'&&!this.locations.has(p.key)){
+   remember(this.locations,p.key,this.saved.locations);if(!this.silent)indicate(p);
+  }
+  const attacking=this.active(now).some(p=>p.kind==='attack');
+  for(const p of this.reminders.update(tasks,targets,now,{...options,attacking}))indicate(p,true);
   this.silent=false;
  }
  event(event,now){
   if(event.type!=='under-attack'||!point(event))return;
+  this.pings=this.pings.filter(p=>!p.reminder);
   const active=this.active(now),near=active.find(p=>p.kind==='attack'&&(event.target&&p.target===event.target||Math.hypot(p.x-event.x,p.y-event.y)<100));
   const alert=near??this.ping('attack',event,now);
   if(alert)Object.assign(alert,{x:event.x,y:event.y,target:event.target,building:event.building,until:now+MINIMAP_PING_MS});
