@@ -60,6 +60,30 @@
     }
   ],
   "cameraMoved": false,
+  "combat": {
+    "firstShot": true,
+    "deferred": true,
+    "deadline": [
+      {
+        "kind": "attack",
+        "protected": false
+      },
+      {
+        "kind": "artifact",
+        "protected": true
+      },
+      {
+        "kind": "enemyObjective",
+        "protected": true
+      },
+      {
+        "kind": "enemyObjective",
+        "protected": true
+      }
+    ],
+    "survivesHits": true,
+    "expired": true
+  },
   "afterCompletion": [
     {
       "kind": "enemyObjective",

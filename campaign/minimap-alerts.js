@@ -29,6 +29,7 @@ export class MinimapAlerts{
   if(this.state===s)return;
   this.state=s;this.pings=[];this.focusIndex=0;this.signals.clear();this.lastMessage.clear();
   this.reminders.reset();
+  this.lastCombatAt=mission.lastPlayerCombatAt;this.combatUntil=0;
   const saved=s.minimapNotices??={artifacts:[],objectives:[],locations:[]};
   this.saved=saved;this.artifacts=new Set(saved.artifacts);this.objectives=new Set(saved.objectives);this.locations=new Set(saved.locations);
  }
@@ -37,12 +38,17 @@ export class MinimapAlerts{
   if(!point(p))return;
   this.active(now);
   if(this.pings.some(a=>a.kind===kind&&Math.hypot(a.x-p.x,a.y-p.y)<72))return;
-  if(this.pings.length>=16){
-   const disposable=this.pings.findIndex(p=>p.kind!=='attack');
-   if(disposable<0&&kind!=='attack')return;
-   this.pings.splice(disposable<0?0:disposable,1);
+  // A forced reminder has its own bounded allowance for three seconds, so
+  // even sixteen simultaneous attacks cannot starve the two-minute deadline.
+  const pool=this.pings.filter(a=>!!a.combatProtected===!!p.combatProtected);
+  if(pool.length>=16){
+   const disposable=pool.find(a=>a.kind!=='attack')??(kind==='attack'?pool[0]:null);
+   if(!disposable)return;
+   this.pings.splice(this.pings.indexOf(disposable),1);
   }
-  const alert={kind,x:p.x,y:p.y,born:now,until:now+MINIMAP_PING_MS};this.pings.push(alert);return alert;
+  const alert={kind,x:p.x,y:p.y,born:now,until:now+MINIMAP_PING_MS};
+  if(p.combatProtected)alert.combatProtected=true;
+  this.pings.push(alert);return alert;
  }
  active(now){
   this.bind();this.pings=this.pings.filter(p=>now<p.until);
@@ -79,13 +85,17 @@ export class MinimapAlerts{
   for(const p of targets)if(p.kind!=='artifact'&&!this.locations.has(p.key)){
    remember(this.locations,p.key,this.saved.locations);if(!this.silent)indicate(p);
   }
-  const attacking=this.active(now).some(p=>p.kind==='attack');
+  if(Number.isFinite(mission.lastPlayerCombatAt)&&mission.lastPlayerCombatAt!==this.lastCombatAt){
+   this.lastCombatAt=mission.lastPlayerCombatAt;this.combatUntil=now+MINIMAP_PING_MS;
+  }
+  const underAttack=this.active(now).some(p=>p.kind==='attack'),attacking=now<this.combatUntil||underAttack;
+  if(attacking)this.pings=this.pings.filter(p=>!p.reminder||p.combatProtected);
   for(const p of this.reminders.update(tasks,targets,now,{...options,attacking}))indicate(p,true);
   this.silent=false;
  }
  event(event,now){
   if(event.type!=='under-attack'||!point(event))return;
-  this.pings=this.pings.filter(p=>!p.reminder);
+  this.pings=this.pings.filter(p=>!p.reminder||p.combatProtected);
   const active=this.active(now),near=active.find(p=>p.kind==='attack'&&(event.target&&p.target===event.target||Math.hypot(p.x-event.x,p.y-event.y)<100));
   const alert=near??this.ping('attack',event,now);
   if(alert)Object.assign(alert,{x:event.x,y:event.y,target:event.target,building:event.building,until:now+MINIMAP_PING_MS});

@@ -37,9 +37,39 @@ try{
  }
  report.cameraMoved=await page.evaluate(()=>campaign.world.controls.target.toArray().some((n,i)=>Math.abs(n-reviewCamera[i])>.01));assert(!report.cameraMoved);
  if(!before){
+  await page.waitForTimeout(3200);
+  report.combat={firstShot:await page.evaluate(()=>{
+   const m=campaign.mission,u=m.state.units.find(u=>u.owner==='rai'&&u.kind==='bukhanka');
+   const enemy=m.addUnit('raider','scavs',{x:u.x+40,y:u.y},{hp:10000,maxHp:10000});
+   const shot=()=>{m.state.time+=1;u.cooldown=0;return m.attack(u,enemy,m.unitSpec(u));};
+   const hit=()=>{m.damage(u,1,enemy);campaign.advance(0);};
+   window.reviewCombat={shot,hit,timer:setInterval(shot,500)};
+   reviewAlerts.reminders.elapsed=29500;return shot();
+  })};assert(report.combat.firstShot);
+  await page.waitForTimeout(1700);
+  report.combat.deferred=await page.evaluate(()=>!reviewAlerts.active(performance.now()).some(p=>p.reminder));assert(report.combat.deferred);
+  await page.evaluate(()=>{
+   clearInterval(reviewCombat.timer);reviewCombat.timer=setInterval(()=>{reviewCombat.shot();reviewCombat.hit();},500);
+   reviewCombat.hit();reviewAlerts.reminders.sinceReminder=119500;
+  });
+  await page.waitForFunction(()=>reviewAlerts.pings.some(p=>p.combatProtected));
+  report.combat.deadline=await page.evaluate(()=>reviewAlerts.active(performance.now()).map(p=>({kind:p.kind,protected:!!p.combatProtected})));
+  assert.equal(report.combat.deadline.filter(p=>p.protected).length,3);assert(report.combat.deadline.some(p=>p.kind==='attack'));
+  for(const [width,height] of [[1440,900],[844,390],[667,375]]){
+   await page.setViewportSize({width,height});await page.waitForTimeout(120);
+   // Freeze only the pulse's visual phase for comparable screenshots.
+   await page.evaluate(()=>{for(const p of reviewAlerts.pings)if(p.combatProtected){p.born=performance.now()-450;p.until=performance.now()+3000;}});
+   await page.screenshot({path:`${folder}/combat-${width}.png`});
+  }
+  await page.waitForTimeout(700);
+  report.combat.survivesHits=await page.evaluate(()=>reviewAlerts.active(performance.now()).some(p=>p.combatProtected));assert(report.combat.survivesHits);
+  await page.evaluate(()=>clearInterval(reviewCombat.timer));await page.waitForTimeout(3200);
+  report.combat.expired=await page.evaluate(()=>!reviewAlerts.active(performance.now()).some(p=>p.reminder));assert(report.combat.expired);
+  await page.evaluate(()=>{reviewAlerts.reminders.elapsed=30000;});
+  await page.waitForFunction(()=>reviewAlerts.pings.some(p=>p.reminder));
   await page.evaluate(()=>{const m=campaign.mission;reviewScenario.bases[0].state='neutralized';m.state.artifacts.find(a=>a.id===reviewScenario.artifactId).collected=true;});
   await page.waitForTimeout(350);report.afterCompletion=await page.evaluate(()=>reviewAlerts.pings.map(p=>({kind:p.kind,key:p.objectiveKey})));
-  assert(!report.afterCompletion.some(p=>p.kind==='artifact'));assert(report.afterCompletion.filter(p=>p.kind==='enemyObjective').length<=1);
+  assert(!report.afterCompletion.some(p=>p.kind==='artifact'));assert.equal(report.afterCompletion.filter(p=>p.kind==='enemyObjective').length,1);
  }
  assert.deepEqual(report.errors,[]);console.log(JSON.stringify(report));
 }catch(error){report.failure=error.stack;if(page)await page.screenshot({path:folder+'/failure.png'}).catch(()=>{});throw error;}

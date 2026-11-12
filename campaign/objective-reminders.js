@@ -1,4 +1,5 @@
 export const OBJECTIVE_REMINDER_MS=30000;
+export const OBJECTIVE_REMINDER_MAX_MS=120000;
 const point=p=>p&&Number.isFinite(p.x)&&Number.isFinite(p.y);
 
 // Only known, unfinished locations. Static camp positions can be remembered
@@ -33,18 +34,22 @@ export function objectiveTargets(mission,tasks,location){
 }
 
 export class ObjectiveReminders{
- reset(){this.signature=null;this.last=null;this.elapsed=0;this.offset=0;}
+ reset(){this.signature=null;this.last=null;this.elapsed=0;this.sinceReminder=0;this.offset=0;}
  constructor(){this.reset();}
  update(tasks,targets,now,{paused=false,attacking=false}={}){
   const signature=JSON.stringify([tasks.filter(t=>!t.done).map(t=>[t.id,t.name,t.id==='m03-objective'?null:t.progress]),targets.map(t=>t.key)]);
   const dt=this.last===null?0:Math.max(0,Math.min(1000,now-this.last));this.last=now;
-  if(signature!==this.signature){this.signature=signature;this.elapsed=0;return [];}
-  if(paused||!targets.length)return [];
-  this.elapsed+=dt;
-  if(attacking||this.elapsed<OBJECTIVE_REMINDER_MS)return [];
-  this.elapsed=0;
+  const changed=signature!==this.signature;this.signature=signature;
+  if(changed)this.elapsed=0;
+  if(!targets.length){this.sinceReminder=0;return [];}
+  if(paused)return [];
+  this.elapsed+=changed?0:dt;this.sinceReminder+=dt;
+  // Progress restarts the normal delay, but cannot keep moving the hard limit.
+  const overdue=this.sinceReminder>=OBJECTIVE_REMINDER_MAX_MS,combatProtected=attacking&&overdue;
+  if(!overdue&&(this.elapsed<OBJECTIVE_REMINDER_MS||attacking))return [];
+  this.elapsed=0;this.sinceReminder=0;
   // Rotate bounded batches if a future mission has more than sixteen goals.
-  const batch=Array.from({length:Math.min(16,targets.length)},(_,i)=>targets[(i+this.offset)%targets.length]);
+  const batch=Array.from({length:Math.min(16,targets.length)},(_,i)=>({...targets[(i+this.offset)%targets.length],combatProtected}));
   this.offset=(this.offset+batch.length)%targets.length;return batch;
  }
 }
