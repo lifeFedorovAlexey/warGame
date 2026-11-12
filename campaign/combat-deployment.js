@@ -5,7 +5,8 @@ import {checkManeuver} from './vehicle-motion.js';
 import {navigationDecision} from './navigation-state.js';
 import {movementCombatTarget} from './combat-orders.js';
 import {checkedCycleActive} from './traffic-cycle.js';
-import {firingSlots,slotCost,validPosition,firingPose} from './firing-positions.js';
+import {slotCost,validPosition,firingPose} from './firing-positions.js';
+import {firingAreaSlotsSteps,firingAreaRevision} from './firing-area.js';
 import {advanceFiringFrontage} from './combat-frontage.js';
 import {firingGroundAllowed} from './firing-ground.js';
 export {validPosition} from './firing-positions.js';
@@ -17,10 +18,11 @@ const resetMotion=unit=>{
 };
 export function cancelCombatDeployment(unit){delete unit.combatDeployment;delete unit.combatGroup;delete unit.combatContactAt;delete unit.combatResume;delete unit.combatArrivalBlockedAt;delete unit.combatArrivalGoal;delete unit.combatParking;delete unit.attackRouteTarget;delete unit.attackFailedConditions;delete unit.combatDisengage;}
 function* reserveSlot(mission,unit,deployment){
-  const slots=firingSlots(mission.unitSpec(unit),mission.config.worldScale,deployment.angle,deployment.anchor);
+  const target=mission.entity(deployment.targetId);
+  if(!target)return false;
+  const slots=yield* firingAreaSlotsSteps(mission,unit,deployment.angle,deployment.anchor,target);
   const reserved=mission.state.units.filter(other=>other!==unit&&other.hp>0&&other.combatDeployment?.group===deployment.group)
     .map(other=>other.combatDeployment.goal??other.combatDeployment.slot).filter(Boolean);
-  const target=mission.entity(deployment.targetId);
   const eligible=[];
   for(let index=0;index<slots.length;index++){
     if(index%8===0)yield;
@@ -35,7 +37,7 @@ function* reserveSlot(mission,unit,deployment){
   // positions change. Exhausting a list must not restart an identical search.
   const index=available[0]?.index??-1;
   if(index<0)return false;
-  deployment.index=index;deployment.slot=slots[index];deployment.status='planning';deployment.compacting=true;return true;
+  deployment.index=index;deployment.slot={...slots[index]};deployment.status='planning';deployment.compacting=true;return true;
 }
 export function combatPositionConditions(mission,unit,anchor){
   let cache=mission.combatConditions;
@@ -44,7 +46,8 @@ export function combatPositionConditions(mission,unit,anchor){
   let value=cache.values.get(key);
   if(value===undefined){
     const nearby=mission.nearbyUnits(anchor,radius).filter(other=>other.hp>0);
-    value=[mission.nav.topologyRevision,...nearby.map(other=>{
+    // A saved exhausted search from an older sampler must get the new area.
+    value=['firing-area:'+firingAreaRevision,mission.nav.topologyRevision,...nearby.map(other=>{
       const goal=other.combatDeployment?.goal??other.combatDeployment?.slot??other.combatRetreat?.destination??other.path.at(-1);
       return other.id+':'+(other.path.length?'moving:'+(goal?goal.x+','+goal.y:''):other.x+','+other.y+','+other.heading)+':'+(other.pendingOrder?.revision??'');
     })].join('|');cache.values.set(key,value);
@@ -82,12 +85,14 @@ function* beginDeployment(mission,unit,target){
   }
   const moving=members.filter(member=>member.combatDeployment.status!=='arrived'),scale=mission.config.worldScale;
   const held=[...existing,...members].map(member=>member.combatDeployment.goal??member.combatDeployment.slot).filter(Boolean);
-  const options=moving.map(member=>firingSlots(mission.unitSpec(member),scale,angle,target)),count=Math.max(0,...options.map(slots=>slots.length));
+  const options=[];
+  for(const member of moving)options.push(yield* firingAreaSlotsSteps(mission,member,angle,target,target));
+  const count=Math.max(0,...options.map(slots=>slots.length));
   const deployments=moving.map(member=>member.combatDeployment),costs=[],depths=[];
   let maximumTravel=0,maximumDepth=0;
   for(const [row,member] of moving.entries()){
     const values=[],ranks=[];costs.push(values);depths.push(ranks);
-    const inner=distance(options[row].at(-1)??target,target);
+    const inner=Math.min(...options[row].map(point=>distance(point,target)));
     for(let index=0;index<count+moving.length;index++){
       if(index%8===0)yield;
       const point=options[row][index],valid=point&&validPosition(mission,member,target,point,held);
@@ -104,7 +109,11 @@ function* beginDeployment(mission,unit,target){
   const assignments=yield* assignFormationSteps(costs);
   for(const [row,index] of assignments.entries())if(index<count&&costs[row][index]<unavailable&&moving[row].combatDeployment===deployments[row]&&!moving[row].pendingOrder){
     const member=moving[row],deployment=member.combatDeployment;
-    deployment.index=index;deployment.slot=options[row][index];deployment.status='planning';deployment.compacting=true;
+    // Different weapon ranges/body types can map one column to different
+    // coordinates. Keep live spacing; an unmatched member uses reserveSlot.
+    if(held.some(point=>distance(point,options[row][index])<scale*5.3))continue;
+    deployment.index=index;deployment.slot={...options[row][index]};deployment.status='planning';deployment.compacting=true;
+    held.push(deployment.slot);
     member.task={type:'combat-position',...deployment.slot};
   }
   return true;

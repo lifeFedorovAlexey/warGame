@@ -1,0 +1,276 @@
+{
+  "version": "0.1.11",
+  "date": "2026-11-12",
+  "scope": [
+    "Fill usable firing terrain between the former fixed circles, with shared cached candidates for both armies",
+    "Allow engineered road climbs only with the whole vehicle footprint on pavement; retain off-road slope checks",
+    "Resume auto-repair after a completed direct movement order, including saved completed commands"
+  ],
+  "checks": {
+    "area": {
+      "results": [
+        {
+          "case": "mixed vehicle profiles retain reservation spacing",
+          "assigned": 12
+        },
+        {
+          "case": "construction invalidates only affected firing areas"
+        },
+        {
+          "case": "road climb, bare hillside, shoulder and cliff"
+        },
+        {
+          "case": "m02.fort.sensor_outpost.watch.nw",
+          "template": 38,
+          "candidates": 43,
+          "valid": 7,
+          "road": 4,
+          "checked": 66,
+          "cpuMs": 8.706500000000005
+        },
+        {
+          "case": "m02.fort.sensor_outpost.watch.se",
+          "template": 38,
+          "candidates": 43,
+          "valid": 11,
+          "road": 5,
+          "checked": 64,
+          "cpuMs": 4.130999999999858
+        },
+        {
+          "case": "m02.fort.sensor_outpost.watch.ne",
+          "template": 38,
+          "candidates": 44,
+          "valid": 10,
+          "road": 5,
+          "checked": 68,
+          "cpuMs": 4.543100000000095
+        },
+        {
+          "case": "m02.fort.sensor_outpost.watch.sw",
+          "template": 38,
+          "candidates": 47,
+          "valid": 13,
+          "road": 6,
+          "checked": 91,
+          "cpuMs": 3.497500000000173
+        },
+        {
+          "case": "500 requests reuse one area across owners and positions",
+          "cpuMs": 0.52150000000006,
+          "staticProbes": 0
+        },
+        {
+          "case": "rai attack uses the shared terrain search",
+          "end": {
+            "x": -1208,
+            "y": -840
+          }
+        },
+        {
+          "case": "scavs attack uses the shared terrain search",
+          "end": {
+            "x": -1154.592679667118,
+            "y": -843.918980332647
+          }
+        },
+        {
+          "case": "terrain topology and target movement invalidate cached geometry"
+        }
+      ]
+    },
+    "repair": {
+      "results": [
+        {
+          "case": "bukhanka completes direct move then repairs without new damage",
+          "arrivedAt": 5.799999999999995,
+          "repairedAt": 24.300000000000075
+        },
+        {
+          "case": "builder completes direct move then repairs without new damage",
+          "arrivedAt": 6.799999999999992,
+          "repairedAt": 25.500000000000092
+        },
+        {
+          "case": "completed manual move in an existing save repairs without new damage",
+          "repairedAt": 24.300000000000075
+        },
+        {
+          "case": "explicit Stop remains authoritative"
+        },
+        {
+          "case": "queued manual legs finish before auto-repair"
+        },
+        {
+          "case": "pending, borrowed and blocked movement do not release control early"
+        },
+        {
+          "case": "nine completed direct moves use three empty factories",
+          "repaired": 9,
+          "factories": 3,
+          "seconds": 65.20000000000057
+        }
+      ]
+    },
+    "frontageCases": 20,
+    "columnCases": 4,
+    "continuousFireCases": 2,
+    "groundCases": 6,
+    "repairDistributionCases": 5,
+    "retreatInterruptionCases": 8,
+    "hpOrderCases": 23,
+    "realMousePolicyCases": 8,
+    "browser": {
+      "version": "0.1.11",
+      "battle": {
+        "cpuMs": 474.8000000715256,
+        "seconds": 18,
+        "fired": [
+          "u435",
+          "u433",
+          "u434",
+          "u436",
+          "u437",
+          "u438",
+          "u439"
+        ],
+        "positions": [
+          [
+            "u435",
+            {
+              "x": -1024,
+              "y": -848
+            }
+          ],
+          [
+            "u433",
+            {
+              "x": -1152,
+              "y": -848
+            }
+          ],
+          [
+            "u434",
+            {
+              "x": -1056,
+              "y": -848
+            }
+          ],
+          [
+            "u436",
+            {
+              "x": -1208.590849723683,
+              "y": -844.5785415581948
+            }
+          ],
+          [
+            "u437",
+            {
+              "x": -992,
+              "y": -848
+            }
+          ],
+          [
+            "u438",
+            {
+              "x": -1166.4590381418575,
+              "y": -846.8407489848968
+            }
+          ],
+          [
+            "u439",
+            {
+              "x": -1000,
+              "y": -944
+            }
+          ]
+        ],
+        "arrived": [
+          "u434",
+          "u435",
+          "u433",
+          "u436",
+          "u437"
+        ],
+        "checked": 940,
+        "alive": 5
+      },
+      "repair": {
+        "arrivedAt": 3.4000000000000017,
+        "retreatedAt": 3.5000000000000018,
+        "repairedAt": 18.799999999999997,
+        "hp": 320,
+        "maxHp": 320,
+        "factory": "b180",
+        "retreat": {
+          "status": "servicing",
+          "resume": {
+            "action": "move",
+            "target": {
+              "x": -1600.0000014359898,
+              "y": 228.00000516957988
+            },
+            "origin": {
+              "x": -1600.0000014222346,
+              "y": 227.6510112749665
+            }
+          },
+          "threat": null,
+          "started": 3.5000000000000018,
+          "home": {
+            "id": "b180",
+            "x": -1600,
+            "y": 408,
+            "radius": 123.47590011563598
+          },
+          "phase": "home",
+          "destination": {
+            "x": -1600,
+            "y": 327
+          },
+          "service": "repairing"
+        }
+      },
+      "errors": [],
+      "viewports": [
+        [
+          1440,
+          900
+        ],
+        [
+          844,
+          390
+        ],
+        [
+          667,
+          375
+        ]
+      ]
+    },
+    "traffic500": {
+      "units": 500,
+      "rai": 250,
+      "scavs": 250,
+      "simulationSeconds": 2.0000000000000004,
+      "cpuMs": 4410.023999999999,
+      "tickMaxMs": 779.0626000000002,
+      "moved": 475,
+      "enemyMoved": 228,
+      "damaged": 0
+    }
+  },
+  "limitations": [
+    "The 500-vehicle traffic simulation remains slower than real time; firing-area cache reuse is not a claim that the whole performance issue is fixed.",
+    "The live 18-second battle keeps enemy fire active: 7 vehicles fired, 5 reached a firing goal during the sample, 5 survived. It does not prove every large formation completes every approach.",
+    "check-retreat-existing-damage.mjs remains 8/10; the same save-load and thirty-healthy-car assertions also fail with all modified tracked campaign modules loaded from HEAD e9b5666. They are not treated as passing."
+  ],
+  "sourceSha256": {
+    "campaign/firing-area.js": "6afef0e0500a37414ccb75eaf1d0d32ca0822bbb6f6a1bc8b7418123a0007d28",
+    "campaign/firing-ground.js": "e7b546acf2dda67d2aee8304c365fdafa779696edb1a22456ebdb171ce8ad513",
+    "campaign/combat-deployment.js": "507e08a2982db0a554b53beb87f00ad6347304ea2c6899c118e62f0b22668c25",
+    "campaign/combat-frontage.js": "bbe6560e0f9b2124ce18d9c0d6fa35acac648a2812df1302946c95230da3db92",
+    "campaign/combat-retreat-state.js": "0b31b7ced8f4e64ee2d1f39f5bf4a2ff09992e31d00c1896ee14071ed2f9943d",
+    "campaign/combat-policy.js": "534f7d07579786254c7efee1a096c57d8a4471f6dbc6376fd0cd2c7406a126ab",
+    "campaign/mission.js": "6bc843db7ac2dd1635de68a97d3f4e114f6901265c2830e8a6eeed2184467421"
+  }
+}

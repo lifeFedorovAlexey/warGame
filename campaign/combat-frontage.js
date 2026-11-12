@@ -1,4 +1,5 @@
-import {firingSlots,firingPose,validPosition} from './firing-positions.js';
+import {firingPose,validPosition} from './firing-positions.js';
+import {firingAreaSlotsSteps} from './firing-area.js';
 import {projectedTrafficView} from './traffic-context.js';
 import {canReceiveAttack} from './combat-retreat-state.js';
 import {canFillBefore,reuseArrivalPath,unoccupiedArrival} from './arrival-slots.js';
@@ -41,7 +42,7 @@ export function* advanceFiringFrontage(m,unit,deployment,target){
   const radius=distance(rear,target);
   if(radius<scale*2)return false;
   const dx=(target.x-rear.x)/radius,dy=(target.y-rear.y)/radius;
-  const candidates=firingSlots(m.unitSpec(unit),scale,deployment.angle,deployment.anchor)
+  const candidates=(yield* firingAreaSlotsSteps(m,unit,deployment.angle,deployment.anchor,target))
     .map((point,index)=>({point,index,depth:distance(point,target)}))
     .filter(({point,depth})=>depth<radius-scale*2&&distance(unit,point)<=scale*16
       &&(point.x-rear.x)*dx+(point.y-rear.y)*dy>scale*2

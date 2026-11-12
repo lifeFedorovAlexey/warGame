@@ -23,6 +23,7 @@ import {setBuilderAutoRepair,assignAutomaticRepair,releaseInvalidRepairTarget,re
 import {combatContact} from './combat-contact.js';
 import {clearCombatSight} from './combat-sight.js';
 import {firingGroundAllowed} from './firing-ground.js';
+import {firingAreaSlotsSteps} from './firing-area.js';
 import {recordDamage} from './damage-contact.js';
 import {destroyDamage,damageMobility,partMissing,upgradeDamageState} from './damage-state.js';
 import {ensureSalvage,updateSalvage,armorMultiplier,salvageFromWreck,availableFieldRecipes,modificationInstalled,touchesSalvage,salvagePickupReach,canInstallRecipe,syncFieldHp} from './vehicle-salvage.js';
@@ -565,18 +566,19 @@ export class Mission{
   if(distance(unit,target)<=spec.range&&this.lineOfSight(unit,target)&&firingGroundAllowed(this,unit))return[];
   const last=unit.task?.targetId===target.id&&unit.path.at(-1);
   if(unit.detour&&last&&allowed(last)&&distance(last,target)<=spec.range&&this.lineOfSight({...unit,...last},target))return unit.path;
-  const angle=Math.atan2(unit.y-target.y,unit.x-target.x);
-  for(const radius of [spec.range*.82,spec.range*.94,spec.range*.68]){
-   for(const offset of [0,.28,-.28,.55,-.55,.9,-.9,1.4,-1.4,Math.PI]){
-    const goal={x:target.x+Math.cos(angle+offset)*radius,y:target.y+Math.sin(angle+offset)*radius};
-    if(!this.inBounds(goal.x,goal.y)||!allowed(goal))continue;
+  // Individual attackers, including the opponent, share the same terrain
+  // search. Their approach direction changes cost, not the sampled area.
+  const candidates=[...(yield* firingAreaSlotsSteps(this,unit,0,target,target))].sort((a,b)=>distance(a,unit)-distance(b,unit));
+  for(const goal of candidates){
+    yield;
+    if(!this.inBounds(goal.x,goal.y)||!allowed(goal)||!this.lineOfSight({...unit,...goal},target))continue;
+    if(reserved.some(point=>distance(goal,point)<this.config.worldScale*4.55))continue;
     const path=(yield* this.vehiclePathSteps(unit,goal,{maxGoalDistance:16,acceptEnd:allowed,
      acceptEndKey:'firing-ground:'+unit.kind+':'+target.x+','+target.y})),end=path?.at(-1);
     if(!end||!allowed(end)||distance(end,target)>spec.range||!this.lineOfSight({...unit,...end},target))continue;
     if(reserved.some(point=>distance(end,point)<this.config.worldScale*4.55))continue;
     if(this.state.units.some(other=>other!==unit&&other.hp>0&&other.owner===unit.owner&&!other.path.length&&distance(end,other)<this.config.worldScale*4.55))continue;
     return path;
-   }
   }
   return null;
  }

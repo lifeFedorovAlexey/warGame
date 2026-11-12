@@ -142,6 +142,7 @@ export function startAutomaticRetreat(mission,unit,spec){
  const resume=unit.combatRetreat?.resume??rememberRetreatOrder(mission,unit),threat=retreatThreat(mission,unit,spec);
  mission.commandPlanner?.cancel([unit.id]);
  clearMotion(unit);
+ unit.retreatSuppressed=false;
  unit.builderWorking=false;unit.builderContact=null;
  if(unit.tool>0)unit.foldTime=Math.max(unit.foldTime??0,2.6);
  unit.combatRetreat={status:'planning',resume,threat:threat?{...threat}:null,started:mission.state.time};

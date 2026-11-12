@@ -5,7 +5,19 @@ export function retreatThresholdReached(unit,spec){
  return unit.owner==='rai'&&unit.hp>0&&canAutoRetreat(spec)&&!!threshold
   &&unit.hp<=unit.maxHp*threshold;
 }
-export const shouldAutoRetreat=(unit,spec)=>!unit.retreatSuppressed&&retreatThresholdReached(unit,spec);
+// Direct control owns the journey, not every later idle tick. The accepted
+// destination also identifies completed manual moves in existing saves.
+// Stop clears routeOrder, so it remains an explicit hold. A queued manual
+// leg/work order and a borrowed manoeuvre still own control until finished.
+export function completedDirectMove(unit){
+ const order=unit.routeOrder,head=unit.orderQueue?.[0];
+ return !!order?.destination&&(order.type??'move')==='move'&&!unit.task&&!unit.path?.length
+  &&!unit.pendingOrder&&!unit.proposedOrder&&!unit.routeContinuation&&!unit.detour
+  &&!unit.yieldReturn&&!unit.jointTraffic&&!unit.cycleContinuation&&!unit.combatRetreat&&!unit.factoryVisit
+  &&(!head||head.action==='attack'||head.action==='attack-move')
+  &&Math.hypot(unit.x-order.destination.x,unit.y-order.destination.y)<2;
+}
+export const shouldAutoRetreat=(unit,spec)=>(!unit.retreatSuppressed||completedDirectMove(unit))&&retreatThresholdReached(unit,spec);
 
 // A manual ground move can override withdrawal. That exception is not a
 // permission for a later attack to recall an under-threshold repair vehicle.
