@@ -46,8 +46,8 @@ export class CombatMenu {
     repair.onclick=()=>{const result=this.mission.setBuilderAutoRepair(!this.mission.state.builderAutoRepair);this.refresh();this.onChange(result);};
     repairs.append(repair);this.element.append(repairs);this.repairControl=repair;
     const modernize=document.createElement('button');modernize.type='button';modernize.dataset.modernize='';
-    const modernizationOption={label:'Переоснастить на спарку',detail:'Выбранные машины заедут на завод для замены пулемёта'};
-    setButtonIcon(modernize,'twin-machinegun',modernizationOption.label,modernizationOption.detail);
+    const modernizationOption={label:'Обновить технику',detail:'Установить лучшие изученные модули своей ветки на заводе'};
+    setButtonIcon(modernize,'upgrade',modernizationOption.label,modernizationOption.detail);
     modernize.addEventListener('pointerenter',()=>this.showHint(modernize,'Переоснащение',modernizationOption));
     modernize.addEventListener('focus',()=>this.showHint(modernize,'Переоснащение',modernizationOption));
     modernize.addEventListener('pointerleave',()=>this.hideHint());modernize.addEventListener('blur',()=>this.hideHint());
@@ -105,7 +105,7 @@ export class CombatMenu {
     this.repairControl.removeAttribute('title');
     const refit=modernizationSelection(this.mission,this.selection());
     this.modernizeControl.setAttribute('aria-disabled',String(!!refit.reason));
-    this.modernizeControl.setAttribute('aria-description',refit.reason||`Выбрано для переоснащения: ${refit.units.length}. Заезд на завод; ${refit.cost} нефти за машину. При нехватке нефти ждут в цехе.`);
+    this.modernizeControl.setAttribute('aria-description',refit.reason||`Машин к обновлению: ${refit.units.length} · Всего ${refit.cost} нефти. Лучшие изученные модули своей ветки; замена на заводе. При нехватке нефти ждут в цехе.`);
     this.modernizeControl.removeAttribute('title');
     if(this.hintOwner===this.modernizeControl)this.hintDetail.textContent=this.modernizeControl.getAttribute('aria-description');
     const policy=armyCombatPolicy(this.mission);

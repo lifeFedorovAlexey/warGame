@@ -1,4 +1,5 @@
 import {matchingRecipe, projectAssemblyKey, projectDesignation, vehicleComponentName} from './vehicle-designs.js';
+import {vehicleUpgrade} from './vehicle-upgrades.js';
 import {DesignPreview} from './design-preview.js';
 import {FIELD_RECIPES,ensureSalvage} from './vehicle-salvage.js';
 import {setButtonIcon} from '../assets/ui/icons.js';
@@ -139,7 +140,7 @@ export class VehicleDesigner {
     if (!force && key === this.recipeKey) return;
     this.recipeKey = key;
     this.recipes = recipes;
-    const recipe = matchingRecipe(recipes, this.components) ?? recipes[0];
+    const recipe = matchingRecipe(recipes, this.components) ?? vehicleUpgrade(this.mission,this.components,recipes) ?? recipes[0];
     this.components = recipe ? [...recipe.components] : [];
     this.paintChoices();
     this.paintAssembly();

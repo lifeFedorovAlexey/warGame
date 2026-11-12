@@ -335,7 +335,7 @@ export function* updateCombatRetreat(mission, unit, spec, dt) {
     }
   }
   const serviceBase=retreat.home?.id&&mission.entity(retreat.home.id);
-  const garage=serviceBase?.kind==='factory'&&(unit.factoryVisit||retreat.service!=='complete'&&needsFactoryVisit(unit,serviceBase));
+  const garage=serviceBase?.kind==='factory'&&(unit.factoryVisit||retreat.service!=='complete'&&needsFactoryVisit(mission,unit,serviceBase));
   const inCover=retreat.phase==='cover';
   const busy=garage?repairBlocker(mission,unit,serviceBase):null;
   const stalled=unit.navigation?.waitSeconds>=.6||retreat.status==='blocked';

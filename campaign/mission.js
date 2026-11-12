@@ -51,6 +51,7 @@ import {alertScavs,updateScavCombat} from './scav-ai.js';
 import {configureCombat,configureArmyCombat,armyCombatPolicy,normalizeCombatPolicy,rememberHostileHit,cancelCombatRetreat,automaticCombatTarget,forceCombatRetreat} from './combat-policy.js';
 import {updateFactoryRepairs} from './factory-repair.js';
 import {modernizationSelection} from './factory-modernization.js';
+import {currentVehicleRecipes} from './vehicle-upgrades.js';
 import {updateFactoryVisit,insideFactory,factoryProductionPaused,tryEnterFactory} from './factory-garage.js';
 import {inFactoryInterior,shouldAutoRetreat,canAutoRetreat} from './combat-retreat-state.js';
 import {blockingCombatTarget,interruptedCombatTargets,movementCombatTarget} from './combat-orders.js';
@@ -893,7 +894,7 @@ export class Mission{
  setRally(id,point){const factory=this.entity(id);if(factory?.kind!=='factory'||factory.owner!=='rai'||!factory.completed)return this.fail('Выберите готовый завод');if(!this.inBounds(point.x,point.y)||!this.exploredAt(point.x,point.y))return this.fail('Точка сбора должна быть разведана');factory.rally={x:point.x,y:point.y};return{ok:true};}
  cancelBuilding(id){this.finishPendingStep();const building=this.entity(id);if(!building||building.owner!=='rai'||building.completed)return this.fail('Отменить можно только незавершённую стройку');this.state.energy=Math.min(this.config.energyCapacity,this.state.energy+oilRefund(building));building.hp=0;this.rebuildNavigation();this.releaseSite(building);for(const unit of this.state.units)if(unit.task?.targetId===id){unit.task=null;unit.path=[];unit.foldTime=2.6;}this.emit('construction-cancelled',{building:id});return {ok:true};}
  availableVehicleRecipes(){
-  return this.vehicleRecipes.filter(({kind,spec})=>(!spec.requires||this.state.research[spec.requires])&&!(kind==='bukhanka'&&this.state.research['twin-machinegun']));
+  return currentVehicleRecipes(this);
  }
  factoryProjects(){
   // Existing projects and paid queues survive obsolescence in the designer.

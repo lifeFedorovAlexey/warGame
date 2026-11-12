@@ -1,0 +1,21 @@
+{
+  "factoryPriorities": {
+    "passed": [
+      "repair: two repairs and two builds, sequential, then the other service",
+      "production: two repairs and two builds, sequential, then the other service",
+      "No oil: paid assembly continues while repair waits; departure never blocks assembly",
+      "Blocked completed output yields to repairs without losing the finished vehicle",
+      "Priority change and save/load retain both queues and paid progress",
+      "Unpaid automatic orders rebalance; started, funded, legacy prepaid and explicit jobs stay put",
+      "Finite repair work is compared with assembly duration, rather than banning a busy factory",
+      "Four factories rebalance a 4/12/1/12 backlog automatically without lost orders",
+      "Incoming cars reconsider overload, but stay committed inside or at the door",
+      "Repair numbers exclude healthy/departing cars and keep incoming repairs"
+    ]
+  },
+  "wg060PreviousScenarios": 11,
+  "upgradeLineScenarios": 10,
+  "wg035Burst": "passed",
+  "legacyGarageCheck": "Fails with waiting != approach on both 49d32b1 and current code; see baseline-garage.json",
+  "m03Combat": "Not executed: required campaign/previews/m03/travel.json is absent. Full M03 playthrough is outside this verification."
+}

@@ -1,5 +1,6 @@
 import {oilOrderProgress} from './oil-economy.js';
 import {damageMobility} from './damage-state.js';
+import {needsModernization} from './factory-modernization.js';
 
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const assignment=u=>u.factoryVisit?.factoryId??u.combatRetreat?.home?.id;
@@ -7,8 +8,8 @@ const queueTime=u=>u.factoryVisit?.queued??u.combatRetreat?.started??0;
 const queueOrder=(a,b)=>queueTime(a)-queueTime(b)||a.id.localeCompare(b.id);
 const committed=u=>['gate','entering','inside','leaving','departure'].includes(u.factoryVisit?.phase);
 
-export function needsFactoryVisit(unit,factory){
- return unit.hp<unit.maxHp||!!(factory.autoModernize||unit.modernizationRequested)&&unit.kind==='bukhanka';
+export function needsFactoryVisit(m,unit,factory){
+ return unit.hp<unit.maxHp||needsModernization(m,factory,unit);
 }
 
 export function factoryRepairQueue(m,f){
@@ -36,7 +37,7 @@ export function repairCompletionSeconds(m,u,f){
  let entrance=0;
  const keepingPlace=assignment(u)===f.id;
  const waiting=m.state.units.filter(v=>v!==u&&v.owner===u.owner&&v.hp>0&&assignment(v)===f.id
-  &&(v.factoryVisit||v.combatRetreat?.service!=='complete'&&needsFactoryVisit(v,f))
+  &&(v.factoryVisit||v.combatRetreat?.service!=='complete'&&needsFactoryVisit(m,v,f))
   &&!['leaving','departure'].includes(v.factoryVisit?.phase));
  const inside=waiting.filter(v=>v.factoryVisit?.phase==='inside')
   .sort((a,b)=>(a.factoryVisit.arrived??0)-(b.factoryVisit.arrived??0)||a.id.localeCompare(b.id));

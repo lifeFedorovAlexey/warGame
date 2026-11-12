@@ -27,6 +27,6 @@ export function installM02Config(config){
  config.research['power-module']??={mission:'m02',name:'Энергомодуль',description:'Достройка АЭС строителем: отдача подключённых вышек +25%, число подключений прежнее.',cost:160,seconds:45};
  config.powerModule??={cost:120,seconds:25,multiplier:1.25};
  for(const kind of ['twin-machinegun','sensor'])if(!config.buildings.factory.production.includes(kind))config.buildings.factory.production.push(kind);
- config.vehicleComponents={...config.vehicleComponents,U01:{...config.vehicleComponents?.U01,cost:gunCost},U02:{name:'Спарка',cost:gunCost*1.3},U21:{name:'Дозор'}};
+ config.vehicleComponents={...config.vehicleComponents,U01:{...config.vehicleComponents?.U01,cost:gunCost},U02:{name:'Спарка',cost:gunCost*1.3,upgrades:'U01'},U21:{name:'Дозор'}};
  return config;
 }
