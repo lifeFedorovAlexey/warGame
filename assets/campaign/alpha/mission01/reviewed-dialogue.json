@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "draftRevision": 227,
-  "draftSha256": "7a1d9bdc8dc476a4c61b13349060215d5df01a1527f624991e627b17c7643bf5",
+  "draftRevision": 228,
+  "draftSha256": "d7c25df5796652488c956e1a3c835e782c5a954bf55d9ffd1a466bf0ba9375f8",
   "throughScene": "r36",
-  "appliedAt": "2026-11-12T00:44:47.573787+00:00",
+  "appliedAt": "2026-11-12T07:20:02.532677+00:00",
   "scenes": [
     {
       "id": "p01",
@@ -680,6 +680,16 @@
       "enabled": true,
       "notes": "",
       "triggerDescription": "Первое успешно завершённое переоснащение существующей машины на спарку через обновление завода. Один раз за кампанию, в свободный эфир после сюжетных реплик."
+    },
+    {
+      "id": "r45",
+      "title": "Контраст хозяйства",
+      "cues": [
+        "m01-v6-r45-l001",
+        "m01-v6-r45-l002"
+      ],
+      "enabled": true,
+      "triggerDescription": "После доклада r41 о существующем главном лагере, перед первым выходом Петровича в эфир (r42)."
     }
   ],
   "dialogue": [
@@ -1698,6 +1708,20 @@
       "id": "m01-v5-r42-l014",
       "speaker": "commander",
       "text": "Слышали, ребята? Нас пригласили. Заходим.",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т"
+    },
+    {
+      "id": "m01-v6-r45-l001",
+      "speaker": "warrant",
+      "text": "У них электричество, вода, огороды. Что мы тут восстанавливать собираемся?",
+      "pauseAfter": 0.2,
+      "recordingStatus": "Т"
+    },
+    {
+      "id": "m01-v6-r45-l002",
+      "speaker": "commander",
+      "text": "Сильную вертикаль власти.",
       "pauseAfter": 0.2,
       "recordingStatus": "Т"
     }
@@ -3697,6 +3721,46 @@
       "duration": 3.52,
       "leadingSilence": 0.08,
       "trailingSilence": 0.1200000000000001
+    },
+    "m01-v6-r45-l001": {
+      "file": "recordings/elevenlabs/m01-v6-r45-l001-2a37d5b3b53f.mp3",
+      "speaker": "warrant",
+      "text": "У них электричество, вода, огороды. Что мы тут восстанавливать собираемся?",
+      "spokenText": "[matter-of-fact, questioning] У них электричество, вода, огороды. Что мы тут восстанавливать собираемся?",
+      "voiceId": "6A9D8WSMm4rFsg2DWFeE",
+      "voiceName": "Egor Gadzhiyev - Clear and Commanding",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "2a37d5b3b53fb89276f7b798fff74dc917ef8c8945e54f5e10a543f9033e05e7",
+      "bytes": 79037,
+      "generatedAt": "2026-11-12T07:18:38.244Z",
+      "duration": 4.88,
+      "leadingSilence": 0.04,
+      "trailingSilence": 0.21999999999999975
+    },
+    "m01-v6-r45-l002": {
+      "file": "recordings/elevenlabs/m01-v6-r45-l002-51ec7cd142eb.mp3",
+      "speaker": "commander",
+      "text": "Сильную вертикаль власти.",
+      "spokenText": "[dry, confident] Сильную вертикаль власти.",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "51ec7cd142eb64492121be3f4910de8b8f5678aee78d933c429ab28333035269",
+      "bytes": 38077,
+      "generatedAt": "2026-11-12T07:18:37.260Z",
+      "duration": 2.32,
+      "leadingSilence": 0.07,
+      "trailingSilence": 0.2799999999999998
     }
   }
 }

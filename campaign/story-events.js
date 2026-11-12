@@ -127,8 +127,9 @@ export function storyRules(director,f) {
     r39:p(0,f.towerStudied&&reportedCamp('mg-tower','r38')),
     r40:p(2,after('r39',12),true,12),
     r41:p(0,(f.firstThreeCleared&&(!f.chiefContactReport||done(f.chiefContactReport)))||f.chiefReachable,f.chief),
-    r42:p(0,heard('r41'),f.chief),
-    r45:p(2,heard('r42')&&!!s.storyFacts?.enemyGarden&&!!s.storyFacts?.ownThreeHangarsRooflessLatrine,f.chief,35),
+    // A saved Petrovich exchange resumes without inserting new material into it.
+    r45:p(0,heard('r41'),f.chief&&!d.scenes.r42),
+    r42:p(0,heard('r41')&&(done('r45')||!!d.scenes.r42),f.chief),
     r46:p(0,!!d.facts.chiefAssault&&(!(f.firstThreeCleared||heard('r41'))||heard('r42')),f.chief),
     r47:p(0,!!s.camps[3]?.cleared),
     r48:p(1,f.victory),

@@ -28,7 +28,7 @@ for(const cue of [...source.dialogue,...source.barks]){
  assert(clip.duration>0);
  if(cue.speaker!=='past')assert(portraits.characters[cue.speaker],cue.speaker);
 }
-assert.equal(userCount,100);assert.equal(elevenlabsCount,76);
+assert.equal(userCount,98);assert.equal(elevenlabsCount,77);
 assert.equal(audio.clips['m01-s07-l014'].voiceName,'Mishka Yaponcik - Odessa Rogue Charm');
 assert.equal(hash(fs.readFileSync(base+'recordings/reviewed/m01-s07-l014-4e14be06b9b1.mp3')),'4e14be06b9b1155f9d172d2ad351ef622770b629d1241313303b233a4ca38308');
 for(const id of ['m01-v3-r24-l001','m01-v3-r24-l002','m01-v3-r24-l003'])assert.equal(audio.clips[id].origin,'user-recording',id);
@@ -61,6 +61,12 @@ assert.deepEqual(petrovich.slice(7).map(l=>l.text),[
  'Слышали, ребята? Нас пригласили. Заходим.',
 ]);
 assert(!source.dialogue.some(l=>l.id.startsWith('m01-v4-r42-')||['m01-s11-l009','m01-s11-l010'].includes(l.id)));
+const household=source.scenes.find(s=>s.id==='r45').cues.map(id=>source.dialogue.find(l=>l.id===id));
+assert.deepEqual(household.map(l=>[l.speaker,l.text]),[
+ ['warrant','У них электричество, вода, огороды. Что мы тут восстанавливать собираемся?'],
+ ['commander','Сильную вертикаль власти.'],
+]);
+assert(!source.dialogue.some(l=>['m01-s11-l011','m01-s11-l012','m01-s11-l013'].includes(l.id)));
 for(const scene of ['r29','r30-alt'])assert.deepEqual(source.scenes.find(s=>s.id===scene).cues.slice(-3),['m01-s08-l015','m01-s08-l018','m01-s08-l019']);
 assert.equal(audio.clips['m01-s08-l015'].text,'Бак от трактора, форсунка от котла. Поверх заводской жёлтой изоленты отбросы намотали синюю.');
 assert.equal(audio.clips['m01-s08-l018'].sha256,'c7597953606c127f669d0c840123c04edac8afb53b4602fb38a1cc611b5c4d88');
@@ -223,20 +229,21 @@ for(const keys of [['flamethrower','mg-ammo-1'],['mg-ammo-1','flamethrower']]){
  const hq=f.building('camp-core',true,'scavs','camp3');assert.equal(f.tick().storyScene,'r41');f.finish();
  f.mission.state.units.push({id:'player',owner:'rai',hp:100,x:-10,y:-10,order:{type:'hold'},path:[]});
  const ordersBefore=JSON.parse(JSON.stringify(f.mission.state.units));
+ assert.equal(f.tick().storyScene,'r45');f.finish();
  assert.equal(f.tick().storyScene,'r42');f.director.completeLine();
  f.mission.effects=[{type:'shot',from:'player',targetId:hq.id}];assert.equal(f.tick().storyScene,'r42');assert.equal(f.director.record('r42').cursor,1);f.finish();
  assert.deepEqual(f.mission.state.units,ordersBefore,'The invitation is dialogue, never a movement or attack command');
  assert.equal(f.tick().storyScene,'r46');f.finish();hq.hp=0;f.mission.effects=[];f.tick(20);
- assert.equal(f.director.record('r42').status,'done');assert(!f.director.data.scenes.r45);
+ assert.equal(f.director.record('r42').status,'done');assert.equal(f.director.record('r45').status,'done');
 }
 // The third cleared camp opens radio contact while the army is still on the
-// road. No visibility, research or quiet period is required, in either order.
-for(const last of [2,1,0]){
+// road. No visibility, research or quiet period is required, in any camp order.
+for(const order of [[0,1,2],[0,2,1],[1,0,2],[1,2,0],[2,0,1],[2,1,0]]){
  const f=fixture();f.finish();const s=f.mission.state;
  const hq=f.building('camp-core',true,'scavs','camp3');f.mission.visibleAt=()=>false;
- for(let i=0;i<3;i++)if(i!==last)s.camps[i].cleared=true;
  f.heard('r25','r32','r38');
- assert.equal(f.tick(),null,'Two cleared camps must not start remote negotiations');
+ for(const i of order.slice(0,2)){s.camps[i].cleared=true;assert.equal(f.tick(),null,'Fewer than three cleared camps must not start remote negotiations');}
+ const last=order.at(-1);
  const report=['r25','r32','r38'][last];delete f.director.data.scenes[report];
  s.camps[last].cleared=true;s.research['mg-tower']=true;
  f.mission.effects=[{type:'shot',from:'player',targetId:hq.id}];
@@ -244,16 +251,39 @@ for(const last of [2,1,0]){
  assert.equal(f.tick(1.999),null);assert.equal(f.tick(.001).storyScene,'r41','Introduce Petrovich in the first radio slot, before research');f.finish();
  f.mission.state=JSON.parse(JSON.stringify(s));
  f.tick(0);
- assert.equal(f.tick().storyScene,'r42','Save/load, an unseen HQ and active combat cannot delay the conversation');
+ assert.equal(f.tick().storyScene,'r45','The short report follows r41 even during combat, without invented garden flags');
+ f.director.completeLine();f.mission.state=JSON.parse(JSON.stringify(f.mission.state));
+ assert.equal(f.tick(0).text,'Сильную вертикаль власти.','Save/load resumes the answer without repeating the question');f.finish();
+ assert.equal(f.tick().storyScene,'r42','Petrovich follows r45 before research or assault reports');
  const reply=f.director.cue().id;f.director.completeLine();const next=f.tick(0).id;assert.notEqual(next,reply);
  f.mission.state.buildings.find(b=>b.id===hq.id).hp=0;f.mission.state.camps[3].cleared=true;f.mission.state.status='victory';
  assert.equal(f.tick().id,next,'A started exchange finishes even if the player quickly destroys the HQ');f.finish();
  assert.equal(f.director.record('r42').status,'done');
+ assert.equal(f.director.record('r45').status,'done');assert.equal(f.director.record('r45').cursor,2);
 }
 {
  const f=fixture();f.finish();f.mission.visibleAt=()=>false;
  f.building('camp-core',true,'scavs','camp3').hp=0;f.mission.state.camps.forEach(c=>c.cleared=true);
  f.heard('r25','r32','r38');assert.equal(f.tick().storyScene,'r47','Do not start a new negotiation with an already defeated chief');
+}
+// Destroying the HQ after the introduction cannot start a stale household report.
+for(const started of [false,true]){
+ const f=fixture();f.finish();const hq=f.building('camp-core',true,'scavs','camp3');
+ assert.equal(f.tick().storyScene,'r41');f.finish();
+ if(started){assert.equal(f.tick().storyScene,'r45');f.director.completeLine();}
+ hq.hp=0;f.mission.state.camps[3].cleared=true;
+ if(started){assert.equal(f.tick().text,'Сильную вертикаль власти.');f.finish();}
+ assert.equal(f.tick().storyScene,'r47');f.finish();f.tick(20);
+ assert(!f.director.heard('r42'));assert.equal(f.director.heard('r45'),started);
+}
+// An old save already inside or past r42 never inserts the new exchange late.
+for(const saved of [{status:'playing',cursor:0},{status:'pending',cursor:5},{status:'done',cursor:14}]){
+ const f=fixture();f.finish();f.building('camp-core',true,'scavs','camp3');f.heard('r41');
+ f.director.data.scenes.r42={...saved};f.mission.state=JSON.parse(JSON.stringify(f.mission.state));
+ f.tick(0);
+ if(saved.status!=='done'){assert.equal(f.tick().id,petrovich[saved.cursor].id);f.finish();}
+ for(let i=0;i<3;i++)assert.notEqual(f.tick(10)?.storyScene,'r45');
+ assert(!f.director.heard('r45'));
 }
 // Saves resume an answer; repeated hits and urgent reports never rewind it.
 {

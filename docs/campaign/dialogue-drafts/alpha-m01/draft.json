@@ -1,6 +1,6 @@
 {
-  "revision": 227,
-  "savedAt": "2026-11-12T00:44:47.557484+00:00",
+  "revision": 228,
+  "savedAt": "2026-11-12T07:20:02.517478+00:00",
   "document": {
     "id": "alpha-m01",
     "title": "Освоение целины",
@@ -852,6 +852,23 @@
         "enabled": true
       },
       {
+        "id": "r45",
+        "title": "Контраст хозяйства",
+        "cues": [
+          "m01-v6-r45-l001",
+          "m01-v6-r45-l002"
+        ],
+        "sourceLine": 801,
+        "sections": [
+          "r45"
+        ],
+        "kind": "sequence",
+        "section": "Этап x. четвёртый лагерь — петрович",
+        "trigger": "После доклада r41 о существующем главном лагере, перед первым выходом Петровича в эфир (r42).",
+        "notes": "",
+        "enabled": true
+      },
+      {
         "id": "r42",
         "title": "Первое обращение Петровича",
         "cues": [
@@ -879,24 +896,6 @@
         "kind": "sequence",
         "section": "Этап x. четвёртый лагерь — петрович",
         "trigger": "командный объект последнего лагеря жив, доступна радиосвязь.",
-        "notes": "",
-        "enabled": true
-      },
-      {
-        "id": "r45",
-        "title": "Контраст хозяйства",
-        "cues": [
-          "m01-s11-l011",
-          "m01-s11-l012",
-          "m01-s11-l013"
-        ],
-        "sourceLine": 801,
-        "sections": [
-          "r45"
-        ],
-        "kind": "sequence",
-        "section": "Этап x. четвёртый лагерь — петрович",
-        "trigger": "необязательный. Вражеское хозяйство действительно обнаружено; описание соответствует текущему состоянию базы игрока.",
         "notes": "",
         "enabled": true
       },
@@ -5200,7 +5199,7 @@
         "sourceLine": 807,
         "recordingStatus": "Т",
         "key": "m01-s11-l011",
-        "enabled": true,
+        "enabled": false,
         "notes": "",
         "portraitState": "",
         "portrait": null,
@@ -5229,7 +5228,7 @@
         "sourceLine": 811,
         "recordingStatus": "Т",
         "key": "m01-s11-l012",
-        "enabled": true,
+        "enabled": false,
         "notes": "",
         "portraitState": "",
         "portrait": null,
@@ -5262,7 +5261,7 @@
         "sourceLine": 815,
         "recordingStatus": "Т",
         "key": "m01-s11-l013",
-        "enabled": true,
+        "enabled": false,
         "notes": "",
         "portraitState": "",
         "portrait": null,
@@ -15005,6 +15004,70 @@
           "duration": 3.52,
           "leadingSilence": 0.08,
           "trailingSilence": 0.1200000000000001
+        }
+      },
+      "m01-v6-r45-l001": {
+        "id": "m01-v6-r45-l001",
+        "key": "m01-v6-r45-l001",
+        "speaker": "warrant",
+        "text": "У них электричество, вода, огороды. Что мы тут восстанавливать собираемся?",
+        "pauseAfter": 0.2,
+        "recordingStatus": "Т",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-v6-r45-l001-2a37d5b3b53f.mp3",
+          "speaker": "warrant",
+          "text": "У них электричество, вода, огороды. Что мы тут восстанавливать собираемся?",
+          "spokenText": "[matter-of-fact, questioning] У них электричество, вода, огороды. Что мы тут восстанавливать собираемся?",
+          "voiceId": "6A9D8WSMm4rFsg2DWFeE",
+          "voiceName": "Egor Gadzhiyev - Clear and Commanding",
+          "modelId": "eleven_v4",
+          "origin": "elevenlabs-synthesis",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "sha256": "2a37d5b3b53fb89276f7b798fff74dc917ef8c8945e54f5e10a543f9033e05e7",
+          "bytes": 79037,
+          "generatedAt": "2026-11-12T07:18:38.244Z",
+          "duration": 4.88,
+          "leadingSilence": 0.04,
+          "trailingSilence": 0.21999999999999975
+        }
+      },
+      "m01-v6-r45-l002": {
+        "id": "m01-v6-r45-l002",
+        "key": "m01-v6-r45-l002",
+        "speaker": "commander",
+        "text": "Сильную вертикаль власти.",
+        "pauseAfter": 0.2,
+        "recordingStatus": "Т",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-v6-r45-l002-51ec7cd142eb.mp3",
+          "speaker": "commander",
+          "text": "Сильную вертикаль власти.",
+          "spokenText": "[dry, confident] Сильную вертикаль власти.",
+          "voiceId": "5mJA7umOnM5ycymymd6P",
+          "voiceName": "comandorNig",
+          "modelId": "eleven_v4",
+          "origin": "elevenlabs-synthesis",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "sha256": "51ec7cd142eb64492121be3f4910de8b8f5678aee78d933c429ab28333035269",
+          "bytes": 38077,
+          "generatedAt": "2026-11-12T07:18:37.260Z",
+          "duration": 2.32,
+          "leadingSilence": 0.07,
+          "trailingSilence": 0.2799999999999998
         }
       }
     },

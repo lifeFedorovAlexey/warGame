@@ -10,7 +10,7 @@ const terminal = status => ['done','skipped','cancelled'].includes(status);
 const sceneSignal = {r01:'intro',r14:'first-contact',r18:'raid-won',r36:'camp3-sighted',r41:'last-camp',r50:'outro'};
 const finalScene = id => ['r48','r49','r50','r54','u01','u02','u04'].includes(id);
 const milestoneScenes=new Set(['r25','r26','r27','r29','r30-alt','r32','r33','r38','r39','r47']);
-const followUp={r14:'r16',r25:'r26',r26:'r27',r27:'r29',r32:'r33',r38:'r39',r41:'r42'};
+const followUp={r14:'r16',r25:'r26',r26:'r27',r27:'r29',r32:'r33',r38:'r39',r41:'r45',r45:'r42'};
 const prologueScenes=['p01','p02','p03','p04'];
 const sceneGapMs=2000;
 
@@ -130,10 +130,10 @@ export class StoryDirector {
       eligible.push({id,...rule});
     }
     // Start the final contact on the march: acknowledge the third cleared camp,
-    // then introduce Petrovich and keep his whole exchange ahead of research.
+    // then report on his camp and keep the Petrovich exchange ahead of research.
     // A recording already in progress still finishes intact.
     const chiefContact=f.chief&&(f.firstThreeCleared||this.heard('r41'))&&!this.finished('r42');
-    const rank=id=>id==='r14'?0:chiefContact&&[f.chiefContactReport,'r41','r42'].includes(id)?1:id===followUp[d.lastScene]?2:3;
+    const rank=id=>id==='r14'?0:chiefContact&&[f.chiefContactReport,'r41','r45','r42'].includes(id)?1:id===followUp[d.lastScene]?2:3;
     eligible.sort((a,b)=>a.priority-b.priority||rank(a.id)-rank(b.id));
     const next=eligible[0];
     if(next&&!d.active){
