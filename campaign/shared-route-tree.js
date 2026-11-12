@@ -3,18 +3,26 @@
 // Physics and exact vehicle poses remain outside this static grid search.
 export class SharedRouteTree{
  constructor(nav,goal,pavedTrip){
-  this.nav=nav;this.goal={x:goal.x,y:goal.y};this.pavedTrip=pavedTrip;this.bounds=nav.bounds.join(',');
+  this.nav=nav;this.goal={x:goal.x,y:goal.y};this.pavedTrip=pavedTrip;this.bounds=nav.bounds.join(',');this.roads=nav.roads;
   const count=nav.size*nav.size;
   this.state=new Uint8Array(count);this.cost=new Float64Array(count);this.next=new Int32Array(count);
   this.ids=new Int32Array(4096);this.priorities=new Float64Array(4096);this.length=0;
   this.regions=new Map();this.expanded=0;this.queries=0;this.proof=null;
-  this.segmentCosts=new Map();this.costCacheHits=0;
-  this.segmentClearance=new Map();this.clearanceCacheHits=0;
+  // Directed segment costs and geometric proofs do not depend on the tree's
+  // destination. Keep them across group orders and private search contexts.
+  const owner=nav.baseNavigator??nav;
+  let shared=owner.sharedRouteSegments;
+  if(!shared||shared.roads!==nav.roads||shared.scale!==nav.vehicleScale||shared.bounds!==this.bounds){
+   shared=owner.sharedRouteSegments={roads:nav.roads,scale:nav.vehicleScale,bounds:this.bounds,profiles:new Map(),clearance:new Map()};
+  }
+  if(!shared.profiles.has(pavedTrip))shared.profiles.set(pavedTrip,new Map());
+  this.segmentCosts=shared.profiles.get(pavedTrip);this.costCacheHits=0;
+  this.segmentClearance=shared.clearance;this.clearanceCacheHits=0;
   const [col,row]=nav.grid(goal.x,goal.y);this.root=row*nav.size+col;
   this.state[this.root]=1;this.next[this.root]=-1;this.mark(col,row);this.push(this.root,0);
  }
  mark(col,row){const key=Math.floor(col/16)+','+Math.floor(row/16);if(!this.regions.has(key))this.regions.set(key,this.nav.regionVersions.get(key)??0);}
- valid(){return this.bounds===this.nav.bounds.join(',')&&this.nav.regionsUnchanged(this.regions);}
+ valid(){return this.roads===this.nav.roads&&this.bounds===this.nav.bounds.join(',')&&this.nav.regionsUnchanged(this.regions);}
  get bytes(){return this.state.byteLength+this.cost.byteLength+this.next.byteLength+this.ids.byteLength+this.priorities.byteLength+(this.proof?.byteLength??0);}
  push(id,priority){
   if(this.length===this.ids.length){
@@ -97,12 +105,12 @@ export class SharedRouteTree{
  }
  clearSegment(from,to){
   const key=this.segmentKey(from,to);if(key===null)return this.nav.lineClear(from,to);
-  if(this.segmentClearance.has(key)){this.clearanceCacheHits++;return this.segmentClearance.get(key);}
+  const cached=this.segmentClearance.get(key);
+  if(cached&&this.nav.regionsUnchanged(cached.regions)){this.clearanceCacheHits++;return cached.clear;}
   const clear=this.nav.lineClear(from,to);
-  // A smoothing chord can cross a region outside its grid branch. Both
-  // successful and rejected cached chords depend on EVERY crossed region.
-  for(const [region,version] of this.nav.pathRegions(from,[to]))if(!this.regions.has(region))this.regions.set(region,version);
-  this.segmentClearance.set(key,clear);
+  // A changed smoothing chord invalidates this proof only, not the settled
+  // Dijkstra nodes elsewhere. Its complete regional dependency stays local.
+  this.segmentClearance.set(key,{clear,regions:this.nav.pathRegions(from,[to])});
   if(this.segmentClearance.size>8192)this.segmentClearance.delete(this.segmentClearance.keys().next().value);
   return clear;
  }

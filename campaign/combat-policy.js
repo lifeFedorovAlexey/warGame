@@ -72,7 +72,7 @@ export function configureCombat(mission, ids, changes) {
     if(changedFireRule&&explicit&&!isAutomaticRepair(unit,mission.unitSpec(unit))){urgent.push(unit.id);clearMotion(unit);unit.driveSpeed=0;}
     if(changes.retreat==='never'&&unit.combatRetreat&&!unit.combatRetreat.forced){clearMotion(unit);cancelCombatRetreat(unit);unit.driveSpeed=0;}
     if(changes.retreat)unit.retreatSuppressed=false;
-    if(changes.retreat&&unit.pendingOrder&&shouldAutoRetreat(unit,mission.unitSpec(unit))){startAutomaticRetreat(mission,unit,mission.unitSpec(unit));urgent.push(unit.id);}
+    if(changes.retreat&&(unit.pendingOrder||unit.proposedOrder)&&shouldAutoRetreat(unit,mission.unitSpec(unit))){startAutomaticRetreat(mission,unit,mission.unitSpec(unit));urgent.push(unit.id);}
     changed++;
   }
   if(urgent.length)mission.commandPlanner?.cancel(urgent);
@@ -82,7 +82,7 @@ const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 export function rememberHostileHit(mission, unit, source) {
   const unitSpec=mission.config.units[unit.kind];
   if(!unitSpec)return;
-  const invalidate=()=>{if(unit.pendingOrder&&shouldAutoRetreat(unit,unitSpec))startAutomaticRetreat(mission,unit,unitSpec);};
+  const invalidate=()=>{if((unit.pendingOrder||unit.proposedOrder)&&shouldAutoRetreat(unit,unitSpec))startAutomaticRetreat(mission,unit,unitSpec);};
   if(!source?.id||source.owner===unit.owner){invalidate();return;}
   const spec=mission.config.units[source.kind]??mission.buildingSpec(source);
   unit.lastHostileHit={id:source.id,x:source.x,y:source.y,time:mission.state.time,range:spec.range??0};
@@ -136,6 +136,7 @@ function clearMotion(unit) {
 }
 export function startAutomaticRetreat(mission,unit,spec){
  const resume=unit.combatRetreat?.resume??rememberRetreatOrder(mission,unit),threat=retreatThreat(mission,unit,spec);
+ mission.commandPlanner?.cancel([unit.id]);
  clearMotion(unit);
  unit.builderWorking=false;unit.builderContact=null;
  if(unit.tool>0)unit.foldTime=Math.max(unit.foldTime??0,2.6);

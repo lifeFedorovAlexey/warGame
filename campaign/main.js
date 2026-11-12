@@ -266,7 +266,8 @@ function beginPlacement(kind) {
 }
 function beginOrder(mode) {
   if(mission.state.status!=='running')return;
-  if (!(mode==='attack'?commandSelection():selection()).some(unit=>liveMobile(unit)&&(mode!=='attack'||config.units[unit.kind].damage>0))) {
+  if (!selection().some(unit=>liveMobile(unit)&&(mode!=='attack'||config.units[unit.kind].damage>0))
+    &&!(mode==='attack'&&commandSelection().some(unit=>liveMobile(unit)&&config.units[unit.kind].damage>0))) {
     const unit = vehicles().find(unit => config.units[unit.kind].damage > 0) ?? (mode!=='attack'&&vehicles()[0]);
     if (!unit) return;
     select([unit.id], false, false);
@@ -551,10 +552,15 @@ function installInput() {
       lastSelectionClick=null;
       event.preventDefault();
       if (buildKind) return cancelMode();
-      ordersAt(world.ground(event.clientX, event.clientY), hitEntity(event.clientX, event.clientY), orderMode, event.shiftKey);
+      const target=hitEntity(event.clientX,event.clientY),chosen=selection();
+      const work=target?.owner==='rai'&&config.buildings[target.kind]&&chosen.some(unit=>unit.kind==='builder');
+      const combat=chosen.some(unit=>liveMobile(unit)&&config.units[unit.kind].damage>0)
+        ||commandSelection().some(unit=>liveMobile(unit)&&config.units[unit.kind].damage>0);
+      const mode=orderMode==='demolish'||work?orderMode:combat?'attack':orderMode;
+      ordersAt(world.ground(event.clientX,event.clientY),target,mode,event.shiftKey);
     }
     if (event.button === 0) {
-      if(['attack','demolish'].includes(orderMode)){event.preventDefault();cancelMapGesture();lastSelectionClick=null;cancelMode();return;}
+      if(['attack','demolish'].includes(orderMode)){event.preventDefault();cancelMapGesture();lastSelectionClick=null;cancelMode();}
       canvas.setPointerCapture(event.pointerId);
       drag = {x: event.clientX, y: event.clientY, append: event.shiftKey, pointerId:event.pointerId};
     }
@@ -621,6 +627,7 @@ function installInput() {
       const oil = !orderMode && !event.shiftKey && oilAt(x,y);
       if (oil) return orderDerrick(oil);
       const target = hitEntity(x,y);
+      if(!target&&selection().some(liveMobile))return ordersAt(world.ground(x,y),null,'move',event.shiftKey);
       select(target ? [target.id] : [], origin.append);
       if(target)lastSelectionClick={id:target.id,repeated:previousClick?.id===target.id};
     }
@@ -1003,7 +1010,8 @@ function flushUi() {
   $('details').textContent = first?.clearing ? 'Освобождение площадки' : first?.awaitingWorkers ? 'В очереди строителей' : first ? Math.ceil(hp) + '/' + maxHp + buildingStatus+wellStatus+(first.powerModule?' · Энергомодуль +25%':'')+(first.kind==='flamer'&&s.research['flamer-upgrade']?' · Урон +20%':'') : '';
   $('attack-order').classList.toggle('active', orderMode === 'attack');
   $('attack-order').setAttribute('aria-pressed',String(orderMode==='attack'));
-  $('attack-order').disabled = orderMode!=='attack'&&!commandSelection().some(unit => liveMobile(unit)&&config.units[unit.kind].damage > 0);
+  $('attack-order').disabled = orderMode!=='attack'&&!group.some(unit=>liveMobile(unit)&&config.units[unit.kind].damage>0)
+    &&!commandSelection().some(unit=>liveMobile(unit)&&config.units[unit.kind].damage>0);
   $('placement').hidden = !buildKind;
   if (buildKind) $('placement-name').textContent = config.buildings[buildKind].name;
   updateRoster();
@@ -1254,6 +1262,7 @@ try {
   $('placement-snap').onclick=()=>{snapBuildings=!snapBuildings;updatePlacement();};
   $('attack-order').onclick=toggleAttackOrder;
   combatMenu=new CombatMenu({button:$('combat-modes'),mission,selection:()=>[...selected],onOpen:()=>cancelMode(),onChange:result=>{if(report(result))sound.signal('order');updateUi();}});
+  $('attack-order').oncontextmenu=event=>{event.preventDefault();combatMenu.open();};
   $('home').onclick = () => {
     document.querySelector('.settings').open = false;
     world.centre(world.field.gridToWorld(config.startGrid), 360);

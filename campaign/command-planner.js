@@ -1,5 +1,5 @@
 import {pickupTarget} from './pickup-orders.js';
-import {inFactoryInterior} from './combat-retreat-state.js';
+import {inFactoryInterior,canReceiveAttack} from './combat-retreat-state.js';
 import {isInfantry} from './scav-unit-profiles.js';
 import {movementEngaged} from './combat-orders.js';
 import {departureSlotOrder} from './traffic-start.js';
@@ -92,7 +92,8 @@ export class CommandPlanner{
   // it is not a shared march to a destination region.
   if(action==='move'&&pickupTarget(m,target))return m.order(ids,action,target);
   if(action==='attack'&&(target.owner==='rai'||!m.entity(target.id)||!m.visibleAt(target.x,target.y)))return m.fail('Цель не обнаружена');
-  const selected=new Set(ids),units=m.state.units.filter(u=>selected.has(u.id)&&u.hp>0&&u.owner==='rai'&&!inFactoryInterior(u)&&(action==='move'||m.unitSpec(u).damage));
+  const selected=new Set(ids),units=m.state.units.filter(u=>selected.has(u.id)&&u.hp>0&&u.owner==='rai'&&!inFactoryInterior(u)
+   &&(action==='move'||m.unitSpec(u).damage&&canReceiveAttack(u,m.unitSpec(u))));
   if(!units.length)return m.fail('Не выбрана подходящая техника');
   const groups=new Set(units.map(u=>u.commandGroupId).filter(Boolean));
   const profile=(m.state.commandGroups??[]).filter(g=>groups.has(g.id)).map(g=>g.id+':'+g.formation).sort().join(',');
@@ -119,7 +120,7 @@ export class CommandPlanner{
   const coordinated=new Set(cohorts.flat());
   for(const unit of units){
    const preserve=preserveAccepted(unit);
-   if(!preserve){unit.commandRevision=revision;unit.retreatSuppressed=true;}
+   if(!preserve){unit.commandRevision=revision;unit.retreatSuppressed=action==='move';}
    // Until slots are allocated, translate the formation toward the click.
    // A group must not steer all its hulls into the same provisional point.
    const pending={revision,type:action,target:{...record.target},
@@ -144,7 +145,7 @@ export class CommandPlanner{
     if(!selected.has(unit.id))return unit;
     const copy={...unit};for(const key of plannedFields)if(unit[key]!==undefined)copy[key]=structuredClone(unit[key]);
     if(unit.proposedOrder?.revision===record.revision){
-     copy.pendingOrder=structuredClone(unit.proposedOrder);copy.commandRevision=record.revision;copy.retreatSuppressed=true;delete copy.proposedOrder;
+     copy.pendingOrder=structuredClone(unit.proposedOrder);copy.commandRevision=record.revision;copy.retreatSuppressed=record.action==='move';delete copy.proposedOrder;
     }
     if(ownsContinuation(unit,record.revision)&&!unit.routeContinuation.ready){
      copy.pendingOrder={revision:record.revision,type:record.action,target:{...record.target},status:'planning'};
@@ -202,6 +203,7 @@ export class CommandPlanner{
    const joins=new Map();let retry=false;
    for(const id of ids){
     const unit=m.entity(id),copy=active.copies.get(id);
+    if(unit&&active.record.action!=='move'&&ownsPending(unit,active.record.revision)&&!canReceiveAttack(unit,m.unitSpec(unit))){this.cancel([id]);continue;}
     if(!unit||unit.hp<=0||!ownsPending(unit,active.record.revision)||copy?.pendingOrder||ownsContinuation(unit,active.record.revision))continue;
     const path=commandPathFromLive(m,unit,copy,copy.path,!!copy.detour||!!copy.passage);
     joins.set(id,path);if(!path)retry=true;

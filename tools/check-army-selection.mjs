@@ -11,9 +11,11 @@ units.push(
  unit('normal-queue',{hp:45,factoryVisit:{phase:'waiting'},navigation:{reason:'factory-door-in-use'},path:[]}),
 );
 const snapshot=structuredClone(units);
-assert.deepEqual(armySelectionIds(mission),['ready','offscreen','command','above-heavy','hold','ignore','manual-override','stranded-apron','stranded-route']);
+assert.deepEqual(armySelectionIds(mission),['ready','offscreen','command','above-heavy','hold','ignore']);
 assert.deepEqual(expandCommandIds(mission,['ready','stranded-apron','stranded-route','normal-queue','entering'],{action:'attack-move'}),
- ['ready','stranded-apron','stranded-route'],'A group order includes explicitly selected stranded cars and leaves the working queue alone');
+ ['ready'],'An attack respects the HP threshold even for explicitly selected stranded cars');
+assert.deepEqual(expandCommandIds(mission,['ready','stranded-apron','stranded-route','normal-queue','entering'],{action:'move'}),
+ ['ready','stranded-apron','stranded-route','normal-queue'],'Manual movement controls selected cars outside the garage');
 assert.deepEqual(units,snapshot,'Selection cannot mutate orders, policies, repairs or units');
 units.find(u=>u.id==='light').combatPolicy.retreat='heavy';
 assert(armySelectionIds(mission).includes('light'),'A new retreat threshold applies on the next selection');
@@ -21,4 +23,4 @@ const repaired=units.find(u=>u.id==='inside');delete repaired.factoryVisit;
 repaired.combatRetreat={status:'arrived',service:'complete',forced:true};
 assert(armySelectionIds(mission).includes('inside'),'Fully repaired vehicles return to mass selection after leaving the garage');
 assert.deepEqual(armySelectionIds({...mission,state:{units:[]}}),[]);
-console.log('PASS: army selection, retreat thresholds, repair phases, manual override, commanders, offscreen units, unchanged policies and orders');
+console.log('PASS: army selection, retreat thresholds, repair phases, manual movement, commanders, offscreen units, unchanged policies and orders');

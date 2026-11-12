@@ -47,7 +47,7 @@ for(const slope of [.15,-.15]){
  assert(tree.clearSegment(a,b));assert(tree.clearSegment(a,b));assert.equal(tree.clearanceCacheHits,0,'Off-grid chords never use the exact cache');
  const c={x:-448,y:448},d={x:448,y:448};assert(tree.clearSegment(c,d));assert(tree.clearSegment(c,d));assert.equal(tree.clearanceCacheHits,1);
  nav.rebuild([{id:'chord-obstacle',hp:1,x:0,y:448,halfWidth:20,halfDepth:20}]);
- const replacement=sharedRouteTree(nav,goal,true);assert.notEqual(replacement,tree,'A changed region on a cached chord invalidates the tree even outside its searched branch');
+ const replacement=sharedRouteTree(nav,goal,true);assert.equal(replacement,tree,'A changed smoothing chord preserves the unrelated settled tree');
  assert.equal(replacement.clearSegment(c,d),false);
  results.push({case:'checked chord cache / exact coordinates / regional dependency',passed:true});
 }

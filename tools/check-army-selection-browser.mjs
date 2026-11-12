@@ -8,7 +8,7 @@ try{
  const page=await browser.newPage({viewport:{width:1440,height:900}}),errors=[];
  page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
  await page.addInitScript(()=>{for(const k of ['fieldSound','fieldRadio','fieldStoryVoice'])localStorage.setItem('warGame.'+k,'off');});
- await page.goto('http://127.0.0.1:8766/review/army-selection/campaign/');
+ await page.goto((process.env.WARGAME_URL??'http://127.0.0.1:8899')+'/campaign/');
  await page.waitForFunction(()=>window.campaign?.ready,null,{timeout:90000});
  await page.locator('#begin').click();await page.waitForFunction(()=>document.getElementById('welcome').hidden);
  if(await page.locator('[data-dream=skip]').isVisible())await page.locator('[data-dream=skip]').click();
@@ -36,7 +36,7 @@ try{
  });
  const selected=()=>page.evaluate(()=>campaign.selected),state=()=>page.evaluate(()=>campaign.mission.state.units.map(u=>({id:u.id,task:u.task,path:u.path,combatPolicy:u.combatPolicy,combatRetreat:u.combatRetreat,factoryVisit:u.factoryVisit})));
  const original=await state(),camera=await page.evaluate(()=>campaign.world.controls.target.toArray());
- const available=[...fixture.ready,fixture.stranded];
+ const available=[...fixture.ready];
  await page.keyboard.press('F2');assert.deepEqual(new Set(await selected()),new Set(available));assert.deepEqual(await state(),original);
  assert.deepEqual(await page.evaluate(()=>campaign.world.controls.target.toArray()),camera);
  await page.waitForFunction(()=>document.getElementById('select-army').getAttribute('aria-pressed')==='true');

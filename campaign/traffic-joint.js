@@ -1,4 +1,4 @@
-import {trafficCollisionRequired} from './vehicle-collision.js';
+import {trafficCollisionRequired,vehicleRadiusBound} from './vehicle-collision.js';
 import {maneuverStep,maneuverPlanStep} from './vehicle-motion.js';
 import {vehicleDynamics} from './vehicle-dynamics.js';
 import {maneuverAdmissionBlocker} from './maneuver-admission.js';
@@ -6,15 +6,30 @@ import {invalidateTrafficCorridors,reserveManeuverCorridorSteps} from './traffic
 import {navigationDecision} from './navigation-state.js';
 
 const topologyCache=new WeakMap();
-export function jointTopology(mission){
+export function jointTopology(mission,region=null){
  let cached=topologyCache.get(mission);
  if(!cached||cached.state!==mission.state||cached.nav!==mission.nav||cached.revision!==mission.nav.topologyRevision){
   cached={state:mission.state,nav:mission.nav,revision:mission.nav.topologyRevision,
-   key:JSON.stringify([mission.nav.bounds,mission.config.worldScale,
-    mission.nav.solids.map(body=>[body.id,body.x,body.y,body.halfWidth,body.halfDepth])])};
+   regions:new WeakMap()};
   topologyCache.set(mission,cached);
  }
- return cached.key;
+ const previous=region?cached.regions.get(region):cached.key;if(previous)return previous;
+ const key=JSON.stringify([mission.nav.bounds,mission.config.worldScale,mission.nav.solids
+  .filter(b=>!region||b.x+b.halfWidth>=region.left&&b.x-b.halfWidth<=region.right
+   &&b.y+b.halfDepth>=region.bottom&&b.y-b.halfDepth<=region.top)
+  .map(body=>[body.id,body.x,body.y,body.halfWidth,body.halfDepth])]);
+ if(region)cached.regions.set(region,key);else cached.key=key;
+ return key;
+}
+function planRegion(mission,corridors){
+ const region={left:Infinity,right:-Infinity,bottom:Infinity,top:-Infinity};
+ for(const corridor of corridors)for(const {from,to} of corridor){
+  const radius=Math.max(vehicleRadiusBound(from.kind,mission.config.worldScale),vehicleRadiusBound(to.kind,mission.config.worldScale))
+   +Math.hypot(to.x-from.x,to.y-from.y)+mission.config.worldScale;
+  region.left=Math.min(region.left,from.x-radius,to.x-radius);region.right=Math.max(region.right,from.x+radius,to.x+radius);
+  region.bottom=Math.min(region.bottom,from.y-radius,to.y-radius);region.top=Math.max(region.top,from.y+radius,to.y+radius);
+ }
+ return region;
 }
 export const jointIntent=unit=>JSON.stringify([unit.kind,unit.owner,unit.commandRevision,unit.task,unit.routeOrder]);
 export const jointPose=unit=>({x:unit.x,y:unit.y,heading:unit.heading});
@@ -42,7 +57,8 @@ export function* commitJointPlanSteps(mission,owner,goal,phases,rememberYieldHom
  mission.emit('navigation-joint-started',{owner:owner.id,token,members:members.map(body=>({id:body.id,
   pose:jointPose(body),hp:body.hp,revision:body.commandRevision,home:body.yieldReturn?.home,
   destination:body.routeOrder?.destination})),phases:phases.map(phase=>({id:phase.body.id,returning:!!phase.returning}))});
- return {legs:[],parking:false,preciseArrival:true,reservedCorridor:corridors.flat(),joint:{token,topology:jointTopology(mission),
+ const region=planRegion(mission,corridors);
+ return {legs:[],parking:false,preciseArrival:true,reservedCorridor:corridors.flat(),joint:{token,region,topology:jointTopology(mission,region),
   goal:{...goal},cursor:0,members:members.map(body=>({id:body.id,intent:jointIntent(body),pose:jointPose(body)})),
   phases:phases.map((p,index)=>({id:p.body.id,legs:p.legs.map(l=>({...l})),returning:!!p.returning,alternative:!!p.alternative,
    arrival:p.arrival??p.body===owner,corridor:corridors[index],continuous:p.continuous,rough:p.rough,trackHistory:!!p.body.yieldReturn,
@@ -52,7 +68,7 @@ export function* commitJointPlanSteps(mission,owner,goal,phases,rememberYieldHom
 // Expected poses also revoke the proof after a collision or external relocation.
 export function jointPlanFor(mission,unit){
  const marker=unit.jointTraffic,owner=marker&&mission.entity(marker.owner),plan=owner?.detour?.joint;
- if(!plan||plan.token!==marker.token||plan.topology!==jointTopology(mission))return null;
+ if(!plan||plan.token!==marker.token||plan.topology!==jointTopology(mission,plan.region))return null;
  for(const member of plan.members){
   const body=mission.entity(member.id);
   if(!body||body.hp<=0||body.pendingOrder||body.jointTraffic?.token!==plan.token||body.jointTraffic.owner!==owner.id
@@ -82,6 +98,18 @@ function release(mission,ownerId,token,complete=false){
  invalidateTrafficCorridors(mission);
  if(members.length)mission.emit('navigation-joint-finished',{owner:ownerId,token,complete,members});
 }
+function needsNewPassage(mission,plan,blockers){
+ // A passing car does not erase already checked parking and return legs.
+ // Replan only for a persistent stationary obstruction or an actual wait
+ // cycle involving this transaction; never keep a deadlock forever.
+ if(!blockers.size)return true;
+ const members=new Set(plan.members.map(m=>m.id)),seen=new Set();
+ const waitsForMember=body=>{
+  if(members.has(body.id))return true;if(seen.has(body.id))return false;seen.add(body.id);
+  return (body.navigation?.blockerIds??[]).some(id=>{const next=mission.entity(id);return next&&waitsForMember(next);});
+ };
+ return [...blockers].some(body=>waitsForMember(body)||!(body.driveSpeed>.01||body.path?.length||body.pendingOrder||body.detour||body.jointTraffic));
+}
 // All phases use the normal vehicle dynamics and live swept-body checks.
 // A single actor moves at a time; waiting members name that actual dependency.
 export function stepJointTraffic(mission,unit,dt,recordYieldStep){
@@ -107,8 +135,8 @@ export function stepJointTraffic(mission,unit,dt,recordYieldStep){
   forwardSpeed:vehicleDynamics(unit).maneuverForward});
  if(!step){
   unit.driveSpeed=0;plan.blocked=(plan.blocked??0)+dt;
-  navigationDecision(unit,'BLOCKED','joint-passage-obstructed',[...blockers].map(b=>b.id),'recheck-or-release-joint-plan');
-  if(plan.blocked>=3)release(mission,owner.id,plan.token);
+  navigationDecision(unit,'BLOCKED','joint-passage-obstructed',[...blockers].map(b=>b.id),'wait-on-checked-passage');
+  if(plan.blocked>=3&&needsNewPassage(mission,plan,blockers))release(mission,owner.id,plan.token);
   return true;
  }
  const travelled=Math.hypot(unit.x-step.pose.x,unit.y-step.pose.y);

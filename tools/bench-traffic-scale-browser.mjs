@@ -3,12 +3,15 @@ import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
+import {bridgeTrafficFixture} from './bridge-traffic-fixture.mjs';
 const require=createRequire(import.meta.url),{chromium}=require(process.env.PLAYWRIGHT_PATH??'C:/Users/Алексей/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
 const option=(name,fallback)=>process.argv.find(a=>a.startsWith('--'+name+'='))?.split('=').slice(1).join('=')??fallback;
 const baselineRef=option('baseline-ref',null),label=option('label','browser-after'),seconds=Number(option('seconds','15'));
 const opponent=process.argv.includes('--opponent');
 const playthrough=process.argv.includes('--playthrough');
-const changed=['predictive-traffic.js','vehicle-collision.js','road-traffic.js','mission.js','turning-headway.js','maneuver-admission.js','world.js','selection-rings.js','combat-sight.js'];
+const changed=[...new Set(['predictive-traffic.js','vehicle-collision.js','road-traffic.js','mission.js','turning-headway.js','maneuver-admission.js','world.js','selection-rings.js','combat-sight.js',
+ ...execFileSync('git',['diff','--diff-filter=M','--name-only',baselineRef??'0b0984f','--','campaign'],{encoding:'utf8'}).trim().split(/\r?\n/).filter(p=>p.endsWith('.js')).map(p=>p.split('/').at(-1)),
+ ...(!baselineRef?['forecast-clearance.js']:[])])];
 const sources=baselineRef?new Map(changed.map(name=>[name,execFileSync('git',['show',baselineRef+':campaign/'+name])])):null;
 const dir='campaign/reports/bridge-driving/'+label;fs.mkdirSync(dir,{recursive:true});
 const browser=await chromium.connectOverCDP(process.env.CDP_URL??'http://127.0.0.1:9337'),summary=[];
@@ -37,7 +40,7 @@ try{
     const gl=w.renderer.getContext(),ext=gl.getExtension('WEBGL_debug_renderer_info');
     return {count:m.state.units.length,gpu:gl.getParameter(ext?.UNMASKED_RENDERER_WEBGL??gl.RENDERER),scale:w.renderer.getPixelRatio()};
    },{save:playthrough?JSON.parse(fs.readFileSync('docs/campaign/alpha/m02/playthrough-50.json','utf8')).state
-    :fs.readFileSync('campaign/reports/bridge-driving/'+(opponent?'opponent-before':'scale-before')+'/'+count+'-initial.json','utf8'),opponent,playthrough});
+    :bridgeTrafficFixture(count,1,{opponent}).mission.save(),opponent,playthrough});
    await page.evaluate(()=>new Promise(resolve=>{let n=90;const frame=()=>--n?requestAnimationFrame(frame):resolve();requestAnimationFrame(frame);}));
    const cdp=process.argv.includes('--profile')?await context.newCDPSession(page):null;if(cdp){await cdp.send('Profiler.enable');await cdp.send('Profiler.start');}
    await page.evaluate(()=>{
@@ -64,7 +67,7 @@ try{
    if(cdp)fs.writeFileSync(dir+'/'+count+'.cpuprofile',JSON.stringify((await cdp.send('Profiler.stop')).profile));
    await page.evaluate(()=>{document.querySelector('#performance-overlay')?.remove();});
    await page.screenshot({path:dir+'/'+count+'-1440.png'});
-   if(count===500)for(const [width,height] of [[844,390],[667,375]]){await page.setViewportSize({width,height});await page.screenshot({path:dir+'/'+count+'-'+width+'.png'});}
+   if(process.argv.includes('--layout')&&count===500)for(const [width,height] of [[844,390],[667,375]]){await page.setViewportSize({width,height});await page.screenshot({path:dir+'/'+count+'-'+width+'.png'});}
    await Promise.all(responses);for(const [path,hash] of Object.entries(hashes))assert.equal(hash,createHash('sha256').update(sources?.get(path.split('/').at(-1))??fs.readFileSync('.'+path)).digest('hex'),path+' source matches');
    assert.equal(Object.keys(hashes).length,changed.length);assert.deepEqual(errors,[]);
    const report={baselineRef,scenario:playthrough?'saved-playthrough':opponent?'opposing-armies':'bridge-traffic',setup,...result,hashes,errors};summary.push(report);fs.writeFileSync(dir+'/'+count+'.json',JSON.stringify(report,null,2));

@@ -15,13 +15,12 @@ for(let bridgeIndex=0;bridgeIndex<2;bridgeIndex++){
  const groups=[[],[]],targets=[offset(b,180,0),offset(a,-180,0)];
  for(let direction=0;direction<2;direction++)for(let row=0;row<rows;row++)for(const side of [-10,10]){
   const forward=(direction?1:-1)*(24+row*24),p=offset(direction?b:a,forward,side),heading=Math.atan2(-u.x,u.y)+(direction?Math.PI:0);
-  const unit=m.addUnit('bukhanka','rai',{...p,heading});groups[direction].push(unit);
+  const unit=m.addUnit('bukhanka','rai',p,{heading});groups[direction].push(unit);
  }
  m.addUnit('builder','rai',f.gridToWorld(m.config.startGrid));
  for(let direction=0;direction<2;direction++)assert(m.order(groups[direction].map(v=>v.id),'move',targets[direction]).ok,'Group command accepted');
  const crossed=new Set(),seenDeck=new Set(),previous=new Map(groups.flat().map(v=>[v.id,{x:v.x,y:v.y}]));let seconds=0;
- while(seconds++<180&&crossed.size<total){
-  m.advance(1);m.drainEffects();m.drainEvents();
+ const observe=()=>{
   for(let direction=0;direction<2;direction++)for(const v of groups[direction]){
    assert(!f.river.forbidden(v.x,v.y),'Vehicle cannot enter the river');
    const progress=(v.x-a.x)*u.x+(v.y-a.y)*u.y;
@@ -32,7 +31,13 @@ for(let bridgeIndex=0;bridgeIndex<2;bridgeIndex++){
    previous.set(v.id,{x:v.x,y:v.y});
    if(direction===0?progress>length+4:progress< -4)crossed.add(v.id);
   }
- }
+ };
+ // Observe every physical tick, not one straight chord between positions a
+ // second apart: a turning car can enter and leave the narrow deck in that
+ // interval. This also checks forbidden water on every simulated step.
+ const continueTick=m.continueTick;
+ m.continueTick=function(...args){const pending=this.pendingTick,result=continueTick.apply(this,args);if(pending&&!this.pendingTick)observe();return result;};
+ while(seconds++<180&&crossed.size<total){m.advance(1);m.drainEffects();m.drainEvents();}
  assert.equal(crossed.size,total,`${bridge.id}: only ${crossed.size}/${total} crossed after ${seconds}s; `+JSON.stringify(groups.flat().filter(v=>!crossed.has(v.id)).map(v=>({id:v.id,x:Math.round(v.x),y:Math.round(v.y),seenDeck:seenDeck.has(v.id),task:v.task?.type,path:v.path.length}))));
  // A large formation may legitimately send a minority of vehicles around the
  // other crossing; every vehicle must still reach the opposite side.

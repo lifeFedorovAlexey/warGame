@@ -1,0 +1,442 @@
+{
+  "date": "2026-11-12",
+  "version": "0.1.8",
+  "baseline": "0b0984fc8efd340c76382f337a69aff01575555f",
+  "status": "Improved common navigation and retreat control; 500 vehicles are still below real-time simulation.",
+  "changes": [
+    "Removed half/quarter-speed candidate grids. Compute a braking profile from the checked free arc and retain its remaining distance while blocked.",
+    "When no full forecast is feasible, execute a physically clear maximum-braking step instead of an instantaneous speed reset.",
+    "Cull forecast pairs with enclosing circles before detailed geometry; reuse exact repeated stationary/first poses within a control slice.",
+    "Copy only changed occupancy regions into pooled search contexts. Revalidate only changed corridor segments.",
+    "Share directed segment costs and regional clearance proofs across destinations/search contexts; a changed smoothing segment does not erase unrelated settled Dijkstra nodes.",
+    "Keep checked parking/passage/return plans through temporary obstruction and distant construction. Actual local obstruction, changed orders or wait cycles invalidate them.",
+    "Attack and attack-move obey live HP thresholds, including queued/proposed orders and early group prefixes. Manual movement remains available.",
+    "All production navigation changes are independent of mission IDs and camera state."
+  ],
+  "fixtureCorrection": {
+    "issue": "The old load fixture checked a heading in the point argument but addUnit reads heading from its extra argument; enemy kind was also changed after placement validation.",
+    "fix": "Create the final kind/owner/heading, then assert every actual starting hull is collision-free. Observe bridge crossings on every physical tick.",
+    "supersedes": "Earlier 500-vehicle runs, including docs/performance/campaign-bridges-2026-11-12.json, used the old fixture and are not the final controlled comparison."
+  },
+  "fixedWork": {
+    "scope": "500 vehicles: 250 player + 250 native enemy; 20 physical ticks (2 simulated seconds), accepted initial routes. CPU time excludes setup and rendering.",
+    "before": {
+      "baseline": true,
+      "count": 500,
+      "ticks": 20,
+      "simulationSeconds": 2.0000000000000004,
+      "cpuMs": 7927.507199999996,
+      "tickMs": {
+        "p50": 368.8127999999997,
+        "p95": 815.9736000000012,
+        "max": 815.9736000000012
+      },
+      "moved": 408,
+      "enemyMoved": 234,
+      "damaged": 0,
+      "motion": {
+        "hardStops": 196,
+        "maxSpeedLoss": 30
+      },
+      "predictive": {
+        "samples": 148361,
+        "projections": 1078689,
+        "maxDecisionMs": 73.31049999999959,
+        "emergencyStops": 208,
+        "routeSearches": 6,
+        "routePublications": 1,
+        "routeDiscards": 166,
+        "maxPlanningMs": 2.5257999999994354,
+        "maxPlanningOverrunMs": 0.5257999999994354,
+        "maxControlSliceMs": 73.31049999999959,
+        "forecastCacheHits": 300015
+      }
+    },
+    "after": {
+      "baseline": false,
+      "count": 500,
+      "ticks": 20,
+      "simulationSeconds": 2.0000000000000004,
+      "cpuMs": 4887.405600000002,
+      "tickMs": {
+        "p50": 212.45620000000054,
+        "p95": 662.5298000000003,
+        "max": 662.5298000000003
+      },
+      "moved": 402,
+      "enemyMoved": 228,
+      "damaged": 0,
+      "motion": {
+        "hardStops": 1,
+        "maxSpeedLoss": 15.535967360428673
+      },
+      "predictive": {
+        "samples": 67598,
+        "projections": 462275,
+        "maxDecisionMs": 20.80240000000049,
+        "emergencyStops": 151,
+        "routeSearches": 6,
+        "routePublications": 2,
+        "routeDiscards": 193,
+        "maxPlanningMs": 2.2320999999974447,
+        "maxPlanningOverrunMs": 0.23209999999744468,
+        "forecastPairChecks": 3079573,
+        "forecastPairsCulled": 11550360,
+        "maxControlSliceMs": 20.80240000000049,
+        "forecastCacheHits": 303247,
+        "brakingProfiles": 15391,
+        "forecastClearanceHits": 72038,
+        "brakingFallbacks": 1018
+      }
+    },
+    "cpuReduction": 0.38348771225335443,
+    "forecastProjectionReduction": 0.5714473773256239,
+    "forecastPairsCulledFraction": 0.7895019068098261,
+    "hardStopDefinition": "Speed loss during driving greater than the vehicle braking limit times the physical timestep.",
+    "limits": "The new controller changes trajectories. This is equal simulation duration/population, not an assertion of identical paths; asynchronous route slices have a wall-time budget."
+  },
+  "browser": {
+    "scope": "Separate headless Edge, 1440x900, RTX4070 ANGLE D3D11, 15 wall seconds; identical validated placements, 250 player + 250 native enemy.",
+    "before": {
+      "count": 500,
+      "scenario": "opposing-armies",
+      "wallSeconds": 15.028,
+      "simulationSeconds": 1.5000000000000002,
+      "simulationRate": 0.09981368112856004,
+      "frameMs": {
+        "count": 681,
+        "p50": 20.700000047683716,
+        "p95": 25.799999952316284,
+        "p99": 45.09999990463257,
+        "max": 83.5,
+        "total": 15003.300000071526
+      },
+      "moved": 480,
+      "enemyMoved": 233,
+      "damaged": 0,
+      "pending": 62,
+      "predictive": {
+        "samples": 60339,
+        "projections": 458363,
+        "maxDecisionMs": 4.800000071525574,
+        "emergencyStops": 93,
+        "routeSearches": 89,
+        "routePublications": 47,
+        "routeDiscards": 9,
+        "maxPlanningMs": 1.899999976158142,
+        "maxPlanningOverrunMs": 0.8999999761581421,
+        "maxControlSliceMs": 4.600000023841858,
+        "forecastCacheHits": 137129,
+        "controlYields": 468
+      },
+      "errors": []
+    },
+    "after": {
+      "count": 500,
+      "scenario": "opposing-armies",
+      "wallSeconds": 15.015100000023843,
+      "simulationSeconds": 2.1000000000000005,
+      "simulationRate": 0.1398592083966584,
+      "frameMs": {
+        "count": 660,
+        "p50": 21.200000047683716,
+        "p95": 26.59999990463257,
+        "p99": 54.89999997615814,
+        "max": 85.40000009536743,
+        "total": 14990
+      },
+      "moved": 473,
+      "enemyMoved": 226,
+      "damaged": 0,
+      "pending": 63,
+      "predictive": {
+        "samples": 39244,
+        "projections": 265701,
+        "maxDecisionMs": 3.1999999284744263,
+        "emergencyStops": 63,
+        "routeSearches": 77,
+        "routePublications": 6,
+        "routeDiscards": 519,
+        "maxPlanningMs": 2.1999999284744263,
+        "maxPlanningOverrunMs": 1.1999999284744263,
+        "maxControlSliceMs": 2.799999952316284,
+        "controlYields": 282,
+        "forecastPairChecks": 1861476,
+        "forecastPairsCulled": 7495101,
+        "forecastCacheHits": 193406,
+        "brakingProfiles": 9085,
+        "forecastClearanceHits": 34000,
+        "brakingFallbacks": 654
+      },
+      "errors": []
+    },
+    "rateImprovement": 0.4012027891899881,
+    "scaleScope": "50/100/250 are two opposing player-owned traffic groups, 10 wall seconds. They are not the same AI workload as the 500-unit enemy test.",
+    "scale": [
+      {
+        "count": 50,
+        "simulationSeconds": 9.89999999999998,
+        "simulationRate": 0.9879845115986923,
+        "frameMs": {
+          "count": 537,
+          "p50": 18.200000047683716,
+          "p95": 23.399999976158142,
+          "p99": 24.90000009536743,
+          "max": 30.100000023841858,
+          "total": 9999.200000047684
+        },
+        "moved": 50,
+        "pending": 1,
+        "errors": []
+      },
+      {
+        "count": 100,
+        "simulationSeconds": 8.999999999999984,
+        "simulationRate": 0.8982573806836137,
+        "frameMs": {
+          "count": 516,
+          "p50": 19.09999990463257,
+          "p95": 23.899999976158142,
+          "p99": 25.600000023841858,
+          "max": 28.100000023841858,
+          "total": 9992.299999952316
+        },
+        "moved": 100,
+        "pending": 10,
+        "errors": []
+      },
+      {
+        "count": 250,
+        "simulationSeconds": 7.29999999999999,
+        "simulationRate": 0.7284047935039619,
+        "frameMs": {
+          "count": 439,
+          "p50": 22.59999990463257,
+          "p95": 28.200000047683716,
+          "p99": 31.700000047683716,
+          "max": 35.199999928474426,
+          "total": 9992.800000071526
+        },
+        "moved": 249,
+        "pending": 185,
+        "errors": []
+      }
+    ],
+    "sourceHashes": {
+      "before": {
+        "/campaign/main.js": "afb2ab333a0c442d62c8313ddb7c0ee157db0ce9c0c1a80e768427c860c2a306",
+        "/campaign/world.js": "10aa818f8acd54b8d5babad2c5bba096996304205f0a0a0b888aa9df253c7492",
+        "/campaign/mission.js": "17096d4a9a655545dfe77351bcb467a6e5c5292d6d8c5217168bf8da193dd3af",
+        "/campaign/army-selection.js": "7c0a1a89421e87353f5ca0312d7cb35b6ef53c10fe7f60f64dd2c7dc47a7bdc1",
+        "/campaign/combat-retreat-state.js": "05f97704be74319ebb2bebc1347aa577b91bf3b3cd40144c55d4425a5587663a",
+        "/campaign/group-command.js": "633b4470b83046fb49432239c2bdcee769c88b45711d2edb00a6c72f01fc8ffe",
+        "/campaign/selection-rings.js": "ce3b9204cf9c263ad9428eaed3a9167ed02c8fd1d5e8b21503e326da6798da27",
+        "/campaign/vehicle-collision.js": "9c7c269219882a0880cc65f5252e11441af4f227b243ac04d390e08898f3e498",
+        "/campaign/navigation.js": "1830fa040a81c734c774c1ac6deaca70ae0072e1ed135b78f32a370fa53872d8",
+        "/campaign/command-motion.js": "b512d5b37d491e9c50b9c8ac90a480cccab202a71109cbf700f142f7d3f09d42",
+        "/campaign/combat-sight.js": "4bf2ec898c5e7fbee3dce6205f31d298cb28b07fd4b7327f8c2e6bf3aa8d9d6a",
+        "/campaign/predictive-traffic.js": "16753e5e338a7405fa4ce391baafa3a6b49d6190c76e32408efaaf3caaa38be1",
+        "/campaign/maneuver-admission.js": "a488a595da5b1f20129ffc4b6ab847eb6446237d09d53f8fb62782ebcd103d0a",
+        "/campaign/combat-policy.js": "3b33af46269b4cb9d07cec6f0eb6008aea757084388226c79601db406645e3b7",
+        "/campaign/turning-headway.js": "a5e2ccd2a64ae7aa085f522ea5b846becfeb065544c10967afe74e3ec8dd1f97",
+        "/campaign/queued-orders.js": "97f0090e90f4b28caabc7cb2de8920fb2a2e9e53afd4431a9c64f37ab4491d16",
+        "/campaign/command-planner.js": "8ef6eeeb5397af1d1fbe589c0852559aca8fbc9e3b5ba479a365e7d657488aae",
+        "/campaign/arrival-planner.js": "68f45e5e9fa6f2542bb2c82495cb3357e271b8bf8db99b9cc62c7b023fd61a84",
+        "/campaign/route-continuation.js": "98e4a70f79ea3b8752f036b9c906a4ffcd2fe0de8cae32a1f6fefd98ba9a8f3f",
+        "/campaign/road-traffic.js": "ded8c0669639e86ceb78e2f049bf1c4b2b10c2a939b12249b6e781c89930f744",
+        "/campaign/traffic-joint.js": "c18a4e1c357f82fd700819a48531f1b3fb6b6816bcc69ac4ac16c4cec065907c",
+        "/campaign/shared-route-tree.js": "75a6a3a6f58ce9f2463e517be3a41c2a3ed588e2f011ff7b56fb07625c453be1"
+      },
+      "after": {
+        "/campaign/main.js": "a914fb64580b25fde72560af3468ee6619d9c04c08d22fb490a3ce9259c33fb0",
+        "/campaign/world.js": "10aa818f8acd54b8d5babad2c5bba096996304205f0a0a0b888aa9df253c7492",
+        "/campaign/army-selection.js": "4ca8a2e0ad25ff6863e86aa8ded871da28593181405cbcf91947afa6cc9f32d2",
+        "/campaign/combat-retreat-state.js": "2790e0654827583eb936633047c58b1a932a44be991dc1b8b0e3ac118403186b",
+        "/campaign/group-command.js": "35c176bb6927f4df360cd87690e411c134d35c9cff3abdb327b5e77589bc5911",
+        "/campaign/mission.js": "0f678d70a0ff2edad326749e0fc77039f0c51f473f224662384ae200a714f434",
+        "/campaign/selection-rings.js": "5326c12350f381a9375080f1e33864c4abb7e433ca3b3c95ba01bdeb197e1cb6",
+        "/campaign/vehicle-collision.js": "17e45238c62d91baf5accec40fc5d0a9a08079d85a81c6a43ae05644c988b1c5",
+        "/campaign/navigation.js": "afbe83ef01e943b904de456cf23d003f4c9f830fac2c720e646a90c3c0182f1a",
+        "/campaign/combat-policy.js": "9b572ade85e5053a9d49e9e55556d2b26c528bbdb9138305c8d5a658ff2f3ab2",
+        "/campaign/command-motion.js": "8b498d2591516a4afb7f3a50d505c078b2026242d5ce51b6dcf1d5a54ac3515f",
+        "/campaign/combat-sight.js": "f813816dc6082016b30bca085e56551aca703f9702838dffb2733bdacd0ba572",
+        "/campaign/predictive-traffic.js": "3188241bc7a9d2581efa357225b3ebe524559f76128422098aca62d2a20050db",
+        "/campaign/maneuver-admission.js": "24a4fca7a553505a1230874b1facba5d6ac2a4e6b762ff045162ee205fb8ad85",
+        "/campaign/turning-headway.js": "e294f14ad16c0576766b99af36b4b0302e7ecbb01e7b65faeb876ee482ca94d4",
+        "/campaign/queued-orders.js": "83c6a33a1169c413739549e8b72246be42ad4d56564c169cb42ac885bf141352",
+        "/campaign/route-continuation.js": "3982666a49da7fc3f9a3b0f4f302f26e6ce2f8d5af89a5e5494470df1fca4013",
+        "/campaign/arrival-planner.js": "a341e17a3b4283e33d87aae54658ea0140c5416205cce1e637cd86814c8dbefb",
+        "/campaign/command-planner.js": "bb900996dbaf1b796fab1bc56927f87d1035b39259de6265aa0c0e1fb1d57658",
+        "/campaign/traffic-joint.js": "e9bf0f57484087ce3a102aba35b748f7beb0c9e6082f77abb3b7f58a51eb25b5",
+        "/campaign/road-traffic.js": "5e2d6f01ffec8e219677bdd298a2a8af9a400ed88dc040ed33558e23c13ab8fc",
+        "/campaign/forecast-clearance.js": "c18a753cc48657625aed205ef170a389e39ce3b7e2262df647997e261d2efe46",
+        "/campaign/shared-route-tree.js": "c7b707e767b5b1c895aa63405a6394683b52bf06ab57f60200a714c5b7c487d5"
+      }
+    }
+  },
+  "sustainedCombat": {
+    "scope": "30 player vehicles at real M02 compound geometry plus native enemies; target HP raised in test data to remain alive throughout. Budgeted Node simulation, no renderer. Not a reproduction of the user's unavailable save.",
+    "before": {
+      "baseline": "0b0984f",
+      "count": 30,
+      "seconds": 15,
+      "simulationSeconds": 13.999999999999966,
+      "rate": 0.9333333333333311,
+      "cpuMs": 3619.0806999999995,
+      "callMs": {
+        "p50": 5.003699999999753,
+        "p95": 7.020899999999983,
+        "p99": 7.108399999999847,
+        "max": 10.140299999999797
+      },
+      "enemyHp": 96422.5,
+      "moved": 11,
+      "damaged": 17,
+      "pending": 0,
+      "predictive": {
+        "samples": 19389,
+        "projections": 152538,
+        "maxDecisionMs": 4.026100000000497,
+        "emergencyStops": 9,
+        "routeSearches": 257,
+        "routePublications": 34,
+        "routeDiscards": 6,
+        "maxPlanningMs": 2.340400000000045,
+        "maxPlanningOverrunMs": 1.0342000000000553,
+        "maxControlSliceMs": 3.2973000000001775,
+        "controlYields": 212,
+        "forecastCacheHits": 3700,
+        "routeFailures": 220
+      },
+      "command": {
+        "slices": 900,
+        "cpuMs": 412.48749999998904,
+        "maxSliceMs": 2.7980999999999767,
+        "applied": 30,
+        "reused": 0,
+        "cancelled": 0,
+        "preemptions": 0,
+        "rejectedKeptRoute": 0
+      }
+    },
+    "after": {
+      "baseline": null,
+      "count": 30,
+      "seconds": 15,
+      "simulationSeconds": 13.899999999999967,
+      "rate": 0.9266666666666644,
+      "cpuMs": 3332.0873,
+      "callMs": {
+        "p50": 3.101399999999785,
+        "p95": 7.030899999999974,
+        "p99": 7.261000000000422,
+        "max": 12.568200000000047
+      },
+      "enemyHp": 96670,
+      "moved": 10,
+      "damaged": 14,
+      "pending": 0,
+      "predictive": {
+        "samples": 10377,
+        "projections": 81186,
+        "maxDecisionMs": 3.7651000000005297,
+        "emergencyStops": 11,
+        "routeSearches": 249,
+        "routePublications": 40,
+        "routeDiscards": 11,
+        "maxPlanningMs": 3.3766999999998006,
+        "maxPlanningOverrunMs": 1.3789999999999054,
+        "forecastPairChecks": 218781,
+        "forecastPairsCulled": 306948,
+        "maxControlSliceMs": 2.927599999999984,
+        "forecastCacheHits": 4363,
+        "brakingProfiles": 1860,
+        "forecastClearanceHits": 10488,
+        "routeFailures": 205,
+        "controlYields": 150,
+        "brakingFallbacks": 39
+      },
+      "command": {
+        "slices": 900,
+        "cpuMs": 408.46699999999976,
+        "maxSliceMs": 2.8204000000000633,
+        "applied": 30,
+        "reused": 0,
+        "cancelled": 0,
+        "preemptions": 0,
+        "rejectedKeptRoute": 0
+      }
+    },
+    "conclusion": "No meaningful simulation-rate improvement in this small battle fixture. Repeated firing-position searches remain visible (205 failed searches after the change)."
+  },
+  "validation": {
+    "passed": [
+      "check-forecast-clearance: 48000 differential queries, same clearance and first blocker",
+      "check-local-route-reuse: 2 of 8 corridor segments rechecked; pooled occupancy and cross-order segment reuse",
+      "check-persistent-passage: both owners, temporary obstruction, save/load, completed return, local/permanent obstruction",
+      "check-predictive-braking: both owners, hull clearance, braking limit, release after obstacle removal",
+      "check-wg-bridge-traffic: both bridges, 8/8 each, forbidden water checked every physical tick",
+      "check-dense-column-driving",
+      "check-stopped-leader-progress: 4 separations, arrivals/returns/no contacts",
+      "check-traffic-camera-rate",
+      "check-attack-retreat-threshold: 23 cases including 500 mixed-owner units and group prefixes",
+      "check-army-selection",
+      "check-group-command",
+      "check-command-immediate-motion: 8 cases",
+      "check-retreat-order-interruption: 8 cases",
+      "check-scav-ai: 8 cases",
+      "syntax and whitespace checks"
+    ],
+    "mouseControls": {
+      "passed": true,
+      "results": [
+        "right ground: HP > 80% only",
+        "left ground: all selected vehicles",
+        "right after manual move still respects HP",
+        "injured-only selection cannot override retreat",
+        "right button opens settings for an injured-only selection",
+        "right ground: HP > 35% only",
+        "retreat disabled: all living combat vehicles",
+        "right enemy: explicit attack also respects HP"
+      ],
+      "errors": []
+    },
+    "existingFailuresReproducedOnBaseline": [
+      [
+        "check-shared-route-tree",
+        "old directional-grade expectation (gradeSpeed is already constant on baseline)"
+      ],
+      [
+        "check-route-continuation",
+        "subset replacement expects accepted continuation to disappear immediately"
+      ],
+      [
+        "check-joint-combat",
+        "automatic fire expectation during a joint manoeuvre"
+      ],
+      [
+        "check-maneuver-sampling",
+        "arc-boundary acceleration expectation"
+      ],
+      [
+        "check-yield-passage",
+        "fixture expects a particular checked-loan path"
+      ],
+      [
+        "check-retreat-existing-damage",
+        "2 timing/state expectations fail before and after"
+      ],
+      [
+        "check-retreat-service",
+        "arrival expectation differs from automatic garage healing/resumption"
+      ]
+    ],
+    "fullSuitePass": false
+  },
+  "sources": [
+    "https://box2d.org/documentation/group__tree.html",
+    "https://github.com/recastnavigation/recastnavigation/blob/main/DetourCrowd/Source/DetourObstacleAvoidance.cpp",
+    "https://www.gameaipro.com/GameAIPro/GameAIPro_Chapter23_Crowd_Pathfinding_and_Steering_Using_Flow_Field_Tiles.pdf",
+    "https://www.gameaipro.com/GameAIPro2/GameAIPro2_Chapter17_Advanced_Techniques_for_Robust_Efficient_Crowds.pdf"
+  ]
+}

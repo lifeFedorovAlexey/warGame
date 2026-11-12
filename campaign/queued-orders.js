@@ -1,4 +1,4 @@
-import {inFactoryInterior} from './combat-retreat-state.js';
+import {inFactoryInterior,canReceiveAttack} from './combat-retreat-state.js';
 import {repairableBuilding} from './builder-auto-repair.js';
 import {canDemolish} from './building-demolition.js';
 import {pickupTarget,canCollectPickup} from './pickup-orders.js';
@@ -18,7 +18,7 @@ export function orderCandidates(m,ids,action,target){
  if(work.has(action)&&(target.owner!=='rai'||!m.entity(target.id)))return m.fail('Нужна своя техника или постройка');
  const selected=new Set(ids),combat=action==='attack'||action==='attack-move';
  const units=m.state.units.filter(u=>selected.has(u.id)&&u.owner==='rai'&&u.hp>0&&!inFactoryInterior(u)
-  &&(!work.has(action)||m.unitSpec(u).role==='builder')&&(!combat||m.unitSpec(u).damage));
+  &&(!work.has(action)||m.unitSpec(u).role==='builder')&&(!combat||m.unitSpec(u).damage&&canReceiveAttack(u,m.unitSpec(u))));
  return units.length?{ok:true,units,pickup:action==='move'?pickupTarget(m,target):null}:m.fail('Не выбрана подходящая техника');
 }
 

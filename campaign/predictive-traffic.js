@@ -6,7 +6,7 @@
 import {TrafficCoordinator} from './traffic-coordinator.js';
 import {vehicleDynamics,steeringResponse,steeringManeuverReady} from './vehicle-dynamics.js';
 import {checkManeuverSteps} from './vehicle-motion.js';
-import {vehicleClearance,vehicleEnvelope,envelopeClearance,vehicleRadiusBound,trafficCollisionRequired} from './vehicle-collision.js';
+import {vehicleClearance,vehicleEnvelope,vehicleRadiusBound,trafficCollisionRequired} from './vehicle-collision.js';
 import {navigationDecision} from './navigation-state.js';
 import {damageMobility} from './damage-state.js';
 import {borrowedHomeClear} from './traffic-start.js';
@@ -17,6 +17,7 @@ import {maneuverAdmissionBlocker} from './maneuver-admission.js';
 import {isInfantry} from './scav-unit-profiles.js';
 import {TrafficPlanner} from './traffic-planner.js';
 import {roadDrivingLane} from './road-merge.js';
+import {ForecastClearance} from './forecast-clearance.js';
 import {stepRetreatContact,retreatSpeed,holdRetreatYield} from './retreat-contact.js';
 
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
@@ -673,23 +674,34 @@ export class PredictiveTraffic extends TrafficCoordinator{
    }
    const value={other,shapes};this.forecasts.set(other,{key,value});return value;
   });
-  let best=null;const blockers=new Set();let preferredBlockers=[];
-  // Full and half speed can both overshoot a tight turn in the forecast.
-  // If neither gives forward progress, also consider a slow approach instead
-  // of repeatedly choosing Stop and asking for the same global route.
+  const forecastClearance=new ForecastClearance(forecasts,scale,this.stats);
+  let best=null,brakingFallback=null;const blockers=new Set();let preferredBlockers=[];
+  const retainedBrake=previous?.stopDistance!==undefined&&unit.driveSpeed>.01&&previous.intent===intent&&previous.topology===topology
+   ?Math.max(0,previous.stopDistance-distance(unit,previous.origin)):Infinity;
+  // One acceleration target, with braking computed from remaining distance
+  // and right of way. Fractional throttle guesses multiply steering forecasts
+  // without representing a different physical control.
   const trafficLimit=this.limit(unit),forwardSpeed=Math.min(targetSpeed,trafficLimit);
   // A forward right-of-way cap does not forbid backing out of the conflict.
   // Reverse candidates still pass the same live swept-body/reservation check
   // and every forecast sample; they cannot move through a following vehicle.
-  const speedPasses=[[forwardSpeed,forwardSpeed*.5,forwardSpeed*.25],
-   [0,-Math.min(dynamics.maneuverReverse,targetSpeed),-Math.min(dynamics.maneuverReverse*.5,targetSpeed)]];
+  const speedPasses=[[forwardSpeed],[0,-Math.min(dynamics.maneuverReverse,targetSpeed)]];
+  const steeringOptions=[...new Set(steerings)],testedControls=new Set();
+  const stoppedSteering=previous?steeringOptions.reduce((a,b)=>Math.abs(b-previous.steering)<Math.abs(a-previous.steering)?b:a):steeringOptions[0];
   for(let pass=0;pass<speedPasses.length;pass++){
    // Keep a productive forward arc. Reverse is an escape when no forward
    // sample makes progress, not a competing preference on every frame.
    if(pass&&!backingArrival&&best&&best.score<initialCost-.05)break;
-   // A zero traffic cap makes all three forward speeds identical. Evaluate
-   // that candidate once, with all the usual future and live collision checks.
-   for(const steering of new Set(steerings))for(const speed of new Set(speedPasses[pass])){
+   // A zero destination cap also makes braking and reverse identical.
+   for(const steering of steeringOptions)for(const speed of new Set(speedPasses[pass])){
+   // At rest every braking rollout has exactly the same hull and score,
+   // except for the steering-change penalty. Evaluate its minimum once.
+   if(speed===0&&!(unit.driveSpeed>0)&&steering!==stoppedSteering)continue;
+   const controlKey=steering+','+speed;if(testedControls.has(controlKey))continue;testedControls.add(controlKey);
+   // Release a retained brake only after the preferred full rollout becomes
+   // clear again. Other steering samples keep the existing stopping bound.
+   const stoppingDistances=[steering===preferred&&speed===forwardSpeed?Infinity:retainedBrake];
+   for(const stopDistance of stoppingDistances){
    this.stats.samples++;
    const control={speed,steering},rejected=new Set();let pose=unit,shape=vehicleEnvelope(unit,scale,mission.field),first=null,clearance=Infinity,valid=true,travel=0,time=mission.state.time;
    // Execution is exactly the first predicted interval, including braking.
@@ -702,10 +714,17 @@ export class PredictiveTraffic extends TrafficCoordinator{
      if(!current()){this.stats.controlDiscards=(this.stats.controlDiscards??0)+1;finish();return false;}
      originPreview=originTerrain=undefined;
      firstMotions.clear();
+     forecastClearance.clear();
     }
     const step=intervals[i],target=preview(pose),feedback=steering===preferred&&speed>=0?routeSteering(pose,target,scale,speed)
      :steering===reversePreferred&&speed<0?-routeSteering({...pose,heading:wrap(pose.heading+Math.PI)},target,scale,speed):steering;
-    const next=integrateControl(pose,{...(passingLane?control:approachingControl(pose,control,target,step,dynamics.braking,final)),steering:feedback,time,fault:unit.steeringFault},step,scale);
+    const requested=passingLane?{...control}:approachingControl(pose,control,target,step,dynamics.braking,final);
+    if(Number.isFinite(stopDistance)){
+     const reaction=dynamics.braking*step,free=Math.max(0,stopDistance-travel);
+     const cap=Math.sqrt(2*dynamics.braking*free+reaction*reaction)-reaction;
+     requested.speed=Math.sign(speed)*Math.min(Math.abs(requested.speed),cap);
+    }
+    const next=integrateControl(pose,{...requested,steering:feedback,time,fault:unit.steeringFault},step,scale);
     time+=step;this.stats.projections++;
     if(i===0){
      first=next;const envelope=vehicleEnvelope(first,scale,mission.field);
@@ -716,6 +735,11 @@ export class PredictiveTraffic extends TrafficCoordinator{
      if(motion){for(const body of motion.blockers)rejected.add(body);}
      else{motion={clear:mission.vehicleMotionClear(unit,unit,first,.52,rejected),blockers:[...rejected]};firstMotions.set(envelope,motion);}
      if(!motion.clear){valid=false;break;}
+     if(speed===0&&unit.driveSpeed>dynamics.braking*dt){
+      const score=Math.abs(steering-(previous?.steering??preferred));
+      if(!brakingFallback||score<brakingFallback.score)brakingFallback={score,
+       control:{...control,stopDistance:0,origin:{x:first.x,y:first.y},intent,topology},pose:first,braking:true};
+     }
     }
     // The first live motion check already proved terrain against all nearby
     // solids. Later stopped predictions share one exact static pose; steering
@@ -730,22 +754,30 @@ export class PredictiveTraffic extends TrafficCoordinator{
     // The threshold must also prove the preferred-control clearance below;
     // a smaller early-out bound could needlessly reject that fast path.
     if(next.x!==pose.x||next.y!==pose.y||next.heading!==pose.heading)shape=vehicleEnvelope(next,scale,mission.field);
-    for(const forecast of forecasts){
-     const gap=envelopeClearance(shape,forecast.shapes[i],scale*.8+.001);
-     clearance=Math.min(clearance,gap);
-     if(gap<scale*.055+.02){rejected.add(forecast.other);valid=false;break;}
-    }
+    const contacts=forecastClearance.query(shape,i,i===0||atOrigin(next));
+    clearance=Math.min(clearance,contacts.clearance);
+    if(contacts.blocker){rejected.add(contacts.blocker);valid=false;}
     if(!valid)break;travel+=distance(pose,next);pose=next;
    }
    for(const body of rejected)blockers.add(body);
    if(steering===preferred&&speed===forwardSpeed)preferredBlockers=[...rejected];
-   if(!valid)continue;
+   if(!valid){
+    // The full-throttle forecast found the end of the free arc. Compute one
+    // braking profile to stop inside that checked distance, then validate it
+    // against the same moving bodies and terrain. No fractional speed grid.
+    if(stopDistance===Infinity&&speed!==0&&(travel>0||Number.isFinite(retainedBrake))){
+     stoppingDistances.push(Math.min(travel,retainedBrake));this.stats.brakingProfiles=(this.stats.brakingProfiles??0)+1;
+    }
+    continue;
+   }
    // A nearby final slot has no required body heading. Score a reversing
    // approach by its travel direction, otherwise a short safe back-up loses
    // to repeated forward loops solely because the bonnet faces away.
    const scoringPose=backingArrival&&speed<0?{...pose,heading:wrap(pose.heading+Math.PI)}:pose;
    const score=motionCost(scoringPose)+(speed<0?travel*.3:0)
     +(previous?Math.abs(steering-previous.steering)*.1:0)+.1/(Math.max(0,clearance)+1);
+   if(Number.isFinite(stopDistance))Object.assign(control,{stopDistance:Math.max(0,stopDistance-distance(origin,first)),
+    origin:{x:first.x,y:first.y},intent,topology});
    if(!best||score<best.score)best={score,control,pose:first};
    // The preferred rollout has passed every terrain, swept-body and future
    // clearance check. If it makes forward progress, keep it. Requiring an
@@ -758,14 +790,21 @@ export class PredictiveTraffic extends TrafficCoordinator{
     finish();return true;
    }
   }
+  }
    }
   if(best&&!mission.vehicleMotionClear(unit,unit,best.pose,.52,blockers))best=null;
+  // When no complete forecast is feasible, a physically clear braking step
+  // is still preferable to an instantaneous velocity reset. Retain braking
+  // until rest; do not alternate acceleration and braking on adjacent ticks.
+  if(!best&&brakingFallback&&mission.vehicleMotionClear(unit,unit,brakingFallback.pose,.52,blockers)){
+   best=brakingFallback;this.stats.brakingFallbacks=(this.stats.brakingFallbacks??0)+1;
+  }
   if(best){Object.assign(unit,best.pose);this.controls.set(unit.id,best.control);}
   else{
    if(unit.driveSpeed>.01)this.stats.emergencyStops++;
    unit.driveSpeed=0;this.controls.delete(unit.id);
   }
-  const dependencies=best?preferredBlockers:[...blockers];
+  const dependencies=best&&!best.braking?preferredBlockers:[...blockers];
   if(trafficLimit<.01)for(const id of this.blockingVehicles(unit))if(!dependencies.some(other=>other.id===id)){
    const owner=mission.entity(id);if(owner)dependencies.push(owner);
   }

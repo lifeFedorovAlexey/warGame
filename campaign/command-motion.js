@@ -73,7 +73,7 @@ export function retryCommandFromRest(job,unit,destination){
  // This handoff is reached only after a complete replacement path was found.
  // A pose-relative departure now needs rest to reconnect that valid route.
  if(unit.proposedOrder){unit.pendingOrder=unit.proposedOrder;delete unit.proposedOrder;
-  unit.commandRevision=unit.pendingOrder.revision;unit.retreatSuppressed=true;delete unit.routeContinuation;}
+  unit.commandRevision=unit.pendingOrder.revision;unit.retreatSuppressed=unit.pendingOrder.type==='move';delete unit.routeContinuation;}
  unit.pendingOrder.holdForRoute=true;
  if(destination)unit.pendingOrder.destination={...destination};
  (job.retryIds??=new Set()).add(unit.id);

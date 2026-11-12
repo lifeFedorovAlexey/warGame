@@ -55,7 +55,7 @@ import {updateFactoryRepairs} from './factory-repair.js';
 import {modernizationSelection} from './factory-modernization.js';
 import {currentVehicleRecipes} from './vehicle-upgrades.js';
 import {updateFactoryVisit,insideFactory,factoryProductionPaused,tryEnterFactory} from './factory-garage.js';
-import {inFactoryInterior,shouldAutoRetreat,canAutoRetreat} from './combat-retreat-state.js';
+import {inFactoryInterior,shouldAutoRetreat,canAutoRetreat,canReceiveAttack} from './combat-retreat-state.js';
 import {blockingCombatTarget,interruptedCombatTargets,movementCombatTarget} from './combat-orders.js';
 import {cancelCombatDeployment,updateCombatDeployment,updateCombatParking,combatPositionConditions} from './combat-deployment.js';
 import {pickupTarget,orderPickupSteps,updatePickupOrder} from './pickup-orders.js';
@@ -637,6 +637,7 @@ export class Mission{
     delete unit.pendingOrder;if(!job.copiedIds?.has(unit.id))activateCommand(job.mission,unit);job.assigned.push(unit.id);
    }
    if(disengage.length)unit.combatDisengage=[...disengage];
+   if(combat)unit.retreatSuppressed=false;
    assigned.add(unit.id);if(job)yield;
   };
   if(repeat.size===units.length){
@@ -759,6 +760,7 @@ export class Mission{
      path=joined;
     }
    }
+   if(combat&&!canReceiveAttack(unit,this.unitSpec(unit)))continue;
    const destination=travel?path.at(-1)??goal:goal;
    if(travel||action==='attack')reserved.push(path.at(-1)??unit);
    const targetId=travel?null:target.id??null;
@@ -801,7 +803,7 @@ export class Mission{
     }
    }
    else delete unit.routeOrder;
-   cancelCombatRetreat(unit);
+   cancelCombatRetreat(unit,!combat);
    cancelCombatDeployment(unit);
    if(disengage.length)unit.combatDisengage=[...disengage];
    if(combat&&units.length>1)unit.combatGroup=combatGroup;
@@ -2714,6 +2716,10 @@ export class Mission{
    if(entity.combatPolicy)entity.combatPolicy=normalizeCombatPolicy(entity.combatPolicy);
    // Army defaults fill legacy omissions; explicit saved unit rules survive.
    if(entity.owner==='rai'&&canAutoRetreat(this.config.units[entity.kind])&&!entity.combatPolicy)entity.combatPolicy={...armyPolicy};
+   // Older attacks incorrectly saved the manual-movement retreat override.
+   // Keep it for actual movement/Stop, but restore the policy for combat.
+   const intent=entity.pendingOrder??entity.combatDeployment?.resume??entity.task;
+   if(intent?.type==='attack'||intent?.type==='attack-move')entity.retreatSuppressed=false;
    upgradeDamageState(entity.damage,!!this.config.units[entity.kind]);
    if(this.config.units[entity.kind])syncFieldHp(this,entity);
    if(entity.hp<=0){if(entity.destroyedAt===undefined)legacyWrecks.push(entity);scheduleWreck(this,entity);}

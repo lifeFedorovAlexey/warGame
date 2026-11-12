@@ -1,6 +1,7 @@
 import {sharedRouteTree} from './shared-route-tree.js';
 import {interruptedCombatTargets} from './combat-orders.js';
 import {cancelCombatRetreat} from './combat-policy.js';
+import {canReceiveAttack} from './combat-retreat-state.js';
 import {cancelCombatDeployment} from './combat-deployment.js';
 import {isInfantry} from './scav-unit-profiles.js';
 import {navigationDecision} from './navigation-state.js';
@@ -93,11 +94,14 @@ export function applyRouteContinuations(mission){
    delete unit.routeContinuation;delete unit.commandRevision;continue;
   }
   if(state.phase==='ready-prefix'){
+   if(state.type!=='move'&&!canReceiveAttack(unit,mission.unitSpec(unit))){
+    mission.commandPlanner?.cancel([unit.id]);delete unit.routeContinuation;continue;
+   }
    if(unit.pendingOrder?.revision!==state.revision||distance(unit,state.source)>.001&&!mission.nav.lineClear(unit,state.frontier,false,true,.52,true)
     ||state.topology!==mission.nav.topologyRevision||state.bounds!==mission.nav.bounds.join(',')){
     delete unit.routeContinuation;if(record)record.status='queued';continue;
    }
-   cancelCombatRetreat(unit,unit.retreatSuppressed);cancelCombatDeployment(unit);
+   cancelCombatRetreat(unit,state.type==='move');cancelCombatDeployment(unit);
    for(const key of ['detour','traffic','trafficHold','driveWatch','reverseDebt','failedArcs','workEscapeRetryAt',
     'passage','passingLane','mergeTraffic','yieldReturn','routeOrder','commandStartAfter'])delete unit[key];
    if(state.disengage.length)unit.combatDisengage=[...state.disengage];

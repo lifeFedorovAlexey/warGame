@@ -119,10 +119,7 @@ export class ArrivalPlanner{
   this.connected.add(unit.id);
   // Store the forward corridor as well: subsequent individual destinations
   // can reuse it with independently checked exact entry/exit connectors.
-  const corridors=nav.corridors??=[];
-  corridors.unshift({from:{x:unit.x,y:unit.y},to:{x:anchor.x,y:anchor.y},kind:unit.kind??'',scale:nav.vehicleScale,
-   bounds:nav.bounds.join(','),topologyRevision:nav.topologyRevision,regions:nav.pathRegions(unit,path),occupancyKey:'',path});
-  if(corridors.length>64)corridors.pop();
+  nav.rememberCorridor(unit,anchor,path);
   return true;
  }
  *path(unit,desired,{roadOnly=false,allowed=()=>true,pathOptions={}}={}){

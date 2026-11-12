@@ -1,6 +1,6 @@
 import {vehicleEnvelope} from './vehicle-collision.js';
 import {assignFormation} from './formation-assignment.js';
-import {isAutomaticRepair,inFactoryInterior,strandedRetreat} from './combat-retreat-state.js';
+import {isAutomaticRepair,inFactoryInterior,canReceiveAttack} from './combat-retreat-state.js';
 
 /** @typedef {'auto'|'column'|'line'|'dispersed'|'concentrate'} Formation */
 export const FORMATIONS=Object.freeze(['auto','column','line','dispersed','concentrate']);
@@ -52,19 +52,17 @@ export function refreshCommandGroups(mission){
 
 export function expandCommandIds(mission,ids,{includeRepairing=false,action=null}={}){
  const byId=new Map(mission.state.units.map(u=>[u.id,u]));
- const available=id=>{const u=byId.get(id);return includeRepairing||!u||!isAutomaticRepair(u,mission.unitSpec(u));};
- // Reissuing the army's attack must not recall its damaged repair visitors.
- // A selection containing only repair visitors is an explicit manual override.
- const keepRepairing=!includeRepairing&&['attack','attack-move'].includes(action)&&ids.some(id=>{
-  const u=byId.get(id);return u?.hp>0&&u.owner==='rai'&&mission.unitSpec(u).damage&&!isAutomaticRepair(u,mission.unitSpec(u));
- });
+ const combat=['attack','attack-move'].includes(action);
+ const available=id=>{const u=byId.get(id);return includeRepairing||!u
+  ||(combat?canReceiveAttack(u,mission.unitSpec(u)):!isAutomaticRepair(u,mission.unitSpec(u)));};
  // Explicitly selected cars outside the garage obey the player. Expanding
  // a healthy leader's group must not recall unselected repair visitors.
  const expanded=new Set(ids.filter(id=>{
   const unit=byId.get(id);
-  return includeRepairing||!inFactoryInterior(unit)&&(!keepRepairing||available(id)||strandedRetreat(unit));
+  return includeRepairing||!inFactoryInterior(unit)&&(!combat||available(id));
  }));
- for(const group of mission.state.commandGroups??[])if(expanded.has(group.leaderId)&&available(group.leaderId))
+ const selected=new Set(ids);
+ for(const group of mission.state.commandGroups??[])if(combat?selected.has(group.leaderId):expanded.has(group.leaderId)&&available(group.leaderId))
   for(const member of liveMembers(mission,group,byId))if(available(member.id))expanded.add(member.id);
  return [...expanded];
 }
