@@ -95,6 +95,7 @@ export class MinimapAlerts{
  }
  event(event,now){
   if(event.type!=='under-attack'||!point(event))return;
+  this.bind();this.combatUntil=now+MINIMAP_PING_MS;
   this.pings=this.pings.filter(p=>!p.reminder||p.combatProtected);
   const active=this.active(now),near=active.find(p=>p.kind==='attack'&&(event.target&&p.target===event.target||Math.hypot(p.x-event.x,p.y-event.y)<100));
   const alert=near??this.ping('attack',event,now);

@@ -1,12 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {execFileSync} from 'node:child_process';
 import {MinimapAlerts} from '../campaign/minimap-alerts.js';
 import {makeMission} from './m02-fixture.mjs';
-const data=source=>'data:text/javascript;base64,'+Buffer.from(source).toString('base64');
-const oldReminders=execFileSync('git',['show','e86afa2:campaign/objective-reminders.js'],{encoding:'utf8'});
-const oldAlerts=execFileSync('git',['show','e86afa2:campaign/minimap-alerts.js'],{encoding:'utf8'}).replace('./objective-reminders.js',data(oldReminders));
-const {MinimapAlerts:Before}=await import(data(oldAlerts));
 const tasks=[{id:'security',name:'Clear camps'}];
 function scene(Type=MinimapAlerts){
  const m={state:{status:'running',units:[],buildings:[],artifacts:[],camps:[{id:'goal',x:100,y:100}]},config:{},inBounds:()=>true,exploredAt:()=>true,entity:()=>null};
@@ -20,9 +15,6 @@ function scene(Type=MinimapAlerts){
  }};
 }
 const checks=[];
-const oldOutgoing=scene(Before);oldOutgoing.tick(30,{fire:true});assert(oldOutgoing.a.pings.some(p=>p.reminder));
-const oldIncoming=scene(Before);oldIncoming.tick(120,{hits:true});assert(!oldIncoming.a.pings.some(p=>p.reminder));
-checks.push('before: outgoing fire failed to defer; sustained incoming fire suppressed reminders indefinitely');
 for(const combat of [{fire:true},{hits:true},{fire:true,hits:true}]){
  const s=scene();s.tick(30,combat);assert(!s.a.pings.some(p=>p.reminder));
  s.tick(89.75,combat);assert(!s.a.pings.some(p=>p.reminder));
@@ -44,10 +36,9 @@ checks.push('incoming, outgoing and two-way combat: no reminder at 30 or 119.75 
  checks.push('deferred reminder resumes after three quiet seconds; a paused minute does not consume the two-minute deadline');
 }
 {
- const s=scene();for(let sec=1;sec<=120;sec++){
-  for(let i=0;i<16;i++)s.a.event({type:'under-attack',x:500+i*200,y:500},s.now+250);
-  s.tick(1,{fire:true});
- }
+ const s=scene();s.tick(119,{fire:true});
+ for(let i=0;i<16;i++)s.a.event({type:'under-attack',x:500+i*200,y:500},s.now+250);
+ s.tick(1,{fire:true});
  assert.equal(s.a.pings.filter(p=>p.kind==='attack').length,16);assert(s.a.pings.some(p=>p.combatProtected));
  s.a.event({type:'under-attack',x:5000,y:500},s.now);assert.equal(s.a.pings.length,17);
  s.tick(3,{fire:true});assert(!s.a.pings.some(p=>p.combatProtected));

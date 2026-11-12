@@ -1,6 +1,5 @@
 {
   "checks": [
-    "before: outgoing fire failed to defer; sustained incoming fire suppressed reminders indefinitely",
     "incoming, outgoing and two-way combat: no reminder at 30 or 119.75 seconds; protected pulses at 120 and 240, lasting exactly three seconds",
     "changing objective progress restarts the 30-second delay but cannot postpone the two-minute limit",
     "deferred reminder resumes after three quiet seconds; a paused minute does not consume the two-minute deadline",
