@@ -43,4 +43,21 @@ if(!observe){
  const steps=updateFactoryVisit(m,ready,f,.1);while(!steps.next().done){}
  assert.equal(ready.factoryVisit.phase,'leaving','An incoming reservation does not prevent release');assert.equal(f.garageExit,ready.id);assert.equal(f.garageGate,waiting.id);
 }
+if(!observe){
+ const m=new Mission(config,field);
+ Object.assign(m.state,{units:[],buildings:[],camps:[],bounds:[0,0,127,127],time:30});
+ const f=m.addStructure('factory','rai',{x:0,y:0},{completed:true,progress:1});
+ const car=(x,y,queued,slot)=>{
+  const point=factoryPoint(m,f,x,y),u=m.addUnit('bukhanka','rai',point);
+  u.hp=100;
+  u.factoryVisit={garageVersion:2,factoryId:f.id,phase:'waiting',queued,slot,waitingPoint:point};
+  return u;
+ };
+ const older=car(9,-37,10,0),newer=car(-9,-23,20,1);
+ const distant=car(70,-90,0,2);
+ delete distant.factoryVisit.waitingPoint;
+ m.rebuildNavigation();
+ for(const _ of updateFactoryVisit(m,newer,f,.1)){}
+ assert.equal(f.garageGate,older.id,'A closer arrival cannot overtake an older ready car, or reserve the gate from far away');
+}
 console.log(observe?'Observed current gate arbitration':'PASS: 12 vehicles repair and exit individually at three factory rotations, no entry-batch barrier or overlapping vehicles');

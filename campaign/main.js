@@ -874,6 +874,7 @@ function updateContext(first) {
       if(running||first.demolitionProgress){const progress=document.createElement('progress');progress.className='production-progress';progress.dataset.demolitionProgress='';progress.max=1;progress.setAttribute('aria-label','Снос здания');control.append(progress);}
     }
     if(factory)items.unshift(createFactoryRows(mission,factories,projects,{
+      factoryId:first.id,
       act:action=>{const result=action();report(result);if(result.ok)sound.signal('order');updateUi();},
       focus:id=>{const f=mission.entity(id);if(f){select([id],false,false);world.centre(f,360);}},
     }));
@@ -1065,9 +1066,6 @@ function frame(now) {
   perf?.begin(now);
   const frameWorkStarted=performance.now();
   let stabilityTicks=0,stabilitySimulationMs=0;
-  // Preserve the original input order: advance camera controls in world.update
-  // AFTER simulation. This read reuses the previous render's visibility cache.
-  world.updateTrafficVisibility(mission);
   if (active || openingPlaying) {
     if (!paused) {const measuring=stabilityGraph.enabled,start=measuring?performance.now():0;const completed=mission.advance(dt * speed,{budgetMs:mission.config.simulationCpuBudgetMs,rate:speed});if(measuring){stabilityTicks=Number.isFinite(completed)?completed:0;stabilitySimulationMs=performance.now()-start;}}
     events();

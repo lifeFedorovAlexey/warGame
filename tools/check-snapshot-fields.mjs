@@ -6,7 +6,7 @@ import {trafficBodyKey,trafficReservationKey,trafficConditionKey,trafficWitness}
 const m=fixture(),planner=new TrafficPlanner();
 const units=Array.from({length:24},(_,i)=>m.addUnit(i%3?'bukhanka':'builder',i%5?'rai':'scav',{x:(i%6)*30,y:Math.floor(i/6)*40}));
 const a=units[0],b=units[1],point={x:150,y:160};
-Object.assign(a,{hp:50,maxHp:100,heading:.2,trafficOnScreen:true,commandRevision:3,
+Object.assign(a,{hp:50,maxHp:100,heading:.2,commandRevision:3,
  factoryVisit:{phase:'approach'},trafficPassThrough:{revision:3,pairs:[{id:b.id,startedAt:1,crossing:false}]},
  pendingOrder:{type:'move',goal:point},path:[point],task:{type:'move',...point},routeOrder:{destination:point},
  reverseDebt:1,driveSpeed:2,reversing:false,steering:.1,steeringFault:{since:1},
@@ -36,7 +36,7 @@ const snapshot=()=>{const j=planner.enqueue(m,'passage',[b.id,units[2].id],'fiel
 const reset=()=>{for(const key of Object.keys(a))delete a[key];Object.assign(a,structuredClone(baseline));};
 const cases=[];
 const add=(field,value,label=field)=>cases.push({field,label,mutate:()=>a[field]=structuredClone(value)});
-for(const [field,value] of Object.entries({id:'renamed',x:5,y:7,heading:.8,kind:'bukhanka',owner:'rai',hp:0,maxHp:40,trafficOnScreen:false,
+for(const [field,value] of Object.entries({id:'renamed',x:5,y:7,heading:.8,kind:'bukhanka',owner:'rai',hp:0,maxHp:40,
  commandRevision:4,pendingOrder:null,path:[],task:null,routeOrder:null,reverseDebt:2,driveSpeed:3,reversing:true,steering:.3,
  steeringFault:{since:2},detour:null,traffic:null,trafficHold:null,passage:null,passingLane:null,yieldReturn:null,jointTraffic:null,
  cycleContinuation:null,tool:'working',foldTime:2,builderWorking:true,combatPolicy:{retreat:'heavy'},retreatSuppressed:true,

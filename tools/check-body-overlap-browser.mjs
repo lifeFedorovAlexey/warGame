@@ -10,17 +10,17 @@ try{
  await page.addInitScript(()=>{for(const k of ['fieldSound','fieldRadio','fieldStoryVoice'])localStorage.setItem('warGame.'+k,'off');});
  await page.goto((process.env.WARGAME_URL??'http://127.0.0.1:8766/review/body-overlap')+'/campaign/');
  await page.waitForFunction(()=>window.campaign?.ready,null,{timeout:90000});
- await page.locator('#begin').click();const skip=page.locator('[data-dream=skip]');if(await skip.isVisible())await skip.click();
- await page.waitForFunction(()=>campaign.mission.state.openingScene?.signId||campaign.state.active,null,{timeout:60000});
- await page.evaluate(()=>{const c=campaign,m=c.mission;c.radio.setEnabled(false);const s=m.entity(m.state.openingScene?.signId);if(s){s.completed=true;s.progress=1;}});
+ await page.locator('#begin').click();await page.waitForFunction(()=>document.getElementById('welcome').hidden);
+ const skip=page.locator('[data-dream=skip]');if(await skip.isVisible())await skip.click();
+ await page.evaluate(()=>{const c=campaign,m=c.mission;c.radio.setEnabled(false);const s=m.entity(m.state.openingScene.signId);s.completed=true;s.progress=1;});
  await page.waitForFunction(()=>campaign.state.active,null,{timeout:25000});await page.locator('#pause').click();
  const before=await page.evaluate(async()=>{
   const {bodyEnvelope,bodyContact}=await import('./vehicle-overlap.js'),c=campaign,m=c.mission,w=c.world;
   c.renderSuspended=true;m.updateMission=()=>{};delete m.overlapStatistics;
   Object.assign(m.state,{units:[],buildings:[],camps:[],raidReserve:[],artifacts:[],pendingCinematics:[],bounds:[0,0,127,127],time:30,status:'running'});
   m.state.storyConstruction={enabled:false};m.explored.fill(255);m.visible.fill(255);m.visionSources=[{x:63.5,y:63.5,radius:200}];m.fogRevision++;
-  const a=m.addUnit('bukhanka','rai',{x:-1115.482,y:294.352},{heading:2.324}),b=m.addUnit('bukhanka','rai',{x:-1103.367,y:289.709},{heading:1.752});
-  for(const u of [a,b]){u.trafficOnScreen=true;u.previousX=u.x;u.previousY=u.y;u.previousHeading=u.heading;}
+  const a=m.addUnit('bukhanka','rai',{x:-1115.482,y:294.352},{heading:2.324}),b=m.addUnit('bukhanka','rai',{x:-1106.2,y:290.7},{heading:1.752});
+  for(const u of [a,b]){u.previousX=u.x;u.previousY=u.y;u.previousHeading=u.heading;}
   m.rebuildNavigation();c.select([],false,false);c.radio.setEnabled(false);document.querySelector('#toast').hidden=true;
   w.fixedRenderScale=1;w.renderer.setPixelRatio(1);w.controls.enableDamping=false;
   w.controls.target.set(-1109,292,w.field.heightAt(-1109,292));w.camera.position.copy(w.controls.target).add({x:0,y:-85,z:110});w.controls.update();w.update(m,new Set(),0);
@@ -34,6 +34,20 @@ try{
  const after=await page.evaluate(async()=>{const {bodyEnvelope,bodyContact}=await import('./vehicle-overlap.js'),m=campaign.mission,[a,b]=m.state.units;return {gap:bodyContact(bodyEnvelope(a,m.config.worldScale,m.field),bodyEnvelope(b,m.config.worldScale,m.field)).gap,hp:m.state.units.map(u=>u.hp),stats:m.overlapStatistics};});
  assert(after.gap>=0,JSON.stringify(after));assert.deepEqual(after.hp,before.hp);assert(after.stats.maxCorrection<=campaignScale()*.12+1e-6);
  await page.screenshot({path:dir+'/after.png'});await page.setViewportSize({width:390,height:844});await page.waitForTimeout(100);await page.evaluate(()=>campaign.world.update(campaign.mission,new Set(),0));await page.screenshot({path:dir+'/narrow.png'});
- assert.deepEqual(errors,[]);console.log(JSON.stringify({passed:true,before,after}));
+ const offscreen=await page.evaluate(async()=>{
+  const {bodyEnvelope,bodyContact}=await import('./vehicle-overlap.js');
+  const {mission:m,world:w}=campaign,[a,b]=m.state.units;
+  Object.assign(a,{x:-1115.482,y:294.352,heading:2.324});
+  Object.assign(b,{x:-1106.2,y:290.7,heading:1.752});
+  w.camera.setViewOffset(innerWidth,innerHeight,innerWidth*3,0,innerWidth,innerHeight);
+  w.update(m,new Set(),0);
+  const rendered=w.vehicles.visible.some(u=>u.id===a.id||u.id===b.id);
+  for(let i=0;i<20;i++)m.advance(.1);
+  const gap=bodyContact(bodyEnvelope(a,m.config.worldScale,w.field),bodyEnvelope(b,m.config.worldScale,w.field)).gap;
+  w.camera.clearViewOffset();
+  return {rendered,gap};
+ });
+ assert(!offscreen.rendered&&offscreen.gap>=0,JSON.stringify(offscreen));
+ assert.deepEqual(errors,[]);console.log(JSON.stringify({passed:true,before,after,offscreen}));
 }finally{await browser.close();}
 function campaignScale(){return JSON.parse(fs.readFileSync('assets/campaign/alpha/mission01/gameplay.json','utf8')).worldScale;}

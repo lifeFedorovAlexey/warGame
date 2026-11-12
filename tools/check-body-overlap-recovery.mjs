@@ -8,7 +8,7 @@ const config=JSON.parse(fs.readFileSync('assets/campaign/alpha/mission01/gamepla
 const field={extent:4096,half:2048,cellMetres:32,heightAt:()=>0,gradientAt:()=>({x:0,y:0}),gridToWorld:([x,y])=>({x:x*32-2048,y:2048-y*32}),worldToGrid:(x,y)=>[(x+2048)/32,(2048-y)/32]};
 function fixture(poses){
  const m=new Mission(config,field);Object.assign(m.state,{units:[],buildings:[],camps:[],artifacts:[],bounds:[0,0,127,127]});m.updateMission=()=>{};
- const units=poses.map(p=>m.addUnit('bukhanka','rai',p,{heading:p.heading??0}));for(const u of units)u.trafficOnScreen=true;
+ const units=poses.map(p=>m.addUnit('bukhanka','rai',p,{heading:p.heading??0}));
  m.rebuildNavigation();m.unitIndex.rebuild(m.state.units);return {m,units};
 }
 const gap=(m,a,b)=>bodyContact(bodyEnvelope(a,config.worldScale,m.field),bodyEnvelope(b,config.worldScale,m.field)).gap;
@@ -44,8 +44,11 @@ for(const poses of [
 {
  const {m,units}=fixture([{x:0,y:0},{x:2,y:1}]);
  assert(vehicleClearance(...units,config.worldScale)<0,'Regression must exercise an actual oval overlap');
- const snapshot=units.map(u=>[u.x,u.y]);for(const u of units)u.trafficOnScreen=false;step(m);assert.deepEqual(units.map(u=>[u.x,u.y]),snapshot,'Keep the explicit off-screen pass-through rule');
- units[0].trafficOnScreen=true;settle(m,units);
+ for(const u of units)u.trafficOnScreen=false;
+ assert(trafficCollisionRequired(...units),'Legacy camera flags never exempt two allies from collision');
+ settle(m,units);
+ const saved=m.save();m.load(saved);
+ assert(m.state.units.every(u=>!Object.hasOwn(u,'trafficOnScreen')),'Strip the legacy camera flag on save load');
 }
 {
  const {m,units}=fixture([{x:0,y:0},{x:2,y:1},{x:40,y:0}]);const idle=units[2];settle(m,units);assert.equal(idle.x,40);assert.equal(idle.y,0,'Do not move an unrelated car');
@@ -94,7 +97,7 @@ for(const poses of [
    if(gap(m,driver,blocker)<0)crossed=true;
   }
  }
- assert(firstPassage&&crossed,'Two on-screen allies physically pass through in a jam');
+ assert(firstPassage&&crossed,'Two allies physically pass through with a jam permit');
  assert(Math.hypot(driver.x-goal.x,driver.y-goal.y)<2,'The original route completes');
  assert(trafficCollisionRequired(driver,blocker)&&!driver.trafficPassThrough,'Collision returns after the passage');
  assert.deepEqual([driver.hp,blocker.hp],hp,'Passage does not cause collision damage');

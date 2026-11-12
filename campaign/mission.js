@@ -212,7 +212,7 @@ export class Mission{
  entity(id){return this.state.units.find(item=>item.id===id&&item.hp>0)??this.state.buildings.find(item=>item.id===id&&item.hp>0);}
  addUnit(kind,owner,point,extra={}){const spec=this.config.units[kind],unit={id:this.id('u'),kind,owner,x:point.x,y:point.y,previousX:point.x,previousY:point.y,hp:spec.hp,maxHp:spec.hp,heading:0,path:[],task:null,cooldown:0,tool:0,foldTime:0,...extra};
   if(owner==='rai'&&canAutoRetreat(spec))unit.combatPolicy={...armyCombatPolicy(this)};
-  if((this.state.m02||this.state.m03))unit.trafficOnScreen=true;this.state.units.push(unit);registerPersonnel(this,unit);if(this.unitIndexActive)this.unitIndex.insert(unit,this.state.units.length-1);return unit;}
+  this.state.units.push(unit);registerPersonnel(this,unit);if(this.unitIndexActive)this.unitIndex.insert(unit,this.state.units.length-1);return unit;}
  addStructure(kind,owner,point,extra={}){const spec=this.config.buildings[kind]??{},scale=this.config.worldScale,foot=spec.footprintMetres??[14,12],item={id:this.id('b'),kind,owner,x:point.x,y:point.y,rotation:0,hp:spec.hp??750,maxHp:spec.hp??750,halfWidth:foot[0]*scale/2,halfDepth:foot[1]*scale/2,progress:owner==='rai'?0:1,completed:owner!=='rai',queue:[],research:null,cooldown:0,...extra};item.maxHp=item.hp;restoreConstructionHealth(item);this.state.buildings.push(item);return item;}
  rebuildNavigation(){
   this.finishPendingStep();
@@ -2660,7 +2660,7 @@ export class Mission{
    });
   }
  }
- load(json){const data=typeof json==='string'?JSON.parse(json):json;if(data.version!==1||data.mission!==this.config.id||data.state?.m02&&![1,2].includes(data.state.m02.version)||!Array.isArray(data.state?.units)||data.explored?.length!==16384)throw new Error('Несовместимое сохранение');this.state=data.state;for(const unit of this.state.units){delete unit.trafficOnScreen;if((this.state.m02||this.state.m03))unit.trafficOnScreen=true;}
+ load(json){const data=typeof json==='string'?JSON.parse(json):json;if(data.version!==1||data.mission!==this.config.id||data.state?.m02&&![1,2].includes(data.state.m02.version)||!Array.isArray(data.state?.units)||data.explored?.length!==16384)throw new Error('Несовместимое сохранение');this.state=data.state;for(const unit of this.state.units)delete unit.trafficOnScreen;
   if(this.field.mapId!=='m03')restoreM01Layout(this);installM02Config(this.config);installM03Config(this.config);restorePersonnel(this);
   this.oilSpent=0;this.oilWorkTime=null;
   this.factoryBalanceAt=undefined;

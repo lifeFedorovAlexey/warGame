@@ -29,7 +29,7 @@ check('m01 → m02 preserves the actual base, army, groups, orders, funding and 
  s.status='victory';s.camps.forEach(c=>c.cleared=true);s.flags.raidWon=true;
  m.explored[700]=255;const before=JSON.stringify({buildings:s.buildings.filter(b=>b.owner==='rai'),unit,groups:s.commandGroups,designs:s.designs,energy:s.energy});
  const count=s.units.filter(u=>u.owner==='rai').length;
- assert(m.enterM02().ok);delete unit.trafficOnScreen;
+ assert(m.enterM02().ok);
  assert.equal(JSON.stringify({buildings:s.buildings.filter(b=>b.owner==='rai'),unit,groups:s.commandGroups,designs:s.designs,energy:s.energy}),before);
  assert.equal(s.units.filter(u=>u.owner==='rai').length,count);assert.equal(builder.task,null);assert.equal(m.explored[700],255);assert.equal(s.campaign.results.m01.status,'victory');
  assert.equal(m.entity(b.id),b);assert.equal(m.entity(lab.id),lab);

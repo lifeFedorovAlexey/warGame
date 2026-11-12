@@ -36,8 +36,12 @@ try{
  for(const [name,width,height] of [['wide',1440,900],['narrow',390,844]]){
   await page.setViewportSize({width,height});await page.waitForTimeout(100);
   await page.evaluate(()=>{campaign.advance(0);campaign.world.update(campaign.mission,new Set(),0);});
-  const rows=page.locator('[data-factory-row]');assert.equal(await rows.count(),3);
-  const badges=await rows.locator('[data-factory-priority] .production-count').allTextContents();assert.deepEqual(badges.map(Number),assignment);
+  const row=page.locator('[data-factory-row]');assert.equal(await row.count(),1);
+  for(const [index,id] of (await page.evaluate(()=>campaign.repairFactories)).entries()){
+   await page.waitForFunction(id=>document.querySelector('[data-factory-row]')?.dataset.factoryRow===id,id);
+   assert.equal(Number(await row.locator('[data-factory-priority] .production-count').textContent()),assignment[index]);
+   await row.locator('[data-icon=factory]').click();
+  }
   await page.screenshot({path:dir+'/'+name+'.png'});
  }
  await page.setViewportSize({width:1440,height:900});

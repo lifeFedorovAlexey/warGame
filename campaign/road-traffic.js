@@ -16,6 +16,7 @@ export class RoadTraffic {
     this.field = field;
     this.buckets = new Map();
     this.routes = new Map();
+    this.waypoints = new WeakMap();
     this.junctionLinks = new Map();
     this.intersections = (field.roadNetwork?.nodes ?? []).filter(node => node.degree > 2 || node.base);
     for (const [pathIndex,path] of [...(field.roadNetwork?.paths ?? []),...localRoads].entries()) {
@@ -80,6 +81,14 @@ export class RoadTraffic {
       }
     }
     return nearest;
+  }
+
+  nearestWaypoint(point, radius) {
+    const {x,y}=point, cached=this.waypoints.get(point);
+    if (cached && cached.x===x && cached.y===y && cached.radius===radius) return cached.road;
+    const road=this.nearest(point,radius);
+    this.waypoints.set(point,{x,y,radius,road});
+    return road;
   }
 
   coverage(x, y) {

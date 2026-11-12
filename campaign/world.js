@@ -1,5 +1,4 @@
 import {perf} from './performance.js';
-import {createTrafficVisibility} from './traffic-visibility.js';
 import * as T from 'three';
 import {OrbitControls} from '../demo/vendor/OrbitControls.js';
 import {campaignCameraLimits,keepCameraAboveTerrain} from './camera-limits.js';
@@ -327,14 +326,12 @@ export async function createCampaignWorld(host,config,sound,loading){
   position.needsUpdate=true;
  }
  function commandMarker(point,hostile=false){marker.position.set(point.x,point.y,field.heightAt(point.x,point.y)+.4);marker.material.color.set(hostile?'#f4a081':'#cfb473');marker.visible=true;markerUntil=performance.now()+1000;}
- const trafficVisibility=createTrafficVisibility(T,camera,field,config),updateTrafficVisibility=trafficVisibility.update;
  function prepareFrame(mission,dt){
   const distance=camera.position.distanceTo(controls.target),pan=distance*dt*.7;let dx=(keys.has('KeyD')?1:0)-(keys.has('KeyA')?1:0),dy=(keys.has('KeyW')?1:0)-(keys.has('KeyS')?1:0);if(controls.enabled&&(dx||dy)){const right=panRight.setFromMatrixColumn(camera.matrixWorld,0);right.z=0;right.normalize();const forward=panForward.set(-right.y,right.x,0);const offset=right.multiplyScalar(dx*pan).addScaledVector(forward,dy*pan);camera.position.add(offset);controls.target.add(offset);}
   const bounds=mission.state.bounds,nw=field.gridToWorld(bounds.slice(0,2)),se=field.gridToWorld(bounds.slice(2));
   const tx=controls.enabled?T.MathUtils.clamp(controls.target.x,nw.x,se.x):controls.target.x,ty=controls.enabled?T.MathUtils.clamp(controls.target.y,se.y,nw.y):controls.target.y;
   camera.position.x+=tx-controls.target.x;camera.position.y+=ty-controls.target.y;
   controls.target.x=tx;controls.target.y=ty;controls.update();keepCameraAboveTerrain(camera,controls,field,minimumCameraHeight);
-  updateTrafficVisibility(mission);
  }
  function update(mission,selected,dt,live=false,showHealth=true){
   mission02Sites.update(mission);
@@ -540,5 +537,5 @@ export async function createCampaignWorld(host,config,sound,loading){
   renderer.render(scene,camera);
   lastWorldTime=time;
  }
- return{renderer,scene,camera,controls,terrain,field,vehicles,damage,healthBars,orderRoutes,setShadowQuality,prepareRendering,shaderPreparation,ground,pickEntity,screen,centre,focusStorySignal,setGhost,commandMarker,drawMinimapFog:fog.drawMinimap,storySignals,update,prepareFrame,updateTrafficVisibility,keys,buildingObjects:buildings,get minimumCameraHeight(){return minimumCameraHeight;},set minimumCameraHeight(value){minimumCameraHeight=value;},set fixedRenderScale(value){fixedRenderScale=value;},get fixedRenderScale(){return fixedRenderScale;},get statistics(){return{drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,vehicleDrawCalls:vehicles.drawCalls,vehicleLod:vehicles.lod,dustParticles:particles.length,dustLimit:256,...combat.statistics,...groundEffects.statistics,headlightBeams:headlightCount,projectors:construction.active,frameMs:frameAverage*1000,renderScale:renderer.getPixelRatio(),terrainMode,shadowUpdates,shadowQuality,shadowHz,fog:fog.stats,damage:damage.statistics};}};
+ return{renderer,scene,camera,controls,terrain,field,vehicles,damage,healthBars,orderRoutes,setShadowQuality,prepareRendering,shaderPreparation,ground,pickEntity,screen,centre,focusStorySignal,setGhost,commandMarker,drawMinimapFog:fog.drawMinimap,storySignals,update,prepareFrame,keys,buildingObjects:buildings,get minimumCameraHeight(){return minimumCameraHeight;},set minimumCameraHeight(value){minimumCameraHeight=value;},set fixedRenderScale(value){fixedRenderScale=value;},get fixedRenderScale(){return fixedRenderScale;},get statistics(){return{drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,vehicleDrawCalls:vehicles.drawCalls,vehicleLod:vehicles.lod,dustParticles:particles.length,dustLimit:256,...combat.statistics,...groundEffects.statistics,headlightBeams:headlightCount,projectors:construction.active,frameMs:frameAverage*1000,renderScale:renderer.getPixelRatio(),terrainMode,shadowUpdates,shadowQuality,shadowHz,fog:fog.stats,damage:damage.statistics};}};
 }
