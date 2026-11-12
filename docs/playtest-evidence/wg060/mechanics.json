@@ -1,0 +1,106 @@
+{
+  "checks": [
+    {
+      "case": "healthy physical visit",
+      "phases": [
+        {
+          "time": 0.1,
+          "phase": "gate",
+          "kind": "bukhanka"
+        },
+        {
+          "time": 1.6,
+          "phase": "entering",
+          "kind": "bukhanka"
+        },
+        {
+          "time": 9.2,
+          "phase": "inside",
+          "kind": "bukhanka"
+        },
+        {
+          "time": 9.3,
+          "phase": "leaving",
+          "kind": "twin-machinegun"
+        },
+        {
+          "time": 16.3,
+          "phase": "departure",
+          "kind": "twin-machinegun"
+        },
+        {
+          "time": 19.3,
+          "phase": "outside",
+          "kind": "twin-machinegun"
+        }
+      ],
+      "oilSpent": 15
+    },
+    {
+      "case": "repair then refit",
+      "phases": [
+        {
+          "time": 0.1,
+          "phase": "gate",
+          "kind": "bukhanka"
+        },
+        {
+          "time": 1.6,
+          "phase": "entering",
+          "kind": "bukhanka"
+        },
+        {
+          "time": 9.1,
+          "phase": "inside",
+          "kind": "bukhanka"
+        },
+        {
+          "time": 12.1,
+          "phase": "leaving",
+          "kind": "twin-machinegun"
+        },
+        {
+          "time": 19.1,
+          "phase": "departure",
+          "kind": "twin-machinegun"
+        },
+        {
+          "time": 22.1,
+          "phase": "outside",
+          "kind": "twin-machinegun"
+        }
+      ],
+      "oilSpent": 19.499999999999318
+    },
+    {
+      "case": "mixed selection does not expand to unselected formation members",
+      "assigned": [
+        "u180"
+      ]
+    },
+    {
+      "case": "stop cancels the refit trip without payment"
+    },
+    {
+      "case": "save/load en route preserves the request and charges once"
+    },
+    {
+      "case": "insufficient oil waits inside, resumes when funded, then physically exits"
+    },
+    {
+      "case": "request during an existing repair keeps the same garage visit"
+    },
+    {
+      "case": "research, working factory and eligible selection required"
+    },
+    {
+      "case": "two selected cars share the factory entrance and both exit upgraded"
+    },
+    {
+      "case": "new movement order cancels the trip without a later surprise upgrade"
+    },
+    {
+      "case": "existing factory auto-modernization still works"
+    }
+  ]
+}

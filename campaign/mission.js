@@ -50,6 +50,7 @@ import {placeExtraCampGuards,updateScavReinforcements} from './scav-reinforcemen
 import {alertScavs,updateScavCombat} from './scav-ai.js';
 import {configureCombat,configureArmyCombat,armyCombatPolicy,normalizeCombatPolicy,rememberHostileHit,cancelCombatRetreat,automaticCombatTarget,forceCombatRetreat} from './combat-policy.js';
 import {updateFactoryRepairs} from './factory-repair.js';
+import {modernizationSelection} from './factory-modernization.js';
 import {updateFactoryVisit,insideFactory,factoryProductionPaused,tryEnterFactory} from './factory-garage.js';
 import {inFactoryInterior,shouldAutoRetreat,canAutoRetreat} from './combat-retreat-state.js';
 import {blockingCombatTarget,interruptedCombatTargets,movementCombatTarget} from './combat-orders.js';
@@ -562,6 +563,22 @@ export class Mission{
  }
  configureGroup(ids,options){this.finishPendingStep();return configureCommandGroup(this,ids,options);}
  retreat(ids){ids=expandCommandIds(this,ids);const result=forceCombatRetreat(this,ids);if(result.ok){clearQueuedOrders(this,ids);this.trafficCoordinator.intentChanged();}return result;}
+ modernize(ids){
+  this.finishPendingStep();const {units,reason}=modernizationSelection(this,ids);
+  if(reason)return this.fail(reason);
+  const assignedIds=units.map(u=>u.id),outside=units.filter(u=>!inFactoryInterior(u)).map(u=>u.id);
+  // Only the selected eligible cars leave the formation. A transfer already
+  // inside the doorway retains its physical visit and queue position.
+  if(outside.length)forceCombatRetreat(this,outside);
+  this.commandPlanner?.cancel(assignedIds);clearQueuedOrders(this,assignedIds);
+  for(const u of units){
+   u.modernizationRequested=true;
+   u.combatRetreat??={status:'planning',started:this.state.time};
+   u.combatRetreat.forced=true;
+  }
+  this.trafficCoordinator.intentChanged();
+  return {ok:true,assigned:units.length,assignedIds};
+ }
  submitOrder(ids,action,target,{append=false,expandGroup=true,preserveQueue=false}={}){
   if(action==='retreat')return this.retreat(ids);
   if(expandGroup)ids=selectedCommandIds(this,ids,action,target);

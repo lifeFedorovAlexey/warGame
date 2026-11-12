@@ -91,6 +91,7 @@ export function rememberHostileHit(mission, unit, source) {
   invalidate();
 }
 export function cancelCombatRetreat(unit, suppress=true) {
+  delete unit.modernizationRequested;
   delete unit.combatRetreat;
   delete unit.retreatPush;
   if(!inFactoryInterior(unit))delete unit.factoryVisit;
@@ -147,6 +148,7 @@ export function forceCombatRetreat(mission,ids){
  if(!units.length)return mission.fail('Не выбрана техника');
  mission.commandPlanner?.cancel(units.map(unit=>unit.id));
  for(const unit of units){
+  delete unit.modernizationRequested;
   const threat=retreatThreat(mission,unit,mission.unitSpec(unit));
   clearMotion(unit);
   unit.builderWorking=false;unit.builderContact=null;

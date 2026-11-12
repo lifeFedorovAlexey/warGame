@@ -26,6 +26,7 @@
 #combat-menu :is([aria-checked=false], [aria-pressed=false]) .game-icon { opacity: .42; }
 #combat-menu :is([aria-checked=true], [aria-pressed=true]) .game-icon { opacity: 1; filter: brightness(1.25); }
 #combat-menu button:hover .game-icon, #combat-menu button:focus-visible .game-icon { opacity: 1; }
+#combat-menu [aria-disabled=true] .game-icon { opacity: .42; }
 #combat-modes[aria-expanded=true]::before {
   content: ''; position: absolute; top: -4px; left: calc(50% - 4px); width: 8px; height: 4px;
   background: #f39a29; clip-path: polygon(50% 0,100% 100%,0 100%);

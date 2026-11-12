@@ -8,7 +8,7 @@ const queueOrder=(a,b)=>queueTime(a)-queueTime(b)||a.id.localeCompare(b.id);
 const committed=u=>['gate','entering','inside','leaving','departure'].includes(u.factoryVisit?.phase);
 
 export function needsFactoryVisit(unit,factory){
- return unit.hp<unit.maxHp||!!factory.autoModernize&&unit.kind==='bukhanka';
+ return unit.hp<unit.maxHp||!!(factory.autoModernize||unit.modernizationRequested)&&unit.kind==='bukhanka';
 }
 
 export function factoryRepairQueue(m,f){
@@ -85,7 +85,7 @@ export function chooseRepairFactory(m,u){
 
 export function repairChoiceDue(m,u){
  const retreat=u.combatRetreat;
- if(!retreat||retreat.service==='complete'||u.hp>=u.maxHp||committed(u)
+ if(!retreat||retreat.service==='complete'||u.hp>=u.maxHp&&!u.modernizationRequested||committed(u)
   ||u.pendingOrder||u.detour||u.yieldReturn||m.state.time<(retreat.factoryChoiceAt??-Infinity))return false;
  retreat.factoryChoiceAt=m.state.time+2;
  return true;
