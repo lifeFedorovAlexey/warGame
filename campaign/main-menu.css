@@ -3,6 +3,7 @@
   overflow:hidden;background:#3a231b;border:0;border-radius:0;box-shadow:none;
 }
 .menu-art { position:absolute;left:0;top:0;width:1672px;height:941px;transform-origin:0 0; }
+#welcome .menu-build { position:absolute;right:max(16px,env(safe-area-inset-right));bottom:max(12px,env(safe-area-inset-bottom));max-width:calc(100% - 32px);margin:0;padding:0;color:#e0c9a3;font-size:12px;line-height:1.4;text-align:right;text-shadow:0 1px 3px #130b07;user-select:text; }
 #welcome.is-loading { background:#211713; }
 .loading-scenery { position:absolute;inset:0;display:block;pointer-events:none;user-select:none; }
 .loading-scenery img { width:100%;height:100%;object-fit:cover;object-position:center; }

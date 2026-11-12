@@ -4,6 +4,9 @@ from pathlib import Path
 import os
 import re
 import socket
+import json
+import subprocess
+from build_info import build_info
 from dialogue_editor import handle as handle_dialogues
 from radio_library import handle as handle_radio
 
@@ -11,6 +14,18 @@ os.chdir(Path(__file__).resolve().parents[1])
 
 class ReviewHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
+        if re.sub(r'^/review/[^/]+/', '/', self.path.split('?', 1)[0]) == '/api/build':
+            try:
+                payload = json.dumps(build_info(self.translate_path('/')), ensure_ascii=False).encode('utf-8')
+            except (OSError, ValueError, KeyError, subprocess.SubprocessError):
+                self.send_error(503, 'Build information unavailable')
+                return
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.send_header('Content-Length', str(len(payload)))
+            self.end_headers()
+            self.wfile.write(payload)
+            return
         if not handle_radio(self) and not handle_dialogues(self):
             super().do_GET()
 

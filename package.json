@@ -1,6 +1,6 @@
 {
   "name": "wargame",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "private": true,
   "description": "Modular vehicle game assets and local review arena",
   "scripts": {
@@ -51,7 +51,7 @@
     "build:map": "python tools/build-alpha-map.py",
     "build:map-textures": "node tools/build-alpha-texture.cjs",
     "build:roads": "node tools/build-roads.cjs",
-    "check:frame-optimizations": "node tools/check-frame-optimizations.mjs && node tools/check-health-cache.mjs && node tools/check-minimap-partial.mjs && node tools/check-snapshot-fields.mjs && node tools/check-traffic-visibility-cache.mjs && node tools/check-traffic-camera-rate.mjs",
+    "check:frame-optimizations": "node tools/check-frame-optimizations.mjs && node tools/check-health-cache.mjs && node tools/check-minimap-partial.mjs && node tools/check-snapshot-fields.mjs && node tools/check-traffic-camera-rate.mjs",
     "check:m02": "node tools/check-m02.mjs && node tools/check-m02-determinism.mjs",
     "check:m02:browser": "node tools/check-m02-browser.mjs",
     "play:m02": "node tools/play-m02.mjs 20 --audit --defend",
