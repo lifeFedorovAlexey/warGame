@@ -1,0 +1,298 @@
+{
+  "status": "awaiting-owner-listening-before-merge",
+  "approval": "Owner approved M01 wording and M03 inspection helicopter story fact in delegated audit task; show finished audio and M03 wording before merge.",
+  "reservedCredits": 481,
+  "generatedRecordings": 7,
+  "originalAudioPreserved": true,
+  "openingHandoffUnchanged": true,
+  "mission03LoadingAndDepartureUnchanged": true,
+  "missions": {
+    "01": {
+      "sourceRevision": 222,
+      "savedRevision": 223,
+      "changedCues": [
+        "m01-s03-l001",
+        "m01-v3-builder-crooked-plinth",
+        "m01-v3-general-coffee",
+        "m01-s06-l008",
+        "m01-r01a-power-building",
+        "m01-r01b-power-ready"
+      ],
+      "clips": {
+        "m01-s03-l001": {
+          "file": "recordings/elevenlabs/m01-s03-l001-5587e90fa1b7.mp3",
+          "speaker": "warrant",
+          "text": "Неужели проверка скоро?",
+          "spokenText": "[curious, conversational] Неужели проверка скоро?",
+          "voiceId": "6A9D8WSMm4rFsg2DWFeE",
+          "voiceName": "Egor Gadzhiyev - Clear and Commanding",
+          "modelId": "eleven_v4",
+          "origin": "elevenlabs-synthesis",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "sha256": "5587e90fa1b7bca784fc57eb13aee30cc2130eac45c43a4e8c79e08dbc6e4dbe",
+          "bytes": 30554,
+          "generatedAt": "2026-11-12T00:08:46.432Z",
+          "duration": 1.84,
+          "leadingSilence": 0.04,
+          "trailingSilence": 0.3600000000000001,
+          "replaces": "recordings/warrant/m01-s03-l001.mp3"
+        },
+        "m01-v3-builder-crooked-plinth": {
+          "file": "recordings/elevenlabs/m01-v3-builder-crooked-plinth-42f96579a802.mp3",
+          "speaker": "builder",
+          "text": "Да. Через пару дней прилетят.",
+          "spokenText": "[matter-of-fact, brisk delivery] Да. Через пару дней прилетят.",
+          "voiceId": "txnCCHHGKmYIwrn7HfHQ",
+          "voiceName": "Alexandr Vlasov - Vibrant and Energetic",
+          "modelId": "eleven_v4",
+          "origin": "elevenlabs-synthesis",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "sha256": "42f96579a8021308b9b56d6653f5247f4b26da288da3f39d1801961839d53bcd",
+          "bytes": 36823,
+          "generatedAt": "2026-11-12T00:08:46.892Z",
+          "duration": 2.24,
+          "leadingSilence": 0.01,
+          "trailingSilence": 0.3100000000000003,
+          "replaces": "recordings/reviewed/m01-v3-builder-crooked-plinth-8e0311c0b77a.mp3"
+        },
+        "m01-v3-general-coffee": {
+          "file": "recordings/elevenlabs/m01-v3-general-coffee-db283f1c2750.mp3",
+          "speaker": "general",
+          "text": "К моему приезду кофе будет?",
+          "spokenText": "[casually expectant] К моему приезду кофе будет?",
+          "voiceId": "rQOBu7YxCDxGiFdTm28w",
+          "voiceName": "Artem Lebedev - Captivating and Engaging",
+          "modelId": "eleven_v4",
+          "origin": "elevenlabs-synthesis",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "sha256": "db283f1c2750405f84b963bca1ecfe6482213c74d3ee14ed33830fc3a1cfdc87",
+          "bytes": 35569,
+          "generatedAt": "2026-11-12T00:08:47.788Z",
+          "duration": 2.16,
+          "leadingSilence": 0.06,
+          "trailingSilence": 0.3400000000000001,
+          "replaces": "recordings/reviewed/m01-v3-general-coffee-e0340deb6dc0.mp3"
+        },
+        "m01-s06-l008": {
+          "file": "recordings/elevenlabs/m01-s06-l008-4aa8351e1c75.mp3",
+          "speaker": "commander",
+          "text": "У нас электричества ещё нет.",
+          "spokenText": "[dry, matter-of-fact delivery] У нас электричества ещё нет.",
+          "voiceId": "5mJA7umOnM5ycymymd6P",
+          "voiceName": "comandorNig",
+          "modelId": "eleven_v4",
+          "origin": "elevenlabs-synthesis",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "sha256": "4aa8351e1c7559d7d66579e6de3665088c0477710e69240ca69f87ce383c99b7",
+          "bytes": 40585,
+          "generatedAt": "2026-11-12T00:08:48.410Z",
+          "duration": 2.48,
+          "leadingSilence": 0.21,
+          "trailingSilence": 0.3599999999999999,
+          "replaces": "recordings/commander/m01-s07-l002.mp3"
+        },
+        "m01-r01a-power-building": {
+          "file": "recordings/elevenlabs/m01-r01a-power-building-6b2ece13e5e8.mp3",
+          "speaker": "commander",
+          "text": "Электростанция уже строится.",
+          "spokenText": "[matter-of-fact, brisk delivery] Электростанция уже строится.",
+          "voiceId": "5mJA7umOnM5ycymymd6P",
+          "voiceName": "comandorNig",
+          "modelId": "eleven_v4",
+          "origin": "elevenlabs-synthesis",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "sha256": "6b2ece13e5e8ff398754ef3b359db1fad6cc4ea1caf547204282bc544d40e11c",
+          "bytes": 34315,
+          "generatedAt": "2026-11-12T00:08:49.101Z",
+          "duration": 2.08,
+          "leadingSilence": 0.2,
+          "trailingSilence": 0.16999999999999993
+        },
+        "m01-r01b-power-ready": {
+          "file": "recordings/elevenlabs/m01-r01b-power-ready-e03f239d1273.mp3",
+          "speaker": "commander",
+          "text": "Электростанция уже работает.",
+          "spokenText": "[matter-of-fact, brisk delivery] Электростанция уже работает.",
+          "voiceId": "5mJA7umOnM5ycymymd6P",
+          "voiceName": "comandorNig",
+          "modelId": "eleven_v4",
+          "origin": "elevenlabs-synthesis",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "sha256": "e03f239d1273cf8d3ac0df04b4c9c6f709cde0de38198798ea21facfc33fedf4",
+          "bytes": 35569,
+          "generatedAt": "2026-11-12T00:08:49.573Z",
+          "duration": 2.16,
+          "leadingSilence": 0.06,
+          "trailingSilence": 0.26
+        }
+      },
+      "scenes": [
+        {
+          "id": "p04",
+          "title": "Вывеска",
+          "lines": [
+            {
+              "id": "m01-s03-l001",
+              "speaker": "warrant",
+              "text": "Неужели проверка скоро?",
+              "audio": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-s03-l001-5587e90fa1b7.mp3"
+            },
+            {
+              "id": "m01-v3-builder-crooked-plinth",
+              "speaker": "builder",
+              "text": "Да. Через пару дней прилетят.",
+              "audio": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-v3-builder-crooked-plinth-42f96579a802.mp3"
+            }
+          ]
+        },
+        {
+          "id": "r01",
+          "title": "Кофе для генерала",
+          "lines": [
+            {
+              "id": "m01-v3-general-coffee",
+              "speaker": "general",
+              "text": "К моему приезду кофе будет?",
+              "audio": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-v3-general-coffee-db283f1c2750.mp3"
+            },
+            {
+              "id": "m01-s06-l008",
+              "speaker": "commander",
+              "text": "У нас электричества ещё нет.",
+              "audio": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-s06-l008-4aa8351e1c75.mp3"
+            },
+            {
+              "id": "m01-v3-general-build-power",
+              "speaker": "general",
+              "text": "Так электростанцию стройте! Вам на всё приказ нужен?",
+              "audio": "docs/campaign/dialogue-drafts/alpha-m01/media/024fc11c65591a3eb2079e32571a66d1d7a51f4643d160d3f77069f754ac76c9.mp3"
+            }
+          ]
+        },
+        {
+          "id": "r01a",
+          "title": "Кофе — электростанция уже строится",
+          "lines": [
+            {
+              "id": "m01-v3-general-coffee",
+              "speaker": "general",
+              "text": "К моему приезду кофе будет?",
+              "audio": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-v3-general-coffee-db283f1c2750.mp3"
+            },
+            {
+              "id": "m01-r01a-power-building",
+              "speaker": "commander",
+              "text": "Электростанция уже строится.",
+              "audio": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-r01a-power-building-6b2ece13e5e8.mp3"
+            },
+            {
+              "id": "m01-v3-r01a-l001",
+              "speaker": "general",
+              "text": "Строится? Хорошо. Тогда к делу.",
+              "audio": "docs/campaign/dialogue-drafts/alpha-m01/media/4658da106db1695e07d6d6188108137fa7a6ca4d940e7e01650f5aabb4cf726f.mp3"
+            }
+          ]
+        },
+        {
+          "id": "r01b",
+          "title": "Кофе — электростанция уже готова",
+          "lines": [
+            {
+              "id": "m01-v3-general-coffee",
+              "speaker": "general",
+              "text": "К моему приезду кофе будет?",
+              "audio": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-v3-general-coffee-db283f1c2750.mp3"
+            },
+            {
+              "id": "m01-r01b-power-ready",
+              "speaker": "commander",
+              "text": "Электростанция уже работает.",
+              "audio": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-r01b-power-ready-e03f239d1273.mp3"
+            },
+            {
+              "id": "m01-v3-r01b-l001",
+              "speaker": "general",
+              "text": "Со светом разобрались. Теперь к делу.",
+              "audio": "docs/campaign/dialogue-drafts/alpha-m01/media/1dfeb34c3c47b1797d4668cf42c10fc2728f781881cf83c569b9ec8fb7c191e3.mp3"
+            }
+          ]
+        }
+      ]
+    },
+    "03": {
+      "sourceRevision": 1,
+      "savedRevision": 2,
+      "changedCues": [
+        "m03-v2-s01-1"
+      ],
+      "clips": {
+        "m03-v2-s01-1": {
+          "file": "recordings/elevenlabs/m03-v2-s01-1-fc4ab1096ed5.mp3",
+          "speaker": "general",
+          "text": "Альфа, проверка прибыла. Её вертолёт выделяю вам для экспедиции. Цель — довоенный склад. Забрать оружейную технологию.",
+          "spokenText": "[firm, brisk delivery] Альфа, проверка прибыла. Её вертолёт выделяю вам для экспедиции. Цель — довоенный склад. Забрать оружейную технологию.",
+          "voiceId": "rQOBu7YxCDxGiFdTm28w",
+          "voiceName": "Artem Lebedev - Captivating and Engaging",
+          "modelId": "eleven_v4",
+          "origin": "elevenlabs-synthesis",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "sha256": "fc4ab1096ed544e859d5c47cd87dbca828d749501251dbc7e2099869c170b2b3",
+          "bytes": 121251,
+          "generatedAt": "2026-11-12T00:08:51.621Z",
+          "duration": 7.52,
+          "leadingSilence": 0.03,
+          "trailingSilence": 0.1899999999999995,
+          "replaces": "recordings/elevenlabs/m03-v2-s01-1-04d85ade51f7.mp3"
+        }
+      },
+      "scenes": [
+        {
+          "id": "m03-s01",
+          "title": "Приказ на экспедицию",
+          "lines": [
+            {
+              "id": "m03-v2-s01-1",
+              "speaker": "general",
+              "text": "Альфа, проверка прибыла. Её вертолёт выделяю вам для экспедиции. Цель — довоенный склад. Забрать оружейную технологию.",
+              "audio": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s01-1-fc4ab1096ed5.mp3"
+            },
+            {
+              "id": "m03-v2-s01-2",
+              "speaker": "commander",
+              "text": "А хозяева склада?",
+              "audio": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s01-2-282b0cd5118e.mp3"
+            },
+            {
+              "id": "m03-v2-s01-3",
+              "speaker": "general",
+              "text": "По документам — мы. Документы оформим по возвращении.",
+              "audio": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s01-3-0a9cdc5f5bbd.mp3"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "note": "Reserved credit estimate, not a verified account debit."
+}

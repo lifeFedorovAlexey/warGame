@@ -1,6 +1,6 @@
 {
-  "revision": 1,
-  "savedAt": "2026-11-11T21:14:06.711117+00:00",
+  "revision": 2,
+  "savedAt": "2026-11-12T00:09:48.729831+00:00",
   "document": {
     "id": "alpha-m03",
     "title": "Миссия 03 — Первый вылет",
@@ -1115,7 +1115,7 @@
       "m03-v2-s01-1": {
         "id": "m03-v2-s01-1",
         "speaker": "general",
-        "text": "Альфа, нашли довоенный склад. Забрать оружейную технологию.",
+        "text": "Альфа, проверка прибыла. Её вертолёт выделяю вам для экспедиции. Цель — довоенный склад. Забрать оружейную технологию.",
         "pauseAfter": 0.25,
         "recordingStatus": "Т",
         "key": "m03-v2-s01-1",
@@ -1124,23 +1124,25 @@
         "portraitState": "",
         "portrait": null,
         "audio": {
-          "file": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s01-1-04d85ade51f7.mp3",
-          "text": "Альфа, нашли довоенный склад. Забрать оружейную технологию.",
+          "file": "assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s01-1-fc4ab1096ed5.mp3",
           "speaker": "general",
-          "origin": "elevenlabs-synthesis",
-          "sha256": "04d85ade51f7563f300b64f0f9141d65b29fe29713bc71e9930e03f849ced0d0",
-          "bytes": 70260,
-          "duration": 4.32,
-          "leadingSilence": 0.07,
-          "trailingSilence": 0.2400000000000002,
+          "text": "Альфа, проверка прибыла. Её вертолёт выделяю вам для экспедиции. Цель — довоенный склад. Забрать оружейную технологию.",
+          "spokenText": "[firm, brisk delivery] Альфа, проверка прибыла. Её вертолёт выделяю вам для экспедиции. Цель — довоенный склад. Забрать оружейную технологию.",
           "voiceId": "rQOBu7YxCDxGiFdTm28w",
           "voiceName": "Artem Lebedev - Captivating and Engaging",
           "modelId": "eleven_v4",
+          "origin": "elevenlabs-synthesis",
           "voiceSettings": {
             "stability": 0.5,
             "similarityBoost": 0.75
           },
-          "generatedAt": "2026-11-11T21:13:14.035Z"
+          "sha256": "fc4ab1096ed544e859d5c47cd87dbca828d749501251dbc7e2099869c170b2b3",
+          "bytes": 121251,
+          "generatedAt": "2026-11-12T00:08:51.621Z",
+          "duration": 7.52,
+          "leadingSilence": 0.03,
+          "trailingSilence": 0.1899999999999995,
+          "replaces": "recordings/elevenlabs/m03-v2-s01-1-04d85ade51f7.mp3"
         }
       },
       "m03-v2-s01-2": {

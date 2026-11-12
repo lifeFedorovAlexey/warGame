@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "draftRevision": 222,
-  "draftSha256": "039e11390a1187311a20a21189db4285acd2116e00a09cba100dc3e7c16e52fc",
+  "draftRevision": 224,
+  "draftSha256": "2758b91ee2a62b6881f4ffeea7fae6441430d229ccde4d38dcee9bb861a0bd48",
   "throughScene": "r36",
-  "appliedAt": "2026-11-12T00:05:21.417514+00:00",
+  "appliedAt": "2026-11-12T00:12:59.375804+00:00",
   "scenes": [
     {
       "id": "p01",
@@ -107,6 +107,8 @@
       "id": "r01a",
       "title": "Кофе — электростанция уже строится",
       "cues": [
+        "m01-v3-general-coffee",
+        "m01-r01a-power-building",
         "m01-v3-r01a-l001"
       ],
       "sourceLine": 108,
@@ -121,6 +123,8 @@
       "id": "r01b",
       "title": "Кофе — электростанция уже готова",
       "cues": [
+        "m01-v3-general-coffee",
+        "m01-r01b-power-ready",
         "m01-v3-r01b-l001"
       ],
       "sourceLine": 108,
@@ -1055,7 +1059,7 @@
     {
       "id": "m01-s03-l001",
       "speaker": "warrant",
-      "text": "Криво повесил.",
+      "text": "Неужели проверка скоро?",
       "pauseAfter": 0.2,
       "recordingStatus": "Т",
       "notes": ""
@@ -1063,7 +1067,7 @@
     {
       "id": "m01-v3-builder-crooked-plinth",
       "speaker": "builder",
-      "text": "Так постамент кривой.",
+      "text": "Да. Через пару дней прилетят.",
       "pauseAfter": 0.2,
       "recordingStatus": "Т",
       "notes": ""
@@ -1303,7 +1307,7 @@
     {
       "id": "m01-v3-general-coffee",
       "speaker": "general",
-      "text": "А кофе почему нет?",
+      "text": "К моему приезду кофе будет?",
       "pauseAfter": 0.2,
       "recordingStatus": "Т",
       "notes": ""
@@ -1311,7 +1315,7 @@
     {
       "id": "m01-s06-l008",
       "speaker": "commander",
-      "text": "Потому что электричества нет.",
+      "text": "У нас электричества ещё нет.",
       "pauseAfter": 0.2,
       "recordingStatus": "Т",
       "notes": ""
@@ -1431,7 +1435,7 @@
     {
       "id": "m01-s05-l012",
       "speaker": "commander",
-      "text": "Не получится из букв «Ж», «О», «П», «А»... То есть «УАЗ» — собрать слово «счастье»... Я имел в виду — танк.",
+      "text": "Из букв «У», «А», «З» слово «танк» не собирается.",
       "pauseAfter": 0.2,
       "recordingStatus": "Т",
       "notes": ""
@@ -1606,6 +1610,20 @@
       "speaker": "general",
       "text": "Вот поэтому и выезжайте.",
       "pauseAfter": 0.25,
+      "recordingStatus": "Т"
+    },
+    {
+      "id": "m01-r01a-power-building",
+      "speaker": "commander",
+      "pauseAfter": 0.2,
+      "text": "Электростанция уже строится.",
+      "recordingStatus": "Т"
+    },
+    {
+      "id": "m01-r01b-power-ready",
+      "speaker": "commander",
+      "pauseAfter": 0.2,
+      "text": "Электростанция уже работает.",
       "recordingStatus": "Т"
     }
   ],
@@ -2312,34 +2330,46 @@
       "text": "Ну что ж. Раз дипломатия не удалась — придётся нанести визит лично."
     },
     "m01-s03-l001": {
-      "file": "recordings/warrant/m01-s03-l001.mp3",
-      "duration": 1.5673333333333332,
-      "leadingSilence": 0.22,
-      "trailingSilence": 0.43733333333333313,
+      "file": "recordings/elevenlabs/m01-s03-l001-5587e90fa1b7.mp3",
       "speaker": "warrant",
-      "sha256": "bd64fa8e549c91dffb9bfc35373ddc789e0b025ab75e7b5fb994e299dd64d5a6",
-      "bytes": 42014,
-      "origin": "user-recording",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s03-l001"
+      "text": "Неужели проверка скоро?",
+      "spokenText": "[curious, conversational] Неужели проверка скоро?",
+      "voiceId": "6A9D8WSMm4rFsg2DWFeE",
+      "voiceName": "Egor Gadzhiyev - Clear and Commanding",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact",
-      "text": "Криво повесил."
+      "sha256": "5587e90fa1b7bca784fc57eb13aee30cc2130eac45c43a4e8c79e08dbc6e4dbe",
+      "bytes": 30554,
+      "generatedAt": "2026-11-12T00:08:46.432Z",
+      "duration": 1.84,
+      "leadingSilence": 0.04,
+      "trailingSilence": 0.3600000000000001,
+      "replaces": "recordings/warrant/m01-s03-l001.mp3"
     },
     "m01-v3-builder-crooked-plinth": {
-      "file": "recordings/reviewed/m01-v3-builder-crooked-plinth-8e0311c0b77a.mp3",
-      "duration": 1.8024583333333333,
-      "leadingSilence": 0.1,
-      "trailingSilence": 0.3224583333333333,
+      "file": "recordings/elevenlabs/m01-v3-builder-crooked-plinth-42f96579a802.mp3",
       "speaker": "builder",
-      "sha256": "8e0311c0b77abdb367ebe7fc71dfc745c48cca922b140d2da23d0beec4225f0d",
-      "bytes": 45776,
-      "origin": "user-recording",
-      "sourceName": "ElevenLabs_2026-11-09T17_21_12_Alexandr Vlasov - Vibrant and Energetic_pvc_s50_sim75_v4.mp3",
-      "draftRevision": 148,
-      "transcriptSource": "owner-workshop",
-      "text": "Так постамент кривой."
+      "text": "Да. Через пару дней прилетят.",
+      "spokenText": "[matter-of-fact, brisk delivery] Да. Через пару дней прилетят.",
+      "voiceId": "txnCCHHGKmYIwrn7HfHQ",
+      "voiceName": "Alexandr Vlasov - Vibrant and Energetic",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "42f96579a8021308b9b56d6653f5247f4b26da288da3f39d1801961839d53bcd",
+      "bytes": 36823,
+      "generatedAt": "2026-11-12T00:08:46.892Z",
+      "duration": 2.24,
+      "leadingSilence": 0.01,
+      "trailingSilence": 0.3100000000000003,
+      "replaces": "recordings/reviewed/m01-v3-builder-crooked-plinth-8e0311c0b77a.mp3"
     },
     "m01-s02-l003": {
       "file": "recordings/commander/m01-s02-l003.mp3",
@@ -2767,34 +2797,46 @@
       "text": "Опять копать?! "
     },
     "m01-v3-general-coffee": {
-      "file": "recordings/reviewed/m01-v3-general-coffee-e0340deb6dc0.mp3",
-      "duration": 1.8808333333333334,
-      "leadingSilence": 0.05,
-      "trailingSilence": 0.3108333333333333,
+      "file": "recordings/elevenlabs/m01-v3-general-coffee-db283f1c2750.mp3",
       "speaker": "general",
-      "sha256": "e0340deb6dc0ff40d7df7d1fa1fc4db78b48a5a573cf1f159b81f434f0f11acd",
-      "bytes": 47030,
-      "origin": "user-recording",
-      "sourceName": "ElevenLabs_2026-11-09T17_34_43_Artem Lebedev - Captivating and Engaging_pvc_s50_sim75_v4.mp3",
-      "draftRevision": 70,
-      "transcriptSource": "owner-workshop",
-      "text": "А кофе почему нет?"
+      "text": "К моему приезду кофе будет?",
+      "spokenText": "[casually expectant] К моему приезду кофе будет?",
+      "voiceId": "rQOBu7YxCDxGiFdTm28w",
+      "voiceName": "Artem Lebedev - Captivating and Engaging",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "db283f1c2750405f84b963bca1ecfe6482213c74d3ee14ed33830fc3a1cfdc87",
+      "bytes": 35569,
+      "generatedAt": "2026-11-12T00:08:47.788Z",
+      "duration": 2.16,
+      "leadingSilence": 0.06,
+      "trailingSilence": 0.3400000000000001,
+      "replaces": "recordings/reviewed/m01-v3-general-coffee-e0340deb6dc0.mp3"
     },
     "m01-s06-l008": {
-      "file": "recordings/commander/m01-s07-l002.mp3",
-      "duration": 2.429375,
-      "leadingSilence": 0.13,
-      "trailingSilence": 0.339375,
+      "file": "recordings/elevenlabs/m01-s06-l008-4aa8351e1c75.mp3",
       "speaker": "commander",
-      "sha256": "3ddb97446f3b9e7db327117aec79f5c37d7ed2b226154a1e936dacb0c406ef2f",
-      "bytes": 55807,
-      "origin": "user-recording",
-      "reusedFrom": {
-        "catalog": "audio.json",
-        "cueId": "m01-s06-l008"
+      "text": "У нас электричества ещё нет.",
+      "spokenText": "[dry, matter-of-fact delivery] У нас электричества ещё нет.",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
       },
-      "textMatch": "exact",
-      "text": "Потому что электричества нет."
+      "sha256": "4aa8351e1c7559d7d66579e6de3665088c0477710e69240ca69f87ce383c99b7",
+      "bytes": 40585,
+      "generatedAt": "2026-11-12T00:08:48.410Z",
+      "duration": 2.48,
+      "leadingSilence": 0.21,
+      "trailingSilence": 0.3599999999999999,
+      "replaces": "recordings/commander/m01-s07-l002.mp3"
     },
     "m01-v3-general-build-power": {
       "file": "recordings/reviewed/m01-v3-general-build-power-024fc11c6559.mp3",
@@ -2994,19 +3036,25 @@
       "text": "В конструкторе подбирайте модули, завод соберёт. Заказывайте что угодно."
     },
     "m01-s05-l012": {
-      "file": "recordings/reviewed/m01-s05-l012-d190e97ede4d.mp3",
-      "duration": 10.840833333333334,
-      "leadingSilence": 0.05,
-      "trailingSilence": 0.1608333333333345,
+      "file": "recordings/elevenlabs/m01-s05-l012-1cdc78ee3df8.mp3",
       "speaker": "commander",
-      "sha256": "d190e97ede4d534ba217ec01b75713449aa19d3c9bde90c13a2d944f441403fc",
-      "bytes": 190390,
-      "origin": "user-recording",
-      "sourceName": "ElevenLabs_2026-11-09T18_41_16_comandorNig_gen_s50_sim75_v4.mp3",
-      "draftRevision": 70,
-      "transcriptSource": "owner-workshop",
-      "text": "Не получится из букв «Ж», «О», «П», «А»...тоесть «УАЗ» — собрать слово «счастье»...я имел ввиду -  танк.",
-      "textEditedAfterUpload": true
+      "text": "Из букв «У», «А», «З» слово «танк» не собирается.",
+      "spokenText": "[dry, conversational] Из букв «У», «А», «Зэ» слово «танк» не собирается.",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "1cdc78ee3df8bd0ef163ed2c1e9a75c6e993bd50dd3d504aee6799dbf9e1be92",
+      "bytes": 76529,
+      "generatedAt": "2026-11-12T00:12:58.912Z",
+      "duration": 4.72,
+      "leadingSilence": 0.03,
+      "trailingSilence": 0.17999999999999972,
+      "replaces": "recordings/reviewed/m01-s05-l012-d190e97ede4d.mp3"
     },
     "m01-s05-l013": {
       "file": "recordings/reviewed/m01-s05-l013-0aedb6128dc0.mp3",
@@ -3367,6 +3415,46 @@
       "speaker": "general",
       "generatedAt": "2026-11-11T20:58:14.903Z",
       "draftRevision": 218
+    },
+    "m01-r01a-power-building": {
+      "file": "recordings/elevenlabs/m01-r01a-power-building-6b2ece13e5e8.mp3",
+      "speaker": "commander",
+      "text": "Электростанция уже строится.",
+      "spokenText": "[matter-of-fact, brisk delivery] Электростанция уже строится.",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "6b2ece13e5e8ff398754ef3b359db1fad6cc4ea1caf547204282bc544d40e11c",
+      "bytes": 34315,
+      "generatedAt": "2026-11-12T00:08:49.101Z",
+      "duration": 2.08,
+      "leadingSilence": 0.2,
+      "trailingSilence": 0.16999999999999993
+    },
+    "m01-r01b-power-ready": {
+      "file": "recordings/elevenlabs/m01-r01b-power-ready-e03f239d1273.mp3",
+      "speaker": "commander",
+      "text": "Электростанция уже работает.",
+      "spokenText": "[matter-of-fact, brisk delivery] Электростанция уже работает.",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "e03f239d1273cf8d3ac0df04b4c9c6f709cde0de38198798ea21facfc33fedf4",
+      "bytes": 35569,
+      "generatedAt": "2026-11-12T00:08:49.573Z",
+      "duration": 2.16,
+      "leadingSilence": 0.06,
+      "trailingSilence": 0.26
     }
   }
 }

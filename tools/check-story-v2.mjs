@@ -28,7 +28,7 @@ for(const cue of [...source.dialogue,...source.barks]){
  assert(clip.duration>0);
  if(cue.speaker!=='past')assert(portraits.characters[cue.speaker],cue.speaker);
 }
-assert.equal(userCount,106);assert.equal(elevenlabsCount,60);
+assert.equal(userCount,101);assert.equal(elevenlabsCount,67);
 assert.equal(audio.clips['m01-s07-l014'].voiceName,'Mishka Yaponcik - Odessa Rogue Charm');
 assert.equal(hash(fs.readFileSync(base+'recordings/reviewed/m01-s07-l014-4e14be06b9b1.mp3')),'4e14be06b9b1155f9d172d2ad351ef622770b629d1241313303b233a4ca38308');
 for(const id of ['m01-v3-r24-l001','m01-v3-r24-l002','m01-v3-r24-l003'])assert.equal(audio.clips[id].origin,'user-recording',id);
@@ -43,12 +43,15 @@ assert.equal(source.dialogue.find(c=>c.id==='m01-s07-l016').text,'Нам и пр
 assert.equal(source.dialogue.find(c=>c.id==='m01-s07-l016').speaker,'builder');
 assert.equal(audio.clips['m01-s07-l016'].origin,'user-recording');
 // Mislabeled takes use the owner's confirmed spoken words, not their filenames.
-assert.equal(audio.clips['m01-s06-l008'].file,'recordings/commander/m01-s07-l002.mp3');
+assert.equal(originalAudio.clips['m01-s06-l008'].file,'recordings/commander/m01-s07-l002.mp3');
+assert.equal(audio.clips['m01-s06-l008'].text,'У нас электричества ещё нет.');
 assert.equal(audio.clips['m01-s07-l002'].file,'recordings/commander/m01-s07-l004.mp3');
 assert.equal(audio.clips['m01-s07-l004'].file,'recordings/commander/pending/m01-s07-l007.mp3');
 for(const clip of Object.values(original.clips).filter(c=>c.origin==='user-recording'))assert.equal(hash(fs.readFileSync(base+clip.file)),clip.sha256);
 assert.equal(source.scenes.find(s=>s.id==='r50').cues.length,4);
 assert.equal(source.scenes.find(s=>s.id==='r06').cues.length,3);
+assert.equal(source.dialogue.find(l=>l.id==='m01-s05-l012').text,'Из букв «У», «А», «З» слово «танк» не собирается.');
+assert(audio.clips['m01-s05-l012'].spokenText.includes('«У», «А», «Зэ»'));
 assert.deepEqual(applyStoryEdits(source,audio,applied),{story:source,audio},'Applied snapshots are idempotent');
 assert.deepEqual(originalStory,read('story-v2.json'),'Applying a snapshot does not mutate the base');
 assert.deepEqual(originalAudio,read('audio-v2.json'));
@@ -108,7 +111,12 @@ function fixture(startImmediately=true){
 }
 for(const completed of [false,true]){
  const f=fixture(false);f.building('generator',completed);
- assert.equal(f.tick().storyScene,completed?'r01b':'r01a');f.finish();
+ const question=f.tick();assert.equal(question.storyScene,completed?'r01b':'r01a');
+ assert.equal(question.text,'К моему приезду кофе будет?');
+ f.director.completeLine();
+ assert.equal(f.tick().text,completed?'Электростанция уже работает.':'Электростанция уже строится.');
+ f.director.completeLine();
+ assert.equal(f.tick().id,completed?'m01-v3-r01b-l001':'m01-v3-r01a-l001');f.finish();
  assert.notEqual(f.tick()?.storyScene,'r01');
 }
 // The new factory order is announced on the general's actual instruction.
@@ -288,9 +296,12 @@ for(const enabled of [false,true]){
  for(const id of ['p02','p03']){assert.equal(f.tick().storyScene,id);f.finish();}
  assert.equal(f.tick(),null,'The sign dialogue waits for actual construction');
  const sign=f.building('base-sign',false);assert.equal(f.tick(),null);
- sign.completed=true;assert.equal(f.tick().storyScene,'p04');f.finish();
+ sign.completed=true;assert.equal(f.tick().storyScene,'p04');
+ assert.equal(f.tick().text,'Неужели проверка скоро?');assert(!f.director.openingFinished);
+ f.director.completeLine();assert.equal(f.tick().text,'Да. Через пару дней прилетят.');
+ assert(!f.director.openingFinished);f.finish();
  assert(f.director.openingFinished);
- assert.equal(f.tick().storyScene,'r01');
+ assert.equal(f.tick().storyScene,'r01');assert.equal(f.tick().text,'К моему приезду кофе будет?');
 }
 // Saving the opening keeps it in the same mission, including the current reply.
 {

@@ -1,0 +1,99 @@
+{
+  "status": "review-ready",
+  "previewPort": 8769,
+  "mainUnchanged": true,
+  "reservedCredits": 553,
+  "recordings": [
+    {
+      "mission": "01",
+      "cue": "m01-s03-l001",
+      "file": "/assets/campaign/alpha/mission01/recordings/elevenlabs/m01-s03-l001-5587e90fa1b7.mp3",
+      "duration": 1.84,
+      "sha256": "5587e90fa1b7bca784fc57eb13aee30cc2130eac45c43a4e8c79e08dbc6e4dbe"
+    },
+    {
+      "mission": "01",
+      "cue": "m01-v3-builder-crooked-plinth",
+      "file": "/assets/campaign/alpha/mission01/recordings/elevenlabs/m01-v3-builder-crooked-plinth-42f96579a802.mp3",
+      "duration": 2.24,
+      "sha256": "42f96579a8021308b9b56d6653f5247f4b26da288da3f39d1801961839d53bcd"
+    },
+    {
+      "mission": "01",
+      "cue": "m01-v3-general-coffee",
+      "file": "/assets/campaign/alpha/mission01/recordings/elevenlabs/m01-v3-general-coffee-db283f1c2750.mp3",
+      "duration": 2.16,
+      "sha256": "db283f1c2750405f84b963bca1ecfe6482213c74d3ee14ed33830fc3a1cfdc87"
+    },
+    {
+      "mission": "01",
+      "cue": "m01-s06-l008",
+      "file": "/assets/campaign/alpha/mission01/recordings/elevenlabs/m01-s06-l008-4aa8351e1c75.mp3",
+      "duration": 2.48,
+      "sha256": "4aa8351e1c7559d7d66579e6de3665088c0477710e69240ca69f87ce383c99b7"
+    },
+    {
+      "mission": "01",
+      "cue": "m01-r01a-power-building",
+      "file": "/assets/campaign/alpha/mission01/recordings/elevenlabs/m01-r01a-power-building-6b2ece13e5e8.mp3",
+      "duration": 2.08,
+      "sha256": "6b2ece13e5e8ff398754ef3b359db1fad6cc4ea1caf547204282bc544d40e11c"
+    },
+    {
+      "mission": "01",
+      "cue": "m01-r01b-power-ready",
+      "file": "/assets/campaign/alpha/mission01/recordings/elevenlabs/m01-r01b-power-ready-e03f239d1273.mp3",
+      "duration": 2.16,
+      "sha256": "e03f239d1273cf8d3ac0df04b4c9c6f709cde0de38198798ea21facfc33fedf4"
+    },
+    {
+      "mission": "03",
+      "cue": "m03-v2-s01-1",
+      "file": "/assets/campaign/alpha/mission03/recordings/elevenlabs/m03-v2-s01-1-fc4ab1096ed5.mp3",
+      "duration": 7.52,
+      "sha256": "fc4ab1096ed544e859d5c47cd87dbca828d749501251dbc7e2099869c170b2b3"
+    },
+    {
+      "mission": "01",
+      "cue": "m01-s05-l012",
+      "file": "/assets/campaign/alpha/mission01/recordings/elevenlabs/m01-s05-l012-1cdc78ee3df8.mp3",
+      "duration": 4.72,
+      "sha256": "1cdc78ee3df8bd0ef163ed2c1e9a75c6e993bd50dd3d504aee6799dbf9e1be92"
+    }
+  ],
+  "logicChecks": [
+    "opening waits for sign and two-line conversation before handoff",
+    "absent, building and ready generator branches",
+    "M03 all 36 subtitles match recordings; loading and departure unchanged",
+    "UAZ subtitle exact; spoken letter names separated"
+  ],
+  "browser": {
+    "decodedNewRecordings": 7,
+    "editorScenes": [
+      "p04",
+      "r01"
+    ],
+    "screenshots": [
+      {
+        "path": "campaign/previews/inspection-coffee-link/game-desktop.png",
+        "width": 1440,
+        "height": 900
+      },
+      {
+        "path": "campaign/previews/inspection-coffee-link/game-landscape.png",
+        "width": 844,
+        "height": 390
+      },
+      {
+        "path": "campaign/previews/inspection-coffee-link/game-small-landscape.png",
+        "width": 667,
+        "height": 375
+      }
+    ],
+    "errors": []
+  },
+  "draftRevisions": {
+    "alpha-m01": 224,
+    "alpha-m03": 2
+  }
+}
