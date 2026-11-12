@@ -1,6 +1,6 @@
 {
   "name": "wargame",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "private": true,
   "description": "Modular vehicle game assets and local review arena",
   "scripts": {
@@ -40,6 +40,7 @@
     "bench:500": "node tools/check-damage-browser.mjs --benchmark --budget",
     "check:damage:browser": "node tools/check-damage-browser.mjs",
     "bench:damage": "node tools/check-damage-browser.mjs --benchmark",
+    "measure:frame-budget": "node tools/measure-frame-budget.mjs",
     "check:campaign": "node tools/check-campaign.cjs",
     "check:story": "node tools/check-story-v2.mjs && node tools/check-radio-save.mjs",
     "check:story:browser": "node tools/check-story-v2-browser.mjs",
