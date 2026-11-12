@@ -997,6 +997,7 @@ export class Mission{
  attack(attacker,target,spec){
   if(!spec.damage||attacker.cooldown>0||partMissing(attacker.damage,9)||distance(attacker,target)>spec.range||!this.lineOfSight(attacker,target))return false;
   attacker.cooldown=spec.cooldown;
+  if(attacker.owner!==target.owner&&(attacker.owner==='rai'||target.owner==='rai'))this.lastPlayerCombatAt=this.state.time;
   const weapon=spec.weapon??(attacker.kind==='flamer'?'flame':'mg');
   if(weapon==='grenade'){
    const scale=this.config.worldScale,to={x:target.x,y:target.y,z:this.field.heightAt(target.x,target.y)+.2};

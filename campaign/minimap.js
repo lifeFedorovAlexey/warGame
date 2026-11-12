@@ -24,7 +24,7 @@ export function minimapTarget(mission,rect,x,y){
 export function installMinimapInput(canvas,{mission,enabled,mode,building,order,centre,cancel}){
  let dragging=null;
  const at=e=>minimapPoint(mission.field,canvas.getBoundingClientRect(),e.clientX,e.clientY,mission.state.bounds);
- canvas.title='ЛКМ — камера · ПКМ — приказ · Shift+ПКМ — в очередь · с «Атакой» — атака';
+ canvas.title='ЛКМ — камера · ПКМ — приказ · Shift+ПКМ — в очередь · Красные уголки — вражеская база · Синий ромб — артефакт';
  canvas.setAttribute('aria-label','Миникарта. ЛКМ — камера, ПКМ — приказ выбранной группе. В режиме атаки — атаковать.');
  canvas.addEventListener('contextmenu',e=>e.preventDefault());
  canvas.addEventListener('pointerdown',e=>{
@@ -43,7 +43,7 @@ export function installMinimapInput(canvas,{mission,enabled,mode,building,order,
 }
 
 export function createMinimap(canvas,{world,mission,selected,background,notify}){
- const base=document.createElement('canvas'),ctx=canvas.getContext('2d'),cached=base.getContext('2d'),alerts=new MinimapAlerts(notify);
+ const base=document.createElement('canvas'),ctx=canvas.getContext('2d'),cached=base.getContext('2d'),alerts=new MinimapAlerts(notify,mission);
  const surface=document.createElement('canvas'),surfaceContext=surface.getContext('2d');
  let refreshed=-Infinity,boundsKey='',cachedCssSize=canvas.clientWidth||132;
  new ResizeObserver(entries=>{cachedCssSize=entries[0].contentRect.width||132;refreshed=-Infinity;}).observe(canvas);
@@ -91,11 +91,13 @@ export function createMinimap(canvas,{world,mission,selected,background,notify})
   for(const p of pings){const [x,y]=position(p),age=(now-p.born)/MINIMAP_PING_MS,wave=(1-Math.cos(age*Math.PI*8))/2,r=(5+wave*3)*scale,arm=3*scale;
    ctx.save();ctx.globalAlpha=.5+wave*.5;ctx.lineCap='square';ctx.strokeStyle=colors[p.kind];ctx.lineWidth=1.6*scale;
    ctx.beginPath();
-   for(const sx of [-1,1])for(const sy of [-1,1]){
+   if(p.kind==='artifact'){
+    ctx.moveTo(x,y-r);ctx.lineTo(x+r,y);ctx.lineTo(x,y+r);ctx.lineTo(x-r,y);ctx.closePath();
+   }else for(const sx of [-1,1])for(const sy of [-1,1]){
     ctx.moveTo(x+sx*(r-arm),y+sy*r);ctx.lineTo(x+sx*r,y+sy*r);ctx.lineTo(x+sx*r,y+sy*(r-arm));
    }
    ctx.stroke();ctx.restore();
   }
  }
- return {alerts,render,observe:(tasks,now)=>alerts.observe(mission,tasks,now),reset(silent){alerts.reset(silent);refreshed=-Infinity;},invalidate(){refreshed=-Infinity;}};
+ return {alerts,render,observe:(tasks,now,options)=>alerts.observe(mission,tasks,now,options),reset(silent){alerts.reset(silent);refreshed=-Infinity;},invalidate(){refreshed=-Infinity;}};
 }

@@ -1,9 +1,7 @@
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
 import {MinimapAlerts,MINIMAP_PING_MS,objectiveLocation} from '../campaign/minimap-alerts.js';
 import {minimapPoint,minimapTarget,minimapPosition} from '../campaign/minimap.js';
-import {Mission} from '../campaign/mission.js';
-import {createHeightfield} from '../demo/map-route.js';
+import {makeMission} from './m02-fixture.mjs';
 const messages=[],alerts=new MinimapAlerts(text=>messages.push(text));
 const field={gridToWorld:([x,y])=>({x:x*32,y:y*32}),worldToGrid:(x,y)=>[x/32,y/32]};
 const mission={field,config:{baseSites:[{kind:'generator',grid:[10,10]}],oilFields:[],units:{car:{}},buildings:{factory:{}}},
@@ -32,8 +30,7 @@ for(const bounds of [[0,0,53,66],[0,0,53,83]]){
 }
 mission.state.units=[{id:'enemy',kind:'car',owner:'scavs',hp:100,...centre}];assert.equal(minimapTarget(mission,rect,86,96).id,'enemy');
 mission.visibleAt=()=>false;assert.equal(minimapTarget(mission,rect,86,96),null,'Minimap targeting never reveals hidden enemies');
-const config=JSON.parse(fs.readFileSync('assets/campaign/alpha/mission01/gameplay.json','utf8')),terrain=createHeightfield(JSON.parse(fs.readFileSync('assets/maps/alpha/heightfield.json','utf8')));
-const m=new Mission(config,terrain),unit=m.state.units.find(u=>u.owner==='rai'),enemy=m.state.units.find(u=>u.owner==='scavs');m.drainEvents();
+const m=makeMission(),unit=m.state.units.find(u=>u.owner==='rai'),enemy=m.state.units.find(u=>u.owner==='scavs');m.drainEvents();
 m.damage(unit,1,enemy);assert(m.drainEvents().some(e=>e.type==='under-attack'&&e.target===unit.id&&!e.building));
 m.damage(unit,1,enemy);assert(!m.drainEvents().some(e=>e.type==='under-attack'),'No event per bullet');
 const building=m.addStructure('generator','rai',{x:unit.x+90,y:unit.y},{completed:true});m.damage(building,1e6,enemy);
