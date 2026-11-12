@@ -40,14 +40,14 @@ function stoppingPath(mission,other,dt,scale){
 // A parking arc may be clear of today's poses but enter a nearby vehicle's
 // unavoidable braking path. Admit it only when that physical path is clear;
 // this is recomputed from actual velocities, not a timed parking lease.
-export function maneuverAdmissionBlocker(mission,unit,from,to,dt){
+export function maneuverAdmissionBlocker(mission,unit,from,to,dt,neighbours){
  const scale=mission.config.worldScale;let obstacle;
  const ownRadius=vehicleRadiusBound(unit.kind,scale),skin=scale*.055+.02;
  // The query surrounds the FUTURE tested body. Its initial position may be
  // far behind it on a turn. The spatial aggregate includes actual speeds,
  // even a fast legacy save, and only grows during sequential tick updates.
  const radius=maneuverAdmissionRadius(mission,unit,dt);
- for(const other of mission.nearbyUnits(to,radius)){
+ for(const other of neighbours??mission.nearbyUnits(to,radius)){
   if(other===unit||unit.id&&other.id===unit.id||other.hp<=0||!trafficCollisionRequired(unit,other)||(other.driveSpeed??0)<.01)continue;
   const braking=vehicleDynamics(other).braking,direction=other.reversing?-1:1;
   const speed=other.driveSpeed;

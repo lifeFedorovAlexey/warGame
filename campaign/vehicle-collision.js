@@ -6,7 +6,12 @@ const modular = [
   [1.177, .065, 2.138, 1.875, .827],
 ];
 const fieldCar = [[1.03, -.075, 2.18, .43, .47], [.96, -.06, 2.10, 1.48, .78]];
-const cached = new WeakMap();
+// Search rollouts create many short-lived pose objects, often at the same
+// physical position (braking, stopped controls and repeated candidate prefixes).
+// Cache geometry by exact pose values rather than retaining one WeakMap entry
+// per temporary object. Hash collisions only evict; equality proves every hit.
+const envelopeCache = new Array(16384);
+const liveEnvelopes = new WeakMap();
 export const collisionStatistics={queries:0,axisSeparated:0,penetrationQueries:0,poseGapCacheHits:0,radiusSeparated:0};
 const exactPoseGaps=new WeakMap(),solidEnvelopes=new WeakMap();
 const thresholdPoseGaps=new WeakMap();
@@ -56,12 +61,19 @@ export function trafficCollisionRequired(a,b){
 }
 
 export function vehicleEnvelope(unit, scale, field) {
- const heading=unit.heading??0,kind=unit.kind,entry=cached.get(unit);
- if(entry&&entry.x===unit.x&&entry.y===unit.y&&entry.heading===heading&&entry.scale===scale&&entry.kind===kind)return entry.envelope;
+ const heading=unit.heading??0,kind=unit.kind,x=unit.x,y=unit.y;
+ // Named live entities keep their last envelope even if temporary forecasts
+ // evict its hash slot. Anonymous integration poses use the bounded cache.
+ if(unit.id){const live=liveEnvelopes.get(unit);
+  if(live&&live.poseX===x&&live.poseY===y&&live.heading===heading&&live.scale===scale&&live.kind===kind)return live;}
+ let hash=Math.imul(Math.floor(x*256),0x9e3779b1)^Math.imul(Math.floor(y*256),0x85ebca6b)^Math.imul(Math.floor(heading*4096),0xc2b2ae35);
+ hash=Math.imul(hash^(hash>>>16),0x7feb352d);const slot=(hash^(hash>>>15))&(envelopeCache.length-1),entry=envelopeCache[slot];
+ if(entry&&entry.poseX===x&&entry.poseY===y&&entry.heading===heading&&entry.scale===scale&&entry.kind===kind){if(unit.id)liveEnvelopes.set(unit,entry);return entry;}
  const p=localFootprint(kind),c=Math.cos(heading),s=Math.sin(heading);
- const envelope={x:unit.x+(p.x*c-p.y*s)*scale,y:unit.y+(p.x*s+p.y*c)*scale,
-  width:p.width*scale,depth:p.depth*scale,c,s,ellipse:p.ellipse,pitch:0,roll:0};
- cached.set(unit,{x:unit.x,y:unit.y,heading,scale,kind,envelope});return envelope;
+ const envelope={x:x+(p.x*c-p.y*s)*scale,y:y+(p.x*s+p.y*c)*scale,
+  width:p.width*scale,depth:p.depth*scale,c,s,ellipse:p.ellipse,pitch:0,roll:0,poseX:x,poseY:y,heading,scale,kind,
+  boundingRadius:(p.ellipse?Math.max(p.width,p.depth):Math.hypot(p.width,p.depth))*scale};
+ envelopeCache[slot]=envelope;if(unit.id)liveEnvelopes.set(unit,envelope);return envelope;
 }
 export function footprintSupport(shape,x,y){
  if(shape.radius!==undefined)return shape.radius*Math.hypot(x,y);
@@ -157,10 +169,17 @@ function poseGap(a,b,separation=Infinity){
 }
 export function envelopeClearance(a,b,separation=Infinity){
  if(Number.isFinite(separation)){
-  const ar=a.ellipse?Math.max(a.width,a.depth):Math.hypot(a.width,a.depth);
-  const br=b.ellipse?Math.max(b.width,b.depth):Math.hypot(b.width,b.depth);
-  const bound=Math.hypot(a.x-b.x,a.y-b.y)-ar-br;
+  const ar=a.boundingRadius??(a.ellipse?Math.max(a.width,a.depth):Math.hypot(a.width,a.depth));
+  const br=b.boundingRadius??(b.ellipse?Math.max(b.width,b.depth):Math.hypot(b.width,b.depth));
+  const dx=b.x-a.x,dy=b.y-a.y,length=Math.hypot(dx,dy),bound=length-ar-br;
   if(bound>=separation){collisionStatistics.radiusSeparated++;return bound;}
+  // Same separating plane as the first GJK iteration, without allocating
+  // support points/simplexes or pair-cache entries for already clear bodies.
+  // This remains a lower bound; close/overlapping shapes use the full solver.
+  if(length>1e-9){
+   const nx=dx/length,ny=dy/length,gap=length-footprintSupport(a,nx,ny)-footprintSupport(b,nx,ny);
+   if(gap>=separation+1e-9){collisionStatistics.centreSeparated=(collisionStatistics.centreSeparated??0)+1;return gap;}
+  }
  }
  return poseGap(a,b,separation);
 }

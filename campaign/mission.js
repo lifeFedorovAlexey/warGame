@@ -1,6 +1,7 @@
 import {requestTransport,loadTransport,cancelTransportLoading,departTransport,unloadTransport,updateTransport,transportObstacles,transportPose} from './korovnik-transport.js';
 import {prepareTransportSite,transportSite} from './transport-site.js';
 import {TerrainNavigator} from './navigation.js';
+import {livingEntity} from './entity-lookup.js';
 import {waterTower} from './threat-guidance.js';
 import {checkBuildingPlacement} from './building-placement.js';
 import {factoryAccessVersion,refreshFactoryAccess} from './factory-access.js';
@@ -212,7 +213,7 @@ export class Mission{
  finishCinematic(id){const index=this.state.pendingCinematics.indexOf(id);if(index>=0)this.state.pendingCinematics.splice(index,1);if(!this.state.seenCinematics.includes(id))this.state.seenCinematics.push(id);}
  unitSpec(unit){return fieldUnitSpec(unit,this.config.units[unit.kind]);}
  buildingSpec(building){return this.config.buildings[building.kind]??{name:'Лагерь отбросов',seconds:1,hp:750,vision:180,power:0};}
- entity(id){return this.state.units.find(item=>item.id===id&&item.hp>0)??this.state.buildings.find(item=>item.id===id&&item.hp>0);}
+ entity(id){return livingEntity(this.state.units,id)??livingEntity(this.state.buildings,id);}
  addUnit(kind,owner,point,extra={}){const spec=this.config.units[kind],unit={id:this.id('u'),kind,owner,x:point.x,y:point.y,previousX:point.x,previousY:point.y,hp:spec.hp,maxHp:spec.hp,heading:0,path:[],task:null,cooldown:0,tool:0,foldTime:0,...extra};
   if(owner==='rai'&&canAutoRetreat(spec))unit.combatPolicy={...armyCombatPolicy(this)};
   this.state.units.push(unit);registerPersonnel(this,unit);if(this.unitIndexActive)this.unitIndex.insert(unit,this.state.units.length-1);return unit;}
@@ -1134,12 +1135,12 @@ export class Mission{
   const padding=scale*.055+.012+Math.SQRT2*radius*turn*turn/24;
   return this.unitIndex.query(to,distance(from,to)+radius+this.unitIndex.maxBodyRadius*scale+padding).filter(other=>trafficCollisionRequired(unit,other));
  }
- vehicleMotionClear(unit,from,to,grade=.52,blockers,obstacles=this.state.units,reservationWitness){
+ vehicleMotionClear(unit,from,to,grade=.52,blockers,obstacles=this.state.units,reservationWitness,regionSolids){
   const reserved=corridorBlocker(this,unit,from,to,reservationWitness);
   if(reserved){blockers?.add(reserved);return false;}
   if(!passageWaitClear(this,unit,from,to))return false;
   if(obstacles===this.state.units)obstacles=this.vehicleMotionNeighbours(unit,from,to);
-  const sweep=this.vehicleTerrainSweep(unit,from,to,grade);
+  const sweep=this.vehicleTerrainSweep(unit,from,to,grade,regionSolids);
   return sweep!==false&&clearOfVehicles(unit,to,obstacles,this.config.worldScale,false,from,this.field,blockers,sweep);
  }
  // Static feasibility is also used for future arrival slots. A temporary

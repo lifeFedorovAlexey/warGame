@@ -66,8 +66,12 @@ export class RoadTraffic {
 
   nearest(point, radius = 0) {
     let cached=this.pointQueries.get(point);
-    if(!cached||cached.x!==point.x||cached.y!==point.y){
+    if(!cached){
       cached={x:point.x,y:point.y,results:new Map()};this.pointQueries.set(point,cached);
+    }else if(cached.x!==point.x||cached.y!==point.y){
+      // A rollout advances the same preview object many times. Reuse its
+      // small query cache instead of allocating a new Map at every position.
+      cached.x=point.x;cached.y=point.y;cached.results.clear();
     }
     if(cached.results.has(radius)){
       const result=cached.results.get(radius);return result?{...result}:null;

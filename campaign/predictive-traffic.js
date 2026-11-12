@@ -264,8 +264,16 @@ export class PredictiveTraffic extends TrafficCoordinator{
   this.planningDeadline=deadline;
   if(!budget)return;
   this.publishPlanning(mission,deadline);
-  for(const [id,job] of this.routes)if(job!==this.routeJob&&job!==this.maneuverJob&&!this.validRoute(mission,job)){
-   job.iterator?.return();this.traceRoute(mission,job,'cancelled',{reason:this.routeInvalidation(mission,job),stage:job.finished?'publish':job.iterator?'search':'queue'});
+  // Scanning every queued intent on every render frame can consume the whole
+  // search budget with a large army. Prune fairly within a small allowance;
+  // selected searches and published results still validate synchronously.
+  const pruneDeadline=started+Math.min(.25,budget*.15);
+  this.routePrune??=this.routes.entries();
+  while(performance.now()<pruneDeadline){
+   const next=this.routePrune.next();if(next.done){this.routePrune=null;break;}
+   const [id,job]=next.value;if(this.routes.get(id)!==job||job===this.routeJob||job===this.maneuverJob)continue;
+   const reason=this.routeInvalidation(mission,job);if(reason===null)continue;
+   job.iterator?.return();this.traceRoute(mission,job,'cancelled',{reason,stage:job.finished?'publish':job.iterator?'search':'queue'});
    this.routes.delete(id);this.stats.routeDiscards++;
   }
   // Route requests must not queue behind expensive pose-space manoeuvres.
@@ -607,8 +615,15 @@ export class PredictiveTraffic extends TrafficCoordinator{
    else delete view.combatRetreat;
    return view;
   };
-  const preview=pose=>roadLane?roadDrivingLane(mission,lanePose(unit,pose,roadLane),unit.path[0],scale)??goal
-   :passingLane?{x:goal.x+passingLane.ux*passingProgress(pose),y:goal.y+passingLane.uy*passingProgress(pose)}:goal;
+  let originPreview,originTerrain;
+  const firstMotions=new Map();
+  const atOrigin=pose=>pose.x===origin.x&&pose.y===origin.y&&pose.heading===origin.heading;
+  const preview=pose=>{
+   const initial=atOrigin(pose);if(initial&&originPreview!==undefined)return originPreview;
+   const target=roadLane?roadDrivingLane(mission,lanePose(unit,pose,roadLane),unit.path[0],scale)??goal
+    :passingLane?{x:goal.x+passingLane.ux*passingProgress(pose),y:goal.y+passingLane.uy*passingProgress(pose)}:goal;
+   if(initial)originPreview=target;return target;
+  };
   const motionCost=pose=>{
    // Parking specifies a position, not a final heading. An already reached
    // slot must not be scored as another full turn to face its centre.
@@ -644,7 +659,7 @@ export class PredictiveTraffic extends TrafficCoordinator{
     this.stats.forecastCacheHits=(this.stats.forecastCacheHits??0)+1;return cached.value;
    }
    let shapes;
-   if(!(other.driveSpeed??0))shapes=intervals.map(()=>vehicleEnvelope(other,scale,mission.field));
+   if(!(other.driveSpeed??0))shapes=Array(intervals.length).fill(vehicleEnvelope(other,scale,mission.field));
    else{
     let pose=other,time=mission.state.time;shapes=[];
     const control={speed:other.driveSpeed*(other.reversing?-1:1),steering:other.steeringRequested??other.steering??0,fault:other.steeringFault};
@@ -672,7 +687,9 @@ export class PredictiveTraffic extends TrafficCoordinator{
    // Keep a productive forward arc. Reverse is an escape when no forward
    // sample makes progress, not a competing preference on every frame.
    if(pass&&!backingArrival&&best&&best.score<initialCost-.05)break;
-   for(const steering of new Set(steerings))for(const speed of speedPasses[pass]){
+   // A zero traffic cap makes all three forward speeds identical. Evaluate
+   // that candidate once, with all the usual future and live collision checks.
+   for(const steering of new Set(steerings))for(const speed of new Set(speedPasses[pass])){
    this.stats.samples++;
    const control={speed,steering},rejected=new Set();let pose=unit,shape=vehicleEnvelope(unit,scale,mission.field),first=null,clearance=Infinity,valid=true,travel=0,time=mission.state.time;
    // Execution is exactly the first predicted interval, including braking.
@@ -683,13 +700,32 @@ export class PredictiveTraffic extends TrafficCoordinator{
      // A new command or changed collision permissions can invalidate a search
      // while it is suspended between frames.
      if(!current()){this.stats.controlDiscards=(this.stats.controlDiscards??0)+1;finish();return false;}
+     originPreview=originTerrain=undefined;
+     firstMotions.clear();
     }
     const step=intervals[i],target=preview(pose),feedback=steering===preferred&&speed>=0?routeSteering(pose,target,scale,speed)
      :steering===reversePreferred&&speed<0?-routeSteering({...pose,heading:wrap(pose.heading+Math.PI)},target,scale,speed):steering;
     const next=integrateControl(pose,{...(passingLane?control:approachingControl(pose,control,target,step,dynamics.braking,final)),steering:feedback,time,fault:unit.steeringFault},step,scale);
     time+=step;this.stats.projections++;
-    if(i===0){first=next;if(!mission.vehicleMotionClear(unit,unit,first,.52,rejected)){valid=false;break;}}
-    if(mission.vehicleTerrainSweep(unit,pose,next,.52,regionSolids)===false){valid=false;break;}
+    if(i===0){
+     first=next;const envelope=vehicleEnvelope(first,scale,mission.field);
+     // Acceleration/braking limits make distinct requested controls reach
+     // exactly the same first pose. Its live sweep has the same origin,
+     // bodies and reservations until this generator yields.
+     let motion=firstMotions.get(envelope);
+     if(motion){for(const body of motion.blockers)rejected.add(body);}
+     else{motion={clear:mission.vehicleMotionClear(unit,unit,first,.52,rejected),blockers:[...rejected]};firstMotions.set(envelope,motion);}
+     if(!motion.clear){valid=false;break;}
+    }
+    // The first live motion check already proved terrain against all nearby
+    // solids. Later stopped predictions share one exact static pose; steering
+    // state alone does not change its hull. Refresh after every suspension.
+    if(i>0){
+     const stationary=atOrigin(pose)&&atOrigin(next);
+     const terrain=stationary&&originTerrain!==undefined?originTerrain:mission.vehicleTerrainSweep(unit,pose,next,.52,regionSolids);
+     if(stationary)originTerrain=terrain;
+     if(terrain===false){valid=false;break;}
+    }
     // Reuse each predicted envelope across all neighbours and candidates.
     // The threshold must also prove the preferred-control clearance below;
     // a smaller early-out bound could needlessly reject that fast path.

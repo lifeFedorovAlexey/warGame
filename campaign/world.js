@@ -21,7 +21,7 @@ import {createGroundEffects} from './ground-effects.js';
 import {updateOilPump} from './oil-pump.js';
 import {createHeadlightPair,setHeadlightPower} from '../demo/vehicle-effects.js';
 import {createCombatEffects} from './combat-effects.js';
-import {placeSelectionRing} from './selection-rings.js';
+import {createSelectionRings} from './selection-rings.js';
 import {createPlacementGrid} from './placement-grid.js';
 import {fitBuildingFoundation} from './building-foundation.js';
 import {SCAV_PROFILES,isInfantry} from './scav-unit-profiles.js';
@@ -137,10 +137,10 @@ export async function createCampaignWorld(host,config,sound,loading){
  const oilMarkers=(expedition?[]:config.oilFields).map(grid=>{const p=field.gridToWorld(grid),root=new T.Group();root.position.set(p.x,p.y,field.heightAt(p.x,p.y)+.25);const ring=new T.Mesh(new T.RingGeometry(10,11.5,24),new T.MeshBasicMaterial({color:'#baac72',transparent:true,opacity:.65,side:T.DoubleSide,depthWrite:false}));root.add(ring);const pipe=new T.Mesh(new T.CylinderGeometry(1.7,2,3,10),new T.MeshStandardMaterial({color:'#44463b',metalness:.6,roughness:.8}));pipe.rotation.x=Math.PI/2;pipe.position.z=1.5;root.add(pipe);scene.add(root);return{root,...p};});
  const artifactObjects=new Map();
  const orderRoutes=createOrderRoutes(T,scene,field);
- const ringGeometry=new T.RingGeometry(1,1.08,64),selectedMaterial=new T.MeshBasicMaterial({color:'#c0ce93',transparent:true,opacity:.85,depthWrite:false,side:T.DoubleSide,polygonOffset:true,polygonOffsetFactor:-1}),selectionRings=[];
+ const ringGeometry=new T.RingGeometry(1,1.08,64),selectedMaterial=new T.MeshBasicMaterial({color:'#c0ce93',transparent:true,opacity:.85,depthWrite:false,side:T.DoubleSide,polygonOffset:true,polygonOffsetFactor:-1});
  const blockerMaterial=new T.MeshBasicMaterial({color:'#ff352b',transparent:true,opacity:.95,depthWrite:false,side:T.DoubleSide,polygonOffset:true,polygonOffsetFactor:-1});
  selectionRoot.name='selection_rings';
- for(let i=0;i<48;i++){const ring=new T.Mesh(ringGeometry.clone(),selectedMaterial);ring.visible=false;selectionRoot.add(ring);selectionRings.push(ring);}
+ const selectionRings=createSelectionRings(T,selectionRoot,field,ringGeometry,[selectedMaterial,blockerMaterial]);
  const marker=new T.Mesh(new T.RingGeometry(6,7,32),new T.MeshBasicMaterial({color:'#cfb473',transparent:true,opacity:.7,depthWrite:false,side:T.DoubleSide}));marker.visible=false;scene.add(marker);let markerUntil=0;
  const placementGrid=createPlacementGrid(T,scene,field,config);
  let ghost=null,ghostKind=null,ghostValid=null;const ghostMaterials=[];
@@ -437,16 +437,14 @@ export async function createCampaignWorld(host,config,sound,loading){
     object.userData.pumpPhase,aim?.x,aim?.y,aim?.z,recoil);
   }
   const blockers=mission.navigationDiagnostics?.blockingIds??new Set(),marked=new Set([...blockers,...selected]);
-  let index=0;
+  selectionRings.begin();
   for(const id of marked){
    const entity=mission.entity(id);if(!entity||entity.factoryVisit?.phase==='inside'||entity.hp<=0||entity.owner!=='rai'&&!mission.visibleAt(entity.x,entity.y))continue;
-   if(index>=selectionRings.length){const ring=new T.Mesh(ringGeometry.clone(),selectedMaterial);selectionRoot.add(ring);selectionRings.push(ring);}
-   const ring=selectionRings[index++],pose=vehicles.transforms.get(id)?.position,profile=SCAV_PROFILES[entity.kind];
-   ring.visible=true;ring.material=blockers.has(id)?blockerMaterial:selectedMaterial;ring.userData.entity=id;ring.userData.trafficBlocker=blockers.has(id);
+   const pose=vehicles.transforms.get(id)?.position,profile=SCAV_PROFILES[entity.kind];
    const radius=entity.path?(profile?.infantry?3:profile?Math.max(8,profile.boxes[0][2]*config.worldScale):8):Math.max(entity.halfWidth,entity.halfDepth)*1.1;
-   placeSelectionRing(ring,field,pose?.x??entity.x,pose?.y??entity.y,radius);
+   selectionRings.add(pose?.x??entity.x,pose?.y??entity.y,radius,blockers.has(id)?1:0);
   }
-  for(;index<selectionRings.length;index++)selectionRings[index].visible=false;
+  selectionRings.end();
   for(const event of shotsThisFrame){
    if(event.type==='explosion'){
     if(event.owner==='rai'||mission.visibleAt(event.to.x,event.to.y))combat.explode(new T.Vector3(event.to.x,event.to.y,event.to.z),event.radius,now,camera);

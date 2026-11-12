@@ -18,17 +18,20 @@ export function turningHeadway(mission,unit,point,dt,scale,blockers,grade=.52,ac
  // apart than four scale units. A sharp turn also probes approaching traffic.
  const curve=actualCurve??Math.tan(Math.max(-dynamics.steeringLimit,Math.min(dynamics.steeringLimit,angle*1.55)));
  const turning=Math.abs(curve)>1e-4,radius=horizon+vehicleRadiusBound(unit.kind,scale);
- const neighbours=turning?mission.nearbyUnits(unit,horizon+maneuverAdmissionRadius(mission,unit,dt))
+ const neighbours=curve!==0?mission.nearbyUnits(unit,horizon+maneuverAdmissionRadius(mission,unit,dt))
   :mission.vehicleMotionNeighbours(unit,unit,{...unit,x:unit.x-Math.sin(unit.heading)*horizon,y:unit.y+Math.cos(unit.heading)*horizon});
+ const solids=mission.nav.nearbySolids(unit,horizon+scale*4.8);
  if(!neighbours.some(other=>other!==unit&&other.hp>0&&trafficCollisionRequired(unit,other))
-  &&!mission.nav.nearbySolids(unit,radius).length&&!corridorWithinReach(mission,unit,radius))return Infinity;
+  &&!solids.length&&!corridorWithinReach(mission,unit,radius))return Infinity;
  // A straight route intent does not describe a body still following a
  // curved approach. The selected physical arc cannot enter a neighbour's
  // unavoidable braking path, even after the nose faces its waypoint.
  let clearDistance=0,terrainOnly=false;
  const safe=checkManeuver(unit,[{direction:1,curve,remaining:horizon}],scale,(from,to)=>{
   const hit=new Set();
-  if(!mission.vehicleMotionClear(unit,from,to,grade,hit)){
+  // Every sample belongs to this same short synchronous arc. Query its whole
+  // region once, then retain the exact swept-body and per-obstacle checks.
+  if(!mission.vehicleMotionClear(unit,from,to,grade,hit,neighbours,undefined,solids)){
    for(const other of hit)blockers?.add(other);
    const solids=mission.nav.nearbySolids(to,scale*4.8);
    const solid=solids.length&&!mission.nav.clearSolidSweep(vehicleSweep(from,to,scale,mission.field),solids);
@@ -37,7 +40,7 @@ export function turningHeadway(mission,unit,point,dt,scale,blockers,grade=.52,ac
    terrainOnly=!hit.size&&!solid;return false;
   }
   if(turning){
-   const approaching=maneuverAdmissionBlocker(mission,unit,from,to,dt);
+   const approaching=maneuverAdmissionBlocker(mission,unit,from,to,dt,neighbours);
    if(approaching){blockers?.add(approaching);return false;}
   }
   clearDistance+=Math.hypot(to.x-from.x,to.y-from.y);return true;

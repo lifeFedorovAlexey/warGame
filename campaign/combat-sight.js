@@ -3,6 +3,7 @@ import {generatorLayout} from './generator-layout.js';
 import {M02_STATION_SCALE} from './mission02-base-layout.js';
 
 const profiles=new Map();
+const buildingProfiles=new WeakMap();
 const volumeRadii=new WeakMap();
 function sightRadius(boxes){
  let radius=volumeRadii.get(boxes);if(radius!==undefined)return radius;
@@ -13,6 +14,18 @@ function sightRadius(boxes){
 // opaque structural volumes from the existing prefabs, not the larger
 // construction exclusion footprint. Open pump/tower frames stay open.
 export function sightVolumes(building,spec,scale){
+ if(spec.sightVolumes)return spec.sightVolumes;
+ const cached=buildingProfiles.get(building),size=spec.realSizeMetres,profile=building.fenceProfile;
+ if(cached&&cached.kind===building.kind&&cached.variant===building.scavVariant&&cached.owner===building.owner&&cached.base===building.m02Base&&cached.camp===building.campId
+  &&cached.width===building.halfWidth&&cached.depth===building.halfDepth&&cached.span===building.fenceSpan&&cached.scale===scale
+  &&cached.w===size?.[0]&&cached.d===size?.[1]&&cached.h===size?.[2]
+  &&cached.p0===profile?.[0]&&cached.p1===profile?.[1]&&cached.p2===profile?.[2])return cached.boxes;
+ const boxes=computeSightVolumes(building,spec,scale);
+ buildingProfiles.set(building,{kind:building.kind,variant:building.scavVariant,owner:building.owner,base:building.m02Base,camp:building.campId,
+  width:building.halfWidth,depth:building.halfDepth,span:building.fenceSpan,scale,w:size?.[0],d:size?.[1],h:size?.[2],
+  p0:profile?.[0],p1:profile?.[1],p2:profile?.[2],boxes});return boxes;
+}
+function computeSightVolumes(building,spec,scale){
  if(building.kind==='scav-gate'&&building.scavVariant==='m02-open-leaf')return [[0,0,.2,.2,building.fenceSpan,2.6],[0,-building.fenceSpan/2,0,.4,.42,3.9]];
  if(building.kind==='scav-fence'){
   const span=building.fenceSpan??7,profile=building.fenceProfile??[0,0,0],key='fence|'+span+'|'+profile;
