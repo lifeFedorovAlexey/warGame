@@ -14,6 +14,7 @@ import {createScavPrefab} from './scav-prefabs.js';
 import {createScavBasePrefab} from './scav-base-prefabs.js';
 import {createScavEmplacement} from './scav-emplacement.js';
 import {createScavYardSurface} from './scav-yard-surface.js';
+import {mountainTrail} from '../assets/maps/alpha/mountain-trail.js';
 import {aimTowerWeapon,towerDamagePose} from './tower-weapon.js';
 import {mgRecoil,twinBarrelDelay} from './mg-burst.js';
 import {createShadowCasters} from './shadow-casters.js';
@@ -98,6 +99,10 @@ export async function createCampaignWorld(host,config,sound,loading){
  field.missionBaseRoads=baseYard.roads;field.localRoads=baseYard.roads;
  const mission02Sites=expedition?absentEnvironment():createMission02Sites(T,field,addFog);scene.add(mission02Sites.root);
  const scavYardSurface=expedition?absentEnvironment():createScavYardSurface(T,field,addFog);scene.add(scavYardSurface.root);
+ if(!expedition){
+  const trail=scavYardSurface.trail(mountainTrail.map(field.gridToWorld),23);
+  trail.name='mountain_trail';terrain.root.add(trail);
+ }
  const dressing=expedition?absentEnvironment():createDesertDressing(T,field,config,[...terrain.roadPaths,...baseYard.roads,...field.m02Roads],dam.layout,addFog);scene.add(dressing.root);
  const factoryRoads=createFactoryRoadView(T,scene,field,terrain,baseYard.roads,addFog,roads=>{baseYard.setAccessRoads(roads);dressing.setAccessRoads(roads);});
  const damage=createDamageSystem(T,scene,field,config);

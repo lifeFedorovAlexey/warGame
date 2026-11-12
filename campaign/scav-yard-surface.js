@@ -17,7 +17,7 @@ export function createScavYardSurface(T,field,addFog){
  }
  function patch(camp,rect,kind,fade,outline=null,step=field.renderCell){
   const [l,b,r,t]=rect.map((v,i)=>v+(i%2?camp.y:camp.x)),vertices=[],uv=[],alpha=[];
-  const put=(x,y)=>{
+  const opacity=(x,y)=>{
    let edge=Math.min(x-l,r-x,y-b,t-y);
    if(outline){
     const px=x-camp.x,py=y-camp.y;let inside=false,gap=Infinity;
@@ -30,12 +30,34 @@ export function createScavYardSurface(T,field,addFog){
    }
    const wear=Math.sin(x*.13+y*.19)*1.4+Math.sin(y*.31-x*.07)*.8;
    const a=Math.max(0,Math.min(1,(edge+wear)/fade));
-   vertices.push(x,y,field.heightAt(x,y)+.2);uv.push(x/23,y/23);alpha.push(a*a*(3-2*a)*(kind==='gravel'?.66:.88));
+   return a*a*(3-2*a)*(kind==='gravel'?.66:.88);
   };
-  for(let y=Math.floor(b/step)*step;y<t;y+=step)for(let x=Math.floor(l/step)*step;x<r;x+=step)
-   for(const [dx,dy] of [[0,0],[1,0],[1,1],[0,0],[1,1],[0,1]])put(x+dx*step,y+dy*step);
+  const put=(x,y,a)=>{vertices.push(x,y,field.heightAt(x,y)+.2);uv.push(x/23,y/23);alpha.push(a);};
+  for(let y=Math.floor(b/step)*step;y<t;y+=step)for(let x=Math.floor(l/step)*step;x<r;x+=step){
+   const east=x+step,north=y+step;
+   const sw=opacity(x,y),se=opacity(east,y),ne=opacity(east,north),nw=opacity(x,north);
+   if(Math.max(sw,se,ne,nw)<.02)continue;
+   put(x,y,sw);put(east,y,se);put(east,north,ne);
+   put(x,y,sw);put(east,north,ne);put(x,north,nw);
+  }
   const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(vertices,3));g.setAttribute('uv',new T.Float32BufferAttribute(uv,2));g.setAttribute('groundAlpha',new T.Float32BufferAttribute(alpha,1));g.computeVertexNormals();
   const mesh=new T.Mesh(g,materials[kind]);mesh.receiveShadow=true;mesh.userData.decorative=true;root.add(mesh);
+  return mesh;
+ }
+
+ function trail(points,width){
+  const curve=new T.CatmullRomCurve3(points.map(p=>new T.Vector3(p.x,p.y,0)));
+  const centre=curve.getSpacedPoints(Math.ceil(curve.getLength()/10));
+  const left=[],right=[];
+  for(let i=0;i<centre.length;i++){
+   const p=centre[i],a=centre[Math.max(0,i-1)],b=centre[Math.min(centre.length-1,i+1)];
+   const taper=Math.min(1,i/3,(centre.length-1-i)/3),radius=(width/2+1.8*Math.sin(i*.8))*taper;
+   const scale=radius/Math.hypot(b.x-a.x,b.y-a.y),dx=(b.y-a.y)*scale,dy=(a.x-b.x)*scale;
+   left.push([p.x-dx,p.y-dy]);right.push([p.x+dx,p.y+dy]);
+  }
+  const outline=[...left,...right.reverse().slice(1,-1)],xs=outline.map(p=>p[0]),ys=outline.map(p=>p[1]);
+  const bounds=[Math.min(...xs)-3,Math.min(...ys)-3,Math.max(...xs)+3,Math.max(...ys)+3];
+  return patch({x:0,y:0},bounds,'gravel',6,outline,field.renderCell/2);
  }
  let signature='';
  function update(mission){
@@ -64,5 +86,5 @@ export function createScavYardSurface(T,field,addFog){
    }
   }
  }
- return {root,update,patch,materials:Object.values(materials)};
+ return {root,update,patch,trail,materials:Object.values(materials)};
 }
