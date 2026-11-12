@@ -43,7 +43,7 @@ export function installMinimapInput(canvas,{mission,enabled,mode,building,order,
 }
 
 export function createMinimap(canvas,{world,mission,selected,background,notify}){
- const base=document.createElement('canvas'),ctx=canvas.getContext('2d'),cached=base.getContext('2d'),alerts=new MinimapAlerts(notify);
+ const base=document.createElement('canvas'),ctx=canvas.getContext('2d'),cached=base.getContext('2d'),alerts=new MinimapAlerts(notify,mission);
  const surface=document.createElement('canvas'),surfaceContext=surface.getContext('2d');
  let refreshed=-Infinity,boundsKey='',cachedCssSize=canvas.clientWidth||132;
  new ResizeObserver(entries=>{cachedCssSize=entries[0].contentRect.width||132;refreshed=-Infinity;}).observe(canvas);
@@ -97,5 +97,5 @@ export function createMinimap(canvas,{world,mission,selected,background,notify})
    ctx.stroke();ctx.restore();
   }
  }
- return {alerts,render,observe:(tasks,now)=>alerts.observe(mission,tasks,now),reset(silent){alerts.reset(silent);refreshed=-Infinity;},invalidate(){refreshed=-Infinity;}};
+ return {alerts,render,observe:(tasks,now)=>alerts.observe(mission,tasks,now),reset(silent){alerts.reset(silent);world.attackPulses?.set([]);refreshed=-Infinity;},invalidate(){refreshed=-Infinity;}};
 }
