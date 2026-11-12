@@ -28,7 +28,7 @@ for(const cue of [...source.dialogue,...source.barks]){
  assert(clip.duration>0);
  if(cue.speaker!=='past')assert(portraits.characters[cue.speaker],cue.speaker);
 }
-assert.equal(userCount,101);assert.equal(elevenlabsCount,67);
+assert.equal(userCount,101);assert.equal(elevenlabsCount,75);
 assert.equal(audio.clips['m01-s07-l014'].voiceName,'Mishka Yaponcik - Odessa Rogue Charm');
 assert.equal(hash(fs.readFileSync(base+'recordings/reviewed/m01-s07-l014-4e14be06b9b1.mp3')),'4e14be06b9b1155f9d172d2ad351ef622770b629d1241313303b233a4ca38308');
 for(const id of ['m01-v3-r24-l001','m01-v3-r24-l002','m01-v3-r24-l003'])assert.equal(audio.clips[id].origin,'user-recording',id);
@@ -52,6 +52,15 @@ assert.equal(source.scenes.find(s=>s.id==='r50').cues.length,4);
 assert.equal(source.scenes.find(s=>s.id==='r06').cues.length,3);
 assert.equal(source.dialogue.find(l=>l.id==='m01-s05-l012').text,'Из букв «У», «А», «З» слово «танк» не собирается.');
 assert(audio.clips['m01-s05-l012'].spokenText.includes('«У», «А», «Зэ»'));
+const petrovich=source.scenes.find(s=>s.id==='r42').cues.map(id=>source.dialogue.find(l=>l.id===id));
+assert.equal(petrovich.length,14);
+assert.deepEqual(petrovich.slice(3,7).map(l=>l.text),['Кто у вас главный?','Петрович.','Должность?','Ну… Петрович.']);
+assert.deepEqual(petrovich.slice(7).map(l=>l.text),[
+ 'Конституция имеется?','А у тебя?','У меня приказ.','Вот и у меня. Только я сам отдаю.',
+ 'Прикажи себе сдаться. Заодно дисциплину проверим.','Да ты сначала зайди сюда!',
+ 'Слышали, ребята? Нас пригласили. Заходим.',
+]);
+assert(!source.dialogue.some(l=>l.id.startsWith('m01-v4-r42-')||['m01-s11-l009','m01-s11-l010'].includes(l.id)));
 assert.deepEqual(applyStoryEdits(source,audio,applied),{story:source,audio},'Applied snapshots are idempotent');
 assert.deepEqual(originalStory,read('story-v2.json'),'Applying a snapshot does not mutate the base');
 assert.deepEqual(originalAudio,read('audio-v2.json'));
@@ -205,8 +214,11 @@ for(const keys of [['flamethrower','mg-ammo-1'],['mg-ammo-1','flamethrower']]){
  tower.hp=0;assert.notEqual(f.tick()?.storyScene,'r38','A destroyed tower alone does not mean its whole camp is clear');
  f.mission.state.camps[2].cleared=true;f.mission.state.artifactKeys.push('mg-tower');assert.equal(f.tick().storyScene,'r38');f.finish();
  const hq=f.building('camp-core',true,'scavs','camp3');assert.equal(f.tick().storyScene,'r41');f.finish();
+ f.mission.state.units.push({id:'player',owner:'rai',hp:100,x:-10,y:-10,order:{type:'hold'},path:[]});
+ const ordersBefore=JSON.parse(JSON.stringify(f.mission.state.units));
  assert.equal(f.tick().storyScene,'r42');f.director.completeLine();
  f.mission.effects=[{type:'shot',from:'player',targetId:hq.id}];assert.equal(f.tick().storyScene,'r42');assert.equal(f.director.record('r42').cursor,1);f.finish();
+ assert.deepEqual(f.mission.state.units,ordersBefore,'The invitation is dialogue, never a movement or attack command');
  assert.equal(f.tick().storyScene,'r46');f.finish();hq.hp=0;f.mission.effects=[];f.tick(20);
  assert.equal(f.director.record('r42').status,'done');assert(!f.director.data.scenes.r45);
 }

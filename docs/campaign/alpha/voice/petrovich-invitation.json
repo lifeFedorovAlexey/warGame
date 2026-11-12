@@ -1,0 +1,400 @@
+{
+  "scene": "r42",
+  "status": "awaiting-owner-listening-before-merge",
+  "approval": "Owner approved exact seven-line constitution exchange and restoration of original opening, including who is in charge / position; audition before merge.",
+  "sourceDraftRevision": 224,
+  "savedDraftRevision": 225,
+  "generatedRecordings": 6,
+  "reusedRecordings": 8,
+  "reservedCredits": 295,
+  "originalAudioPreserved": true,
+  "otherScenesUnchanged": true,
+  "newGameplayCommands": false,
+  "retiredCues": [
+    "m01-s11-l009",
+    "m01-s11-l010",
+    "m01-v4-r42-l001",
+    "m01-v4-r42-l002",
+    "m01-v4-r42-l003",
+    "m01-v4-r42-l004",
+    "m01-v4-r42-l005",
+    "m01-v4-r42-l006"
+  ],
+  "newCues": [
+    "m01-v5-r42-l009",
+    "m01-v5-r42-l010",
+    "m01-v5-r42-l011",
+    "m01-v5-r42-l012",
+    "m01-v5-r42-l013",
+    "m01-v5-r42-l014"
+  ],
+  "lines": [
+    {
+      "id": "m01-s11-l001",
+      "speaker": "chief",
+      "text": "Слышь, командир! Вы чё к нам пристали?! Мы тут уже сто лет живём!",
+      "audio": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-s11-l001-b5757000d3f2.mp3"
+    },
+    {
+      "id": "m01-s11-l002",
+      "speaker": "commander",
+      "text": "Какое у вас государственное образование?",
+      "audio": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-s11-l002-f67cdd75de30.mp3"
+    },
+    {
+      "id": "m01-s11-l003",
+      "speaker": "chief",
+      "text": "Чего?",
+      "audio": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-s11-l003-f55b022a480d.mp3"
+    },
+    {
+      "id": "m01-s11-l004",
+      "speaker": "commander",
+      "text": "Кто у вас главный?",
+      "audio": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-s11-l004-4e300026b671.mp3"
+    },
+    {
+      "id": "m01-s11-l005",
+      "speaker": "chief",
+      "text": "Петрович.",
+      "audio": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-s11-l005-dc2761e92dbd.mp3"
+    },
+    {
+      "id": "m01-s11-l006",
+      "speaker": "commander",
+      "text": "Должность?",
+      "audio": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-s11-l006-563d746d9757.mp3"
+    },
+    {
+      "id": "m01-s11-l007",
+      "speaker": "chief",
+      "text": "Ну… Петрович.",
+      "audio": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-s11-l007-227f54bb39fa.mp3"
+    },
+    {
+      "id": "m01-s11-l008",
+      "speaker": "commander",
+      "text": "Конституция имеется?",
+      "audio": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-s11-l008-f972f8c51555.mp3"
+    },
+    {
+      "id": "m01-v5-r42-l009",
+      "speaker": "chief",
+      "text": "А у тебя?",
+      "audio": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-v5-r42-l009-90cba10f36d1.mp3"
+    },
+    {
+      "id": "m01-v5-r42-l010",
+      "speaker": "commander",
+      "text": "У меня приказ.",
+      "audio": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-v5-r42-l010-a07ed3bc68bf.mp3"
+    },
+    {
+      "id": "m01-v5-r42-l011",
+      "speaker": "chief",
+      "text": "Вот и у меня. Только я сам отдаю.",
+      "audio": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-v5-r42-l011-f7c11885572a.mp3"
+    },
+    {
+      "id": "m01-v5-r42-l012",
+      "speaker": "commander",
+      "text": "Прикажи себе сдаться. Заодно дисциплину проверим.",
+      "audio": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-v5-r42-l012-8fe62faa07e4.mp3"
+    },
+    {
+      "id": "m01-v5-r42-l013",
+      "speaker": "chief",
+      "text": "Да ты сначала зайди сюда!",
+      "audio": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-v5-r42-l013-76aac33a7283.mp3"
+    },
+    {
+      "id": "m01-v5-r42-l014",
+      "speaker": "commander",
+      "text": "Слышали, ребята? Нас пригласили. Заходим.",
+      "audio": "assets/campaign/alpha/mission01/recordings/elevenlabs/m01-v5-r42-l014-c41e47f01629.mp3"
+    }
+  ],
+  "clips": {
+    "m01-s11-l001": {
+      "file": "recordings/elevenlabs/m01-s11-l001-b5757000d3f2.mp3",
+      "duration": 4.72,
+      "leadingSilence": 0.04,
+      "trailingSilence": 0.3099999999999996,
+      "speaker": "chief",
+      "text": "Слышь, командир! Вы чё к нам пристали?! Мы тут уже сто лет живём!",
+      "sha256": "b5757000d3f2934c8cc3cc0af69bf3072a4bef4fea58c9144f822fc544991ce1",
+      "bytes": 76529,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "hD8aK7CmEPgH3mbFO08e",
+      "voiceName": "Ivo - Calming, chill and narrative",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:23:42.181Z",
+      "draftRevision": 217
+    },
+    "m01-s11-l002": {
+      "file": "recordings/elevenlabs/m01-s11-l002-f67cdd75de30.mp3",
+      "duration": 2.64,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.10999999999999988,
+      "speaker": "commander",
+      "text": "Какое у вас государственное образование?",
+      "sha256": "f67cdd75de306b365521e5bb310d73ad8bda47c392abaf226e2372655ff54186",
+      "bytes": 43510,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:23:43.515Z",
+      "draftRevision": 217
+    },
+    "m01-s11-l003": {
+      "file": "recordings/elevenlabs/m01-s11-l003-f55b022a480d.mp3",
+      "duration": 1.2,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.35,
+      "speaker": "chief",
+      "text": "Чего?",
+      "sha256": "f55b022a480db8f68dc157eb0cb1bf1adcf223efd6823f1fb9aa0fd89ef7db6b",
+      "bytes": 20105,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "hD8aK7CmEPgH3mbFO08e",
+      "voiceName": "Ivo - Calming, chill and narrative",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:23:44.433Z",
+      "draftRevision": 217
+    },
+    "m01-s11-l004": {
+      "file": "recordings/elevenlabs/m01-s11-l004-4e300026b671.mp3",
+      "duration": 1.28,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.1499999999999999,
+      "speaker": "commander",
+      "text": "Кто у вас главный?",
+      "sha256": "4e300026b67107467d944d96082659b78685dc7cba1ef0250c18261ed1c2101f",
+      "bytes": 21358,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:23:45.350Z",
+      "draftRevision": 217
+    },
+    "m01-s11-l005": {
+      "file": "recordings/elevenlabs/m01-s11-l005-dc2761e92dbd.mp3",
+      "duration": 1.36,
+      "leadingSilence": 0.06,
+      "trailingSilence": 0.18000000000000016,
+      "speaker": "chief",
+      "text": "Петрович.",
+      "sha256": "dc2761e92dbd004751b2f871da368481a1982a57ca7f7a71919b235c622b2496",
+      "bytes": 23030,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "hD8aK7CmEPgH3mbFO08e",
+      "voiceName": "Ivo - Calming, chill and narrative",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:23:46.251Z",
+      "draftRevision": 217
+    },
+    "m01-s11-l006": {
+      "file": "recordings/elevenlabs/m01-s11-l006-563d746d9757.mp3",
+      "duration": 1.04,
+      "leadingSilence": 0.02,
+      "trailingSilence": 0.28,
+      "speaker": "commander",
+      "text": "Должность?",
+      "sha256": "563d746d9757bd8302c7848ca2bb8c56866007a4665f4a97fe1a0ca378b203ca",
+      "bytes": 17597,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:23:47.040Z",
+      "draftRevision": 217
+    },
+    "m01-s11-l007": {
+      "file": "recordings/elevenlabs/m01-s11-l007-227f54bb39fa.mp3",
+      "duration": 2.24,
+      "leadingSilence": 0.03,
+      "trailingSilence": 0.18000000000000016,
+      "speaker": "chief",
+      "text": "Ну… Петрович.",
+      "sha256": "227f54bb39fa1f26489144b87892a4375a87442469e7a62aaeb735646fb938f3",
+      "bytes": 36823,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "hD8aK7CmEPgH3mbFO08e",
+      "voiceName": "Ivo - Calming, chill and narrative",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:23:48.043Z",
+      "draftRevision": 217
+    },
+    "m01-s11-l008": {
+      "file": "recordings/elevenlabs/m01-s11-l008-f972f8c51555.mp3",
+      "duration": 1.92,
+      "leadingSilence": 0.05,
+      "trailingSilence": 0.16999999999999993,
+      "speaker": "commander",
+      "text": "Конституция имеется?",
+      "sha256": "f972f8c515553170d75b10bbc4095840ea08c110f8c1cdc3064d4193e851815a",
+      "bytes": 31807,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:23:49.272Z",
+      "draftRevision": 217
+    },
+    "m01-v5-r42-l009": {
+      "file": "recordings/elevenlabs/m01-v5-r42-l009-90cba10f36d1.mp3",
+      "speaker": "chief",
+      "text": "А у тебя?",
+      "spokenText": "[challenging, curt] А у тебя?",
+      "voiceId": "hD8aK7CmEPgH3mbFO08e",
+      "voiceName": "Ivo - Calming, chill and narrative",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "90cba10f36d109def1aa9bf8d6b7741ec3eaaa22a68b3bd08bfe8869f2f31f69",
+      "bytes": 18851,
+      "generatedAt": "2026-11-12T00:26:22.552Z",
+      "duration": 1.12,
+      "leadingSilence": 0.2,
+      "trailingSilence": 0.29000000000000004
+    },
+    "m01-v5-r42-l010": {
+      "file": "recordings/elevenlabs/m01-v5-r42-l010-a07ed3bc68bf.mp3",
+      "speaker": "commander",
+      "text": "У меня приказ.",
+      "spokenText": "[dry, firm] У меня приказ.",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "a07ed3bc68bf555bd4d091d3e4ae0869e79914f97c4eed95ba0bc2fb1a1a1930",
+      "bytes": 26792,
+      "generatedAt": "2026-11-12T00:26:22.272Z",
+      "duration": 1.6,
+      "leadingSilence": 0.21,
+      "trailingSilence": 0.3500000000000001
+    },
+    "m01-v5-r42-l011": {
+      "file": "recordings/elevenlabs/m01-v5-r42-l011-f7c11885572a.mp3",
+      "speaker": "chief",
+      "text": "Вот и у меня. Только я сам отдаю.",
+      "spokenText": "[defiant, smug] Вот и у меня. Только я сам отдаю.",
+      "voiceId": "hD8aK7CmEPgH3mbFO08e",
+      "voiceName": "Ivo - Calming, chill and narrative",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "f7c11885572afdde657e772c600d7466be99db65a92e2b18be0245eff6ef9496",
+      "bytes": 44764,
+      "generatedAt": "2026-11-12T00:26:23.541Z",
+      "duration": 2.72,
+      "leadingSilence": 0.02,
+      "trailingSilence": 0.2200000000000002
+    },
+    "m01-v5-r42-l012": {
+      "file": "recordings/elevenlabs/m01-v5-r42-l012-8fe62faa07e4.mp3",
+      "speaker": "commander",
+      "text": "Прикажи себе сдаться. Заодно дисциплину проверим.",
+      "spokenText": "[dryly amused, clipped delivery] Прикажи себе сдаться. Заодно дисциплину проверим.",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "8fe62faa07e445c23c2f664e2852a997023b4d40736c79823ae7df6abc5ee0b3",
+      "bytes": 62318,
+      "generatedAt": "2026-11-12T00:26:23.971Z",
+      "duration": 3.84,
+      "leadingSilence": 0.08,
+      "trailingSilence": 0.18999999999999995
+    },
+    "m01-v5-r42-l013": {
+      "file": "recordings/elevenlabs/m01-v5-r42-l013-76aac33a7283.mp3",
+      "speaker": "chief",
+      "text": "Да ты сначала зайди сюда!",
+      "spokenText": "[angry, defiant] Да ты сначала зайди сюда!",
+      "voiceId": "hD8aK7CmEPgH3mbFO08e",
+      "voiceName": "Ivo - Calming, chill and narrative",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "76aac33a72835b76e9cd2bb490126deb98ca2fa78f79380d8b5c069eba1866f4",
+      "bytes": 35569,
+      "generatedAt": "2026-11-12T00:26:24.524Z",
+      "duration": 2.16,
+      "leadingSilence": 0.02,
+      "trailingSilence": 0.30000000000000004
+    },
+    "m01-v5-r42-l014": {
+      "file": "recordings/elevenlabs/m01-v5-r42-l014-c41e47f01629.mp3",
+      "speaker": "commander",
+      "text": "Слышали, ребята? Нас пригласили. Заходим.",
+      "spokenText": "[confident, dryly amused] Слышали, ребята? Нас пригласили. Заходим.",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "c41e47f016291691713b0d2a05ee4b2e159ed9681d9b3293cbccc3c4d69ad275",
+      "bytes": 57303,
+      "generatedAt": "2026-11-12T00:26:25.297Z",
+      "duration": 3.52,
+      "leadingSilence": 0.08,
+      "trailingSilence": 0.1200000000000001
+    }
+  },
+  "note": "Original opening restored from existing recordings; old percentage exchange and official verdict are inactive. Reserved credits are not verified account debit."
+}

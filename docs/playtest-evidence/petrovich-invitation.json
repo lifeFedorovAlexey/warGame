@@ -1,0 +1,147 @@
+{
+  "status": "review-ready",
+  "previewPort": 8769,
+  "scene": "r42",
+  "activeLines": 14,
+  "newRecordings": 6,
+  "reusedRecordings": 8,
+  "reservedCredits": 295,
+  "draftRevision": 225,
+  "logicChecks": [
+    "live chief required to begin contact",
+    "dialogue completes before assault report",
+    "invitation does not move units or issue attack orders",
+    "retired official verdict and percentage exchange are absent from active cues",
+    "r39 text, scene and recordings unchanged"
+  ],
+  "browser": {
+    "errors": [],
+    "paidRequests": [],
+    "screenshots": [
+      {
+        "path": "campaign/previews/petrovich-invitation/game-desktop.png",
+        "width": 1440,
+        "height": 900
+      },
+      {
+        "path": "campaign/previews/petrovich-invitation/game-landscape.png",
+        "width": 844,
+        "height": 390
+      },
+      {
+        "path": "campaign/previews/petrovich-invitation/game-small-landscape.png",
+        "width": 667,
+        "height": 375
+      }
+    ],
+    "decoded": [
+      {
+        "file": "recordings/elevenlabs/m01-s11-l001-b5757000d3f2.mp3",
+        "duration": 4.72,
+        "expected": 4.72,
+        "peak": 0.8501231670379639
+      },
+      {
+        "file": "recordings/elevenlabs/m01-s11-l002-f67cdd75de30.mp3",
+        "duration": 2.64,
+        "expected": 2.64,
+        "peak": 0.6812298893928528
+      },
+      {
+        "file": "recordings/elevenlabs/m01-s11-l003-f55b022a480d.mp3",
+        "duration": 1.2,
+        "expected": 1.2,
+        "peak": 0.4355798363685608
+      },
+      {
+        "file": "recordings/elevenlabs/m01-s11-l004-4e300026b671.mp3",
+        "duration": 1.28,
+        "expected": 1.28,
+        "peak": 0.5572956800460815
+      },
+      {
+        "file": "recordings/elevenlabs/m01-s11-l005-dc2761e92dbd.mp3",
+        "duration": 1.36,
+        "expected": 1.36,
+        "peak": 0.5188227891921997
+      },
+      {
+        "file": "recordings/elevenlabs/m01-s11-l006-563d746d9757.mp3",
+        "duration": 1.04,
+        "expected": 1.04,
+        "peak": 0.6332920789718628
+      },
+      {
+        "file": "recordings/elevenlabs/m01-s11-l007-227f54bb39fa.mp3",
+        "duration": 2.24,
+        "expected": 2.24,
+        "peak": 0.5390385985374451
+      },
+      {
+        "file": "recordings/elevenlabs/m01-s11-l008-f972f8c51555.mp3",
+        "duration": 1.92,
+        "expected": 1.92,
+        "peak": 0.5709691643714905
+      },
+      {
+        "file": "recordings/elevenlabs/m01-v5-r42-l009-90cba10f36d1.mp3",
+        "duration": 1.12,
+        "expected": 1.12,
+        "peak": 0.8583840131759644
+      },
+      {
+        "file": "recordings/elevenlabs/m01-v5-r42-l010-a07ed3bc68bf.mp3",
+        "duration": 1.6,
+        "expected": 1.6,
+        "peak": 0.6825637817382812
+      },
+      {
+        "file": "recordings/elevenlabs/m01-v5-r42-l011-f7c11885572a.mp3",
+        "duration": 2.72,
+        "expected": 2.72,
+        "peak": 0.8210486173629761
+      },
+      {
+        "file": "recordings/elevenlabs/m01-v5-r42-l012-8fe62faa07e4.mp3",
+        "duration": 3.84,
+        "expected": 3.84,
+        "peak": 0.6588609218597412
+      },
+      {
+        "file": "recordings/elevenlabs/m01-v5-r42-l013-76aac33a7283.mp3",
+        "duration": 2.16,
+        "expected": 2.16,
+        "peak": 0.9237585067749023
+      },
+      {
+        "file": "recordings/elevenlabs/m01-v5-r42-l014-c41e47f01629.mp3",
+        "duration": 3.52,
+        "expected": 3.52,
+        "peak": 0.7076550126075745
+      }
+    ],
+    "game": [
+      {
+        "id": "m01-v5-r42-l014",
+        "file": "recordings/elevenlabs/m01-v5-r42-l014-c41e47f01629.mp3",
+        "state": "running"
+      }
+    ],
+    "editor": [
+      "/assets/campaign/alpha/mission01/recordings/elevenlabs/m01-s11-l001-b5757000d3f2.mp3",
+      "/assets/campaign/alpha/mission01/recordings/elevenlabs/m01-s11-l002-f67cdd75de30.mp3",
+      "/assets/campaign/alpha/mission01/recordings/elevenlabs/m01-s11-l003-f55b022a480d.mp3",
+      "/assets/campaign/alpha/mission01/recordings/elevenlabs/m01-s11-l004-4e300026b671.mp3",
+      "/assets/campaign/alpha/mission01/recordings/elevenlabs/m01-s11-l005-dc2761e92dbd.mp3",
+      "/assets/campaign/alpha/mission01/recordings/elevenlabs/m01-s11-l006-563d746d9757.mp3",
+      "/assets/campaign/alpha/mission01/recordings/elevenlabs/m01-s11-l007-227f54bb39fa.mp3",
+      "/assets/campaign/alpha/mission01/recordings/elevenlabs/m01-s11-l008-f972f8c51555.mp3",
+      "/assets/campaign/alpha/mission01/recordings/elevenlabs/m01-v5-r42-l009-90cba10f36d1.mp3",
+      "/assets/campaign/alpha/mission01/recordings/elevenlabs/m01-v5-r42-l010-a07ed3bc68bf.mp3",
+      "/assets/campaign/alpha/mission01/recordings/elevenlabs/m01-v5-r42-l011-f7c11885572a.mp3",
+      "/assets/campaign/alpha/mission01/recordings/elevenlabs/m01-v5-r42-l012-8fe62faa07e4.mp3",
+      "/assets/campaign/alpha/mission01/recordings/elevenlabs/m01-v5-r42-l013-76aac33a7283.mp3",
+      "/assets/campaign/alpha/mission01/recordings/elevenlabs/m01-v5-r42-l014-c41e47f01629.mp3"
+    ]
+  }
+}
