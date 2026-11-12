@@ -1,6 +1,6 @@
 {
   "scene": "m02-radio-start",
-  "status": "awaiting-owner-listening-before-merge",
+  "status": "owner-approved",
   "approval": "Owner selected this exact four-line exchange and delegated it: «вот так хорошо в работу». Show the full opening for listening before merge.",
   "sourceDraftRevision": 1,
   "savedDraftRevision": 2,
@@ -181,5 +181,10 @@
     }
   },
   "note": "Reserved credits are not a verified account debit.",
-  "previewSeconds": 24.36
+  "previewSeconds": 24.36,
+  "ownerApproval": {
+    "text": "гуд",
+    "approvedAt": "2026-11-12T07:42:28.248890+00:00",
+    "scope": "Merge both reviewed scenes: M01 r45 and M02 opening."
+  }
 }

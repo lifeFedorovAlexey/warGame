@@ -1,6 +1,6 @@
 {
   "scene": "r45",
-  "status": "awaiting-owner-listening-before-merge",
+  "status": "owner-approved",
   "approval": "Owner approved exact wording and delegated implementation through the scenario audit chat. Show finished audio before merging.",
   "sourceDraftRevision": 227,
   "savedDraftRevision": 228,
@@ -84,5 +84,10 @@
       "trailingSilence": 0.2799999999999998
     }
   },
-  "note": "Reserved credits are not a verified account debit. Existing r42 saves resume without inserting r45."
+  "note": "Reserved credits are not a verified account debit. Existing r42 saves resume without inserting r45.",
+  "ownerApproval": {
+    "text": "гуд",
+    "approvedAt": "2026-11-12T07:42:28.248231+00:00",
+    "scope": "Merge both reviewed scenes: M01 r45 and M02 opening."
+  }
 }
