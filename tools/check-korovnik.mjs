@@ -32,8 +32,8 @@ for(let i=0;i<11;i++){
  const p={x:pad.x-100+i%3*36,y:260+Math.floor(i/3)*36};
  ids.push(m.addUnit(i===9?'builder':'bukhanka','rai',p,{heading:pad.heading,paint:i%2?'earth':'olive'}).id);
 }
-assert.equal(m.loadTransport(ids).ok,false);assert.equal(m.state.transport.queue.length,0);
-assert(m.loadTransport(ids.slice(0,10)).ok);assert.equal(m.departTransport().ok,false);
+const batch=m.loadTransport(ids);assert.equal(batch.accepted,10);assert.equal(batch.rejected.length,1);assert.equal(m.state.transport.queue.length,10);
+assert.equal(m.departTransport().ok,false);
 let savedBoarding=false;
 for(let second=0;second<360;second++){
  m.advance(1);

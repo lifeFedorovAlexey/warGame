@@ -15,8 +15,8 @@ export function createScavYardSurface(T,field,addFog){
   };
   material.customProgramCacheKey=()=> 'scav_ground_alpha_v1';addFog(material);materials[kind]=material;
  }
- function patch(camp,rect,kind,fade,outline=null){
-  const [l,b,r,t]=rect.map((v,i)=>v+(i%2?camp.y:camp.x)),step=field.renderCell,vertices=[],uv=[],alpha=[];
+ function patch(camp,rect,kind,fade,outline=null,step=field.renderCell){
+  const [l,b,r,t]=rect.map((v,i)=>v+(i%2?camp.y:camp.x)),vertices=[],uv=[],alpha=[];
   const put=(x,y)=>{
    let edge=Math.min(x-l,r-x,y-b,t-y);
    if(outline){
@@ -64,5 +64,5 @@ export function createScavYardSurface(T,field,addFog){
    }
   }
  }
- return {root,update};
+ return {root,update,patch,materials:Object.values(materials)};
 }

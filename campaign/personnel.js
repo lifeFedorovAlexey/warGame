@@ -3,7 +3,7 @@ import {rankById,promotePersonnel} from './personnel-ranks.js';
 import {awardMissionPersonnel} from './personnel-awards.js';
 import {allocateCallsign} from './personnel-callsigns.js';
 
-export const personnelMissionId=mission=>mission.state.m02?'m02':'m01';
+export const personnelMissionId=mission=>mission.state.m03?'m03':mission.state.m02?'m02':'m01';
 const emptyCounts=()=>({enemyUnitsDestroyed:0,enemyStructuresDestroyed:0,ownUnitsLost:0,personnelLost:0});
 const copy=value=>structuredClone(value);
 const mobile=(mission,entity)=>!!mission.config.units[entity?.kind];
@@ -18,7 +18,7 @@ export function ensurePersonnel(mission,{legacy=false}={}){
 
 export function beginPersonnelMission(mission,{legacy=false}={}){
  const p=ensurePersonnel(mission,{legacy}),id=personnelMissionId(mission),s=mission.state;
- return p.missions[id]??={id,startedAt:s.m02?.startedAt??0,trackingStartedAt:legacy?s.time:(s.m02?.startedAt??0),historyComplete:!legacy,
+ return p.missions[id]??={id,startedAt:s.m03?.startedAt??s.m02?.startedAt??0,trackingStartedAt:legacy?s.time:(s.m03?.startedAt??s.m02?.startedAt??0),historyComplete:!legacy,
   baseline:{produced:s.statistics?.produced??0,buildingsCompleted:s.statistics?.buildingsCompleted??0},...emptyCounts(),casualtyIds:[]};
 }
 
@@ -115,9 +115,9 @@ export function finalizeMissionResults(mission){
   durationSeconds:Math.max(0,s.time-phase.startedAt),historyComplete:phase.historyComplete,campaignHistoryComplete:p.historyComplete,
   trackingStartedAt:phase.trackingStartedAt,statistics:{...Object.fromEntries(Object.keys(emptyCounts()).map(key=>[key,phase[key]])),
    produced:Math.max(0,(s.statistics?.produced??0)-phase.baseline.produced),buildingsCompleted:Math.max(0,(s.statistics?.buildingsCompleted??0)-phase.baseline.buildingsCompleted)},
-  casualtyIds:[...phase.casualtyIds],memorialIds:[...p.graveOrder],survivorIds:Object.values(p.soldiers).filter(v=>!v.death).map(v=>v.id),
+  casualtyIds:[...phase.casualtyIds],memorialIds:[...p.graveOrder],survivorIds:Object.values(p.soldiers).filter(v=>!v.death&&v.status!=='missing').map(v=>v.id),
   casualties:campaignMemorial(mission,{ids:phase.casualtyIds}),memorial:campaignMemorial(mission),
-  survivors:Object.values(p.soldiers).filter(v=>!v.death).map(copy)};
+  survivors:Object.values(p.soldiers).filter(v=>!v.death&&v.status!=='missing').map(copy)};
  const existing=s.campaign.results[phase.id]??={};
  Object.assign(existing,{status:s.status,time:s.time,personnelReportVersion:1});
  mission.emit?.('mission-results-ready',{mission:phase.id,outcome:s.status});

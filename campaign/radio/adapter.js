@@ -3,6 +3,7 @@ import {stableHash} from './conditions.js';
 import {TacticalIntel} from './tactical-intel.js';
 import {CrewStories} from './crew-stories.js';
 import {CrewBanter,banterCrew} from './crew-banter.js';
+import {loadRecordedSpeech} from './audio.js';
 import {RetreatIncidents,mergeRetreatLibrary} from './retreat-incidents.js';
 
 export const ENGINE_EVENTS={
@@ -80,7 +81,7 @@ export class MissionRadio{
  bind(){
   const m=this.mission;if(this.bound===m.state)return;
   this.bound=m.state;const saved=m.state.dynamicRadio;
-  this.engine=new RadioEngine(this.library,{missionId:m.state.m02?'alpha-m02':m.config.id,saved:saved?.engine,
+  this.engine=new RadioEngine(this.library,{missionId:m.state.m03?'alpha-m03':m.state.m02?'alpha-m02':m.config.id,saved:saved?.engine,
    snapshot:c=>this.snapshot(c),legacy:(r,c)=>this.legacy(r,c)});
   this.traffic=new TrafficIncidents(saved?.traffic);this.previous=new Map(saved?.previous??[]);this.orders=new Map(saved?.orders??[]);this.assignments=new Map(saved?.assignments??[]);
   this.crews=new Map(saved?.crews??[]);this.memories=new Map(saved?.memories??[]);
@@ -94,7 +95,7 @@ export class MissionRadio{
  }
  safe(fn){try{this.bind();if(this.engine.enabled)return fn();}catch(error){this.error=error.message;this.library.settings.enabled=false;console.error('Динамический эфир отключён:',error);}}
  get time(){return this.mission.state.time;}
- get warmingUp(){return this.time-(this.mission.state.m02?.startedAt??0)<15;}
+ get warmingUp(){return this.time-(this.mission.state.m03?.startedAt??this.mission.state.m02?.startedAt??0)<15;}
  clearStartupQueue(){
   this.engine.pending.clear();this.engine.state.queue.length=0;this.engine.state.batch.length=0;this.engine.active=null;
   this.eventWindows.clear();
@@ -282,6 +283,7 @@ export class MissionRadio{
 }
 
 export async function loadRadioLibrary(){
+ await loadRecordedSpeech();
  const response=await fetch('/api/radio/published').catch(()=>null);
  const seed=await fetch(new URL('../../assets/radio/situations_catalog.json',import.meta.url));
  if(!seed.ok){if(response?.ok)return (await response.json()).document;throw Error('Библиотека радио недоступна');}

@@ -3,7 +3,7 @@ import {buildTerrainPassability} from './terrain-passability.js';
 export const KOROVNIK = Object.freeze({capacity:10, width:36, length:64, grid:[20.75,60], heading:Math.PI/2});
 export function transportSite(field,config){
  const scale=config.worldScale??4.5;
- return {...field.gridToWorld(KOROVNIK.grid),heading:KOROVNIK.heading,scale,
+ return {...field.gridToWorld(field.transportGrid??KOROVNIK.grid),heading:field.transportHeading??KOROVNIK.heading,scale,
   halfWidth:KOROVNIK.length*scale/2,halfDepth:KOROVNIK.width*scale/2};
 }
 export function transportPoint(site,x,y,z=0){
@@ -17,7 +17,7 @@ export function transportReservation(field,config,site){
 // Grade before the terrain mesh and navigation are constructed. This is an
 // engineered earth apron, not a floating slab over the original hills.
 export function prepareTransportSite(field){
- if(field.korovnikGrading||!field.renderSamples)return;
+ if(field.mapId==='m03'||field.korovnikGrading||!field.renderSamples)return;
  const pad=transportSite(field,{worldScale:4.5}),height=field.heightAt(pad.x,pad.y),blend=26;
  let maximum=0;
  for(let row=0;row<field.renderSize;row++)for(let col=0;col<field.renderSize;col++){

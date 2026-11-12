@@ -57,6 +57,15 @@ export function buildTerrainPassability(field){
    }
   }
  }
+ // Imported maps can supply impassable source cliff cells. They participate
+ // in the same segment and vehicle sweep checks as authored level walls.
+ for(const item of field.terrainObstacles??[]){
+  const wall={...item};walls.push(wall);
+  for(let y=Math.floor((wall.y-wall.halfDepth)/64);y<=Math.floor((wall.y+wall.halfDepth)/64);y++)
+   for(let x=Math.floor((wall.x-wall.halfWidth)/64);x<=Math.floor((wall.x+wall.halfWidth)/64);x++){
+    const key=x+','+y,list=buckets.get(key)??[];list.push(wall);buckets.set(key,list);
+   }
+ }
  function nearby(a,b=a,padding=0){
   const found=new Set(),left=Math.min(a.x,b.x)-padding,right=Math.max(a.x,b.x)+padding,
    bottom=Math.min(a.y,b.y)-padding,top=Math.max(a.y,b.y)+padding;

@@ -10,6 +10,7 @@ const catalogue = {
   B01: {role:'light', detail:'Кузов фургона', icon:'command', massKg:730, armor:'Без навесной', armorDetail:'Штатный стальной кузов без навесных бронепанелей'},
   U01: {role:'combat', detail:'Пулемёт', icon:'bukhanka', massKg:155},
   U02: {role:'combat', detail:'Два ствола · урон +40%', icon:'twin-gun', massKg:195},
+  'mission-heavy-mg': {role:'combat', detail:'Тяжёлый пулемёт · увеличенные урон и дальность', icon:'heavy-gun', massKg:280},
   U21: {role:'recon', detail:'Обнаружение ×1,5 · без оружия', icon:'sensor', massKg:160},
   U25: {role:'builder', detail:'Стройка и ремонт', icon:'builder', massKg:175},
   'mission-flamer': {role:'combat', detail:'Ближний бой', icon:'flamer', tag:'ОГН', massKg:210},

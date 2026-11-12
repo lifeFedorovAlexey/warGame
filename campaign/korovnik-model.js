@@ -21,8 +21,8 @@ export function createKorovnik(T){
    shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>','#include <color_fragment>\nfloat camo=smoothstep(.45,.59,muNoise(muLocal*.34)+.1*muNoise(muLocal*.9));diffuseColor.rgb*=mix(vec3(.6,.64,.6),vec3(1.1,1.05,.94),camo)*(.94+.09*muNoise(muLocal*14.));');
   };material.customProgramCacheKey=()=>'mu26-clean-camo-v1';
  }
- const batches=new Map();
- function part(parent,g,m,p=[0,0,0],r=[0,0,0]){if(!g.getAttribute('uv'))g.setAttribute('uv',new T.Float32BufferAttribute(new Float32Array(g.getAttribute('position').count*2),2));const mesh=new T.Mesh(g,m);mesh.position.set(...p);mesh.rotation.set(...r);mesh.updateMatrix();g.applyMatrix4(mesh.matrix);let e=batches.get(parent);if(!e)batches.set(parent,e=new Map());if(!e.has(m))e.set(m,[]);e.get(m).push(g.index?g.toNonIndexed():g);if(g.index)g.dispose();}
+ const batches=new Map(),fineDetails=new T.Group();fineDetails.name='mu26_near_details';root.add(fineDetails);
+ function part(parent,g,m,p=[0,0,0],r=[0,0,0]){if(!g.getAttribute('uv'))g.setAttribute('uv',new T.Float32BufferAttribute(new Float32Array(g.getAttribute('position').count*2),2));const mesh=new T.Mesh(g,m);mesh.position.set(...p);mesh.rotation.set(...r);mesh.updateMatrix();g.applyMatrix4(mesh.matrix);if(parent===root&&(m===edge||m===steel)){g.computeBoundingBox();const b=g.boundingBox;if(Math.max(b.max.x-b.min.x,b.max.y-b.min.y,b.max.z-b.min.z)<.65)parent=fineDetails;}let e=batches.get(parent);if(!e)batches.set(parent,e=new Map());if(!e.has(m))e.set(m,[]);e.get(m).push(g.index?g.toNonIndexed():g);if(g.index)g.dispose();}
  const box=(p,size,at,m=hull,r)=>part(p,new T.BoxGeometry(...size),m,at,r),cyl=(p,a,b,h,at,m=steel,r=[Math.PI/2,0,0],n=16)=>part(p,new T.CylinderGeometry(a,b,h,n),m,at,r);
  function beam(p,a,b,r=.07,m=steel){const u=new T.Vector3(...a),v=new T.Vector3(...b),g=new T.CylinderGeometry(r,r,u.distanceTo(v),8);g.applyQuaternion(new T.Quaternion().setFromUnitVectors(new T.Vector3(0,1,0),v.clone().sub(u).normalize()));part(p,g,m,u.add(v).multiplyScalar(.5).toArray());}
  function poly(p,points,m=hull,uv){const xyz=[],tex=[];for(let i=1;i<points.length-1;i++)for(const j of [0,i,i+1]){xyz.push(...points[j]);tex.push(...(uv?.[j]??[[0,0],[1,0],[1,1],[0,1]][j%4]));}const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(xyz,3));g.setAttribute('uv',new T.Float32BufferAttribute(tex,2));g.computeVertexNormals();part(p,g,m);}
@@ -190,5 +190,5 @@ export function createKorovnik(T){
  for(const [parent,entries] of batches)for(const [m,parts] of entries){const g=mergeGeometries(parts,false);parts.forEach(p=>p.dispose());const mesh=new T.Mesh(g,m);mesh.castShadow=mesh.receiveShadow=true;parent.add(mesh);}
  function pose({door=0,rotor=0}={}){for(const [i,r] of rotors.entries())r.rotation.z=(i?-1:1)*rotor+i*Math.PI/8;tail.rotation.z=rotor*1.65;for(const d of doors)d.root.rotation.z=-d.side*door*Math.PI*.56;ramp.rotation.x=(1-door)*-Math.PI/2+door*.255;}
  root.userData.korovnik={mainRotors:rotors.length,wheels:landingGear.length,cargoCapacity:10};
- pose();return {root,materials,rotors,doors,ramp,landingGear,pose};
+ pose();return {root,materials,rotors,doors,ramp,landingGear,pose,setDetail:near=>{fineDetails.visible=near;}};
 }

@@ -40,6 +40,15 @@ const saveKey = 'warGame.alpha.mission01.v1';
 const autoSaveKey='warGame.alpha.autosave.v1',checkpointKey='warGame.alpha.before-m02.v1';
 const diagnosticM02=new URLSearchParams(location.search).get('mission')==='m02';
 const latestSaveKey='warGame.alpha.latest-save.v1';
+const mapKey='warGame.alpha.map-transition.v1';
+const activeMap=new URLSearchParams(location.search).get('map')==='m03'?'m03':'home';
+function transferMap(data){
+ const raw=typeof data==='string'?data:JSON.stringify(data),snapshot=typeof data==='string'?JSON.parse(data):data;
+ localStorage.setItem(autoSaveKey,raw);localStorage.setItem(latestSaveKey,autoSaveKey);sessionStorage.setItem(mapKey,'resume');
+ const url=new URL(location.href);url.searchParams.delete('mission');url.searchParams.delete('transport');
+ if(snapshot.state.m03?.location==='expedition')url.searchParams.set('map','m03');else url.searchParams.delete('map');
+ location.replace(url.href);
+}
 function resumeData(){const latest=localStorage.getItem(latestSaveKey);return latest&&localStorage.getItem(latest)||localStorage.getItem(saveKey)||localStorage.getItem(autoSaveKey);}
 const dataUrl = '../assets/campaign/alpha/mission01/gameplay.json';
 const selected = new Set();
@@ -84,6 +93,7 @@ function knownArtifact(mission){
 }
 function nextObjectiveHint(state,{plant,well},tasks,artifact,contact,southernApproach,warehouseHint){
   if(state.status!=='running')return '';
+  if(state.m03)return '';
   if(state.m02)return 'Разведайте юг, подавите четыре опорных пункта и соберите образцы.';
   if(state.flags.contact&&!state.flags.raidWon)return contact ? 'Отразите рейд на базу.' : 'Прикройте въезд к базе.';
   if(artifact)return 'Подберите артефакт.';
@@ -137,8 +147,8 @@ function staticThreat(contact){
 }
 const isMobile = entity => entity?.owner === 'rai' && !!config.units[entity.kind];
 const hpColor = fraction => fraction > .58 ? '#9cdd69' : fraction > .28 ? '#f1cc58' : '#ed6a4d';
-const sampleNames = {'flamethrower':'Устройство №001','mg-ammo-1':'Образец со склада','mg-tower':'Узел башни','flamer-upgrade':'Усиление огнемёта','twin-machinegun':'Спаренный пулемёт',sensor:'Сенсор','power-module':'Энергомодуль'};
-const sampleIcons = {'flamethrower':'technology','mg-ammo-1':'ammunition','mg-tower':'turret-ring','flamer-upgrade':'damage-upgrade','twin-machinegun':'twin-gun',sensor:'sensor','power-module':'power-upgrade'};
+const sampleNames = {'heavy-machinegun':'Тяжёлый пулемёт','flamethrower':'Устройство №001','mg-ammo-1':'Образец со склада','mg-tower':'Узел башни','flamer-upgrade':'Усиление огнемёта','twin-machinegun':'Спаренный пулемёт',sensor:'Сенсор','power-module':'Энергомодуль'};
+const sampleIcons = {'heavy-machinegun':'heavy-gun','flamethrower':'technology','mg-ammo-1':'ammunition','mg-tower':'turret-ring','flamer-upgrade':'damage-upgrade','twin-machinegun':'twin-gun',sensor:'sensor','power-module':'power-upgrade'};
 const projectLabel = vehicle => latestVehicleProject(mission.state.designs,vehicle,config)?.name
   ?? (vehicle.projectId===vehicle.kind?null:vehicle.designName) ?? config.units[vehicle.kind]?.name;
 
@@ -275,6 +285,7 @@ async function saveGame(notify = true) {
 }
 let loadingGame=false;
 async function start(restore = false) {
+  if(!restore&&activeMap==='m03'){const url=new URL(location.href);url.searchParams.delete('map');location.replace(url.href);return;}
   if(loadingGame)return;
   loadingGame=true;
   sound.unlock();
@@ -286,6 +297,8 @@ async function start(restore = false) {
     try {
       const data = restore==='map-backup'?localStorage.getItem('warGame.alpha.before-map-v2.v1'):restore==='checkpoint'?localStorage.getItem(checkpointKey):restore==='manual'?localStorage.getItem(saveKey):resumeData();
       if (!data) return toast('Сохранения ещё нет');
+      const destination=JSON.parse(data).state.m03?.location==='expedition'?'m03':'home';
+      if(destination!==activeMap){transferMap(data);return;}
       if(restore==='checkpoint')localStorage.setItem('warGame.alpha.before-map-v2.v1',await mission.saveAsync());
       mission.load(data);
       if(radio.director)restoreRadioStory(mission.state);
@@ -318,13 +331,13 @@ async function start(restore = false) {
   blockedOrders.clear();
   $('order-feedback').hidden=true;
   resultsView?.hide();
-  $('results-open').hidden=mission.state.status==='running';
+  $('results-open').hidden=mission.state.status==='running'&&!mission.state.m03?.completedAt;
   $('mission-hud').hidden = false;
   document.querySelector('.settings').open = false;
   const worker = builders()[0];
   const startPoint=world.field.gridToWorld(config.startGrid),signPoint=world.field.gridToWorld(config.openingSignGrid);
   // Establish the initial view once, with both the base and hillside construction visible.
-  const centre = restore&&!openingPlaying ? vehicles()[0] : {x:startPoint.x+(signPoint.x-startPoint.x)*.25,y:startPoint.y+(signPoint.y-startPoint.y)*.25};
+  const centre = mission.state.m03?.location==='expedition' ? mission.transportSite() : restore&&!openingPlaying ? vehicles()[0] : {x:startPoint.x+(signPoint.x-startPoint.x)*.25,y:startPoint.y+(signPoint.y-startPoint.y)*.25};
   if (centre) world.centre(centre, 360);
   openingCamera?.dispose();
   openingCamera=openingPlaying?new OpeningCamera(world,mission):null;
@@ -997,6 +1010,7 @@ function events() {
     if (event.type === 'unit-produced') ordinaryNotice((event.name ?? config.units[event.kind].name) + ' · готово к выезду');
     if (event.type === 'field-modification') toast('Установлено · '+event.name+' · +'+event.massKg+' кг');
     if (event.type === 'construction-refused') toast(event.reason);
+    if(event.type==='m03-completed'){toast(`На базу вернулись: ${event.evacuated.length}. Потеряны: ${event.losses.length}. Остались в районе: ${event.leftBehind.length}. Технология передана в НИИ.`,6500);$('results-open').hidden=false;saveGame(false);}
     if (mission.state.m02&&event.type === 'artifact-collected') toast('Артефакт доставлен в НИИ');
     if (mission.state.m02&&event.type === 'camp-cleared') toast('Лагерь зачищен');
   }
@@ -1088,6 +1102,7 @@ try {
   const response = await fetch(dataUrl);
   if (!response.ok) throw new Error('Конфигурация миссии ' + response.status);
   config = await response.json();
+  config.activeMap=activeMap;
   const story = await loadMissionStory();
   sound = new FieldSound($('sound-toggle'), $('story-voice-toggle'));
   openingTelevision = new OpeningTelevision(sound,{
@@ -1171,12 +1186,15 @@ try {
   };
   const {installKorovnikControls}=await import('./korovnik-controls.js');
   window.campaign.transportControls=installKorovnikControls(window.campaign);
+  const {installM03Client}=await import('./mission03-client.js');
+  window.campaign.expeditionClient=installM03Client(window.campaign,{travel:transferMap,notify:toast});
   if(new URLSearchParams(location.search).has('damage')){
     const [{installDamageDebug},T]=await Promise.all([import('./damage-debug.js'),import('three')]);
     window.campaign.damageDebug=installDamageDebug(T,world,mission,window.campaign);
   }
   if(new URLSearchParams(location.search).has('navigation'))await toggleNavigationDebug(true);
-  miniBackground.src = '../assets/maps/alpha/macro-albedo.jpg';
+  if(activeMap!=='m03')miniBackground.src = '../assets/maps/alpha/macro-albedo.jpg';
+  else{const {m03Minimap}=await import('./mission03-map.js');miniBackground.src=m03Minimap(world.field);}
   installInput();
   let hasSave=false;
   try { hasSave=!!resumeData(); } catch {}
@@ -1228,17 +1246,18 @@ try {
   }});
   $('results-open').onclick=()=>resultsView.show(mission);
   $('result-continue').onclick=async()=>{
-    if(enteringM02||mission.state.m02||mission.state.status!=='victory')return;
+    if(enteringM02||mission.state.m03||mission.state.status!=='victory')return;
     enteringM02=true;$('result-continue').disabled=true;
     try{
       try{localStorage.setItem(checkpointKey,await mission.saveAsync());}catch{return toast('Не удалось создать контрольное сохранение');}
-      const result=mission.enterM02();if(!result.ok)return report(result);
+      const result=mission.state.m02?mission.enterM03():mission.enterM02();if(!result.ok)return report(result);
       resultShown=false;resultPrepared=false;resultsView.hide();$('results-open').hidden=true;radio.reset();taskKey='';actionKey='';world.storySignals.show(null);
       await saveGame(false);updateUi();
     }finally{enteringM02=false;$('result-continue').disabled=false;}
   };
   $('result-close').onclick = () => resultsView.hide();
   $('result-menu').onclick = () => {resultsView.hide();$('main-menu-return').click();};
+  if(sessionStorage.getItem(mapKey)==='resume'){sessionStorage.removeItem(mapKey);await start(true);}
 } catch (error) {
   console.error(error);
   mainMenu.error('Ошибка запуска. ' + error.message);

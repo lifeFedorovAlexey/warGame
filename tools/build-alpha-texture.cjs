@@ -2,6 +2,7 @@
 const {chromium}=require('C:/Users/Алексей/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
 const fs=require('node:fs'),path=require('node:path');
 (async()=>{
+ const {alphaTerrainPalette}=await import('../demo/terrain-palette.js');
  const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true});
  try{
   const page=await browser.newPage();await page.goto('http://127.0.0.1:8766/references/terrain/README.md');
@@ -9,7 +10,7 @@ const fs=require('node:fs'),path=require('node:path');
   const {campBaseLayout}=await import('../campaign/scav-base-layout.js'),config=JSON.parse(fs.readFileSync('assets/campaign/alpha/mission01/gameplay.json','utf8'));
   const depot=config.camps.find(c=>c.id==='nw-west'),depotBounds=campBaseLayout({...depot,...field.gridToWorld(depot.grid)}).bounds;
   depotBounds[1]-=160; // The obsolete yard apron also continued south of the gate.
-  const result=await page.evaluate(async({size,samples,roads,roadsOnly,depotBounds,surfaceOnly})=>{
+  const result=await page.evaluate(async({size,samples,roads,roadsOnly,depotBounds,surfaceOnly,palette})=>{
    const load=async src=>{const im=new Image();im.src=src;await im.decode();return im;},make=(w,h=w)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;};
    const clamp=v=>Math.max(0,Math.min(1,v)),smooth=(a,b,v)=>{const t=clamp((v-a)/(b-a));return t*t*(3-2*t);},gauss=(x,y,cx,cy,r)=>Math.exp(-((x-cx)**2+(y-cy)**2)/(r*r));
    const source=await load('/references/terrain/alpha/map-sectors.jpg'),ref=make(2048),rc=ref.getContext('2d',{willReadFrequently:true});rc.drawImage(source,192,320,4096,4096,0,0,2048,2048);rc.drawImage(ref,380,804,180,64,184,804,180,64);
@@ -39,7 +40,6 @@ const fs=require('node:fs'),path=require('node:path');
    const names=['dune-sand','bleached-sand','rust-clay','desert-gravel','scorched-rock','ash-earth','ruined-asphalt','weathered-concrete','transition-sand','dusty-sandstone','sandy-talus','weathered-limestone'];
    const controls=Array.from({length:4},()=>make(1024)),data=controls.map(c=>c.getContext('2d').createImageData(1024,1024)),mini=make(1024),mc=mini.getContext('2d'),mp=mc.createImageData(1024,1024),totals=Array(12).fill(0),dominant=Array(12).fill(0);
    const sample=(gx,gy)=>{const x=Math.max(0,Math.min(size-1.00001,gx/127*(size-1))),y=Math.max(0,Math.min(size-1.00001,gy/127*(size-1))),ix=Math.floor(x),iy=Math.floor(y),u=x-ix,v=y-iy,a=samples[iy*size+ix],b=samples[iy*size+ix+1],c=samples[(iy+1)*size+ix],d=samples[(iy+1)*size+ix+1];return u+v<=1?a+(b-a)*u+(c-a)*v:d+(c-d)*(1-u)+(b-d)*(1-v);};
-   const palette=[[166,124,76],[186,153,109],[142,95,64],[132,112,84],[80,77,66],[103,91,73],[57,58,54],[139,134,119],[177,141,94],[132,101,67],[149,119,80],[173,150,110]];
    for(let y=0;y<1024;y++)for(let x=0;x<1024;x++){
     const i=(y*1024+x)*4,gx=x/1023*127,gy=y/1023*127,n=.5+.24*Math.sin(gx*.23+Math.sin(gy*.17)*1.5)+.16*Math.cos(gy*.28-gx*.10),px=gx+Math.sin(gy*.55+gx*.09)*.24,py=gy+Math.cos(gx*.51-gy*.1)*.24,h=sample(px,py),dx=(sample(px+.55,py)-sample(px-.55,py))/35.2,dy=(sample(px,py+.55)-sample(px,py-.55))/35.2,slope=Math.hypot(dx,dy);
     const low=1-smooth(14,32,h),mid=smooth(15,29,h)*(1-smooth(42,55,h)),high=smooth(42,58,h),face=smooth(.12,.55,slope),flat=1-smooth(.08,.38,slope);
@@ -84,7 +84,7 @@ const fs=require('node:fs'),path=require('node:path');
     }
    }
    return {output,roads,layout:surfaceOnly?null:names.map((name,i)=>({name,coveragePercent:totals[i]/1024**2*100,dominantPercent:dominant[i]/1024**2*100}))};
-  },{size:field.renderSize,samples:Array.from(field.renderSamples),roads,depotBounds,roadsOnly:process.argv.includes('--roads-only'),surfaceOnly:process.argv.includes('--surface-only')});
+  },{size:field.renderSize,samples:Array.from(field.renderSamples),roads,depotBounds,roadsOnly:process.argv.includes('--roads-only'),surfaceOnly:process.argv.includes('--surface-only'),palette:alphaTerrainPalette});
   for(const [name,data] of Object.entries(result.output)){
    const target=path.resolve('assets/maps/alpha',name);fs.mkdirSync(path.dirname(target),{recursive:true});fs.writeFileSync(target,Buffer.from(data,'base64'));
   }

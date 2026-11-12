@@ -74,6 +74,9 @@ import {enterM02,updateM02,updateM02Steps,m02Objectives} from './mission02.js';
 import {restoreM02Continuity} from './mission02-continuity.js';
 import {installPowerModule,advancePowerModule} from './power-module.js';
 import {beginPersonnelMission,registerPersonnel,recordPersonnelDeath,restorePersonnel,finalizeMissionResults} from './personnel.js';
+import {installM03Config} from './mission03-config.js';
+import {m03TerrainSight} from './mission03-sight.js';
+import {enterM03,initializeM03Expedition,updateM03,m03Objectives,m03DepartureAllowed,m03RequestAllowed} from './mission03.js';
 
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 const routeOrderRevision=2;
@@ -92,7 +95,8 @@ export class Mission{
  constructor(config,field){
   installM01Layout(config);
   installM02Config(config);
-  installM02Terrain(field);
+  installM03Config(config);
+  if(field.mapId!=='m03')installM02Terrain(field);
   prepareTransportSite(field);
   selectMissionTerrain(field,false);
   this.config=config;this.field=field;this.nav=new TerrainNavigator(field,{bounds:config.initialMapBounds.slice(),vehicleScale:config.worldScale});this.accumulator=0;this.serial=1;this.randomState=19452;this.events=[];this.effects=[];
@@ -107,6 +111,7 @@ export class Mission{
   ensureSalvage(this);
   this.state.designs=starterProjects(this.vehicleRecipes);
   this.visible=new Uint8Array(128*128);this.explored=new Uint8Array(128*128);this.visionSources=[];this.fogTimer=1;this.fogRevision=0;
+  if(field.mapId==='m03'){this.state.scavRosterVersion=1;this.state.projectiles=[];return;}
   const start=field.gridToWorld(config.startGrid);
   const row=config.initialRow??{offset:[-(config.initialUnits.length-1)*14,-60],spacing:28};
   config.initialUnits.forEach((kind,index)=>this.addUnit(kind,'rai',{x:start.x+row.offset[0]+index*row.spacing,y:start.y+row.offset[1]}));
@@ -127,12 +132,13 @@ export class Mission{
  }
  id(prefix){return prefix+this.serial++;}
  transportSite(){return transportSite(this.field,this.config);}
- requestTransport(){return requestTransport(this);}
+ requestTransport(){const allowed=m03RequestAllowed(this);return allowed.ok?requestTransport(this):allowed;}
  loadTransport(ids){return loadTransport(this,ids);}
- cancelTransportLoading(){return cancelTransportLoading(this);}
- departTransport(){return departTransport(this);}
- unloadTransport(){return unloadTransport(this);}
+ cancelTransportLoading(ids){return cancelTransportLoading(this,ids);}
+ departTransport(){const allowed=m03DepartureAllowed(this);return allowed.ok?departTransport(this):allowed;}
+ unloadTransport(ids){return unloadTransport(this,ids);}
  enterM02(){return enterM02(this);}
+ enterM03(){return enterM03(this);}
  installPowerModule(buildingId,workerIds){return installPowerModule(this,buildingId,workerIds);}
  reserveRaid(unseen=false){
   const camp=this.state.camps[0],positions=[],target=this.field.gridToWorld(this.config.startGrid);
@@ -206,10 +212,11 @@ export class Mission{
  entity(id){return this.state.units.find(item=>item.id===id&&item.hp>0)??this.state.buildings.find(item=>item.id===id&&item.hp>0);}
  addUnit(kind,owner,point,extra={}){const spec=this.config.units[kind],unit={id:this.id('u'),kind,owner,x:point.x,y:point.y,previousX:point.x,previousY:point.y,hp:spec.hp,maxHp:spec.hp,heading:0,path:[],task:null,cooldown:0,tool:0,foldTime:0,...extra};
   if(owner==='rai'&&canAutoRetreat(spec))unit.combatPolicy={...armyCombatPolicy(this)};
-  if(this.state.m02)unit.trafficOnScreen=true;this.state.units.push(unit);registerPersonnel(this,unit);if(this.unitIndexActive)this.unitIndex.insert(unit,this.state.units.length-1);return unit;}
+  if((this.state.m02||this.state.m03))unit.trafficOnScreen=true;this.state.units.push(unit);registerPersonnel(this,unit);if(this.unitIndexActive)this.unitIndex.insert(unit,this.state.units.length-1);return unit;}
  addStructure(kind,owner,point,extra={}){const spec=this.config.buildings[kind]??{},scale=this.config.worldScale,foot=spec.footprintMetres??[14,12],item={id:this.id('b'),kind,owner,x:point.x,y:point.y,rotation:0,hp:spec.hp??750,maxHp:spec.hp??750,halfWidth:foot[0]*scale/2,halfDepth:foot[1]*scale/2,progress:owner==='rai'?0:1,completed:owner!=='rai',queue:[],research:null,cooldown:0,...extra};item.maxHp=item.hp;restoreConstructionHealth(item);this.state.buildings.push(item);return item;}
  rebuildNavigation(){
   this.finishPendingStep();
+  if(this.field.mapId==='m03'){this.nav.bounds=this.state.bounds.slice();this.nav.rebuild([...this.state.buildings,...(this.field.m03Ruins??[]),...transportObstacles(this)]);return;}
   const changed=syncScavBaseRoads(this.field,this.config),southern=this.state.m02?.version>=2;
   const terrainChanged=selectMissionTerrain(this.field,southern);
   if(changed)this.field.localRoads=missionRoads(this.field,southern);
@@ -227,7 +234,7 @@ export class Mission{
  inBounds(x,y){const [gx,gy]=this.field.worldToGrid(x,y),b=this.state.bounds;return gx>=b[0]&&gx<=b[2]&&gy>=b[1]&&gy<=b[3];}
  exploredAt(x,y){const [gx,gy]=this.field.worldToGrid(x,y),col=Math.round(gx),row=Math.round(gy);return col>=0&&row>=0&&col<128&&row<128&&!!this.explored[row*128+col];}
  visibleAt(x,y){const [gx,gy]=this.field.worldToGrid(x,y),col=Math.round(gx),row=Math.round(gy);return col>=0&&row>=0&&col<128&&row<128&&!!this.visible[row*128+col];}
- constructionUnlocked(kind){return !this.config.buildings[kind]?.enemyOnly&&constructionUnlocked(this.state,kind);}
+ constructionUnlocked(kind){return this.state.m03?.location!=='expedition'&&!this.config.buildings[kind]?.enemyOnly&&constructionUnlocked(this.state,kind);}
  researchUnlocked(){return researchUnlocked(this.state);}
  defenseReady(){return defenseReady(this.state);}
  placement(kind,x,y,rotation=0,options={}){return checkBuildingPlacement(this,kind,x,y,rotation,options);}
@@ -2447,7 +2454,7 @@ export class Mission{
    this.visionSources.push({x,y,radius});
    for(let row=Math.max(0,b[1],Math.ceil(y-radius));row<=Math.min(127,b[3],Math.floor(y+radius));row++)
     for(let col=Math.max(0,b[0],Math.ceil(x-radius));col<=Math.min(127,b[2],Math.floor(x+radius));col++)
-     if(Math.hypot(col-x,row-y)<=radius){this.visible[row*128+col]=255;this.explored[row*128+col]=255;}
+     if(Math.hypot(col-x,row-y)<=radius){if(this.field.mapId==='m03'){const p=this.field.gridToWorld([col,row]);if(!m03TerrainSight(this.field,item,p.x,p.y))continue;}this.visible[row*128+col]=255;this.explored[row*128+col]=255;}
   };
   for(const unit of this.state.units)if(unit.owner==='rai'&&unit.hp>0&&!insideFactory(unit))stamp(unit,this.unitSpec(unit).vision);for(const b of this.state.buildings)if(b.owner==='rai'&&b.hp>0&&b.completed)stamp(b,this.buildingSpec(b).vision);
   if(this.state.transport&&!['absent','departed'].includes(this.state.transport.phase))stamp(transportPose(this.state.transport),300);
@@ -2455,6 +2462,7 @@ export class Mission{
  updateMission(){
   if(this.state.status!=='running')return;
   updateCampPerimeters(this);
+  if(this.state.m03){updateM03(this);return;}
   if(this.state.m02){updateM02(this);return;}
   const s=this.state,captured=s.camps.filter(c=>c.cleared).length;
   for(const camp of s.camps){if(camp.cleared)continue;const hostile=[...s.units,...s.buildings].some(e=>e.campId===camp.id&&e.owner==='scavs'&&e.hp>0&&!isCampPerimeter(e)&&!e.campResource);if(!hostile){camp.cleared=true;captureCampResources(this,camp);this.emit('camp-cleared',{camp:camp.id});if(camp.artifact&&!camp.artifactSpawned){const point=this.nav.nearest(camp.x+35,camp.y,8)??camp;s.artifacts.push({id:this.id('a'),key:camp.artifact,x:point.x,y:point.y,collected:false});camp.artifactSpawned=true;}}}
@@ -2468,14 +2476,14 @@ export class Mission{
    if(tower&&this.visibleAt(tower.x,tower.y)){s.flags.thirdSighted=true;this.cinematic('camp3-sighted');}
   }
   if(!s.flags.lastRevealed&&s.camps.filter(c=>c.cleared).length>=3){s.flags.lastRevealed=true;s.bounds=this.config.finalMapBounds.slice();this.rebuildNavigation();this.cinematic('last-camp');this.emit('map-expanded',{bounds:s.bounds});}
-  if(s.camps.every(c=>c.cleared)&&has('generator')&&has('derrick')&&has('factory')&&has('lab')&&this.defenseReady()&&s.statistics.produced>0&&Object.keys(this.config.research).filter(key=>this.config.research[key].mission!=='m02').every(key=>s.research[key])&&s.flags.raidWon){s.status='victory';this.cinematic('victory');this.cinematic('outro');this.emit('victory');}
+  if(s.camps.every(c=>c.cleared)&&has('generator')&&has('derrick')&&has('factory')&&has('lab')&&this.defenseReady()&&s.statistics.produced>0&&Object.keys(this.config.research).filter(key=>!['m02','m03'].includes(this.config.research[key].mission)).every(key=>s.research[key])&&s.flags.raidWon){s.status='victory';this.cinematic('victory');this.cinematic('outro');this.emit('victory');}
   if(!s.units.some(u=>u.owner==='rai'&&u.hp>0&&this.unitSpec(u).role==='builder')&&!s.transport?.manifest.some(c=>c.unit.hp>0&&this.unitSpec(c.unit).role==='builder')&&!s.buildings.some(b=>b.owner==='rai'&&b.hp>0&&b.completed&&b.kind==='factory')){s.status='defeat';this.emit('defeat',{reason:'Утрачены строители и производство'});}
   finalizeMissionResults(this);
  }
  beginTick(dt,budgeted=false){
   updateTransport(this,dt);
   dispatchQueuedTravel(this);
-  if(this.state.m02){
+  if(this.state.m02||this.state.m03){
    if(!this.commandPlanner&&this.state.commandOrders?.some(order=>['queued','planning'].includes(order.status)))this.commandPlanner=new CommandPlanner(this);
    this.commandPlanner?.advance(1,512);
    this.trafficCoordinator.advanceFixedPlanning(this);
@@ -2529,10 +2537,10 @@ export class Mission{
    if(!pending.missionUpdated){
    for(const b of this.state.buildings)if(b.owner==='scavs'&&b.hp>0){b.cooldown=Math.max(0,b.cooldown-dt);const spec=this.buildingSpec(b);if(spec.damage){const enemy=this.nearestEnemy(b,spec.range);if(enemy)this.attack(b,enemy,spec);}}
    this.fogTimer+=dt;if(this.fogTimer>=.25){this.fogTimer=0;this.updateFog();}this.updateMission();if(this.navigationDirty){this.rebuildNavigation();this.navigationDirty=false;}
-   pending.missionUpdated=true;pending.scenario=this.state.m02?updateM02Steps(this):null;
+   pending.missionUpdated=true;pending.scenario=this.state.m02&&!this.state.m03?updateM02Steps(this):null;
    }
    while(pending.scenario){if(pending.scenario.next().done){pending.scenario=null;break;}if(performance.now()>=deadline)return false;}
-   this.pendingTick=null;if(!this.state.m02){updateOpeningConstruction(this);updateScavReinforcements(this);}this.radioObserver?.tick();return true;
+   this.pendingTick=null;if(!this.state.m02&&!this.state.m03){updateOpeningConstruction(this);updateScavReinforcements(this);}this.radioObserver?.tick();return true;
   }finally{this.unitIndexActive=false;this.nav.workDeadline=Infinity;}
  }
  vehicleCollision(unit,speed,blockers){
@@ -2589,7 +2597,7 @@ export class Mission{
   if(distance(unit,point)<1)unit.path.shift();return true;
  }
  finishPendingStep(){if(this.pendingTick&&!this.unitIndexActive)this.continueTick();}
- tick(dt){this.continueTick();if(this.state.status!=='running'){advanceCampDemolition(this,dt);return;}if(!this.state.m02)this.trafficCoordinator.advancePlanning(this,2);this.beginTick(dt);this.continueTick();}
+ tick(dt){this.continueTick();if(this.state.status!=='running'){advanceCampDemolition(this,dt);return;}if(!this.state.m02&&!this.state.m03)this.trafficCoordinator.advancePlanning(this,2);this.beginTick(dt);this.continueTick();}
  advance(seconds,{budgetMs=Infinity,rate=1}={}){
   if(!this.pendingTick&&this.state.status!=='running')return advanceCampDemolition(this,seconds);
   const frameStarted=performance.now();
@@ -2598,7 +2606,7 @@ export class Mission{
   // Individual JS geometry operations remain cooperative, not preemptible.
   const planningBudget=Number.isFinite(budgetMs)?Math.min(2,Math.max(0,budgetMs)):2;
   const planningDeadline=frameStarted+planningBudget;
-  if(!this.state.m02){
+  if(!this.state.m02&&!this.state.m03){
    this.commandPlanner?.advance(Math.min(planningBudget*.5,Math.max(0,planningDeadline-performance.now())));
    this.trafficCoordinator.advancePlanning(this,Math.max(0,planningDeadline-performance.now()));
   }
@@ -2622,7 +2630,7 @@ export class Mission{
   return ticks;
  }
  renderUnitPhase(unit,nowMs){const at=this.unitFrameTimes.get(unit);return at===undefined?null:clamp((nowMs-at)*(this.presentationRate??1)/(this.config.simulationStep*1000),0,1);}
- objectives(){if(this.state.m02)return m02Objectives(this);const s=this.state,has=kind=>s.buildings.some(b=>b.owner==='rai'&&b.hp>0&&b.completed&&b.kind===kind);return [{id:'base',name:'Развернуть передовую базу',done:has('generator')&&has('factory')&&has('lab')&&this.defenseReady()},{id:'power',name:'Обеспечить энергоснабжение',done:s.powered},{id:'production',name:'Наладить производство техники',done:s.statistics.produced>0},{id:'research',name:'Организовать научные исследования',done:Object.keys(this.config.research).filter(key=>this.config.research[key].mission!=='m02').every(key=>s.research[key]),progress:Object.keys(s.research).length+'/3'},{id:'security',name:s.flags.contact?'Уничтожить четыре лагеря':'Обеспечить безопасность района',done:s.camps.every(c=>c.cleared)&&s.flags.raidWon,progress:s.camps.filter(c=>c.cleared).length+'/4'}];}
+ objectives(){if(this.state.m03)return m03Objectives(this);if(this.state.m02)return m02Objectives(this);const s=this.state,has=kind=>s.buildings.some(b=>b.owner==='rai'&&b.hp>0&&b.completed&&b.kind===kind);return [{id:'base',name:'Развернуть передовую базу',done:has('generator')&&has('factory')&&has('lab')&&this.defenseReady()},{id:'power',name:'Обеспечить энергоснабжение',done:s.powered},{id:'production',name:'Наладить производство техники',done:s.statistics.produced>0},{id:'research',name:'Организовать научные исследования',done:Object.keys(this.config.research).filter(key=>!['m02','m03'].includes(this.config.research[key].mission)).every(key=>s.research[key]),progress:Object.keys(s.research).length+'/3'},{id:'security',name:s.flags.contact?'Уничтожить четыре лагеря':'Обеспечить безопасность района',done:s.camps.every(c=>c.cleared)&&s.flags.raidWon,progress:s.camps.filter(c=>c.cleared).length+'/4'}];}
  save(){this.continueTick();this.updateFog();finalizeMissionResults(this);this.radioObserver?.save();return JSON.stringify({version:1,mission:this.config.id,serial:this.serial,randomState:this.randomState,accumulator:this.accumulator,fogTimer:this.fogTimer,state:this.state,explored:Array.from(this.explored)});}
  async saveAsync(){
   const world=this.state;
@@ -2651,8 +2659,8 @@ export class Mission{
    });
   }
  }
- load(json){const data=typeof json==='string'?JSON.parse(json):json;if(data.version!==1||data.mission!==this.config.id||data.state?.m02&&![1,2].includes(data.state.m02.version)||!Array.isArray(data.state?.units)||data.explored?.length!==16384)throw new Error('Несовместимое сохранение');this.state=data.state;for(const unit of this.state.units){delete unit.trafficOnScreen;if(this.state.m02)unit.trafficOnScreen=true;}
-  restoreM01Layout(this);installM02Config(this.config);restorePersonnel(this);
+ load(json){const data=typeof json==='string'?JSON.parse(json):json;if(data.version!==1||data.mission!==this.config.id||data.state?.m02&&![1,2].includes(data.state.m02.version)||!Array.isArray(data.state?.units)||data.explored?.length!==16384)throw new Error('Несовместимое сохранение');this.state=data.state;for(const unit of this.state.units){delete unit.trafficOnScreen;if((this.state.m02||this.state.m03))unit.trafficOnScreen=true;}
+  if(this.field.mapId!=='m03')restoreM01Layout(this);installM02Config(this.config);installM03Config(this.config);restorePersonnel(this);
   this.oilSpent=0;this.oilWorkTime=null;
   this.factoryBalanceAt=undefined;
   for(const building of this.state.buildings)restoreConstructionHealth(building);
@@ -2677,7 +2685,7 @@ export class Mission{
    if(this.config.units[entity.kind])syncFieldHp(this,entity);
    if(entity.hp<=0){if(entity.destroyedAt===undefined)legacyWrecks.push(entity);scheduleWreck(this,entity);}
   }
-  this.updateUnrevealedCampLayout();migrateScavLayout(this);restoreM02Continuity(this);
+  if(this.field.mapId!=='m03'){this.updateUnrevealedCampLayout();migrateScavLayout(this);restoreM02Continuity(this);}
   // Live towers from older saves must not lose their weapon before destruction.
   for(const building of this.state.buildings)if(building.owner==='scavs'&&building.kind==='mg-tower'&&building.hp>0&&building.damage)this.restoreLiveTowerParts?.(building);
   // Keep existing wells on their authored oil points after the base-yard edit.
@@ -2705,8 +2713,8 @@ export class Mission{
    building.halfWidth=Math.min(building.halfWidth,halfWidth);
    building.halfDepth=Math.min(building.halfDepth,halfDepth);
   }
-  this.state.bounds=(this.state.m02?this.state.bounds:this.state.flags.lastRevealed?this.config.finalMapBounds:this.config.initialMapBounds).slice();this.state.designs=Array.isArray(this.state.designs)?latestVehicleProjects(this.state.designs):starterProjects(this.vehicleRecipes);this.serial=data.serial;this.randomState=data.randomState;this.explored.set(data.explored);this.events=[];this.effects=[];this.accumulator=data.accumulator??0;this.fogTimer=data.fogTimer??0;this.navigationDirty=false;this.linkOilWells(this.state.buildings.filter(b=>b.owner==='rai'&&b.hp>0&&b.completed),0);this.rebuildNavigation();this.updateFog();
-  installScavBases(this,{restoring:true});installCampResources(this);installM02Fortifications(this);this.rebuildNavigation();
+  this.state.bounds=(this.state.m02||this.state.m03?this.state.bounds:this.state.flags.lastRevealed?this.config.finalMapBounds:this.config.initialMapBounds).slice();this.state.designs=Array.isArray(this.state.designs)?latestVehicleProjects(this.state.designs):starterProjects(this.vehicleRecipes);this.serial=data.serial;this.randomState=data.randomState;this.explored.set(data.explored);this.events=[];this.effects=[];this.accumulator=data.accumulator??0;this.fogTimer=data.fogTimer??0;this.navigationDirty=false;this.linkOilWells(this.state.buildings.filter(b=>b.owner==='rai'&&b.hp>0&&b.completed),0);this.rebuildNavigation();this.updateFog();
+  if(this.field.mapId!=='m03'){installScavBases(this,{restoring:true});installCampResources(this);installM02Fortifications(this);}else initializeM03Expedition(this);this.rebuildNavigation();
   if(refreshFactoryAccess(this))this.rebuildNavigation();
   for(const entity of legacyWrecks){
    const state=entity.damage,mark=state?.marks?.at(-1);

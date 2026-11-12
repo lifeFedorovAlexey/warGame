@@ -72,12 +72,12 @@ export function createFogMask(T){
       if(reset||exploredCopy[i]!==value){exploredCopy[i]=value;x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y);}
     }
     if(x1>=0)blurHistory(mission.explored,x0,y0,x1,y1);
-    const sources=mission.visionSources;
+    const sources=mission.visionSources,terrainSight=mission.field.mapId==='m03';
     const boundsChanged=mission.state.bounds.some((v,i)=>v!==previousBounds[i]);
-    const changed=reset||sources.length!==previousSources.length||boundsChanged
+    const changed=terrainSight||reset||sources.length!==previousSources.length||boundsChanged
       ||sources.some((v,i)=>v.x!==previousSources[i].x||v.y!==previousSources[i].y||v.radius!==previousSources[i].radius);
     if(changed){for(const source of previousSources)sourceRect(source);for(const source of sources)sourceRect(source);}
-    if(reset||boundsChanged)dirty(0,0,textureSize-1,textureSize-1);
+    if(terrainSight||reset||boundsChanged)dirty(0,0,textureSize-1,textureSize-1);
     if(!changed&&x1<0)return false;
     const [left,top,right,bottom]=mission.state.bounds,feather=1.35;
     const historyLeft=Math.ceil((left-.5)/gridStep-.5),historyRight=Math.floor((right+.5)/gridStep-.5);
@@ -85,13 +85,14 @@ export function createFogMask(T){
       const inRow=samples[y].grid>=top-.5&&samples[y].grid<=bottom+.5;
       for(let x=dirtyLeft[y];x<=dirtyRight[y];x++){
         const i=y*textureSize+x;data[i*2]=0;
+        if(terrainSight){const sx=samples[x],sy=samples[y],v=mission.visible,row=sy.base*gridSize,a=v[row+sx.base]*(1-sx.weight)+v[row+sx.base+1]*sx.weight,b=v[row+gridSize+sx.base]*(1-sx.weight)+v[row+gridSize+sx.base+1]*sx.weight;data[i*2]=a+(b-a)*sy.weight;}
         // Historical exploration and its blur cannot reveal a locked sector.
         data[i*2+1]=inRow&&x>=historyLeft&&x<=historyRight?baseMask[i]:0;stats.pixels++;
       }
     }
     const first=(centre,radius,bound)=>Math.max(0,Math.ceil(Math.max(centre-radius,bound-.5)/gridStep-.5));
     const last=(centre,radius,bound)=>Math.min(textureSize-1,Math.floor(Math.min(centre+radius,bound+.5)/gridStep-.5));
-    for(const source of mission.visionSources){
+    for(const source of terrainSight?[]:mission.visionSources){
       const x0=first(source.x,source.radius,left),x1=last(source.x,source.radius,right);
       const y0=first(source.y,source.radius,top),y1=last(source.y,source.radius,bottom);
       const outer2=source.radius*source.radius,inner2=Math.max(0,source.radius-feather)**2;

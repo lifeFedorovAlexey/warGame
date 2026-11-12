@@ -54,7 +54,7 @@ function rayBox(ax,ay,az,bx,by,bz,box,progress){
 
 export function clearCombatSight(mission,from,to){
  const field=mission.field,scale=mission.config.worldScale;
- const a=field.heightAt(from.x,from.y)+(from.kind==='mg-tower'?12:SCAV_PROFILES[from.kind]?.height??3.2)*scale;
+ const a=field.heightAt(from.x,from.y)+(['mg-tower','m03-flame-tower'].includes(from.kind)?12:SCAV_PROFILES[from.kind]?.height??3.2)*scale;
  const targetSpec=mission.config.buildings[to.kind];
  const targetHeight=targetSpec?(targetSpec.realSizeMetres?.[2]??3.2)*(to.kind==='mg-tower'?.74:.42):isInfantry(to)?1:1.5;
  const b=(to.groundHeight??field.heightAt(to.x,to.y))+targetHeight*scale;

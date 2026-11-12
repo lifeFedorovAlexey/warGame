@@ -1,4 +1,9 @@
 node_modules/
+# Local credentials; the ElevenLabs key normally lives outside this repository.
+.env
+.env.*
+*.env
+!.env.example
 __pycache__/
 *.pyc
 demo/previews/

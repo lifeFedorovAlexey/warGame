@@ -4,6 +4,18 @@ const clamp=v=>Math.max(0,Math.min(1,v));
 const smooth=v=>{v=clamp(v);return v*v*(3-2*v);};
 export const cargoSlot=index=>({x:index%2?-2.25:2.25,y:10-Math.floor(index/2)*5.2,z:2.05});
 export const cargoGate=(site,index=0)=>transportPoint(site,cargoSlot(index).x,-29);
+export const cargoUsed=t=>[...(t?.manifest??[]),...(t?.queue??[])].reduce((n,c)=>n+(c.slots?.length??1),0);
+export function transportCargoSpec(m,u){
+ const cfg=m.config.transport,spec=u&&m.unitSpec(u),value=u?.transport??spec?.transport;
+ const cargo=typeof value==='string'?cfg?.classes[value]:value;
+ if(!cargo||!Number.isInteger(cargo.slots)||cargo.slots<1||cargo.slots>4||!['width','height','length'].every(k=>Number.isFinite(cargo[k])&&cargo[k]>0)||cargo.width>cfg.maxWidth||cargo.height>cfg.maxHeight||cargo.length>cfg.slotLength*cargo.slots)return null;
+ return cargo;
+}
+function reserveSlots(t,count,capacity){
+ const used=new Set([...t.manifest,...t.queue].flatMap(c=>c.slots??[c.slot]));
+ for(let i=0;i<capacity;i++){const slots=Array.from({length:count},(_,j)=>i+j*2);if(slots.at(-1)<capacity&&slots.every(s=>!used.has(s)))return slots;}
+ return null;
+}
 export function ensureTransport(m){
  return m.state.transport??={version:1,kind:'mu26',phase:'absent',elapsed:0,door:0,rotor:0,manifest:[],queue:[],site:transportSite(m.field,m.config)};
 }
@@ -30,14 +42,18 @@ export function loadTransport(m,ids){
  if(t.unloading)return m.fail('Сначала завершите выгрузку');
  const unique=[...new Set(ids)].filter(id=>!t.queue.some(q=>q.id===id)&&!t.manifest.some(c=>c.unit.id===id));
  if(!unique.length)return m.fail('Выберите технику для погрузки');
- if(unique.length+t.queue.length+t.manifest.length>KOROVNIK.capacity)return m.fail('МУ-26 вмещает не более 10 машин');
- const units=unique.map(id=>m.entity(id));
- if(units.some(u=>!u||u.owner!=='rai'||u.hp<=0||u.factoryVisit||!u.path||!m.unitSpec(u)?.components||m.unitSpec(u)?.infantry))return m.fail('Для погрузки нужна исправная наземная техника РАЯ вне завода');
- for(const u of units)t.queue.push({id:u.id,issued:false,queuedAt:m.state.time});
- return {ok:true,accepted:unique.length};
+ const accepted=[],rejected=[];
+ for(const id of unique){const u=m.entity(id),cargo=transportCargoSpec(m,u);
+  if(!u||u.owner!=='rai'||u.hp<=0||u.factoryVisit||!u.path||!cargo||!m.unitSpec(u)?.components||m.unitSpec(u)?.infantry||m.unitSpec(u).speed<=0){rejected.push({id,reason:'Техника не подходит для перевозки'});continue;}
+  const slots=reserveSlots(t,cargo.slots,m.config.transport.capacity);
+  if(!slots){rejected.push({id,reason:'Нет свободных грузовых мест'});continue;}
+  t.queue.push({id,slot:slots[0],slots,issued:false,queuedAt:m.state.time});accepted.push(id);
+ }
+ if(accepted.length&&m.state.m03)m.state.m03.events.loading=true;
+ return accepted.length?{ok:true,accepted:accepted.length,acceptedIds:accepted,rejected}:{...m.fail(rejected[0]?.reason??'Нет свободных мест'),rejected};
 }
-export function cancelTransportLoading(m){
- m.finishPendingStep();const t=ensureTransport(m);m.stop(t.queue.map(q=>q.id),{expandGroup:false});t.queue=[];return {ok:true};
+export function cancelTransportLoading(m,ids){
+ m.finishPendingStep();const t=ensureTransport(m),chosen=ids?new Set(ids):null,removed=t.queue.filter(q=>!chosen||chosen.has(q.id));m.stop(removed.map(q=>q.id),{expandGroup:false});t.queue=t.queue.filter(q=>chosen&&!chosen.has(q.id));return {ok:true};
 }
 export function departTransport(m){
  m.finishPendingStep();const t=ensureTransport(m);
@@ -45,16 +61,16 @@ export function departTransport(m){
  if(t.queue.length||t.manifest.some(c=>c.phase!=='aboard')||t.unloading)return m.fail('Завершите погрузку или выгрузку перед вылетом');
  setPhase(m,t,'closing');return {ok:true};
 }
-export function unloadTransport(m){
+export function unloadTransport(m,ids){
  m.finishPendingStep();const t=ensureTransport(m);
  if(t.phase!=='ready'||t.queue.length||t.manifest.some(c=>c.phase!=='aboard'))return m.fail('Выгрузка возможна после посадки и завершения погрузки');
  if(!t.manifest.length)return m.fail('Грузовой отсек пуст');
- t.unloading=true;return {ok:true};
+ t.unloading=true;t.unloadIds=ids?[...ids]:null;return {ok:true};
 }
 function cargoExit(m,t,c){
  // Offload onto the apron's east access, leaving both ramp lanes free.
  for(let row=0;row<12;row++)for(let col=0;col<2;col++){
-   const x=13+row*6,y=-34-col*7,p=transportPoint(t.site,x,y),heading=t.site.heading+Math.atan2(2*(x-cargoSlot(c.slot).x),-y-26.5),pose={...c.unit,...p,heading};
+   const x=13+row*6,y=-38-col*7,p=transportPoint(t.site,x,y),heading=t.site.heading+Math.atan2(2*(x-cargoSlot(c.slot).x),-y-26.5),pose={...c.unit,...p,heading};
   if(m.inBounds(p.x,p.y)&&m.vehicleMotionClear(pose,pose,pose))return p;
  }
  return null;
@@ -71,7 +87,7 @@ export function transportPose(t){
  return {...pos,heading:p.heading,tilt,door:t.door,rotor:t.rotor};
 }
 export function cargoPose(t,c){
- const end=cargoSlot(c.slot),p=smooth(c.progress??1);
+ const end=cargoSlot(c.slot),p=smooth(c.progress??1);end.y-=((c.slots?.length??1)-1)*2.6;
  if(c.phase==='aboard')return end;
  if(c.phase==='boarding'){
   const a=c.from,b={x:end.x,y:-23.2},h=c.from.heading??0;
@@ -93,7 +109,10 @@ export function cargoPose(t,c){
 export function updateTransport(m,dt){
  const t=m.state.transport;if(!t||['absent','departed'].includes(t.phase))return;
  t.elapsed+=dt;
- t.rotor=(t.rotor+dt*(['ready','opening'].includes(t.phase)?1.2:22))%(Math.PI*2);
+ if(m.config.transport.animations===false&&t.phase!=='ready')t.elapsed=1000;
+ const target=['ready','opening'].includes(t.phase)?1.2:t.phase==='closing'?3:22;
+ t.rotorSpeed=(t.rotorSpeed??target)+(target-(t.rotorSpeed??target))*Math.min(1,dt*(t.phase==='spooling'?1.3:.7));
+ t.rotor=(t.rotor+dt*t.rotorSpeed)%(Math.PI*2);
  if(t.phase==='approaching'&&t.elapsed>=14)setPhase(m,t,'landing');
  else if(t.phase==='landing'&&t.elapsed>=9)setPhase(m,t,'opening');
  else if(t.phase==='opening'){t.door=clamp(t.elapsed/4);if(t.door===1)setPhase(m,t,'ready');}
@@ -115,7 +134,7 @@ export function updateTransport(m,dt){
  }
  if(t.manifest.some(c=>c.phase!=='aboard'))return;
  if(t.unloading){
-  const c=t.manifest.at(-1);if(!c){t.unloading=false;return;}
+  const c=t.unloadIds?t.manifest.findLast(c=>t.unloadIds.includes(c.unit.id)):t.manifest.at(-1);if(!c){t.unloading=false;delete t.unloadIds;return;}
   const exit=cargoExit(m,t,c);if(!exit){t.blocked='Выезд занят — освободите площадку';return;}
   const dx=(exit.x-t.site.x)/t.site.scale,dy=(exit.y-t.site.y)/t.site.scale,h=t.site.heading;
   c.exit=exit;c.exitLocal={x:dx*Math.cos(h)+dy*Math.sin(h),y:-dx*Math.sin(h)+dy*Math.cos(h)};c.phase='unloading';c.progress=0;delete t.blocked;return;
@@ -123,7 +142,7 @@ export function updateTransport(m,dt){
  const q=t.queue[0];if(!q)return;
  const u=m.entity(q.id);
  if(!u||u.owner!=='rai'||u.hp<=0||u.factoryVisit){t.queue.shift();return;}
- const slot=Array.from({length:KOROVNIK.capacity},(_,i)=>i).find(i=>!t.manifest.some(c=>c.slot===i)),gate=cargoGate(t.site,slot);
+ const slot=q.slot??Array.from({length:KOROVNIK.capacity},(_,i)=>i).find(i=>![...t.manifest,...t.queue.filter(v=>v!==q)].some(c=>(c.slots??[c.slot]).includes(i))),gate=cargoGate(t.site,slot);
  const approach=transportPoint(t.site,24,-29);
  if(q.issued&&(u.proposedOrder?.revision??u.pendingOrder?.revision??u.commandRevision)!==q.revision){t.queue.shift();return;}
  if(!q.issued){
@@ -131,6 +150,8 @@ export function updateTransport(m,dt){
   if(!result.ok){t.queue.shift();t.blocked=result.reason;return;}
   q.issued=true;q.revision=result.revision;return;
  }
+ if(!q.lastPosition||Math.hypot(u.x-q.lastPosition.x,u.y-q.lastPosition.y)>2){q.lastPosition={x:u.x,y:u.y};q.lastProgressAt=m.state.time;}
+ if(m.state.time-(q.lastProgressAt??m.state.time)>m.config.transport.boardingTimeout){m.stop([u.id],{expandGroup:false});t.queue.shift();t.blocked='Машина не может подъехать — очередь продолжена';return;}
  if(q.leg!=='gate'){
   if(Math.hypot(u.x-approach.x,u.y-approach.y)<t.site.scale*1.1){q.leg='gate';q.issued=false;}
   return;
@@ -138,6 +159,6 @@ export function updateTransport(m,dt){
  if(Math.hypot(u.x-gate.x,u.y-gate.y)>t.site.scale*1.1)return;
  m.stop([u.id],{expandGroup:false});
  const dx=(u.x-t.site.x)/t.site.scale,dy=(u.y-t.site.y)/t.site.scale,h=t.site.heading;
- t.manifest.push({unit:u,slot,phase:'boarding',progress:0,from:{x:dx*Math.cos(h)+dy*Math.sin(h),y:-dx*Math.sin(h)+dy*Math.cos(h),z:0,heading:u.heading-h}});
+ t.manifest.push({unit:u,slot,slots:q.slots??[slot],phase:'boarding',progress:0,from:{x:dx*Math.cos(h)+dy*Math.sin(h),y:-dx*Math.sin(h)+dy*Math.cos(h),z:0,heading:u.heading-h}});
  t.queue.shift();m.state.units.splice(m.state.units.indexOf(u),1);m.commandPlanner?.cancel([u.id]);delete t.blocked;
 }

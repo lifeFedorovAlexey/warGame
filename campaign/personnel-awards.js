@@ -1,5 +1,5 @@
 // Campaign distinctions are fictional awards of РАЙ, separate from military rank.
-export const personnelMissionName=id=>({m01:'Освоение целины',m02:'Энергетический всплеск'}[id]??id);
+export const personnelMissionName=id=>({m01:'Освоение целины',m02:'Энергетический всплеск',m03:'Первый вылет'}[id]??id);
 export const personnelAwardTypes=Object.freeze({
  participant:{name:'Участник операции',description:'Участие в успешно завершённой операции'},
  hero:{name:'Герой операции',description:'Лучший личный счёт: не менее 5 уничтоженных противников'},
@@ -9,7 +9,7 @@ export const personnelAwardTypes=Object.freeze({
 export function awardMissionPersonnel(personnel,phase,outcome){
  const granted=[];
  if(outcome!=='victory')return granted;
- const participants=Object.values(personnel.soldiers).filter(s=>!s.death||s.death.missionId===phase.id);
+ const participants=Object.values(personnel.soldiers).filter(s=>(!phase.participantIds||phase.participantIds.includes(s.id))&&(!s.death||s.death.missionId===phase.id));
  const bestKills=Math.max(5,...participants.map(s=>s.missions[phase.id]?.kills??0));
  const bestStructures=Math.max(3,...participants.map(s=>s.missions[phase.id]?.structuresDestroyed??0));
  for(const soldier of participants){

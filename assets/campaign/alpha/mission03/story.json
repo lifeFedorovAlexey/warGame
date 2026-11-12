@@ -1,0 +1,571 @@
+{
+  "version": 1,
+  "id": "alpha-m03",
+  "name": "Миссия 03 — Первый вылет",
+  "campaign": "Альфа",
+  "audioStatus": "temporary-synthesis",
+  "speakers": {
+    "narrator": {
+      "name": "Диктор",
+      "voice": "dmitri",
+      "lengthScale": 1.08,
+      "pitchSemitones": -0.8,
+      "effect": "clean"
+    },
+    "commander": {
+      "name": "Командир",
+      "voice": "denis",
+      "lengthScale": 1.04,
+      "pitchSemitones": -1.0,
+      "effect": "clean"
+    },
+    "warrant": {
+      "name": "Прапорщик",
+      "voice": "dmitri",
+      "lengthScale": 1.12,
+      "pitchSemitones": -1.6,
+      "effect": "clean"
+    },
+    "general": {
+      "name": "Генерал",
+      "voice": "dmitri",
+      "lengthScale": 1.16,
+      "pitchSemitones": -0.5,
+      "effect": "clean"
+    },
+    "radio": {
+      "name": "Радист",
+      "voice": "denis",
+      "lengthScale": 0.97,
+      "pitchSemitones": 0.5,
+      "effect": "radio"
+    },
+    "scientist": {
+      "name": "Учёный",
+      "voice": "dmitri",
+      "lengthScale": 1.06,
+      "pitchSemitones": 0.8,
+      "effect": "clean"
+    },
+    "scout": {
+      "name": "Разведчик",
+      "voice": "denis",
+      "lengthScale": 1.0,
+      "pitchSemitones": 0.8,
+      "effect": "radio"
+    },
+    "raider": {
+      "name": "Отброс",
+      "voice": "dmitri",
+      "lengthScale": 0.98,
+      "pitchSemitones": -1.4,
+      "effect": "radio"
+    },
+    "chief": {
+      "name": "Петрович",
+      "voice": "dmitri",
+      "lengthScale": 1.05,
+      "pitchSemitones": -1.7,
+      "effect": "radio"
+    },
+    "past": {
+      "name": "Голос из прошлого",
+      "voice": "dmitri",
+      "lengthScale": 1.26,
+      "pitchSemitones": -2.0,
+      "effect": "dream"
+    },
+    "soldier": {
+      "name": "Солдат",
+      "voice": "denis",
+      "lengthScale": 0.98,
+      "pitchSemitones": 1.2,
+      "effect": "room"
+    },
+    "officer": {
+      "name": "Офицер",
+      "voice": "denis",
+      "lengthScale": 1.03,
+      "pitchSemitones": -0.2,
+      "effect": "room"
+    },
+    "builder": {
+      "name": "Строитель",
+      "voice": "denis",
+      "lengthScale": 1.06,
+      "pitchSemitones": -0.4,
+      "effect": "radio"
+    },
+    "driver": {
+      "name": "Водитель",
+      "voice": "denis",
+      "lengthScale": 1.05,
+      "pitchSemitones": -0.8,
+      "effect": "radio"
+    },
+    "pilot": {
+      "name": "Пилот «Коровника»",
+      "voice": "denis",
+      "lengthScale": 0.97,
+      "pitchSemitones": 0.5,
+      "effect": "radio"
+    }
+  },
+  "scenes": [
+    {
+      "id": "m03-s01",
+      "title": "Приказ на экспедицию",
+      "cues": [
+        "m03-s01-1",
+        "m03-s01-2",
+        "m03-s01-3"
+      ],
+      "triggerDescription": "начало третьей миссии, основная база.",
+      "presentation": {
+        "type": "radio"
+      }
+    },
+    {
+      "id": "m03-s02",
+      "title": "Знакомство с «Коровником»",
+      "cues": [
+        "m03-s02-1",
+        "m03-s02-2",
+        "m03-s02-3",
+        "m03-s02-4"
+      ],
+      "triggerDescription": "игрок впервые открывает транспортную площадку.",
+      "presentation": {
+        "type": "radio"
+      }
+    },
+    {
+      "id": "m03-s03",
+      "title": "Начало погрузки",
+      "cues": [
+        "m03-s03-1",
+        "m03-s03-2"
+      ],
+      "triggerDescription": "первый приказ на погрузку.",
+      "presentation": {
+        "type": "radio"
+      }
+    },
+    {
+      "id": "m03-s04",
+      "title": "Транспорт загружен",
+      "cues": [
+        "m03-s04-1",
+        "m03-s04-2"
+      ],
+      "triggerDescription": "необходимый состав готов к вылету.",
+      "presentation": {
+        "type": "radio"
+      }
+    },
+    {
+      "id": "m03-s05",
+      "title": "Высадка",
+      "cues": [
+        "m03-s05-1",
+        "m03-s05-2",
+        "m03-s05-3"
+      ],
+      "triggerDescription": "первая посадка на карте экспедиции.",
+      "presentation": {
+        "type": "radio"
+      }
+    },
+    {
+      "id": "m03-s06",
+      "title": "Первый контакт",
+      "cues": [
+        "m03-s06-1",
+        "m03-s06-2",
+        "m03-s06-3"
+      ],
+      "triggerDescription": "патруль действительно обнаружен.",
+      "presentation": {
+        "type": "radio"
+      }
+    },
+    {
+      "id": "m03-s07",
+      "title": "Обнаружен склад",
+      "cues": [
+        "m03-s07-1",
+        "m03-s07-2"
+      ],
+      "triggerDescription": "главный довоенный объект впервые попал в разведданные.",
+      "presentation": {
+        "type": "radio"
+      }
+    },
+    {
+      "id": "m03-s08",
+      "title": "Технология найдена",
+      "cues": [
+        "m03-s08-1",
+        "m03-s08-2"
+      ],
+      "triggerDescription": "артефакт подобран.",
+      "presentation": {
+        "type": "radio"
+      }
+    },
+    {
+      "id": "m03-s09",
+      "title": "Странная находка",
+      "cues": [
+        "m03-s09-1",
+        "m03-s09-2"
+      ],
+      "triggerDescription": "игрок осмотрел центральный склад после взятия артефакта.",
+      "presentation": {
+        "type": "radio"
+      }
+    },
+    {
+      "id": "m03-s10",
+      "title": "Вызов эвакуации",
+      "cues": [
+        "m03-s10-1",
+        "m03-s10-2"
+      ],
+      "triggerDescription": "отряд прибыл в зону посадки с артефактом.",
+      "presentation": {
+        "type": "radio"
+      }
+    },
+    {
+      "id": "m03-s11",
+      "title": "Возвращение",
+      "cues": [
+        "m03-s11-1",
+        "m03-s11-2"
+      ],
+      "triggerDescription": "транспорт вернулся на основную базу.",
+      "presentation": {
+        "type": "radio"
+      }
+    },
+    {
+      "id": "m03-s12",
+      "title": "Итог исследования",
+      "cues": [
+        "m03-s12-1",
+        "m03-s12-2"
+      ],
+      "triggerDescription": "соответствующее исследование завершено, не раньше.",
+      "presentation": {
+        "type": "radio"
+      }
+    },
+    {
+      "id": "m03-five-minutes",
+      "title": "Осталось пять минут",
+      "cues": [
+        "m03-five-minutes-1"
+      ],
+      "presentation": {
+        "type": "radio"
+      }
+    },
+    {
+      "id": "m03-one-minute",
+      "title": "Осталась минута",
+      "cues": [
+        "m03-one-minute-1"
+      ],
+      "presentation": {
+        "type": "radio"
+      }
+    },
+    {
+      "id": "m03-s07-clear",
+      "title": "Склад без охраны",
+      "cues": [
+        "m03-s07-clear-1"
+      ],
+      "presentation": {
+        "type": "radio"
+      }
+    },
+    {
+      "id": "m03-s12-losses",
+      "title": "Исследование после потерь",
+      "cues": [
+        "m03-s12-losses-1"
+      ],
+      "presentation": {
+        "type": "radio"
+      }
+    }
+  ],
+  "dialogue": [
+    {
+      "id": "m03-s01-1",
+      "speaker": "general",
+      "text": "Альфа, разведка обнаружила довоенный объект за пределами нашего сектора. Есть основания полагать, что там сохранилось вооружение",
+      "emotion": "firm, measured, over radio",
+      "pauseAfter": 0.25,
+      "recordingStatus": "temporary-synthesis"
+    },
+    {
+      "id": "m03-s01-2",
+      "speaker": "commander",
+      "text": "Наземным маршрутом?",
+      "emotion": "calm, businesslike",
+      "pauseAfter": 0.25,
+      "recordingStatus": "temporary-synthesis"
+    },
+    {
+      "id": "m03-s01-3",
+      "speaker": "general",
+      "text": "Отрицательно. Для вас подготовлен транспорт. Задача — забрать технологию и вернуться",
+      "emotion": "confident",
+      "pauseAfter": 0.25,
+      "recordingStatus": "temporary-synthesis"
+    },
+    {
+      "id": "m03-s02-1",
+      "speaker": "commander",
+      "text": "Это и есть наш транспорт?",
+      "emotion": "curious, restrained",
+      "pauseAfter": 0.25,
+      "recordingStatus": "temporary-synthesis"
+    },
+    {
+      "id": "m03-s02-2",
+      "speaker": "warrant",
+      "text": "Ми-26. Модификация “Коровник”. Два винта, большая грузовая и аппетит соответствующий",
+      "emotion": "proud, matter-of-fact",
+      "pauseAfter": 0.25,
+      "recordingStatus": "temporary-synthesis"
+    },
+    {
+      "id": "m03-s02-3",
+      "speaker": "commander",
+      "text": "Главное, чтоб обратно прилетел",
+      "emotion": "dry",
+      "pauseAfter": 0.25,
+      "recordingStatus": "temporary-synthesis"
+    },
+    {
+      "id": "m03-s02-4",
+      "speaker": "warrant",
+      "text": "Туда-то мы его точно заправили",
+      "emotion": "deadpan",
+      "pauseAfter": 0.25,
+      "recordingStatus": "temporary-synthesis"
+    },
+    {
+      "id": "m03-s03-1",
+      "speaker": "radio",
+      "text": "Коровник, приготовиться к приёму техники",
+      "emotion": "focused",
+      "pauseAfter": 0.25,
+      "recordingStatus": "temporary-synthesis"
+    },
+    {
+      "id": "m03-s03-2",
+      "speaker": "pilot",
+      "text": "Принял. Рампа открыта. Только без гонок",
+      "emotion": "over radio, relaxed",
+      "pauseAfter": 0.25,
+      "recordingStatus": "temporary-synthesis"
+    },
+    {
+      "id": "m03-s04-1",
+      "speaker": "pilot",
+      "text": "Груз закреплён. Машины на борту. К вылету готов",
+      "emotion": "professional",
+      "pauseAfter": 0.25,
+      "recordingStatus": "temporary-synthesis"
+    },
+    {
+      "id": "m03-s04-2",
+      "speaker": "commander",
+      "text": "Начинайте",
+      "emotion": "firm",
+      "pauseAfter": 0.25,
+      "recordingStatus": "temporary-synthesis"
+    },
+    {
+      "id": "m03-s05-1",
+      "speaker": "pilot",
+      "text": "Альфа, точка высадки. Рампа пошла",
+      "emotion": "focused, over radio",
+      "pauseAfter": 0.25,
+      "recordingStatus": "temporary-synthesis"
+    },
+    {
+      "id": "m03-s05-2",
+      "speaker": "scout",
+      "text": "Дорога рядом. Следы свежие. Похоже, район не пустой",
+      "emotion": "alert",
+      "pauseAfter": 0.25,
+      "recordingStatus": "temporary-synthesis"
+    },
+    {
+      "id": "m03-s05-3",
+      "speaker": "commander",
+      "text": "Осмотреться. Вперёд без лишнего шума",
+      "emotion": "commanding",
+      "pauseAfter": 0.25,
+      "recordingStatus": "temporary-synthesis"
+    },
+    {
+      "id": "m03-s06-1",
+      "speaker": "scout",
+      "text": "Впереди патруль. Несколько машин, идут по дороге",
+      "emotion": "quiet, reporting",
+      "pauseAfter": 0.25,
+      "recordingStatus": "temporary-synthesis"
+    },
+    {
+      "id": "m03-s06-2",
+      "speaker": "commander",
+      "text": "Обойти можем?",
+      "emotion": "calm",
+      "pauseAfter": 0.25,
+      "recordingStatus": "temporary-synthesis"
+    },
+    {
+      "id": "m03-s06-3",
+      "speaker": "scout",
+      "text": "Есть грунтовка. Только она уходит за высоту",
+      "emotion": "measured",
+      "pauseAfter": 0.25,
+      "recordingStatus": "temporary-synthesis"
+    },
+    {
+      "id": "m03-s07-1",
+      "speaker": "scout",
+      "text": "Нашли объект. Старый склад, у ворот огнемётная башня",
+      "emotion": "reporting",
+      "pauseAfter": 0.25,
+      "recordingStatus": "temporary-synthesis"
+    },
+    {
+      "id": "m03-s07-2",
+      "speaker": "commander",
+      "text": "Серьёзно встречают. Значит, есть что охранять",
+      "emotion": "dry, businesslike",
+      "pauseAfter": 0.25,
+      "recordingStatus": "temporary-synthesis"
+    },
+    {
+      "id": "m03-s08-1",
+      "speaker": "scout",
+      "text": "Командир, здесь оружейный модуль. Пулемёт тяжёлый, довоенный. Документы уцелели",
+      "emotion": "pleased, reporting",
+      "pauseAfter": 0.25,
+      "recordingStatus": "temporary-synthesis"
+    },
+    {
+      "id": "m03-s08-2",
+      "speaker": "commander",
+      "text": "Отлично. Забираем и домой",
+      "emotion": "decisive",
+      "pauseAfter": 0.25,
+      "recordingStatus": "temporary-synthesis"
+    },
+    {
+      "id": "m03-s09-1",
+      "speaker": "scout",
+      "text": "Тут ещё одна странность. Часть оборудования снята недавно. Причём аккуратно",
+      "emotion": "thoughtful, suspicious",
+      "pauseAfter": 0.25,
+      "recordingStatus": "temporary-synthesis"
+    },
+    {
+      "id": "m03-s09-2",
+      "speaker": "commander",
+      "text": "Отметь на карте. Вернёмся к этому позже",
+      "emotion": "calm, serious",
+      "pauseAfter": 0.25,
+      "recordingStatus": "temporary-synthesis"
+    },
+    {
+      "id": "m03-s10-1",
+      "speaker": "commander",
+      "text": "Коровник, Альфа на точке. Готовы к эвакуации",
+      "emotion": "commanding, over radio",
+      "pauseAfter": 0.25,
+      "recordingStatus": "temporary-synthesis"
+    },
+    {
+      "id": "m03-s10-2",
+      "speaker": "pilot",
+      "text": "Вас понял. Захожу",
+      "emotion": "focused",
+      "pauseAfter": 0.25,
+      "recordingStatus": "temporary-synthesis"
+    },
+    {
+      "id": "m03-s11-1",
+      "speaker": "radio",
+      "text": "Альфа вернулась. Транспорт на площадке",
+      "emotion": "pleased, reporting",
+      "pauseAfter": 0.25,
+      "recordingStatus": "temporary-synthesis"
+    },
+    {
+      "id": "m03-s11-2",
+      "speaker": "commander",
+      "text": "Находку в НИИ. Технику осмотреть, экипажам отдых",
+      "emotion": "calm",
+      "pauseAfter": 0.25,
+      "recordingStatus": "temporary-synthesis"
+    },
+    {
+      "id": "m03-s12-1",
+      "speaker": "scientist",
+      "text": "Тяжёлый пулемёт восстановили по документации. Теперь можем производить свой",
+      "emotion": "professional, satisfied",
+      "pauseAfter": 0.25,
+      "recordingStatus": "temporary-synthesis"
+    },
+    {
+      "id": "m03-s12-2",
+      "speaker": "commander",
+      "text": "Ну наконец-то. Хоть что-то новое без изоленты",
+      "emotion": "calm, slightly amused",
+      "pauseAfter": 0.25,
+      "recordingStatus": "temporary-synthesis"
+    },
+    {
+      "id": "m03-five-minutes-1",
+      "speaker": "pilot",
+      "text": "Альфа, до конца операции пять минут. Рассчитывайте время на погрузку.",
+      "pauseAfter": 0.25,
+      "recordingStatus": "temporary-synthesis"
+    },
+    {
+      "id": "m03-one-minute-1",
+      "speaker": "pilot",
+      "text": "Альфа, осталась минута. Срочно на эвакуацию.",
+      "pauseAfter": 0.25,
+      "recordingStatus": "temporary-synthesis"
+    },
+    {
+      "id": "m03-s07-clear-1",
+      "speaker": "scout",
+      "text": "Довоенный склад перед нами. Подступы свободны. Проверяем документацию.",
+      "pauseAfter": 0.25,
+      "recordingStatus": "temporary-synthesis"
+    },
+    {
+      "id": "m03-s12-losses-1",
+      "speaker": "scientist",
+      "text": "Тяжёлый пулемёт восстановили по документации. Теперь можем производить свой.",
+      "pauseAfter": 0.25,
+      "recordingStatus": "temporary-synthesis"
+    }
+  ],
+  "barks": [],
+  "source": {
+    "path": "docs/campaign/alpha/m03/request.txt"
+  }
+}

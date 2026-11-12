@@ -1,0 +1,52 @@
+{
+  "commit": "253e370c2af78228a822df6afa82b6261dc94656",
+  "source": "Warzone2100/warzone2100",
+  "retrieved": "2026-11-11",
+  "files": [
+    {
+      "file": "game.map",
+      "url": "https://raw.githubusercontent.com/Warzone2100/warzone2100/253e370c2af78228a822df6afa82b6261dc94656/data/base/wrf/cam1/sub1-1/game.map",
+      "sha256": "a1eb20e7e49261d784e20841ebaaa30b1b4eb0b4cf79d95283bb1bba6704dc49"
+    },
+    {
+      "file": "labels.json",
+      "url": "https://raw.githubusercontent.com/Warzone2100/warzone2100/253e370c2af78228a822df6afa82b6261dc94656/data/base/wrf/cam1/sub1-1/labels.json",
+      "sha256": "8ff78020087db0fff833d1f4d67e83087c725ba97072417e8ea4a0d88dd7df44"
+    },
+    {
+      "file": "struct.bjo",
+      "url": "https://raw.githubusercontent.com/Warzone2100/warzone2100/253e370c2af78228a822df6afa82b6261dc94656/data/base/wrf/cam1/sub1-1/struct.bjo",
+      "sha256": "c57cee21893b735e8cf226e2b4824753866c00d1b876f5a85ff1d738a134c067"
+    },
+    {
+      "file": "feat.bjo",
+      "url": "https://raw.githubusercontent.com/Warzone2100/warzone2100/253e370c2af78228a822df6afa82b6261dc94656/data/base/wrf/cam1/sub1-1/feat.bjo",
+      "sha256": "070baf83029556a72c786d6cc51dfa492935790f9c8404ab50613c4e84731af7"
+    },
+    {
+      "file": "dinit.bjo",
+      "url": "https://raw.githubusercontent.com/Warzone2100/warzone2100/253e370c2af78228a822df6afa82b6261dc94656/data/base/wrf/cam1/sub1-1/dinit.bjo",
+      "sha256": "cb848804191f251b4932d391dc4cf2218eb0cd943fa5af604066f2be34087600"
+    },
+    {
+      "file": "ttypes.ttp",
+      "url": "https://raw.githubusercontent.com/Warzone2100/warzone2100/253e370c2af78228a822df6afa82b6261dc94656/data/base/wrf/cam1/sub1-1/ttypes.ttp",
+      "sha256": "b3e6b3c5f337e02cf65984f1d80668e906dc56a5c24689d9b143da515099c3e3"
+    },
+    {
+      "file": "cam1-1.js",
+      "url": "https://raw.githubusercontent.com/Warzone2100/warzone2100/253e370c2af78228a822df6afa82b6261dc94656/data/base/script/campaign/cam1-1.js",
+      "sha256": "eae6ac5df2ed57ab83d49b90557196447e40d9fc668f737e033a90b0c263d330"
+    },
+    {
+      "file": "sub1-1.gam",
+      "url": "https://raw.githubusercontent.com/Warzone2100/warzone2100/253e370c2af78228a822df6afa82b6261dc94656/data/base/wrf/cam1/sub1-1.gam",
+      "sha256": "3c01741b269ce00390b643ef93f7647c58d7883c938186d286b056844c9585d5"
+    },
+    {
+      "file": "COPYING",
+      "url": "https://raw.githubusercontent.com/Warzone2100/warzone2100/253e370c2af78228a822df6afa82b6261dc94656/COPYING",
+      "sha256": "e6d6a009505e345fe949e1310334fcb0747f28dae2856759de102ab66b722cb4"
+    }
+  ]
+}
