@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {progressMission} from './check-navigation-public-progress.mjs';
-import {chooseRepairFactory,repairCompletionSeconds,repairChoiceDue} from '../campaign/factory-routing.js';
+import {chooseRepairFactory,repairCompletionSeconds,repairChoiceDue,factoryRepairQueue} from '../campaign/factory-routing.js';
 import {updateCombatRetreat} from '../campaign/combat-policy.js';
+import {updateFactoryVisit} from '../campaign/factory-garage.js';
 const before=process.argv.includes('--before'),results=[];
 function scene(){
  const m=progressMission();m.state.units=[];m.state.buildings=[];m.state.energy=2400;m.state.time=20;m.updateMission=()=>{};
@@ -62,6 +63,24 @@ if(!before){
  m.state.units=[u];u.factoryVisit.phase='gate';u.combatRetreat.home.id=a.id;
  assert.equal(chooseRepairFactory(m,u),a,'An almost free nearby bay beats a needless drive');
  results.push({case:'physical transfers stay protected, a free nearby factory keeps the vehicle'});
+}
+if(!before){
+ const {m,factories}=scene(),[a,b]=factories,u=exterior(m,a);
+ u.combatRetreat.factoryChoiceAt=m.state.time+40;
+ assert(!repairChoiceDue(m,u),'A reserved trip keeps its destination');
+ u.combatRetreat.unavailableFactories={[a.id]:{at:m.state.time,revision:m.nav.topologyRevision,x:u.x,y:u.y}};
+ assert(repairChoiceDue(m,u),'A failed route breaks the long transfer hold');
+ assert(!repairChoiceDue(m,u),'A failed route still waits two seconds between comparisons');
+ assert.notEqual(chooseRepairFactory(m,u),a);
+ const inside=m.state.units.find(v=>v.factoryVisit?.phase==='inside');
+ inside.factoryVisit.nextFactoryId=b.id;
+ assert(!factoryRepairQueue(m,a).includes(inside));assert(factoryRepairQueue(m,b).includes(inside));
+ b.hp=0;a.repairTransferAt=m.state.time+2;
+ const step=updateFactoryVisit(m,inside,a,0);step.next();step.return();
+ assert.equal(inside.factoryVisit.phase,'inside');assert(!inside.factoryVisit.nextFactoryId);
+ assert(factoryRepairQueue(m,a).includes(inside));assert(!factoryRepairQueue(m,b).includes(inside));
+ assert.equal(inside.hp,1,'A cancelled transfer cannot repair remotely');
+ results.push({case:'route failure releases trip hold; destroyed receiving factory returns the interior reservation'});
 }
 fs.mkdirSync('docs/playtest-evidence/wg066',{recursive:true});
 fs.writeFileSync(`docs/playtest-evidence/wg066/${before?'before':'routing'}.json`,JSON.stringify({results},null,2));console.log(JSON.stringify({results}));

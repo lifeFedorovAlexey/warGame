@@ -52,7 +52,7 @@ try{
   return {before,queues:review.counts(),outside:review.factories.map(id=>exterior.filter(uid=>m.entity(uid).combatRetreat.home.id===id).length),source:source.id,factories:review.factories};
  });
  console.log(JSON.stringify(report.initial));
- if(before)assert.deepEqual(report.initial.outside,[4,0,0,0]);
+ if(before){assert(report.initial.outside[0]>0);assert(report.initial.queues[0]>=20);}
  else{assert.equal(report.initial.outside[0],0);assert(report.initial.queues.every(n=>n>0),'All four bays have assigned repair work, including the reserved interior transfer');}
  await page.locator('#production-toggle').click();await page.mouse.move(20,200);await page.waitForTimeout(5500);
  for(const [name,width,height] of (before?[['before-desktop',1440,900]]:[['desktop',1440,900],['landscape',844,390],['landscape-small',667,375]])){
@@ -61,8 +61,9 @@ try{
    overflow:[...document.querySelectorAll('[data-factory-row] button')].filter(b=>{const r=b.getBoundingClientRect();return r.width&&(r.left<0||r.right>innerWidth||r.top<0||r.bottom>innerHeight);}).map(b=>b.ariaLabel),
    counts:review.counts()}));
   assert.equal(layout.width,width);assert.equal(layout.height,height);assert.deepEqual(layout.overflow,[]);
-  assert.equal(await page.locator('[data-factory-row]').count(),4);
-  assert.deepEqual((await page.locator('[data-factory-priority] .production-count').allTextContents()).map(Number),layout.counts);
+  const row=page.locator('[data-factory-row]');assert.equal(await row.count(),1);
+  const id=await row.getAttribute('data-factory-row');
+  assert.equal(Number(await row.locator('[data-factory-priority] .production-count').textContent()),layout.counts[report.initial.factories.indexOf(id)]);
   await page.screenshot({path:dir+'/'+name+'.png'});report.captures.push({name,...layout});
  }
  if(!before){

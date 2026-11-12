@@ -25,9 +25,670 @@
         1,
         2
       ]
+    },
+    {
+      "name": "landscape-small",
+      "width": 667,
+      "height": 375,
+      "overflow": [],
+      "counts": [
+        19,
+        2,
+        1,
+        2
+      ]
     }
   ],
-  "events": [],
+  "events": [
+    {
+      "id": "e210",
+      "type": "factory-repair-start",
+      "time": 20,
+      "unit": "u186",
+      "factory": "b182"
+    },
+    {
+      "id": "e211",
+      "type": "factory-repair-rerouted",
+      "time": 20.1,
+      "unit": "u205",
+      "from": "b182",
+      "to": "b184"
+    },
+    {
+      "id": "e212",
+      "type": "factory-repair-rerouted",
+      "time": 20.1,
+      "unit": "u206",
+      "from": "b182",
+      "to": "b183"
+    },
+    {
+      "id": "e213",
+      "type": "factory-repair-rerouted",
+      "time": 20.1,
+      "unit": "u207",
+      "from": "b182",
+      "to": "b185"
+    },
+    {
+      "id": "e214",
+      "type": "factory-repair-rerouted",
+      "time": 20.1,
+      "unit": "u208",
+      "from": "b182",
+      "to": "b183"
+    },
+    {
+      "id": "e215",
+      "type": "factory-repair-rerouted",
+      "time": 20.1,
+      "unit": "u209",
+      "from": "b182",
+      "to": "b185"
+    },
+    {
+      "id": "e216",
+      "type": "factory-repair-complete",
+      "time": 26.900000000000098,
+      "unit": "u186",
+      "factory": "b182"
+    },
+    {
+      "id": "e217",
+      "type": "factory-repair-start",
+      "time": 27.0000000000001,
+      "unit": "u187",
+      "factory": "b182"
+    },
+    {
+      "id": "e218",
+      "type": "factory-released",
+      "time": 29.80000000000014,
+      "unit": "u205",
+      "factory": "b182"
+    },
+    {
+      "id": "e219",
+      "type": "factory-repair-rerouted",
+      "time": 29.90000000000014,
+      "unit": "u204",
+      "from": "b182",
+      "to": "b184"
+    },
+    {
+      "id": "e220",
+      "type": "factory-admitted",
+      "time": 33.000000000000185,
+      "unit": "u208",
+      "factory": "b183"
+    },
+    {
+      "id": "e221",
+      "type": "factory-repair-start",
+      "time": 33.000000000000185,
+      "unit": "u208",
+      "factory": "b183"
+    },
+    {
+      "id": "e222",
+      "type": "factory-repair-complete",
+      "time": 33.9000000000002,
+      "unit": "u187",
+      "factory": "b182"
+    },
+    {
+      "id": "e223",
+      "type": "factory-repair-start",
+      "time": 34.0000000000002,
+      "unit": "u188",
+      "factory": "b182"
+    },
+    {
+      "id": "e224",
+      "type": "factory-admitted",
+      "time": 37.60000000000025,
+      "unit": "u209",
+      "factory": "b185"
+    },
+    {
+      "id": "e225",
+      "type": "factory-repair-start",
+      "time": 37.60000000000025,
+      "unit": "u209",
+      "factory": "b185"
+    },
+    {
+      "id": "e226",
+      "type": "factory-released",
+      "time": 39.60000000000028,
+      "unit": "u204",
+      "factory": "b182"
+    },
+    {
+      "id": "e227",
+      "type": "factory-repair-rerouted",
+      "time": 39.70000000000028,
+      "unit": "u203",
+      "from": "b182",
+      "to": "b183"
+    },
+    {
+      "id": "e228",
+      "type": "factory-repair-complete",
+      "time": 39.90000000000028,
+      "unit": "u208",
+      "factory": "b183"
+    },
+    {
+      "id": "e230",
+      "type": "factory-repair-complete",
+      "time": 40.9000000000003,
+      "unit": "u188",
+      "factory": "b182"
+    },
+    {
+      "id": "e231",
+      "type": "factory-repair-start",
+      "time": 41.0000000000003,
+      "unit": "u189",
+      "factory": "b182"
+    },
+    {
+      "id": "e233",
+      "type": "factory-admitted",
+      "time": 42.800000000000324,
+      "unit": "u206",
+      "factory": "b183"
+    },
+    {
+      "id": "e234",
+      "type": "factory-repair-start",
+      "time": 42.800000000000324,
+      "unit": "u206",
+      "factory": "b183"
+    },
+    {
+      "id": "e235",
+      "type": "factory-repair-complete",
+      "time": 44.50000000000035,
+      "unit": "u209",
+      "factory": "b185"
+    },
+    {
+      "id": "e236",
+      "type": "factory-repair-complete",
+      "time": 47.9000000000004,
+      "unit": "u189",
+      "factory": "b182"
+    },
+    {
+      "id": "e237",
+      "type": "factory-repair-start",
+      "time": 48.0000000000004,
+      "unit": "u190",
+      "factory": "b182"
+    },
+    {
+      "id": "e239",
+      "type": "factory-released",
+      "time": 49.40000000000042,
+      "unit": "u203",
+      "factory": "b182"
+    },
+    {
+      "id": "e240",
+      "type": "factory-repair-rerouted",
+      "time": 49.50000000000042,
+      "unit": "u202",
+      "from": "b182",
+      "to": "b184"
+    },
+    {
+      "id": "e241",
+      "type": "factory-repair-complete",
+      "time": 49.70000000000042,
+      "unit": "u206",
+      "factory": "b183"
+    },
+    {
+      "id": "e242",
+      "type": "factory-admitted",
+      "time": 50.20000000000043,
+      "unit": "u205",
+      "factory": "b184"
+    },
+    {
+      "id": "e243",
+      "type": "factory-repair-start",
+      "time": 50.20000000000043,
+      "unit": "u205",
+      "factory": "b184"
+    },
+    {
+      "id": "e244",
+      "type": "factory-released",
+      "time": 54.40000000000049,
+      "unit": "u209",
+      "factory": "b185"
+    },
+    {
+      "id": "e246",
+      "type": "factory-repair-complete",
+      "time": 54.900000000000496,
+      "unit": "u190",
+      "factory": "b182"
+    },
+    {
+      "id": "e247",
+      "type": "factory-repair-start",
+      "time": 55.0000000000005,
+      "unit": "u191",
+      "factory": "b182"
+    },
+    {
+      "id": "e248",
+      "type": "factory-repair-complete",
+      "time": 57.10000000000053,
+      "unit": "u205",
+      "factory": "b184"
+    },
+    {
+      "id": "e249",
+      "type": "factory-released",
+      "time": 59.000000000000554,
+      "unit": "u208",
+      "factory": "b183"
+    },
+    {
+      "id": "e250",
+      "type": "factory-released",
+      "time": 59.20000000000056,
+      "unit": "u202",
+      "factory": "b182"
+    },
+    {
+      "id": "e251",
+      "type": "factory-repair-rerouted",
+      "time": 59.30000000000056,
+      "unit": "u201",
+      "from": "b182",
+      "to": "b184"
+    },
+    {
+      "id": "e252",
+      "type": "factory-admitted",
+      "time": 59.700000000000564,
+      "unit": "u207",
+      "factory": "b185"
+    },
+    {
+      "id": "e253",
+      "type": "factory-repair-start",
+      "time": 59.700000000000564,
+      "unit": "u207",
+      "factory": "b185"
+    },
+    {
+      "id": "e254",
+      "type": "factory-admitted",
+      "time": 61.800000000000594,
+      "unit": "u204",
+      "factory": "b184"
+    },
+    {
+      "id": "e255",
+      "type": "factory-repair-start",
+      "time": 61.800000000000594,
+      "unit": "u204",
+      "factory": "b184"
+    },
+    {
+      "id": "e256",
+      "type": "factory-repair-complete",
+      "time": 61.900000000000595,
+      "unit": "u191",
+      "factory": "b182"
+    },
+    {
+      "id": "e257",
+      "type": "factory-repair-start",
+      "time": 62.0000000000006,
+      "unit": "u192",
+      "factory": "b182"
+    },
+    {
+      "id": "e258",
+      "type": "factory-repair-complete",
+      "time": 66.60000000000048,
+      "unit": "u207",
+      "factory": "b185"
+    },
+    {
+      "id": "e259",
+      "type": "factory-repair-complete",
+      "time": 68.70000000000036,
+      "unit": "u204",
+      "factory": "b184"
+    },
+    {
+      "id": "e260",
+      "type": "factory-repair-complete",
+      "time": 68.90000000000035,
+      "unit": "u192",
+      "factory": "b182"
+    },
+    {
+      "id": "e261",
+      "type": "factory-released",
+      "time": 69.00000000000034,
+      "unit": "u201",
+      "factory": "b182"
+    },
+    {
+      "id": "e262",
+      "type": "factory-repair-start",
+      "time": 69.00000000000034,
+      "unit": "u193",
+      "factory": "b182"
+    },
+    {
+      "id": "e263",
+      "type": "factory-repair-rerouted",
+      "time": 69.10000000000034,
+      "unit": "u200",
+      "from": "b182",
+      "to": "b183"
+    },
+    {
+      "id": "e264",
+      "type": "factory-released",
+      "time": 69.50000000000031,
+      "unit": "u206",
+      "factory": "b183"
+    },
+    {
+      "id": "e266",
+      "type": "factory-released",
+      "time": 71.6000000000002,
+      "unit": "u205",
+      "factory": "b184"
+    },
+    {
+      "id": "e267",
+      "type": "factory-admitted",
+      "time": 74.9,
+      "unit": "u203",
+      "factory": "b183"
+    },
+    {
+      "id": "e268",
+      "type": "factory-repair-start",
+      "time": 74.9,
+      "unit": "u203",
+      "factory": "b183"
+    },
+    {
+      "id": "e269",
+      "type": "factory-repair-complete",
+      "time": 75.89999999999995,
+      "unit": "u193",
+      "factory": "b182"
+    },
+    {
+      "id": "e270",
+      "type": "factory-repair-start",
+      "time": 75.99999999999994,
+      "unit": "u194",
+      "factory": "b182"
+    },
+    {
+      "id": "e271",
+      "type": "factory-released",
+      "time": 76.39999999999992,
+      "unit": "u207",
+      "factory": "b185"
+    },
+    {
+      "id": "e272",
+      "type": "factory-released",
+      "time": 78.79999999999978,
+      "unit": "u200",
+      "factory": "b182"
+    },
+    {
+      "id": "e273",
+      "type": "factory-repair-rerouted",
+      "time": 78.89999999999978,
+      "unit": "u199",
+      "from": "b182",
+      "to": "b184"
+    },
+    {
+      "id": "e275",
+      "type": "factory-released",
+      "time": 81.49999999999963,
+      "unit": "u204",
+      "factory": "b184"
+    },
+    {
+      "id": "e276",
+      "type": "factory-repair-complete",
+      "time": 81.79999999999961,
+      "unit": "u203",
+      "factory": "b183"
+    },
+    {
+      "id": "e277",
+      "type": "factory-repair-complete",
+      "time": 82.89999999999955,
+      "unit": "u194",
+      "factory": "b182"
+    },
+    {
+      "id": "e278",
+      "type": "factory-repair-start",
+      "time": 82.99999999999955,
+      "unit": "u195",
+      "factory": "b182"
+    },
+    {
+      "id": "e280",
+      "type": "factory-admitted",
+      "time": 86.79999999999933,
+      "unit": "u202",
+      "factory": "b184"
+    },
+    {
+      "id": "e281",
+      "type": "factory-repair-start",
+      "time": 86.79999999999933,
+      "unit": "u202",
+      "factory": "b184"
+    },
+    {
+      "id": "e284",
+      "type": "factory-released",
+      "time": 88.59999999999923,
+      "unit": "u199",
+      "factory": "b182"
+    },
+    {
+      "id": "e285",
+      "type": "factory-repair-complete",
+      "time": 89.89999999999915,
+      "unit": "u195",
+      "factory": "b182"
+    },
+    {
+      "id": "e286",
+      "type": "factory-repair-start",
+      "time": 89.99999999999915,
+      "unit": "u196",
+      "factory": "b182"
+    },
+    {
+      "id": "e287",
+      "type": "factory-repair-complete",
+      "time": 93.69999999999894,
+      "unit": "u202",
+      "factory": "b184"
+    },
+    {
+      "id": "e288",
+      "type": "factory-released",
+      "time": 94.79999999999887,
+      "unit": "u203",
+      "factory": "b183"
+    },
+    {
+      "id": "e289",
+      "type": "factory-repair-complete",
+      "time": 96.89999999999876,
+      "unit": "u196",
+      "factory": "b182"
+    },
+    {
+      "id": "e290",
+      "type": "factory-repair-start",
+      "time": 96.99999999999875,
+      "unit": "u197",
+      "factory": "b182"
+    },
+    {
+      "id": "e291",
+      "type": "factory-admitted",
+      "time": 97.19999999999874,
+      "unit": "u201",
+      "factory": "b184"
+    },
+    {
+      "id": "e292",
+      "type": "factory-repair-start",
+      "time": 97.19999999999874,
+      "unit": "u201",
+      "factory": "b184"
+    },
+    {
+      "id": "e293",
+      "type": "factory-released",
+      "time": 98.39999999999867,
+      "unit": "u186",
+      "factory": "b182"
+    },
+    {
+      "id": "e294",
+      "type": "factory-admitted",
+      "time": 100.19999999999857,
+      "unit": "u200",
+      "factory": "b183"
+    },
+    {
+      "id": "e295",
+      "type": "factory-repair-start",
+      "time": 100.19999999999857,
+      "unit": "u200",
+      "factory": "b183"
+    },
+    {
+      "id": "e296",
+      "type": "factory-repair-complete",
+      "time": 103.89999999999836,
+      "unit": "u197",
+      "factory": "b182"
+    },
+    {
+      "id": "e297",
+      "type": "factory-repair-start",
+      "time": 103.99999999999835,
+      "unit": "u198",
+      "factory": "b182"
+    },
+    {
+      "id": "e298",
+      "type": "factory-repair-complete",
+      "time": 104.09999999999835,
+      "unit": "u201",
+      "factory": "b184"
+    },
+    {
+      "id": "e299",
+      "type": "factory-repair-complete",
+      "time": 107.09999999999818,
+      "unit": "u200",
+      "factory": "b183"
+    },
+    {
+      "id": "e301",
+      "type": "factory-released",
+      "time": 108.79999999999808,
+      "unit": "u187",
+      "factory": "b182"
+    },
+    {
+      "id": "e302",
+      "type": "factory-released",
+      "time": 109.49999999999804,
+      "unit": "u202",
+      "factory": "b184"
+    },
+    {
+      "id": "e303",
+      "type": "factory-repair-complete",
+      "time": 110.89999999999796,
+      "unit": "u198",
+      "factory": "b182"
+    },
+    {
+      "id": "e304",
+      "type": "factory-released",
+      "time": 121.59999999999735,
+      "unit": "u188",
+      "factory": "b182"
+    },
+    {
+      "id": "e305",
+      "type": "factory-released",
+      "time": 121.69999999999735,
+      "unit": "u200",
+      "factory": "b183"
+    },
+    {
+      "id": "e306",
+      "type": "factory-released",
+      "time": 122.4999999999973,
+      "unit": "u201",
+      "factory": "b184"
+    },
+    {
+      "id": "e307",
+      "type": "factory-admitted",
+      "time": 127.799999999997,
+      "unit": "u199",
+      "factory": "b184"
+    },
+    {
+      "id": "e308",
+      "type": "factory-repair-start",
+      "time": 127.799999999997,
+      "unit": "u199",
+      "factory": "b184"
+    },
+    {
+      "id": "e309",
+      "type": "factory-released",
+      "time": 133.49999999999667,
+      "unit": "u189",
+      "factory": "b182"
+    },
+    {
+      "id": "e310",
+      "type": "factory-repair-complete",
+      "time": 134.6999999999966,
+      "unit": "u199",
+      "factory": "b184"
+    }
+  ],
   "initial": {
     "before": [
       24,
@@ -53,6 +714,238 @@
       "b183",
       "b184",
       "b185"
+    ]
+  },
+  "final": {
+    "time": 135.09999999999658,
+    "queues": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "done": 24,
+    "units": [
+      {
+        "id": "u186",
+        "hp": 320,
+        "maxHp": 320,
+        "home": "b182",
+        "reason": "retreat-position"
+      },
+      {
+        "id": "u187",
+        "hp": 320,
+        "maxHp": 320,
+        "home": "b182",
+        "reason": "retreat-position"
+      },
+      {
+        "id": "u188",
+        "hp": 320,
+        "maxHp": 320,
+        "home": "b182",
+        "reason": "retreat-position"
+      },
+      {
+        "id": "u189",
+        "hp": 320,
+        "maxHp": 320,
+        "home": "b182",
+        "reason": "retreat-position"
+      },
+      {
+        "id": "u190",
+        "hp": 320,
+        "maxHp": 320,
+        "phase": "leaving",
+        "factory": "b182",
+        "home": "b182",
+        "reason": "following-route"
+      },
+      {
+        "id": "u191",
+        "hp": 320,
+        "maxHp": 320,
+        "phase": "inside",
+        "factory": "b182",
+        "home": "b182",
+        "reason": "inside-factory"
+      },
+      {
+        "id": "u192",
+        "hp": 320,
+        "maxHp": 320,
+        "phase": "inside",
+        "factory": "b182",
+        "home": "b182",
+        "reason": "inside-factory"
+      },
+      {
+        "id": "u193",
+        "hp": 320,
+        "maxHp": 320,
+        "phase": "inside",
+        "factory": "b182",
+        "home": "b182",
+        "reason": "inside-factory"
+      },
+      {
+        "id": "u194",
+        "hp": 320,
+        "maxHp": 320,
+        "phase": "inside",
+        "factory": "b182",
+        "home": "b182",
+        "reason": "inside-factory"
+      },
+      {
+        "id": "u195",
+        "hp": 320,
+        "maxHp": 320,
+        "phase": "inside",
+        "factory": "b182",
+        "home": "b182",
+        "reason": "inside-factory"
+      },
+      {
+        "id": "u196",
+        "hp": 320,
+        "maxHp": 320,
+        "phase": "inside",
+        "factory": "b182",
+        "home": "b182",
+        "reason": "inside-factory"
+      },
+      {
+        "id": "u197",
+        "hp": 320,
+        "maxHp": 320,
+        "phase": "inside",
+        "factory": "b182",
+        "home": "b182",
+        "reason": "inside-factory"
+      },
+      {
+        "id": "u198",
+        "hp": 320,
+        "maxHp": 320,
+        "phase": "inside",
+        "factory": "b182",
+        "home": "b182",
+        "reason": "inside-factory"
+      },
+      {
+        "id": "u199",
+        "hp": 320,
+        "maxHp": 320,
+        "phase": "leaving",
+        "factory": "b184",
+        "home": "b184",
+        "reason": "following-route"
+      },
+      {
+        "id": "u200",
+        "hp": 320,
+        "maxHp": 320,
+        "home": "b183",
+        "reason": "retreat-position"
+      },
+      {
+        "id": "u201",
+        "hp": 320,
+        "maxHp": 320,
+        "home": "b184",
+        "reason": "retreat-position"
+      },
+      {
+        "id": "u202",
+        "hp": 320,
+        "maxHp": 320,
+        "home": "b184",
+        "reason": "retreat-position"
+      },
+      {
+        "id": "u203",
+        "hp": 320,
+        "maxHp": 320,
+        "home": "b183",
+        "reason": "retreat-position"
+      },
+      {
+        "id": "u204",
+        "hp": 320,
+        "maxHp": 320,
+        "home": "b184",
+        "reason": "retreat-position"
+      },
+      {
+        "id": "u205",
+        "hp": 320,
+        "maxHp": 320,
+        "home": "b184",
+        "reason": "retreat-position"
+      },
+      {
+        "id": "u206",
+        "hp": 320,
+        "maxHp": 320,
+        "home": "b183",
+        "reason": "retreat-position"
+      },
+      {
+        "id": "u207",
+        "hp": 320,
+        "maxHp": 320,
+        "home": "b185",
+        "reason": "retreat-position"
+      },
+      {
+        "id": "u208",
+        "hp": 320,
+        "maxHp": 320,
+        "home": "b183",
+        "reason": "retreat-position"
+      },
+      {
+        "id": "u209",
+        "hp": 320,
+        "maxHp": 320,
+        "home": "b185",
+        "reason": "retreat-position"
+      }
+    ],
+    "used": [
+      "b182",
+      "b183",
+      "b185",
+      "b184"
+    ],
+    "transferred": [
+      "u205",
+      "u206",
+      "u207",
+      "u208",
+      "u209",
+      "u204",
+      "u203",
+      "u202",
+      "u201",
+      "u200",
+      "u199"
+    ],
+    "repairedTransfers": [
+      "u208",
+      "u209",
+      "u206",
+      "u205",
+      "u207",
+      "u204",
+      "u203",
+      "u202",
+      "u201",
+      "u200",
+      "u199"
     ]
   }
 }

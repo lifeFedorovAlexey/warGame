@@ -1,0 +1,26 @@
+{
+  "base": "6e223a3",
+  "passed": [
+    "check-wg066-repair-routing.mjs",
+    "check-wg066-repair-transfer.mjs",
+    "check-wg066-repair-browser.mjs (1440x900, 844x390, 667x375)",
+    "check-factory-priorities.mjs (10 cases)",
+    "check-repair-distribution.mjs (5 cases)",
+    "check-wg060-modernization.mjs (11 cases)",
+    "check-factory-exit-priority.mjs (12 cars, 3 rotations)",
+    "check-wg059-factory-queue.mjs (M01 and M02, save/load)",
+    "check-builder-autorepair.mjs (32 cases)"
+  ],
+  "existingFailures": [
+    {
+      "test": "check-factory-frame-budget.mjs",
+      "baseline": "Same assertion fails on main 6e223a3: calls=1, heartbeats=0, produced=1. Fixture blocks the former front exit, while the garage uses the rear exit.",
+      "changedBranch": "Same assertion: calls=1, heartbeats=0, produced=1. No repair queue or transfer in this fixture."
+    },
+    {
+      "test": "check-retreat-service.mjs",
+      "baseline": "Same assertion at line 36 fails on main 6e223a3. It waits for arrived before partial repair; the physical garage already repaired the unit and returned it to its move destination.",
+      "changedBranch": "Same position (0.2104,449.5926), full 320 HP, no retreat, ARRIVED/destination-reached."
+    }
+  ]
+}
