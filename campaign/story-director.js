@@ -98,6 +98,8 @@ export class StoryDirector {
     const id=this.data?.active;if(!id)return;
     const record=this.record(id);record.cursor++;
     if(record.cursor>=this.scenes.get(id).cues.length)this.end();
+    // The M02 opening yields after a full spoken line, preserving its place.
+    else if(id==='m02-radio-start'&&this.data.clock-this.data.lastCombat<3000)this.suspend();
   }
   skip(){this.end('skipped');}
   update(mission,now,{enabled=true}={}) {
@@ -114,7 +116,7 @@ export class StoryDirector {
       // A started exchange finishes naturally. Attacks use the existing minimap
       // alert; neither combat nor an urgent report rewinds or replaces speech.
       if(!rule||(mission.state.m02||mission.state.m03)&&!rule.valid)this.end('cancelled');
-      else if((mission.state.m02||mission.state.m03)&&rule.priority>0&&f.battle){this.record(d.active).cursor=0;this.suspend();}
+      else if((mission.state.m02||mission.state.m03)&&d.active!=='m02-radio-start'&&rule.priority>0&&f.battle){this.record(d.active).cursor=0;this.suspend();}
     }
     const eligible=[];
     for(const [id,rule] of Object.entries(rules)){
@@ -172,5 +174,5 @@ export async function loadMissionStory() {
   const m03=applyStoryEdits(m03Script,m03Audio,m03Edits);
   m03.story.dialogue=m03.story.dialogue.map(line=>({...line,clip:m03.audio.clips[line.id]?.file?{...m03.audio.clips[line.id],base:m03Base.href}:null}));
   const merged=appendM02Story(appendM02Story({...story,dialogue:story.dialogue.map(line=>({...line,clip:audio.clips[line.id]})),barks:[...story.barks.map(line=>({...line,clip:audio.clips[line.id]})),...service.barks]},m02.story),m03.story);
-  merged.speakers={...story.speakers,...m03.story.speakers};return merged;
+  merged.speakers={...story.speakers,...m02.story.speakers,...m03.story.speakers};return merged;
 }

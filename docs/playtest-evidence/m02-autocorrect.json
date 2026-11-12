@@ -1,0 +1,244 @@
+{
+  "scene": "m02-radio-start",
+  "checks": {
+    "story": "node tools/check-m02-start-radio.mjs: PASS",
+    "m01Regression": "node tools/check-story-v2.mjs --logic-only: PASS",
+    "exactApprovedWording": true,
+    "originalTwoRecordingsPreserved": true,
+    "unstartedSceneExpiresAt90Seconds": true,
+    "startedSceneSurvivesDeadline": true,
+    "combatPausesAtLineBoundaries": true,
+    "saveResumesCurrentCursor": true,
+    "urgentContactCanUseCombatPause": true,
+    "missionCompletionCancelsOpening": true,
+    "otherM02ScenesUnchanged": true,
+    "screenshotsInspected": true
+  },
+  "cases": [
+    {
+      "delayed": false,
+      "trace": [
+        {
+          "id": "m02-radio-start-1",
+          "file": "recordings/elevenlabs/m02-radio-start-1-84d48f6554e6.mp3",
+          "startedAt": 13051.899999976158,
+          "missionElapsed": 0,
+          "duration": 3.92,
+          "peak": 0.8438933491706848,
+          "contextState": "running",
+          "controlsEnabled": true,
+          "active": true,
+          "openingPlaying": false,
+          "paused": false,
+          "endedAt": 16970.600000023842
+        },
+        {
+          "id": "m02-v2-start-1",
+          "file": "recordings/elevenlabs/m02-v2-start-1-19b7636f2261.mp3",
+          "startedAt": 17014.299999952316,
+          "missionElapsed": 4.000000000000002,
+          "duration": 3.6,
+          "peak": 0.6585775017738342,
+          "contextState": "running",
+          "controlsEnabled": true,
+          "active": true,
+          "openingPlaying": false,
+          "paused": false,
+          "endedAt": 20611.899999976158
+        },
+        {
+          "id": "m02-v2-start-2",
+          "file": "recordings/elevenlabs/m02-v2-start-2-3c2d97abcf89.mp3",
+          "startedAt": 20681.100000023842,
+          "missionElapsed": 7.599999999999989,
+          "duration": 4.4,
+          "peak": 0.7119183540344238,
+          "contextState": "running",
+          "controlsEnabled": true,
+          "active": true,
+          "openingPlaying": false,
+          "paused": false,
+          "endedAt": 25080.700000047684
+        },
+        {
+          "id": "m02-v2-start-3",
+          "file": "recordings/elevenlabs/m02-v2-start-3-4b778e7a1cc6.mp3",
+          "startedAt": 25130.200000047684,
+          "missionElapsed": 12.099999999999973,
+          "duration": 2.72,
+          "peak": 0.5814811587333679,
+          "contextState": "running",
+          "controlsEnabled": true,
+          "active": true,
+          "openingPlaying": false,
+          "paused": false,
+          "endedAt": 27843.399999976158
+        },
+        {
+          "id": "m02-v2-start-4",
+          "file": "recordings/elevenlabs/m02-v2-start-4-1f1866fefdba.mp3",
+          "startedAt": 27863.100000023842,
+          "missionElapsed": 14.799999999999963,
+          "duration": 5.52,
+          "peak": 0.7265746593475342,
+          "contextState": "running",
+          "controlsEnabled": true,
+          "active": true,
+          "openingPlaying": false,
+          "paused": false,
+          "endedAt": 33380.799999952316
+        },
+        {
+          "id": "m02-radio-start-2",
+          "file": "recordings/elevenlabs/m02-radio-start-2-bafddb0be0d6.mp3",
+          "startedAt": 33428.799999952316,
+          "missionElapsed": 20.40000000000002,
+          "duration": 3.2,
+          "peak": 0.6406750679016113,
+          "contextState": "running",
+          "controlsEnabled": true,
+          "active": true,
+          "openingPlaying": false,
+          "paused": false,
+          "endedAt": 36620.89999997616
+        }
+      ],
+      "hitEvents": 0,
+      "record": {
+        "status": "done",
+        "cursor": 6,
+        "endedAt": 23697.199999999997
+      },
+      "controlsEnabled": true
+    },
+    {
+      "delayed": true,
+      "trace": [
+        {
+          "id": "m02-radio-start-1",
+          "file": "recordings/elevenlabs/m02-radio-start-1-84d48f6554e6.mp3",
+          "startedAt": 5998.399999976158,
+          "missionElapsed": 89,
+          "duration": 3.92,
+          "peak": 0.8438933491706848,
+          "contextState": "running",
+          "controlsEnabled": true,
+          "active": true,
+          "openingPlaying": false,
+          "paused": false,
+          "endedAt": 9917.100000023842
+        },
+        {
+          "id": "m02-v2-start-1",
+          "file": "recordings/elevenlabs/m02-v2-start-1-19b7636f2261.mp3",
+          "startedAt": 9964.299999952316,
+          "missionElapsed": 92.99999999999977,
+          "duration": 3.6,
+          "peak": 0.6585775017738342,
+          "contextState": "running",
+          "controlsEnabled": true,
+          "active": true,
+          "openingPlaying": false,
+          "paused": false,
+          "endedAt": 13557.100000023842
+        },
+        {
+          "id": "m02-v2-start-2",
+          "file": "recordings/elevenlabs/m02-v2-start-2-3c2d97abcf89.mp3",
+          "startedAt": 22648.600000023842,
+          "missionElapsed": 105.69999999999905,
+          "duration": 4.4,
+          "peak": 0.7119183540344238,
+          "contextState": "running",
+          "controlsEnabled": true,
+          "active": true,
+          "openingPlaying": false,
+          "paused": false,
+          "endedAt": 27047.399999976158
+        },
+        {
+          "id": "m02-v2-start-3",
+          "file": "recordings/elevenlabs/m02-v2-start-3-4b778e7a1cc6.mp3",
+          "startedAt": 27097.799999952316,
+          "missionElapsed": 110.0999999999988,
+          "duration": 2.72,
+          "peak": 0.5814811587333679,
+          "contextState": "running",
+          "controlsEnabled": true,
+          "active": true,
+          "openingPlaying": false,
+          "paused": false,
+          "endedAt": 29817.399999976158
+        },
+        {
+          "id": "m02-v2-start-4",
+          "file": "recordings/elevenlabs/m02-v2-start-4-1f1866fefdba.mp3",
+          "startedAt": 29833.899999976158,
+          "missionElapsed": 112.89999999999864,
+          "duration": 5.52,
+          "peak": 0.7265746593475342,
+          "contextState": "running",
+          "controlsEnabled": true,
+          "active": true,
+          "openingPlaying": false,
+          "paused": false,
+          "endedAt": 35347.39999997616
+        },
+        {
+          "id": "m02-radio-start-2",
+          "file": "recordings/elevenlabs/m02-radio-start-2-bafddb0be0d6.mp3",
+          "startedAt": 35397,
+          "missionElapsed": 118.39999999999833,
+          "duration": 3.2,
+          "peak": 0.6406750679016113,
+          "contextState": "running",
+          "controlsEnabled": true,
+          "active": true,
+          "openingPlaying": false,
+          "paused": false,
+          "endedAt": 38587.60000002384
+        }
+      ],
+      "hitEvents": 81,
+      "lastHit": 17974,
+      "record": {
+        "status": "done",
+        "cursor": 6,
+        "endedAt": 31824.700000023844
+      },
+      "controlsEnabled": true,
+      "pauseMs": 9091.5
+    }
+  ],
+  "editorCues": [
+    "m02-radio-start-1",
+    "m02-v2-start-1",
+    "m02-v2-start-2",
+    "m02-v2-start-3",
+    "m02-v2-start-4",
+    "m02-radio-start-2"
+  ],
+  "screenshots": [
+    {
+      "path": "campaign/previews/m02-autocorrect/game-desktop.png",
+      "width": 1440,
+      "height": 900,
+      "text": "Да там уже фотки посмотрели, дальше переслали. Езжайте пока. Потом разберёмся."
+    },
+    {
+      "path": "campaign/previews/m02-autocorrect/game-landscape.png",
+      "width": 844,
+      "height": 390,
+      "text": "Да там уже фотки посмотрели, дальше переслали. Езжайте пока. Потом разберёмся."
+    },
+    {
+      "path": "campaign/previews/m02-autocorrect/game-small-landscape.png",
+      "width": 667,
+      "height": 375,
+      "text": "Да там уже фотки посмотрели, дальше переслали. Езжайте пока. Потом разберёмся."
+    }
+  ],
+  "errors": [],
+  "paidRequestsDuringVerification": [],
+  "source": "campaign/previews/m02-autocorrect/verify.mjs"
+}

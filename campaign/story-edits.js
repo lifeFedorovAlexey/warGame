@@ -14,7 +14,7 @@ export function applyStoryEdits(story, audio, edits) {
   const spoken=new Set([...referenced,...story.barks.map(line=>line.id)]);
   for(const id of Object.keys(clips))if(!spoken.has(id))delete clips[id];
   return {
-    story:{...story,scenes,dialogue,appliedDialogue:{draftRevision:edits.draftRevision,throughScene:edits.throughScene}},
+    story:{...story,speakers:{...story.speakers,...edits.speakers},scenes,dialogue,appliedDialogue:{draftRevision:edits.draftRevision,throughScene:edits.throughScene}},
     audio:{...audio,clips},
   };
 }

@@ -1,6 +1,6 @@
 {
-  "revision": 1,
-  "savedAt": "2026-11-11T19:59:29.523721+00:00",
+  "revision": 2,
+  "savedAt": "2026-11-12T07:33:59.583994+00:00",
   "document": {
     "id": "alpha-m02",
     "title": "Энергетический всплеск",
@@ -43,6 +43,13 @@
         "lengthScale": 1.0,
         "pitchSemitones": 0.8,
         "effect": "radio"
+      },
+      "general": {
+        "name": "Генерал",
+        "voice": "dmitri",
+        "lengthScale": 1.16,
+        "pitchSemitones": -0.5,
+        "effect": "clean"
       }
     },
     "scenes": [
@@ -51,12 +58,16 @@
         "title": "На юг",
         "cues": [
           "m02-radio-start-1",
+          "m02-v2-start-1",
+          "m02-v2-start-2",
+          "m02-v2-start-3",
+          "m02-v2-start-4",
           "m02-radio-start-2"
         ],
-        "triggerDescription": "Начало m02; отменяется после 90 секунд или победы.",
+        "triggerDescription": "Начало m02. Не начатая сцена доступна первые 90 секунд; начатый разговор продолжается после этого срока. Во время боя пауза между репликами, затем продолжение с той же позиции. Отмена при завершении миссии.",
         "kind": "sequence",
         "section": "Сюжет",
-        "trigger": "Начало m02; отменяется после 90 секунд или победы.",
+        "trigger": "Начало m02. Не начатая сцена доступна первые 90 секунд; начатый разговор продолжается после этого срока. Во время боя пауза между репликами, затем продолжение с той же позиции. Отмена при завершении миссии.",
         "notes": "",
         "enabled": true
       },
@@ -1054,6 +1065,134 @@
           },
           "generatedAt": "2026-11-11T19:58:48.379Z",
           "draftRevision": 0
+        }
+      },
+      "m02-v2-start-1": {
+        "id": "m02-v2-start-1",
+        "key": "m02-v2-start-1",
+        "speaker": "commander",
+        "text": "Товарищ генерал, у вас в отчёте станцию уже взяли.",
+        "pauseAfter": 0.2,
+        "recordingStatus": "Т",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission02/recordings/elevenlabs/m02-v2-start-1-19b7636f2261.mp3",
+          "speaker": "commander",
+          "text": "Товарищ генерал, у вас в отчёте станцию уже взяли.",
+          "spokenText": "[matter-of-fact] Товарищ генерал, у вас в отчёте станцию уже взяли.",
+          "voiceId": "5mJA7umOnM5ycymymd6P",
+          "voiceName": "comandorNig",
+          "modelId": "eleven_v4",
+          "origin": "elevenlabs-synthesis",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "sha256": "19b7636f2261a628bf17f7e683c636df2d7032f818b9d2eb820202f329b76f59",
+          "bytes": 58557,
+          "generatedAt": "2026-11-12T07:31:33.135Z",
+          "duration": 3.6,
+          "leadingSilence": 0.09,
+          "trailingSilence": 0.1499999999999999
+        }
+      },
+      "m02-v2-start-2": {
+        "id": "m02-v2-start-2",
+        "key": "m02-v2-start-2",
+        "speaker": "general",
+        "text": "Не взяли. Я «не взяли» писал. Автозамена эта…",
+        "pauseAfter": 0.2,
+        "recordingStatus": "Т",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission02/recordings/elevenlabs/m02-v2-start-2-3c2d97abcf89.mp3",
+          "speaker": "general",
+          "text": "Не взяли. Я «не взяли» писал. Автозамена эта…",
+          "spokenText": "[casual, matter-of-fact] Не взяли. Я «не взяли» писал. Автозамена эта…",
+          "voiceId": "rQOBu7YxCDxGiFdTm28w",
+          "voiceName": "Artem Lebedev - Captivating and Engaging",
+          "modelId": "eleven_v4",
+          "origin": "elevenlabs-synthesis",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "sha256": "3c2d97abcf89598c619bd76a00efdbd6f05ef5d8017daa2fac5b16ac89b20b84",
+          "bytes": 71514,
+          "generatedAt": "2026-11-12T07:31:33.853Z",
+          "duration": 4.4,
+          "leadingSilence": 0.02,
+          "trailingSilence": 0.16999999999999993
+        }
+      },
+      "m02-v2-start-3": {
+        "id": "m02-v2-start-3",
+        "key": "m02-v2-start-3",
+        "speaker": "commander",
+        "text": "Может, исправление отправить?",
+        "pauseAfter": 0.2,
+        "recordingStatus": "Т",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission02/recordings/elevenlabs/m02-v2-start-3-4b778e7a1cc6.mp3",
+          "speaker": "commander",
+          "text": "Может, исправление отправить?",
+          "spokenText": "[questioning, matter-of-fact] Может, исправление отправить?",
+          "voiceId": "5mJA7umOnM5ycymymd6P",
+          "voiceName": "comandorNig",
+          "modelId": "eleven_v4",
+          "origin": "elevenlabs-synthesis",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "sha256": "4b778e7a1cc6f389a20efa5bffa8067f191a31f0edfa40ae3c5f0fab958d207a",
+          "bytes": 44764,
+          "generatedAt": "2026-11-12T07:31:34.412Z",
+          "duration": 2.72,
+          "leadingSilence": 0.29,
+          "trailingSilence": 0.3600000000000003
+        }
+      },
+      "m02-v2-start-4": {
+        "id": "m02-v2-start-4",
+        "key": "m02-v2-start-4",
+        "speaker": "general",
+        "text": "Да там уже фотки посмотрели, дальше переслали. Езжайте пока. Потом разберёмся.",
+        "pauseAfter": 0.2,
+        "recordingStatus": "Т",
+        "enabled": true,
+        "notes": "",
+        "portraitState": "",
+        "portrait": null,
+        "audio": {
+          "file": "assets/campaign/alpha/mission02/recordings/elevenlabs/m02-v2-start-4-1f1866fefdba.mp3",
+          "speaker": "general",
+          "text": "Да там уже фотки посмотрели, дальше переслали. Езжайте пока. Потом разберёмся.",
+          "spokenText": "[casual, matter-of-fact] Да там уже фотки посмотрели, дальше переслали. Езжайте пока. Потом разберёмся.",
+          "voiceId": "rQOBu7YxCDxGiFdTm28w",
+          "voiceName": "Artem Lebedev - Captivating and Engaging",
+          "modelId": "eleven_v4",
+          "origin": "elevenlabs-synthesis",
+          "voiceSettings": {
+            "stability": 0.5,
+            "similarityBoost": 0.75
+          },
+          "sha256": "1f1866fefdbaf4d97a289c8f95f1941fab2d4a7fa9f26a45fa708f0376b47c10",
+          "bytes": 89486,
+          "generatedAt": "2026-11-12T07:31:35.800Z",
+          "duration": 5.52,
+          "leadingSilence": 0.01,
+          "trailingSilence": 0.15999999999999925
         }
       }
     },

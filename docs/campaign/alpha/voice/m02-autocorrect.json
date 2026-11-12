@@ -1,0 +1,185 @@
+{
+  "scene": "m02-radio-start",
+  "status": "awaiting-owner-listening-before-merge",
+  "approval": "Owner selected this exact four-line exchange and delegated it: «вот так хорошо в работу». Show the full opening for listening before merge.",
+  "sourceDraftRevision": 1,
+  "savedDraftRevision": 2,
+  "generatedRecordings": 4,
+  "reusedRecordings": 2,
+  "reservedCredits": 299,
+  "originalAudioPreserved": true,
+  "otherScenesUnchanged": true,
+  "newGameplayCommands": false,
+  "cues": [
+    "m02-radio-start-1",
+    "m02-v2-start-1",
+    "m02-v2-start-2",
+    "m02-v2-start-3",
+    "m02-v2-start-4",
+    "m02-radio-start-2"
+  ],
+  "trigger": "Начало m02. Не начатая сцена доступна первые 90 секунд; начатый разговор продолжается после этого срока. Во время боя пауза между репликами, затем продолжение с той же позиции. Отмена при завершении миссии.",
+  "context": "General blames autocorrect for the premature report from M01 r50. Photos refer to the earlier base/report, not newly discovered southern energy infrastructure.",
+  "lines": [
+    {
+      "id": "m02-radio-start-1",
+      "speaker": "radio",
+      "text": "Альфа, источник сигнала к югу. Координаты передаю.",
+      "audio": "assets/campaign/alpha/mission02/recordings/elevenlabs/m02-radio-start-1-84d48f6554e6.mp3"
+    },
+    {
+      "id": "m02-v2-start-1",
+      "speaker": "commander",
+      "text": "Товарищ генерал, у вас в отчёте станцию уже взяли.",
+      "audio": "assets/campaign/alpha/mission02/recordings/elevenlabs/m02-v2-start-1-19b7636f2261.mp3"
+    },
+    {
+      "id": "m02-v2-start-2",
+      "speaker": "general",
+      "text": "Не взяли. Я «не взяли» писал. Автозамена эта…",
+      "audio": "assets/campaign/alpha/mission02/recordings/elevenlabs/m02-v2-start-2-3c2d97abcf89.mp3"
+    },
+    {
+      "id": "m02-v2-start-3",
+      "speaker": "commander",
+      "text": "Может, исправление отправить?",
+      "audio": "assets/campaign/alpha/mission02/recordings/elevenlabs/m02-v2-start-3-4b778e7a1cc6.mp3"
+    },
+    {
+      "id": "m02-v2-start-4",
+      "speaker": "general",
+      "text": "Да там уже фотки посмотрели, дальше переслали. Езжайте пока. Потом разберёмся.",
+      "audio": "assets/campaign/alpha/mission02/recordings/elevenlabs/m02-v2-start-4-1f1866fefdba.mp3"
+    },
+    {
+      "id": "m02-radio-start-2",
+      "speaker": "commander",
+      "text": "Базу прикрыть. Основной группе — на выезд.",
+      "audio": "assets/campaign/alpha/mission02/recordings/elevenlabs/m02-radio-start-2-bafddb0be0d6.mp3"
+    }
+  ],
+  "clips": {
+    "m02-radio-start-1": {
+      "file": "recordings/elevenlabs/m02-radio-start-1-84d48f6554e6.mp3",
+      "duration": 3.92,
+      "leadingSilence": 0.03,
+      "trailingSilence": 0.16999999999999993,
+      "speaker": "radio",
+      "text": "Альфа, источник сигнала к югу. Координаты передаю.",
+      "sha256": "84d48f6554e6f96960c97427611631ffcbfb21c75a565ddec8933d1ba8202411",
+      "bytes": 63990,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "RLRdvNFwJJct2XZOgfzy",
+      "voiceName": "Mishka Yaponcik - Odessa Rogue Charm",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:58:27.080Z",
+      "draftRevision": 0
+    },
+    "m02-radio-start-2": {
+      "file": "recordings/elevenlabs/m02-radio-start-2-bafddb0be0d6.mp3",
+      "duration": 3.2,
+      "leadingSilence": 0.02,
+      "trailingSilence": 0.14000000000000012,
+      "speaker": "commander",
+      "text": "Базу прикрыть. Основной группе — на выезд.",
+      "sha256": "bafddb0be0d69e91f923b0c3f9e28d67e417d5a8b74e24b8e9d278f9206b2124",
+      "bytes": 52287,
+      "origin": "elevenlabs-synthesis",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "generatedAt": "2026-11-11T19:58:23.615Z",
+      "draftRevision": 0
+    },
+    "m02-v2-start-1": {
+      "file": "recordings/elevenlabs/m02-v2-start-1-19b7636f2261.mp3",
+      "speaker": "commander",
+      "text": "Товарищ генерал, у вас в отчёте станцию уже взяли.",
+      "spokenText": "[matter-of-fact] Товарищ генерал, у вас в отчёте станцию уже взяли.",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "19b7636f2261a628bf17f7e683c636df2d7032f818b9d2eb820202f329b76f59",
+      "bytes": 58557,
+      "generatedAt": "2026-11-12T07:31:33.135Z",
+      "duration": 3.6,
+      "leadingSilence": 0.09,
+      "trailingSilence": 0.1499999999999999
+    },
+    "m02-v2-start-2": {
+      "file": "recordings/elevenlabs/m02-v2-start-2-3c2d97abcf89.mp3",
+      "speaker": "general",
+      "text": "Не взяли. Я «не взяли» писал. Автозамена эта…",
+      "spokenText": "[casual, matter-of-fact] Не взяли. Я «не взяли» писал. Автозамена эта…",
+      "voiceId": "rQOBu7YxCDxGiFdTm28w",
+      "voiceName": "Artem Lebedev - Captivating and Engaging",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "3c2d97abcf89598c619bd76a00efdbd6f05ef5d8017daa2fac5b16ac89b20b84",
+      "bytes": 71514,
+      "generatedAt": "2026-11-12T07:31:33.853Z",
+      "duration": 4.4,
+      "leadingSilence": 0.02,
+      "trailingSilence": 0.16999999999999993
+    },
+    "m02-v2-start-3": {
+      "file": "recordings/elevenlabs/m02-v2-start-3-4b778e7a1cc6.mp3",
+      "speaker": "commander",
+      "text": "Может, исправление отправить?",
+      "spokenText": "[questioning, matter-of-fact] Может, исправление отправить?",
+      "voiceId": "5mJA7umOnM5ycymymd6P",
+      "voiceName": "comandorNig",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "4b778e7a1cc6f389a20efa5bffa8067f191a31f0edfa40ae3c5f0fab958d207a",
+      "bytes": 44764,
+      "generatedAt": "2026-11-12T07:31:34.412Z",
+      "duration": 2.72,
+      "leadingSilence": 0.29,
+      "trailingSilence": 0.3600000000000003
+    },
+    "m02-v2-start-4": {
+      "file": "recordings/elevenlabs/m02-v2-start-4-1f1866fefdba.mp3",
+      "speaker": "general",
+      "text": "Да там уже фотки посмотрели, дальше переслали. Езжайте пока. Потом разберёмся.",
+      "spokenText": "[casual, matter-of-fact] Да там уже фотки посмотрели, дальше переслали. Езжайте пока. Потом разберёмся.",
+      "voiceId": "rQOBu7YxCDxGiFdTm28w",
+      "voiceName": "Artem Lebedev - Captivating and Engaging",
+      "modelId": "eleven_v4",
+      "origin": "elevenlabs-synthesis",
+      "voiceSettings": {
+        "stability": 0.5,
+        "similarityBoost": 0.75
+      },
+      "sha256": "1f1866fefdbaf4d97a289c8f95f1941fab2d4a7fa9f26a45fa708f0376b47c10",
+      "bytes": 89486,
+      "generatedAt": "2026-11-12T07:31:35.800Z",
+      "duration": 5.52,
+      "leadingSilence": 0.01,
+      "trailingSilence": 0.15999999999999925
+    }
+  },
+  "note": "Reserved credits are not a verified account debit.",
+  "previewSeconds": 24.36
+}
