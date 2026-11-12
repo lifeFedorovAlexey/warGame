@@ -1,0 +1,46 @@
+{
+  "before": true,
+  "errors": [],
+  "captures": [
+    {
+      "name": "before-desktop",
+      "width": 1440,
+      "height": 900,
+      "overflow": [],
+      "counts": [
+        22,
+        1,
+        1,
+        0
+      ]
+    }
+  ],
+  "events": [],
+  "initial": {
+    "before": [
+      24,
+      0,
+      0,
+      0
+    ],
+    "queues": [
+      22,
+      1,
+      1,
+      0
+    ],
+    "outside": [
+      2,
+      1,
+      1,
+      0
+    ],
+    "source": "b182",
+    "factories": [
+      "b182",
+      "b183",
+      "b184",
+      "b185"
+    ]
+  }
+}

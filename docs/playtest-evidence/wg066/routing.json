@@ -1,0 +1,67 @@
+{
+  "results": [
+    {
+      "phase": "approach",
+      "quotes": [
+        {
+          "id": "b180",
+          "seconds": 54.85
+        },
+        {
+          "id": "b181",
+          "seconds": 18.666666666666668
+        },
+        {
+          "id": "b182",
+          "seconds": 18.666666666666668
+        },
+        {
+          "id": "b183",
+          "seconds": 25.333333333333336
+        }
+      ],
+      "chosen": "b181",
+      "recheckAllowed": true,
+      "assigned": "b181"
+    },
+    {
+      "phase": "gate",
+      "quotes": [
+        {
+          "id": "b180",
+          "seconds": 54.85
+        },
+        {
+          "id": "b181",
+          "seconds": 18.666666666666668
+        },
+        {
+          "id": "b182",
+          "seconds": 18.666666666666668
+        },
+        {
+          "id": "b183",
+          "seconds": 25.333333333333336
+        }
+      ],
+      "chosen": "b181",
+      "recheckAllowed": true,
+      "assigned": "b181"
+    },
+    {
+      "case": "four factories, six repairs inside nearest, four waiting outside",
+      "distribution": [
+        0,
+        1,
+        2,
+        1
+      ]
+    },
+    {
+      "case": "physical transfers stay protected, a free nearby factory keeps the vehicle"
+    },
+    {
+      "case": "route failure releases trip hold; destroyed receiving factory returns the interior reservation"
+    }
+  ]
+}

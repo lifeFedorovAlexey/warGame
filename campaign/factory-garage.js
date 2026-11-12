@@ -8,13 +8,14 @@ import {corridorBlocker,invalidateTrafficCorridors} from './traffic-corridor.js'
 import {needsModernization,modernizeAfterRepair} from './factory-modernization.js';
 import {factoryPoint,terrainSegmentClear,prepareFactoryQueue,factoryWaitingPoint} from './factory-waiting.js';
 export {factoryPoint} from './factory-waiting.js';
+import {chooseRepairFactory,repairChoiceDue,factoryArrivalSeconds} from './factory-routing.js';
 
 export const insideFactory=u=>u.factoryVisit?.phase==='inside';
 export const factoryPriority=f=>f.workPriority??'repair';
 export function factoryVisitors(m,f){return m.state.units.filter(u=>u.hp>0&&u.factoryVisit?.factoryId===f.id);}
 export function factoryProductionPaused(m,f){
  const canRepair=m.state.energy>0||(m.buildingSpec(f).repair?.energyPerSecond??1.5)===0;
- return factoryPriority(f)==='repair'&&canRepair&&factoryVisitors(m,f).some(u=>insideFactory(u)&&u.hp<u.maxHp);
+ return factoryPriority(f)==='repair'&&canRepair&&factoryVisitors(m,f).some(u=>insideFactory(u)&&!u.factoryVisit.nextFactoryId&&u.hp<u.maxHp);
 }
 export function setFactoryPriority(m,id,priority){
  m.finishPendingStep();const f=m.entity(id);
@@ -24,8 +25,26 @@ export function setFactoryPriority(m,id,priority){
 function resetDrive(u){u.path=[];u.task=null;u.driveSpeed=0;for(const k of ['detour','yieldReturn','traffic','trafficHold','passingLane','driveWatch','routeOrder','routeContinuation','combatParking'])delete u[k];}
 function exitOwner(m,f){
  const visitors=factoryVisitors(m,f),current=visitors.find(u=>['leaving','departure'].includes(u.factoryVisit.phase));
- const ready=visitors.filter(u=>insideFactory(u)&&(u.hp>=u.maxHp&&!needsModernization(m,f,u)||f.hp<=0)).sort((a,b)=>a.factoryVisit.arrived-b.factoryVisit.arrived);
+ const ready=visitors.filter(u=>insideFactory(u)&&(u.factoryVisit.nextFactoryId||u.hp>=u.maxHp&&!needsModernization(m,f,u)||f.hp<=0))
+  .sort((a,b)=>Number(!!b.factoryVisit.nextFactoryId)-Number(!!a.factoryVisit.nextFactoryId)||a.factoryVisit.arrived-b.factoryVisit.arrived);
  const owner=current??ready[0];f.garageExit=owner?.id;return owner;
+}
+function redistributeInteriorRepair(m,f){
+ if(f.hp<=0||m.state.time<(f.repairTransferAt??0))return;
+ f.repairTransferAt=m.state.time+2;
+ const visitors=factoryVisitors(m,f);
+ // Promise only the next physical exit, not a second invisible queue of
+ // transfers. Reconsider the remaining work after this car clears the apron.
+ if(visitors.some(u=>u.factoryVisit.nextFactoryId||['entering','leaving','departure'].includes(u.factoryVisit.phase)))return;
+ const waiting=visitors.filter(u=>insideFactory(u)&&u.hp<u.maxHp&&u.factoryVisit.repairStartHp===undefined)
+  .sort((a,b)=>b.factoryVisit.arrived-a.factoryVisit.arrived||b.id.localeCompare(a.id));
+ for(const unit of waiting){
+  if(!repairChoiceDue(m,unit,{queuedInside:true}))continue;
+  const target=chooseRepairFactory(m,unit,{queuedInside:true});
+  if(!target||target.id===f.id)continue;
+  unit.factoryVisit.nextFactoryId=target.id;
+  m.emit('factory-repair-rerouted',{unit:unit.id,from:f.id,to:target.id});return;
+ }
 }
 function factoryDeparturePoint(m,f,u){
  const visit=u.factoryVisit,scale=m.config.worldScale,terrain=m.nav.terrainAllowed;
@@ -206,6 +225,11 @@ export function* updateFactoryVisit(m,u,f,dt){
  const current=()=>m.state===world&&u.hp>0&&u.factoryVisit===visit&&!u.pendingOrder&&!u.proposedOrder;
  if(f.id!==visit.factoryId){resetDrive(u);delete u.factoryVisit;return false;}
  if(!f.hp&&['approach','waiting','gate'].includes(visit.phase)){resetDrive(u);delete u.factoryVisit;return false;}
+ if(insideFactory(u)){
+  const next=visit.nextFactoryId&&m.entity(visit.nextFactoryId);
+  if(visit.nextFactoryId&&(!next||next.hp<=0||!next.completed||next.owner!==u.owner))delete visit.nextFactoryId;
+  redistributeInteriorRepair(m,f);
+ }
  modernizeAfterRepair(m,f,u);
  const visitors=factoryVisitors(m,f),entering=visitors.find(other=>other.factoryVisit.phase==='entering');
  yield* prepareFactoryQueue(m,f,visitors);if(!current())return true;
@@ -273,7 +297,7 @@ export function* updateFactoryVisit(m,u,f,dt){
   navigationDecision(u,'IDLE','inside-factory',null,u.hp<u.maxHp?'wait-for-repair':'leave-factory');
   // Entry and departure share the interior turn at the bay. Let a vehicle
   // already in that turn clear it before bringing another hull out of storage.
-  if((u.hp>=u.maxHp||f.hp<=0)&&outgoing===u&&!entering){
+  if((visit.nextFactoryId||u.hp>=u.maxHp||f.hp<=0)&&outgoing===u&&!entering){
    const visible={...u,factoryVisit:{...visit,phase:'leaving'}};
    if(clearOfVehicles(visible,visible,m.state.units.filter(v=>v!==u&&!insideFactory(v)),m.config.worldScale,true,visible,m.field)){visit.phase='leaving';resetDrive(u);}
   }
@@ -288,9 +312,16 @@ export function* updateFactoryVisit(m,u,f,dt){
   const park=factoryDeparturePoint(m,f,u);
   if(!park){u.driveSpeed=0;if(retreat)retreat.service='waiting-apron-space';return true;}
   if(yield* driveTo(m,u,park,dt,current)){
-   resetDrive(u);delete u.factoryVisit;delete f.garageExit;
-   if(retreat){retreat.status='arrived';retreat.phase='home';retreat.destination={x:u.x,y:u.y};retreat.service='complete';}
-   if(retreat&&!retreat.forced&&u.hp>=u.maxHp){
+   resetDrive(u);delete u.factoryVisit;delete f.garageExit;delete f.repairTransferAt;
+   if(retreat&&visit.nextFactoryId){
+    const next=m.entity(visit.nextFactoryId);
+    retreat.home=next&&{id:next.id,x:next.x,y:next.y,radius:Math.hypot(next.halfWidth,next.halfDepth)+m.config.worldScale*9};
+    retreat.status='planning';
+    // Let the reserved trip clear the old apron before comparing queues again.
+    retreat.factoryChoiceAt=m.state.time+(next?Math.max(12,factoryArrivalSeconds(m,u,next)*2+15):0);
+    delete retreat.phase;delete retreat.destination;delete retreat.service;delete retreat.failedSignature;
+   }else if(retreat){retreat.status='arrived';retreat.phase='home';retreat.destination={x:u.x,y:u.y};retreat.service='complete';}
+   if(retreat&&!visit.nextFactoryId&&!retreat.forced&&u.hp>=u.maxHp){
     const order=retreatReturnOrder(m,u);
     // Returning one repaired member must not overwrite its whole group's order.
     if(order&&(m.commandPlanner??=new CommandPlanner(m)).submit([u.id],order.action,order.target).ok)delete u.combatRetreat;

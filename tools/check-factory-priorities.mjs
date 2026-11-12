@@ -65,11 +65,11 @@ check('Four factories rebalance a 4/12/1/12 backlog automatically without lost o
  assert.equal(lengths.reduce((a,b)=>a+b),29);assert(Math.max(...lengths)-Math.min(...lengths)<=1,JSON.stringify(lengths));assert.equal(oilReserved(m.state),reserved);
  const serials=factories.flatMap(f=>f.queue.map(j=>j.orderSerial));assert.equal(new Set(serials).size,29);
 });
-check('Incoming cars reconsider overload, but stay committed inside or at the door',()=>{
+check('Incoming cars reconsider overload near the door, but keep an active interior visit',()=>{
  const m=fixture(),a=factory(m),b=factory(m,200),u=car(m,a,100,'approach');u.y=-500;
  for(let n=0;n<12;n++)car(m,a,10);assert(repairChoiceDue(m,u));assert.equal(chooseRepairFactory(m,u),b);
  u.factoryVisit.phase='inside';assert(!repairChoiceDue(m,u));assert.equal(chooseRepairFactory(m,u),a);
- u.factoryVisit.phase='approach';u.y=-18*m.config.worldScale;assert.equal(chooseRepairFactory(m,u),a);
+ u.factoryVisit.phase='approach';u.y=-18*m.config.worldScale;assert.equal(chooseRepairFactory(m,u),b);
 });
 check('Repair numbers exclude healthy/departing cars and keep incoming repairs',()=>{
  const m=fixture(),f=factory(m),u=car(m,f),healthy=car(m,f),departing=car(m,f,100,'departure');healthy.hp=healthy.maxHp;car(m,f,100,'approach');f.autoModernize=true;f.queue=[job()];

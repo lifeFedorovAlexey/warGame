@@ -1,0 +1,61 @@
+{
+  "results": [
+    {
+      "phase": "approach",
+      "quotes": [
+        {
+          "id": "b180",
+          "seconds": 54.85
+        },
+        {
+          "id": "b181",
+          "seconds": 18.666666666666668
+        },
+        {
+          "id": "b182",
+          "seconds": 18.666666666666668
+        },
+        {
+          "id": "b183",
+          "seconds": 25.333333333333336
+        }
+      ],
+      "chosen": "b180",
+      "recheckAllowed": true,
+      "assigned": "b180"
+    },
+    {
+      "phase": "gate",
+      "quotes": [
+        {
+          "id": "b180",
+          "seconds": 54.85
+        },
+        {
+          "id": "b181",
+          "seconds": 18.666666666666668
+        },
+        {
+          "id": "b182",
+          "seconds": 18.666666666666668
+        },
+        {
+          "id": "b183",
+          "seconds": 25.333333333333336
+        }
+      ],
+      "chosen": "b180",
+      "recheckAllowed": false,
+      "assigned": "b180"
+    },
+    {
+      "case": "four factories, six repairs inside nearest, four waiting outside",
+      "distribution": [
+        4,
+        0,
+        0,
+        0
+      ]
+    }
+  ]
+}

@@ -62,7 +62,7 @@ export function updateFactoryRepairs(mission,structures,dt){
  for(const factory of structures){
   if(factory.kind!=='factory')continue;
   const service=mission.buildingSpec(factory).repair??{hpPerSecond:40,energyPerSecond:1.5};factory.activeRepair=null;
-  const waiting=factoryVisitors(mission,factory).filter(u=>insideFactory(u)&&u.hp<u.maxHp)
+  const waiting=factoryVisitors(mission,factory).filter(u=>insideFactory(u)&&!u.factoryVisit.nextFactoryId&&u.hp<u.maxHp)
    .sort((a,b)=>a.factoryVisit.arrived-b.factoryVisit.arrived||a.id.localeCompare(b.id));
   for(const [index,unit] of waiting.entries()){
    const retreat=unit.combatRetreat??={},visit=unit.factoryVisit;

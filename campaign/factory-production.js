@@ -8,7 +8,7 @@ export function productionCompletionSeconds(mission,factory,job){
  if(job)seconds+=oilOrderProgress(job,mission.config.units[job.kind].seconds,mission.config).remaining;
  if((factory.workPriority??'repair')==='repair'){
   const rate=mission.buildingSpec(factory).repair?.hpPerSecond??40;
-  const repairs=factoryRepairQueue(mission,factory).map(u=>({u,arrival:u.factoryVisit?.phase==='inside'?0:factoryArrivalSeconds(mission,u,factory)+5}));
+  const repairs=factoryRepairQueue(mission,factory).map(u=>({u,arrival:u.factoryVisit?.phase==='inside'&&u.factoryVisit.factoryId===factory.id?0:factoryArrivalSeconds(mission,u,factory)+5}));
   repairs.sort((a,b)=>a.arrival-b.arrival||a.u.id.localeCompare(b.u.id));
   for(const {u,arrival} of repairs){
    if(arrival<=seconds)seconds+=Math.max(0,u.maxHp-u.hp)/rate;
