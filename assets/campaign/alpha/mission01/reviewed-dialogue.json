@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "draftRevision": 221,
-  "draftSha256": "1c5043ff3241222489be8ed397529c87ee35b77771d3939975d6458ba5943d11",
+  "draftRevision": 222,
+  "draftSha256": "039e11390a1187311a20a21189db4285acd2116e00a09cba100dc3e7c16e52fc",
   "throughScene": "r36",
-  "appliedAt": "2026-11-11T23:55:05.135292+00:00",
+  "appliedAt": "2026-11-12T00:05:21.417514+00:00",
   "scenes": [
     {
       "id": "p01",
@@ -1991,7 +1991,7 @@
       "text": "Впереди ещё один лагерь. У ворот часовые, за ограждением какие-то баллоны таскают. Похоже, не самогон."
     },
     "m01-v3-r25-l001": {
-      "file": "recordings/elevenlabs/m01-v3-r25-l001-12ab4f065f10.mp3",
+      "file": "recordings/elevenlabs/m01-v3-r25-l001-51a847cc8765.mp3",
       "speaker": "scout",
       "text": "Лагерь зачищен. Нашли установку: бак, шланги, довоенный блок. На самогонный аппарат похоже.",
       "origin": "elevenlabs-synthesis",
@@ -2002,13 +2002,14 @@
         "stability": 0.5,
         "similarityBoost": 0.75
       },
-      "sha256": "12ab4f065f10188a63b9eeb18e4c3c98f9c432e8672cab47b5970e4b9833d010",
-      "bytes": 113727,
-      "duration": 7.04,
-      "leadingSilence": 0.04,
-      "trailingSilence": 0.16000000000000014,
-      "generatedAt": "2026-11-11T23:54:51.660Z",
-      "replaces": "recordings/reviewed/m01-v3-r25-l001-dd44a3c494ba.mp3"
+      "sha256": "51a847cc87652d587f9734e6073b45520c1a9215d2b7f22317b186dbb6695f4d",
+      "bytes": 102025,
+      "duration": 6.32,
+      "leadingSilence": 0.01,
+      "trailingSilence": 0.17999999999999972,
+      "generatedAt": "2026-11-12T00:02:34.782Z",
+      "replaces": "recordings/elevenlabs/m01-v3-r25-l001-12ab4f065f10.mp3",
+      "spokenText": "[brisk, clipped delivery] Лагерь зачищен. Нашли установку: бак, шланги, довоенный блок. [dryly amused, brisk delivery] На самогонный аппарат похоже."
     },
     "m01-v3-r25-l002": {
       "file": "recordings/reviewed/m01-v3-r25-l002-2eb2e25e06c8.mp3",
